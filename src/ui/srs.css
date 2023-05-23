@@ -23,8 +23,8 @@ code.block-code {
 
 code.block-code .srs-syntax.line {
   @apply rounded hover:bg-black/5;
-  @apply pl-24 -indent-24;
-  @apply ml-1 min-w-fit;
+  @apply pl-[6.25rem] -indent-24;
+  @apply min-w-fit;
   display: block;
 }
 
