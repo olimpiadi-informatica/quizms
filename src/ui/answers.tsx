@@ -1,9 +1,9 @@
-import React, { ReactNode, useId } from "react";
+import React, { ReactNode, useEffect, useId } from "react";
 import classNames from "classnames";
 
-import { useProblemAnswer } from "./problem";
 import Spoiler from "./components/spoiler";
-import { useAuthentication } from "~/src/auth/provider";
+import { useAnswer, useAuthentication } from "~/src/auth/provider";
+import { useProblem } from "~/src/ui/problem";
 
 type AnswerGroupProps = {
   children: ReactNode;
@@ -24,9 +24,16 @@ type AnswerProps = {
 };
 
 export function Answer({ id, correct, children }: AnswerProps) {
-  const [answer, setProblemAnswer] = useProblemAnswer();
+  const { id: problemId, setCorrect } = useProblem();
+  const [answer, setAnswer] = useAnswer(problemId!);
   const { terminated } = useAuthentication();
   const answerId = useId();
+
+  useEffect(() => {
+    if (correct !== undefined) {
+      setCorrect(correct);
+    }
+  }, [correct, setCorrect]);
 
   return (
     <div
@@ -50,7 +57,7 @@ export function Answer({ id, correct, children }: AnswerProps) {
               "!bg-red-600 dark:!bg-red-500": correct === "false",
             }
         )}
-        onChange={(e) => setProblemAnswer(e.target.checked ? id : undefined)}
+        onChange={(e) => setAnswer(e.target.checked ? id : undefined)}
         type="radio"
         disabled={terminated}
       />
@@ -62,8 +69,16 @@ export function Answer({ id, correct, children }: AnswerProps) {
 }
 
 export function OpenAnswer({ correct }: { correct?: string }) {
-  const [problemAnswer, setProblemAnswer] = useProblemAnswer();
+  const { id: problemId, setCorrect } = useProblem();
+  const [answer, setAnswer] = useAnswer(problemId!);
   const { terminated } = useAuthentication();
+
+  useEffect(() => {
+    if (correct !== undefined) {
+      setCorrect(correct);
+    }
+  }, [correct, setCorrect]);
+
   return (
     <div className="open-answer px-2">
       <input
@@ -76,15 +91,15 @@ export function OpenAnswer({ correct }: { correct?: string }) {
           terminated &&
             correct !== undefined && {
               "border-2 dark:border-3": true,
-              "!border-green-600": correct === problemAnswer,
-              "!border-red-600 dark:!border-red-500": correct !== problemAnswer,
+              "!border-green-600": correct === answer,
+              "!border-red-600 dark:!border-red-500": correct !== answer,
             }
         )}
-        onChange={(e) => setProblemAnswer(e.target.value || undefined)}
+        onChange={(e) => setAnswer(e.target.value || undefined)}
         onWheel={(e) => e.currentTarget.blur()}
         placeholder="Inserisci la risposta"
         type="number"
-        value={problemAnswer ?? ""}
+        value={answer ?? ""}
         disabled={terminated}
       />
     </div>

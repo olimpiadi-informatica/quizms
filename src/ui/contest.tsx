@@ -1,11 +1,5 @@
-import React, {
-  ComponentType,
-  createContext,
-  ReactNode,
-  useContext,
-  useMemo,
-  useState,
-} from "react";
+import React, { ComponentType, createContext, ReactNode } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 
 import { useAuthentication } from "~/src/auth/provider";
 import { Button } from "~/src/ui/components/button";
@@ -14,10 +8,17 @@ import Timer from "~/src/ui/components/timer";
 import ProgressBlock from "~/src/ui/components/progressBlock";
 import classNames from "classnames";
 
+type Problem = {
+  id: string;
+  section: string;
+  correct: string | undefined;
+  points: [number, number, number];
+};
+
 type ContestContextProps = {
   randomizeProblemOrder: boolean;
   randomizeAnswerOrder: boolean;
-  registerProblem: (id: string, section: string, points: [number, number, number]) => void;
+  registerProblem: (problem: Problem) => void;
 };
 
 const ContestContext = createContext<ContestContextProps>({
@@ -60,17 +61,22 @@ function InnerContest({
   randomizeAnswerOrder,
   children,
 }: Omit<ContestProps, "auth">) {
-  const { answers } = useAuthentication();
-  const [problems, setProblems] = useState<Record<string, [string, [number, number, number]]>>({});
+  const { answers, terminated } = useAuthentication();
+  const [problems, setProblems] = useState<Record<string, Problem>>({});
 
-  const registerProblem = (id: string, section: string, points: [number, number, number]) => {
-    setProblems((prev) => ({ ...prev, [id]: [section, points] }));
-  };
+  const registerProblem = useCallback((problem: Problem) => {
+    setProblems((prev) => ({
+      ...prev,
+      [problem.id]: problem,
+    }));
+  }, []);
 
-  const [progress, sectionProgress] = useMemo(() => {
-    let total = [0, 0];
-    let sections: Record<string, [number, number]> = {};
-    for (const [id, [section, points]] of Object.entries(problems)) {
+  const [score, maxScore, progress, sectionProgress] = useMemo(() => {
+    let score: number | undefined = 0;
+    let maxScore = 0;
+    const total = [0, 0];
+    const sections: Record<string, [number, number]> = {};
+    for (const { id, section, correct, points } of Object.values(problems)) {
       if (!(section in sections)) sections[section] = [0, 0];
       if (id in answers && answers[id] !== undefined) {
         total[0] += points[0];
@@ -78,6 +84,21 @@ function InnerContest({
       }
       total[1] += points[0];
       sections[section][1] += points[0];
+      maxScore += points[0];
+
+      if (correct === undefined) {
+        score = undefined;
+      }
+      if (score === undefined) {
+        continue;
+      }
+      if (answers[id] === correct) {
+        score += points[0];
+      } else if (answers[id] === undefined) {
+        score += points[1];
+      } else {
+        score += points[2];
+      }
     }
 
     const progress = Math.round((total[0] / total[1]) * 100);
@@ -87,8 +108,17 @@ function InnerContest({
         Math.round((points[0] / points[1]) * 100),
       ])
     );
-    return [progress, sectionProgress];
+    return [score, maxScore, progress, sectionProgress];
   }, [answers, problems]);
+
+  const [resultShown, setResultShown] = useState(false);
+  const [isModalOpen, setModalOpen] = useState(false);
+  useEffect(() => {
+    if (terminated && !resultShown) {
+      setResultShown(true);
+      setModalOpen(true);
+    }
+  }, [terminated, resultShown]);
 
   return (
     <ContestContext.Provider
@@ -109,6 +139,17 @@ function InnerContest({
           <StickyFooter progress={progress} sectionProgress={sectionProgress} />
         </div>
       </div>
+      <Modal
+        title="Prova terminata"
+        description="La prova è terminata."
+        isOpen={isModalOpen}
+        close={() => setModalOpen(false)}>
+        {score !== undefined && (
+          <p>
+            Hai ottenuto un punteggio di <b>{score}</b> su <b>{maxScore}</b>.
+          </p>
+        )}
+      </Modal>
     </ContestContext.Provider>
   );
 }
@@ -130,7 +171,7 @@ function StickyFooter({ progress, sectionProgress }: FooterProps) {
       )}>
       {terminated && (
         <ProgressBlock className="w-20" percentage={100}>
-          00:00
+          0:00
         </ProgressBlock>
       )}
       {!terminated && <Timer startTime={startTime} endTime={endTime} />}
@@ -170,7 +211,6 @@ function SubmitModal({ isOpen, close }: { isOpen: boolean; close: () => void }) 
       description="Confermando non potrai più modificare le tue risposte."
       isOpen={isOpen}
       close={close}>
-      <div className="h-10" />
       <div className="text-md flex flex-row justify-center gap-5">
         <Button className="border-black dark:border-slate-400 dark:bg-slate-600" onClick={close}>
           Annulla

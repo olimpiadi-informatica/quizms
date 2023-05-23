@@ -1,11 +1,18 @@
-import React, { ComponentType, useContext, createContext, ReactNode, useEffect } from "react";
+import React, {
+  ComponentType,
+  useContext,
+  createContext,
+  ReactNode,
+  useEffect,
+  useState,
+} from "react";
 
 import Katex from "react-katex";
 
-import { useAnswer, useAuthentication } from "~/src/auth/provider";
+import { useAuthentication } from "~/src/auth/provider";
 import { AnswerGroup, Answer, OpenAnswer, Explanation } from "./answers";
-import { useContest } from "~/src/ui/contest";
-import { useSection } from "~/src/ui/section";
+import { useContest } from "./contest";
+import { useSection } from "./section";
 
 type StatementProps = {
   variant: number;
@@ -22,11 +29,13 @@ type ProblemProps = {
 type ProblemContextProps = {
   id?: string;
   points: [number, number, number];
+  setCorrect: (value: string) => void;
 };
 
 const ProblemContext = createContext<ProblemContextProps>({
   id: undefined,
   points: [0, 0, 0],
+  setCorrect: () => {},
 });
 ProblemContext.displayName = "ProblemContext";
 
@@ -34,7 +43,7 @@ export function Problem({ id, points, statement: Statement }: ProblemProps) {
   const { variant } = useAuthentication();
 
   return (
-    <ProblemContext.Provider value={{ id, points }}>
+    <ProblemContext.Provider value={{ id, points, setCorrect: () => {} }}>
       <Statement
         components={{ Math, SubProblem, AnswerGroup, Answer, OpenAnswer, Explanation }}
         variant={variant}
@@ -55,24 +64,22 @@ export function SubProblem({ subId, children }: SubProblemProps) {
 
   const { registerProblem } = useContest();
   const section = useSection();
+  const [correct, setCorrect] = useState<string>();
 
   useEffect(() => {
-    registerProblem(newId, section, points);
-  }, []);
+    registerProblem({ id: newId, section, correct, points });
+  }, [registerProblem, newId, section, correct, points]);
 
   return (
-    <ProblemContext.Provider value={{ id: newId, points }}>
+    <ProblemContext.Provider value={{ id: newId, points, setCorrect }}>
       <h3>Problema {newId}</h3>
       {children}
     </ProblemContext.Provider>
   );
 }
 
-type UseAnswerReturn = [string | undefined, (value: string | undefined) => void];
-
-export function useProblemAnswer(): UseAnswerReturn {
-  const { id } = useContext(ProblemContext);
-  return useAnswer(id!);
+export function useProblem() {
+  return useContext(ProblemContext);
 }
 
 type MathProps = {
