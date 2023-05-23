@@ -7,6 +7,7 @@ export function NoAuth({ children }: { children: ReactNode }) {
   const [submitted, setSubmitted] = useState(false);
   const [answers, setAnswers] = useState<Record<string, string | undefined>>({});
   const [startTime] = useState(dayjs());
+  const endTime = startTime.add(45, "minutes");
 
   const setAnswer = (name: string, value: string | undefined) => {
     if (submitted) return;
@@ -34,7 +35,7 @@ export function NoAuth({ children }: { children: ReactNode }) {
       setAnswer={setAnswer}
       submit={() => setSubmitted(true)}
       startTime={startTime}
-      endTime={startTime.add(90, "m")}
+      endTime={endTime}
       variant={0}
       terminated={submitted}>
       {children}

@@ -23,9 +23,9 @@ export default function Timer({ startTime, endTime }: TimerProps) {
     return () => clearInterval(id);
   }, [endTime]);
 
-  const duration = endTime.diff(startTime, "s");
-  const timeLeft = Math.max(endTime.diff(currentTime, "s"), 0);
-  const timeElapsed = Math.min(currentTime.diff(startTime, "s"), duration);
+  const duration = endTime.diff(startTime, "seconds");
+  const timeLeft = Math.max(endTime.diff(currentTime, "seconds"), 0);
+  const timeElapsed = Math.min(currentTime.diff(startTime, "seconds"), duration);
 
   return (
     <ProgressBlock percentage={(timeElapsed / (duration - 1)) * 100} className="w-20">
