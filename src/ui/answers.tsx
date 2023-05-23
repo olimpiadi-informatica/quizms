@@ -1,4 +1,4 @@
-import React, { ReactNode } from "react";
+import React, { ReactNode, useId } from "react";
 import classNames from "classnames";
 
 import { useProblemAnswer } from "./problem";
@@ -22,6 +22,8 @@ type AnswerProps = {
 export function Answer({ id, correct, children }: AnswerProps) {
   const [answer, setProblemAnswer] = useProblemAnswer();
   const { terminated } = useAuthentication();
+  const answerId = useId();
+
   return (
     <div
       className={classNames(
@@ -33,6 +35,7 @@ export function Answer({ id, correct, children }: AnswerProps) {
         }
       )}>
       <input
+        id={answerId}
         checked={answer === id}
         className={classNames(
           "mr-4 my-auto",
@@ -48,6 +51,9 @@ export function Answer({ id, correct, children }: AnswerProps) {
         disabled={terminated}
       />
       <div>{children}</div>
+      <label htmlFor={answerId} className="grow">
+        {children}
+      </label>
     </div>
   );
 }
