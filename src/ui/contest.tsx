@@ -138,7 +138,7 @@ function StickyFooter({ progress, sectionProgress }: FooterProps) {
         ))}
       </div>
       <ProgressBlock className="lg:hidden min-w-[5rem]" percentage={progress}>
-        <span className="hidden xs:inline">Avanzamento: </span>
+        <span className="hidden xs:inline">Risposte date: </span>
         {progress}%
       </ProgressBlock>
       <Button
