@@ -1,4 +1,4 @@
-import React, { ReactNode, Fragment } from "react";
+import React, { ReactNode, Fragment, useRef } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { XMarkIcon } from "@heroicons/react/24/solid";
 import classNames from "classnames";
@@ -12,6 +12,7 @@ type ModalProps = {
 };
 
 export default function Modal({ title, description, isOpen, close, children }: ModalProps) {
+  const initialFocus = useRef(null);
   return (
     <Transition
       enter="ease-out duration-100"
@@ -22,8 +23,8 @@ export default function Modal({ title, description, isOpen, close, children }: M
       leaveTo="opacity-0"
       show={isOpen}
       as={Fragment}>
-      <Dialog onClose={close} className="relative z-50">
-        <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
+      <Dialog onClose={close} initialFocus={initialFocus} className="relative z-50">
+        <div className="fixed inset-0 bg-black/50" aria-hidden="true" />
         <div className="fixed inset-0 flex items-center justify-center px-4 pt-4">
           <Transition.Child
             enter="ease-out duration-100"
@@ -39,7 +40,9 @@ export default function Modal({ title, description, isOpen, close, children }: M
                 "rounded-xl flex flex-col mx-auto mb-auto p-5 w-[32rem] max-h-full"
               )}>
               <Dialog.Title className="flex flex-row pb-2">
-                <div className="text-xl grow mr-3">{title}</div>
+                <div className="text-xl grow mr-3" ref={initialFocus}>
+                  {title}
+                </div>
                 <div className="shrink-0">
                   <button
                     className="flex flex-row justify-items-start mt-0.5"
