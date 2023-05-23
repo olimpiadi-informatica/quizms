@@ -14,7 +14,7 @@ img {
   @apply dark:bg-white;
   @apply rounded-xl p-4;
   @apply mx-auto;
-  @apply max-w-full;
+  @apply max-w-full max-h-screen;
 }
 
 input::-webkit-outer-spin-button,
