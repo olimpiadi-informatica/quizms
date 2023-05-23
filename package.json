@@ -7,7 +7,7 @@
   "scripts": {
     "build": "parcel build",
     "watch": "parcel build --no-optimize && parcel watch -p 1235",
-    "lint": "eslint --fix ."
+    "lint": "eslint --fix . ; tsc --noEmit"
   },
   "asy-loader": "dist/asy-loader/index.js",
   "main": "dist/index.mjs",
