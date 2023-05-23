@@ -14,25 +14,26 @@ type ModalProps = {
 export default function Modal({ title, description, isOpen, close, children }: ModalProps) {
   const initialFocus = useRef(null);
   return (
-    <Transition
-      enter="ease-out duration-100"
-      enterFrom="opacity-0"
-      enterTo="opacity-100"
-      leave="ease-in duration-100"
-      leaveFrom="opacity-100"
-      leaveTo="opacity-0"
-      show={isOpen}
-      as={Fragment}>
+    <Transition show={isOpen} as={Fragment}>
       <Dialog onClose={close} initialFocus={initialFocus} className="relative z-50">
-        <div className="fixed inset-0 bg-black/50" aria-hidden="true" />
+        <Transition.Child
+          enter="ease-out duration-150"
+          enterFrom="opacity-0"
+          enterTo="opacity-100"
+          leave="ease-in duration-150"
+          leaveFrom="opacity-100"
+          leaveTo="opacity-0"
+          as={Fragment}>
+          <div className="fixed inset-0 bg-black/50" aria-hidden="true" />
+        </Transition.Child>
         <div className="fixed inset-0 flex items-center justify-center px-4 pt-4">
           <Transition.Child
-            enter="ease-out duration-100"
-            enterFrom="scale-75"
-            enterTo="scale-100"
-            leave="ease-in duration-100"
-            leaveFrom="scale-100"
-            leaveTo="scale-75"
+            enter="ease-out duration-150"
+            enterFrom="scale-75 opacity-0"
+            enterTo="scale-100 opacity-100"
+            leave="ease-in duration-150"
+            leaveFrom="scale-100 opacity-100"
+            leaveTo="scale-75 opacity-0"
             as={Fragment}>
             <Dialog.Panel
               className={classNames(
