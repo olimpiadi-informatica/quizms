@@ -3,7 +3,7 @@ import React, { ComponentType, useContext, createContext, ReactNode } from "reac
 import Katex from "react-katex";
 
 import { useAnswer, useAuthentication } from "~/src/auth/provider";
-import * as AnswerComponents from "./answers";
+import { AnswerGroup, Answer, OpenAnswer, Explanation } from "./answers";
 import { useContest } from "~/src/ui/contest";
 import { useSection } from "~/src/ui/section";
 
@@ -35,7 +35,10 @@ export function Problem({ id, points, statement: Statement }: ProblemProps) {
 
   return (
     <ProblemContext.Provider value={{ id, points }}>
-      <Statement components={{ Math, SubProblem, ...AnswerComponents }} variant={variant} />
+      <Statement
+        components={{ Math, SubProblem, AnswerGroup, Answer, OpenAnswer, Explanation }}
+        variant={variant}
+      />
       <hr className="last:hidden" />
     </ProblemContext.Provider>
   );
