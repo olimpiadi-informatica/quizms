@@ -36,7 +36,7 @@ export const rehypePlugins: PluggableList = [
   [rehypeRaw, { passThrough: mdxNodeTypes }],
 ];
 
-export const recmaPlugins: PluggableList = [recmaVariants, remarkProblemIds];
+export const recmaPlugins: PluggableList = [recmaVariants];
 
 export const mdxOptions: CompileOptions = {
   remarkPlugins,
