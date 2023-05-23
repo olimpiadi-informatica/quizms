@@ -8,8 +8,9 @@ type ProgressBlockProps = {
 };
 
 export default function ProgressBlock({ percentage, className, children }: ProgressBlockProps) {
+  percentage = Math.round(percentage);
   if (isNaN(percentage)) {
-    percentage = 50;
+    percentage = 100;
   }
   return (
     <div
