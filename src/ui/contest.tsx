@@ -1,5 +1,6 @@
 import React, { ComponentType, createContext, ReactNode } from "react";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import _ from "lodash";
 
 import { useAuthentication } from "~/src/auth/provider";
 import { Button } from "~/src/ui/components/button";
@@ -71,44 +72,41 @@ function InnerContest({
     }));
   }, []);
 
-  const [score, maxScore, progress, sectionProgress] = useMemo(() => {
-    let score: number | undefined = 0;
-    let maxScore = 0;
-    const total = [0, 0];
-    const sections: Record<string, [number, number]> = {};
-    for (const { id, section, correct, points } of Object.values(problems)) {
-      if (!(section in sections)) sections[section] = [0, 0];
-      if (id in answers && answers[id] !== undefined) {
-        total[0] += points[0];
-        sections[section][0] += points[0];
-      }
-      total[1] += points[0];
-      sections[section][1] += points[0];
-      maxScore += points[0];
+  const score = useMemo(() => {
+    if (_(problems).values().map("correct").some(_.isNull)) return undefined;
+    return _(problems)
+      .values()
+      .sumBy(({ id, correct, points }) => {
+        if (answers[id] === undefined) return points[1];
+        if (answers[id] === correct) return points[0];
+        return points[2];
+      });
+  }, [answers, problems]);
 
-      if (correct === undefined) {
-        score = undefined;
-      }
-      if (score === undefined) {
-        continue;
-      }
-      if (answers[id] === correct) {
-        score += points[0];
-      } else if (answers[id] === undefined) {
-        score += points[1];
-      } else {
-        score += points[2];
-      }
-    }
+  const maxScore = useMemo(() => {
+    return _(problems).values().sumBy("points[0]");
+  }, [problems]);
 
-    const progress = Math.round((total[0] / total[1]) * 100);
-    const sectionProgress = Object.fromEntries(
-      Object.entries(sections).map(([section, points]) => [
-        section,
-        Math.round((points[0] / points[1]) * 100),
-      ])
-    );
-    return [score, maxScore, progress, sectionProgress];
+  const progress = useMemo(() => {
+    const total = _.sumBy(_.values(problems), "points[0]");
+    const user = _(problems)
+      .filter(({ id }) => id in answers)
+      .sumBy("points[0]");
+    return Math.round((user / total) * 100);
+  }, [answers, problems]);
+
+  const sectionProgress = useMemo(() => {
+    return _(problems)
+      .values()
+      .groupBy("section")
+      .mapValues((section) => {
+        const total = _.sumBy(section, "points[0]");
+        const user = _(section)
+          .filter(({ id }) => id in answers)
+          .sumBy("points[0]");
+        return Math.round((user / total) * 100);
+      })
+      .value();
   }, [answers, problems]);
 
   const [resultShown, setResultShown] = useState(false);
@@ -176,7 +174,7 @@ function StickyFooter({ progress, sectionProgress }: FooterProps) {
       )}
       {!terminated && <Timer startTime={startTime} endTime={endTime} />}
       <div className="hidden lg:flex flex-row gap-4">
-        {Object.entries(sectionProgress).map(([id, val]) => (
+        {_.map(sectionProgress, (val, id) => (
           <ProgressBlock key={id} percentage={val}>
             Sezione {id}: {val}%
           </ProgressBlock>

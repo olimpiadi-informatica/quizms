@@ -8,6 +8,7 @@ import { randomUUID } from "node:crypto";
 import colors from "colors";
 import { LoaderContext } from "webpack";
 import svgToMiniDataURI from "mini-svg-data-uri";
+import _ from "lodash";
 
 const execFile = promisify(child_process.execFile);
 
@@ -31,10 +32,7 @@ export default function loader(this: LoaderContext<Record<string, never>>, conte
         ext: ".asy",
       });
 
-      const exists = await fs.access(file).then(
-        () => true,
-        () => false
-      );
+      const exists = await fs.access(file).then(_.stubTrue, _.stubFalse);
       if (exists) {
         context.addDependency(file);
       }

@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import { Plugin } from "unified";
 import { visit } from "unist-util-visit";
 import { InlineCode, Code, Parent, Root } from "mdast";
+import _ from "lodash";
 
 import { initSync, format_code, format_snippet } from "~/src/pseudocode-interpreter/sc_int.js";
 
@@ -41,9 +42,7 @@ const remarkSrs: Plugin<[], Root> = () => {
     const contexts = parseMainBlockCode(tree);
     parseSecondaryBlockCode(tree, contexts);
 
-    const inlineContext = Object.values(contexts).find(
-      (c): c is InlineContext => "functionName" in c
-    );
+    const inlineContext = _.find(contexts, (c): c is InlineContext => "functionName" in c);
     if (inlineContext) parseInlineCode(tree, inlineContext);
   };
 };
@@ -54,9 +53,9 @@ function parseMainBlockCode(tree: Root): Record<string, Context> {
   const contexts: Record<string, Context> = {};
 
   visit(tree, { type: "code", lang: "srs" }, (node: Code, index, parent: Parent) => {
-    const meta: Metadata = Object.fromEntries(
+    const meta: Metadata = _.fromPairs(
       node.meta?.split(/\s+/).map((m) => m.split("=", 2)) ?? []
-    );
+    ) as Metadata;
 
     if ("id" in meta) {
       node.value += "\n";
@@ -83,9 +82,9 @@ function parseMainBlockCode(tree: Root): Record<string, Context> {
 
 function parseSecondaryBlockCode(tree: Root, contexts: Record<string, Context>): void {
   visit(tree, { type: "code", lang: "srs" }, (node: Code, index, parent: Parent) => {
-    const meta: Metadata = Object.fromEntries(
+    const meta: Metadata = _.fromPairs(
       node.meta?.split(/\s+/).map((m) => m.split("=", 2)) ?? []
-    );
+    ) as Metadata;
 
     if ("context" in meta) {
       const [id, functionName, placeholderIndex] = meta["context"].split(".");
