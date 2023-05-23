@@ -1,0 +1,43 @@
+@media screen {
+  code.block-code,
+  code.inline-code {
+    color: #072063;
+  }
+
+  .srs-syntax.active-stmt {
+    background-color: #073642;
+  }
+
+  .srs-syntax.alert {
+    color: white;
+    background-color: #d84d4d;
+  }
+
+  .srs-syntax.body {
+    color: #d47c2a;
+  }
+
+  .srs-syntax.comment {
+    color: #3d8a05;
+  }
+
+  .srs-syntax.expression {
+    color: #851e30;
+  }
+
+  .srs-syntax.operator {
+    color: #77488a;
+  }
+
+  .srs-syntax.value {
+    color: #ab8300;
+  }
+
+  .srs-syntax.var {
+    color: #237ec8;
+  }
+
+  .srs-syntax.var.highlighted {
+    background-color: #7fc9db;
+  }
+}

@@ -1,0 +1,28 @@
+@import "npm:katex/dist/katex.css";
+@import "./ui/srs.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply min-w-[320px];
+}
+
+img {
+  @apply mx-auto;
+  @apply max-w-full;
+}
+
+.prose {
+  @apply lg:max-w-4xl;
+}
+
+.answer p {
+  @apply my-1;
+}
+
+.katex-display .katex-html {
+  @apply overflow-auto;
+  @apply pb-3;
+}

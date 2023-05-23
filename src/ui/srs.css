@@ -1,0 +1,57 @@
+@import "./srs-light.css";
+
+code:before,
+code:after {
+  @apply !content-none;
+}
+
+code.block-code,
+code.inline-code {
+  @apply !font-normal;
+}
+
+code.block-code {
+  @apply break-inside-avoid;
+  @apply my-1;
+  display: block;
+
+  @media screen {
+    @apply whitespace-nowrap;
+    @apply overflow-x-auto;
+  }
+}
+
+code.block-code .srs-syntax.line {
+  @apply rounded hover:bg-black/5;
+  @apply pl-24 -indent-24;
+  @apply ml-1 min-w-fit;
+  display: block;
+}
+
+.srs-syntax.block {
+  @apply border-l-2 border-solid border-[#8ea8ae];
+  @apply pl-8 ml-1.5;
+  display: block;
+}
+
+.srs-syntax.body,
+.srs-syntax.operator,
+.srs-syntax.keyword,
+.srs-syntax.var {
+  @apply font-bold;
+}
+
+.srs-syntax.type {
+  @apply italic;
+}
+
+.srs-syntax.active-expr {
+  @apply underline;
+}
+
+.srs-syntax.alert {
+  @media screen {
+    @apply rounded;
+    @apply px-3 py-0.5;
+  }
+}
