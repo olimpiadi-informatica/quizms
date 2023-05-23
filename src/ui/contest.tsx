@@ -64,7 +64,6 @@ function InnerContest({
   const [problems, setProblems] = useState<Record<string, [string, [number, number, number]]>>({});
 
   const registerProblem = (id: string, section: string, points: [number, number, number]) => {
-    if (id in problems) return;
     setProblems((prev) => ({ ...prev, [id]: [section, points] }));
   };
 

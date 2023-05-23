@@ -1,4 +1,4 @@
-import React, { ComponentType, useContext, createContext, ReactNode } from "react";
+import React, { ComponentType, useContext, createContext, ReactNode, useEffect } from "react";
 
 import Katex from "react-katex";
 
@@ -56,7 +56,9 @@ export function SubProblem({ subId, children }: SubProblemProps) {
   const { registerProblem } = useContest();
   const section = useSection();
 
-  registerProblem(newId, section, points);
+  useEffect(() => {
+    registerProblem(newId, section, points);
+  }, []);
 
   return (
     <ProblemContext.Provider value={{ id: newId, points }}>
