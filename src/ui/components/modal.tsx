@@ -1,6 +1,7 @@
 import React, { ReactNode, Fragment } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { XMarkIcon } from "@heroicons/react/24/solid";
+import classNames from "classnames";
 
 type ModalProps = {
   title: string;
@@ -32,7 +33,11 @@ export default function Modal({ title, description, isOpen, close, children }: M
             leaveFrom="scale-100"
             leaveTo="scale-75"
             as={Fragment}>
-            <Dialog.Panel className="bg-white rounded-xl flex flex-col mx-auto mb-auto p-5 w-[32rem] max-h-full">
+            <Dialog.Panel
+              className={classNames(
+                "prose dark:prose-invert bg-white dark:bg-slate-700",
+                "rounded-xl flex flex-col mx-auto mb-auto p-5 w-[32rem] max-h-full"
+              )}>
               <Dialog.Title className="flex flex-row pb-2">
                 <div className="text-xl grow mr-3">{title}</div>
                 <div className="shrink-0">
@@ -40,7 +45,7 @@ export default function Modal({ title, description, isOpen, close, children }: M
                     className="flex flex-row justify-items-start mt-0.5"
                     aria-label="Chiudi"
                     onClick={close}>
-                    <XMarkIcon className="text-2xl hover:text-red-600 hover:scale-125 transition h-7 w-7" />
+                    <XMarkIcon className="text-2xl hover:text-red-600 dark:hover:text-red-500 hover:scale-125 transition h-7 w-7" />
                   </button>
                 </div>
               </Dialog.Title>

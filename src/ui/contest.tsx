@@ -12,6 +12,7 @@ import { Button } from "~/src/ui/components/button";
 import Modal from "~/src/ui/components/modal";
 import Timer from "~/src/ui/components/timer";
 import ProgressBlock from "~/src/ui/components/progressBlock";
+import classNames from "classnames";
 
 type ContestContextProps = {
   randomizeProblemOrder: boolean;
@@ -97,7 +98,7 @@ function InnerContest({
         randomizeAnswerOrder: randomizeAnswerOrder ?? false,
         registerProblem,
       }}>
-      <div className="prose prose-md px-4 mx-auto my-5">
+      <div className="prose prose-md dark:prose-invert lg:max-w-4xl px-4 mx-auto mt-5 mb-0">
         {Header && (
           <div className="header [page-break-after:always]">
             <Header />
@@ -123,7 +124,11 @@ function StickyFooter({ progress, sectionProgress }: FooterProps) {
   const { startTime, endTime, terminated } = useAuthentication();
 
   return (
-    <div className="bg-white border-t border-zinc-600 flex justify-between p-3 overflow-hidden sticky bottom-0 print:hidden">
+    <div
+      className={classNames(
+        "bg-white dark:bg-slate-800 border-t border-zinc-600 dark:border-slate-400",
+        "flex justify-between p-3 overflow-hidden sticky bottom-0 print:hidden"
+      )}>
       {terminated && (
         <ProgressBlock className="w-20" percentage={100}>
           00:00
@@ -142,7 +147,7 @@ function StickyFooter({ progress, sectionProgress }: FooterProps) {
         {progress}%
       </ProgressBlock>
       <Button
-        className="text-white bg-emerald-600"
+        className="text-white border-emerald-600 bg-emerald-600"
         onClick={() => setModalOpen(true)}
         disabled={terminated}>
         Termina
@@ -168,7 +173,7 @@ function SubmitModal({ isOpen, close }: { isOpen: boolean; close: () => void }) 
       close={close}>
       <div className="h-10" />
       <div className="text-md flex flex-row justify-center gap-5">
-        <Button className="border-black" onClick={close}>
+        <Button className="border-black dark:border-slate-400 dark:bg-slate-600" onClick={close}>
           Annulla
         </Button>
         <Button className="text-white border-red-600 bg-red-600" onClick={confirm}>

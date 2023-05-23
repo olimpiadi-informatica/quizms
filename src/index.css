@@ -6,16 +6,25 @@
 @tailwind utilities;
 
 body {
+  @apply dark:bg-slate-800;
   @apply min-w-[320px];
 }
 
 img {
+  @apply dark:bg-white;
+  @apply rounded-xl p-4;
   @apply mx-auto;
   @apply max-w-full;
 }
 
-.prose {
-  @apply lg:max-w-4xl;
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  appearance: textfield;
 }
 
 .answer p {
