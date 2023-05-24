@@ -12,27 +12,21 @@ code.inline-code {
 }
 
 code.block-code {
+  @apply _block pl-2 my-1;
   @apply break-inside-avoid;
-  @apply pl-2 my-1;
-  display: block;
-
-  @media screen {
-    @apply whitespace-nowrap;
-    @apply overflow-x-auto;
-  }
+  @apply screen:whitespace-nowrap;
+  @apply screen:overflow-x-auto;
 }
 
 code.block-code .srs-syntax.line {
   @apply rounded hover:bg-black/5 dark:hover:bg-white/5;
   @apply pl-[6.25rem] -indent-24;
-  @apply min-w-fit;
-  display: block;
+  @apply _block min-w-fit;
 }
 
 .srs-syntax.block {
   @apply border-l-2 border-solid border-[#8ea8ae];
-  @apply pl-8 ml-1.5;
-  display: block;
+  @apply _block pl-8 ml-1.5;
 }
 
 .srs-syntax.body,
@@ -51,8 +45,6 @@ code.block-code .srs-syntax.line {
 }
 
 .srs-syntax.alert {
-  @media screen {
-    @apply rounded;
-    @apply px-3 py-0.5;
-  }
+  @apply screen:rounded;
+  @apply screen:px-3 screen:py-0.5;
 }

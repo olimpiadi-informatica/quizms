@@ -20,8 +20,8 @@ export function Section({ id, children }: SectionProps) {
 
   return (
     <SectionContext.Provider value={id ?? "0"}>
-      <div className="section">{problems}</div>
-      <hr className="last:hidden [page-break-after:always]" />
+      <div className="section print:columns-2">{problems}</div>
+      <hr className="last:hidden" />
     </SectionContext.Provider>
   );
 }

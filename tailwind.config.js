@@ -1,3 +1,5 @@
+const plugin = require("tailwindcss/plugin");
+
 /** @type {import("tailwindcss").Config} */
 module.exports = {
   content: ["./src/**/*.{ts,tsx}"],
@@ -8,5 +10,16 @@ module.exports = {
       },
     },
   },
-  plugins: [require("@tailwindcss/forms"), require("@tailwindcss/typography")],
+  plugins: [
+    require("@tailwindcss/forms"),
+    require("@tailwindcss/typography"),
+    plugin(function ({ addUtilities, addVariant }) {
+      addUtilities({
+        "._block": {
+          display: "block",
+        },
+      });
+      addVariant("screen", "@media screen");
+    }),
+  ],
 };

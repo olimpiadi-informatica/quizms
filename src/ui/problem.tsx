@@ -43,7 +43,12 @@ export function Problem({ id, points, statement: Statement }: ProblemProps) {
   const { variant } = useAuthentication();
 
   return (
-    <ProblemContext.Provider value={{ id, points, setCorrect: () => {} }}>
+    <ProblemContext.Provider
+      value={{
+        id,
+        points,
+        setCorrect: () => {},
+      }}>
       <Statement
         components={{ Math, SubProblem, AnswerGroup, Answer, OpenAnswer, Explanation }}
         variant={variant}
@@ -72,8 +77,10 @@ export function SubProblem({ subId, children }: SubProblemProps) {
 
   return (
     <ProblemContext.Provider value={{ id: newId, points, setCorrect }}>
-      <h3>Domanda {newId}</h3>
-      {children}
+      <div className="subproblem">
+        <h3>Domanda {newId}</h3>
+        {children}
+      </div>
     </ProblemContext.Provider>
   );
 }

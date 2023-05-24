@@ -37,7 +37,7 @@ export default function Modal({ title, description, isOpen, close, children }: M
             as={Fragment}>
             <Dialog.Panel
               className={classNames(
-                "prose dark:prose-invert bg-white dark:bg-slate-700",
+                "prose screen:dark:prose-invert bg-white dark:bg-slate-700",
                 "rounded-xl flex flex-col mx-auto mb-auto p-5 w-[32rem] max-h-full"
               )}>
               <Dialog.Title className="flex flex-row pb-2">

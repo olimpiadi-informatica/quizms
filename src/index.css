@@ -19,12 +19,12 @@ img {
 
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
-  appearance: none;
-  margin: 0;
+  @apply appearance-none;
+  @apply m-0;
 }
 
 input[type="number"] {
-  appearance: textfield;
+  @apply [appearance:textfield];
 }
 
 .answer p {

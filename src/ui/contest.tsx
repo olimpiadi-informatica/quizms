@@ -110,14 +110,18 @@ function InnerContest({
         randomizeAnswerOrder: randomizeAnswerOrder ?? false,
         registerProblem,
       }}>
-      <div className="prose prose-md dark:prose-invert lg:max-w-4xl px-4 mx-auto mt-5 mb-0">
+      <div
+        className={classNames(
+          "prose prose-md dark:prose-invert print:prose-sm print:mx-1.5 print:max-w-full",
+          "lg:max-w-4xl px-4 mx-auto mt-5 mb-0"
+        )}>
         {Header && (
-          <div className="header [page-break-after:always]">
+          <div className="header">
             <Header />
             <hr />
           </div>
         )}
-        <div className="contest">
+        <div className="contest prose-headings:break-before-page">
           <main>{children}</main>
           <StickyFooter progress={progress} sectionProgress={sectionProgress} />
         </div>
