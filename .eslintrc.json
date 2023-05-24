@@ -3,7 +3,7 @@
     "es2021": true,
     "node": true
   },
-  "ignorePatterns": ["src/pseudocode-interpreter/", "dist/"],
+  "ignorePatterns": ["*.js", "dist/"],
   "extends": [
     "eslint:recommended",
     "plugin:react/recommended",

@@ -1,4 +1,4 @@
-import { Blockquote, List, Paragraph, Parent, Root } from "mdast";
+import { Blockquote, List, Paragraph, Parent, Root, Text } from "mdast";
 import { MdxJsxAttribute, MdxJsxFlowElement } from "mdast-util-mdx-jsx";
 import * as process from "process";
 import { Plugin } from "unified";
@@ -25,11 +25,15 @@ function parseMultipleAnswerGroup(tree: Root) {
       }
       return text;
     });
-    if (radios.some((radio) => radio === null)) return;
 
-    const correct = radios.findIndex((radio) => radio!.value.startsWith("(x)"));
+    function isAnswerGroup(radios: (Text | null)[]): radios is Text[] {
+      return !radios.includes(null);
+    }
+    if (!isAnswerGroup(radios)) return;
+
+    const correct = radios.findIndex((radio) => radio.value.startsWith("(x)"));
     for (const radio of radios) {
-      radio!.value = radio!.value.slice(4);
+      radio.value = radio.value.slice(4);
     }
 
     parent.children[index] = {

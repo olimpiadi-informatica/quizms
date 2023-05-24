@@ -7,6 +7,7 @@ import React, {
   useState,
 } from "react";
 
+import _ from "lodash";
 import Katex from "react-katex";
 
 import { useAuthentication } from "~/src/auth/provider";
@@ -44,12 +45,7 @@ export function Problem({ id, points, statement: Statement }: ProblemProps) {
   const { variant } = useAuthentication();
 
   return (
-    <ProblemContext.Provider
-      value={{
-        id,
-        points,
-        setCorrect: () => {},
-      }}>
+    <ProblemContext.Provider value={{ id, points, setCorrect: _.noop }}>
       <Statement
         components={{ Math, SubProblem, AnswerGroup, Answer, OpenAnswer, Explanation }}
         variant={variant}

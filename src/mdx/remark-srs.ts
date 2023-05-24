@@ -6,7 +6,7 @@ import { Code, InlineCode, Parent, Root } from "mdast";
 import { Plugin } from "unified";
 import { visit } from "unist-util-visit";
 
-import { format_code, format_snippet, initSync } from "~/src/pseudocode-interpreter/sc_int.js";
+import { format_code, format_snippet, initSync } from "~/src/pseudocode-interpreter/sc_int";
 
 initSync(
   fs.readFileSync(

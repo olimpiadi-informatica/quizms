@@ -82,7 +82,7 @@ function InnerContest({
   }, []);
 
   const progress = useMemo(() => {
-    const total = _.sumBy(_.values(problems), "points[0]");
+    const total = _(problems).values().sumBy("points[0]");
     const user = _(problems)
       .filter(({ id }) => id in answers)
       .sumBy("points[0]");
@@ -91,7 +91,6 @@ function InnerContest({
 
   const sectionProgress = useMemo(() => {
     return _(problems)
-      .values()
       .groupBy("section")
       .mapValues((section) => {
         const total = _.sumBy(section, "points[0]");
@@ -153,16 +152,19 @@ type ModalProps = {
 };
 
 function CompletedModal({ problems, answers, isOpen, close }: ModalProps) {
-  const calcPoints = (problem: Problem) => {
-    if (answers[problem.id] === undefined) return problem.points[1];
-    if (answers[problem.id] === problem.correct) return problem.points[0];
-    return problem.points[2];
-  };
+  const calcPoints = useCallback(
+    (problem: Problem) => {
+      if (answers[problem.id] === undefined) return problem.points[1];
+      if (answers[problem.id] === problem.correct) return problem.points[0];
+      return problem.points[2];
+    },
+    [answers]
+  );
 
   const score = useMemo(() => {
-    if (_(problems).values().map("correct").some(_.isNil)) return undefined;
+    if (_(problems).map("correct").some(_.isNil)) return undefined;
     return _(problems).values().sumBy(calcPoints);
-  }, [answers, problems]);
+  }, [problems, calcPoints]);
 
   const maxScore = useMemo(() => {
     return _(problems).values().sumBy("points[0]");

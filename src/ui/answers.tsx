@@ -35,7 +35,7 @@ export function Answer({ id, correct, children }: AnswerProps) {
     if (correct === "true") {
       setCorrect(id);
     }
-  }, [correct, setCorrect]);
+  }, [correct, setCorrect, id]);
 
   return (
     <div
