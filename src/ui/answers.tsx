@@ -30,8 +30,8 @@ export function Answer({ id, correct, children }: AnswerProps) {
   const answerId = useId();
 
   useEffect(() => {
-    if (correct !== undefined) {
-      setCorrect(correct);
+    if (correct === "true") {
+      setCorrect(id);
     }
   }, [correct, setCorrect]);
 
@@ -39,11 +39,12 @@ export function Answer({ id, correct, children }: AnswerProps) {
     <div
       className={classNames(
         "answer rounded-lg hover:bg-zinc-300 dark:hover:bg-slate-600 flex pl-2 pr-1 my-1",
-        terminated && {
-          "border-2": answer === id || correct === "true",
-          "border-green-600": correct === "true",
-          "border-red-600 dark:!border-red-500": answer === id && correct === "false",
-        }
+        terminated &&
+          correct !== undefined && {
+            "border-2": answer === id || correct === "true",
+            "border-green-600": correct === "true",
+            "border-red-600 dark:!border-red-500": answer === id && correct === "false",
+          }
       )}>
       <input
         id={answerId}
@@ -110,7 +111,7 @@ export function Explanation({ children }: { children: ReactNode }) {
   const { terminated } = useAuthentication();
   if (!terminated) return null;
   return (
-    <div className="explanation rounded-xl bg-zinc-200 dark:bg-slate-700 px-5 py-3 my-5">
+    <div className="explanation print:hidden rounded-xl bg-zinc-200 dark:bg-slate-700 px-5 py-3 my-5">
       <Spoiler title="Mostra soluzione">{children}</Spoiler>
     </div>
   );

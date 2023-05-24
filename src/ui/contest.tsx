@@ -72,21 +72,6 @@ function InnerContest({
     }));
   }, []);
 
-  const score = useMemo(() => {
-    if (_(problems).values().map("correct").some(_.isNull)) return undefined;
-    return _(problems)
-      .values()
-      .sumBy(({ id, correct, points }) => {
-        if (answers[id] === undefined) return points[1];
-        if (answers[id] === correct) return points[0];
-        return points[2];
-      });
-  }, [answers, problems]);
-
-  const maxScore = useMemo(() => {
-    return _(problems).values().sumBy("points[0]");
-  }, [problems]);
-
   const progress = useMemo(() => {
     const total = _.sumBy(_.values(problems), "points[0]");
     const user = _(problems)
@@ -137,18 +122,77 @@ function InnerContest({
           <StickyFooter progress={progress} sectionProgress={sectionProgress} />
         </div>
       </div>
-      <Modal
-        title="Prova terminata"
-        description="La prova è terminata."
+      <CompletedModal
+        problems={problems}
+        answers={answers}
         isOpen={isModalOpen}
-        close={() => setModalOpen(false)}>
-        {score !== undefined && (
+        close={() => setModalOpen(false)}
+      />
+    </ContestContext.Provider>
+  );
+}
+
+type ModalProps = {
+  problems: Record<string, Problem>;
+  answers: Record<string, string | undefined>;
+  isOpen: boolean;
+  close: () => void;
+};
+
+function CompletedModal({ problems, answers, isOpen, close }: ModalProps) {
+  const calcPoints = (problem: Problem) => {
+    if (answers[problem.id] === undefined) return problem.points[1];
+    if (answers[problem.id] === problem.correct) return problem.points[0];
+    return problem.points[2];
+  };
+
+  const score = useMemo(() => {
+    if (_(problems).values().map("correct").some(_.isNil)) return undefined;
+    return _(problems).values().sumBy(calcPoints);
+  }, [answers, problems]);
+
+  const maxScore = useMemo(() => {
+    return _(problems).values().sumBy("points[0]");
+  }, [problems]);
+
+  return (
+    <Modal
+      title="Prova terminata"
+      description="La prova è terminata."
+      isOpen={isOpen}
+      close={close}>
+      {score !== undefined && (
+        <>
           <p>
             Hai ottenuto un punteggio di <b>{score}</b> su <b>{maxScore}</b>.
           </p>
-        )}
-      </Modal>
-    </ContestContext.Provider>
+          <table className="text-center">
+            <thead>
+              <tr>
+                <th>Domanda</th>
+                <th>Risposta</th>
+                <th>Soluzione</th>
+                <th>Punteggio</th>
+              </tr>
+            </thead>
+            <tbody>
+              {_(problems)
+                .values()
+                .sortBy("id")
+                .map((problem) => (
+                  <tr key={problem.id}>
+                    <th>{problem.id}</th>
+                    <th>{answers[problem.id] ?? "-"}</th>
+                    <th>{problem.correct}</th>
+                    <th>{calcPoints(problem)}</th>
+                  </tr>
+                ))
+                .value()}
+            </tbody>
+          </table>
+        </>
+      )}
+    </Modal>
   );
 }
 
