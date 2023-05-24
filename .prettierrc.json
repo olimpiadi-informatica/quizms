@@ -5,5 +5,16 @@
   "singleQuote": false,
   "printWidth": 100,
   "endOfLine": "lf",
-  "bracketSameLine": true
+  "bracketSameLine": true,
+  "importOrder": [
+    "^server-only$",
+    "^node:",
+    "^(react|react-dom)(/|$)",
+    "<THIRD_PARTY_MODULES>",
+    "^~/",
+    "^./",
+    "\\.css$"
+  ],
+  "importOrderSeparation": true,
+  "importOrderSortSpecifiers": true
 }

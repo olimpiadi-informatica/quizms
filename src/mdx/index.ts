@@ -1,23 +1,18 @@
-import { PluggableList } from "unified";
 import { CompileOptions, nodeTypes as mdxNodeTypes } from "@mdx-js/mdx";
-
-// Remark plugins
+import rehypeRaw from "rehype-raw";
 import remarkFrontmatter from "remark-frontmatter";
 import remarkMath from "remark-math";
 import remarkMdxFrontmatter from "remark-mdx-frontmatter";
 import remarkMdxImages from "remark-mdx-images";
 import remarkMdxMathEnhancedPlugin from "remark-mdx-math-enhanced";
 import remarkSmartypants from "remark-smartypants";
+import { PluggableList } from "unified";
+
+import recmaVariants from "./recma-variants";
+import rehypeFixWrap from "./rehype-fix-wrap";
 import remarkAnswers from "./remark-answers";
 import remarkProblemIds from "./remark-problem-ids";
 import remarkSrs from "./remark-srs";
-
-// Rehype plugins
-import rehypeRaw from "rehype-raw";
-import rehypeFixWrap from "./rehype-fix-wrap";
-
-// Recma plugins
-import recmaVariants from "./recma-variants";
 
 export const remarkPlugins: PluggableList = [
   remarkAnswers,

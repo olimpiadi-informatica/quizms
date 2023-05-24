@@ -1,8 +1,8 @@
-import React, { createRef, Fragment, ReactNode } from "react";
+import React, { Fragment, ReactNode, createRef } from "react";
 
-import classNames from "classnames";
 import { Disclosure, Transition } from "@headlessui/react";
 import { ChevronDownIcon } from "@heroicons/react/24/solid";
+import classNames from "classnames";
 
 type Props = {
   title: string;

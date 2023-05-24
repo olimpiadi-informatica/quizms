@@ -1,8 +1,8 @@
 import React, {
   ComponentType,
-  useContext,
-  createContext,
   ReactNode,
+  createContext,
+  useContext,
   useEffect,
   useState,
 } from "react";
@@ -10,7 +10,8 @@ import React, {
 import Katex from "react-katex";
 
 import { useAuthentication } from "~/src/auth/provider";
-import { AnswerGroup, Answer, OpenAnswer, Explanation } from "./answers";
+
+import { Answer, AnswerGroup, Explanation, OpenAnswer } from "./answers";
 import { useContest } from "./contest";
 import { useSection } from "./section";
 

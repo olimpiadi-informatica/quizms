@@ -1,14 +1,14 @@
-import fs from "node:fs/promises";
-import path from "node:path";
 import child_process from "node:child_process";
-import { promisify } from "node:util";
-import { tmpdir } from "node:os";
 import { randomUUID } from "node:crypto";
+import fs from "node:fs/promises";
+import { tmpdir } from "node:os";
+import path from "node:path";
+import { promisify } from "node:util";
 
 import colors from "colors";
-import { LoaderContext } from "webpack";
-import svgToMiniDataURI from "mini-svg-data-uri";
 import _ from "lodash";
+import svgToMiniDataURI from "mini-svg-data-uri";
+import { LoaderContext } from "webpack";
 
 const execFile = promisify(child_process.execFile);
 

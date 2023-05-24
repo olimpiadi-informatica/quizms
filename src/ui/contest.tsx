@@ -1,13 +1,22 @@
-import React, { ComponentType, createContext, ReactNode } from "react";
-import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import React, {
+  ComponentType,
+  ReactNode,
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+
+import classNames from "classnames";
 import _ from "lodash";
 
 import { useAuthentication } from "~/src/auth/provider";
 import { Button } from "~/src/ui/components/button";
 import Modal from "~/src/ui/components/modal";
-import Timer from "~/src/ui/components/timer";
 import ProgressBlock from "~/src/ui/components/progressBlock";
-import classNames from "classnames";
+import Timer from "~/src/ui/components/timer";
 
 type Problem = {
   id: string;

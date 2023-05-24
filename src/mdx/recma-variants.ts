@@ -1,5 +1,5 @@
-import { visit } from "estree-util-visit";
 import { Program, VariableDeclaration } from "estree";
+import { visit } from "estree-util-visit";
 import { Plugin } from "unified";
 
 const recmaVariants: Plugin<[], Program> = () => {

@@ -1,7 +1,7 @@
-import { Plugin } from "unified";
-import { SKIP, visit } from "unist-util-visit";
 import { Parent, Root } from "hast";
 import { MdxJsxTextElementHast } from "mdast-util-mdx-jsx";
+import { Plugin } from "unified";
+import { SKIP, visit } from "unist-util-visit";
 
 const rehypeFixWrap: Plugin<[], Root> = () => {
   return (tree) => {

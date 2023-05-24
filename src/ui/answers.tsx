@@ -1,9 +1,11 @@
 import React, { ReactNode, useEffect, useId } from "react";
+
 import classNames from "classnames";
 
-import Spoiler from "./components/spoiler";
 import { useAnswer, useAuthentication } from "~/src/auth/provider";
 import { useProblem } from "~/src/ui/problem";
+
+import Spoiler from "./components/spoiler";
 
 type AnswerGroupProps = {
   children: ReactNode;

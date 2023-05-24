@@ -1,12 +1,12 @@
 import fs from "node:fs";
 import { fileURLToPath } from "node:url";
 
+import _ from "lodash";
+import { Code, InlineCode, Parent, Root } from "mdast";
 import { Plugin } from "unified";
 import { visit } from "unist-util-visit";
-import { InlineCode, Code, Parent, Root } from "mdast";
-import _ from "lodash";
 
-import { initSync, format_code, format_snippet } from "~/src/pseudocode-interpreter/sc_int.js";
+import { format_code, format_snippet, initSync } from "~/src/pseudocode-interpreter/sc_int.js";
 
 initSync(
   fs.readFileSync(

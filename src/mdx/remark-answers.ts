@@ -1,8 +1,8 @@
+import { Blockquote, List, Paragraph, Parent, Root } from "mdast";
+import { MdxJsxAttribute, MdxJsxFlowElement } from "mdast-util-mdx-jsx";
+import * as process from "process";
 import { Plugin } from "unified";
 import { visit } from "unist-util-visit";
-import { Blockquote, List, Paragraph, Parent, Root } from "mdast";
-import { MdxJsxFlowElement, MdxJsxAttribute } from "mdast-util-mdx-jsx";
-import * as process from "process";
 
 const remarkAnswers: Plugin<[], Root> = () => {
   return (tree) => {
