@@ -72,7 +72,7 @@ export function SubProblem({ subId, children }: SubProblemProps) {
 
   return (
     <ProblemContext.Provider value={{ id: newId, points, setCorrect }}>
-      <h3>Problema {newId}</h3>
+      <h3>Domanda {newId}</h3>
       {children}
     </ProblemContext.Provider>
   );
