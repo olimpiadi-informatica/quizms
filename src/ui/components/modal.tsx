@@ -38,19 +38,19 @@ export default function Modal({ title, description, isOpen, close, children }: M
             as={Fragment}>
             <Dialog.Panel
               className={classNames(
-                "prose screen:dark:prose-invert bg-white dark:bg-slate-700",
-                "rounded-xl flex flex-col mx-auto mb-auto p-5 w-[32rem] max-h-full"
+                "prose mx-auto mb-auto flex max-h-full w-[32rem] flex-col rounded-xl bg-white",
+                "p-5 screen:dark:prose-invert dark:bg-slate-700"
               )}>
               <Dialog.Title className="flex flex-row pb-2">
-                <div className="text-xl grow mr-3" ref={initialFocus}>
+                <div className="mr-3 grow text-xl" ref={initialFocus}>
                   {title}
                 </div>
                 <div className="shrink-0">
                   <button
-                    className="flex flex-row justify-items-start mt-0.5"
+                    className="mt-0.5 flex flex-row justify-items-start"
                     aria-label="Chiudi"
                     onClick={close}>
-                    <XMarkIcon className="text-2xl hover:text-red-600 dark:hover:text-red-500 hover:scale-125 transition h-7 w-7" />
+                    <XMarkIcon className="h-7 w-7 text-2xl transition hover:scale-125 hover:text-red-600 dark:hover:text-red-500" />
                   </button>
                 </div>
               </Dialog.Title>

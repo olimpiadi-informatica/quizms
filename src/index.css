@@ -6,21 +6,16 @@
 @tailwind utilities;
 
 body {
-  @apply dark:bg-slate-800;
-  @apply min-w-[320px];
+  @apply min-w-[320px] dark:bg-slate-800;
 }
 
 img {
-  @apply dark:bg-white;
-  @apply rounded-xl p-4;
-  @apply mx-auto;
-  @apply max-w-full max-h-screen;
+  @apply mx-auto max-h-screen max-w-full rounded-xl p-4 dark:bg-white;
 }
 
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
-  @apply appearance-none;
-  @apply m-0;
+  @apply m-0 appearance-none;
 }
 
 input[type="number"] {
@@ -32,6 +27,5 @@ input[type="number"] {
 }
 
 .katex-display .katex-html {
-  @apply overflow-auto;
-  @apply pb-3;
+  @apply overflow-auto pb-3;
 }

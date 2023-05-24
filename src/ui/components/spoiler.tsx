@@ -19,11 +19,11 @@ export default function Spoiler({ title, children }: Props) {
     <Disclosure>
       {({ open }) => (
         <>
-          <Disclosure.Button className="flex justify-between w-full">
+          <Disclosure.Button className="flex w-full justify-between">
             <p className="mt-1 mb-2">{title}</p>
             <ChevronDownIcon
-              className={classNames("transition duration-200 my-auto h-7 w-7", {
-                "transform rotate-180": open,
+              className={classNames("my-auto h-7 w-7 transition duration-200", {
+                "rotate-180 transform": open,
               })}
             />
           </Disclosure.Button>
@@ -39,7 +39,7 @@ export default function Spoiler({ title, children }: Props) {
             unmount={false}
             as={Fragment}>
             <div className="overflow-y-hidden" ref={ref}>
-              <hr className="border-zinc-400 mt-3 mb-0" />
+              <hr className="mt-3 mb-0 border-zinc-400" />
               <Disclosure.Panel>{children}</Disclosure.Panel>
             </div>
           </Transition>

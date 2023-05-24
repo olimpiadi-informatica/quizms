@@ -120,8 +120,8 @@ function InnerContest({
       }}>
       <div
         className={classNames(
-          "prose prose-md dark:prose-invert print:prose-sm print:mx-1.5 print:max-w-full",
-          "lg:max-w-4xl px-4 mx-auto mt-5 mb-0"
+          "prose-md prose mx-auto mt-5 mb-0 px-4 dark:prose-invert print:prose-sm print:mx-1.5",
+          "print:max-w-full lg:max-w-4xl"
         )}>
         {Header && (
           <div className="header">
@@ -223,8 +223,8 @@ function StickyFooter({ progress, sectionProgress }: FooterProps) {
   return (
     <div
       className={classNames(
-        "bg-white dark:bg-slate-800 border-t border-zinc-600 dark:border-slate-400",
-        "flex justify-between p-3 overflow-hidden sticky bottom-0 print:hidden"
+        "sticky bottom-0 flex justify-between overflow-hidden border-t border-zinc-600 bg-white",
+        "p-3 dark:border-slate-400 dark:bg-slate-800 print:hidden"
       )}>
       {terminated && (
         <ProgressBlock className="w-20" percentage={100}>
@@ -232,19 +232,19 @@ function StickyFooter({ progress, sectionProgress }: FooterProps) {
         </ProgressBlock>
       )}
       {!terminated && <Timer startTime={startTime} endTime={endTime} />}
-      <div className="hidden lg:flex flex-row gap-4">
+      <div className="hidden flex-row gap-4 lg:flex">
         {_.map(sectionProgress, (val, id) => (
           <ProgressBlock key={id} percentage={val}>
             Sezione {id}: {val}%
           </ProgressBlock>
         ))}
       </div>
-      <ProgressBlock className="lg:hidden min-w-[5rem]" percentage={progress}>
+      <ProgressBlock className="min-w-[5rem] lg:hidden" percentage={progress}>
         <span className="hidden xs:inline">Risposte date: </span>
         {progress}%
       </ProgressBlock>
       <Button
-        className="text-white border-emerald-600 bg-emerald-600"
+        className="border-emerald-600 bg-emerald-600 text-white"
         onClick={() => setModalOpen(true)}
         disabled={terminated}>
         Termina
@@ -272,7 +272,7 @@ function SubmitModal({ isOpen, close }: { isOpen: boolean; close: () => void }) 
         <Button className="border-black dark:border-slate-400 dark:bg-slate-600" onClick={close}>
           Annulla
         </Button>
-        <Button className="text-white border-red-600 bg-red-600" onClick={confirm}>
+        <Button className="border-red-600 bg-red-600 text-white" onClick={confirm}>
           Conferma
         </Button>
       </div>

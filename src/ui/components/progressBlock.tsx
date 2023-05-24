@@ -15,7 +15,7 @@ export default function ProgressBlock({ percentage, className, children }: Progr
   }
   return (
     <div
-      className={classNames("text-white text-center rounded-lg p-2", className)}
+      className={classNames("rounded-lg p-2 text-center text-white", className)}
       style={{
         background: `linear-gradient(to right, #3b82f6 ${percentage}%, #71717a ${percentage}%)`,
       }}>

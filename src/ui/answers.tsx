@@ -13,7 +13,7 @@ type AnswerGroupProps = {
 
 export function AnswerGroup({ children }: AnswerGroupProps) {
   return (
-    <div className="answer-group rounded-xl bg-zinc-200 dark:bg-slate-700 px-3 py-3 my-5">
+    <div className="answer-group my-5 rounded-xl bg-zinc-200 px-3 py-3 dark:bg-slate-700">
       {children}
     </div>
   );
@@ -40,7 +40,7 @@ export function Answer({ id, correct, children }: AnswerProps) {
   return (
     <div
       className={classNames(
-        "answer rounded-lg hover:bg-zinc-300 dark:hover:bg-slate-600 flex pl-2 pr-1 my-1",
+        "answer my-1 flex rounded-lg pl-2 pr-1 hover:bg-zinc-300 dark:hover:bg-slate-600",
         terminated &&
           correct !== undefined && {
             "border-2": answer === id || correct === "true",
@@ -52,7 +52,7 @@ export function Answer({ id, correct, children }: AnswerProps) {
         id={answerId}
         checked={answer === id}
         className={classNames(
-          "mr-4 my-auto",
+          "my-auto mr-4",
           { "cursor-pointer": !terminated },
           terminated &&
             answer === id && {
@@ -86,14 +86,12 @@ export function OpenAnswer({ correct }: { correct?: string }) {
     <div className="open-answer px-2">
       <input
         className={classNames(
-          "rounded-md border-zinc-400 focus:border-indigo-300",
-          "shadow-sm focus:ring-2 focus:ring-indigo-200",
-          "dark:bg-slate-700 dark:text-slate-200 dark:placeholder:text-slate-400",
-          "dark:border-slate-400 dark:focus:border-slate-400 dark:focus:ring-slate-400",
-          "w-72 max-w-full",
+          "w-72 max-w-full rounded-md border-zinc-400 shadow-sm focus:border-indigo-300 focus:ring-2",
+          "focus:ring-indigo-200 dark:border-slate-400 dark:bg-slate-700 dark:text-slate-200",
+          "dark:placeholder:text-slate-400 dark:focus:border-slate-400 dark:focus:ring-slate-400",
           terminated &&
             correct !== undefined && {
-              "border-2 dark:border-3": true,
+              "dark:border-3 border-2": true,
               "!border-green-600": correct === answer,
               "!border-red-600 dark:!border-red-500": correct !== answer,
             }
@@ -113,7 +111,7 @@ export function Explanation({ children }: { children: ReactNode }) {
   const { terminated } = useAuthentication();
   if (!terminated) return null;
   return (
-    <div className="explanation print:hidden rounded-xl bg-zinc-200 dark:bg-slate-700 px-5 py-3 my-5">
+    <div className="explanation my-5 rounded-xl bg-zinc-200 px-5 py-3 dark:bg-slate-700 print:hidden">
       <Spoiler title="Mostra soluzione">{children}</Spoiler>
     </div>
   );

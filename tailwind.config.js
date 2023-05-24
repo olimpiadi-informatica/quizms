@@ -13,12 +13,7 @@ module.exports = {
   plugins: [
     require("@tailwindcss/forms"),
     require("@tailwindcss/typography"),
-    plugin(function ({ addUtilities, addVariant }) {
-      addUtilities({
-        "._block": {
-          display: "block",
-        },
-      });
+    plugin(function ({ addVariant }) {
       addVariant("screen", "@media screen");
     }),
   ],
