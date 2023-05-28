@@ -18,7 +18,6 @@ import { useSection } from "./section";
 
 type StatementProps = {
   variant: number;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   components: Record<string, ComponentType<any>>;
 };
 
