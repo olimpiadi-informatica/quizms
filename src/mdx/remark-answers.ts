@@ -1,8 +1,11 @@
+import _ from "lodash";
 import { Blockquote, List, Paragraph, Parent, Root, Text } from "mdast";
-import { MdxJsxAttribute, MdxJsxFlowElement } from "mdast-util-mdx-jsx";
+import { MdxJsxFlowElement } from "mdast-util-mdx-jsx";
 import * as process from "process";
 import { Plugin } from "unified";
 import { visit } from "unist-util-visit";
+
+import { jsxAttribute } from "./utils";
 
 const remarkAnswers: Plugin<[], Root> = () => {
   return (tree) => {
@@ -29,6 +32,7 @@ function parseMultipleAnswerGroup(tree: Root) {
     function isAnswerGroup(radios: (Text | null)[]): radios is Text[] {
       return !radios.includes(null);
     }
+
     if (!isAnswerGroup(radios)) return;
 
     const correct = radios.findIndex((radio) => radio.value.startsWith("(x)"));
@@ -41,22 +45,14 @@ function parseMultipleAnswerGroup(tree: Root) {
       name: "AnswerGroup",
       attributes: [],
       children: list.children.map((child, index): MdxJsxFlowElement => {
-        const attr: MdxJsxAttribute | false = process.env.QUIZMS_PUBLIC_SOLUTIONS === "true" && {
-          type: "mdxJsxAttribute",
-          name: "correct",
-          value: JSON.stringify(index === correct),
-        };
+        const attr =
+          process.env.QUIZMS_PUBLIC_SOLUTIONS === "true" &&
+          jsxAttribute("correct", index === correct);
+
         return {
           type: "mdxJsxFlowElement",
           name: "Answer",
-          attributes: [
-            {
-              type: "mdxJsxAttribute",
-              name: "id",
-              value: String.fromCharCode(65 + index),
-            },
-            ...(attr ? [attr] : []),
-          ],
+          attributes: _.compact([jsxAttribute("id", String.fromCharCode(65 + index)), attr]),
           children: child.children,
         };
       }),
@@ -70,11 +66,9 @@ function parseOpenAnswerGroup(tree: Root) {
     if (text.type !== "text") return;
     if (!text.value.startsWith("?> ")) return;
 
-    const attr: MdxJsxAttribute | false = process.env.QUIZMS_PUBLIC_SOLUTIONS === "true" && {
-      type: "mdxJsxAttribute",
-      name: "correct",
-      value: text.value.slice(3),
-    };
+    const attr =
+      process.env.QUIZMS_PUBLIC_SOLUTIONS === "true" &&
+      jsxAttribute("correct", text.value.slice(3));
 
     parent.children[index] = {
       type: "mdxJsxFlowElement",
@@ -84,7 +78,7 @@ function parseOpenAnswerGroup(tree: Root) {
         {
           type: "mdxJsxFlowElement",
           name: "OpenAnswer",
-          attributes: [...(attr ? [attr] : [])],
+          attributes: _.compact([attr]),
           children: [],
         },
       ],

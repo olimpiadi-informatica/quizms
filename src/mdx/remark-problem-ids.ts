@@ -1,8 +1,11 @@
+import _ from "lodash";
 import { Root, TopLevelContent } from "mdast";
-import { MdxJsxAttribute, MdxJsxFlowElement } from "mdast-util-mdx-jsx";
+import { MdxJsxFlowElement } from "mdast-util-mdx-jsx";
 import "mdast-util-mdxjs-esm";
 import { Plugin } from "unified";
 import { visit } from "unist-util-visit";
+
+import { jsxAttribute } from "~/src/mdx/utils";
 
 const remarkProblemIds: Plugin<[], Root> = () => {
   return (tree) => {
@@ -17,22 +20,14 @@ export default remarkProblemIds;
 function assignProblemIds(tree: Root) {
   let problemIndex = 1;
   visit(tree, { type: "mdxJsxFlowElement", name: "Problem" }, (node: MdxJsxFlowElement) => {
-    node.attributes.push({
-      type: "mdxJsxAttribute",
-      name: "id",
-      value: JSON.stringify(problemIndex++),
-    });
+    node.attributes.push(jsxAttribute("id", problemIndex++));
   });
 }
 
 function assignSectionIds(tree: Root) {
   let sectionIndex = 1;
   visit(tree, { type: "mdxJsxFlowElement", name: "Section" }, (node: MdxJsxFlowElement) => {
-    node.attributes.push({
-      type: "mdxJsxAttribute",
-      name: "id",
-      value: JSON.stringify(sectionIndex++),
-    });
+    node.attributes.push(jsxAttribute("id", sectionIndex++));
   });
 }
 
@@ -53,14 +48,11 @@ function parseSubProblems(tree: Root) {
     }
 
     if (contents[contents.length - 1]?.type !== "mdxJsxFlowElement") {
-      const attributes: MdxJsxAttribute[] =
-        subProblems > 1
-          ? [{ type: "mdxJsxAttribute", name: "subId", value: JSON.stringify(id++) }]
-          : [];
+      const attr = subProblems > 1 && jsxAttribute("subId", id++);
       contents.push({
         type: "mdxJsxFlowElement",
         name: "SubProblem",
-        attributes,
+        attributes: _.compact([attr]),
         children: [],
       });
     }
