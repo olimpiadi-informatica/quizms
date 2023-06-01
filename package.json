@@ -22,7 +22,7 @@
       "optimize": true
     },
     "css": {
-      "source": "src/index.css",
+      "source": "src/css/index.css",
       "isLibrary": true,
       "optimize": true
     },
