@@ -1,5 +1,4 @@
 import React, {
-  ComponentType,
   ReactNode,
   createContext,
   useCallback,
@@ -39,38 +38,12 @@ const ContestContext = createContext<ContestContextProps>({
 ContestContext.displayName = "ContestContext";
 
 type ContestProps = {
-  auth: ComponentType<Record<"children", ReactNode>>;
-  header?: ComponentType;
   randomizeProblemOrder?: boolean;
   randomizeAnswerOrder?: boolean;
   children: ReactNode;
 };
 
-export function Contest({
-  auth: Auth,
-  header,
-  randomizeProblemOrder,
-  randomizeAnswerOrder,
-  children,
-}: ContestProps) {
-  return (
-    <Auth>
-      <InnerContest
-        header={header}
-        randomizeProblemOrder={randomizeProblemOrder}
-        randomizeAnswerOrder={randomizeAnswerOrder}>
-        {children}
-      </InnerContest>
-    </Auth>
-  );
-}
-
-function InnerContest({
-  header: Header,
-  randomizeProblemOrder,
-  randomizeAnswerOrder,
-  children,
-}: Omit<ContestProps, "auth">) {
+export function Contest({ randomizeProblemOrder, randomizeAnswerOrder, children }: ContestProps) {
   const { answers, terminated } = useAuthentication();
   const [problems, setProblems] = useState<Record<string, Problem>>({});
 
@@ -118,21 +91,9 @@ function InnerContest({
         randomizeAnswerOrder: randomizeAnswerOrder ?? false,
         registerProblem,
       }}>
-      <div
-        className={classNames(
-          "prose-md prose mx-auto mt-5 mb-0 px-4 dark:prose-invert print:prose-sm print:mx-1.5",
-          "print:max-w-full lg:max-w-4xl"
-        )}>
-        {Header && (
-          <div className="header">
-            <Header />
-            <hr />
-          </div>
-        )}
-        <div className="contest prose-headings:break-before-page">
-          <main>{children}</main>
-          <StickyFooter progress={progress} sectionProgress={sectionProgress} />
-        </div>
+      <div className="contest prose-headings:break-before-page">
+        <main>{children}</main>
+        <StickyFooter progress={progress} sectionProgress={sectionProgress} />
       </div>
       <CompletedModal
         problems={problems}

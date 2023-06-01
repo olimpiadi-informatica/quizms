@@ -1,10 +1,17 @@
-import React, { ReactNode, useEffect, useState } from "react";
+import React, { ComponentType, ReactNode, useEffect, useState } from "react";
 
 import dayjs from "dayjs";
 
+import Prose from "~/src/ui/components/prose";
+
 import { AuthenticationProvider } from "./provider";
 
-export function NoAuth({ children }: { children: ReactNode }) {
+type AuthProps = {
+  header: ComponentType<Record<any, never>>;
+  children: ReactNode;
+};
+
+export function NoAuth({ header: Header, children }: AuthProps) {
   const [submitted, setSubmitted] = useState(false);
   const [answers, setAnswers] = useState<Record<string, string | undefined>>({});
   const [startTime] = useState(dayjs());
@@ -31,15 +38,18 @@ export function NoAuth({ children }: { children: ReactNode }) {
   }, [loaded, answers]);
 
   return (
-    <AuthenticationProvider
-      answers={answers}
-      setAnswer={setAnswer}
-      submit={() => setSubmitted(true)}
-      startTime={startTime}
-      endTime={endTime}
-      variant={0}
-      terminated={submitted}>
-      {children}
-    </AuthenticationProvider>
+    <Prose>
+      <AuthenticationProvider
+        answers={answers}
+        setAnswer={setAnswer}
+        submit={() => setSubmitted(true)}
+        startTime={startTime}
+        endTime={endTime}
+        variant={0}
+        terminated={submitted}>
+        <Header />
+        {children}
+      </AuthenticationProvider>
+    </Prose>
   );
 }
