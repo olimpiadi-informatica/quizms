@@ -9,7 +9,7 @@ type ButtonProps = {
   children: ReactNode;
 };
 
-export function Button({ className, onClick, disabled, children }: ButtonProps) {
+export default function Button({ className, onClick, disabled, children }: ButtonProps) {
   return (
     <button
       className={classNames(

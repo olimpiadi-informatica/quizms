@@ -13,7 +13,7 @@ import classNames from "classnames";
 import _ from "lodash";
 
 import { useAuthentication } from "~/src/auth/provider";
-import { Button } from "~/src/ui/components/button";
+import Button from "~/src/ui/components/button";
 import Modal from "~/src/ui/components/modal";
 import ProgressBlock from "~/src/ui/components/progressBlock";
 import Timer from "~/src/ui/components/timer";
