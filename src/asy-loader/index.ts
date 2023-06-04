@@ -1,7 +1,7 @@
 import child_process from "node:child_process";
 import { randomUUID } from "node:crypto";
 import fs from "node:fs/promises";
-import { tmpdir } from "node:os";
+import { platform, tmpdir } from "node:os";
 import path from "node:path";
 import { promisify } from "node:util";
 
@@ -38,15 +38,25 @@ export default function loader(this: LoaderContext<Record<string, never>>, conte
       }
     }
 
-    const pdfFile = tmpfile("pdf");
-    await execFile("asy", [asyPath, "-f", "pdf", "-o", pdfFile]);
+    let svgData: string;
 
-    const svgFile = tmpfile("svg");
-    await execFile("pdf2svg", [pdfFile, svgFile]);
-    const svgData = await fs.readFile(svgFile, { encoding: "utf8" });
+    if (platform() === "darwin") {
+      const pdfFile = tmpfile("pdf");
+      await execFile("asy", [asyPath, "-f", "pdf", "-o", pdfFile]);
 
-    await fs.unlink(pdfFile);
-    await fs.unlink(svgFile);
+      const svgFile = tmpfile("svg");
+      await execFile("pdf2svg", [pdfFile, svgFile]);
+      svgData = await fs.readFile(svgFile, { encoding: "utf8" });
+
+      await fs.unlink(pdfFile);
+      await fs.unlink(svgFile);
+    } else {
+      const svgFile = tmpfile("svg");
+      await execFile("asy", [asyPath, "-f", "svg", "-o", svgFile]);
+      svgData = await fs.readFile(svgFile, { encoding: "utf8" });
+
+      await fs.unlink(svgFile);
+    }
 
     return `export default "${svgToMiniDataURI(svgData)}";`;
   }
