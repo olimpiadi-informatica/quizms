@@ -11,6 +11,7 @@
     "fmt": "prettier --write src/"
   },
   "asy-loader": "dist/asy-loader/index.js",
+  "cli": "dist/cli.mjs",
   "main": "dist/index.mjs",
   "mdx": "dist/mdx/index.mjs",
   "targets": {
@@ -18,6 +19,13 @@
       "source": "src/asy-loader/index.ts",
       "outputFormat": "commonjs",
       "context": "node",
+      "isLibrary": true,
+      "optimize": true
+    },
+    "cli": {
+      "source": "src/cli/index.ts",
+      "context": "node",
+      "outputFormat": "esmodule",
       "isLibrary": true,
       "optimize": true
     },
@@ -46,8 +54,10 @@
     "maintained node versions"
   ],
   "files": [
+    "bin",
     "dist"
   ],
+  "bin": "bin/bin.js",
   "exports": {
     ".": "./dist/index.mjs",
     "./asy-loader": "./dist/asy-loader/index.js",
@@ -59,6 +69,9 @@
     "@heroicons/react": "^2.0",
     "@mdx-js/mdx": "^2.3",
     "@mdx-js/react": "^2.3",
+    "@swc/core": "^1.3",
+    "@swc/plugin-transform-imports": "^1.5",
+    "@swc/wasm": "^1.3",
     "classnames": "^2.3",
     "colors": "^1.4",
     "dayjs": "^1.11",
@@ -75,15 +88,17 @@
     "remark-mdx-images": "^2.0",
     "remark-mdx-math-enhanced": "=0.0.1-beta.3",
     "remark-smartypants": "^2.0",
+    "swc-loader": "^0.2",
+    "terser-webpack-plugin": "^5.3",
     "unified": "^10.1",
-    "unist-util-visit": "^4.1"
+    "unist-util-visit": "^4.1",
+    "webpack": "^5.76"
   },
   "peerDependencies": {
     "react": ">=16",
     "react-dom": ">=16"
   },
   "devDependencies": {
-    "@parcel/transformer-typescript-types": "2.8",
     "@tailwindcss/forms": "^0.5",
     "@tailwindcss/typography": "^0.5",
     "@trivago/prettier-plugin-sort-imports": "^4.1.1",
@@ -97,14 +112,13 @@
     "eslint": "^8.34",
     "eslint-plugin-react": "^7.32",
     "eslint-plugin-react-hooks": "^4.6",
-    "parcel": "^2.8",
+    "parcel": "=2.7.0",
     "postcss": "^8.4",
     "prettier": "^2.8",
     "prettier-plugin-tailwindcss": "^0.2",
     "react": "^18.2",
     "react-dom": "^18.2",
     "tailwindcss": "^3.2",
-    "typescript": "^4.9",
-    "webpack": "^5.64"
+    "typescript": "^4.9"
   }
 }
