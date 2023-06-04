@@ -13,7 +13,7 @@
   "asy-loader": "dist/asy-loader/index.js",
   "cli": "dist/cli.mjs",
   "main": "dist/index.mjs",
-  "mdx": "dist/mdx/index.mjs",
+  "mdx": "dist/mdx.mjs",
   "targets": {
     "asy-loader": {
       "source": "src/asy-loader/index.ts",
@@ -62,7 +62,7 @@
     ".": "./dist/index.mjs",
     "./asy-loader": "./dist/asy-loader/index.js",
     "./css": "./dist/css/index.css",
-    "./mdx": "./dist/mdx/index.mjs"
+    "./mdx": "./dist/mdx.mjs"
   },
   "dependencies": {
     "@headlessui/react": "^1.7",
