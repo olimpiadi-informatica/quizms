@@ -4,6 +4,7 @@ import { argv, exit } from "node:process";
 import { promisify } from "node:util";
 
 import { Config as SwcOptions } from "@swc/core";
+import "colors";
 import _ from "lodash";
 import TerserPlugin from "terser-webpack-plugin";
 import webpack, { Configuration as WebpackConfig } from "webpack";
@@ -15,6 +16,8 @@ async function exists(path: string): Promise<boolean> {
 }
 
 async function bundle(contestFile: string): Promise<void> {
+  console.log(`${"info".cyan}  - compiling ${contestFile}`);
+
   const swcOptions: SwcOptions = {
     jsc: {
       experimental: {
@@ -30,6 +33,7 @@ async function bundle(contestFile: string): Promise<void> {
       library: {
         name: "quizmsContest",
         type: "var",
+        export: "default",
       },
     },
     mode: "production",
@@ -57,7 +61,6 @@ async function bundle(contestFile: string): Promise<void> {
       ],
     },
     externals: ["quizms", "react"],
-    externalsType: "var",
     resolve: {
       modules: ["node_modules"],
     },
@@ -74,9 +77,9 @@ async function bundle(contestFile: string): Promise<void> {
   const nextConfigPath = path.resolve("next.config.js");
   if (await exists(nextConfigPath)) {
     const { nextConfig } = await import(nextConfigPath);
-    nextConfig.webpack(webpackConfig);
+    nextConfig?.webpack?.(webpackConfig);
 
-    if (nextConfig.modularizeImports) {
+    if (nextConfig?.modularizeImports) {
       swcOptions.jsc!.experimental!.plugins!.push([
         "@swc/plugin-transform-imports",
         nextConfig.modularizeImports,
@@ -89,9 +92,21 @@ async function bundle(contestFile: string): Promise<void> {
   await promisify(compiler.close.bind(compiler))();
 
   if (stats?.hasErrors()) {
-    console.log(stats?.toString({ colors: true }));
+    const json = stats.toJson();
+    for (const error of json.errors!) {
+      console.log(`${"error".red} - ${error.message}`);
+    }
     exit(1);
   }
+
+  if (stats?.hasWarnings()) {
+    const json = stats.toJson();
+    for (const warning of json.warnings!) {
+      console.log(`${"warn".yellow}  - ${warning.message}`);
+    }
+  }
+
+  console.log(`${"info".cyan}  - compilation completed.`);
 }
 
 async function main() {
