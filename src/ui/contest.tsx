@@ -184,8 +184,8 @@ function StickyFooter({ progress, sectionProgress }: FooterProps) {
   return (
     <div
       className={classNames(
-        "sticky bottom-0 flex justify-between overflow-hidden border-t border-zinc-600 bg-white",
-        "p-3 dark:border-slate-400 dark:bg-slate-800 print:hidden"
+        "sticky bottom-0 z-[9999] flex justify-between overflow-hidden border-t border-zinc-600",
+        "bg-white p-3 dark:border-slate-400 dark:bg-slate-800 print:hidden"
       )}>
       {terminated && (
         <ProgressBlock className="w-20" percentage={100}>

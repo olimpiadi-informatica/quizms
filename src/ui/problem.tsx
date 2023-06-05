@@ -13,6 +13,7 @@ import Katex from "react-katex";
 import { useAuthentication } from "~/src/auth/provider";
 
 import { Answer, AnswerGroup, Explanation, OpenAnswer } from "./answers";
+import { Blockly } from "./blockly";
 import { useContest } from "./contest";
 import { useSection } from "./section";
 
@@ -46,7 +47,7 @@ export function Problem({ id, points, statement: Statement }: ProblemProps) {
   return (
     <ProblemContext.Provider value={{ id, points, setCorrect: _.noop }}>
       <Statement
-        components={{ Math, SubProblem, AnswerGroup, Answer, OpenAnswer, Explanation }}
+        components={{ Math, SubProblem, AnswerGroup, Answer, OpenAnswer, Explanation, Blockly }}
         variant={variant}
       />
       <hr className="last:hidden" />
