@@ -77,7 +77,11 @@ async function bundle(contestFile: string): Promise<void> {
   const nextConfigPath = path.resolve("next.config.js");
   if (await exists(nextConfigPath)) {
     const { nextConfig } = await import(nextConfigPath);
-    nextConfig?.webpack?.(webpackConfig);
+
+    nextConfig?.webpack?.(webpackConfig, {
+      dev: false,
+      isServer: true,
+    });
 
     if (nextConfig?.modularizeImports) {
       swcOptions.jsc!.experimental!.plugins!.push([
