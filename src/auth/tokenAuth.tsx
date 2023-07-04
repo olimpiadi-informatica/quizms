@@ -1,7 +1,7 @@
 import React, { ComponentType, useEffect, useState } from "react";
 
-import { NoAuth } from "~/src/auth";
-import * as quizms from "~/src/ui";
+import { NoAuth } from "@/auth";
+import * as quizms from "@/ui";
 
 type AuthProps = {
   header: ComponentType<Record<any, never>>;

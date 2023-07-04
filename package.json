@@ -64,6 +64,9 @@
     "./css": "./dist/css/index.css",
     "./mdx": "./dist/mdx.mjs"
   },
+  "alias": {
+    "@/*": "~/src/$1"
+  },
   "dependencies": {
     "@headlessui/react": "^1.7",
     "@heroicons/react": "^2.0",
@@ -138,7 +141,7 @@
       "^node:",
       "^(react|react-dom)(/|$)",
       "<THIRD_PARTY_MODULES>",
-      "^~/",
+      "^(@|~)/",
       "^./",
       "\\.css$"
     ],

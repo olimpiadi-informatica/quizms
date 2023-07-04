@@ -10,7 +10,7 @@ import React, {
 import _ from "lodash";
 import Katex from "react-katex";
 
-import { useAuthentication } from "~/src/auth/provider";
+import { useAuthentication } from "@/auth/provider";
 
 import { Answer, AnswerGroup, Explanation, OpenAnswer } from "./answers";
 import { Blockly } from "./blockly";

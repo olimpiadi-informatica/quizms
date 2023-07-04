@@ -11,11 +11,11 @@ import React, {
 import classNames from "classnames";
 import _ from "lodash";
 
-import { useAuthentication } from "~/src/auth/provider";
-import Button from "~/src/ui/components/button";
-import Modal from "~/src/ui/components/modal";
-import ProgressBlock from "~/src/ui/components/progressBlock";
-import Timer from "~/src/ui/components/timer";
+import { useAuthentication } from "@/auth/provider";
+import Button from "@/ui/components/button";
+import Modal from "@/ui/components/modal";
+import ProgressBlock from "@/ui/components/progressBlock";
+import Timer from "@/ui/components/timer";
 
 type Problem = {
   id: string;

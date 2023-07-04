@@ -9,7 +9,7 @@ import _ from "lodash";
 import TerserPlugin from "terser-webpack-plugin";
 import webpack, { Configuration as WebpackConfig } from "webpack";
 
-import { mdxOptions } from "~/src/mdx";
+import { mdxOptions } from "@/mdx";
 
 async function exists(path: string): Promise<boolean> {
   return fs.access(path).then(_.stubTrue, _.stubFalse);

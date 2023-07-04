@@ -2,7 +2,7 @@ import React, { ComponentType, ReactNode, useEffect, useState } from "react";
 
 import dayjs from "dayjs";
 
-import Prose from "~/src/ui/components/prose";
+import Prose from "@/ui/components/prose";
 
 import { AuthenticationProvider } from "./provider";
 
