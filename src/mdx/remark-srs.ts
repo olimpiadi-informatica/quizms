@@ -5,6 +5,7 @@ import _ from "lodash";
 import { Code, InlineCode, Parent, Root } from "mdast";
 import { Plugin } from "unified";
 import { visit } from "unist-util-visit";
+import z from "zod";
 
 import { format_code, format_snippet, initSync } from "@/pseudocode-interpreter/sc_int";
 
@@ -14,16 +15,48 @@ initSync(
   )
 );
 
-type ContextMetadata = {
-  id: string;
-  "inline-code-context"?: string;
-};
+const contextMetadataSchema = z
+  .object({
+    id: z.string(),
+    "inline-code-context": z
+      .string()
+      .optional()
+      .transform((value) => {
+        if (value === undefined) return value;
+        const [functionName, placeholderIndex] = value.split(".", 2);
+        return { functionName, placeholderIndex };
+      })
+      .pipe(z.object({ functionName: z.string(), placeholderIndex: z.coerce.number() })),
+  })
+  .transform((value) => {
+    const { "inline-code-context": inlineCodeContext, ...rest } = value;
+    return { ...rest, inlineCodeContext };
+  });
 
-type InlineContextMetadata = {
-  context: string;
-};
+const inlineContextMetadataSchema = z.object({
+  context: z
+    .string()
+    .transform((value) => {
+      const [id, functionName, placeholderIndex] = value.split(".", 3);
+      return { id, functionName, placeholderIndex };
+    })
+    .pipe(
+      z.object({
+        id: z.string(),
+        functionName: z.string(),
+        placeholderIndex: z.coerce.number(),
+      })
+    ),
+});
 
-type Metadata = ContextMetadata | InlineContextMetadata;
+const metadataSchema = z
+  .string()
+  .optional()
+  .transform((value) => {
+    if (value === undefined) return value;
+    return _.fromPairs(value.split(/\s+/).map((m) => m.split("=", 2)));
+  })
+  .pipe(z.union([contextMetadataSchema, inlineContextMetadataSchema]));
 
 type MainContext = {
   id: string;
@@ -53,11 +86,9 @@ function parseMainBlockCode(tree: Root): Record<string, Context> {
   const contexts: Record<string, Context> = {};
 
   visit(tree, { type: "code", lang: "srs" }, (node: Code, index, parent: Parent) => {
-    const meta: Metadata = _.fromPairs(
-      node.meta?.split(/\s+/).map((m) => m.split("=", 2)) ?? []
-    ) as Metadata;
+    const meta = metadataSchema.parse(node.meta);
 
-    if ("id" in meta) {
+    if ("inlineCodeContext" in meta) {
       node.value += "\n";
       const html = format_code(node.value, 0, true);
       parent.children[index] = {
@@ -65,14 +96,10 @@ function parseMainBlockCode(tree: Root): Record<string, Context> {
         value: `<code class="block-code">${html}</code>`,
       };
 
-      const [functionName, placeholderIndex] = meta["inline-code-context"]?.split(".") ?? [];
       contexts[meta.id] = {
         id: meta.id,
         baseCode: node.value,
-        ...(meta["inline-code-context"] && {
-          functionName,
-          placeholderIndex: parseInt(placeholderIndex),
-        }),
+        ...meta.inlineCodeContext,
       };
     }
   });
@@ -82,20 +109,18 @@ function parseMainBlockCode(tree: Root): Record<string, Context> {
 
 function parseSecondaryBlockCode(tree: Root, contexts: Record<string, Context>): void {
   visit(tree, { type: "code", lang: "srs" }, (node: Code, index, parent: Parent) => {
-    const meta: Metadata = _.fromPairs(
-      node.meta?.split(/\s+/).map((m) => m.split("=", 2)) ?? []
-    ) as Metadata;
+    const meta = metadataSchema.parse(node.meta);
 
     if ("context" in meta) {
-      const [id, functionName, placeholderIndex] = meta["context"].split(".");
-      const context = contexts[id];
+      const context = contexts[meta.context.id];
+      if (!context) throw new Error(`context ${meta.context.id} not found`);
 
       node.value += "\n";
       const html = format_snippet(
         node.value,
         context.baseCode,
-        functionName,
-        parseInt(placeholderIndex),
+        meta.context.functionName,
+        meta.context.placeholderIndex,
         0,
         true
       );

@@ -99,7 +99,8 @@
     "unified": "^10.1",
     "unist-util-visit": "^4.1",
     "utf-8-validate": "^6.0",
-    "webpack": "^5.76"
+    "webpack": "^5.76",
+    "zod": "^3.21"
   },
   "peerDependencies": {
     "react": ">=16",
