@@ -5,18 +5,12 @@ import classNames from "classnames";
 import { useAnswer, useAuthentication } from "@/auth/provider";
 import { useProblem } from "@/ui/problem";
 
-import Spoiler from "./components/spoiler";
-
 type AnswerGroupProps = {
   children: ReactNode;
 };
 
 export function AnswerGroup({ children }: AnswerGroupProps) {
-  return (
-    <div className="answer-group my-5 rounded-xl bg-zinc-200 px-3 py-3 dark:bg-slate-700">
-      {children}
-    </div>
-  );
+  return <div className="answer-group my-5 rounded-xl bg-base-200 px-3 py-3">{children}</div>;
 }
 
 type AnswerProps = {
@@ -40,24 +34,21 @@ export function Answer({ id, correct, children }: AnswerProps) {
   return (
     <div
       className={classNames(
-        "answer my-1 flex rounded-lg pl-2 pr-1 hover:bg-zinc-300 dark:hover:bg-slate-600",
-        terminated &&
-          correct !== undefined && {
-            "border-2": answer === id || correct === "true",
-            "border-green-600": correct === "true",
-            "border-red-600 dark:!border-red-500": answer === id && correct === "false",
-          }
+        "answer my-1 flex rounded-lg pl-2 pr-1 hover:bg-base-300",
+        terminated && {
+          "border-2 border-success": correct === "true",
+          "border-2 border-error": answer === id && correct === "false",
+        }
       )}>
       <input
         id={answerId}
         checked={answer === id}
         className={classNames(
-          "my-auto mr-4",
-          { "cursor-pointer": !terminated },
+          "radio radio-sm my-auto mr-4 bg-base-100 disabled:opacity-90",
           terminated &&
             answer === id && {
-              "!bg-green-600": correct === "true",
-              "!bg-red-600 dark:!bg-red-500": correct === "false",
+              "radio-success": correct === "true",
+              "radio-error": correct === "false",
             }
         )}
         onChange={(e) => setAnswer(e.target.checked ? id : undefined)}
@@ -86,14 +77,11 @@ export function OpenAnswer({ correct }: { correct?: string }) {
     <div className="open-answer px-2">
       <input
         className={classNames(
-          "w-72 max-w-full rounded-md border-zinc-400 shadow-sm focus:border-indigo-300 focus:ring-2",
-          "focus:ring-indigo-200 dark:border-slate-400 dark:bg-slate-700 dark:text-slate-200",
-          "dark:placeholder:text-slate-400 dark:focus:border-slate-400 dark:focus:ring-slate-400",
+          "input-bordered input w-72 max-w-full border-2",
           terminated &&
             correct !== undefined && {
-              "dark:border-3 border-2": true,
-              "!border-green-600": correct === answer,
-              "!border-red-600 dark:!border-red-500": correct !== answer,
+              "disabled:input-success": correct === answer,
+              "disabled:input-error": correct !== answer,
             }
         )}
         onChange={(e) => setAnswer(e.target.value || undefined)}
@@ -111,8 +99,12 @@ export function Explanation({ children }: { children: ReactNode }) {
   const { terminated } = useAuthentication();
   if (!terminated) return null;
   return (
-    <div className="explanation my-5 rounded-xl bg-zinc-200 px-5 py-3 dark:bg-slate-700 print:hidden">
-      <Spoiler title="Mostra soluzione">{children}</Spoiler>
+    <div className="explanation my-5 rounded-xl bg-base-200 print:hidden">
+      <div className="collapse">
+        <input type="checkbox" />
+        <div className="collapse-title text-xl font-medium">Mostra soluzione</div>
+        <div className="collapse-content">{children}</div>
+      </div>
     </div>
   );
 }

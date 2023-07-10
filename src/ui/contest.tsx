@@ -1,20 +1,21 @@
 import React, {
   ReactNode,
+  Ref,
   createContext,
+  forwardRef,
   useCallback,
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 
-import classNames from "classnames";
 import _ from "lodash";
 
 import { useAuthentication } from "@/auth/provider";
-import Button from "@/ui/components/button";
 import Modal from "@/ui/components/modal";
-import ProgressBlock from "@/ui/components/progressBlock";
+import Progress from "@/ui/components/progress";
 import Timer from "@/ui/components/timer";
 
 type Problem = {
@@ -62,25 +63,13 @@ export function Contest({ randomizeProblemOrder, randomizeAnswerOrder, children 
     return Math.round((user / total) * 100);
   }, [answers, problems]);
 
-  const sectionProgress = useMemo(() => {
-    return _(problems)
-      .groupBy("section")
-      .mapValues((section) => {
-        const total = _.sumBy(section, "points[0]");
-        const user = _(section)
-          .filter(({ id }) => id in answers)
-          .sumBy("points[0]");
-        return Math.round((user / total) * 100);
-      })
-      .value();
-  }, [answers, problems]);
-
   const [resultShown, setResultShown] = useState(false);
-  const [isModalOpen, setModalOpen] = useState(false);
+  const ref = useRef<HTMLDialogElement>(null);
+
   useEffect(() => {
     if (terminated && !resultShown) {
       setResultShown(true);
-      setModalOpen(true);
+      ref.current?.showModal();
     }
   }, [terminated, resultShown]);
 
@@ -93,26 +82,23 @@ export function Contest({ randomizeProblemOrder, randomizeAnswerOrder, children 
       }}>
       <div className="contest prose-headings:break-before-page">
         <main>{children}</main>
-        <StickyFooter progress={progress} sectionProgress={sectionProgress} />
+        <StickyFooter progress={progress} />
       </div>
-      <CompletedModal
-        problems={problems}
-        answers={answers}
-        isOpen={isModalOpen}
-        close={() => setModalOpen(false)}
-      />
+      <CompletedModal ref={ref} problems={problems} answers={answers} />
     </ContestContext.Provider>
   );
 }
 
 type ModalProps = {
+  ref: Ref<HTMLDialogElement>;
   problems: Record<string, Problem>;
   answers: Record<string, string | undefined>;
-  isOpen: boolean;
-  close: () => void;
 };
 
-function CompletedModal({ problems, answers, isOpen, close }: ModalProps) {
+const CompletedModal = forwardRef(function CompletedModal(
+  { problems, answers }: ModalProps,
+  ref: Ref<HTMLDialogElement>
+) {
   const calcPoints = useCallback(
     (problem: Problem) => {
       if (answers[problem.id] === undefined) return problem.points[1];
@@ -132,13 +118,10 @@ function CompletedModal({ problems, answers, isOpen, close }: ModalProps) {
   }, [problems]);
 
   return (
-    <Modal
-      title="Prova terminata"
-      description="La prova è terminata."
-      isOpen={isOpen}
-      close={close}>
+    <Modal ref={ref} title="Prova terminata">
       {score !== undefined && (
         <>
+          <p>La prova è terminata.</p>
           <p>
             Hai ottenuto un punteggio di <b>{score}</b> su <b>{maxScore}</b>.
           </p>
@@ -170,76 +153,65 @@ function CompletedModal({ problems, answers, isOpen, close }: ModalProps) {
       )}
     </Modal>
   );
-}
+});
 
 type FooterProps = {
   progress: number;
-  sectionProgress: Record<string, number>;
 };
 
-function StickyFooter({ progress, sectionProgress }: FooterProps) {
-  const [isModalOpen, setModalOpen] = useState(false);
+function StickyFooter({ progress }: FooterProps) {
+  const ref = useRef<HTMLDialogElement>(null);
   const { startTime, endTime, terminated } = useAuthentication();
 
   return (
-    <div
-      className={classNames(
-        "sticky bottom-0 z-[9999] flex justify-between overflow-hidden border-t border-zinc-600",
-        "bg-white p-3 dark:border-slate-400 dark:bg-slate-800 print:hidden"
-      )}>
+    <div className="sticky bottom-0 z-[9999] flex justify-between overflow-hidden border-t border-base-content bg-base-100 p-3 print:hidden">
       {terminated && (
-        <ProgressBlock className="w-20" percentage={100}>
+        <Progress className="w-20" percentage={100}>
           0:00
-        </ProgressBlock>
+        </Progress>
       )}
       {!terminated && <Timer startTime={startTime} endTime={endTime} />}
-      <div className="hidden flex-row gap-4 lg:flex">
-        {_.map(sectionProgress, (val, id) => (
-          <ProgressBlock key={id} percentage={val}>
-            Sezione {id}: {val}%
-          </ProgressBlock>
-        ))}
-      </div>
-      <ProgressBlock className="min-w-[5rem] lg:hidden" percentage={progress}>
+      <Progress className="min-w-[5rem]" percentage={progress}>
         <span className="hidden xs:inline">Risposte date: </span>
         {progress}%
-      </ProgressBlock>
-      <Button
-        className="border-emerald-600 bg-emerald-600 text-white"
-        onClick={() => setModalOpen(true)}
+      </Progress>
+      <button
+        className="btn-success btn"
+        onClick={() => ref.current?.showModal()}
         disabled={terminated}>
         Termina
-      </Button>
-      <SubmitModal isOpen={isModalOpen} close={() => setModalOpen(false)} />
+      </button>
+      <SubmitModal ref={ref} />
     </div>
   );
 }
 
-function SubmitModal({ isOpen, close }: { isOpen: boolean; close: () => void }) {
+const SubmitModal = forwardRef(function SubmitModal(_, ref: Ref<HTMLDialogElement>) {
   const { submit } = useAuthentication();
 
-  const confirm = () => {
+  const close = useCallback(() => {
+    if (ref && "current" in ref && ref.current) ref.current.close();
+  }, [ref]);
+
+  const confirm = useCallback(() => {
     submit();
     close();
-  };
+  }, [submit, close]);
 
   return (
-    <Modal
-      title="Confermi di voler terminare?"
-      description="Confermando non potrai più modificare le tue risposte."
-      isOpen={isOpen}
-      close={close}>
+    <Modal ref={ref} title="Confermi di voler terminare?">
+      <p>Confermando non potrai più modificare le tue risposte.</p>
       <div className="text-md flex flex-row justify-center gap-5">
-        <Button className="border-black dark:border-slate-400 dark:bg-slate-600" onClick={close}>
+        <button className="btn-neutral btn-outline btn" onClick={close}>
           Annulla
-        </Button>
-        <Button className="border-red-600 bg-red-600 text-white" onClick={confirm}>
+        </button>
+        <button className="btn-error btn" onClick={confirm}>
           Conferma
-        </Button>
+        </button>
       </div>
     </Modal>
   );
-}
+});
 
 export function useContest() {
   return useContext(ContestContext);

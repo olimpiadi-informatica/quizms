@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 
 import dayjs, { Dayjs } from "dayjs";
-import relativeTime from "dayjs/plugin/relativeTime";
+import relativeTime from "dayjs/plugin/relativeTime.js";
 
-import ProgressBlock from "@/ui/components/progressBlock";
+import Progress from "@/ui/components/progress";
 
 dayjs.extend(relativeTime);
 
@@ -11,6 +11,7 @@ type TimerProps = {
   startTime: Dayjs;
   endTime: Dayjs;
 };
+
 export default function Timer({ startTime, endTime }: TimerProps) {
   const [currentTime, setCurrentTime] = useState(dayjs());
 
@@ -29,11 +30,15 @@ export default function Timer({ startTime, endTime }: TimerProps) {
   const timeLeft = Math.max(endTime.diff(currentTime, "seconds"), 0);
   const timeElapsed = Math.min(currentTime.diff(startTime, "seconds"), duration);
 
+  const minutes = Math.floor(timeLeft / 60);
+  const seconds = timeLeft % 60;
+
   return (
-    <ProgressBlock percentage={(timeElapsed / (duration - 1)) * 100} className="w-20">
-      <span>{Math.floor(timeLeft / 60)}</span>
-      <span>:</span>
-      <span>{(timeLeft % 60).toString().padStart(2, "0")}</span>
-    </ProgressBlock>
+    <Progress percentage={(timeElapsed / (duration - 1)) * 100} className="w-20">
+      <div className="countdown font-mono">
+        <span style={{ "--value": minutes } as any} />:
+        <span style={{ "--value": seconds } as any} />
+      </div>
+    </Progress>
   );
 }

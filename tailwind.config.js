@@ -1,4 +1,5 @@
 const plugin = require("tailwindcss/plugin");
+const daisyThemes = require("daisyui/src/theming/themes");
 
 /** @type {import("tailwindcss").Config} */
 module.exports = {
@@ -11,9 +12,9 @@ module.exports = {
     },
   },
   plugins: [
-    require("@tailwindcss/forms"),
     require("@tailwindcss/typography"),
-    plugin(function ({ addVariant }) {
+    require("daisyui"),
+    plugin(function({ addVariant }) {
       addVariant("screen", "@media screen");
     }),
   ],
