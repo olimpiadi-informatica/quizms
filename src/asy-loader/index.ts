@@ -22,7 +22,7 @@ export default function loader(this: LoaderContext<Record<string, never>>, conte
 
     colors.enable();
     const relativePath = path.relative(path.resolve(), asyPath);
-    console.log(`${"info".cyan}  - compiling ${relativePath}...`);
+    console.log(`- ${"info".cyan} compiling ${relativePath}...`);
 
     const matches = content.matchAll(/^(?:access|from|import|include)\s+("[^"]+"|\S+)/gm);
     for (const match of matches) {

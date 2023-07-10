@@ -8,7 +8,7 @@ import { visit } from "unist-util-visit";
 import { jsxAttribute } from "@/mdx/utils";
 
 const remarkProblemIds: Plugin<[], Root> = () => {
-  return (tree) => {
+  return (tree: Root) => {
     assignProblemIds(tree);
     assignSectionIds(tree);
     parseSubProblems(tree);
@@ -54,7 +54,7 @@ function parseSubProblems(tree: Root) {
         name: "SubProblem",
         attributes: _.compact([attr]),
         children: [],
-      });
+      } as MdxJsxFlowElement);
     }
     (contents[contents.length - 1] as MdxJsxFlowElement).children.push(child);
   }

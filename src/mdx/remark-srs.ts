@@ -2,7 +2,7 @@ import fs from "node:fs";
 import { fileURLToPath } from "node:url";
 
 import _ from "lodash";
-import { Code, InlineCode, Parent, Root } from "mdast";
+import { Code, HTML, InlineCode, Parent, Root } from "mdast";
 import { Plugin } from "unified";
 import { visit } from "unist-util-visit";
 import z from "zod";
@@ -11,8 +11,8 @@ import { format_code, format_snippet, initSync } from "@/pseudocode-interpreter/
 
 initSync(
   fs.readFileSync(
-    fileURLToPath(new URL("/src/pseudocode-interpreter/sc_int_bg.wasm", import.meta.url))
-  )
+    fileURLToPath(new URL("/src/pseudocode-interpreter/sc_int_bg.wasm", import.meta.url)),
+  ),
 );
 
 const contextMetadataSchema = z
@@ -45,7 +45,7 @@ const inlineContextMetadataSchema = z.object({
         id: z.string(),
         functionName: z.string(),
         placeholderIndex: z.coerce.number(),
-      })
+      }),
     ),
 });
 
@@ -71,7 +71,7 @@ type InlineContext = MainContext & {
 type Context = MainContext | InlineContext;
 
 const remarkSrs: Plugin<[], Root> = () => {
-  return (tree) => {
+  return (tree: Root) => {
     const contexts = parseMainBlockCode(tree);
     parseSecondaryBlockCode(tree, contexts);
 
@@ -91,10 +91,10 @@ function parseMainBlockCode(tree: Root): Record<string, Context> {
     if ("inlineCodeContext" in meta) {
       node.value += "\n";
       const html = format_code(node.value, 0, true);
-      parent.children[index] = {
+      parent.children[index!] = {
         type: "html",
         value: `<code class="block-code">${html}</code>`,
-      };
+      } as HTML;
 
       contexts[meta.id] = {
         id: meta.id,
@@ -122,18 +122,18 @@ function parseSecondaryBlockCode(tree: Root, contexts: Record<string, Context>):
         meta.context.functionName,
         meta.context.placeholderIndex,
         0,
-        true
+        true,
       );
-      parent.children[index] = {
+      parent.children[index!] = {
         type: "html",
         value: `<code class="block-code">${html}</code>`,
-      };
+      } as HTML;
     }
   });
 }
 
 function parseInlineCode(tree: Root, context: InlineContext): void {
-  visit(tree, "inlineCode", (node: InlineCode, index, parent: Parent | null) => {
+  visit(tree, "inlineCode", (node: InlineCode, index, parent: Parent | undefined) => {
     if (!parent) return;
     node.value += "\n";
     const html = format_snippet(
@@ -142,11 +142,11 @@ function parseInlineCode(tree: Root, context: InlineContext): void {
       context.functionName,
       context.placeholderIndex,
       0,
-      true
+      true,
     );
     parent.children[index!] = {
       type: "html",
       value: `<code class="inline-code">${html}</code>`,
-    };
+    } as HTML;
   });
 }

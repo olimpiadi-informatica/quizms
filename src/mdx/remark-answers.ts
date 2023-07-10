@@ -8,7 +8,7 @@ import { visit } from "unist-util-visit";
 import { jsxAttribute } from "./utils";
 
 const remarkAnswers: Plugin<[], Root> = () => {
-  return (tree) => {
+  return (tree: Root) => {
     parseMultipleAnswerGroup(tree);
     parseOpenAnswerGroup(tree);
     parseExplanation(tree);
@@ -40,7 +40,7 @@ function parseMultipleAnswerGroup(tree: Root) {
       radio.value = radio.value.slice(4);
     }
 
-    parent.children[index] = {
+    parent.children[index!] = {
       type: "mdxJsxFlowElement",
       name: "AnswerGroup",
       attributes: [],
@@ -54,14 +54,14 @@ function parseMultipleAnswerGroup(tree: Root) {
           name: "Answer",
           attributes: _.compact([jsxAttribute("id", String.fromCharCode(65 + index)), attr]),
           children: child.children,
-        };
+        } as MdxJsxFlowElement;
       }),
-    };
+    } as MdxJsxFlowElement;
   });
 }
 
 function parseOpenAnswerGroup(tree: Root) {
-  visit(tree, "paragraph", (paragraph: Paragraph, index, parent: Parent) => {
+  visit(tree, "paragraph", (paragraph: Paragraph, index, parent) => {
     const text = paragraph.children[0];
     if (text.type !== "text") return;
     if (!text.value.startsWith("?> ")) return;
@@ -70,7 +70,7 @@ function parseOpenAnswerGroup(tree: Root) {
       process.env.QUIZMS_PUBLIC_SOLUTIONS === "true" &&
       jsxAttribute("correct", text.value.slice(3));
 
-    parent.children[index] = {
+    parent!.children[index!] = {
       type: "mdxJsxFlowElement",
       name: "AnswerGroup",
       attributes: [],
@@ -80,23 +80,23 @@ function parseOpenAnswerGroup(tree: Root) {
           name: "OpenAnswer",
           attributes: _.compact([attr]),
           children: [],
-        },
+        } as MdxJsxFlowElement,
       ],
-    };
+    } as MdxJsxFlowElement;
   });
 }
 
 function parseExplanation(tree: Root) {
-  visit(tree, "blockquote", (blockquote: Blockquote, index, parent: Parent) => {
+  visit(tree, "blockquote", (blockquote: Blockquote, index, parent) => {
     if (process.env.QUIZMS_PUBLIC_SOLUTIONS === "true") {
-      parent.children[index] = {
+      parent!.children[index!] = {
         type: "mdxJsxFlowElement",
         name: "Explanation",
         attributes: [],
         children: blockquote.children,
-      };
+      } as MdxJsxFlowElement;
     } else {
-      parent.children.splice(index, 1);
+      parent!.children.splice(index!, 1);
     }
   });
 }
