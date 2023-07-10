@@ -1,5 +1,5 @@
 @import "npm:katex/dist/katex.css";
-@import "./srs.css";
+@import "srs.css";
 
 @tailwind base;
 @tailwind components;

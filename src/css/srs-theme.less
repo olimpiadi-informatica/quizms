@@ -1,0 +1,38 @@
+@media (prefers-color-scheme: light) {
+  @import (reference, less) "highlight.js/styles/atom-one-light.css";
+}
+
+@media (prefers-color-scheme: dark) {
+  @import (reference, less) "highlight.js/styles/atom-one-dark-reasonable.css";
+}
+
+code.block-code:extend(.hljs) {
+}
+
+.srs-syntax.alert {
+  color: white;
+  background-color: #d84d4d;
+  border-radius: 2px;
+  padding: 1px 2px;
+}
+
+.srs-syntax.arrow:extend(.hljs-operator) {
+}
+
+.srs-syntax.comment:extend(.hljs-comment) {
+}
+
+.srs-syntax.keyword:extend(.hljs-keyword) {
+}
+
+.srs-syntax.operator:extend(.hljs-operator) {
+}
+
+.srs-syntax.type:extend(.hljs-type) {
+}
+
+.srs-syntax.value:extend(.hljs-literal) {
+}
+
+.srs-syntax.var:extend(.hljs-variable) {
+}

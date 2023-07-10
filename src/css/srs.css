@@ -1,5 +1,4 @@
-@import "./srs-light.css" screen and (prefers-color-scheme: light);
-@import "./srs-dark.css" screen and (prefers-color-scheme: dark);
+@import "srs-theme.less";
 
 code:before,
 code:after {
@@ -25,23 +24,4 @@ code.block-code .srs-syntax.line {
 
 .srs-syntax.block {
   @apply ml-1.5 border-l-2 border-solid border-[#8ea8ae] pl-8 [display:block];
-}
-
-.srs-syntax.body,
-.srs-syntax.operator,
-.srs-syntax.keyword,
-.srs-syntax.var {
-  @apply font-bold;
-}
-
-.srs-syntax.type {
-  @apply italic;
-}
-
-.srs-syntax.active-expr {
-  @apply underline;
-}
-
-.srs-syntax.alert {
-  @apply screen:rounded screen:px-3 screen:py-0.5;
 }
