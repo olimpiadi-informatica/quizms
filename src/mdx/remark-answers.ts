@@ -66,9 +66,12 @@ function parseOpenAnswerGroup(tree: Root) {
     if (text.type !== "text") return;
     if (!text.value.startsWith("?> ")) return;
 
-    const attr =
-      process.env.QUIZMS_INCLUDE_SOLUTIONS === "true" &&
-      jsxAttribute("correct", text.value.slice(3));
+    const value = text.value.slice(3);
+
+    const attributes = _.compact([
+      jsxAttribute("type", /^\d+$/.test(value) ? "number" : "text"),
+      process.env.QUIZMS_INCLUDE_SOLUTIONS === "true" && jsxAttribute("correct", value),
+    ]);
 
     parent!.children[index!] = {
       type: "mdxJsxFlowElement",
@@ -78,7 +81,7 @@ function parseOpenAnswerGroup(tree: Root) {
         {
           type: "mdxJsxFlowElement",
           name: "OpenAnswer",
-          attributes: _.compact([attr]),
+          attributes,
           children: [],
         } as MdxJsxFlowElement,
       ],

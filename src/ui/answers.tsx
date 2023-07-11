@@ -62,7 +62,12 @@ export function Answer({ id, correct, children }: AnswerProps) {
   );
 }
 
-export function OpenAnswer({ correct }: { correct?: string }) {
+type OpenAnswerProps = {
+  correct?: string;
+  type: "number" | "text";
+};
+
+export function OpenAnswer({ correct, type }: OpenAnswerProps) {
   const { id: problemId, setCorrect } = useProblem();
   const [answer, setAnswer] = useAnswer(problemId!);
   const { terminated } = useAuthentication();
@@ -87,7 +92,7 @@ export function OpenAnswer({ correct }: { correct?: string }) {
         onChange={(e) => setAnswer(e.target.value || undefined)}
         onWheel={(e) => e.currentTarget.blur()}
         placeholder="Inserisci la risposta"
-        type="number"
+        type={type}
         value={answer ?? ""}
         disabled={terminated}
         aria-label="Risposta"
