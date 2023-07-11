@@ -10,7 +10,7 @@ type AnswerGroupProps = {
 };
 
 export function AnswerGroup({ children }: AnswerGroupProps) {
-  return <div className="answer-group my-5 rounded-xl bg-base-200 px-3 py-3">{children}</div>;
+  return <form className="answer-group my-5 rounded-xl bg-base-200 px-3 py-3">{children}</form>;
 }
 
 type AnswerProps = {
@@ -90,6 +90,7 @@ export function OpenAnswer({ correct }: { correct?: string }) {
         type="number"
         value={answer ?? ""}
         disabled={terminated}
+        aria-label="Risposta"
       />
     </div>
   );
