@@ -164,7 +164,7 @@ function StickyFooter({ progress }: FooterProps) {
   const { startTime, endTime, terminated } = useAuthentication();
 
   return (
-    <div className="sticky bottom-0 z-[9999] flex justify-between overflow-hidden border-t border-base-content bg-base-100 p-3 print:hidden">
+    <div className="sticky bottom-0 z-[100] flex justify-between overflow-hidden border-t border-base-content bg-base-100 p-3 print:hidden">
       {terminated && (
         <Progress className="w-20" percentage={100}>
           0:00

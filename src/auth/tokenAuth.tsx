@@ -8,7 +8,7 @@ type AuthProps = {
 };
 
 export function TokenAuth({ header }: AuthProps) {
-  const [Contest, setContest] = useState<ComponentType<Record<any, never>>>();
+  const [Contest, setContest] = useState<ComponentType>(Loading);
 
   const init = async () => {
     const res = await fetch("/contest.bundle.js");
@@ -23,7 +23,11 @@ export function TokenAuth({ header }: AuthProps) {
 
   return (
     <NoAuth header={header}>
-      {Contest ? <Contest /> : <p className="m-4">Caricamento in corso...</p>}
+      <Contest />
     </NoAuth>
   );
+}
+
+function Loading() {
+  return <p className="m-4">Caricamento in corso...</p>;
 }
