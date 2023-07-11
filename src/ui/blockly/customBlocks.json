@@ -1,0 +1,26 @@
+[
+  {
+    "type": "read_int",
+    "message0": "Leggi intero",
+    "output": "Number",
+    "colour": 65,
+    "tooltip": "Leggi un numero intero dall'input",
+    "helpUrl": ""
+  },
+  {
+    "type": "write_int",
+    "message0": "Stampa %1",
+    "args0": [
+      {
+        "type": "input_value",
+        "name": "NUM",
+        "check": "Number"
+      }
+    ],
+    "previousStatement": null,
+    "nextStatement": null,
+    "colour": 65,
+    "tooltip": "Stampa un numero intero",
+    "helpUrl": ""
+  }
+]

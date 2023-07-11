@@ -13,7 +13,7 @@ import Katex from "react-katex";
 import { useAuthentication } from "@/auth/provider";
 
 import { Answer, AnswerGroup, Explanation, OpenAnswer } from "./answers";
-import { Blockly } from "./blockly";
+import { Blockly } from "./blockly/blockly";
 import { useContest } from "./contest";
 import { useSection } from "./section";
 

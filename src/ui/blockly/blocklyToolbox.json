@@ -217,6 +217,21 @@
           }
         }
       ]
+    },
+    {
+      "kind": "category",
+      "name": "Input/output",
+      "colour": 65,
+      "contents": [
+        {
+          "kind": "block",
+          "type": "read_int"
+        },
+        {
+          "kind": "block",
+          "type": "write_int"
+        }
+      ]
     }
   ]
 }
