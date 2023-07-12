@@ -40,6 +40,14 @@
         },
         {
           "kind": "block",
+          "type": "math_number_property",
+          "extraState": "<mutation divisor_input=\"false\"></mutation>",
+          "fields": {
+            "PROPERTY": "EVEN"
+          }
+        },
+        {
+          "kind": "block",
           "type": "math_random_int",
           "inputs": {
             "FROM": {
@@ -229,7 +237,11 @@
         },
         {
           "kind": "block",
-          "type": "write_int"
+          "type": "read_array_int"
+        },
+        {
+          "kind": "block",
+          "type": "write_any"
         }
       ]
     }

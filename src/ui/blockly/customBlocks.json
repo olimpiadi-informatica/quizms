@@ -1,26 +1,40 @@
 [
   {
     "type": "read_int",
-    "message0": "Leggi intero",
+    "message0": "leggi un numero",
     "output": "Number",
     "colour": 65,
     "tooltip": "Leggi un numero intero dall'input",
     "helpUrl": ""
   },
   {
-    "type": "write_int",
-    "message0": "Stampa %1",
+    "type": "read_array_int",
+    "message0": "leggi una lista di lunghezza %1",
     "args0": [
       {
         "type": "input_value",
-        "name": "NUM",
+        "name": "LENGTH",
         "check": "Number"
+      }
+    ],
+    "output": "Array",
+    "colour": 65,
+    "tooltip": "Leggi una lista di numeri interi dall'input",
+    "helpUrl": ""
+  },
+  {
+    "type": "write_any",
+    "message0": "stampa %1",
+    "args0": [
+      {
+        "type": "input_value",
+        "name": "VAL"
       }
     ],
     "previousStatement": null,
     "nextStatement": null,
     "colour": 65,
-    "tooltip": "Stampa un numero intero",
+    "tooltip": "Stampa un valore",
     "helpUrl": ""
   }
 ]

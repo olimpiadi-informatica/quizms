@@ -24,3 +24,7 @@ img {
 .katex-display .katex-html {
   @apply overflow-auto pb-3;
 }
+
+.blocklyHtmlInput {
+  @apply bg-white;
+}

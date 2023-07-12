@@ -1,10 +1,9 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 
 import { default as BlocklyCore, BlocklyOptions } from "blockly/core.js";
 import { Workspace } from "blockly/core/workspace";
 import { javascriptGenerator } from "blockly/javascript";
 import locale from "blockly/msg/it";
-import * as process from "process";
 import { BlocklyWorkspace } from "react-blockly";
 
 import toolboxConfiguration from "./blocklyToolbox.json";
@@ -12,8 +11,18 @@ import "./customBlocks";
 
 BlocklyCore.setLocale(locale);
 
-export function Blockly() {
-  const [xml, setXml] = useState('<xml xmlns="https://developers.google.com/blockly/xml" />');
+type BlocklyProps = {
+  initialBlocks?: object;
+  debug?: {
+    logBlocks?: boolean;
+    logJs?: boolean;
+  };
+};
+
+export function Blockly({ initialBlocks, debug }: BlocklyProps) {
+  const json = initialBlocks ?? {};
+
+  const [workspace, setWorkspace] = useState<Workspace>();
 
   const workspaceConfiguration: BlocklyOptions = {
     renderer: "zelos",
@@ -24,29 +33,27 @@ export function Blockly() {
     },
   };
 
-  useEffect(() => {
-    if (
-      process.env.QUIZMS_LOG_BLOCKLY_XML === "true" ||
-      process.env.NEXT_PUBLIC_QUIZMS_LOG_BLOCKLY_XML === "true"
-    ) {
-      console.log(xml);
-    }
-  }, [xml]);
-
-  const onWorkspaceChange = useCallback((workspace: Workspace | undefined) => {
-    if (workspace) {
-      if (
-        process.env.QUIZMS_LOG_BLOCKLY_JS === "true" ||
-        process.env.NEXT_PUBLIC_QUIZMS_LOG_BLOCKLY_JS === "true"
-      ) {
-        const js = javascriptGenerator.workspaceToCode(workspace);
-        console.log(js);
+  const onJsonChange = useCallback(
+    (json: object) => {
+      if (debug?.logBlocks) {
+        console.log(JSON.stringify(json, null, 2));
       }
+    },
+    [debug?.logBlocks]
+  );
 
-      // const state = BlocklyCore.serialization.workspaces.save(workspace);
-      // BlocklyCore.serialization.workspaces.load(state, workspace);
-    }
-  }, []);
+  const onWorkspaceChange = useCallback(
+    (workspace: Workspace | undefined) => {
+      setWorkspace(workspace);
+      if (workspace) {
+        if (debug?.logJs) {
+          const js = javascriptGenerator.workspaceToCode(workspace);
+          console.log(js);
+        }
+      }
+    },
+    [debug?.logJs]
+  );
 
   return (
     <div className="mb-4 overflow-hidden rounded-xl border-2 border-[#c6c6c6]">
@@ -54,8 +61,8 @@ export function Blockly() {
         toolboxConfiguration={toolboxConfiguration}
         workspaceConfiguration={workspaceConfiguration}
         onWorkspaceChange={onWorkspaceChange}
-        initialXml={xml}
-        onXmlChange={setXml}
+        initialJson={json}
+        onJsonChange={onJsonChange}
         className="h-[30rem] border-0 text-gray-700"
       />
     </div>

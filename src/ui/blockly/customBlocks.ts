@@ -9,14 +9,18 @@ BlocklyCore.defineBlocksWithJsonArray(customBlocks);
 javascriptGenerator.addReservedWords("input,output");
 
 javascriptGenerator.forBlock["read_int"] = () => {
-  return ["input.readIntSync()", javascriptGenerator.ORDER_FUNCTION_CALL];
+  return ["input.readInt()", javascriptGenerator.ORDER_FUNCTION_CALL];
 };
 
-javascriptGenerator.forBlock["write_int"] = (block: Block) => {
+javascriptGenerator.forBlock["read_array_int"] = () => {
+  return ["input.readArrayInt()", javascriptGenerator.ORDER_FUNCTION_CALL];
+};
+
+javascriptGenerator.forBlock["write_any"] = (block: Block) => {
   const num = javascriptGenerator.valueToCode(
     block,
-    "NUM",
+    "VAL",
     javascriptGenerator.ORDER_FUNCTION_CALL
   );
-  return `output.writeIntSync(${num});`;
+  return `output.writeAny(${num});`;
 };
