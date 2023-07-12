@@ -25,6 +25,16 @@ img {
   @apply overflow-auto pb-3;
 }
 
+.tooltip:hover:before,
+.tooltip:hover:after {
+  @apply delay-1000;
+}
+
+.tooltip:before,
+.tooltip:after {
+  @apply z-30;
+}
+
 .blocklyHtmlInput {
   @apply bg-white;
 }

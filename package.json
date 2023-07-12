@@ -84,6 +84,7 @@
     "mini-svg-data-uri": "^1.4",
     "prop-types": "^15.8",
     "react-blockly": "^7.2",
+    "react-feather": "^2.0",
     "react-katex": "^3.0",
     "rehype-raw": "^6.1",
     "remark-frontmatter": "^4.0",
