@@ -23,8 +23,6 @@ type BlocklyProps = {
 export default function Workspace({ initialBlocks, debug }: BlocklyProps) {
   const json = initialBlocks ?? {};
 
-  const [workspace, setWorkspace] = useState<WorkspaceSvg>();
-
   const workspaceConfiguration: BlocklyOptions = {
     renderer: "zelos",
     sounds: false,
@@ -34,8 +32,8 @@ export default function Workspace({ initialBlocks, debug }: BlocklyProps) {
     },
   };
 
-  const [input, setInput] = useState("");
-  const [executor, output] = useExecutor(workspace, input);
+  const [workspace, setWorkspace] = useState<WorkspaceSvg>();
+  const [executor, output] = useExecutor(workspace);
 
   const [pause, setPause] = useState(false);
   const onPlayPause = useCallback(() => {
@@ -56,11 +54,14 @@ export default function Workspace({ initialBlocks, debug }: BlocklyProps) {
 
   const onWorkspaceChange = useCallback(
     (workspace: WorkspaceSvg | undefined) => {
-      executor?.reset();
       setWorkspace(workspace);
-      if (workspace && debug?.logJs) {
+      if (workspace) {
         const js = javascriptGenerator.workspaceToCode(workspace);
-        console.log(js);
+        executor?.setCode(js);
+
+        if (debug?.logJs) {
+          console.log(js);
+        }
       }
     },
     [executor, debug?.logJs]
@@ -93,8 +94,7 @@ export default function Workspace({ initialBlocks, debug }: BlocklyProps) {
             rows={4}
             className="textarea-bordered textarea w-full resize-none font-mono placeholder:font-sans"
             placeholder="Input"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={(e) => executor?.setInput(e.target.value)}
           />
           <div className="divider divider-horizontal">
             <ArrowRight className="h-20 w-20" />

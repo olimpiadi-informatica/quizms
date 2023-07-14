@@ -10,43 +10,59 @@ javascriptGenerator.STATEMENT_PREFIX = "highlightBlock(%1);\n";
 javascriptGenerator.addReservedWords("highlightBlock");
 
 class Executor {
-  private readonly code: string;
   private readonly workspace: WorkspaceSvg;
   private readonly setOutput: Dispatch<SetStateAction<string>>;
-  private readonly initInterpreter: (interpreter: Interpreter, globalObject: any) => void;
+  private code: string;
+  private input: string;
   private interpreter: Interpreter;
   private timerId: ReturnType<typeof setInterval> | undefined;
   private stepFinished = false;
   private exited = false;
 
-  constructor(workspace: WorkspaceSvg, input: string, setOutput: Dispatch<SetStateAction<string>>) {
-    this.code = javascriptGenerator.workspaceToCode(workspace);
+  private initInterpreter = () => (interpreter: Interpreter, globalObject: any) => {
+    const highlightBlockWrapper = (id: string) => {
+      this.workspace.highlightBlock(id);
+      this.stepFinished = true;
+    };
+
+    interpreter.setProperty(
+      globalObject,
+      "highlightBlock",
+      interpreter.createNativeFunction(highlightBlockWrapper)
+    );
+
+    interpreter.setProperty(
+      globalObject,
+      "input",
+      interpreter.nativeToPseudo(new Input(this.input))
+    );
+
+    interpreter.setProperty(
+      globalObject,
+      "output",
+      interpreter.nativeToPseudo(new Output(this.setOutput))
+    );
+  };
+
+  constructor(workspace: WorkspaceSvg, setOutput: Dispatch<SetStateAction<string>>) {
     this.workspace = workspace;
     this.setOutput = setOutput;
 
-    this.initInterpreter = (interpreter: Interpreter, globalObject: any) => {
-      const highlightBlockWrapper = (id: string) => {
-        workspace.highlightBlock(id);
-        this.stepFinished = true;
-      };
-
-      interpreter.setProperty(
-        globalObject,
-        "highlightBlock",
-        interpreter.createNativeFunction(highlightBlockWrapper)
-      );
-
-      interpreter.setProperty(globalObject, "input", interpreter.nativeToPseudo(new Input(input)));
-
-      interpreter.setProperty(
-        globalObject,
-        "output",
-        interpreter.nativeToPseudo(new Output(setOutput))
-      );
-    };
-
-    this.interpreter = new Interpreter(this.code, this.initInterpreter);
+    this.code = javascriptGenerator.workspaceToCode(workspace);
+    this.input = "";
+    this.interpreter = new Interpreter(this.code, this.initInterpreter());
   }
+
+  public setCode = (code: string) => {
+    if (this.code !== code) {
+      this.code = code;
+      this.reset();
+    }
+  };
+
+  public setInput = (input: string) => {
+    this.input = input;
+  };
 
   public run = () => {
     if (this.exited) return;
@@ -84,7 +100,7 @@ class Executor {
 
   public reset = () => {
     clearInterval(this.timerId);
-    this.interpreter = new Interpreter(this.code, this.initInterpreter);
+    this.interpreter = new Interpreter(this.code, this.initInterpreter());
     this.setOutput("");
     this.stepFinished = false;
     this.exited = false;
@@ -92,10 +108,7 @@ class Executor {
   };
 }
 
-export default function useExecutor(
-  workspace: WorkspaceSvg | undefined,
-  input: string
-): [Executor | undefined, string] {
+export default function useExecutor(workspace?: WorkspaceSvg): [Executor | undefined, string] {
   const [output, setOutput] = useState("");
   const [executor, setExecutor] = useState<Executor>();
 
@@ -103,10 +116,10 @@ export default function useExecutor(
     if (workspace) {
       setExecutor((prev) => {
         prev?.reset();
-        return new Executor(workspace, input, setOutput);
+        return new Executor(workspace, setOutput);
       });
     }
-  }, [workspace, input]);
+  }, [workspace]);
 
   return [executor, output];
 }
