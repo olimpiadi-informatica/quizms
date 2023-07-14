@@ -26,7 +26,7 @@ javascriptGenerator.forBlock["write_any"] = (block: Block) => {
     "VAL",
     javascriptGenerator.ORDER_FUNCTION_CALL
   );
-  return `output.writeAny(${num});`;
+  return `output.writeAny(${num});\n`;
 };
 
 javascriptGenerator.forBlock["start"] = () => {
@@ -34,5 +34,5 @@ javascriptGenerator.forBlock["start"] = () => {
 };
 
 javascriptGenerator.forBlock["exit"] = () => {
-  return "exit();";
+  return "exit();\n";
 };

@@ -21,8 +21,6 @@ type BlocklyProps = {
 };
 
 export default function Workspace({ initialBlocks, debug }: BlocklyProps) {
-  const json = initialBlocks ?? {};
-
   const workspaceConfiguration: BlocklyOptions = {
     renderer: "zelos",
     sounds: false,
@@ -84,9 +82,9 @@ export default function Workspace({ initialBlocks, debug }: BlocklyProps) {
             toolboxConfiguration={toolboxConfiguration}
             workspaceConfiguration={workspaceConfiguration}
             onWorkspaceChange={onWorkspaceChange}
-            initialJson={json}
+            initialJson={initialBlocks}
             onJsonChange={onJsonChange}
-            className="h-[30rem] border-0 text-[#1f2937]"
+            className="h-[32rem] border-0 text-[#1f2937]"
           />
         </div>
         <div className="mb-5 flex">
