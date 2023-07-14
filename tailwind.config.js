@@ -1,5 +1,6 @@
 const plugin = require("tailwindcss/plugin");
 const daisyThemes = require("daisyui/src/theming/themes");
+const daisyFunctions = require("daisyui/src/theming/functions");
 
 /** @type {import("tailwindcss").Config} */
 module.exports = {
@@ -11,10 +12,20 @@ module.exports = {
       },
     },
   },
+  daisyui: {
+    logs: false,
+  },
   plugins: [
     require("@tailwindcss/typography"),
     require("daisyui"),
-    plugin(function({ addVariant }) {
+    plugin(({ addBase }) => {
+      addBase({
+        "@media print": {
+          ":root": daisyFunctions.convertColorFormat(daisyThemes["[data-theme=light]"]),
+        },
+      });
+    }),
+    plugin(({ addVariant }) => {
       addVariant("screen", "@media screen");
     }),
   ],

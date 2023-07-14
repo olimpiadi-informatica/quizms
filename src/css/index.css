@@ -17,10 +17,6 @@ img {
   @apply hidden;
 }
 
-.answer p {
-  @apply my-1;
-}
-
 .katex-display .katex-html {
   @apply overflow-auto pb-3;
 }

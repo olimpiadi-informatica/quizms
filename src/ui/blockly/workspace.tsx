@@ -76,7 +76,7 @@ export default function Workspace({ initialBlocks, debug }: BlocklyProps) {
   );
 
   return (
-    <div className="flex gap-3">
+    <div className="flex gap-2">
       <div className="grow">
         <div className="mb-5 overflow-hidden rounded-xl border-2 border-[#c6c6c6]">
           <BlocklyWorkspace
@@ -85,7 +85,7 @@ export default function Workspace({ initialBlocks, debug }: BlocklyProps) {
             onWorkspaceChange={onWorkspaceChange}
             initialJson={json}
             onJsonChange={onJsonChange}
-            className="h-[30rem] border-0 text-gray-700"
+            className="h-[30rem] border-0 text-[#1f2937]"
           />
         </div>
         <div className="mb-5 flex">
@@ -108,9 +108,9 @@ export default function Workspace({ initialBlocks, debug }: BlocklyProps) {
           />
         </div>
       </div>
-      <div className="flex flex-col gap-3">
+      <div className="join-vertical join">
         <div className="tooltip" data-tip="Esegui/pausa">
-          <div className="btn h-full w-full p-0">
+          <div className="join-item btn h-full w-full p-0">
             <label className="swap swap-rotate h-full w-full">
               <input type="checkbox" checked={pause} onChange={onPlayPause} />
               <Pause className="swap-on h-6 w-6" />
@@ -119,17 +119,17 @@ export default function Workspace({ initialBlocks, debug }: BlocklyProps) {
           </div>
         </div>
         <div className="tooltip" data-tip="Esegui un blocco">
-          <button className="btn" onClick={() => executor?.step()}>
+          <button className="join-item btn" onClick={() => executor?.step()}>
             <SkipForward className="h-6 w-6" />
           </button>
         </div>
         <div className="tooltip" data-tip="Esegui fino alla fine">
-          <button className="btn" onClick={() => executor?.runAll()}>
+          <button className="join-item btn" onClick={() => executor?.runAll()}>
             <FastForward className="h-6 w-6" />
           </button>
         </div>
         <div className="tooltip" data-tip="Esegui da capo">
-          <button className="btn" onClick={onReset}>
+          <button className="join-item btn" onClick={onReset}>
             <RotateCcw className="h-6 w-6" />
           </button>
         </div>

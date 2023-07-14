@@ -10,7 +10,11 @@ type AnswerGroupProps = {
 };
 
 export function AnswerGroup({ children }: AnswerGroupProps) {
-  return <form className="answer-group my-5 rounded-xl bg-base-200 px-3 py-3">{children}</form>;
+  return (
+    <form className="answer-group my-5 break-before-avoid break-inside-avoid rounded-xl bg-base-200 px-3 py-3 prose-p:my-1">
+      {children}
+    </form>
+  );
 }
 
 type AnswerProps = {
@@ -82,7 +86,7 @@ export function OpenAnswer({ correct, type }: OpenAnswerProps) {
     <div className="open-answer px-2">
       <input
         className={classNames(
-          "input-bordered input w-72 max-w-full border-2",
+          "input-bordered input w-72 max-w-full border-2 print:placeholder:text-transparent",
           terminated &&
             correct !== undefined && {
               "disabled:input-success": correct === answer,
