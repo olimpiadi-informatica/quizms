@@ -61,6 +61,7 @@ class Executor {
   };
 
   public step = () => {
+    if (this.exited) return;
     do {
       this.stepFinished = false;
       try {
@@ -77,10 +78,12 @@ class Executor {
   };
 
   public pause = () => {
+    if (this.exited) return;
     clearInterval(this.timerId);
   };
 
   public reset = () => {
+    clearInterval(this.timerId);
     this.interpreter = new Interpreter(this.code, this.initInterpreter);
     this.setOutput("");
     this.stepFinished = false;

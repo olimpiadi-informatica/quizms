@@ -49,6 +49,11 @@ export default function Workspace({ initialBlocks, debug }: BlocklyProps) {
     });
   }, [executor]);
 
+  const onReset = useCallback(() => {
+    executor?.reset();
+    setPause(false);
+  }, [executor]);
+
   const onWorkspaceChange = useCallback(
     (workspace: WorkspaceSvg | undefined) => {
       executor?.reset();
@@ -124,7 +129,7 @@ export default function Workspace({ initialBlocks, debug }: BlocklyProps) {
           </button>
         </div>
         <div className="tooltip" data-tip="Esegui da capo">
-          <button className="btn" onClick={() => executor?.reset()}>
+          <button className="btn" onClick={onReset}>
             <RotateCcw className="h-6 w-6" />
           </button>
         </div>
