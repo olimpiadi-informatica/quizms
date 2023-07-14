@@ -1,5 +1,6 @@
 import React, { useCallback, useState } from "react";
 
+import { DisableTopBlocks } from "@blockly/disable-top-blocks";
 import { default as BlocklyCore, BlocklyOptions, WorkspaceSvg } from "blockly";
 import { javascriptGenerator } from "blockly/javascript";
 import locale from "blockly/msg/it";
@@ -27,6 +28,9 @@ export default function Workspace({ initialBlocks, debug }: BlocklyProps) {
     zoom: {
       controls: true,
       startScale: 0.8,
+    },
+    maxInstances: {
+      start: 1,
     },
   };
 
@@ -79,6 +83,10 @@ export default function Workspace({ initialBlocks, debug }: BlocklyProps) {
       <div className="grow">
         <div className="mb-5 overflow-hidden rounded-xl border-2 border-[#c6c6c6]">
           <BlocklyWorkspace
+            onInject={(workspace) => {
+              workspace.addChangeListener(BlocklyCore.Events.disableOrphans);
+              new DisableTopBlocks().init();
+            }}
             toolboxConfiguration={toolboxConfiguration}
             workspaceConfiguration={workspaceConfiguration}
             onWorkspaceChange={onWorkspaceChange}

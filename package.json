@@ -68,6 +68,7 @@
     "@/*": "~/src/$1"
   },
   "dependencies": {
+    "@blockly/disable-top-blocks": "^0.4",
     "@mdx-js/mdx": "^2.3",
     "@mdx-js/react": "^2.3",
     "@swc/core": "^1.3",

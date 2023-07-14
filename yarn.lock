@@ -131,6 +131,11 @@
     "@babel/helper-validator-identifier" "^7.22.5"
     to-fast-properties "^2.0.0"
 
+"@blockly/disable-top-blocks@^0.4":
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/@blockly/disable-top-blocks/-/disable-top-blocks-0.4.0.tgz#9ba601b77a57114fa49b5133cfe4cb1563384625"
+  integrity sha512-S3w3gQKlA6EPYNPE8aFxsSsH1Y5oPMuXLwwKtWLw8JX1hMKT74hTczjXyp80mRdBFopWshAB26+doMqZJEU+1A==
+
 "@eslint-community/eslint-utils@^4.2.0":
   version "4.4.0"
   resolved "https://registry.yarnpkg.com/@eslint-community/eslint-utils/-/eslint-utils-4.4.0.tgz#a23514e8fb9af1269d5f7788aa556798d61c6b59"
