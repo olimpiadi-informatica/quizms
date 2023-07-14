@@ -20,15 +20,21 @@ class Executor {
   private exited = false;
 
   private initInterpreter = () => (interpreter: Interpreter, globalObject: any) => {
-    const highlightBlockWrapper = (id: string) => {
-      this.workspace.highlightBlock(id);
-      this.stepFinished = true;
-    };
-
     interpreter.setProperty(
       globalObject,
       "highlightBlock",
-      interpreter.createNativeFunction(highlightBlockWrapper)
+      interpreter.createNativeFunction((id: string) => {
+        this.workspace.highlightBlock(id);
+        this.stepFinished = true;
+      })
+    );
+
+    interpreter.setProperty(
+      globalObject,
+      "exit",
+      interpreter.createNativeFunction(() => {
+        this.exited = true;
+      })
     );
 
     interpreter.setProperty(
@@ -81,7 +87,7 @@ class Executor {
     do {
       this.stepFinished = false;
       try {
-        this.exited = !this.interpreter.step();
+        this.exited = !this.interpreter.step() || this.exited;
       } catch (e) {
         this.setOutput((prev) => `${prev}===== Errore ========\n${e}\n`);
         this.exited = true;

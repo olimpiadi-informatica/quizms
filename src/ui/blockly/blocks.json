@@ -1,5 +1,21 @@
 [
   {
+    "type": "start",
+    "message0": "inizia qui",
+    "nextStatement": null,
+    "colour": 20,
+    "tooltip": "L'esecuzione inizia da qui",
+    "helpUrl": ""
+  },
+  {
+    "type": "exit",
+    "message0": "termina",
+    "previousStatement": null,
+    "colour": 20,
+    "tooltip": "L'esecuzione termina qui",
+    "helpUrl": ""
+  },
+  {
     "type": "read_int",
     "message0": "leggi un numero",
     "output": "Number",

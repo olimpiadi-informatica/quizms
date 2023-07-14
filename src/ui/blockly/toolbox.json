@@ -244,6 +244,21 @@
           "type": "write_any"
         }
       ]
+    },
+    {
+      "kind": "category",
+      "name": "Esecuzione",
+      "colour": 20,
+      "contents": [
+        {
+          "kind": "block",
+          "type": "start"
+        },
+        {
+          "kind": "block",
+          "type": "exit"
+        }
+      ]
     }
   ]
 }

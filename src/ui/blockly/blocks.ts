@@ -5,7 +5,7 @@ import customBlocks from "./blocks.json";
 
 BlocklyCore.defineBlocksWithJsonArray(customBlocks);
 
-javascriptGenerator.addReservedWords("input,output");
+javascriptGenerator.addReservedWords("input,output,exit");
 
 javascriptGenerator.forBlock["read_int"] = () => {
   return ["input.readInt()", javascriptGenerator.ORDER_FUNCTION_CALL];
@@ -27,4 +27,12 @@ javascriptGenerator.forBlock["write_any"] = (block: Block) => {
     javascriptGenerator.ORDER_FUNCTION_CALL
   );
   return `output.writeAny(${num});`;
+};
+
+javascriptGenerator.forBlock["start"] = () => {
+  return "";
+};
+
+javascriptGenerator.forBlock["exit"] = () => {
+  return "exit();";
 };
