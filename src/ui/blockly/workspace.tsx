@@ -6,9 +6,9 @@ import locale from "blockly/msg/it";
 import { BlocklyWorkspace } from "react-blockly";
 import { ArrowRight, FastForward, Pause, Play, RotateCcw, SkipForward } from "react-feather";
 
-import toolboxConfiguration from "./blocklyToolbox.json";
-import "./customBlocks";
+import "./blocks";
 import useExecutor from "./executor";
+import toolboxConfiguration from "./toolbox.json";
 
 BlocklyCore.setLocale(locale);
 
@@ -20,7 +20,7 @@ type BlocklyProps = {
   };
 };
 
-export function Blockly({ initialBlocks, debug }: BlocklyProps) {
+export default function Workspace({ initialBlocks, debug }: BlocklyProps) {
   const json = initialBlocks ?? {};
 
   const [workspace, setWorkspace] = useState<WorkspaceSvg>();

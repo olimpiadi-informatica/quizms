@@ -1,7 +1,7 @@
 import { Block, default as BlocklyCore } from "blockly";
 import { javascriptGenerator } from "blockly/javascript";
 
-import customBlocks from "./customBlocks.json";
+import customBlocks from "./blocks.json";
 
 BlocklyCore.defineBlocksWithJsonArray(customBlocks);
 
