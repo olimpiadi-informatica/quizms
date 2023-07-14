@@ -5,7 +5,15 @@ import { default as BlocklyCore, BlocklyOptions, WorkspaceSvg } from "blockly";
 import { javascriptGenerator } from "blockly/javascript";
 import locale from "blockly/msg/it";
 import { BlocklyWorkspace } from "react-blockly";
-import { ArrowRight, FastForward, Pause, Play, RotateCcw, SkipForward } from "react-feather";
+import {
+  ArrowDown,
+  ArrowRight,
+  FastForward,
+  Pause,
+  Play,
+  RotateCcw,
+  SkipForward,
+} from "react-feather";
 
 import "./blocks";
 import useExecutor from "./executor";
@@ -95,15 +103,16 @@ export default function Workspace({ initialBlocks, debug }: BlocklyProps) {
             className="h-[32rem] border-0 text-[#1f2937]"
           />
         </div>
-        <div className="mb-5 flex">
+        <div className="mb-5 flex flex-col lg:flex-row">
           <textarea
             rows={4}
             className="textarea-bordered textarea w-full resize-none font-mono placeholder:font-sans"
             placeholder="Input"
             onChange={(e) => executor?.setInput(e.target.value)}
           />
-          <div className="divider divider-horizontal">
-            <ArrowRight className="h-20 w-20" />
+          <div className="divider lg:divider-horizontal">
+            <ArrowRight size={72} className="hidden h-full lg:block" />
+            <ArrowDown size={72} className="lg:hidden" />
           </div>
           <textarea
             rows={4}
