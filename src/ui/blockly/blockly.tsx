@@ -1,7 +1,6 @@
 import React, { useCallback, useState } from "react";
 
-import { default as BlocklyCore, BlocklyOptions } from "blockly/core.js";
-import { Workspace } from "blockly/core/workspace";
+import { default as BlocklyCore, BlocklyOptions, WorkspaceSvg } from "blockly";
 import { javascriptGenerator } from "blockly/javascript";
 import locale from "blockly/msg/it";
 import { BlocklyWorkspace } from "react-blockly";
@@ -9,6 +8,7 @@ import { ArrowRight, FastForward, Pause, Play, RotateCcw, SkipForward } from "re
 
 import toolboxConfiguration from "./blocklyToolbox.json";
 import "./customBlocks";
+import useExecutor from "./executor";
 
 BlocklyCore.setLocale(locale);
 
@@ -23,7 +23,7 @@ type BlocklyProps = {
 export function Blockly({ initialBlocks, debug }: BlocklyProps) {
   const json = initialBlocks ?? {};
 
-  const [workspace, setWorkspace] = useState<Workspace>();
+  const [workspace, setWorkspace] = useState<WorkspaceSvg>();
 
   const workspaceConfiguration: BlocklyOptions = {
     renderer: "zelos",
@@ -34,6 +34,33 @@ export function Blockly({ initialBlocks, debug }: BlocklyProps) {
     },
   };
 
+  const [input, setInput] = useState("");
+  const [executor, output] = useExecutor(workspace, input);
+
+  const [pause, setPause] = useState(false);
+  const onPlayPause = useCallback(() => {
+    setPause((old) => {
+      if (old) {
+        executor?.pause();
+      } else {
+        executor?.run();
+      }
+      return !old;
+    });
+  }, [executor]);
+
+  const onWorkspaceChange = useCallback(
+    (workspace: WorkspaceSvg | undefined) => {
+      executor?.reset();
+      setWorkspace(workspace);
+      if (workspace && debug?.logJs) {
+        const js = javascriptGenerator.workspaceToCode(workspace);
+        console.log(js);
+      }
+    },
+    [executor, debug?.logJs]
+  );
+
   const onJsonChange = useCallback(
     (json: object) => {
       if (debug?.logBlocks) {
@@ -41,19 +68,6 @@ export function Blockly({ initialBlocks, debug }: BlocklyProps) {
       }
     },
     [debug?.logBlocks]
-  );
-
-  const onWorkspaceChange = useCallback(
-    (workspace: Workspace | undefined) => {
-      setWorkspace(workspace);
-      if (workspace) {
-        if (debug?.logJs) {
-          const js = javascriptGenerator.workspaceToCode(workspace);
-          console.log(js);
-        }
-      }
-    },
-    [debug?.logJs]
   );
 
   return (
@@ -74,6 +88,8 @@ export function Blockly({ initialBlocks, debug }: BlocklyProps) {
             rows={4}
             className="textarea-bordered textarea w-full resize-none font-mono placeholder:font-sans"
             placeholder="Input"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
           />
           <div className="divider divider-horizontal">
             <ArrowRight className="h-20 w-20" />
@@ -82,31 +98,33 @@ export function Blockly({ initialBlocks, debug }: BlocklyProps) {
             rows={4}
             className="textarea-bordered textarea w-full resize-none font-mono placeholder:font-sans"
             placeholder="Output"
+            value={output}
+            readOnly
           />
         </div>
       </div>
       <div className="flex flex-col gap-3">
-        <div className="tooltip" data-tip="Esegui/ferma">
+        <div className="tooltip" data-tip="Esegui/pausa">
           <div className="btn h-full w-full p-0">
             <label className="swap swap-rotate h-full w-full">
-              <input type="checkbox" />
+              <input type="checkbox" checked={pause} onChange={onPlayPause} />
               <Pause className="swap-on h-6 w-6" />
               <Play className="swap-off h-6 w-6" />
             </label>
           </div>
         </div>
         <div className="tooltip" data-tip="Esegui un blocco">
-          <button className="btn">
+          <button className="btn" onClick={() => executor?.step()}>
             <SkipForward className="h-6 w-6" />
           </button>
         </div>
         <div className="tooltip" data-tip="Esegui fino alla fine">
-          <button className="btn">
+          <button className="btn" onClick={() => executor?.runAll()}>
             <FastForward className="h-6 w-6" />
           </button>
         </div>
         <div className="tooltip" data-tip="Esegui da capo">
-          <button className="btn">
+          <button className="btn" onClick={() => executor?.reset()}>
             <RotateCcw className="h-6 w-6" />
           </button>
         </div>

@@ -1,5 +1,4 @@
-import { default as BlocklyCore } from "blockly/core";
-import { Block } from "blockly/core/block";
+import { Block, default as BlocklyCore } from "blockly";
 import { javascriptGenerator } from "blockly/javascript";
 
 import customBlocks from "./customBlocks.json";
@@ -12,8 +11,13 @@ javascriptGenerator.forBlock["read_int"] = () => {
   return ["input.readInt()", javascriptGenerator.ORDER_FUNCTION_CALL];
 };
 
-javascriptGenerator.forBlock["read_array_int"] = () => {
-  return ["input.readArrayInt()", javascriptGenerator.ORDER_FUNCTION_CALL];
+javascriptGenerator.forBlock["read_array_int"] = (block: Block) => {
+  const length = javascriptGenerator.valueToCode(
+    block,
+    "LENGTH",
+    javascriptGenerator.ORDER_FUNCTION_CALL
+  );
+  return [`input.readArrayInt(${length})`, javascriptGenerator.ORDER_FUNCTION_CALL];
 };
 
 javascriptGenerator.forBlock["write_any"] = (block: Block) => {
