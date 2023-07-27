@@ -12,6 +12,7 @@ javascriptGenerator.addReservedWords("highlightBlock");
 class Executor {
   private readonly workspace: WorkspaceSvg;
   private readonly setOutput: Dispatch<SetStateAction<string>>;
+  private readonly setExited: Dispatch<SetStateAction<boolean>>;
   private code: string;
   private input: string;
   private interpreter: Interpreter;
@@ -53,10 +54,12 @@ class Executor {
   constructor(
     workspace: WorkspaceSvg,
     initialInput: string,
-    setOutput: Dispatch<SetStateAction<string>>
+    setOutput: Dispatch<SetStateAction<string>>,
+    setExited: Dispatch<SetStateAction<boolean>>
   ) {
     this.workspace = workspace;
     this.setOutput = setOutput;
+    this.setExited = setExited;
 
     this.code = javascriptGenerator.workspaceToCode(workspace);
     this.input = initialInput;
@@ -100,6 +103,7 @@ class Executor {
     if (this.exited) {
       this.setOutput((prev) => `${prev}===== Terminato =====\n`);
       clearInterval(this.timerId);
+      this.setExited(true);
     }
   };
 
@@ -114,6 +118,7 @@ class Executor {
     this.setOutput("");
     this.stepFinished = false;
     this.exited = false;
+    this.setExited(false);
     this.workspace.highlightBlock(null);
   };
 }
@@ -121,18 +126,19 @@ class Executor {
 export default function useExecutor(
   workspace: WorkspaceSvg | undefined,
   initialInput: string
-): [Executor | undefined, string] {
+): [Executor | undefined, string, boolean] {
   const [output, setOutput] = useState("");
   const [executor, setExecutor] = useState<Executor>();
+  const [exited, setExited] = useState(false);
 
   useEffect(() => {
     if (workspace) {
       setExecutor((prev) => {
         prev?.reset();
-        return new Executor(workspace, initialInput, setOutput);
+        return new Executor(workspace, initialInput, setOutput, setExited);
       });
     }
-  }, [workspace]);
+  }, [workspace, initialInput]);
 
-  return [executor, output];
+  return [executor, output, exited];
 }
