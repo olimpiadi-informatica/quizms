@@ -12,24 +12,29 @@ import {
   Pause,
   Play,
   RotateCcw,
+  Send,
   SkipForward,
 } from "react-feather";
 
 import "./blocks";
 import useExecutor from "./executor";
+import { Input, Output, Rng } from "./io";
 import toolboxConfiguration from "./toolbox.json";
 
 BlocklyCore.setLocale(locale);
 
 type BlocklyProps = {
   initialBlocks?: object;
+  example?: string;
+  generateInput: (rng: Rng) => Generator<any>;
+  solution: (input: Input, output: Output) => void;
   debug?: {
     logBlocks?: boolean;
     logJs?: boolean;
   };
 };
 
-export default function Workspace({ initialBlocks, debug }: BlocklyProps) {
+export default function Workspace({ initialBlocks, example, debug }: BlocklyProps) {
   const workspaceConfiguration: BlocklyOptions = {
     renderer: "zelos",
     sounds: false,
@@ -42,8 +47,9 @@ export default function Workspace({ initialBlocks, debug }: BlocklyProps) {
     },
   };
 
+  const [input, setInput] = useState(example ?? "");
   const [workspace, setWorkspace] = useState<WorkspaceSvg>();
-  const [executor, output] = useExecutor(workspace);
+  const [executor, output] = useExecutor(workspace, input);
 
   const [pause, setPause] = useState(false);
   const onPlayPause = useCallback(() => {
@@ -61,6 +67,14 @@ export default function Workspace({ initialBlocks, debug }: BlocklyProps) {
     executor?.reset();
     setPause(false);
   }, [executor]);
+
+  const onInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      setInput(e.target.value);
+      executor?.setInput(e.target.value);
+    },
+    [executor]
+  );
 
   const onWorkspaceChange = useCallback(
     (workspace: WorkspaceSvg | undefined) => {
@@ -108,7 +122,8 @@ export default function Workspace({ initialBlocks, debug }: BlocklyProps) {
             rows={4}
             className="textarea-bordered textarea w-full resize-none font-mono placeholder:font-sans"
             placeholder="Input"
-            onChange={(e) => executor?.setInput(e.target.value)}
+            value={input}
+            onChange={onInputChange}
           />
           <div className="divider lg:divider-horizontal">
             <ArrowRight size={72} className="hidden h-full lg:block" />

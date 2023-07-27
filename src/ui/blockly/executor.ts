@@ -50,12 +50,16 @@ class Executor {
     );
   };
 
-  constructor(workspace: WorkspaceSvg, setOutput: Dispatch<SetStateAction<string>>) {
+  constructor(
+    workspace: WorkspaceSvg,
+    initialInput: string,
+    setOutput: Dispatch<SetStateAction<string>>
+  ) {
     this.workspace = workspace;
     this.setOutput = setOutput;
 
     this.code = javascriptGenerator.workspaceToCode(workspace);
-    this.input = "";
+    this.input = initialInput;
     this.interpreter = new Interpreter(this.code, this.initInterpreter());
   }
 
@@ -114,7 +118,10 @@ class Executor {
   };
 }
 
-export default function useExecutor(workspace?: WorkspaceSvg): [Executor | undefined, string] {
+export default function useExecutor(
+  workspace: WorkspaceSvg | undefined,
+  initialInput: string
+): [Executor | undefined, string] {
   const [output, setOutput] = useState("");
   const [executor, setExecutor] = useState<Executor>();
 
@@ -122,7 +129,7 @@ export default function useExecutor(workspace?: WorkspaceSvg): [Executor | undef
     if (workspace) {
       setExecutor((prev) => {
         prev?.reset();
-        return new Executor(workspace, setOutput);
+        return new Executor(workspace, initialInput, setOutput);
       });
     }
   }, [workspace]);
