@@ -74,7 +74,7 @@ export default function Workspace({ initialBlocks, example, debug }: BlocklyProp
       setInput(e.target.value);
       executor?.setInput(e.target.value);
     },
-    [executor]
+    [executor],
   );
 
   const onWorkspaceChange = useCallback(
@@ -89,7 +89,7 @@ export default function Workspace({ initialBlocks, example, debug }: BlocklyProp
         }
       }
     },
-    [executor, debug?.logJs]
+    [executor, debug?.logJs],
   );
 
   const onJsonChange = useCallback(
@@ -98,7 +98,7 @@ export default function Workspace({ initialBlocks, example, debug }: BlocklyProp
         console.log(JSON.stringify(json, null, 2));
       }
     },
-    [debug?.logBlocks]
+    [debug?.logBlocks],
   );
 
   useEffect(() => {
@@ -125,12 +125,12 @@ export default function Workspace({ initialBlocks, example, debug }: BlocklyProp
           />
         </div>
         <div className="flex flex-col gap-3">
-          <div className="join-vertical join">
+          <div className="join join-vertical">
             <div className="tooltip" data-tip="Esegui/pausa">
               <div
                 className={classNames(
-                  "join-item btn h-full w-full p-0",
-                  terminated && "btn-disabled"
+                  "btn join-item h-full w-full p-0",
+                  terminated && "btn-disabled",
                 )}>
                 <label className="swap swap-rotate h-full w-full">
                   <input
@@ -146,7 +146,7 @@ export default function Workspace({ initialBlocks, example, debug }: BlocklyProp
             </div>
             <div className="tooltip" data-tip="Esegui un blocco">
               <button
-                className="join-item btn"
+                className="btn join-item"
                 disabled={terminated}
                 onClick={() => executor?.step()}>
                 <SkipForward className="h-6 w-6" />
@@ -154,20 +154,20 @@ export default function Workspace({ initialBlocks, example, debug }: BlocklyProp
             </div>
             <div className="tooltip" data-tip="Esegui fino alla fine">
               <button
-                className="join-item btn"
+                className="btn join-item"
                 disabled={terminated}
                 onClick={() => executor?.runAll()}>
                 <FastForward className="h-6 w-6" />
               </button>
             </div>
             <div className="tooltip" data-tip="Esegui da capo">
-              <button className="join-item btn" onClick={onReset}>
+              <button className="btn join-item" onClick={onReset}>
                 <RotateCcw className="h-6 w-6" />
               </button>
             </div>
           </div>
           <div className="tooltip" data-tip="Invia la soluzione">
-            <button className="btn-success join-item btn">
+            <button className="btn btn-success join-item">
               <Send className="h-6 w-6" />
             </button>
           </div>
@@ -176,7 +176,7 @@ export default function Workspace({ initialBlocks, example, debug }: BlocklyProp
       <div className="mb-5 flex flex-col lg:flex-row">
         <textarea
           rows={4}
-          className="textarea-bordered textarea w-full resize-none font-mono placeholder:font-sans"
+          className="textarea textarea-bordered w-full resize-none font-mono placeholder:font-sans"
           placeholder="Input"
           value={input}
           onChange={onInputChange}
@@ -187,7 +187,7 @@ export default function Workspace({ initialBlocks, example, debug }: BlocklyProp
         </div>
         <textarea
           rows={4}
-          className="textarea-bordered textarea w-full resize-none font-mono placeholder:font-sans"
+          className="textarea textarea-bordered w-full resize-none font-mono placeholder:font-sans"
           placeholder="Output"
           value={output}
           readOnly

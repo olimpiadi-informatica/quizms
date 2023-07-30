@@ -7,13 +7,13 @@ type ModalProps = {
 
 export default forwardRef(function Modal(
   { title, children }: ModalProps,
-  ref: Ref<HTMLDialogElement>
+  ref: Ref<HTMLDialogElement>,
 ) {
   return (
     <dialog ref={ref} className="modal">
       <form method="dialog" className="modal-box">
         <button
-          className="btn-ghost btn-sm btn-circle btn absolute right-2 top-2"
+          className="btn btn-circle btn-ghost btn-sm absolute right-2 top-2"
           aria-label="Chiudi">
           ✕
         </button>

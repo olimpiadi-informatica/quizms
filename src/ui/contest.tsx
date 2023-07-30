@@ -97,7 +97,7 @@ type ModalProps = {
 
 const CompletedModal = forwardRef(function CompletedModal(
   { problems, answers }: ModalProps,
-  ref: Ref<HTMLDialogElement>
+  ref: Ref<HTMLDialogElement>,
 ) {
   const calcPoints = useCallback(
     (problem: Problem) => {
@@ -105,7 +105,7 @@ const CompletedModal = forwardRef(function CompletedModal(
       if (answers[problem.id] === problem.correct) return problem.points[0];
       return problem.points[2];
     },
-    [answers]
+    [answers],
   );
 
   const score = useMemo(() => {
@@ -176,7 +176,7 @@ function StickyFooter({ progress }: FooterProps) {
         {progress}%
       </Progress>
       <button
-        className="btn-success btn"
+        className="btn btn-success"
         onClick={() => ref.current?.showModal()}
         disabled={terminated}>
         Termina
@@ -202,10 +202,10 @@ const SubmitModal = forwardRef(function SubmitModal(_, ref: Ref<HTMLDialogElemen
     <Modal ref={ref} title="Confermi di voler terminare?">
       <p>Confermando non potrai più modificare le tue risposte.</p>
       <div className="text-md flex flex-row justify-center gap-5">
-        <button className="btn-neutral btn-outline btn" onClick={close}>
+        <button className="btn btn-neutral btn-outline" onClick={close}>
           Annulla
         </button>
-        <button className="btn-error btn" onClick={confirm}>
+        <button className="btn btn-error" onClick={confirm}>
           Conferma
         </button>
       </div>

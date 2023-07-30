@@ -27,7 +27,7 @@ class Executor {
       interpreter.createNativeFunction((id: string) => {
         this.workspace.highlightBlock(id);
         this.stepFinished = true;
-      })
+      }),
     );
 
     interpreter.setProperty(
@@ -35,19 +35,19 @@ class Executor {
       "exit",
       interpreter.createNativeFunction(() => {
         this.exited = true;
-      })
+      }),
     );
 
     interpreter.setProperty(
       globalObject,
       "input",
-      interpreter.nativeToPseudo(new Input(this.input))
+      interpreter.nativeToPseudo(new Input(this.input)),
     );
 
     interpreter.setProperty(
       globalObject,
       "output",
-      interpreter.nativeToPseudo(new Output(this.setOutput))
+      interpreter.nativeToPseudo(new Output(this.setOutput)),
     );
   };
 
@@ -55,7 +55,7 @@ class Executor {
     workspace: WorkspaceSvg,
     initialInput: string,
     setOutput: Dispatch<SetStateAction<string>>,
-    setExited: Dispatch<SetStateAction<boolean>>
+    setExited: Dispatch<SetStateAction<boolean>>,
   ) {
     this.workspace = workspace;
     this.setOutput = setOutput;
@@ -125,7 +125,7 @@ class Executor {
 
 export default function useExecutor(
   workspace: WorkspaceSvg | undefined,
-  initialInput: string
+  initialInput: string,
 ): [Executor | undefined, string, boolean] {
   const [output, setOutput] = useState("");
   const [executor, setExecutor] = useState<Executor>();

@@ -14,7 +14,7 @@ export function AnswerGroup({ children }: AnswerGroupProps) {
     <form
       className={classNames(
         "answer-group my-5 break-before-avoid break-inside-avoid rounded-xl",
-        "bg-base-200 px-3 py-3 prose-p:my-1 print:border print:border-[var(--tw-prose-hr)]"
+        "bg-base-200 px-3 py-3 prose-p:my-1 print:border print:border-[var(--tw-prose-hr)]",
       )}>
       {children}
     </form>
@@ -46,7 +46,7 @@ export function Answer({ id, correct, children }: AnswerProps) {
         terminated && {
           "border-2 border-success": correct === "true",
           "border-2 border-error": answer === id && correct === "false",
-        }
+        },
       )}>
       <input
         id={answerId}
@@ -57,7 +57,7 @@ export function Answer({ id, correct, children }: AnswerProps) {
             answer === id && {
               "radio-success": correct === "true",
               "radio-error": correct === "false",
-            }
+            },
         )}
         onChange={(e) => setAnswer(e.target.checked ? id : undefined)}
         type="radio"
@@ -95,7 +95,7 @@ export function OpenAnswer({ correct, type }: OpenAnswerProps) {
             correct !== undefined && {
               "disabled:input-success": correct === answer,
               "disabled:input-error": correct !== answer,
-            }
+            },
         )}
         onChange={(e) => setAnswer(e.target.value || undefined)}
         onWheel={(e) => e.currentTarget.blur()}

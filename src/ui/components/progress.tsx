@@ -17,7 +17,7 @@ export default function Progress({ percentage, className, children }: ProgressBl
     <div className={classNames("relative p-2 text-center", className)}>
       <div className="relative z-10">{children}</div>
       <progress
-        className="progress-info progress absolute inset-x-0"
+        className="progress progress-info absolute inset-x-0"
         value={percentage}
         max="100"
       />
