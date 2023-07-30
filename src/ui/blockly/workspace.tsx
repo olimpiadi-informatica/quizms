@@ -108,28 +108,14 @@ export default function Workspace({ initialBlocks, example, debug }: BlocklyProp
   }, [terminated, pause, onPlayPause]);
 
   return (
-    <div>
-      <div className="flex gap-3">
-        <div className="mb-5 grow overflow-hidden rounded-xl border-2 border-[#c6c6c6]">
-          <BlocklyWorkspace
-            onInject={(workspace) => {
-              workspace.addChangeListener(BlocklyCore.Events.disableOrphans);
-              new DisableTopBlocks().init();
-            }}
-            toolboxConfiguration={toolboxConfiguration}
-            workspaceConfiguration={workspaceConfiguration}
-            onWorkspaceChange={onWorkspaceChange}
-            initialJson={initialBlocks}
-            onJsonChange={onJsonChange}
-            className="h-[32rem] border-0 text-[#1f2937]"
-          />
-        </div>
-        <div className="flex flex-col gap-3">
-          <div className="join join-vertical">
-            <div className="tooltip" data-tip="Esegui/pausa">
+    <div className="relative inset-y-0 left-1/2 mb-5 w-screen -translate-x-1/2 px-4 sm:px-8">
+      <div className="grid gap-3 md:grid-cols-[1fr_auto] lg:grid-rows-[auto_1fr] xl:grid-cols-[2fr_1fr]">
+        <div className="flex gap-3 md:flex-col lg:flex-row">
+          <div className="join md:join-vertical lg:join-horizontal">
+            <div className="join-item tooltip" data-tip="Esegui/pausa">
               <div
                 className={classNames(
-                  "btn join-item h-full w-full p-0",
+                  "btn btn-info h-full w-full rounded-[inherit]",
                   terminated && "btn-disabled",
                 )}>
                 <label className="swap swap-rotate h-full w-full">
@@ -144,54 +130,67 @@ export default function Workspace({ initialBlocks, example, debug }: BlocklyProp
                 </label>
               </div>
             </div>
-            <div className="tooltip" data-tip="Esegui un blocco">
+            <div className="join-item tooltip" data-tip="Esegui un blocco">
               <button
-                className="btn join-item"
+                className="btn btn-info rounded-[inherit]"
                 disabled={terminated}
                 onClick={() => executor?.step()}>
                 <SkipForward className="h-6 w-6" />
               </button>
             </div>
-            <div className="tooltip" data-tip="Esegui fino alla fine">
+            <div className="join-item tooltip" data-tip="Esegui fino alla fine">
               <button
-                className="btn join-item"
+                className="btn btn-info rounded-[inherit]"
                 disabled={terminated}
                 onClick={() => executor?.runAll()}>
                 <FastForward className="h-6 w-6" />
               </button>
             </div>
-            <div className="tooltip" data-tip="Esegui da capo">
-              <button className="btn join-item" onClick={onReset}>
+            <div className="join-item tooltip" data-tip="Esegui da capo">
+              <button className="btn btn-info rounded-[inherit]" onClick={onReset}>
                 <RotateCcw className="h-6 w-6" />
               </button>
             </div>
           </div>
           <div className="tooltip" data-tip="Invia la soluzione">
-            <button className="btn btn-success join-item">
+            <button className="btn btn-success">
               <Send className="h-6 w-6" />
             </button>
           </div>
         </div>
-      </div>
-      <div className="mb-5 flex flex-col lg:flex-row">
-        <textarea
-          rows={4}
-          className="textarea textarea-bordered w-full resize-none font-mono placeholder:font-sans"
-          placeholder="Input"
-          value={input}
-          onChange={onInputChange}
-        />
-        <div className="divider lg:divider-horizontal">
-          <ArrowRight size={72} className="hidden h-full lg:block" />
-          <ArrowDown size={72} className="lg:hidden" />
+        <div className="overflow-hidden rounded-xl border-2 border-[#c6c6c6] md:order-first lg:row-span-2">
+          <BlocklyWorkspace
+            onInject={(workspace) => {
+              workspace.addChangeListener(BlocklyCore.Events.disableOrphans);
+              new DisableTopBlocks().init();
+            }}
+            toolboxConfiguration={toolboxConfiguration}
+            workspaceConfiguration={workspaceConfiguration}
+            onWorkspaceChange={onWorkspaceChange}
+            initialJson={initialBlocks}
+            onJsonChange={onJsonChange}
+            className="h-[32rem] max-h-[calc(100vh-6rem)] border-0 text-[#1f2937]"
+          />
         </div>
-        <textarea
-          rows={4}
-          className="textarea textarea-bordered w-full resize-none font-mono placeholder:font-sans"
-          placeholder="Output"
-          value={output}
-          readOnly
-        />
+        <div className="flex flex-col md:col-span-2 lg:col-span-1">
+          <textarea
+            rows={4}
+            className="textarea textarea-bordered w-full grow resize-none font-mono placeholder:font-sans"
+            placeholder="Input"
+            value={input}
+            onChange={onInputChange}
+          />
+          <div className="divider-horizontall divider">
+            <ArrowDown size={72} />
+          </div>
+          <textarea
+            rows={4}
+            className="textarea textarea-bordered w-full grow resize-none font-mono placeholder:font-sans"
+            placeholder="Output"
+            value={output}
+            readOnly
+          />
+        </div>
       </div>
     </div>
   );

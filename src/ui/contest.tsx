@@ -164,23 +164,28 @@ function StickyFooter({ progress }: FooterProps) {
   const { startTime, endTime, terminated } = useAuthentication();
 
   return (
-    <div className="sticky bottom-0 z-[100] flex justify-between overflow-hidden border-t border-base-content bg-base-100 p-3 print:hidden">
-      {terminated && (
-        <Progress className="w-20" percentage={100}>
-          0:00
-        </Progress>
-      )}
-      {!terminated && <Timer startTime={startTime} endTime={endTime} />}
-      <Progress className="min-w-[5rem]" percentage={progress}>
-        <span className="hidden xs:inline">Risposte date: </span>
-        {progress}%
-      </Progress>
-      <button
-        className="btn btn-success"
-        onClick={() => ref.current?.showModal()}
-        disabled={terminated}>
-        Termina
-      </button>
+    <div className="sticky bottom-0 z-[100] border-t border-base-content print:hidden">
+      <div className="relative">
+        <div className="absolute inset-y-0 left-1/2 -z-10 w-screen -translate-x-1/2 bg-base-100" />
+        <div className="flex justify-between p-3">
+          {terminated && (
+            <Progress className="w-20" percentage={100}>
+              <span className="font-mono">00:00</span>
+            </Progress>
+          )}
+          {!terminated && <Timer startTime={startTime} endTime={endTime} />}
+          <Progress className="min-w-[5rem]" percentage={progress}>
+            <span className="hidden xs:inline">Risposte date: </span>
+            {progress}%
+          </Progress>
+          <button
+            className="btn btn-success"
+            onClick={() => ref.current?.showModal()}
+            disabled={terminated}>
+            Termina
+          </button>
+        </div>
+      </div>
       <SubmitModal ref={ref} />
     </div>
   );

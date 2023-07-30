@@ -6,7 +6,7 @@
 @tailwind utilities;
 
 body {
-  @apply min-w-[320px];
+  @apply min-w-[320px] overflow-x-hidden;
 }
 
 img {
