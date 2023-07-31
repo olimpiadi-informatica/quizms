@@ -7,7 +7,8 @@ import Interpreter from "js-interpreter";
 import { Input, Output } from "./io";
 
 javascriptGenerator.STATEMENT_PREFIX = "highlightBlock(%1);\n";
-javascriptGenerator.addReservedWords("highlightBlock");
+javascriptGenerator.INFINITE_LOOP_TRAP = "if(--loopTrap == 0) throw \"Ciclo infinito\";\n";
+javascriptGenerator.addReservedWords("highlightBlock,loopTrap");
 
 class Executor {
   private readonly workspace: WorkspaceSvg;
@@ -21,6 +22,10 @@ class Executor {
   private started = false;
   private exited = false;
 
+  private readonly MAX_OUTPUT_LENGTH = 2000;
+  private readonly MAX_OUTPUT_LINES = 100;
+  private readonly MAX_LOOP_ITERATIONS = 1000;
+
   private initInterpreter = () => (interpreter: Interpreter, globalObject: any) => {
     interpreter.setProperty(
       globalObject,
@@ -30,6 +35,8 @@ class Executor {
         this.stepFinished = true;
       }),
     );
+
+    interpreter.setProperty(globalObject, "loopTrap", this.MAX_LOOP_ITERATIONS);
 
     interpreter.setProperty(
       globalObject,
@@ -98,6 +105,24 @@ class Executor {
       this.stepFinished = false;
       try {
         this.exited = !this.interpreter.step() || this.exited;
+
+        let length = 0;
+        let lines = 0;
+        this.setOutput((prev) => {
+          length = prev.length;
+          if (length > this.MAX_OUTPUT_LENGTH) {
+            return prev.slice(0, this.MAX_OUTPUT_LENGTH) + "...\n";
+          }
+          lines = prev.split("\n").length;
+          if (lines > this.MAX_OUTPUT_LINES) {
+            return prev.split("\n").slice(0, this.MAX_OUTPUT_LINES).join("\n") + "\n";
+          }
+          return prev;
+        });
+
+        if (length > this.MAX_OUTPUT_LENGTH || lines > this.MAX_OUTPUT_LINES) {
+          throw "L'output è troppo lungo";
+        }
       } catch (e) {
         this.setOutput((prev) => `${prev}===== Errore ========\n${e}\n`);
         this.exited = true;

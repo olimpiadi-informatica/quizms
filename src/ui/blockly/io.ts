@@ -15,7 +15,7 @@ export class Input {
 
   public readInt = (): number => {
     if (this.index >= this.tokens.length) {
-      throw new Error("Non ci sono abbastanza numeri in input");
+      throw "Non ci sono abbastanza numeri in input";
     }
     return parseInt(this.tokens[this.index++]);
   };

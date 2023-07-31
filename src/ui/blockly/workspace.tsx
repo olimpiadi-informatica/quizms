@@ -177,6 +177,7 @@ export default function Workspace({ initialBlocks, example, debug }: BlocklyProp
             rows={4}
             className="textarea textarea-bordered w-full grow resize-none font-mono placeholder:font-sans"
             placeholder="Input"
+            maxLength={2000}
             value={input}
             onChange={onInputChange}
           />
