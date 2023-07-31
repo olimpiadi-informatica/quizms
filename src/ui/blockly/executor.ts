@@ -18,6 +18,7 @@ class Executor {
   private interpreter: Interpreter;
   private timerId: ReturnType<typeof setInterval> | undefined;
   private stepFinished = false;
+  private started = false;
   private exited = false;
 
   private initInterpreter = () => (interpreter: Interpreter, globalObject: any) => {
@@ -75,6 +76,7 @@ class Executor {
 
   public setInput = (input: string) => {
     this.input = input;
+    if (!this.started) this.reset();
   };
 
   public run = () => {
@@ -91,6 +93,7 @@ class Executor {
 
   public step = () => {
     if (this.exited) return;
+    this.started = true;
     do {
       this.stepFinished = false;
       try {
@@ -117,6 +120,7 @@ class Executor {
     this.interpreter = new Interpreter(this.code, this.initInterpreter());
     this.setOutput("");
     this.stepFinished = false;
+    this.started = false;
     this.exited = false;
     this.setExited(false);
     this.workspace.highlightBlock(null);
