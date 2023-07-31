@@ -6,7 +6,7 @@
 @tailwind utilities;
 
 body {
-  @apply min-w-[320px] overflow-x-hidden;
+  @apply min-w-[360px];
 }
 
 img {
@@ -33,4 +33,15 @@ img {
 
 .blocklyHtmlInput {
   @apply bg-white;
+}
+
+@media not screen(sm) {
+  .blocklyToolboxDiv {
+    @apply w-10;
+  }
+
+  .blocklyToolboxCategory .blocklyTreeRow {
+    @apply border-l-[20px] !important;
+    @apply indent-96;
+  }
 }
