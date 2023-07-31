@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 
 import { DisableTopBlocks } from "@blockly/disable-top-blocks";
 import { default as BlocklyCore, BlocklyOptions, WorkspaceSvg } from "blockly";
@@ -6,16 +6,7 @@ import { javascriptGenerator } from "blockly/javascript";
 import locale from "blockly/msg/it";
 import classNames from "classnames";
 import { BlocklyWorkspace } from "react-blockly";
-import {
-  ArrowDown,
-  ArrowRight,
-  FastForward,
-  Pause,
-  Play,
-  RotateCcw,
-  Send,
-  SkipForward,
-} from "react-feather";
+import { ArrowDown, FastForward, Pause, Play, RotateCcw, Send, SkipForward } from "react-feather";
 
 import "./blocks";
 import useExecutor from "./executor";
@@ -67,7 +58,7 @@ export default function Workspace({ initialBlocks, example, debug }: BlocklyProp
       }
       return !old;
     });
-  }, [executor, terminated, onReset]);
+  }, [executor]);
 
   const onInputChange = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
