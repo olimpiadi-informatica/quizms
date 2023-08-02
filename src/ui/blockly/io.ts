@@ -40,11 +40,3 @@ export class Output {
     }
   };
 }
-
-export class Rng {
-  constructor(seed: number) {}
-
-  randint = (min: number, max: number): number => {
-    return 42;
-  };
-}

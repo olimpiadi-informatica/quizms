@@ -88,6 +88,7 @@
     "mini-svg-data-uri": "^1.4",
     "pretty-bytes": "^6.1.1",
     "prop-types": "^15.8",
+    "pure-rand": "^6.0.2",
     "react-blockly": "^7.2",
     "react-feather": "^2.0",
     "react-katex": "^3.0",
