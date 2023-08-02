@@ -7,9 +7,10 @@ import configs from "./configs";
 
 export type DevOptions = {
   dir?: string;
+  port: number;
 };
 
-export default async function devServer(options?: DevOptions) {
+export default async function devServer(options: DevOptions) {
   const root = join(cwd(), options?.dir ?? ".");
 
   const server = await createServer({
@@ -17,7 +18,7 @@ export default async function devServer(options?: DevOptions) {
     root,
     mode: "development",
     server: {
-      port: 1234,
+      port: options.port,
     },
   });
   await server.listen();

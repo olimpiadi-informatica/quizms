@@ -7,10 +7,15 @@ import configs from "./configs";
 
 export type BundleOptions = {
   dir?: string;
+  variant?: string;
 };
 
-export default async function bundle(options?: BundleOptions): Promise<void> {
+export default async function bundle(options: BundleOptions): Promise<void> {
   const root = join(cwd(), options?.dir ?? ".");
+
+  if (options?.variant) {
+    process.env.QUIZMS_VARIANT = options.variant;
+  }
 
   const variant = process.env.QUIZMS_VARIANT?.padStart(5, "0") ?? "default";
 
