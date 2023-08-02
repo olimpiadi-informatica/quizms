@@ -46,7 +46,7 @@ function parseMultipleAnswerGroup(tree: Root) {
       attributes: [],
       children: list.children.map((child, index): MdxJsxFlowElement => {
         const attr =
-          process.env.QUIZMS_INCLUDE_SOLUTIONS === "true" &&
+          (process.env.NODE_ENV === "development" || process.env.QUIZMS_MODE === "training") &&
           jsxAttribute("correct", index === correct);
 
         return {
@@ -70,7 +70,8 @@ function parseOpenAnswerGroup(tree: Root) {
 
     const attributes = _.compact([
       jsxAttribute("type", /^\d+$/.test(value) ? "number" : "text"),
-      process.env.QUIZMS_INCLUDE_SOLUTIONS === "true" && jsxAttribute("correct", value),
+      (process.env.NODE_ENV === "development" || process.env.QUIZMS_MODE === "training") &&
+        jsxAttribute("correct", value),
     ]);
 
     parent!.children[index!] = {
@@ -91,7 +92,7 @@ function parseOpenAnswerGroup(tree: Root) {
 
 function parseExplanation(tree: Root) {
   visit(tree, "blockquote", (blockquote: Blockquote, index, parent) => {
-    if (process.env.QUIZMS_INCLUDE_SOLUTIONS === "true") {
+    if (process.env.NODE_ENV === "development" || process.env.QUIZMS_MODE === "training") {
       parent!.children[index!] = {
         type: "mdxJsxFlowElement",
         name: "Explanation",
