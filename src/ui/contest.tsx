@@ -80,7 +80,7 @@ export function Contest({ randomizeProblemOrder, randomizeAnswerOrder, children 
         randomizeAnswerOrder: randomizeAnswerOrder ?? false,
         registerProblem,
       }}>
-      <div className="contest">
+      <div className="contest break-before-page">
         <main>{children}</main>
         <StickyFooter progress={progress} />
       </div>

@@ -99,7 +99,7 @@ export default function Workspace({ initialBlocks, example, debug }: BlocklyProp
   }, [terminated, pause, onPlayPause]);
 
   return (
-    <div className="relative inset-y-0 left-1/2 mb-5 w-screen -translate-x-1/2 px-4 sm:px-8">
+    <div className="relative inset-y-0 left-1/2 mb-5 w-screen -translate-x-1/2 overflow-x-hidden px-4 sm:px-8">
       <div className="grid gap-3 md:grid-cols-[1fr_auto] lg:grid-rows-[auto_1fr] xl:grid-cols-[2fr_1fr]">
         <div className="flex gap-3 md:flex-col lg:flex-row">
           <div className="join md:join-vertical lg:join-horizontal">
