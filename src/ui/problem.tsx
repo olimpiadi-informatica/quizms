@@ -8,7 +8,7 @@ import React, {
 } from "react";
 
 import _ from "lodash";
-import Katex from "react-katex";
+import { BlockMath, InlineMath } from "react-katex";
 
 import { useAuthentication } from "@/auth/provider";
 
@@ -93,8 +93,8 @@ type MathProps = {
 
 function Math({ display, children }: MathProps) {
   if (display) {
-    return <Katex.BlockMath math={children} />;
+    return <BlockMath math={children} />;
   } else {
-    return <Katex.InlineMath math={children} />;
+    return <InlineMath math={children} />;
   }
 }

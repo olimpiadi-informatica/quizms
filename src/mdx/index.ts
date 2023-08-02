@@ -39,4 +39,5 @@ export const mdxOptions: CompileOptions = {
   recmaPlugins,
   providerImportSource: "@mdx-js/react",
   format: "mdx",
+  mdxExtensions: [".md", ".mdx"],
 };

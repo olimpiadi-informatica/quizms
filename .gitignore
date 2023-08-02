@@ -130,6 +130,9 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
+# SWC
+.swc
+
 # IDEs and editors
 .idea
 .vscode
