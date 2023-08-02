@@ -8,9 +8,11 @@ import classNames from "classnames";
 import { BlocklyWorkspace } from "react-blockly";
 import { ArrowDown, FastForward, Pause, Play, RotateCcw, Send, SkipForward } from "react-feather";
 
+import { Rng } from "@/utils/random";
+
 import "./blocks";
 import useExecutor from "./executor";
-import { Input, Output, Rng } from "./io";
+import { Input, Output } from "./io";
 import toolboxConfiguration from "./toolbox.json";
 
 BlocklyCore.setLocale(locale);

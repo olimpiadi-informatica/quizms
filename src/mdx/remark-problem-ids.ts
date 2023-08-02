@@ -5,7 +5,7 @@ import "mdast-util-mdxjs-esm";
 import { Plugin } from "unified";
 import { visit } from "unist-util-visit";
 
-import { jsxAttribute } from "@/mdx/utils";
+import { jsxAttribute } from "./utils";
 
 const remarkProblemIds: Plugin<[], Root> = () => {
   return (tree: Root) => {
