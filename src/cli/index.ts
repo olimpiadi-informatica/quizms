@@ -1,126 +1,70 @@
-import fs from "node:fs/promises";
-import path from "node:path";
-import { argv, exit } from "node:process";
-import { promisify } from "node:util";
+import { env, exit } from "node:process";
 
-import { Config as SwcOptions } from "@swc/core";
-import "colors";
-import _ from "lodash";
-import TerserPlugin from "terser-webpack-plugin";
-import webpack, { Configuration as WebpackConfig } from "webpack";
+import arg from "arg";
 
-import { mdxOptions } from "@/mdx";
+import bundle from "./bundle";
 
-async function exists(path: string): Promise<boolean> {
-  return fs.access(path).then(_.stubTrue, _.stubFalse);
-}
+const USAGE = `Usage: quizms [options] <command>
 
-async function bundle(contestFile: string): Promise<void> {
-  console.log(`${"info".cyan}  - compiling ${contestFile}`);
+Commands:
+  bundle            Create a bundle from the contest file.
 
-  const swcOptions: SwcOptions = {
-    jsc: {
-      experimental: {
-        plugins: [],
-      },
+Options:
+  -h, --help        Show this help message and exit.`;
+
+const BUNDLE_USAGE = `Usage: quizms bundle [options] <contest-file>
+
+Options:
+  --variant         The seed representing the variant of the contest to bundle.
+                    If not specified, problems and answers are not randomized.`;
+
+function bundleMain(argv: string[]) {
+  const bundleArgs = arg(
+    {
+      "--variant": String,
     },
-  };
+    { argv },
+  );
 
-  const webpackConfig: WebpackConfig = {
-    entry: contestFile,
-    output: {
-      filename: "contest.bundle.js",
-      library: {
-        name: "quizmsContest",
-        type: "var",
-        export: "default",
-      },
-    },
-    mode: "production",
-    optimization: {
-      minimizer: [
-        new TerserPlugin({
-          extractComments: false,
-          terserOptions: {
-            format: {
-              comments: false,
-            },
-          },
-        }),
-      ],
-    },
-    module: {
-      rules: [
-        {
-          test: /\.mdx?$/,
-          use: [
-            { loader: "swc-loader", options: swcOptions },
-            { loader: "@mdx-js/loader", options: mdxOptions },
-          ],
-        },
-      ],
-    },
-    externals: ["quizms", "react"],
-    resolve: {
-      modules: ["node_modules"],
-    },
-  };
-
-  const jsconfigPath = path.resolve("jsconfig.json");
-  if (await exists(jsconfigPath)) {
-    const jsconfig = JSON.parse(await fs.readFile(jsconfigPath, "utf-8"));
-    if (jsconfig?.compilerOptions?.baseUrl) {
-      webpackConfig.resolve!.modules!.push(path.resolve(jsconfig.compilerOptions.baseUrl));
-    }
-  }
-
-  const nextConfigPath = path.resolve("next.config.js");
-  if (await exists(nextConfigPath)) {
-    const { nextConfig } = await import(nextConfigPath);
-
-    nextConfig?.webpack?.(webpackConfig, {
-      dev: false,
-      isServer: true,
-    });
-
-    if (nextConfig?.modularizeImports) {
-      swcOptions.jsc!.experimental!.plugins!.push([
-        "@swc/plugin-transform-imports",
-        nextConfig.modularizeImports,
-      ]);
-    }
-  }
-
-  const compiler = webpack(webpackConfig);
-  const stats = await promisify(compiler.run.bind(compiler))();
-  await promisify(compiler.close.bind(compiler))();
-
-  if (stats?.hasErrors()) {
-    const json = stats.toJson();
-    for (const error of json.errors!) {
-      console.log(`${"error".red} - ${error.message}`);
-    }
+  if (bundleArgs._.length !== 1) {
+    console.log(BUNDLE_USAGE);
     exit(1);
   }
 
-  if (stats?.hasWarnings()) {
-    const json = stats.toJson();
-    for (const warning of json.warnings!) {
-      console.log(`${"warn".yellow}  - ${warning.message}`);
-    }
+  if (bundleArgs["--variant"]) {
+    env.QUIZMS_VARIANT = bundleArgs["--variant"];
   }
 
-  console.log(`${"info".cyan}  - compilation completed.`);
+  void bundle(bundleArgs._[0]);
 }
 
-async function main() {
-  const contestFile = argv.at(2);
-  if (!contestFile) {
-    console.error("No contest file provided.");
+function main() {
+  const args = arg(
+    {
+      "--help": Boolean,
+      "-h": "--help",
+    },
+    {
+      stopAtPositional: true,
+    },
+  );
+
+  if (args["--help"]) {
+    console.log(USAGE);
+    exit(0);
+  }
+
+  if (args._.length === 0) {
+    console.log(USAGE);
     exit(1);
   }
 
-  await bundle(contestFile);
+  if (args._[0] === "bundle") {
+    bundleMain(args._.slice(1));
+  } else {
+    console.log(USAGE);
+    exit(1);
+  }
 }
 
-void main();
+main();

@@ -1,37 +1,36 @@
-import { Program, VariableDeclaration } from "estree";
+import "colors";
+import { ExpressionStatement, Program } from "estree";
 import { visit } from "estree-util-visit";
 import { Plugin } from "unified";
 
 const recmaVariants: Plugin<[], Program> = () => {
+  const variant = parseInt(process.env.QUIZMS_VARIANT ?? "");
+
   return (ast) => {
-    const variantsKeys: string[] = [];
+    let variantsFound = false;
+
     visit(ast, (node) => {
       if (
         node.type === "VariableDeclarator" &&
         node.id.type === "Identifier" &&
-        node.id.name === "variants" &&
-        node.init?.type === "ArrayExpression"
+        node.id.name === "variants"
       ) {
-        for (const element of node.init.elements) {
-          if (element?.type !== "ObjectExpression") continue;
-          for (const property of element.properties) {
-            if (property.type !== "Property") continue;
-            let key: string | undefined;
-            if (property.key.type === "Identifier") {
-              key = property.key.name;
-            } else if (property.key.type === "Literal" && typeof property.key.value === "string") {
-              key = property.key.value;
-            }
-            if (key && !variantsKeys.includes(key)) variantsKeys.push(key);
-          }
+        if (node.init?.type !== "ArrayExpression") {
+          throw new Error(
+            `invalid problem variants: variable's type must be an array, \`${node.init?.type}\` is not an array`,
+          );
+        }
+        variantsFound = true;
+        if (variant >= 0 && variant < node.init.elements.length) {
+          node.init.elements = node.init.elements.slice(variant, variant + 1);
         }
       }
       if (
         node.type === "FunctionDeclaration" &&
         node.id?.name === "_createMdxContent" &&
-        variantsKeys.length > 0
+        variantsFound
       ) {
-        node.body.body.unshift(buildDeclaration(variantsKeys));
+        node.body.body.unshift(buildDeclaration());
       }
     });
   };
@@ -39,43 +38,37 @@ const recmaVariants: Plugin<[], Program> = () => {
 
 export default recmaVariants;
 
-function buildDeclaration(keys: string[]): VariableDeclaration {
+function buildDeclaration(): ExpressionStatement {
   return {
-    type: "VariableDeclaration",
-    kind: "const",
-    declarations: [
-      {
-        type: "VariableDeclarator",
-        id: {
-          type: "ObjectPattern",
-          properties: keys.map((name) => ({
-            type: "Property",
-            kind: "init",
-            method: false,
-            shorthand: true,
-            computed: false,
-            key: {
-              type: "Identifier",
-              name,
-            },
-            value: {
-              type: "Identifier",
-              name,
-            },
-          })),
+    type: "ExpressionStatement",
+    expression: {
+      type: "CallExpression",
+      callee: {
+        type: "MemberExpression",
+        object: {
+          type: "Identifier",
+          name: "Object",
         },
-        init: {
+        property: {
+          type: "Identifier",
+          name: "assign",
+        },
+        computed: false,
+        optional: false,
+      },
+      arguments: [
+        {
+          type: "Identifier",
+          name: "globalThis",
+        },
+        {
           type: "MemberExpression",
-          computed: true,
-          optional: false,
           object: {
             type: "Identifier",
             name: "variants",
           },
           property: {
             type: "MemberExpression",
-            computed: false,
-            optional: false,
             object: {
               type: "Identifier",
               name: "props",
@@ -84,9 +77,14 @@ function buildDeclaration(keys: string[]): VariableDeclaration {
               type: "Identifier",
               name: "variant",
             },
+            computed: false,
+            optional: false,
           },
+          computed: true,
+          optional: false,
         },
-      },
-    ],
+      ],
+      optional: false,
+    },
   };
 }
