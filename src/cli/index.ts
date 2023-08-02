@@ -30,7 +30,7 @@ function bundleMain(argv: string[]) {
     { argv },
   );
 
-  if (bundleArgs._.length !== 1) {
+  if (bundleArgs._.length > 1) {
     console.log(BUNDLE_USAGE);
     exit(1);
   }
@@ -39,7 +39,7 @@ function bundleMain(argv: string[]) {
     env.QUIZMS_VARIANT = bundleArgs["--variant"];
   }
 
-  void bundle(bundleArgs._[0]);
+  void bundle({ dir: bundleArgs._[0] });
 }
 
 function devMain(argv: string[]) {
