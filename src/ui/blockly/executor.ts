@@ -7,7 +7,7 @@ import Interpreter from "js-interpreter";
 import { Input, Output } from "./io";
 
 javascriptGenerator.STATEMENT_PREFIX = "highlightBlock(%1);\n";
-javascriptGenerator.INFINITE_LOOP_TRAP = "if(--loopTrap == 0) throw \"Ciclo infinito\";\n";
+javascriptGenerator.INFINITE_LOOP_TRAP = 'if(--loopTrap == 0) throw "Ciclo infinito";\n';
 javascriptGenerator.addReservedWords("highlightBlock,loopTrap");
 
 class Executor {

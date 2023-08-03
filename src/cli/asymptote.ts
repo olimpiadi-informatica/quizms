@@ -21,8 +21,6 @@ export default function asymptote(): Plugin {
     async transform(value, asyPath): Promise<TransformResult> {
       if (path.extname(asyPath) !== ".asy") return;
 
-      this.info(`compiling ${asyPath}...`); // TODO: relative path
-
       const matches = value.matchAll(/^(?:access|from|import|include)\s+("[^"]+"|\S+)/gm);
       for (const match of matches) {
         const file = path.format({
