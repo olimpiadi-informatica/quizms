@@ -3,7 +3,7 @@ import { cwd } from "node:process";
 
 import { createServer } from "vite";
 
-import configs from "./configs";
+import configs from "./vite/configs";
 
 export type DevOptions = {
   dir?: string;

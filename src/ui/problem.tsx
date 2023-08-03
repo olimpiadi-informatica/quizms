@@ -10,9 +10,8 @@ import React, {
 import _ from "lodash";
 import { BlockMath, InlineMath } from "react-katex";
 
-import { useAuthentication } from "@/auth/provider";
-
 import { Answer, AnswerGroup, Explanation, OpenAnswer } from "./answers";
+import { useAuthentication } from "./auth/provider";
 import Blockly from "./blockly/workspace";
 import { useContest } from "./contest";
 import { useSection } from "./section";

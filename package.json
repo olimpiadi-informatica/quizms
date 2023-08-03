@@ -26,7 +26,7 @@
       "optimize": true
     },
     "main": {
-      "source": "src/index.ts",
+      "source": "src/ui/index.ts",
       "context": "browser",
       "outputFormat": "esmodule",
       "isLibrary": true,
@@ -130,7 +130,7 @@
       "^(react|react-dom)(/|$)",
       "<THIRD_PARTY_MODULES>",
       "^(@|~)/",
-      "^./",
+      "^..?/",
       "\\.css$"
     ],
     "importOrderSeparation": true,

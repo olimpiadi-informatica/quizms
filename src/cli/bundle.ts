@@ -3,7 +3,7 @@ import { cwd } from "node:process";
 
 import { build } from "vite";
 
-import configs from "./configs";
+import configs from "./vite/configs";
 
 export type BundleOptions = {
   dir?: string;

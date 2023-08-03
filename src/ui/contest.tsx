@@ -13,10 +13,10 @@ import React, {
 
 import _ from "lodash";
 
-import { useAuthentication } from "@/auth/provider";
-import Modal from "@/ui/components/modal";
-import Progress from "@/ui/components/progress";
-import Timer from "@/ui/components/timer";
+import { useAuthentication } from "./auth/provider";
+import Modal from "./components/modal";
+import Progress from "./components/progress";
+import Timer from "./components/timer";
 
 type Problem = {
   id: string;

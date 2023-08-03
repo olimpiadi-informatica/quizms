@@ -17,7 +17,7 @@ function tmpfile(ext: string) {
 
 export default function asymptote(): Plugin {
   return {
-    name: "rollup-plugin-asymptote",
+    name: "asymptote",
     async transform(value, asyPath): Promise<TransformResult> {
       if (path.extname(asyPath) !== ".asy") return;
 

@@ -1,8 +1,9 @@
 import React, { ComponentType, useCallback, useEffect, useState } from "react";
 
-import { NoAuth } from "@/auth";
 import * as quizms from "@/ui";
-import Progress from "@/ui/components/progress";
+
+import Progress from "../components/progress";
+import { NoAuth } from "./noAuth";
 
 type AuthProps = {
   header: ComponentType;
@@ -23,7 +24,7 @@ export function TokenAuth({ header }: AuthProps) {
 
   useEffect(() => {
     void init();
-  }, []);
+  }, [init]);
 
   return <NoAuth header={header}>{Content ? <Content /> : <Loading />}</NoAuth>;
 }

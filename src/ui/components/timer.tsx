@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import dayjs, { Dayjs } from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime.js";
 
-import Progress from "@/ui/components/progress";
+import Progress from "./progress";
 
 dayjs.extend(relativeTime);
 

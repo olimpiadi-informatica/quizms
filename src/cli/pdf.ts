@@ -4,7 +4,7 @@ import { cwd } from "node:process";
 import { chromium } from "playwright";
 import { createServer } from "vite";
 
-import configs from "./configs";
+import configs from "./vite/configs";
 
 export type PdfOptions = {
   dir?: string;

@@ -2,8 +2,8 @@ import React, { ReactNode, useEffect, useId } from "react";
 
 import classNames from "classnames";
 
-import { useAnswer, useAuthentication } from "@/auth/provider";
-import { useProblem } from "@/ui/problem";
+import { useAnswer, useAuthentication } from "./auth/provider";
+import { useProblem } from "./problem";
 
 type AnswerGroupProps = {
   children: ReactNode;
