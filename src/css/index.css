@@ -45,3 +45,7 @@ img {
     @apply indent-96;
   }
 }
+
+@page {
+  margin: 16px;
+}

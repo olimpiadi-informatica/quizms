@@ -2,6 +2,7 @@ import { InvalidArgumentError, program } from "commander";
 
 import bundle from "./bundle";
 import devServer from "./dev";
+import pdf from "./pdf";
 
 function safeParseInt(value: string): number {
   const parsedValue = parseInt(value);
@@ -25,6 +26,14 @@ function main() {
     .argument("[directory]", "The directory of the contest.")
     .option("-p, --port <port>", "The port to use for the server.", safeParseInt, 1234)
     .action((dir, options) => void devServer({ dir, ...options }));
+
+  program
+    .command("pdf")
+    .description("Create a PDF of the contest.")
+    .argument("[directory]", "The directory of the contest.")
+    .option("-d, --outDir <directory>", "The directory to output the PDF.", "pdf")
+    .option("-v, --variant <variant>", "The seed used to generate the variant of the contest.")
+    .action((dir, options) => void pdf({ dir, ...options }));
 
   program.parse();
 }

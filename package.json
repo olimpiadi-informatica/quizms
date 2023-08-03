@@ -70,6 +70,7 @@
     "lodash": "^4.17",
     "mdast-util-mdxjs-esm": "^2.0",
     "mini-svg-data-uri": "^1.4",
+    "playwright": "^1.36",
     "prop-types": "^15.8",
     "pure-rand": "^6.0",
     "react-blockly": "^8.0",
