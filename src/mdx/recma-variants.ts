@@ -1,4 +1,3 @@
-import "colors";
 import { ExpressionStatement, Program } from "estree";
 import { visit } from "estree-util-visit";
 import { Plugin } from "unified";
