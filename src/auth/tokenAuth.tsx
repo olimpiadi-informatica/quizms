@@ -1,33 +1,37 @@
-import React, { ComponentType, useEffect, useState } from "react";
+import React, { ComponentType, useCallback, useEffect, useState } from "react";
 
 import { NoAuth } from "@/auth";
 import * as quizms from "@/ui";
+import Progress from "@/ui/components/progress";
 
 type AuthProps = {
-  header: ComponentType<Record<any, never>>;
+  header: ComponentType;
 };
 
 export function TokenAuth({ header }: AuthProps) {
-  const [Contest, setContest] = useState<ComponentType>(Loading);
+  const [Content, setContent] = useState<ComponentType>();
 
-  const init = async () => {
-    const res = await fetch("/contest.bundle.js");
-    const text = await res.text();
-    const fn = new Function("quizms", "react", `${text}\nreturn quizmsContest;`);
-    setContest(() => fn(quizms, React));
-  };
+  const init = useCallback(async () => {
+    const res = await fetch("/bundle/contest-default.iife.js");
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+
+    Object.assign(globalThis, { quizms, React });
+    const { default: Contest } = await import(/* @vite-ignore */ url);
+    setContent(() => Contest);
+  }, []);
 
   useEffect(() => {
     void init();
   }, []);
 
-  return (
-    <NoAuth header={header}>
-      <Contest />
-    </NoAuth>
-  );
+  return <NoAuth header={header}>{Content ? <Content /> : <Loading />}</NoAuth>;
 }
 
 function Loading() {
-  return <p className="m-4">Caricamento in corso...</p>;
+  return (
+    <div className="m-auto h-32 w-64">
+      <Progress>Caricamento in corso...</Progress>
+    </div>
+  );
 }

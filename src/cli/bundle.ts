@@ -11,19 +11,20 @@ export type BundleOptions = {
 };
 
 export default async function bundle(options: BundleOptions): Promise<void> {
-  const root = join(cwd(), options?.dir ?? ".");
+  const root = join(cwd(), options.dir ?? ".");
 
-  if (options?.variant) {
+  if (options.variant) {
     process.env.QUIZMS_VARIANT = options.variant;
   }
 
-  const variant = process.env.QUIZMS_VARIANT?.padStart(5, "0") ?? "default";
+  const variant = options.variant?.padStart(5, "0") ?? "default";
 
   await build({
-    ...configs,
+    ...configs("production"),
     root,
-    mode: "production",
     build: {
+      copyPublicDir: false,
+      outDir: "bundle",
       lib: {
         entry: "contest/contest.mdx",
         name: "Contest",
@@ -32,6 +33,13 @@ export default async function bundle(options: BundleOptions): Promise<void> {
       },
       rollupOptions: {
         external: ["quizms", "react"],
+        output: {
+          footer: "export default Contest;",
+          globals: {
+            quizms: "quizms",
+            react: "React",
+          },
+        },
       },
     },
   });
