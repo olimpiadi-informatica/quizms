@@ -63,6 +63,7 @@ export function Answer({ id, correct, children }: AnswerProps) {
         type="radio"
         disabled={terminated}
       />
+      <div className="my-auto w-8 screen:hidden">{id})</div>
       <label htmlFor={answerId} className="grow">
         {children}
       </label>
