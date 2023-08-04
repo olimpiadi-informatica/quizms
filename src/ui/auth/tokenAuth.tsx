@@ -1,4 +1,6 @@
-import React, { ComponentType, useCallback, useEffect, useState } from "react";
+import React, { ComponentType } from "react";
+
+import useSWR from "swr/immutable";
 
 import * as quizms from "@/ui";
 
@@ -9,30 +11,33 @@ type AuthProps = {
   header: ComponentType;
 };
 
-export function TokenAuth({ header }: AuthProps) {
-  const [Content, setContent] = useState<ComponentType>();
+async function fetcher(variant: string) {
+  const res = await fetch(`/bundle/contest-${variant}.iife.js`);
+  if (!res.ok) throw new Error(res.statusText);
 
-  const init = useCallback(async () => {
-    const res = await fetch("/bundle/contest-default.iife.js");
-    const blob = await res.blob();
-    const url = URL.createObjectURL(blob);
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
 
-    Object.assign(globalThis, { quizms, React });
-    const { default: Contest } = await import(/* @vite-ignore */ url);
-    setContent(() => Contest);
-  }, []);
+  Object.assign(globalThis, { quizms, React });
+  const { default: Contest } = await import(/* @vite-ignore */ url);
 
-  useEffect(() => {
-    void init();
-  }, [init]);
-
-  return <NoAuth header={header}>{Content ? <Content /> : <Loading />}</NoAuth>;
+  return Contest;
 }
 
-function Loading() {
+export function TokenAuth({ header }: AuthProps) {
+  const { data: Contest, error, isLoading } = useSWR("default", fetcher);
+
   return (
-    <div className="m-auto h-32 w-64">
-      <Progress>Caricamento in corso...</Progress>
-    </div>
+    <NoAuth header={header}>
+      {isLoading ? (
+        <div className="m-auto h-32 w-64">
+          <Progress>Caricamento in corso...</Progress>
+        </div>
+      ) : error ? (
+        <div>Errore: {error}</div>
+      ) : (
+        <Contest />
+      )}
+    </NoAuth>
   );
 }

@@ -84,6 +84,7 @@
     "remark-mdx-math-enhanced": "=0.0.1-beta.3",
     "remark-smartypants": "^2.0",
     "rollup": "^3.27",
+    "swr": "^2.2",
     "unified": "^10.1",
     "unist-util-visit": "^5.0",
     "utf-8-validate": "^6.0",
@@ -91,8 +92,8 @@
     "zod": "^3.21"
   },
   "peerDependencies": {
-    "react": ">=18",
-    "react-dom": ">=18"
+    "react": "^18",
+    "react-dom": "^18"
   },
   "devDependencies": {
     "@parcel/transformer-less": "=2.7.0",
