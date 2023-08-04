@@ -7,6 +7,7 @@ import configs from "./vite/configs";
 
 export type BundleOptions = {
   dir?: string;
+  outDir?: string;
   variant?: string;
 };
 
@@ -24,7 +25,7 @@ export default async function bundle(options: BundleOptions): Promise<void> {
     root,
     build: {
       copyPublicDir: false,
-      outDir: "bundle",
+      outDir: options.outDir ?? "bundle",
       lib: {
         entry: "contest/contest.mdx",
         name: "Contest",
