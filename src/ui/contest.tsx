@@ -58,7 +58,7 @@ export function Contest({ randomizeProblemOrder, randomizeAnswerOrder, children 
   const progress = useMemo(() => {
     const total = _(problems).values().sumBy("points[0]");
     const user = _(problems)
-      .filter(({ id }) => id in answers)
+      .filter(({ id }) => answers[id] !== undefined)
       .sumBy("points[0]");
     return Math.round((user / total) * 100);
   }, [answers, problems]);

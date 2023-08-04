@@ -1,6 +1,7 @@
 import React, { ReactNode, useEffect, useId } from "react";
 
 import classNames from "classnames";
+import { Trash2 } from "react-feather";
 
 import { useAnswer, useAuthentication } from "./auth/provider";
 import { useProblem } from "./problem";
@@ -42,7 +43,7 @@ export function Answer({ id, correct, children }: AnswerProps) {
   return (
     <div
       className={classNames(
-        "answer my-1 flex rounded-lg pl-2 pr-1 hover:bg-base-300",
+        "answer relative my-1 flex rounded-lg pl-2 pr-1 hover:bg-base-300",
         terminated && {
           "border-2 border-success": correct === "true",
           "border-2 border-error": answer === id && correct === "false",
@@ -67,6 +68,17 @@ export function Answer({ id, correct, children }: AnswerProps) {
       <label htmlFor={answerId} className="grow">
         {children}
       </label>
+      <div className="absolute right-0 top-0 mr-1 flex h-full justify-center">
+        <button
+          className={classNames(
+            "btn btn-square btn-ghost btn-sm my-auto",
+            answer !== id && "hidden",
+          )}
+          type="button"
+          onClick={() => setAnswer(undefined)}>
+          <Trash2 size={20} />
+        </button>
+      </div>
     </div>
   );
 }
