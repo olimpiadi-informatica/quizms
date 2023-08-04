@@ -101,7 +101,7 @@ function NoAuthInner({ duration, children }: Omit<AuthProps, "header">) {
     );
   }
 
-  if (process.env.NODE_ENV !== "development" && !startTime) {
+  if (import.meta.env.PROD && !startTime) {
     return (
       <div className="flex h-screen justify-center">
         <div className="flex flex-col justify-center">

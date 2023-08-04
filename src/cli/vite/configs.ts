@@ -4,7 +4,7 @@ import url from "@rollup/plugin-url";
 import react from "@vitejs/plugin-react-swc";
 import { InlineConfig } from "vite";
 
-import { mdxOptions } from "@/mdx";
+import { mdxOptions } from "~/mdx";
 
 import asymptote from "./asymptote";
 

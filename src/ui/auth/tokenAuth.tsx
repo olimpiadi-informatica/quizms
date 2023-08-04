@@ -2,7 +2,7 @@ import React, { ComponentType } from "react";
 
 import useSWR from "swr/immutable";
 
-import * as quizms from "@/ui";
+import * as quizms from "~/ui";
 
 import Progress from "../components/progress";
 import { NoAuth } from "./noAuth";

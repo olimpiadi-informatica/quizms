@@ -6,6 +6,7 @@
     "declaration": true,
     "declarationDir": "dist",
     "jsx": "react",
+    "types": ["vite/client"],
     "strict": true,
     "noImplicitAny": true,
     "allowJs": true,
@@ -18,8 +19,7 @@
     "isolatedModules": true,
     "baseUrl": "./",
     "paths": {
-      "@/*": ["./src/*"],
-      "~/*": ["./*"]
+      "~/*": ["./src/*"]
     }
   },
   "include": ["src/"],

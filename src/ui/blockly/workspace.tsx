@@ -8,7 +8,7 @@ import classNames from "classnames";
 import { BlocklyWorkspace } from "react-blockly";
 import { ArrowDown, FastForward, Pause, Play, RotateCcw, Send, SkipForward } from "react-feather";
 
-import { Rng } from "@/utils/random";
+import { Rng } from "~/utils/random";
 
 import "./blocks";
 import useExecutor from "./executor";

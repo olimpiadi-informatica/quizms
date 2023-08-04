@@ -7,7 +7,7 @@ import { promisify } from "node:util";
 
 import _ from "lodash";
 import svgToMiniDataURI from "mini-svg-data-uri";
-import { Plugin, TransformResult } from "rollup";
+import { PluginOption } from "vite";
 
 const execFile = promisify(child_process.execFile);
 
@@ -15,10 +15,10 @@ function tmpfile(ext: string) {
   return path.format({ dir: tmpdir(), name: randomUUID(), ext });
 }
 
-export default function asymptote(): Plugin {
+export default function asymptote(): PluginOption {
   return {
     name: "asymptote",
-    async transform(value, asyPath): Promise<TransformResult> {
+    async transform(value, asyPath) {
       if (path.extname(asyPath) !== ".asy") return;
 
       const matches = value.matchAll(/^(?:access|from|import|include)\s+("[^"]+"|\S+)/gm);

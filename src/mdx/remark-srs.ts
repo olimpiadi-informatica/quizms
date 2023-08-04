@@ -7,13 +7,10 @@ import { Plugin } from "unified";
 import { visit } from "unist-util-visit";
 import z from "zod";
 
-import { format_code, format_snippet, initSync } from "@/pseudocode-interpreter/sc_int";
+import { format_code, format_snippet, initSync } from "~/pseudocode-interpreter/sc_int";
+import scIntWasm from "~/pseudocode-interpreter/sc_int_bg.wasm";
 
-initSync(
-  fs.readFileSync(
-    fileURLToPath(new URL("/src/pseudocode-interpreter/sc_int_bg.wasm", import.meta.url)),
-  ),
-);
+initSync(fs.readFileSync(fileURLToPath(new URL(scIntWasm as any, import.meta.url))));
 
 const contextMetadataSchema = z
   .object({
