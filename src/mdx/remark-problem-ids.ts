@@ -47,7 +47,7 @@ function parseSubProblems(tree: Root) {
       continue;
     }
 
-    if (contents[contents.length - 1]?.type !== "mdxJsxFlowElement") {
+    if (contents.at(-1)?.type !== "mdxJsxFlowElement") {
       const attr = subProblems > 1 && jsxAttribute("subId", id++);
       contents.push({
         type: "mdxJsxFlowElement",
@@ -56,7 +56,7 @@ function parseSubProblems(tree: Root) {
         children: [],
       } as MdxJsxFlowElement);
     }
-    (contents[contents.length - 1] as MdxJsxFlowElement).children.push(child);
+    (contents.at(-1)! as MdxJsxFlowElement).children.push(child);
   }
 
   tree.children = contents;
