@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from "react";
 
 import dayjs, { Dayjs } from "dayjs";
-import relativeTime from "dayjs/plugin/relativeTime.js";
+import relativeTime from "dayjs/plugin/relativeTime";
 
 import Progress from "./progress";
 
 dayjs.extend(relativeTime);
 
 type TimerProps = {
-  startTime: Dayjs;
-  endTime: Dayjs;
+  startTime?: Dayjs;
+  endTime?: Dayjs;
 };
 
 export default function Timer({ startTime, endTime }: TimerProps) {
@@ -25,6 +25,14 @@ export default function Timer({ startTime, endTime }: TimerProps) {
     }, 1000);
     return () => clearInterval(id);
   }, [endTime]);
+
+  if (!startTime || !endTime) {
+    return (
+      <Progress className="w-20">
+        <div className="font-mono">--:--</div>
+      </Progress>
+    );
+  }
 
   const duration = endTime.diff(startTime, "seconds");
   const timeLeft = Math.max(endTime.diff(currentTime, "seconds"), 0);

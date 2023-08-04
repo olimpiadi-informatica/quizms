@@ -9,6 +9,7 @@ import { NoAuth } from "./noAuth";
 
 type AuthProps = {
   header: ComponentType;
+  duration: object;
 };
 
 async function fetcher(variant: string) {
@@ -24,13 +25,13 @@ async function fetcher(variant: string) {
   return Contest;
 }
 
-export function TokenAuth({ header }: AuthProps) {
+export function TokenAuth({ header, duration }: AuthProps) {
   const { data: Contest, error, isLoading } = useSWR("default", fetcher);
 
   return (
-    <NoAuth header={header}>
+    <NoAuth header={header} duration={duration}>
       {isLoading ? (
-        <div className="m-auto h-32 w-64">
+        <div className="m-auto h-64 w-64">
           <Progress>Caricamento in corso...</Progress>
         </div>
       ) : error ? (

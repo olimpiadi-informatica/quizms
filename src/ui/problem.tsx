@@ -17,7 +17,7 @@ import { useContest } from "./contest";
 import { useSection } from "./section";
 
 type StatementProps = {
-  variant: number;
+  variant?: number;
   components: Record<string, ComponentType<any>>;
 };
 

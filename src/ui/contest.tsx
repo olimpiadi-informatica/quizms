@@ -161,7 +161,7 @@ type FooterProps = {
 
 function StickyFooter({ progress }: FooterProps) {
   const ref = useRef<HTMLDialogElement>(null);
-  const { startTime, endTime, terminated } = useAuthentication();
+  const { startTime, endTime, reset, terminated } = useAuthentication();
 
   return (
     <div className="sticky bottom-0 z-[100] border-t border-base-content print:hidden">
@@ -178,12 +178,18 @@ function StickyFooter({ progress }: FooterProps) {
             <span className="hidden xs:inline">Risposte date: </span>
             {progress}%
           </Progress>
-          <button
-            className="btn btn-success"
-            onClick={() => ref.current?.showModal()}
-            disabled={terminated}>
-            Termina
-          </button>
+          {terminated && reset ? (
+            <button className="btn btn-warning" onClick={reset}>
+              Ricomincia
+            </button>
+          ) : (
+            <button
+              className="btn btn-success"
+              onClick={() => ref.current?.showModal()}
+              disabled={terminated}>
+              Termina
+            </button>
+          )}
         </div>
       </div>
       <SubmitModal ref={ref} />
