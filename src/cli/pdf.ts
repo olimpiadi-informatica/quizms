@@ -1,5 +1,4 @@
 import { join } from "node:path";
-import { cwd } from "node:process";
 
 import { chromium } from "playwright";
 import { createServer } from "vite";
@@ -13,20 +12,18 @@ export type PdfOptions = {
 };
 
 export default async function pdf(options: PdfOptions) {
-  const root = join(cwd(), options.dir ?? ".");
-
   if (options.variant) {
     process.env.QUIZMS_VARIANT = options.variant;
   }
 
   const variant = options.variant?.padStart(5, "0") ?? "default";
-  const pdfPath = join(root, "pdf", `contest-${variant}.pdf`);
+  const pdfPath = join("pdf", `contest-${variant}.pdf`);
 
   process.env.QUIZMS_MODE = "pdf";
 
   const server = await createServer({
     ...configs("production"),
-    root,
+    root: options.dir,
   });
   await server.listen();
 
@@ -37,8 +34,9 @@ export default async function pdf(options: PdfOptions) {
   const page = await context.newPage();
 
   await page.goto(url, { waitUntil: "load" });
-
-  await new Promise((resolve) => setTimeout(resolve, 500));
+  for (const img of await page.getByRole("img").all()) {
+    await img.isVisible();
+  }
 
   await page.pdf({
     path: pdfPath,
