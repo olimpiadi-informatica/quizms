@@ -12,7 +12,7 @@ import { BlockMath, InlineMath } from "react-katex";
 
 import { Answer, AnswerGroup, Explanation, OpenAnswer } from "./answers";
 import { useAuthentication } from "./auth/provider";
-import Blockly from "./blockly/workspace";
+import Blockly from "./blockly/workspaceWrapper";
 import { useContest } from "./contest";
 import { useSection } from "./section";
 

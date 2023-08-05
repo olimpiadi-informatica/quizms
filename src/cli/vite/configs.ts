@@ -2,7 +2,7 @@ import mdx from "@mdx-js/rollup";
 import replace from "@rollup/plugin-replace";
 import url from "@rollup/plugin-url";
 import react from "@vitejs/plugin-react-swc";
-import { InlineConfig } from "vite";
+import { InlineConfig, splitVendorChunkPlugin } from "vite";
 
 import { mdxOptions } from "~/mdx";
 
@@ -39,6 +39,7 @@ export default function (mode: "development" | "production"): InlineConfig {
           "process.env.NODE_ENV": `"${mode}"`,
         },
       }),
+      splitVendorChunkPlugin(),
       url(),
     ],
   };

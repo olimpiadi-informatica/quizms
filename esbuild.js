@@ -31,6 +31,9 @@ const commonConfig = {
   format: "esm",
   sourcemap: true,
   logLevel: "info",
+  alias: {
+    "~": "./src",
+  },
 };
 
 /** @type {import("esbuild").BuildOptions} */
@@ -39,11 +42,8 @@ const uiConfig = {
   entryPoints: ["src/ui/index.ts"],
   packages: "external",
   platform: "browser",
-  outfile: "dist/index.js",
-  alias: {
-    "~": "./src",
-    vm: "vm-browserify",
-  },
+  splitting: true,
+  outdir: "dist",
 };
 
 /** @type {import("esbuild").BuildOptions} */
@@ -53,9 +53,6 @@ const cliConfig = {
   packages: "external",
   platform: "node",
   outfile: "dist/cli.js",
-  alias: {
-    "~": "./src",
-  },
   loader: {
     ".wasm": "file",
   },
