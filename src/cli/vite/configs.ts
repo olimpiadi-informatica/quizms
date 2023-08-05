@@ -26,6 +26,7 @@ export default function (mode: "development" | "production"): InlineConfig {
     resolve: {
       alias: {
         contest: "/contest",
+        vm: "vm-browserify",
       },
       extensions: [".js", ".jsx", ".ts", ".tsx", ".md", ".mdx"],
     },
