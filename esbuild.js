@@ -25,6 +25,27 @@ const cssPlugin = {
   },
 };
 
+/** @type {import("esbuild").Plugin} */
+const importPlugin = {
+  name: "import",
+  setup(build) {
+    build.initialOptions.write = false;
+
+    build.onEnd(async (result) => {
+      await Promise.all(
+        result.outputFiles.map(async (file) => {
+          if (file.path.endsWith(".js")) {
+            const text = file.text.replace(/\bimport\((\w+)\)/g, "import(/* @vite-ignore */ $1)");
+            const encoder = new TextEncoder();
+            file.contents = encoder.encode(text);
+          }
+          await fs.writeFile(file.path, file.contents);
+        }),
+      );
+    });
+  },
+};
+
 /** @type {import("esbuild").BuildOptions} */
 const commonConfig = {
   bundle: true,
@@ -44,6 +65,7 @@ const uiConfig = {
   platform: "browser",
   splitting: true,
   outdir: "dist",
+  plugins: [importPlugin],
 };
 
 /** @type {import("esbuild").BuildOptions} */
