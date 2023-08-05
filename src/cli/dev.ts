@@ -11,11 +11,9 @@ export type DevOptions = {
 };
 
 export default async function devServer(options: DevOptions) {
-  const root = join(cwd(), options.dir ?? ".");
-
   const server = await createServer({
     ...configs("development"),
-    root,
+    root: options.dir,
   });
   await server.listen(options.port);
 

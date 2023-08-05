@@ -12,8 +12,6 @@ export type BundleOptions = {
 };
 
 export default async function bundle(options: BundleOptions): Promise<void> {
-  const root = join(cwd(), options.dir ?? ".");
-
   if (options.variant) {
     process.env.QUIZMS_VARIANT = options.variant;
   }
@@ -22,10 +20,10 @@ export default async function bundle(options: BundleOptions): Promise<void> {
 
   await build({
     ...configs("production"),
-    root,
+    root: options.dir,
     build: {
       copyPublicDir: false,
-      outDir: options.outDir ?? "bundle",
+      outDir: options.outDir,
       lib: {
         entry: "contest/contest.mdx",
         name: "Contest",
