@@ -22,12 +22,16 @@ export default function (mode: "development" | "production"): InlineConfig {
   return {
     configFile: false,
     mode,
+    envPrefix: "QUIZMS_",
     resolve: {
       alias: {
         contest: "/contest",
         vm: "vm-browserify",
       },
       extensions: [".js", ".jsx", ".ts", ".tsx", ".md", ".mdx"],
+    },
+    define: {
+      "process.env.NODE_ENV": JSON.stringify(mode),
     },
     plugins: [
       asymptote(),

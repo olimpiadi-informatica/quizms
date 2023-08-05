@@ -22,6 +22,8 @@ export default async function pdf(options: PdfOptions) {
   const variant = options.variant?.padStart(5, "0") ?? "default";
   const pdfPath = join(root, "pdf", `contest-${variant}.pdf`);
 
+  process.env.QUIZMS_MODE = "pdf";
+
   const server = await createServer({
     ...configs("production"),
     root,

@@ -39,7 +39,7 @@ function NoAuthInner({ duration, children }: Omit<AuthProps, "header">) {
     [submitted],
   );
 
-  const [loaded, setLoaded] = useState(false);
+  const [loaded, setLoaded] = useState(import.meta.env.QUIZMS_MODE === "pdf");
   useEffect(() => {
     if (loaded) return;
 
@@ -101,7 +101,7 @@ function NoAuthInner({ duration, children }: Omit<AuthProps, "header">) {
     );
   }
 
-  if (import.meta.env.PROD && !startTime) {
+  if (!["pdf", "development"].includes(import.meta.env.QUIZMS_MODE) && !startTime) {
     return (
       <div className="flex h-screen justify-center">
         <div className="flex flex-col justify-center">

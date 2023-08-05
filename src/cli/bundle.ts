@@ -1,6 +1,3 @@
-import { join } from "node:path";
-import { cwd } from "node:process";
-
 import { build } from "vite";
 
 import configs from "./vite/configs";
@@ -15,6 +12,8 @@ export default async function bundle(options: BundleOptions): Promise<void> {
   if (options.variant) {
     process.env.QUIZMS_VARIANT = options.variant;
   }
+
+  process.env.QUIZMS_MODE = "contest";
 
   const variant = options.variant?.padStart(5, "0") ?? "default";
 
