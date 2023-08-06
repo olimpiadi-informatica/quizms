@@ -22,7 +22,7 @@ export const remarkPlugins: PluggableList = [
   remarkMath,
   remarkMdxFrontmatter,
   remarkMdxImages,
-  remarkMdxMathEnhancedPlugin,
+  [remarkMdxMathEnhancedPlugin, { component: "MathExpr" }],
   remarkProblemIds,
   [remarkSmartypants, { dashes: "oldschool" }],
   remarkSrs,

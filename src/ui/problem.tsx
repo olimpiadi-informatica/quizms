@@ -46,7 +46,15 @@ export function Problem({ id, points, statement: Statement }: ProblemProps) {
   return (
     <ProblemContext.Provider value={{ id, points, setCorrect: _.noop }}>
       <Statement
-        components={{ Math, SubProblem, AnswerGroup, Answer, OpenAnswer, Explanation, Blockly }}
+        components={{
+          MathExpr,
+          SubProblem,
+          AnswerGroup,
+          Answer,
+          OpenAnswer,
+          Explanation,
+          Blockly,
+        }}
         variant={variant}
       />
       <hr className="last:hidden" />
@@ -90,7 +98,7 @@ type MathProps = {
   children: string;
 };
 
-function Math({ display, children }: MathProps) {
+function MathExpr({ display, children }: MathProps) {
   if (display) {
     return <BlockMath math={children} />;
   } else {
