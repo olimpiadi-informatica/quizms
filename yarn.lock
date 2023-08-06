@@ -533,7 +533,7 @@
   dependencies:
     "@types/estree" "*"
 
-"@types/estree@*", "@types/estree@^1.0.0":
+"@types/estree@*", "@types/estree@^1.0.0", "@types/estree@^1.0.1":
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/@types/estree/-/estree-1.0.1.tgz#aa22750962f3bf0e79d753d3cc067f010c95f194"
   integrity sha512-LG4opVs2ANWZ1TJoKc937iMmNstM/d0ae1vNbnBvBhqCSezgVUOzcLCqbI5elV8Vy6WKwKjaqR+zO9VKirBBCA==
@@ -1460,6 +1460,14 @@ estraverse@^5.1.0, estraverse@^5.2.0, estraverse@^5.3.0:
   resolved "https://registry.yarnpkg.com/estraverse/-/estraverse-5.3.0.tgz#2eea5290702f26ab8fe5370370ff86c965d21123"
   integrity sha512-MMdARuVEQziNTeJD8DgMqmhwR11BRQ/cBP+pLtYdSTnf3MIO8fFeiINEbX36ZdNlfU/7A9f3gUw49B3oQsvwBA==
 
+estree-toolkit@^1.6:
+  version "1.6.3"
+  resolved "https://registry.yarnpkg.com/estree-toolkit/-/estree-toolkit-1.6.3.tgz#61849fe5cb4295aa170837ce7f58c3f2ee194e7b"
+  integrity sha512-WDwylzPF78dzjfpNIaVZtSlDaGuOzohqumOht7bUrZHptXMr9dpP4Ked9rf4M5kJwEa/amB2sRUI+zfFQv5bQw==
+  dependencies:
+    "@types/estree" "^1.0.1"
+    "@types/estree-jsx" "^1.0.0"
+
 estree-util-attach-comments@^2.0.0:
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/estree-util-attach-comments/-/estree-util-attach-comments-2.1.1.tgz#ee44f4ff6890ee7dfb3237ac7810154c94c63f84"
@@ -1498,7 +1506,7 @@ estree-util-value-to-estree@^2.0.0:
     "@types/estree" "^1.0.0"
     is-plain-obj "^4.0.0"
 
-estree-util-visit@=1.2.1, estree-util-visit@^1.0.0:
+estree-util-visit@^1.0.0:
   version "1.2.1"
   resolved "https://registry.yarnpkg.com/estree-util-visit/-/estree-util-visit-1.2.1.tgz#8bc2bc09f25b00827294703835aabee1cc9ec69d"
   integrity sha512-xbgqcrkIVbIG+lI/gzbvd9SGTJL4zqJKBFttUl5pP27KhAjtMKbX/mQXJ7qgyXpMgVy/zvpm0xoQQaGL8OloOw==
