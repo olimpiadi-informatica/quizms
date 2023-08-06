@@ -9,6 +9,7 @@ import remarkMdxMathEnhancedPlugin from "remark-mdx-math-enhanced";
 import remarkSmartypants from "remark-smartypants";
 import { PluggableList } from "unified";
 
+import recmaRemoveExports from "./recma-remove-exports";
 import recmaVariants from "./recma-variants";
 import rehypeFixWrap from "./rehype-fix-wrap";
 import remarkAnswers from "./remark-answers";
@@ -33,7 +34,7 @@ export const rehypePlugins: PluggableList = [
   [rehypeRaw, { passThrough: mdxNodeTypes }],
 ];
 
-export const recmaPlugins: PluggableList = [recmaVariants];
+export const recmaPlugins: PluggableList = [recmaRemoveExports, recmaVariants];
 
 export const mdxOptions: CompileOptions = {
   remarkPlugins,
