@@ -65,7 +65,11 @@ function injectLocalVariables(ast: Program) {
 
     Identifier(path) {
       const name = path.node!.name;
-      if (path.scope!.hasGlobalBinding(name) && !wellKnownGlobals.has(name)) {
+      if (
+        !path.scope!.hasBinding(name) &&
+        path.scope!.hasGlobalBinding(name) &&
+        !wellKnownGlobals.has(name)
+      ) {
         path.replaceWith(b.memberExpression(b.identifier("_v"), b.identifier(name))).skip();
       }
     },
