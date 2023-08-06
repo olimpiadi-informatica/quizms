@@ -1,5 +1,5 @@
 import _ from "lodash";
-import { Blockquote, List, Paragraph, Parent, Root, Text } from "mdast";
+import { Blockquote, List, Paragraph, Parent, Root } from "mdast";
 import { MdxJsxFlowElement } from "mdast-util-mdx-jsx";
 import * as process from "process";
 import { Plugin } from "unified";
@@ -19,26 +19,7 @@ export default remarkAnswers;
 
 function parseMultipleAnswerGroup(tree: Root) {
   visit(tree, { type: "list", ordered: false }, (list: List, index, parent: Parent) => {
-    const radios = list.children.map((child) => {
-      const paragraph = child.children[0];
-      if (paragraph?.type !== "paragraph") return null;
-      const text = paragraph.children[0];
-      if (text?.type !== "text" || !/^\((x|\s)\)/.test(text.value)) {
-        return null;
-      }
-      return text;
-    });
-
-    function isAnswerGroup(radios: (Text | null)[]): radios is Text[] {
-      return !radios.includes(null);
-    }
-
-    if (!isAnswerGroup(radios)) return;
-
-    const correct = radios.findIndex((radio) => radio.value.startsWith("(x)"));
-    for (const radio of radios) {
-      radio.value = radio.value.slice(4);
-    }
+    if (!_.some(list.children, "checked")) return;
 
     parent.children[index!] = {
       type: "mdxJsxFlowElement",
@@ -47,7 +28,7 @@ function parseMultipleAnswerGroup(tree: Root) {
       children: list.children.map((child, index): MdxJsxFlowElement => {
         const attr =
           (process.env.NODE_ENV === "development" || process.env.QUIZMS_MODE === "training") &&
-          jsxAttribute("correct", index === correct);
+          jsxAttribute("correct", child.checked);
 
         return {
           type: "mdxJsxFlowElement",

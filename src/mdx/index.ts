@@ -1,6 +1,7 @@
 import { CompileOptions, nodeTypes as mdxNodeTypes } from "@mdx-js/mdx";
 import rehypeRaw from "rehype-raw";
 import remarkFrontmatter from "remark-frontmatter";
+import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 import remarkMdxFrontmatter from "remark-mdx-frontmatter";
 import remarkMdxImages from "remark-mdx-images";
@@ -17,6 +18,7 @@ import remarkSrs from "./remark-srs";
 export const remarkPlugins: PluggableList = [
   remarkAnswers,
   remarkFrontmatter,
+  remarkGfm,
   remarkMath,
   remarkMdxFrontmatter,
   remarkMdxImages,
