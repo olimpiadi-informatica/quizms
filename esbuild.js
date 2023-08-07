@@ -4,8 +4,21 @@ import { argv } from "node:process";
 import { Command } from "commander";
 import { build, context } from "esbuild";
 import less from "less";
+import _ from "lodash";
 import postcss from "postcss";
 import tailwindcss from "tailwindcss";
+
+function merge(...objects) {
+  const result = {};
+  for (const object of objects) {
+    _.mergeWith(result, object, (a, b) => {
+      if (_.isArray(a)) {
+        return a.concat(b);
+      }
+    });
+  }
+  return result;
+}
 
 /** @type {import("esbuild").Plugin} */
 const cssPlugin = {
@@ -109,10 +122,22 @@ command
   .command("watch")
   .description("Watch for changes and rebuild")
   .action(async () => {
-    for (const config of [uiConfig, cliConfig, cssConfig]) {
-      const ctx = await context(config);
-      await ctx.watch();
-    }
+    const cliCtx = await context(cliConfig);
+    await cliCtx.watch();
+
+    const cssCtx = await context(cssConfig);
+    await cssCtx.watch();
+
+    /** @type {import("esbuild").Plugin} */
+    const watchPlugin = {
+      name: "watch",
+      setup(build) {
+        build.onEnd(() => void cssCtx.rebuild());
+      },
+    };
+
+    const uiCtx = await context(merge(uiConfig, { plugins: [watchPlugin] }));
+    await uiCtx.watch();
   });
 
 try {
