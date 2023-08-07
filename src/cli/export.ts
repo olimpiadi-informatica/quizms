@@ -25,6 +25,13 @@ export default async function staticExport(options: ExportOptions): Promise<void
     root: options.dir,
     build: {
       outDir: options.outDir,
+      rollupOptions: {
+        output: {
+          manualChunks: (id) => {
+            if (id.includes("node_modules/katex/")) return "katex";
+          },
+        },
+      },
     },
     logLevel: "info",
   });
