@@ -54,7 +54,12 @@ export default function asymptote(): PluginOption {
         await fs.unlink(svgFile);
       }
 
-      return `export default "${svgToMiniDataURI(svgData)}";`;
+      return {
+        code: `export default "${svgToMiniDataURI(svgData)}";`,
+        map: {
+          mappings: "",
+        },
+      };
     },
   };
 }
