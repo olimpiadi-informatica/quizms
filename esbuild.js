@@ -1,4 +1,5 @@
 import fs from "node:fs/promises";
+import { dirname } from "node:path";
 import { argv } from "node:process";
 
 import { Command } from "commander";
@@ -52,6 +53,7 @@ const importPlugin = {
             const encoder = new TextEncoder();
             file.contents = encoder.encode(text);
           }
+          await fs.mkdir(dirname(file.path), { recursive: true });
           await fs.writeFile(file.path, file.contents);
         }),
       );
