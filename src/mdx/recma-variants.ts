@@ -1,5 +1,6 @@
 import { Program } from "estree";
 import { builders as b, is, traverse } from "estree-toolkit";
+import _ from "lodash";
 import { Plugin } from "unified";
 
 const recmaVariants: Plugin<[], Program> = () => {
@@ -39,34 +40,49 @@ function findVariants(ast: Program) {
   return variantsFound;
 }
 
-const wellKnownGlobals = new Set(["String", "Object", "Error", "Math"]);
+const wellKnownGlobals = new Set(["console", "parseInt"]);
+
+function isGlobal(name: string) {
+  return name === _.upperFirst(name) || wellKnownGlobals.has(name);
+}
 
 function injectLocalVariables(ast: Program) {
+  let mdxScope = false;
+
   traverse(ast, {
     $: { scope: true },
 
-    FunctionDeclaration(path) {
-      const node = path.node!;
-      if (node.id?.name === "_createMdxContent") {
-        node.body.body.unshift(
-          b.variableDeclaration("const", [
-            b.variableDeclarator(
-              b.identifier("_v"),
-              b.memberExpression(
-                b.identifier("variants"),
-                b.memberExpression(b.identifier("props"), b.identifier("variant")),
-                true,
+    FunctionDeclaration: {
+      enter(path) {
+        mdxScope = true;
+
+        const node = path.node!;
+        if (node.id?.name === "_createMdxContent") {
+          node.body.body.unshift(
+            b.variableDeclaration("const", [
+              b.variableDeclarator(
+                b.identifier("_v"),
+                b.memberExpression(
+                  b.identifier("variants"),
+                  b.memberExpression(b.identifier("props"), b.identifier("variant")),
+                  true,
+                ),
               ),
-            ),
-          ]),
-        );
-      }
+            ]),
+          );
+        }
+      },
+      leave() {
+        mdxScope = false;
+      },
     },
 
     Identifier(path) {
+      if (!mdxScope || !is.expression(path.parent)) return;
+
       const name = path.node!.name;
       const scope = path.scope!;
-      if (!scope.hasBinding(name) && scope.hasGlobalBinding(name) && !wellKnownGlobals.has(name)) {
+      if (!scope.hasBinding(name) && scope.hasGlobalBinding(name) && !isGlobal(name)) {
         path.replaceWith(b.memberExpression(b.identifier("_v"), b.identifier(name))).skip();
       }
     },
