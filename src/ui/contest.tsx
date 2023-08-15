@@ -166,7 +166,7 @@ function StickyFooter({ progress }: FooterProps) {
   return (
     <div className="sticky bottom-0 z-[100] border-t border-base-content print:hidden">
       <div className="relative">
-        <div className="absolute inset-y-0 left-1/2 -z-10 w-screen -translate-x-1/2 bg-base-100" />
+        <div className="absolute inset-y-0 left-1/2 -z-10 w-[max(calc(100vw-2rem),360px)] -translate-x-1/2 bg-base-100" />
         <div className="flex justify-between p-3">
           {terminated && (
             <Progress className="w-20" percentage={100}>
