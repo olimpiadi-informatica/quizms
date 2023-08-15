@@ -42,9 +42,12 @@ export default async function staticExport(options: ExportOptions): Promise<void
         output: {
           manualChunks: (id) => {
             if (id.includes("node_modules/katex/")) return "katex";
+            if (id.includes("node_modules/lodash/")) return "lodash";
           },
         },
       },
+      sourcemap: options.training,
+      chunkSizeWarningLimit: 1000,
     },
     logLevel: "info",
   });
