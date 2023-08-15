@@ -24,7 +24,7 @@ export function AnswerGroup({ children }: AnswerGroupProps) {
 
 type AnswerProps = {
   id: string;
-  correct?: "true" | "false";
+  correct?: boolean;
   children: ReactNode;
 };
 
@@ -35,7 +35,7 @@ export function Answer({ id, correct, children }: AnswerProps) {
   const answerId = useId();
 
   useEffect(() => {
-    if (correct === "true") {
+    if (correct === true) {
       setCorrect(id);
     }
   }, [correct, setCorrect, id]);
@@ -45,8 +45,8 @@ export function Answer({ id, correct, children }: AnswerProps) {
       className={classNames(
         "answer relative my-1 flex rounded-lg pl-2 pr-1 hover:bg-base-300",
         terminated && {
-          "border-2 border-success": correct === "true",
-          "border-2 border-error": answer === id && correct === "false",
+          "border-2 border-success": correct === true,
+          "border-2 border-error": answer === id && correct === false,
         },
       )}>
       <input
@@ -56,8 +56,8 @@ export function Answer({ id, correct, children }: AnswerProps) {
           "radio radio-sm my-auto mr-4 bg-base-100 disabled:opacity-90",
           terminated &&
             answer === id && {
-              "radio-success": correct === "true",
-              "radio-error": correct === "false",
+              "radio-success": correct === true,
+              "radio-error": correct === false,
             },
         )}
         onChange={(e) => setAnswer(e.target.checked ? id : undefined)}
@@ -72,7 +72,7 @@ export function Answer({ id, correct, children }: AnswerProps) {
         <button
           className={classNames(
             "btn btn-square btn-ghost btn-sm my-auto",
-            answer !== id && "hidden",
+            (answer !== id || terminated) && "hidden",
           )}
           type="button"
           onClick={() => setAnswer(undefined)}>
