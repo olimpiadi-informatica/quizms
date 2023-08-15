@@ -11,8 +11,8 @@ const swcPlugins: [string, Record<string, any>][] = [
   [
     "@swc/plugin-transform-imports",
     {
-      contest: {
-        transform: "contest/{{ kebabCase member }}/question",
+      problemset: {
+        transform: "./{{ kebabCase member }}/question",
       },
     },
   ],
@@ -25,7 +25,6 @@ export default function (mode: "development" | "production"): InlineConfig {
     envPrefix: "QUIZMS_",
     resolve: {
       alias: {
-        contest: "/contest",
         vm: "vm-browserify",
       },
       extensions: [".js", ".jsx", ".ts", ".tsx", ".md", ".mdx"],

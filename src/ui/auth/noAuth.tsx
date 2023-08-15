@@ -25,6 +25,8 @@ export function NoAuth({ header: Header, children, ...rest }: AuthProps) {
 }
 
 function NoAuthInner({ duration, children }: Omit<AuthProps, "header">) {
+  const path = window.location.pathname;
+
   const [submitted, setSubmitted] = useState(false);
   const [answers, setAnswers] = useState<Record<string, string | undefined>>({});
   const [startTime, setStartTime] = useState<Dayjs>();
@@ -43,23 +45,23 @@ function NoAuthInner({ duration, children }: Omit<AuthProps, "header">) {
   useEffect(() => {
     if (loaded) return;
 
-    const prevStartTime = localStorage.getItem("startTime");
+    const prevStartTime = localStorage.getItem(path + "#startTime");
     if (prevStartTime) {
       setStartTime(dayjs(prevStartTime));
     }
 
-    const prevAnswers = localStorage.getItem("answers");
+    const prevAnswers = localStorage.getItem(path + "#answers");
     if (prevAnswers) {
       setAnswers(JSON.parse(prevAnswers));
     }
 
-    const prevSubmit = localStorage.getItem("submit");
+    const prevSubmit = localStorage.getItem(path + "#submit");
     if (prevSubmit) {
       setSubmitted(true);
     }
 
     setLoaded(true);
-  }, [loaded]);
+  }, [path, loaded]);
 
   useEffect(() => {
     if (!endTime) return;
@@ -69,27 +71,27 @@ function NoAuthInner({ duration, children }: Omit<AuthProps, "header">) {
 
   useEffect(() => {
     if (!loaded) return;
-    localStorage.setItem("answers", JSON.stringify(answers));
-  }, [loaded, answers]);
+    localStorage.setItem(path + "#answers", JSON.stringify(answers));
+  }, [path, loaded, answers]);
 
   const onStart = useCallback(() => {
     setStartTime(dayjs());
-    localStorage.setItem("startTime", dayjs().toISOString());
-  }, []);
+    localStorage.setItem(path + "#startTime", dayjs().toISOString());
+  }, [path]);
 
   const submit = useCallback(() => {
-    localStorage.setItem("submit", "1");
+    localStorage.setItem(path + "#submit", "1");
     setSubmitted(true);
-  }, []);
+  }, [path]);
 
   const reset = useCallback(() => {
     setSubmitted(false);
     setAnswers({});
     setStartTime(undefined);
-    localStorage.removeItem("startTime");
-    localStorage.removeItem("answers");
-    localStorage.removeItem("submit");
-  }, []);
+    localStorage.removeItem(path + "#startTime");
+    localStorage.removeItem(path + "#answers");
+    localStorage.removeItem(path + "#submit");
+  }, [path]);
 
   if (!loaded) {
     return (

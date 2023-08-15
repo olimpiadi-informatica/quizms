@@ -1,3 +1,6 @@
+import { dirname } from "node:path";
+
+import glob from "fast-glob";
 import { build } from "vite";
 
 import configs from "./vite/configs";
@@ -20,12 +23,22 @@ export default async function staticExport(options: ExportOptions): Promise<void
     process.env.QUIZMS_VARIANT = options.variant;
   }
 
+  const pages = await glob("*/index.html", {
+    cwd: options.dir,
+    ignore: ["dist/**"],
+  });
+  const inputs = Object.fromEntries(pages.map((p) => [dirname(p), p]));
+
   await build({
     ...configs("production"),
     root: options.dir,
     build: {
       outDir: options.outDir,
       rollupOptions: {
+        input: {
+          index: "index.html",
+          ...inputs,
+        },
         output: {
           manualChunks: (id) => {
             if (id.includes("node_modules/katex/")) return "katex";
