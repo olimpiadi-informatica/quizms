@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto";
 import fs from "node:fs/promises";
 import { platform, tmpdir } from "node:os";
 import path from "node:path";
+import process from "node:process";
 import { promisify } from "node:util";
 
 import _ from "lodash";
@@ -15,55 +16,84 @@ function tmpfile(ext: string) {
   return path.format({ dir: tmpdir(), name: randomUUID(), ext });
 }
 
+async function findDependencies(asyPath: string) {
+  let imports = new Set<string>();
+  let newImports: string[] = [asyPath];
+
+  while (newImports.length > 0) {
+    const file = newImports.pop()!;
+    if (imports.has(file)) continue;
+    imports.add(file);
+
+    const content = await fs.readFile(file, { encoding: "utf8" });
+
+    const matches = content.matchAll(
+      /^(?:access|from|import|include)\s+(?:"([^\n"]+)"|([^\s"]+);)/gm,
+    );
+    for (const match of matches) {
+      const matchPath = match[1] ?? match[2];
+      const matchFile = path.format({
+        dir: path.join(path.dirname(file), path.dirname(matchPath)),
+        name: path.basename(matchPath, ".asy"),
+        ext: ".asy",
+      });
+
+      const exists = await fs.access(matchFile).then(_.stubTrue, _.stubFalse);
+      if (exists) newImports.push(matchFile);
+    }
+  }
+
+  imports.delete(asyPath);
+  return Array.from(imports);
+}
+
 export default function asymptote(): PluginOption {
+  let isBuild: boolean = false;
+
   return {
     name: "asymptote",
-    async transform(value, asyPath) {
+    configResolved({ command }) {
+      isBuild = command === "build";
+    },
+    async load(asyPath) {
       if (path.extname(asyPath) !== ".asy") return;
 
-      const matches = value.matchAll(/^(?:access|from|import|include)\s+("[^"]+"|\S+)/gm);
-      for (const match of matches) {
-        const file = path.format({
-          dir: path.dirname(asyPath),
-          name: path.basename(match[1], ".asy"),
-          ext: ".asy",
-        });
+      const svgFile = tmpfile("svg");
 
-        const exists = await fs.access(file).then(_.stubTrue, _.stubFalse);
-        if (exists) {
-          this.addWatchFile(file);
-        }
-      }
-
-      let svgData: string;
       if (platform() === "darwin") {
         const pdfFile = tmpfile("pdf");
         await execFile("asy", [asyPath, "-f", "pdf", "-o", pdfFile], {
           cwd: path.dirname(asyPath),
         });
 
-        const svgFile = tmpfile("svg");
         await execFile("pdf2svg", [pdfFile, svgFile]);
-        svgData = await fs.readFile(svgFile, { encoding: "utf8" });
-
         await fs.unlink(pdfFile);
-        await fs.unlink(svgFile);
       } else {
-        const svgFile = tmpfile("svg");
         await execFile("asy", [asyPath, "-f", "svg", "-o", svgFile], {
           cwd: path.dirname(asyPath),
         });
-        svgData = await fs.readFile(svgFile, { encoding: "utf8" });
-
-        await fs.unlink(svgFile);
       }
 
-      return {
-        code: `export default "${svgToMiniDataURI(svgData)}";`,
-        map: {
-          mappings: "",
-        },
-      };
+      const svgData = await fs.readFile(svgFile, { encoding: "utf-8" });
+      await fs.unlink(svgFile);
+
+      if (isBuild && process.env.QUIZMS_MODE !== "contest") {
+        const id = this.emitFile({
+          type: "asset",
+          name: path.basename(asyPath, ".asy") + ".svg",
+          source: svgData,
+          needsCodeReference: true,
+        });
+
+        return `export default import.meta.ROLLUP_FILE_URL_${id};`;
+      } else {
+        const imports = await findDependencies(asyPath);
+
+        return (
+          imports.map((f) => `import "${f}?url";\n`).join("") +
+          `export default "${svgToMiniDataURI(svgData)}";`
+        );
+      }
     },
   };
 }
