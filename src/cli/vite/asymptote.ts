@@ -38,7 +38,9 @@ export default function asymptote(): PluginOption {
       let svgData: string;
       if (platform() === "darwin") {
         const pdfFile = tmpfile("pdf");
-        await execFile("asy", [asyPath, "-f", "pdf", "-o", pdfFile]);
+        await execFile("asy", [asyPath, "-f", "pdf", "-o", pdfFile], {
+          cwd: path.dirname(asyPath),
+        });
 
         const svgFile = tmpfile("svg");
         await execFile("pdf2svg", [pdfFile, svgFile]);
@@ -48,7 +50,9 @@ export default function asymptote(): PluginOption {
         await fs.unlink(svgFile);
       } else {
         const svgFile = tmpfile("svg");
-        await execFile("asy", [asyPath, "-f", "svg", "-o", svgFile]);
+        await execFile("asy", [asyPath, "-f", "svg", "-o", svgFile], {
+          cwd: path.dirname(asyPath),
+        });
         svgData = await fs.readFile(svgFile, { encoding: "utf8" });
 
         await fs.unlink(svgFile);
