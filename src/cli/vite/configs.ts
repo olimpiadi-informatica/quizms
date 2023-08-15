@@ -1,5 +1,4 @@
 import mdx from "@mdx-js/rollup";
-import url from "@rollup/plugin-url";
 import react from "@vitejs/plugin-react-swc";
 import { InlineConfig, splitVendorChunkPlugin } from "vite";
 
@@ -37,7 +36,6 @@ export default function (mode: "development" | "production"): InlineConfig {
       { enforce: "pre", ...mdx(mdxOptions) },
       react({ plugins: swcPlugins }),
       splitVendorChunkPlugin(),
-      url(),
     ],
   };
 }

@@ -22,7 +22,6 @@
     "@mdx-js/mdx": "^2.3",
     "@mdx-js/react": "^2.3",
     "@mdx-js/rollup": "^2.3",
-    "@rollup/plugin-url": "^8.0",
     "@swc/plugin-transform-imports": "^1.5",
     "@vitejs/plugin-react-swc": "^3.3",
     "acorn": "^8.10",
