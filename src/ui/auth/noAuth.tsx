@@ -103,7 +103,7 @@ function NoAuthInner({ duration, children }: Omit<AuthProps, "header">) {
     );
   }
 
-  if (!["pdf", "development"].includes(import.meta.env.QUIZMS_MODE) && !startTime) {
+  if (import.meta.env.PROD && import.meta.env.QUIZMS_MODE !== "pdf" && !startTime) {
     return (
       <div className="flex h-screen justify-center">
         <div className="flex flex-col justify-center">

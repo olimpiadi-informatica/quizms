@@ -128,10 +128,10 @@ const CompletedModal = forwardRef(function CompletedModal(
           <table className="text-center">
             <thead>
               <tr>
-                <th>Domanda</th>
-                <th>Risposta</th>
-                <th>Soluzione</th>
-                <th>Punteggio</th>
+                <th scope="col">Domanda</th>
+                <th scope="col">Risposta</th>
+                <th scope="col">Soluzione</th>
+                <th scope="col">Punteggio</th>
               </tr>
             </thead>
             <tbody>
