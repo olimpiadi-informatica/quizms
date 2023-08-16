@@ -1,6 +1,4 @@
-import React, { Children, ReactNode, createContext, useContext } from "react";
-
-import { useContest } from "./contest";
+import React, { ReactNode, createContext, useContext } from "react";
 
 type SectionProps = {
   id?: string;
@@ -11,17 +9,10 @@ const SectionContext = createContext<string>("0");
 SectionContext.displayName = "SectionContext";
 
 export function Section({ id, children }: SectionProps) {
-  const contest = useContest();
-
-  const problems = Children.toArray(children);
-  if (contest.randomizeProblemOrder) {
-    // TODO
-  }
-
   return (
     <SectionContext.Provider value={id ?? "0"}>
       <div className="section gap-x-10 [column-rule:solid_1px_var(--tw-prose-hr)] print:columns-2">
-        {problems}
+        {children}
       </div>
       <hr className="last:hidden" />
     </SectionContext.Provider>

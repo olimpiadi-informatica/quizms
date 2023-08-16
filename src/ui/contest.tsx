@@ -26,25 +26,15 @@ type Problem = {
 };
 
 type ContestContextProps = {
-  randomizeProblemOrder: boolean;
-  randomizeAnswerOrder: boolean;
   registerProblem: (problem: Problem) => void;
 };
 
 const ContestContext = createContext<ContestContextProps>({
-  randomizeProblemOrder: false,
-  randomizeAnswerOrder: false,
   registerProblem: () => {},
 });
 ContestContext.displayName = "ContestContext";
 
-type ContestProps = {
-  randomizeProblemOrder?: boolean;
-  randomizeAnswerOrder?: boolean;
-  children: ReactNode;
-};
-
-export function Contest({ randomizeProblemOrder, randomizeAnswerOrder, children }: ContestProps) {
+export function Contest({ children }: { children: ReactNode }) {
   const { answers, terminated } = useAuthentication();
   const [problems, setProblems] = useState<Record<string, Problem>>({});
 
@@ -74,12 +64,7 @@ export function Contest({ randomizeProblemOrder, randomizeAnswerOrder, children 
   }, [terminated, resultShown]);
 
   return (
-    <ContestContext.Provider
-      value={{
-        randomizeProblemOrder: randomizeProblemOrder ?? false,
-        randomizeAnswerOrder: randomizeAnswerOrder ?? false,
-        registerProblem,
-      }}>
+    <ContestContext.Provider value={{ registerProblem }}>
       <div className="contest break-before-page">
         <main>{children}</main>
         <StickyFooter progress={progress} />
