@@ -20,7 +20,7 @@ async function fetcher(variant: string) {
   const url = URL.createObjectURL(blob);
 
   Object.assign(globalThis, { quizms, React });
-  const { default: Contest } = await import(url);
+  const { default: Contest } = await import(/* @vite-ignore */ url);
 
   return Contest;
 }

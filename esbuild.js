@@ -1,25 +1,11 @@
 import fs from "node:fs/promises";
-import { dirname } from "node:path";
 import { argv } from "node:process";
 
 import { Command } from "commander";
 import { build, context } from "esbuild";
 import less from "less";
-import _ from "lodash";
 import postcss from "postcss";
 import tailwindcss from "tailwindcss";
-
-function merge(...objects) {
-  const result = {};
-  for (const object of objects) {
-    _.mergeWith(result, object, (a, b) => {
-      if (_.isArray(a)) {
-        return a.concat(b);
-      }
-    });
-  }
-  return result;
-}
 
 /** @type {import("esbuild").Plugin} */
 const cssPlugin = {
@@ -35,28 +21,6 @@ const cssPlugin = {
       const content = await fs.readFile(args.path, "utf8");
       const { css } = await less.render(content, { filename: args.path });
       return { contents: css, loader: "css" };
-    });
-  },
-};
-
-/** @type {import("esbuild").Plugin} */
-const importPlugin = {
-  name: "import",
-  setup(build) {
-    build.initialOptions.write = false;
-
-    build.onEnd(async (result) => {
-      await Promise.all(
-        result.outputFiles.map(async (file) => {
-          if (file.path.endsWith(".js")) {
-            const text = file.text.replace(/\bimport\((\w+)\)/g, "import(/* @vite-ignore */ $1)");
-            const encoder = new TextEncoder();
-            file.contents = encoder.encode(text);
-          }
-          await fs.mkdir(dirname(file.path), { recursive: true });
-          await fs.writeFile(file.path, file.contents);
-        }),
-      );
     });
   },
 };
@@ -80,7 +44,6 @@ const uiConfig = {
   platform: "browser",
   splitting: true,
   outdir: "dist",
-  plugins: [importPlugin],
 };
 
 /** @type {import("esbuild").BuildOptions} */
@@ -115,8 +78,13 @@ command
   .command("build")
   .description("Create a production build")
   .action(async () => {
-    for (const config of [uiConfig, cliConfig, cssConfig]) {
-      await build({ ...config, minify: true });
+    for (const config of [uiConfig, cliConfig, cssConfig, jsxRuntimeConfig]) {
+      await build({
+        ...config,
+        minifyIdentifiers: true,
+        minifySyntax: true,
+        minifyWhitespace: false,
+      });
     }
   });
 
@@ -138,7 +106,7 @@ command
       },
     };
 
-    const uiCtx = await context(merge(uiConfig, { plugins: [watchPlugin] }));
+    const uiCtx = await context({ ...uiConfig, plugins: [watchPlugin] });
     await uiCtx.watch();
   });
 
