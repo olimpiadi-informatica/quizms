@@ -20,7 +20,6 @@
   "dependencies": {
     "@blockly/disable-top-blocks": "^0.4",
     "@mdx-js/mdx": "^2.3",
-    "@mdx-js/react": "^2.3",
     "@mdx-js/rollup": "^2.3",
     "@swc/plugin-transform-imports": "^1.5",
     "@vitejs/plugin-react-swc": "^3.3",
@@ -56,6 +55,7 @@
     "zod": "^3.21"
   },
   "peerDependencies": {
+    "@mdx-js/react": "^2.3",
     "react": "^18",
     "react-dom": "^18"
   },
