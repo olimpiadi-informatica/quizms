@@ -15,25 +15,11 @@ const recmaVariants: Plugin<[], Program> = () => {
 export default recmaVariants;
 
 function findVariants(ast: Program) {
-  const variant = parseInt(process.env.QUIZMS_VARIANT ?? "");
-
   let variantsFound = false;
   traverse(ast, {
     VariableDeclarator(path) {
       const node = path.node!;
-      if (is.identifier(node.id) && node.id.name === "variants") {
-        const init = node.init;
-        if (!is.arrayExpression(init)) {
-          throw new Error(
-            `invalid problem variants: variable's type must be an array, \`${init?.type}\` is not an array`,
-          );
-        }
-        variantsFound = true;
-        if (variant >= 0 && variant < init.elements.length) {
-          // TODO
-          init.elements = init.elements.slice(variant, variant + 1);
-        }
-      }
+      variantsFound ||= is.identifier(node.id) && node.id.name === "variants";
     },
   });
 
@@ -64,7 +50,11 @@ function injectLocalVariables(ast: Program) {
                 b.identifier("_v"),
                 b.memberExpression(
                   b.identifier("variants"),
-                  b.memberExpression(b.identifier("props"), b.identifier("variant")),
+                  b.logicalExpression(
+                    "??",
+                    b.memberExpression(b.identifier("props"), b.identifier("variant")),
+                    b.literal(0),
+                  ),
                   true,
                 ),
               ),

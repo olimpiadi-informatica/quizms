@@ -1,10 +1,12 @@
-import { build } from "vite";
+import { InlineConfig, build, mergeConfig } from "vite";
 
 import configs from "./vite/configs";
+import { runBundle } from "./vite/runBundle";
 
 export type BundleOptions = {
   dir?: string;
-  outDir?: string;
+  outDir: string;
+  contest: string;
   variant?: string;
 };
 
@@ -17,28 +19,26 @@ export default async function bundle(options: BundleOptions): Promise<void> {
 
   const variant = options.variant?.padStart(5, "0") ?? "default";
 
-  await build({
-    ...configs("production"),
+  const defaultConfig = configs("production", {
+    mdx: {
+      providerImportSource: "quizms/jsx-runtime",
+      jsxImportSource: "quizms",
+    },
+  });
+
+  const bundleConfig: InlineConfig = {
     root: options.dir,
     build: {
       copyPublicDir: false,
       outDir: options.outDir,
       lib: {
-        entry: "contest/contest.mdx",
-        name: "Contest",
+        entry: options.contest,
         fileName: `contest-${variant}`,
-        formats: ["iife"],
-      },
-      rollupOptions: {
-        external: ["quizms", "react"],
-        output: {
-          footer: "export default Contest;",
-          globals: {
-            quizms: "quizms",
-            react: "React",
-          },
-        },
+        formats: ["es"],
       },
     },
-  });
+    plugins: [runBundle()],
+  };
+
+  await build(mergeConfig(defaultConfig, bundleConfig));
 }

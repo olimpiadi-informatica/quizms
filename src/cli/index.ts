@@ -18,6 +18,7 @@ function main() {
     .command("bundle")
     .description("Create a bundle with all question.")
     .argument("[directory]", "The directory of the contest.")
+    .option("-c, --contest <file>", "The contest file to bundle.", "contest/contest.mdx")
     .option("-d, --outDir <directory>", "The directory to output the bundle.", "bundle")
     .option("-v, --variant <variant>", "The seed used to generate the variant of the contest.")
     .action((dir, options) => void bundle({ dir, ...options }));

@@ -8,17 +8,13 @@ import React, {
 } from "react";
 
 import _ from "lodash";
-import { BlockMath, InlineMath } from "react-katex";
 
-import { Answer, AnswerGroup, Explanation, OpenAnswer } from "./answers";
 import { useAuthentication } from "./auth/provider";
-import Blockly from "./blockly/workspaceWrapper";
 import { useContest } from "./contest";
 import { useSection } from "./section";
 
 type StatementProps = {
   variant?: number;
-  components: Record<string, ComponentType<any>>;
 };
 
 type ProblemProps = {
@@ -45,18 +41,7 @@ export function Problem({ id, points, statement: Statement }: ProblemProps) {
 
   return (
     <ProblemContext.Provider value={{ id, points, setCorrect: _.noop }}>
-      <Statement
-        components={{
-          MathExpr,
-          SubProblem,
-          AnswerGroup,
-          Answer,
-          OpenAnswer,
-          Explanation,
-          Blockly,
-        }}
-        variant={variant}
-      />
+      <Statement variant={variant} />
       <hr className="last:hidden" />
     </ProblemContext.Provider>
   );
@@ -91,17 +76,4 @@ export function SubProblem({ subId, children }: SubProblemProps) {
 
 export function useProblem() {
   return useContext(ProblemContext);
-}
-
-type MathProps = {
-  display?: boolean;
-  children: string;
-};
-
-function MathExpr({ display, children }: MathProps) {
-  if (display) {
-    return <BlockMath math={children} />;
-  } else {
-    return <InlineMath math={children} />;
-  }
 }

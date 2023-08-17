@@ -1,5 +1,4 @@
-import { Expression } from "estree";
-import { Literal } from "estree-jsx";
+import { Expression, Literal } from "estree";
 import { builders as b } from "estree-toolkit";
 import _ from "lodash";
 import { MdxJsxAttribute } from "mdast-util-mdx-jsx";

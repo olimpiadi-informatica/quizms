@@ -72,6 +72,15 @@ const cssConfig = {
   },
 };
 
+/** @type {import("esbuild").BuildOptions} */
+const jsxRuntimeConfig = {
+  ...commonConfig,
+  entryPoints: ["src/jsx-runtime/index.ts"],
+  packages: "external",
+  platform: "browser",
+  outfile: "dist/jsx-runtime.js",
+};
+
 const command = new Command();
 
 command
@@ -94,6 +103,9 @@ command
   .action(async () => {
     const cliCtx = await context(cliConfig);
     await cliCtx.watch();
+
+    const jsxRuntimeCtx = await context(jsxRuntimeConfig);
+    await jsxRuntimeCtx.watch();
 
     const cssCtx = await context(cssConfig);
     await cssCtx.watch();

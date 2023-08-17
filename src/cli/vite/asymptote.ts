@@ -1,24 +1,20 @@
 import child_process from "node:child_process";
-import { randomUUID } from "node:crypto";
 import fs from "node:fs/promises";
-import { platform, tmpdir } from "node:os";
+import { platform } from "node:os";
 import path from "node:path";
 import process from "node:process";
 import { promisify } from "node:util";
 
 import _ from "lodash";
 import svgToMiniDataURI from "mini-svg-data-uri";
+import { temporaryFile } from "tempy";
 import { PluginOption } from "vite";
 
 const execFile = promisify(child_process.execFile);
 
-function tmpfile(ext: string) {
-  return path.format({ dir: tmpdir(), name: randomUUID(), ext });
-}
-
 async function findDependencies(asyPath: string) {
-  let imports = new Set<string>();
-  let newImports: string[] = [asyPath];
+  const imports = new Set<string>();
+  const newImports: string[] = [asyPath];
 
   while (newImports.length > 0) {
     const file = newImports.pop()!;
@@ -58,10 +54,10 @@ export default function asymptote(): PluginOption {
     async load(asyPath) {
       if (path.extname(asyPath) !== ".asy") return;
 
-      const svgFile = tmpfile("svg");
+      const svgFile = temporaryFile({ extension: "svg" });
 
       if (platform() === "darwin") {
-        const pdfFile = tmpfile("pdf");
+        const pdfFile = temporaryFile({ extension: "pdf" });
         await execFile("asy", [asyPath, "-f", "pdf", "-o", pdfFile], {
           cwd: path.dirname(asyPath),
         });

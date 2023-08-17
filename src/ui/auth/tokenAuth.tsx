@@ -2,7 +2,7 @@ import React, { ComponentType } from "react";
 
 import useSWR from "swr/immutable";
 
-import * as quizms from "~/ui";
+import { components } from "~/ui/mdxComponents";
 
 import Progress from "../components/progress";
 import { NoAuth } from "./noAuth";
@@ -13,16 +13,15 @@ type AuthProps = {
 };
 
 async function fetcher(variant: string) {
-  const res = await fetch(`/bundle/contest-${variant}.iife.js`);
+  const res = await fetch(`/bundle/contest-${variant}.mjs`);
   if (!res.ok) throw new Error(res.statusText);
 
   const blob = await res.blob();
   const url = URL.createObjectURL(blob);
 
-  Object.assign(globalThis, { quizms, React });
-  const { default: Contest } = await import(/* @vite-ignore */ url);
+  const { default: contest } = await import(/* @vite-ignore */ url);
 
-  return Contest;
+  return () => contest(React, components);
 }
 
 export function TokenAuth({ header, duration }: AuthProps) {
@@ -35,10 +34,10 @@ export function TokenAuth({ header, duration }: AuthProps) {
           <Progress>Caricamento in corso...</Progress>
         </div>
       ) : error ? (
-        <div>Errore: {error}</div>
-      ) : (
+        <div>{`${error}`}</div>
+      ) : Contest ? (
         <Contest />
-      )}
+      ) : null}
     </NoAuth>
   );
 }

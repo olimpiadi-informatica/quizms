@@ -13,6 +13,11 @@
   },
   "main": "dist/index.js",
   "bin": "bin/bin.js",
+  "exports": {
+    ".": "./dist/index.js",
+    "./css": "./dist/index.css",
+    "./jsx-runtime": "./dist/jsx-runtime.js"
+  },
   "files": [
     "bin",
     "dist"
@@ -29,6 +34,7 @@
     "commander": "^11.0",
     "dayjs": "^1.11",
     "estree-toolkit": "^1.6",
+    "estree-util-to-js": "^2.0",
     "fast-glob": "^3.3.1",
     "js-interpreter": "^4.0",
     "lodash": "^4.17",
@@ -48,6 +54,7 @@
     "remark-mdx-math-enhanced": "=0.0.1-beta.3",
     "remark-smartypants": "^2.0",
     "swr": "^2.2",
+    "tempy": "^3.1",
     "unified": "^10.1",
     "unist-util-visit": "^5.0",
     "vite": "^4.4",

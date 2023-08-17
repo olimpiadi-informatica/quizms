@@ -1,4 +1,5 @@
-import mdx from "@mdx-js/rollup";
+import { CompileOptions as MdxOptions } from "@mdx-js/mdx";
+import mdxPlugin from "@mdx-js/rollup";
 import react from "@vitejs/plugin-react-swc";
 import { InlineConfig, splitVendorChunkPlugin } from "vite";
 
@@ -6,18 +7,11 @@ import { mdxOptions } from "~/mdx";
 
 import asymptote from "./asymptote";
 
-const swcPlugins: [string, Record<string, any>][] = [
-  [
-    "@swc/plugin-transform-imports",
-    {
-      problemset: {
-        transform: "./{{ kebabCase member }}/question",
-      },
-    },
-  ],
-];
+type Options = {
+  mdx?: MdxOptions;
+};
 
-export default function (mode: "development" | "production"): InlineConfig {
+export default function (mode: "development" | "production", options?: Options): InlineConfig {
   return {
     configFile: false,
     mode,
@@ -33,9 +27,20 @@ export default function (mode: "development" | "production"): InlineConfig {
     },
     plugins: [
       asymptote(),
-      { enforce: "pre", ...mdx(mdxOptions) },
+      { enforce: "pre", ...mdxPlugin({ ...mdxOptions, ...options?.mdx }) },
       react({ plugins: swcPlugins }),
       splitVendorChunkPlugin(),
     ],
   };
 }
+
+const swcPlugins: [string, Record<string, any>][] = [
+  [
+    "@swc/plugin-transform-imports",
+    {
+      problemset: {
+        transform: "./{{ kebabCase member }}/question",
+      },
+    },
+  ],
+];

@@ -3,9 +3,7 @@ import React, { ReactNode, createContext, useContext } from "react";
 import { MDXProvider } from "@mdx-js/react";
 import dayjs, { Dayjs } from "dayjs";
 
-import { Contest } from "../contest";
-import { Problem } from "../problem";
-import { Section } from "../section";
+import { components } from "../mdxComponents";
 
 type AuthProviderProps = {
   /** Record con le risposte dell'utente */
@@ -41,7 +39,7 @@ AuthenticationContext.displayName = "AuthenticationContext";
 export function AuthenticationProvider({ children, ...rest }: AuthProviderProps) {
   return (
     <AuthenticationContext.Provider value={{ ...rest }}>
-      <MDXProvider components={{ Contest, Section, Problem }}>{children}</MDXProvider>
+      <MDXProvider components={components}>{children}</MDXProvider>
     </AuthenticationContext.Provider>
   );
 }
