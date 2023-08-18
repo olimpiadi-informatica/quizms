@@ -5,7 +5,7 @@ import { InlineConfig, splitVendorChunkPlugin } from "vite";
 
 import { mdxOptions } from "~/mdx";
 
-import asymptote from "./asymptote";
+import images from "./images";
 
 type Options = {
   mdx?: MdxOptions;
@@ -26,7 +26,7 @@ export default function (mode: "development" | "production", options?: Options):
       "process.env.NODE_ENV": JSON.stringify(mode),
     },
     plugins: [
-      asymptote(),
+      images(),
       { enforce: "pre", ...mdxPlugin({ ...mdxOptions, ...options?.mdx }) },
       react({ plugins: swcPlugins }),
       splitVendorChunkPlugin(),
