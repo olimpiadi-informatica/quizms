@@ -1,4 +1,4 @@
-import { Program } from "estree";
+import { AssignmentProperty, Program } from "estree";
 import { builders as b, is, traverse } from "estree-toolkit";
 import _ from "lodash";
 import { Plugin } from "unified";
@@ -26,54 +26,44 @@ function findVariants(ast: Program) {
   return variantsFound;
 }
 
-const wellKnownGlobals = new Set(["console", "parseInt"]);
-
-function isGlobal(name: string) {
-  return name === _.upperFirst(name) || wellKnownGlobals.has(name);
-}
+const wellKnownGlobals = new Set(["console", "import", "parseInt"]);
 
 function injectLocalVariables(ast: Program) {
-  let mdxScope = false;
-
   traverse(ast, {
     $: { scope: true },
 
-    FunctionDeclaration: {
-      enter(path) {
-        mdxScope = true;
+    FunctionDeclaration(path) {
+      const variables = Object.keys(path.scope!.globalBindings).filter(
+        (name) => name !== _.upperFirst(name) && !wellKnownGlobals.has(name),
+      );
 
-        const node = path.node!;
-        if (node.id?.name === "_createMdxContent") {
-          node.body.body.unshift(
-            b.variableDeclaration("const", [
-              b.variableDeclarator(
-                b.identifier("_v"),
-                b.memberExpression(
-                  b.identifier("variants"),
-                  b.logicalExpression(
-                    "??",
-                    b.memberExpression(b.identifier("props"), b.identifier("variant")),
-                    b.literal(0),
-                  ),
-                  true,
+      const node = path.node!;
+      if (node.id?.name === "_createMdxContent") {
+        node.body.body.unshift(
+          b.variableDeclaration("const", [
+            b.variableDeclarator(
+              b.objectPattern(
+                variables.map(
+                  (name) =>
+                    b.property(
+                      "init",
+                      b.identifier(name),
+                      b.identifier(name),
+                    ) as AssignmentProperty,
                 ),
               ),
-            ]),
-          );
-        }
-      },
-      leave() {
-        mdxScope = false;
-      },
-    },
-
-    Identifier(path) {
-      if (!mdxScope || !is.expression(path.parent)) return;
-
-      const name = path.node!.name;
-      const scope = path.scope!;
-      if (!scope.hasBinding(name) && scope.hasGlobalBinding(name) && !isGlobal(name)) {
-        path.replaceWith(b.memberExpression(b.identifier("_v"), b.identifier(name))).skip();
+              b.memberExpression(
+                b.identifier("variants"),
+                b.logicalExpression(
+                  "??",
+                  b.memberExpression(b.identifier("props"), b.identifier("variant")),
+                  b.literal(0),
+                ),
+                true,
+              ),
+            ),
+          ]),
+        );
       }
     },
   });
