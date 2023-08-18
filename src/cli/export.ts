@@ -34,6 +34,7 @@ export default async function staticExport(options: ExportOptions): Promise<void
     root: options.dir,
     build: {
       outDir: options.outDir,
+      assetsInlineLimit: 1024,
       rollupOptions: {
         input: {
           index: "index.html",

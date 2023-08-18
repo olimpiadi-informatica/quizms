@@ -122,10 +122,10 @@ const CompletedModal = forwardRef(function CompletedModal(
             <tbody>
               {_.sortBy(problems, "id").map((problem) => (
                 <tr key={problem.id}>
-                  <th>{problem.id}</th>
-                  <th>{answers[problem.id] ?? "-"}</th>
-                  <th>{problem.correct}</th>
-                  <th>{calcPoints(problem)}</th>
+                  <td>{problem.id}</td>
+                  <td>{answers[problem.id] ?? "-"}</td>
+                  <td>{problem.correct}</td>
+                  <td>{calcPoints(problem)}</td>
                 </tr>
               ))}
             </tbody>

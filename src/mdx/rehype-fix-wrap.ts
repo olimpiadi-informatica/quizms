@@ -6,7 +6,7 @@ import { SKIP, visit } from "unist-util-visit";
 const rehypeFixWrap: Plugin<[], Root> = () => {
   return (tree: Root) => {
     visit(tree, "mdxJsxTextElement", (math: MdxJsxTextElementHast, index, parent) => {
-      if (math.name !== "Math") return;
+      if (math.name !== "MathExpr") return;
 
       const siblings = parent!.children[index! + 1];
       if (siblings?.type === "text") {
