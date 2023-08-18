@@ -72,7 +72,9 @@ const remarkImages: Plugin<[], Root> = () => {
         children: [],
         attributes: _.compact([
           jsxAttribute("alt", alt),
-          jsxAttribute("src", imgSrc),
+          jsxAttribute("src", b.memberExpression(imgSrc, b.identifier("src"))),
+          jsxAttribute("width", b.memberExpression(imgSrc, b.identifier("width"))),
+          jsxAttribute("height", b.memberExpression(imgSrc, b.identifier("height"))),
           title && jsxAttribute("title", title),
         ]),
       };
