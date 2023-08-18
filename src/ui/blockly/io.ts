@@ -7,10 +7,7 @@ export class Input {
   private index = 0;
 
   constructor(text: string) {
-    this.tokens = _(text)
-      .split("\n")
-      .flatMap((line) => _(line).trim().split(/\s+/))
-      .value();
+    this.tokens = text.split("\n").flatMap((line) => line.trim().split(/\s+/));
   }
 
   public readInt = (): number => {
@@ -34,7 +31,7 @@ export class Output {
 
   public writeAny = (value: any) => {
     if (Array.isArray(value)) {
-      this.setOutput((prev) => `${prev}${_(value).map(this.writeAny).join(" ")}\n`);
+      this.setOutput((prev) => `${prev}${value.map(this.writeAny).join(" ")}\n`);
     } else {
       this.setOutput((prev) => `${prev}${value}\n`);
     }

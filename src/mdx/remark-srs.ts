@@ -51,7 +51,7 @@ const metadataSchema = z
   .optional()
   .transform((value) => {
     if (value === undefined) return value;
-    return _.fromPairs(value.split(/\s+/).map((m) => m.split("=", 2)));
+    return Object.fromEntries(value.split(/\s+/).map((m) => m.split("=", 2)));
   })
   .pipe(z.union([contextMetadataSchema, inlineContextMetadataSchema]));
 
