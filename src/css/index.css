@@ -9,10 +9,6 @@ body {
   @apply min-w-[360px];
 }
 
-img {
-  @apply mx-auto max-h-screen max-w-full rounded-xl p-4 dark:bg-white;
-}
-
 [display="none"] {
   @apply hidden;
 }
