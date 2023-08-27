@@ -20,6 +20,7 @@ export default function (mode: "development" | "production", options?: Options):
       alias: {
         vm: "vm-browserify",
       },
+      dedupe: ["react", "react-dom", "@mdx-js/react"],
       extensions: [".js", ".jsx", ".ts", ".tsx", ".md", ".mdx"],
     },
     define: {
@@ -31,6 +32,7 @@ export default function (mode: "development" | "production", options?: Options):
       react({ plugins: swcPlugins }),
       splitVendorChunkPlugin(),
     ],
+    clearScreen: false,
   };
 }
 
