@@ -6,8 +6,8 @@ import { createServer } from "vite";
 import configs from "./vite/configs";
 
 export type PdfOptions = {
-  dir?: string;
-  outDir?: string;
+  dir: string;
+  outDir: string;
   variant?: string;
 };
 
@@ -23,7 +23,7 @@ export default async function pdf(options: PdfOptions) {
 
   const server = await createServer({
     ...configs("production"),
-    root: options.dir,
+    root: join(options.dir, "src"),
   });
   await server.listen();
 

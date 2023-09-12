@@ -1,4 +1,5 @@
-import { dirname } from "node:path";
+import { dirname, join } from "node:path";
+import { cwd } from "node:process";
 
 import glob from "fast-glob";
 import { build } from "vite";
@@ -6,8 +7,8 @@ import { build } from "vite";
 import configs from "./vite/configs";
 
 export type ExportOptions = {
-  dir?: string;
-  outDir?: string;
+  dir: string;
+  outDir: string;
   training?: boolean;
   variant?: string;
 };
@@ -23,7 +24,7 @@ export default async function staticExport(options: ExportOptions): Promise<void
     process.env.QUIZMS_VARIANT = options.variant;
   }
 
-  const pages = await glob("*/index.html", {
+  const pages = await glob("**/index.html", {
     cwd: options.dir,
     ignore: ["dist/**"],
   });
@@ -31,7 +32,7 @@ export default async function staticExport(options: ExportOptions): Promise<void
 
   await build({
     ...configs("production"),
-    root: options.dir,
+    root: join(options.dir, "src"),
     build: {
       outDir: options.outDir,
       assetsInlineLimit: 1024,

@@ -1,10 +1,12 @@
+import { join } from "node:path";
+
 import { InlineConfig, build, mergeConfig } from "vite";
 
 import configs from "./vite/configs";
 import { runBundle } from "./vite/runBundle";
 
 export type BundleOptions = {
-  dir?: string;
+  dir: string;
   outDir: string;
   contest: string;
   variant?: string;
@@ -27,7 +29,7 @@ export default async function bundle(options: BundleOptions): Promise<void> {
   });
 
   const bundleConfig: InlineConfig = {
-    root: options.dir,
+    root: join(options.dir, "src"),
     build: {
       copyPublicDir: false,
       outDir: options.outDir,
