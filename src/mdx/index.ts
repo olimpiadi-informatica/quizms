@@ -1,5 +1,4 @@
-import { CompileOptions, nodeTypes as mdxNodeTypes } from "@mdx-js/mdx";
-import rehypeRaw from "rehype-raw";
+import { CompileOptions } from "@mdx-js/mdx";
 import remarkFrontmatter from "remark-frontmatter";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
@@ -14,7 +13,8 @@ import rehypeFixWrap from "./rehype-fix-wrap";
 import remarkAnswers from "./remark-answers";
 import remarkImages from "./remark-images";
 import remarkProblemIds from "./remark-problem-ids";
-import remarkSrs from "./remark-srs";
+import rehypeCodeReplacements from "./srs/rehype-code-replacements";
+import rehypeHighlight from "./srs/rehype-highlight";
 
 export const remarkPlugins: PluggableList = [
   remarkAnswers,
@@ -26,12 +26,12 @@ export const remarkPlugins: PluggableList = [
   [remarkMdxMathEnhancedPlugin, { component: "MathExpr" }],
   remarkProblemIds,
   [remarkSmartypants, { dashes: "oldschool" }],
-  remarkSrs,
 ];
 
 export const rehypePlugins: PluggableList = [
   rehypeFixWrap,
-  [rehypeRaw, { passThrough: mdxNodeTypes }],
+  rehypeHighlight,
+  rehypeCodeReplacements,
 ];
 
 export const recmaPlugins: PluggableList = [recmaRemoveExports, recmaVariants];

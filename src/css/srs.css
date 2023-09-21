@@ -1,27 +1,13 @@
 @import "srs-theme.less";
 
-code:before,
-code:after {
-  @apply !content-none;
+code {
+  @apply !px-0.5;
 }
 
-code.block-code,
-code.inline-code {
-  @apply !font-normal;
+pre {
+  @apply !bg-base-200 !text-base-content;
 }
 
-code.inline-code {
-  @apply px-0;
-}
-
-code.block-code {
-  @apply my-1 break-inside-avoid rounded-xl p-2 pl-3 [display:block] screen:overflow-x-auto screen:whitespace-nowrap;
-}
-
-code.block-code .srs-syntax.line {
-  @apply min-w-fit rounded pl-[6.25rem] -indent-24 [display:block] hover:bg-black/5 dark:hover:bg-white/5;
-}
-
-.srs-syntax.block {
-  @apply ml-1.5 border-l-2 border-solid border-[#8ea8ae] pl-8 [display:block];
+label pre {
+  @apply !my-2 !p-3;
 }

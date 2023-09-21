@@ -53,9 +53,6 @@ const cliConfig = {
   packages: "external",
   platform: "node",
   outfile: "dist/cli.js",
-  loader: {
-    ".wasm": "file",
-  },
 };
 
 /** @type {import("esbuild").BuildOptions} */
