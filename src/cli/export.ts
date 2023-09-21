@@ -24,23 +24,21 @@ export default async function staticExport(options: ExportOptions): Promise<void
     process.env.QUIZMS_VARIANT = options.variant;
   }
 
-  const pages = await glob("**/index.html", {
+  const pages = await glob("src/**/index.html", {
     cwd: options.dir,
-    ignore: ["dist/**"],
   });
-  const inputs = Object.fromEntries(pages.map((p) => [dirname(p), p]));
+  const inputs = Object.fromEntries(pages.map((p) => [dirname(p).replace(/\W/g, "-"), p]));
 
   await build({
     ...configs("production"),
     root: join(options.dir, "src"),
+    publicDir: join(options.dir, "public"),
     build: {
-      outDir: options.outDir,
+      outDir: join(options.dir, options.outDir),
+      emptyOutDir: true,
       assetsInlineLimit: 1024,
       rollupOptions: {
-        input: {
-          index: "index.html",
-          ...inputs,
-        },
+        input: inputs,
         output: {
           manualChunks: (id) => {
             if (id.includes("node_modules/katex/")) return "katex";

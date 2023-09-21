@@ -24,6 +24,7 @@ export default async function pdf(options: PdfOptions) {
   const server = await createServer({
     ...configs("production"),
     root: join(options.dir, "src"),
+    publicDir: join(options.dir, "public"),
   });
   await server.listen();
 

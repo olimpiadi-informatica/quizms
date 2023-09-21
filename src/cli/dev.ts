@@ -16,6 +16,7 @@ export default async function devServer(options: DevOptions) {
   const server = await createServer({
     ...configs("development"),
     root: join(options.dir, "src"),
+    publicDir: join(options.dir, "public"),
   });
   await server.listen(options.port);
 
