@@ -111,6 +111,9 @@
     ],
     "importOrderSeparation": true,
     "importOrderSortSpecifiers": true,
+    "tailwindFunctions": [
+      "jsxAttribute"
+    ],
     "plugins": [
       "@trivago/prettier-plugin-sort-imports",
       "prettier-plugin-tailwindcss"

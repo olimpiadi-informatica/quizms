@@ -98,12 +98,6 @@ command
   .command("watch")
   .description("Watch for changes and rebuild")
   .action(async () => {
-    const cliCtx = await context(cliConfig);
-    await cliCtx.watch();
-
-    const jsxRuntimeCtx = await context(jsxRuntimeConfig);
-    await jsxRuntimeCtx.watch();
-
     const cssCtx = await context(cssConfig);
     await cssCtx.watch();
 
@@ -115,8 +109,10 @@ command
       },
     };
 
-    const uiCtx = await context({ ...uiConfig, plugins: [watchPlugin] });
-    await uiCtx.watch();
+    for (const config of [uiConfig, cliConfig, jsxRuntimeConfig]) {
+      const ctx = await context({ ...config, plugins: [watchPlugin] });
+      await ctx.watch();
+    }
   });
 
 try {
