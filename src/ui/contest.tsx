@@ -110,26 +110,28 @@ const CompletedModal = forwardRef(function CompletedModal(
           <p>
             Hai ottenuto un punteggio di <b>{score}</b> su <b>{maxScore}</b>.
           </p>
-          <table className="text-center">
-            <thead>
-              <tr>
-                <th scope="col">Domanda</th>
-                <th scope="col">Risposta</th>
-                <th scope="col">Soluzione</th>
-                <th scope="col">Punteggio</th>
-              </tr>
-            </thead>
-            <tbody>
-              {_.sortBy(problems, "id").map((problem) => (
-                <tr key={problem.id}>
-                  <td>{problem.id}</td>
-                  <td>{answers[problem.id] ?? "-"}</td>
-                  <td>{problem.correct}</td>
-                  <td>{calcPoints(problem)}</td>
+          <div className="w-full">
+            <table className="table-fixed prose-td:truncate">
+              <thead>
+                <tr>
+                  <th scope="col">Domanda</th>
+                  <th scope="col">Risposta</th>
+                  <th scope="col">Soluzione</th>
+                  <th scope="col">Punteggio</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {_.sortBy(problems, "id").map((problem) => (
+                  <tr key={problem.id}>
+                    <td>{problem.id}</td>
+                    <td>{answers[problem.id] ?? "-"}</td>
+                    <td>{problem.correct}</td>
+                    <td>{calcPoints(problem)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </>
       )}
     </Modal>
