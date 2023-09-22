@@ -5,9 +5,21 @@ code {
 }
 
 pre {
-  @apply !bg-base-200 !text-base-content;
+  @apply !bg-base-200 !pl-5 !text-base-content;
 }
 
 label pre {
-  @apply !my-2 !p-3;
+  @apply !my-2 border border-base-content !p-3;
+}
+
+pre code {
+  @apply block;
+}
+
+pre code > span {
+  @apply block min-w-fit rounded py-px pr-4 hover:bg-base-300;
+}
+
+pre code .linenumber {
+  @apply mx-2;
 }

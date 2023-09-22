@@ -11,15 +11,15 @@ import recmaRemoveExports from "./recma-remove-exports";
 import recmaVariants from "./recma-variants";
 import rehypeFixWrap from "./rehype-fix-wrap";
 import remarkAnswers from "./remark-answers";
+import remarkHighlight from "./remark-highlight";
 import remarkImages from "./remark-images";
 import remarkProblemIds from "./remark-problem-ids";
-import rehypeCodeReplacements from "./srs/rehype-code-replacements";
-import rehypeHighlight from "./srs/rehype-highlight";
 
 export const remarkPlugins: PluggableList = [
   remarkAnswers,
   remarkFrontmatter,
   remarkGfm,
+  remarkHighlight,
   remarkMath,
   remarkMdxFrontmatter,
   remarkImages,
@@ -28,11 +28,7 @@ export const remarkPlugins: PluggableList = [
   [remarkSmartypants, { dashes: "oldschool" }],
 ];
 
-export const rehypePlugins: PluggableList = [
-  rehypeFixWrap,
-  rehypeHighlight,
-  rehypeCodeReplacements,
-];
+export const rehypePlugins: PluggableList = [rehypeFixWrap];
 
 export const recmaPlugins: PluggableList = [recmaRemoveExports, recmaVariants];
 

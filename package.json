@@ -36,7 +36,6 @@
     "estree-toolkit": "^1.6",
     "estree-util-to-js": "^2.0",
     "fast-glob": "^3.3.1",
-    "hast-util-to-text": "^3.0",
     "js-interpreter": "^4.0",
     "lodash": "^4.17",
     "lowlight": "^3.0",
@@ -48,6 +47,7 @@
     "react-blockly": "^8.0",
     "react-feather": "^2.0",
     "react-katex": "^3.0",
+    "react-syntax-highlighter": "^15.5",
     "remark-frontmatter": "^4.0",
     "remark-gfm": "^3.0.1",
     "remark-math": "^5.1",
@@ -76,6 +76,7 @@
     "@types/node": "^20",
     "@types/react": "^18.0",
     "@types/react-katex": "^3.0",
+    "@types/react-syntax-highlighter": "^15.5",
     "@typescript-eslint/eslint-plugin": "^6.2",
     "@typescript-eslint/parser": "^6.2",
     "daisyui": "^3.2",
@@ -91,10 +92,6 @@
     "tailwindcss": "^3.2",
     "typescript": "^5.1"
   },
-  "browserslist": [
-    "defaults, >1% in IT, last 3 versions, not dead",
-    "maintained node versions"
-  ],
   "prettier": {
     "trailingComma": "all",
     "tabWidth": 2,

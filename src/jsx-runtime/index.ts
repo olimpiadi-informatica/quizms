@@ -23,6 +23,7 @@ export function useMDXComponents() {
     "Answer",
     "AnswerGroup",
     "Blockly",
+    "Code",
     "Contest",
     "Explanation",
     "MathExpr",
