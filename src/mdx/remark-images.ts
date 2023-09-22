@@ -29,6 +29,9 @@ const remarkImages: Plugin<[], Root> = () => {
       let imgSrc: Expression;
 
       if (/\{.*?}/.test(url)) {
+        const [path, query] = url.split("?");
+        const params = new URLSearchParams(query).entries();
+
         imports.push(
           b.exportNamedDeclaration(
             b.variableDeclaration("const", [
@@ -40,10 +43,19 @@ const remarkImages: Plugin<[], Root> = () => {
                     b.identifier("glob"),
                   ),
                   [
-                    b.literal(url.replace(/\{.*?}/g, "*")),
+                    b.literal(path.replace(/\{.*?}/g, "*")),
                     b.objectExpression([
                       b.property("init", b.identifier("eager"), b.literal(true)),
                       b.property("init", b.identifier("import"), b.literal("default")),
+                      b.property(
+                        "init",
+                        b.identifier("query"),
+                        b.objectExpression(
+                          Array.from(params, ([key, value]) =>
+                            b.property("init", b.identifier(key), b.literal(value)),
+                          ),
+                        ),
+                      ),
                     ]),
                   ],
                 ),
@@ -52,7 +64,7 @@ const remarkImages: Plugin<[], Root> = () => {
           ),
         );
 
-        const templateLiteral = `String.raw\`${url.replace(/{/g, "${")}\``;
+        const templateLiteral = `String.raw\`${path.replace(/{/g, "${")}\``;
         const template = Parser.parse(templateLiteral, {
           ecmaVersion: "latest",
           sourceType: "module",
@@ -101,7 +113,7 @@ const remarkImages: Plugin<[], Root> = () => {
         attributes: _.compact([
           jsxAttribute(
             "className",
-            "max-h-screen max-w-full p-4 first:rounded-l-xl last:rounded-r-xl dark:bg-white",
+            "max-h-screen min-w-0 max-w-full p-4 first:rounded-l-xl last:rounded-r-xl dark:bg-white",
           ),
           jsxAttribute("alt", alt),
           jsxAttribute("src", b.memberExpression(imgSrc, b.identifier("src"))),
