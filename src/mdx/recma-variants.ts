@@ -34,7 +34,7 @@ function injectLocalVariables(ast: Program) {
 
     FunctionDeclaration(path) {
       const variables = Object.keys(path.scope!.globalBindings).filter(
-        (name) => name !== _.upperFirst(name) && !wellKnownGlobals.has(name),
+        (name) => (name.length === 1 || name !== _.upperFirst(name)) && !wellKnownGlobals.has(name),
       );
 
       const node = path.node!;

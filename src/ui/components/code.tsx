@@ -1,8 +1,8 @@
-import React, { ReactNode } from "react";
+import React from "react";
 
 import { HLJSApi, Language } from "highlight.js";
 import { createLowlight } from "lowlight";
-import { Light as SyntaxHighlighter } from "react-syntax-highlighter";
+import SyntaxHighlighterBuilder from "react-syntax-highlighter/dist/esm/highlight";
 
 function srs(hljs: HLJSApi): Language {
   return {
@@ -48,17 +48,22 @@ function srs(hljs: HLJSApi): Language {
 }
 
 const lowlight = createLowlight({ srs });
-const astGenerator = {
-  highlight: (lang: string, value: string) => {
-    const result = lowlight.highlight(lang, value);
-    return {
-      language: result.data?.language || null,
-      value: result.children,
-    };
+const SyntaxHighlighter = SyntaxHighlighterBuilder(
+  {
+    highlight: (lang: string, value: string) => {
+      const result = lowlight.highlight(lang, value);
+      return {
+        language: result.data?.language || null,
+        value: result.children,
+      };
+    },
+    highlightAuto: () => {
+      throw new Error("Not implemented");
+    },
+    listLanguages: () => lowlight.listLanguages(),
   },
-  highlightAuto: () => {},
-  listLanguages: () => lowlight.listLanguages(),
-};
+  {},
+);
 
 type Props = {
   code: string;
@@ -74,9 +79,8 @@ function InlineCode({ code, language }: Omit<Props, "inline">) {
   return (
     <SyntaxHighlighter
       language={language}
-      PreTag={({ children }) => children}
-      useInlineStyles={false}
-      astGenerator={astGenerator}>
+      PreTag={({ children }) => <>{children}</>}
+      useInlineStyles={false}>
       {code}
     </SyntaxHighlighter>
   );
@@ -88,8 +92,7 @@ function BlockCode({ code, language }: Omit<Props, "inline">) {
       language={language}
       wrapLines={true}
       showLineNumbers={true}
-      useInlineStyles={false}
-      astGenerator={astGenerator}>
+      useInlineStyles={false}>
       {code}
     </SyntaxHighlighter>
   );
