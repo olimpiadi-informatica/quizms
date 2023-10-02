@@ -13,7 +13,7 @@ const remarkHighlight: Plugin<[], Root> = () => {
       const code = node as Code | InlineCode;
       const lang = code.type === "code" ? code.lang ?? "text" : "srs";
 
-      let value = code.value
+      const value = code.value
         .replace(/{/g, "${")
         .replace(/<-/g, "←")
         .replace(/->/g, "→")

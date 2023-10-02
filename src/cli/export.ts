@@ -1,5 +1,4 @@
 import { dirname, join } from "node:path";
-import { cwd } from "node:process";
 
 import glob from "fast-glob";
 import { build } from "vite";

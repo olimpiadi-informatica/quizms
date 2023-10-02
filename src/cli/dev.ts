@@ -1,5 +1,4 @@
 import { join } from "node:path";
-import { cwd } from "node:process";
 
 import { createServer } from "vite";
 
