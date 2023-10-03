@@ -1,17 +1,14 @@
 import React, { ComponentType, ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 
-import dayjs, { Dayjs } from "dayjs";
-import objectSupport from "dayjs/plugin/objectSupport";
+import { Duration, add, differenceInMilliseconds } from "date-fns";
 
 import Progress from "../components/progress";
 import Prose from "../components/prose";
 import { AuthenticationProvider } from "./provider";
 
-dayjs.extend(objectSupport);
-
 type AuthProps = {
   header: ComponentType<Record<any, never>>;
-  duration: object;
+  duration: Duration;
   children: ReactNode;
 };
 
@@ -29,9 +26,9 @@ function NoAuthInner({ duration, children }: Omit<AuthProps, "header">) {
 
   const [submitted, setSubmitted] = useState(false);
   const [answers, setAnswers] = useState<Record<string, string | undefined>>({});
-  const [startTime, setStartTime] = useState<Dayjs>();
+  const [startTime, setStartTime] = useState<Date>();
 
-  const endTime = useMemo(() => startTime?.add(duration), [startTime, duration]);
+  const endTime = useMemo(() => startTime && add(startTime, duration), [startTime, duration]);
 
   const setAnswer = useCallback(
     (name: string, value: string | undefined) => {
@@ -47,7 +44,7 @@ function NoAuthInner({ duration, children }: Omit<AuthProps, "header">) {
 
     const prevStartTime = localStorage.getItem(path + "#startTime");
     if (prevStartTime) {
-      setStartTime(dayjs(prevStartTime));
+      setStartTime(new Date(prevStartTime));
     }
 
     const prevAnswers = localStorage.getItem(path + "#answers");
@@ -65,7 +62,7 @@ function NoAuthInner({ duration, children }: Omit<AuthProps, "header">) {
 
   useEffect(() => {
     if (!endTime) return;
-    const id = setTimeout(() => setSubmitted(true), endTime.diff(dayjs(), "millisecond"));
+    const id = setTimeout(() => setSubmitted(true), differenceInMilliseconds(endTime, new Date()));
     return () => clearTimeout(id);
   }, [endTime]);
 
@@ -75,8 +72,9 @@ function NoAuthInner({ duration, children }: Omit<AuthProps, "header">) {
   }, [path, loaded, answers]);
 
   const onStart = useCallback(() => {
-    setStartTime(dayjs());
-    localStorage.setItem(path + "#startTime", dayjs().toISOString());
+    const now = new Date();
+    setStartTime(now);
+    localStorage.setItem(path + "#startTime", now.toISOString());
   }, [path]);
 
   const submit = useCallback(() => {

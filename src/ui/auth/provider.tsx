@@ -1,7 +1,6 @@
 import React, { ReactNode, createContext, useContext } from "react";
 
 import { MDXProvider } from "@mdx-js/react";
-import dayjs, { Dayjs } from "dayjs";
 
 import { components } from "../mdxComponents";
 
@@ -15,9 +14,9 @@ type AuthProviderProps = {
   /** Funzione per resettare le risposte e ricominciare la prova (opzionale) */
   reset?: () => void;
   /** Data e ora d'inizio prova (opzionale) */
-  startTime?: Dayjs;
+  startTime?: Date;
   /** Data e ora di fine prova (opzionale) */
-  endTime?: Dayjs;
+  endTime?: Date;
   /** Variante della prova assegnata all'utente (opzionale) */
   variant?: number;
   /** Flag che indica se la prova è terminata */
@@ -29,8 +28,8 @@ const AuthenticationContext = createContext<Omit<AuthProviderProps, "children">>
   answers: {},
   setAnswer: () => {},
   submit: () => {},
-  startTime: dayjs(),
-  endTime: dayjs(),
+  startTime: new Date(),
+  endTime: new Date(),
   variant: 0,
   terminated: false,
 });

@@ -1,6 +1,7 @@
 import React, { ReactNode } from "react";
 
 import classNames from "classnames";
+import _ from "lodash";
 
 type ProgressBlockProps = {
   percentage?: number;
@@ -10,7 +11,13 @@ type ProgressBlockProps = {
 
 export default function Progress({ percentage, className, children }: ProgressBlockProps) {
   let value = percentage !== undefined ? Math.round(percentage) : undefined;
-  if (value !== undefined && isNaN(value)) value = undefined;
+  if (value !== undefined) {
+    if (isNaN(value)) {
+      value = undefined;
+    } else {
+      value = _.clamp(value, 0, 100);
+    }
+  }
 
   return (
     <div className={classNames("relative p-2 pt-0 text-center", className)}>

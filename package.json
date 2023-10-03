@@ -32,7 +32,7 @@
     "blockly": "^10.0",
     "classnames": "^2.3",
     "commander": "^11.0",
-    "dayjs": "^1.11",
+    "date-fns": "^2.30",
     "estree-toolkit": "^1.6",
     "estree-util-to-js": "^2.0",
     "fast-glob": "^3.3.1",
