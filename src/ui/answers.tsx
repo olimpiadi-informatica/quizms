@@ -1,7 +1,7 @@
 import React, { ReactNode, useEffect, useId } from "react";
 
 import classNames from "classnames";
-import { Trash2 } from "react-feather";
+import { Trash2 } from "lucide-react";
 
 import { useAnswer, useAuthentication } from "./auth/provider";
 import { useProblem } from "./problem";

@@ -5,8 +5,8 @@ import { default as BlocklyCore, BlocklyOptions, WorkspaceSvg } from "blockly";
 import { javascriptGenerator } from "blockly/javascript";
 import locale from "blockly/msg/it";
 import classNames from "classnames";
+import { ArrowDown, FastForward, Pause, Play, RotateCcw, Send, SkipForward } from "lucide-react";
 import { BlocklyWorkspace } from "react-blockly";
-import { ArrowDown, FastForward, Pause, Play, RotateCcw, Send, SkipForward } from "react-feather";
 
 import { Rng } from "~/utils/random";
 
