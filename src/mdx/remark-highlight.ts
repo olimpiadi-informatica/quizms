@@ -13,15 +13,18 @@ const remarkHighlight: Plugin<[], Root> = () => {
       const code = node as Code | InlineCode;
       const lang = code.type === "code" ? code.lang ?? "text" : "srs";
 
-      const value = code.value
-        .replace(/{/g, "${")
-        .replace(/<-/g, "←")
-        .replace(/->/g, "→")
-        .replace(/<=/g, "≤")
-        .replace(/>=/g, "≥")
-        .replace(/!=/g, "≠")
-        .replace(/\*/g, "×")
-        .replace(/\.\.\./g, "…");
+      const value =
+        lang !== "srs"
+          ? code.value
+          : code.value
+              .replace(/{/g, "${")
+              .replace(/<-/g, "←")
+              .replace(/->/g, "→")
+              .replace(/<=/g, "≤")
+              .replace(/>=/g, "≥")
+              .replace(/!=/g, "≠")
+              .replace(/\*/g, "×")
+              .replace(/\.\.\./g, "…");
 
       const templateLiteral = `String.raw\`${value}\``;
       const template = Parser.parse(templateLiteral, {
