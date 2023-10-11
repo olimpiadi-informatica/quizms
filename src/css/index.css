@@ -13,6 +13,10 @@ body {
   @apply hidden;
 }
 
+.katex-mathml {
+  @apply select-none;
+}
+
 .katex-display .katex-html {
   @apply overflow-auto pb-3;
 }
@@ -37,7 +41,7 @@ body {
   }
 
   .blocklyToolboxCategory .blocklyTreeRow {
-    @apply border-l-[20px] !important;
+    @apply !border-l-[20px];
     @apply indent-96;
   }
 }

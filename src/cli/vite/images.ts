@@ -156,7 +156,13 @@ async function transformSvg(path: string, options: ImageOptions): Promise<Image>
       {
         name: "preset-default",
         params: {
-          overrides: { removeViewBox: false }, // https://github.com/svg/svgo/issues/1128
+          overrides: {
+            removeViewBox: false, // https://github.com/svg/svgo/issues/1128
+            cleanupIds: {
+              minify: false,
+              remove: false,
+            },
+          },
         },
       },
       sizePlugin(originalSize),
