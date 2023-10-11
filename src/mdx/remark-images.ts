@@ -1,4 +1,4 @@
-import path from "node:path";
+import { isAbsolute } from "node:path";
 
 import { Parser } from "acorn";
 import { Directive, Expression, ModuleDeclaration, Program } from "estree";
@@ -22,14 +22,14 @@ const remarkImages: Plugin<[], Root> = () => {
         throw new Error("Image must have a parent");
       }
 
-      const url = (path.isAbsolute(image.url) ? "" : "./") + image.url;
+      const url = (isAbsolute(image.url) ? "" : "./") + image.url;
       const { alt, title } = image;
       const name = `__img__${imports.length}__`;
 
+      const [path, query] = url.split("?");
       let imgSrc: Expression;
 
-      if (/\{.*?}/.test(url)) {
-        const [path, query] = url.split("?");
+      if (path.includes("{")) {
         const params = new URLSearchParams(query).entries();
 
         imports.push(
@@ -108,18 +108,16 @@ const remarkImages: Plugin<[], Root> = () => {
 
       container.children.push({
         type: "mdxJsxTextElement",
-        name: "img",
+        name: "Image",
         children: [],
         attributes: _.compact([
-          jsxAttribute(
-            "className",
-            "max-h-screen min-w-0 max-w-full p-4 first:rounded-l-xl last:rounded-r-xl dark:bg-white",
-          ),
           jsxAttribute("alt", alt),
-          jsxAttribute("src", b.memberExpression(imgSrc, b.identifier("src"))),
-          jsxAttribute("width", b.memberExpression(imgSrc, b.identifier("width"))),
-          jsxAttribute("height", b.memberExpression(imgSrc, b.identifier("height"))),
+          jsxAttribute("src", imgSrc),
           title && jsxAttribute("title", title),
+          jsxAttribute(
+            "variant",
+            b.memberExpression(b.identifier("props"), b.identifier("variant")),
+          ),
         ]),
       });
 

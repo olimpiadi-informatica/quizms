@@ -10,8 +10,11 @@ import svgToMiniDataURI from "mini-svg-data-uri";
 import { PluginContext } from "rollup";
 import sharp, { ResizeOptions } from "sharp";
 import { CustomPlugin as SvgoPlugin, optimize } from "svgo";
-import { temporaryFile } from "tempy";
+import { temporaryFile, temporaryWrite } from "tempy";
 import { PluginOption } from "vite";
+
+import { jsToAsy } from "./asymptote";
+import { executePython } from "./python";
 
 const execFile = promisify(child_process.execFile);
 
@@ -52,10 +55,17 @@ export default function images(): PluginOption {
       const options: ImageOptions = { width, height };
 
       if (ext === ".asy") {
+        const variantFile = params.get("v");
+        if (variantFile) {
+          return await transformAsymptoteVariants(path, joinPath(dirname(path), variantFile));
+        }
+
         const imports = await findAsymptoteDependencies(path);
         const header = imports.map((f) => `import "${f}?url";`).join("\n");
 
-        const image = await transformAsymptote(path, options);
+        const inject = params.get("inject");
+
+        const image = await transformAsymptote(path, options, inject);
         return emitFile(this, path, image, isBuild, header);
       }
 
@@ -72,25 +82,65 @@ export default function images(): PluginOption {
   };
 }
 
-async function transformAsymptote(path: string, options: ImageOptions): Promise<Image> {
+async function transformAsymptoteVariants(path: string, variantFile: string): Promise<string> {
+  const variants = await executePython(variantFile);
+
+  if (!Array.isArray(variants) || !_.isPlainObject(variants[0])) {
+    throw new TypeError("Variant file must export an array of objects");
+  }
+
+  const imports = variants
+    .map((v, i) => {
+      const inject = Object.entries(v)
+        .map(([key, val]) => jsToAsy(key, val))
+        .join("\n");
+
+      return `import img_${i} from "${path}?inject=${encodeURIComponent(inject)}";`;
+    })
+    .join("\n");
+
+  return `${imports}
+import "${variantFile}?url";
+
+const variants = [${variants.map((_, i) => `img_${i}`).join(", ")}];
+
+export default function img({ variant }) {
+  return variants[variant];
+}
+`;
+}
+
+async function transformAsymptote(
+  path: string,
+  options: ImageOptions,
+  inject: string | null,
+): Promise<Image> {
   const svgFile = temporaryFile({ extension: "svg" });
+
+  // ????????? https://github.com/vitejs/vite/pull/2614
+  while (inject?.includes("%")) {
+    inject = decodeURIComponent(inject);
+  }
+
+  const injectFile = await temporaryWrite(inject ?? "", { extension: "asy" });
 
   if (platform() === "darwin") {
     const pdfFile = temporaryFile({ extension: "pdf" });
-    await execFile("asy", [path, "-f", "pdf", "-o", pdfFile], {
+    await execFile("asy", [path, "-f", "pdf", "-autoimport", injectFile, "-o", pdfFile], {
       cwd: dirname(path),
     });
 
     await execFile("pdf2svg", [pdfFile, svgFile]);
     await fs.unlink(pdfFile);
   } else {
-    await execFile("asy", [path, "-f", "svg", "-o", svgFile], {
+    await execFile("asy", [path, "-f", "svg", "-autoimport", injectFile, "-o", svgFile], {
       cwd: dirname(path),
     });
   }
 
   const image = await transformSvg(svgFile, options);
   await fs.unlink(svgFile);
+  // await fs.unlink(injectFile);
 
   return image;
 }

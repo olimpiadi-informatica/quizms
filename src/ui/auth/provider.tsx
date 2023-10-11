@@ -1,9 +1,5 @@
 import React, { ReactNode, createContext, useContext } from "react";
 
-import { MDXProvider } from "@mdx-js/react";
-
-import { components } from "../mdxComponents";
-
 type AuthProviderProps = {
   /** Record con le risposte dell'utente */
   answers: Record<string, string | undefined>;
@@ -37,9 +33,7 @@ AuthenticationContext.displayName = "AuthenticationContext";
 
 export function AuthenticationProvider({ children, ...rest }: AuthProviderProps) {
   return (
-    <AuthenticationContext.Provider value={{ ...rest }}>
-      <MDXProvider components={components}>{children}</MDXProvider>
-    </AuthenticationContext.Provider>
+    <AuthenticationContext.Provider value={{ ...rest }}>{children}</AuthenticationContext.Provider>
   );
 }
 

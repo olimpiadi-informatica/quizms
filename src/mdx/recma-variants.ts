@@ -17,6 +17,10 @@ export default recmaVariants;
 function findVariants(ast: Program) {
   let variantsFound = false;
   traverse(ast, {
+    ImportDeclaration(path) {
+      const node = path.node!;
+      variantsFound ||= node.specifiers.some((specifier) => specifier.local.name === "variants");
+    },
     VariableDeclarator(path) {
       const node = path.node!;
       variantsFound ||= is.identifier(node.id) && node.id.name === "variants";

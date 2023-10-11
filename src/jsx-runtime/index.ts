@@ -26,6 +26,7 @@ export function useMDXComponents() {
     "Code",
     "Contest",
     "Explanation",
+    "Image",
     "MathExpr",
     "OpenAnswer",
     "Problem",

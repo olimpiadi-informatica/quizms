@@ -8,6 +8,7 @@ import { InlineConfig, splitVendorChunkPlugin } from "vite";
 import { mdxOptions } from "~/mdx";
 
 import images from "./images";
+import python from "./python";
 
 type Options = {
   mdx?: MdxOptions;
@@ -31,6 +32,7 @@ export default function (mode: "development" | "production", options?: Options):
     plugins: [
       images(),
       { enforce: "pre", ...mdxPlugin({ ...mdxOptions, ...options?.mdx }) },
+      python(),
       react({ plugins: swcPlugins }),
       splitVendorChunkPlugin(),
     ],
