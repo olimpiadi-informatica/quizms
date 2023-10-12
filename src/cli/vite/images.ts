@@ -20,7 +20,7 @@ const execFile = promisify(child_process.execFile);
 
 const imageExtensions = [".png", ".jpg", ".jpeg", ".tiff", ".gif", ".webp", ".avif"];
 
-type ImageOptions = ResizeOptions;
+type ImageOptions = ResizeOptions | { scale: number };
 
 type SvgImage = {
   format: ".svg";
@@ -52,12 +52,12 @@ export default function images(): PluginOption {
 
       const width = params.has("w") ? Number(params.get("w")) : undefined;
       const height = params.has("h") ? Number(params.get("h")) : undefined;
-      const options: ImageOptions = { width, height };
+      const scale = params.has("s") ? Number(params.get("s")) : undefined;
+      const options: ImageOptions = scale ? { scale } : { width, height };
 
       if (ext === ".asy") {
-        const variantFile = params.get("v");
-        if (variantFile) {
-          return await transformAsymptoteVariants(path, joinPath(dirname(path), variantFile));
+        if (params.has("v")) {
+          return await transformAsymptoteVariants(path, params);
         }
 
         const imports = await findAsymptoteDependencies(path);
@@ -82,12 +82,15 @@ export default function images(): PluginOption {
   };
 }
 
-async function transformAsymptoteVariants(path: string, variantFile: string): Promise<string> {
+async function transformAsymptoteVariants(path: string, params: URLSearchParams): Promise<string> {
+  const variantFile = joinPath(dirname(path), params.get("v")!);
   const variants = await executePython(variantFile);
 
   if (!Array.isArray(variants) || !_.isPlainObject(variants[0])) {
     throw new TypeError("Variant file must export an array of objects");
   }
+
+  params.delete("v");
 
   const imports = variants
     .map((v, i) => {
@@ -95,7 +98,9 @@ async function transformAsymptoteVariants(path: string, variantFile: string): Pr
         .map(([key, val]) => jsToAsy(key, val))
         .join("\n");
 
-      return `import img_${i} from "${path}?inject=${encodeURIComponent(inject)}";`;
+      params.set("inject", inject);
+
+      return `import img_${i} from "${path}?${params.toString()}";`;
     })
     .join("\n");
 
@@ -175,7 +180,10 @@ async function transformSvg(path: string, options: ImageOptions): Promise<Image>
   }
 
   let width: number, height: number;
-  if (options.width || options.height) {
+  if ("scale" in options) {
+    width = originalSize.width * options.scale;
+    height = originalSize.height * options.scale;
+  } else if (options.width || options.height) {
     width = options.width || (options.height! * originalSize.width) / originalSize.height;
     height = options.height || (options.width! * originalSize.height) / originalSize.width;
   } else {
@@ -187,7 +195,15 @@ async function transformSvg(path: string, options: ImageOptions): Promise<Image>
 }
 
 async function transformImage(path: string, options: ImageOptions): Promise<Image> {
-  let process = sharp(path).toFormat("webp");
+  let process = sharp(path).webp();
+
+  if ("scale" in options) {
+    const metadata = await sharp(path).metadata();
+    options = {
+      width: metadata.width! * options.scale,
+    };
+  }
+
   if (options.width || options.height) {
     process = process.resize(options);
   }
