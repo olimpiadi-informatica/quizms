@@ -109,7 +109,7 @@ import "${variantFile}?url";
 
 const variants = [${variants.map((_, i) => `img_${i}`).join(", ")}];
 
-export default function img({ variant }) {
+export default function img(variant) {
   return variants[variant];
 }
 `;

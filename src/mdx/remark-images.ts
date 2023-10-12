@@ -112,12 +112,15 @@ const remarkImages: Plugin<[], Root> = () => {
         children: [],
         attributes: _.compact([
           jsxAttribute("alt", alt),
-          jsxAttribute("src", imgSrc),
-          title && jsxAttribute("title", title),
           jsxAttribute(
-            "variant",
-            b.memberExpression(b.identifier("props"), b.identifier("variant")),
+            "src",
+            b.conditionalExpression(
+              b.binaryExpression("===", b.unaryExpression("typeof", imgSrc), b.literal("function")),
+              b.callExpression(imgSrc, [b.identifier("__variant__")]),
+              imgSrc,
+            ),
           ),
+          title && jsxAttribute("title", title),
         ]),
       });
 

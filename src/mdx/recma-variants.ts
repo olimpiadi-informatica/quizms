@@ -46,6 +46,20 @@ function injectLocalVariables(ast: Program) {
         node.body.body.unshift(
           b.variableDeclaration("const", [
             b.variableDeclarator(
+              b.identifier("__variant__"),
+              b.binaryExpression(
+                "%",
+                b.logicalExpression(
+                  "??",
+                  b.memberExpression(b.identifier("props"), b.identifier("variant"), false, true),
+                  b.literal(0),
+                ),
+                b.memberExpression(b.identifier("variants"), b.identifier("length")),
+              ),
+            ),
+          ]),
+          b.variableDeclaration("const", [
+            b.variableDeclarator(
               b.objectPattern(
                 variables.map(
                   (name) =>
@@ -56,15 +70,7 @@ function injectLocalVariables(ast: Program) {
                     ) as AssignmentProperty,
                 ),
               ),
-              b.memberExpression(
-                b.identifier("variants"),
-                b.logicalExpression(
-                  "??",
-                  b.memberExpression(b.identifier("props"), b.identifier("variant")),
-                  b.literal(0),
-                ),
-                true,
-              ),
+              b.memberExpression(b.identifier("variants"), b.identifier("__variant__"), true),
             ),
           ]),
         );
