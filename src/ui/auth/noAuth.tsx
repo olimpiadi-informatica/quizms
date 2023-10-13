@@ -11,7 +11,6 @@ import React, {
 import { Duration, add, differenceInMilliseconds } from "date-fns";
 import _ from "lodash";
 
-import Progress from "../components/progress";
 import Prose from "../components/prose";
 import { AuthenticationProvider } from "./provider";
 
@@ -30,15 +29,11 @@ export function NoAuth({ header: Header, children, ...rest }: AuthProps) {
   );
 }
 
-function useLocalStorage<T>(
-  prefix: string,
-  key: string,
-  defaultValue: T,
-  parser?: (value: string) => T,
-) {
-  const [value, setValue] = useState<T>(defaultValue);
+function useLocalStorage<T>(key: string, defaultValue: T, parser?: (value: string) => T) {
+  const fullKey = `${window.location.pathname}#${key}`;
+  const prev = localStorage.getItem(fullKey);
 
-  const fullKey = `${prefix}#${key}`;
+  const [value, setValue] = useState<T>(prev ? (parser ?? JSON.parse)(prev) : defaultValue);
 
   const set = useCallback(
     (value: SetStateAction<T>) => {
@@ -55,39 +50,21 @@ function useLocalStorage<T>(
     [fullKey],
   );
 
-  useEffect(() => {
-    const prev = localStorage.getItem(fullKey);
-    if (prev) set((parser ?? JSON.parse)(prev));
-  }, [fullKey, parser, set]);
-
   return [value, set] as const;
 }
 
 function NoAuthInner({ duration, children }: Omit<AuthProps, "header">) {
-  const [path, setPath] = useState("");
-  const [loaded, setLoaded] = useState(import.meta.env.QUIZMS_MODE === "pdf");
-
-  useEffect(() => {
-    setPath(window.location.pathname);
-    setLoaded(true);
-  }, []);
-
-  const [variant, setVariant] = useLocalStorage(path, "variant", 0);
-  const [submitted, setSubmitted] = useLocalStorage(path, "submit", false);
+  const [variant, setVariant] = useLocalStorage("variant", 0);
+  const [submitted, setSubmitted] = useLocalStorage("submit", false);
 
   const [startTime, setStartTime] = useLocalStorage<Date | undefined>(
-    path,
     "startTime",
     undefined,
-    (value) => (value !== "undefined" ? new Date(value) : undefined),
+    (value) => (value !== "undefined" ? new Date(JSON.parse(value)) : undefined),
   );
   const endTime = useMemo(() => startTime && add(startTime, duration), [startTime, duration]);
 
-  const [answers, setAnswers] = useLocalStorage<Record<string, string | undefined>>(
-    path,
-    "answers",
-    {},
-  );
+  const [answers, setAnswers] = useLocalStorage<Record<string, string | undefined>>("answers", {});
 
   const setAnswer = useCallback(
     (name: string, value: string | undefined) => {
@@ -114,16 +91,6 @@ function NoAuthInner({ duration, children }: Omit<AuthProps, "header">) {
     setAnswers({});
     setStartTime(undefined);
   }, [setAnswers, setStartTime, setSubmitted]);
-
-  if (!loaded) {
-    return (
-      <div className="flex h-screen justify-center">
-        <div className="flex flex-col justify-center">
-          <Progress>Caricamento in corso...</Progress>
-        </div>
-      </div>
-    );
-  }
 
   if (import.meta.env.PROD && import.meta.env.QUIZMS_MODE !== "pdf" && !startTime) {
     return (
