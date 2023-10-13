@@ -111,7 +111,7 @@ const remarkImages: Plugin<[], Root> = () => {
         name: "Image",
         children: [],
         attributes: _.compact([
-          jsxAttribute("alt", alt),
+          jsxAttribute("alt", alt ?? ""),
           jsxAttribute(
             "src",
             b.conditionalExpression(

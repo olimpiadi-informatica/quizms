@@ -167,6 +167,7 @@ async function transformSvg(path: string, options: ImageOptions): Promise<Image>
               minify: false,
               remove: false,
             },
+            inlineStyles: false,
           },
         },
       },
@@ -175,9 +176,14 @@ async function transformSvg(path: string, options: ImageOptions): Promise<Image>
     path,
   });
 
-  if (!originalSize.width || !originalSize.height) {
+  if (
+    (!originalSize.width || !originalSize.height) &&
+    ("scale" in options || !options.width || !options.height)
+  ) {
     throw new Error(`Unable to determine size of SVG image: ${path}`);
   }
+  originalSize.width = originalSize.width!;
+  originalSize.height = originalSize.height!;
 
   let width: number, height: number;
   if ("scale" in options) {
@@ -294,10 +300,9 @@ function sizePlugin(out: { width?: number; height?: number }): SvgoPlugin {
   };
 }
 
-function convertUnit(length: string) {
-  const match = length.match(/^(\d+(?:\.\d+)?)(in|cm|mm|pt|pc|px)?$/);
-
-  if (!match) throw new Error(`Invalid length: ${length}`);
+function convertUnit(length: string | undefined): number | undefined {
+  const match = length?.match(/^(\d+(?:\.\d+)?)(in|cm|mm|pt|pc|px)?$/);
+  if (!match) return;
 
   const PPI = 96;
   const conversion = {

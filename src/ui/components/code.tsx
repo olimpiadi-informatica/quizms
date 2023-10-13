@@ -47,7 +47,8 @@ function srs(hljs: HLJSApi): Language {
   };
 }
 
-const lowlight = createLowlight({ srs });
+const languages = { srs };
+const lowlight = createLowlight(languages);
 const SyntaxHighlighter = SyntaxHighlighterBuilder(
   {
     highlight: (lang: string, value: string) => {
@@ -78,7 +79,7 @@ export default function Code({ inline, ...props }: Props) {
 function InlineCode({ code, language }: Omit<Props, "inline">) {
   return (
     <SyntaxHighlighter
-      language={language}
+      language={language in languages ? language : "text"}
       PreTag={({ children }) => <>{children}</>}
       useInlineStyles={false}>
       {code}
@@ -89,7 +90,7 @@ function InlineCode({ code, language }: Omit<Props, "inline">) {
 function BlockCode({ code, language }: Omit<Props, "inline">) {
   return (
     <SyntaxHighlighter
-      language={language}
+      language={language in languages ? language : "text"}
       wrapLines={true}
       showLineNumbers={true}
       useInlineStyles={false}>

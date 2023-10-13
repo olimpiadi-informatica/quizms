@@ -7,6 +7,8 @@ import remarkMdxMathEnhancedPlugin from "remark-mdx-math-enhanced";
 import remarkSmartypants from "remark-smartypants";
 import { PluggableList } from "unified";
 
+import remarkMermaid from "~/mdx/remark-mermaid";
+
 import recmaRemoveExports from "./recma-remove-exports";
 import recmaVariants from "./recma-variants";
 import rehypeFixWrap from "./rehype-fix-wrap";
@@ -19,6 +21,7 @@ export const remarkPlugins: PluggableList = [
   remarkAnswers,
   remarkFrontmatter,
   remarkGfm,
+  remarkMermaid,
   remarkHighlight,
   remarkMath,
   remarkMdxFrontmatter,
