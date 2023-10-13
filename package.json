@@ -37,6 +37,7 @@
     "estree-util-to-js": "^2.0",
     "fast-glob": "^3.3.1",
     "js-interpreter": "^4.0",
+    "js-sha256": "^0.10.1",
     "lodash": "^4.17",
     "lowlight": "^3.0",
     "lucide-react": "^0.284",

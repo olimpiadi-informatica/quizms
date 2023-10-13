@@ -7,6 +7,8 @@ import * as process from "process";
 import { Plugin } from "unified";
 import { visit } from "unist-util-visit";
 
+import { Rng } from "~/utils/random";
+
 import { jsxAttribute } from "./utils";
 
 const remarkAnswers: Plugin<[], Root> = () => {
@@ -23,11 +25,16 @@ function parseMultipleAnswerGroup(tree: Root) {
   visit(tree, { type: "list", ordered: false }, (list: List, index, parent: Parent) => {
     if (!_.some(list.children, "checked")) return;
 
+    if (process.env.QUIZMS_VARIANT) {
+      const rng = new Rng(`b#answers#${process.env.QUIZMS_VARIANT}#${id}`);
+      rng.shuffle(list.children);
+    }
+
     parent.children[index!] = {
       type: "mdxJsxFlowElement",
       name: "AnswerGroup",
       attributes: [],
-      children: list.children.map((child, index): MdxJsxFlowElement => {
+      children: list.children.map((child): MdxJsxFlowElement => {
         const attr =
           (process.env.NODE_ENV === "development" || process.env.QUIZMS_MODE === "training") &&
           jsxAttribute("correct", child.checked);
@@ -35,7 +42,7 @@ function parseMultipleAnswerGroup(tree: Root) {
         return {
           type: "mdxJsxFlowElement",
           name: "Answer",
-          attributes: _.compact([jsxAttribute("id", String.fromCharCode(65 + index)), attr]),
+          attributes: _.compact([attr]),
           children: child.children,
         } as MdxJsxFlowElement;
       }),

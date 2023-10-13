@@ -9,6 +9,8 @@ import React, {
 
 import _ from "lodash";
 
+import { hash } from "~/utils/random";
+
 import { useAuthentication } from "./auth/provider";
 import { useContest } from "./contest";
 import { useSection } from "./section";
@@ -39,9 +41,11 @@ ProblemContext.displayName = "ProblemContext";
 export function Problem({ id, points, statement: Statement }: ProblemProps) {
   const { variant } = useAuthentication();
 
+  const variantId = import.meta.env.PROD ? hash(`r#problem#${variant}#${id}`) : 0;
+
   return (
     <ProblemContext.Provider value={{ id, points, setCorrect: _.noop }}>
-      <Statement variant={variant} />
+      <Statement variant={variantId} />
       <hr className="last:hidden" />
     </ProblemContext.Provider>
   );

@@ -1,34 +1,56 @@
-import React, { ReactNode, useEffect, useId } from "react";
+import React, { Children, ReactNode, createContext, useContext, useEffect, useId } from "react";
 
 import classNames from "classnames";
 import { Trash2 } from "lucide-react";
 
+import { Rng } from "~/utils/random";
+
 import { useAnswer, useAuthentication } from "./auth/provider";
 import { useProblem } from "./problem";
+
+type AnswerGroupContextProps = {
+  id: string;
+};
+const AnswerGroupContext = createContext<AnswerGroupContextProps>({
+  id: "",
+});
+AnswerGroupContext.displayName = "AnswerGroupContext";
 
 type AnswerGroupProps = {
   children: ReactNode;
 };
 
 export function AnswerGroup({ children }: AnswerGroupProps) {
+  const { variant } = useAuthentication();
+  const { id } = useProblem();
+
+  const rng = new Rng(`r#answers#${variant}#${id}`);
+
+  const answers = Children.toArray(children);
+  if (import.meta.env.PROD) rng.shuffle(answers);
+
   return (
     <form
       className={classNames(
         "answer-group my-5 break-before-avoid break-inside-avoid rounded-xl",
         "bg-base-200 px-3 py-3 prose-p:my-1 print:border print:border-[var(--tw-prose-hr)]",
       )}>
-      {children}
+      {answers.map((answer, i) => (
+        <AnswerGroupContext.Provider key={i} value={{ id: String.fromCharCode(65 + i) }}>
+          {answer}
+        </AnswerGroupContext.Provider>
+      ))}
     </form>
   );
 }
 
 type AnswerProps = {
-  id: string;
   correct?: boolean;
   children: ReactNode;
 };
 
-export function Answer({ id, correct, children }: AnswerProps) {
+export function Answer({ correct, children }: AnswerProps) {
+  const { id } = useContext(AnswerGroupContext);
   const { id: problemId, setCorrect } = useProblem();
   const [answer, setAnswer] = useAnswer(problemId!);
   const { terminated } = useAuthentication();

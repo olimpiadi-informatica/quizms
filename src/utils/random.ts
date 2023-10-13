@@ -1,14 +1,11 @@
-import { createHash } from "crypto";
+import { sha256 } from "js-sha256";
 import { RandomGenerator, unsafeUniformIntDistribution, xoroshiro128plus } from "pure-rand";
 
 export class Rng {
   private readonly rng: RandomGenerator;
 
   constructor(seed: string) {
-    const hash = createHash("sha256");
-    hash.update(seed);
-    const digest = hash.digest().readInt32BE();
-    this.rng = xoroshiro128plus(digest);
+    this.rng = xoroshiro128plus(hash(seed));
   }
 
   public randint = (min: number, max: number): number => {
@@ -21,4 +18,10 @@ export class Rng {
       [array[i], array[j]] = [array[j], array[i]];
     }
   };
+}
+
+export function hash(seed: string): number {
+  const digest = sha256.arrayBuffer(seed);
+  const view = new DataView(digest);
+  return view.getUint32(0);
 }

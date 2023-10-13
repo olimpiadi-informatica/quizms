@@ -9,12 +9,13 @@ export type BundleOptions = {
   dir: string;
   outDir: string;
   contest: string;
+  secret?: string;
   variant?: string;
 };
 
 export default async function bundle(options: BundleOptions): Promise<void> {
   if (options.variant) {
-    process.env.QUIZMS_VARIANT = options.variant;
+    process.env.QUIZMS_VARIANT = `${options.secret}#${options.variant}`;
   }
 
   process.env.QUIZMS_MODE = "contest";
@@ -32,7 +33,8 @@ export default async function bundle(options: BundleOptions): Promise<void> {
     root: join(options.dir, "src"),
     build: {
       copyPublicDir: false,
-      outDir: options.outDir,
+      outDir: join(options.dir, options.outDir),
+      emptyOutDir: true,
       lib: {
         entry: options.contest,
         fileName: `contest-${variant}`,

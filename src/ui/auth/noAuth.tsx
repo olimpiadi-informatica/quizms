@@ -1,6 +1,15 @@
-import React, { ComponentType, ReactNode, useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+  ComponentType,
+  ReactNode,
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
 import { Duration, add, differenceInMilliseconds } from "date-fns";
+import _ from "lodash";
 
 import Progress from "../components/progress";
 import Prose from "../components/prose";
@@ -21,75 +30,90 @@ export function NoAuth({ header: Header, children, ...rest }: AuthProps) {
   );
 }
 
+function useLocalStorage<T>(
+  prefix: string,
+  key: string,
+  defaultValue: T,
+  parser?: (value: string) => T,
+) {
+  const [value, setValue] = useState<T>(defaultValue);
+
+  const fullKey = `${prefix}#${key}`;
+
+  const set = useCallback(
+    (value: SetStateAction<T>) => {
+      setValue((oldValue) => {
+        const newValue = _.isFunction(value) ? value(oldValue) : value;
+        if (newValue === undefined) {
+          localStorage.removeItem(fullKey);
+        } else {
+          localStorage.setItem(fullKey, JSON.stringify(newValue));
+        }
+        return newValue;
+      });
+    },
+    [fullKey],
+  );
+
+  useEffect(() => {
+    const prev = localStorage.getItem(fullKey);
+    if (prev) set((parser ?? JSON.parse)(prev));
+  }, [fullKey, parser, set]);
+
+  return [value, set] as const;
+}
+
 function NoAuthInner({ duration, children }: Omit<AuthProps, "header">) {
-  const path = window.location.pathname;
+  const [path, setPath] = useState("");
+  const [loaded, setLoaded] = useState(import.meta.env.QUIZMS_MODE === "pdf");
 
-  const [submitted, setSubmitted] = useState(false);
-  const [answers, setAnswers] = useState<Record<string, string | undefined>>({});
-  const [startTime, setStartTime] = useState<Date>();
+  useEffect(() => {
+    setPath(window.location.pathname);
+    setLoaded(true);
+  }, []);
 
+  const [variant, setVariant] = useLocalStorage(path, "variant", 0);
+  const [submitted, setSubmitted] = useLocalStorage(path, "submit", false);
+
+  const [startTime, setStartTime] = useLocalStorage<Date | undefined>(
+    path,
+    "startTime",
+    undefined,
+    (value) => (value !== "undefined" ? new Date(value) : undefined),
+  );
   const endTime = useMemo(() => startTime && add(startTime, duration), [startTime, duration]);
+
+  const [answers, setAnswers] = useLocalStorage<Record<string, string | undefined>>(
+    path,
+    "answers",
+    {},
+  );
 
   const setAnswer = useCallback(
     (name: string, value: string | undefined) => {
       if (submitted) return;
       setAnswers((prev) => ({ ...prev, [name]: value }));
     },
-    [submitted],
+    [submitted, setAnswers],
   );
-
-  const [loaded, setLoaded] = useState(import.meta.env.QUIZMS_MODE === "pdf");
-  useEffect(() => {
-    if (loaded) return;
-
-    const prevStartTime = localStorage.getItem(path + "#startTime");
-    if (prevStartTime) {
-      setStartTime(new Date(prevStartTime));
-    }
-
-    const prevAnswers = localStorage.getItem(path + "#answers");
-    if (prevAnswers) {
-      setAnswers(JSON.parse(prevAnswers));
-    }
-
-    const prevSubmit = localStorage.getItem(path + "#submit");
-    if (prevSubmit) {
-      setSubmitted(true);
-    }
-
-    setLoaded(true);
-  }, [path, loaded]);
 
   useEffect(() => {
     if (!endTime) return;
     const id = setTimeout(() => setSubmitted(true), differenceInMilliseconds(endTime, new Date()));
     return () => clearTimeout(id);
-  }, [endTime]);
+  }, [endTime, setSubmitted]);
 
-  useEffect(() => {
-    if (!loaded) return;
-    localStorage.setItem(path + "#answers", JSON.stringify(answers));
-  }, [path, loaded, answers]);
-
-  const onStart = useCallback(() => {
+  const start = useCallback(() => {
     const now = new Date();
     setStartTime(now);
-    localStorage.setItem(path + "#startTime", now.toISOString());
-  }, [path]);
-
-  const submit = useCallback(() => {
-    localStorage.setItem(path + "#submit", "1");
-    setSubmitted(true);
-  }, [path]);
+    setVariant(import.meta.env.PROD ? Math.random() * Number.MAX_SAFE_INTEGER : 0);
+  }, [setStartTime, setVariant]);
 
   const reset = useCallback(() => {
     setSubmitted(false);
     setAnswers({});
     setStartTime(undefined);
-    localStorage.removeItem(path + "#startTime");
-    localStorage.removeItem(path + "#answers");
-    localStorage.removeItem(path + "#submit");
-  }, [path]);
+  }, [setAnswers, setStartTime, setSubmitted]);
 
   if (!loaded) {
     return (
@@ -105,7 +129,7 @@ function NoAuthInner({ duration, children }: Omit<AuthProps, "header">) {
     return (
       <div className="flex h-screen justify-center">
         <div className="flex flex-col justify-center">
-          <button className="btn btn-success btn-lg" onClick={onStart}>
+          <button className="btn btn-success btn-lg" onClick={start}>
             Inizia
           </button>
         </div>
@@ -117,11 +141,11 @@ function NoAuthInner({ duration, children }: Omit<AuthProps, "header">) {
     <AuthenticationProvider
       answers={answers}
       setAnswer={setAnswer}
-      submit={submit}
+      submit={() => setSubmitted(true)}
       reset={reset}
       startTime={startTime}
       endTime={endTime!}
-      variant={0}
+      variant={variant}
       terminated={submitted}>
       {children}
     </AuthenticationProvider>
