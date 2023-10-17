@@ -8,13 +8,13 @@ import { Rng } from "~/utils/random";
 import { useAnswer, useAuthentication } from "./auth/provider";
 import { useProblem } from "./problem";
 
-type AnswerGroupContextProps = {
+type AnswerContextProps = {
   id: string;
 };
-const AnswerGroupContext = createContext<AnswerGroupContextProps>({
+const AnswerContext = createContext<AnswerContextProps>({
   id: "",
 });
-AnswerGroupContext.displayName = "AnswerGroupContext";
+AnswerContext.displayName = "AnswerContext";
 
 type AnswerGroupProps = {
   children: ReactNode;
@@ -36,9 +36,9 @@ export function AnswerGroup({ children }: AnswerGroupProps) {
         "bg-base-200 px-3 py-3 prose-p:my-1 print:border print:border-[var(--tw-prose-hr)]",
       )}>
       {answers.map((answer, i) => (
-        <AnswerGroupContext.Provider key={i} value={{ id: String.fromCharCode(65 + i) }}>
+        <AnswerContext.Provider key={i} value={{ id: String.fromCharCode(65 + i) }}>
           {answer}
-        </AnswerGroupContext.Provider>
+        </AnswerContext.Provider>
       ))}
     </form>
   );
@@ -50,7 +50,7 @@ type AnswerProps = {
 };
 
 export function Answer({ correct, children }: AnswerProps) {
-  const { id } = useContext(AnswerGroupContext);
+  const { id } = useContext(AnswerContext);
   const { id: problemId, setCorrect } = useProblem();
   const [answer, setAnswer] = useAnswer(problemId!);
   const { terminated } = useAuthentication();

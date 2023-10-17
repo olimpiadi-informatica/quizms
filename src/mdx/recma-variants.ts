@@ -1,13 +1,17 @@
+import process from "node:process";
+
 import { AssignmentProperty, Program } from "estree";
 import { builders as b, is, traverse } from "estree-toolkit";
 import _ from "lodash";
 import { Plugin } from "unified";
 
+import { hash } from "~/utils/random";
+
 const recmaVariants: Plugin<[], Program> = () => {
-  return (ast) => {
+  return (ast, file) => {
     const found = findVariants(ast);
     if (found) {
-      injectLocalVariables(ast);
+      injectLocalVariables(ast, hash(file.value));
     }
   };
 };
@@ -32,7 +36,7 @@ function findVariants(ast: Program) {
 
 const wellKnownGlobals = new Set(["console", "import", "parseInt"]);
 
-function injectLocalVariables(ast: Program) {
+function injectLocalVariables(ast: Program, problemId: number) {
   traverse(ast, {
     $: { scope: true },
 
@@ -40,6 +44,11 @@ function injectLocalVariables(ast: Program) {
       const variables = Object.keys(path.scope!.globalBindings).filter(
         (name) => (name.length === 1 || name !== _.upperFirst(name)) && !wellKnownGlobals.has(name),
       );
+
+      let variant = 0;
+      if (process.env.QUIZMS_VARIANT) {
+        variant = hash(`b#problem#${process.env.QUIZMS_VARIANT}#${problemId}`);
+      }
 
       const node = path.node!;
       if (node.id?.name === "_createMdxContent") {
@@ -52,7 +61,7 @@ function injectLocalVariables(ast: Program) {
                 b.logicalExpression(
                   "??",
                   b.memberExpression(b.identifier("props"), b.identifier("variant"), false, true),
-                  b.literal(0),
+                  b.literal(variant),
                 ),
                 b.memberExpression(b.identifier("variants"), b.identifier("length")),
               ),

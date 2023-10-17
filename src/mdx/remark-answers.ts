@@ -1,19 +1,20 @@
+import process from "node:process";
+
 import { Parser } from "acorn";
 import { Directive, Program } from "estree";
 import _ from "lodash";
 import { Blockquote, List, Paragraph, Parent, Root } from "mdast";
 import { MdxJsxFlowElement } from "mdast-util-mdx-jsx";
-import * as process from "process";
 import { Plugin } from "unified";
 import { visit } from "unist-util-visit";
 
-import { Rng } from "~/utils/random";
+import { Rng, hash } from "~/utils/random";
 
 import { jsxAttribute } from "./utils";
 
 const remarkAnswers: Plugin<[], Root> = () => {
-  return (tree: Root) => {
-    parseMultipleAnswerGroup(tree);
+  return (tree: Root, file) => {
+    parseMultipleAnswerGroup(tree, hash(file.value));
     parseOpenAnswerGroup(tree);
     parseExplanation(tree);
   };
@@ -21,12 +22,12 @@ const remarkAnswers: Plugin<[], Root> = () => {
 
 export default remarkAnswers;
 
-function parseMultipleAnswerGroup(tree: Root) {
+function parseMultipleAnswerGroup(tree: Root, problemId: number) {
   visit(tree, { type: "list", ordered: false }, (list: List, index, parent: Parent) => {
     if (!_.some(list.children, "checked")) return;
 
     if (process.env.QUIZMS_VARIANT) {
-      const rng = new Rng(`b#answers#${process.env.QUIZMS_VARIANT}#${id}`);
+      const rng = new Rng(`b#answers#${process.env.QUIZMS_VARIANT}#${problemId}`);
       rng.shuffle(list.children);
     }
 

@@ -1,4 +1,4 @@
-import { sha256 } from "js-sha256";
+import { Message, sha256 } from "js-sha256";
 import { RandomGenerator, unsafeUniformIntDistribution, xoroshiro128plus } from "pure-rand";
 
 export class Rng {
@@ -20,8 +20,8 @@ export class Rng {
   };
 }
 
-export function hash(seed: string): number {
+export function hash(seed: Message): number {
   const digest = sha256.arrayBuffer(seed);
   const view = new DataView(digest);
-  return view.getUint32(0);
+  return Number(view.getBigUint64(0) >> BigInt(11));
 }
