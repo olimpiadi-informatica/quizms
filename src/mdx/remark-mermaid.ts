@@ -15,7 +15,7 @@ const remarkMermaid: Plugin<[], Root> = () => {
 
     if (diagrams.length === 0) return;
 
-    const renderer = createMermaidRenderer({ browser: chromium as any });
+    const renderer = createMermaidRenderer();
     const results = await renderer(
       diagrams.map(({ node }) => node.value),
       { mermaidConfig: { theme: "forest" } },

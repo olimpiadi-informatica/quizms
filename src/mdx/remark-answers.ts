@@ -1,7 +1,7 @@
 import process from "node:process";
 
 import { Parser } from "acorn";
-import { Directive, Program } from "estree";
+import { Directive } from "estree";
 import { compact } from "lodash-es";
 import { Blockquote, List, Paragraph, Parent, Root } from "mdast";
 import { MdxJsxFlowElement } from "mdast-util-mdx-jsx";
@@ -74,7 +74,7 @@ function parseOpenAnswerGroup(tree: Root) {
     const template = Parser.parse(templateLiteral, {
       ecmaVersion: "latest",
       sourceType: "module",
-    }) as unknown as Program;
+    });
 
     const attributes = compact([
       jsxAttribute("type", "text"),

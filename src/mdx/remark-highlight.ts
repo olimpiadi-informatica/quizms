@@ -1,5 +1,5 @@
 import { Parser } from "acorn";
-import { Directive, Program } from "estree";
+import { Directive } from "estree";
 import { Code, InlineCode, Root } from "mdast";
 import { MdxJsxFlowElement } from "mdast-util-mdx";
 import { Plugin } from "unified";
@@ -30,7 +30,7 @@ const remarkHighlight: Plugin<[], Root> = () => {
       const template = Parser.parse(templateLiteral, {
         ecmaVersion: "latest",
         sourceType: "module",
-      }) as unknown as Program;
+      });
 
       parent!.children[index!] = {
         type: "mdxJsxFlowElement",

@@ -1,7 +1,7 @@
 import { isAbsolute } from "node:path";
 
 import { Parser } from "acorn";
-import { Directive, Expression, ModuleDeclaration, Program } from "estree";
+import { Directive, Expression, ModuleDeclaration } from "estree";
 import { builders as b } from "estree-toolkit";
 import { compact } from "lodash-es";
 import { Image, Parent, Root, Text } from "mdast";
@@ -11,6 +11,12 @@ import { Node } from "unist";
 import { SKIP, visit } from "unist-util-visit";
 
 import { jsxAttribute } from "./utils";
+
+declare module "unist" {
+  interface Data {
+    imgContainer?: boolean | undefined;
+  }
+}
 
 const remarkImages: Plugin<[], Root> = () => {
   return (tree: Root) => {
@@ -68,7 +74,7 @@ const remarkImages: Plugin<[], Root> = () => {
         const template = Parser.parse(templateLiteral, {
           ecmaVersion: "latest",
           sourceType: "module",
-        }) as unknown as Program;
+        });
 
         imgSrc = b.memberExpression(
           b.identifier(name),
@@ -84,7 +90,7 @@ const remarkImages: Plugin<[], Root> = () => {
       }
 
       let siblingIndex = index - 1;
-      let sibling: Node<any> | undefined = parent.children[siblingIndex];
+      let sibling: Node | undefined = parent.children[siblingIndex];
       while (sibling?.type === "text" && /^\s*$/.test((sibling as Text).value)) {
         siblingIndex -= 1;
         sibling = parent.children[siblingIndex];

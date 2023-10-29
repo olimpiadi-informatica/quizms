@@ -28,6 +28,16 @@ function findVariants(ast: Program) {
     VariableDeclarator(path) {
       const node = path.node!;
       variantsFound ||= is.identifier(node.id) && node.id.name === "variants";
+      variantsFound ||=
+        is.identifier(node.id) &&
+        node.id.name === "frontmatter" &&
+        is.objectExpression(node.init) &&
+        node.init.properties.some(
+          (property) =>
+            is.property(property) &&
+            ((is.identifier(property.key) && property.key.name === "variants") ||
+              (is.literal(property.key) && property.key.value === "variants")),
+        );
     },
   });
 
@@ -63,7 +73,19 @@ function injectLocalVariables(ast: Program, problemId: number) {
                   b.memberExpression(b.identifier("props"), b.identifier("variant"), false, true),
                   b.literal(variant),
                 ),
-                b.memberExpression(b.identifier("variants"), b.identifier("length")),
+                b.memberExpression(
+                  b.logicalExpression(
+                    "??",
+                    b.memberExpression(
+                      b.identifier("frontmatter"),
+                      b.identifier("variants"),
+                      false,
+                      true,
+                    ),
+                    b.identifier("variants"),
+                  ),
+                  b.identifier("length"),
+                ),
               ),
             ),
           ]),
@@ -79,7 +101,20 @@ function injectLocalVariables(ast: Program, problemId: number) {
                     ) as AssignmentProperty,
                 ),
               ),
-              b.memberExpression(b.identifier("variants"), b.identifier("__variant__"), true),
+              b.memberExpression(
+                b.logicalExpression(
+                  "??",
+                  b.memberExpression(
+                    b.identifier("frontmatter"),
+                    b.identifier("variants"),
+                    false,
+                    true,
+                  ),
+                  b.identifier("variants"),
+                ),
+                b.identifier("__variant__"),
+                true,
+              ),
             ),
           ]),
         );
