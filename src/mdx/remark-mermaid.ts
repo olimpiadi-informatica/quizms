@@ -1,6 +1,8 @@
+import _ from "lodash";
 import { Code, Parent, Root } from "mdast";
 import { createMermaidRenderer } from "mermaid-isomorphic";
 import { chromium } from "playwright";
+import { optimize } from "svgo";
 import { temporaryWrite } from "tempy";
 import { Plugin } from "unified";
 import { visit } from "unist-util-visit";
@@ -26,13 +28,33 @@ const remarkMermaid: Plugin<[], Root> = () => {
         if (res.status === "rejected") {
           throw new Error(`Mermaid rendering failed: ${res.reason}`);
         }
-        const { svg, width, height } = res.value;
 
-        const file = await temporaryWrite(svg, { extension: "svg" });
+        const { svg, width, height } = res.value;
+        const { data } = optimize(svg, {
+          plugins: [
+            "removeDimensions",
+            {
+              name: "addAttributesToSVGElement",
+              params: {
+                attribute: { width: `${width}px`, height: `${height}px` },
+              },
+            },
+          ],
+        });
+
+        const params = _(node.meta ?? "")
+          .split(/\s+/)
+          .map(decodeURIComponent)
+          .map((m) => m.split("=", 2))
+          .fromPairs()
+          .value();
+
+        const file = await temporaryWrite(data, { extension: "svg" });
         parent.children[index] = {
           type: "image",
-          url: `${file}?w=${width}&h=${height}`,
-          alt: node.meta ?? "",
+          url: `${file}?${new URLSearchParams(params)}`,
+          alt: params.alt,
+          title: params.title,
         };
       }),
     );

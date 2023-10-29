@@ -176,14 +176,9 @@ async function transformSvg(path: string, options: ImageOptions): Promise<Image>
     path,
   });
 
-  if (
-    (!originalSize.width || !originalSize.height) &&
-    ("scale" in options || !options.width || !options.height)
-  ) {
+  if (!originalSize.width || !originalSize.height) {
     throw new Error(`Unable to determine size of SVG image: ${path}`);
   }
-  originalSize.width = originalSize.width!;
-  originalSize.height = originalSize.height!;
 
   let width: number, height: number;
   if ("scale" in options) {
