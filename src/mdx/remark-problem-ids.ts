@@ -1,4 +1,3 @@
-import _ from "lodash";
 import { Root, TopLevelContent } from "mdast";
 import { MdxJsxFlowElement } from "mdast-util-mdx-jsx";
 import "mdast-util-mdxjs-esm";
@@ -52,7 +51,7 @@ function parseSubProblems(tree: Root) {
       contents.push({
         type: "mdxJsxFlowElement",
         name: "SubProblem",
-        attributes: _.compact([attr]),
+        attributes: attr ? [attr] : [],
         children: [],
       } as MdxJsxFlowElement);
     }

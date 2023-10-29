@@ -7,7 +7,7 @@ import React, {
   useState,
 } from "react";
 
-import _ from "lodash";
+import { noop } from "lodash-es";
 
 import { hash } from "~/utils/random";
 
@@ -44,7 +44,7 @@ export function Problem({ id, points, statement: Statement }: ProblemProps) {
   const variantId = import.meta.env.PROD ? hash(`r#problem#${variant}#${id}`) : 0;
 
   return (
-    <ProblemContext.Provider value={{ id, points, setCorrect: _.noop }}>
+    <ProblemContext.Provider value={{ id, points, setCorrect: noop }}>
       <Statement variant={variantId} />
       <hr className="last:hidden" />
     </ProblemContext.Provider>

@@ -2,7 +2,7 @@ import process from "node:process";
 
 import { AssignmentProperty, Program } from "estree";
 import { builders as b, is, traverse } from "estree-toolkit";
-import _ from "lodash";
+import { upperFirst } from "lodash-es";
 import { Plugin } from "unified";
 
 import { hash } from "~/utils/random";
@@ -42,7 +42,7 @@ function injectLocalVariables(ast: Program, problemId: number) {
 
     FunctionDeclaration(path) {
       const variables = Object.keys(path.scope!.globalBindings).filter(
-        (name) => (name.length === 1 || name !== _.upperFirst(name)) && !wellKnownGlobals.has(name),
+        (name) => (name.length === 1 || name !== upperFirst(name)) && !wellKnownGlobals.has(name),
       );
 
       let variant = 0;

@@ -11,7 +11,7 @@ import React, {
   useState,
 } from "react";
 
-import _ from "lodash";
+import { isNil, sortBy, sumBy } from "lodash-es";
 
 import { useAuthentication } from "./auth/provider";
 import Modal from "./components/modal";
@@ -46,10 +46,11 @@ export function Contest({ children }: { children: ReactNode }) {
   }, []);
 
   const progress = useMemo(() => {
-    const total = _(problems).values().sumBy("points[0]");
-    const user = _(problems)
-      .filter(({ id }) => answers[id] !== undefined)
-      .sumBy("points[0]");
+    const total = sumBy(Object.values(problems), "points[0]");
+    const user = sumBy(
+      Object.values(problems).filter(({ id }) => answers[id] !== undefined),
+      "points[0]",
+    );
     return Math.round((user / total) * 100);
   }, [answers, problems]);
 
@@ -94,12 +95,17 @@ const CompletedModal = forwardRef(function CompletedModal(
   );
 
   const score = useMemo(() => {
-    if (_(problems).map("correct").some(_.isNil)) return undefined;
-    return _(problems).values().sumBy(calcPoints);
+    if (
+      Object.values(problems)
+        .map((p) => p.correct)
+        .some(isNil)
+    )
+      return undefined;
+    return sumBy(Object.values(problems), calcPoints);
   }, [problems, calcPoints]);
 
   const maxScore = useMemo(() => {
-    return _(problems).values().sumBy("points[0]");
+    return sumBy(Object.values(problems), "points[0]");
   }, [problems]);
 
   return (
@@ -121,7 +127,7 @@ const CompletedModal = forwardRef(function CompletedModal(
                 </tr>
               </thead>
               <tbody>
-                {_.sortBy(problems, "id").map((problem) => (
+                {sortBy(problems, "id").map((problem) => (
                   <tr key={problem.id}>
                     <td>{problem.id}</td>
                     <td>{answers[problem.id] ?? "-"}</td>

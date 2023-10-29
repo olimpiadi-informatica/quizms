@@ -41,7 +41,7 @@ export default async function staticExport(options: ExportOptions): Promise<void
         output: {
           manualChunks: (id) => {
             if (id.includes("node_modules/katex/")) return "katex";
-            if (id.includes("node_modules/lodash/")) return "lodash";
+            if (id.includes("node_modules/lodash-es/")) return "lodash";
             if (
               id.includes("node_modules/highlight.js/") ||
               id.includes("node_modules/lowlight/") ||

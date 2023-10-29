@@ -1,7 +1,7 @@
 import React, { ReactNode } from "react";
 
 import classNames from "classnames";
-import _ from "lodash";
+import { clamp } from "lodash-es";
 
 type ProgressBlockProps = {
   percentage?: number;
@@ -15,7 +15,7 @@ export default function Progress({ percentage, className, children }: ProgressBl
     if (isNaN(value)) {
       value = undefined;
     } else {
-      value = _.clamp(value, 0, 100);
+      value = clamp(value, 0, 100);
     }
   }
 

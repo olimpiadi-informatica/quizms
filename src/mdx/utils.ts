@@ -1,6 +1,6 @@
 import { Expression, Literal } from "estree";
 import { builders as b } from "estree-toolkit";
-import _ from "lodash";
+import { isObject } from "lodash-es";
 import { MdxJsxAttribute } from "mdast-util-mdx-jsx";
 
 export function jsxAttribute(name: string, value: Literal["value"] | Expression): MdxJsxAttribute {
@@ -12,7 +12,7 @@ export function jsxAttribute(name: string, value: Literal["value"] | Expression)
       value: "",
       data: {
         estree: b.program([
-          b.expressionStatement(_.isObject(value) && "type" in value ? value : b.literal(value)),
+          b.expressionStatement(isObject(value) && "type" in value ? value : b.literal(value)),
         ]),
       },
     },

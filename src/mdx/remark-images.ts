@@ -3,7 +3,7 @@ import { isAbsolute } from "node:path";
 import { Parser } from "acorn";
 import { Directive, Expression, ModuleDeclaration, Program } from "estree";
 import { builders as b } from "estree-toolkit";
-import _ from "lodash";
+import { compact } from "lodash-es";
 import { Image, Parent, Root, Text } from "mdast";
 import { MdxJsxTextElement, MdxjsEsm } from "mdast-util-mdx";
 import { Plugin } from "unified";
@@ -110,7 +110,7 @@ const remarkImages: Plugin<[], Root> = () => {
         type: "mdxJsxTextElement",
         name: "Image",
         children: [],
-        attributes: _.compact([
+        attributes: compact([
           jsxAttribute("alt", alt ?? ""),
           jsxAttribute(
             "src",

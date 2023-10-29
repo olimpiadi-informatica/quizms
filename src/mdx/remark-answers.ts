@@ -2,7 +2,7 @@ import process from "node:process";
 
 import { Parser } from "acorn";
 import { Directive, Program } from "estree";
-import _ from "lodash";
+import { compact } from "lodash-es";
 import { Blockquote, List, Paragraph, Parent, Root } from "mdast";
 import { MdxJsxFlowElement } from "mdast-util-mdx-jsx";
 import { Plugin } from "unified";
@@ -24,7 +24,7 @@ export default remarkAnswers;
 
 function parseMultipleAnswerGroup(tree: Root, problemId: number) {
   visit(tree, { type: "list", ordered: false }, (list: List, index, parent: Parent) => {
-    if (!_.some(list.children, "checked")) return;
+    if (!list.children.some((c) => c.checked)) return;
 
     if (process.env.QUIZMS_VARIANT) {
       const rng = new Rng(`b#answers#${process.env.QUIZMS_VARIANT}#${problemId}`);
@@ -43,7 +43,7 @@ function parseMultipleAnswerGroup(tree: Root, problemId: number) {
         return {
           type: "mdxJsxFlowElement",
           name: "Answer",
-          attributes: _.compact([attr]),
+          attributes: compact([attr]),
           children: child.children,
         } as MdxJsxFlowElement;
       }),
@@ -76,7 +76,7 @@ function parseOpenAnswerGroup(tree: Root) {
       sourceType: "module",
     }) as unknown as Program;
 
-    const attributes = _.compact([
+    const attributes = compact([
       jsxAttribute("type", "text"),
       (process.env.NODE_ENV === "development" || process.env.QUIZMS_MODE === "training") &&
         jsxAttribute("correct", (template.body[0] as Directive).expression),

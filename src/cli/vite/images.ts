@@ -5,7 +5,7 @@ import { basename, dirname, extname, format as formatPath, join as joinPath } fr
 import process from "node:process";
 import { promisify } from "node:util";
 
-import _ from "lodash";
+import { isPlainObject, stubFalse, stubTrue } from "lodash-es";
 import svgToMiniDataURI from "mini-svg-data-uri";
 import { PluginContext } from "rollup";
 import sharp, { ResizeOptions } from "sharp";
@@ -86,7 +86,7 @@ async function transformAsymptoteVariants(path: string, params: URLSearchParams)
   const variantFile = joinPath(dirname(path), params.get("v")!);
   const variants = await executePython(variantFile);
 
-  if (!Array.isArray(variants) || !_.isPlainObject(variants[0])) {
+  if (!Array.isArray(variants) || !isPlainObject(variants[0])) {
     throw new TypeError("Variant file must export an array of objects");
   }
 
@@ -270,7 +270,7 @@ async function findAsymptoteDependencies(asyPath: string) {
         ext: ".asy",
       });
 
-      const exists = await fs.access(matchFile).then(_.stubTrue, _.stubFalse);
+      const exists = await fs.access(matchFile).then(stubTrue, stubFalse);
       if (exists) newImports.push(matchFile);
     }
   }

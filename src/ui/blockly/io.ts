@@ -1,6 +1,6 @@
 import { Dispatch, SetStateAction } from "react";
 
-import _ from "lodash";
+import { range } from "lodash-es";
 
 export class Input {
   private readonly tokens: string[];
@@ -18,7 +18,7 @@ export class Input {
   };
 
   public readArrayInt = (length: number): number[] => {
-    return _.range(length).map(this.readInt);
+    return range(length).map(this.readInt);
   };
 }
 

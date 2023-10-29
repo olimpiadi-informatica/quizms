@@ -9,7 +9,7 @@ import React, {
 } from "react";
 
 import { Duration, add, differenceInMilliseconds } from "date-fns";
-import _ from "lodash";
+import { isFunction } from "lodash-es";
 
 import Prose from "../components/prose";
 import { AuthenticationProvider } from "./provider";
@@ -38,7 +38,7 @@ function useLocalStorage<T>(key: string, defaultValue: T, parser?: (value: strin
   const set = useCallback(
     (value: SetStateAction<T>) => {
       setValue((oldValue) => {
-        const newValue = _.isFunction(value) ? value(oldValue) : value;
+        const newValue = isFunction(value) ? value(oldValue) : value;
         if (newValue === undefined) {
           localStorage.removeItem(fullKey);
         } else {

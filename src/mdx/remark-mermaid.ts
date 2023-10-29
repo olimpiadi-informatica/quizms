@@ -1,4 +1,3 @@
-import _ from "lodash";
 import { Code, Parent, Root } from "mdast";
 import { createMermaidRenderer } from "mermaid-isomorphic";
 import { chromium } from "playwright";
@@ -42,12 +41,12 @@ const remarkMermaid: Plugin<[], Root> = () => {
           ],
         });
 
-        const params = _(node.meta ?? "")
-          .split(/\s+/)
-          .map(decodeURIComponent)
-          .map((m) => m.split("=", 2))
-          .fromPairs()
-          .value();
+        const params = Object.fromEntries(
+          (node.meta ?? "")
+            .split(/\s+/)
+            .map(decodeURIComponent)
+            .map((m) => m.split("=", 2)),
+        );
 
         const file = await temporaryWrite(data, { extension: "svg" });
         parent.children[index] = {
