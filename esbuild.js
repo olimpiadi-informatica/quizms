@@ -5,6 +5,7 @@ import { Command } from "commander";
 import { build, context } from "esbuild";
 import less from "less";
 import postcss from "postcss";
+import fontDisplay from "postcss-font-display";
 import tailwindcss from "tailwindcss";
 
 /** @type {import("esbuild").Plugin} */
@@ -13,7 +14,12 @@ const cssPlugin = {
   setup(build) {
     build.onLoad({ filter: /\.css$/ }, async (args) => {
       const content = await fs.readFile(args.path, "utf8");
-      const { css } = await postcss([tailwindcss]).process(content, { from: args.path });
+
+      const processor = postcss([
+        tailwindcss,
+        fontDisplay({ test: /^KaTeX/, display: "swap", replace: false }),
+      ]);
+      const { css } = await processor.process(content, { from: args.path });
       return { contents: css, loader: "css" };
     });
 
