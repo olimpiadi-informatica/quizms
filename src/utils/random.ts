@@ -23,5 +23,5 @@ export class Rng {
 export function hash(seed: Message): number {
   const digest = sha256.arrayBuffer(seed);
   const view = new DataView(digest);
-  return Number(view.getBigUint64(0) >> BigInt(11));
+  return Number(view.getBigUint64(0) & BigInt(Number.MAX_SAFE_INTEGER));
 }

@@ -23,7 +23,6 @@ const remarkImages: Plugin<[], Root> = () => {
     const imports: ModuleDeclaration[] = [];
 
     visit(tree, "image", (image: Image, index, parent: Parent | undefined) => {
-      if (/^https?:\/\//.test(image.url)) return;
       if (parent === undefined || index === undefined) {
         throw new Error("Image must have a parent");
       }
@@ -35,7 +34,9 @@ const remarkImages: Plugin<[], Root> = () => {
       const [path, query] = url.split("?");
       let imgSrc: Expression;
 
-      if (path.includes("{")) {
+      if (URL.canParse(image.url)) {
+        imgSrc = b.literal(image.url);
+      } else if (path.includes("{")) {
         const params = new URLSearchParams(query).entries();
 
         imports.push(
