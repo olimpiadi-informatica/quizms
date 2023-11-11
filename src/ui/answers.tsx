@@ -1,4 +1,12 @@
-import React, { Children, ReactNode, createContext, useContext, useEffect, useId } from "react";
+import React, {
+  Children,
+  ReactNode,
+  createContext,
+  useContext,
+  useEffect,
+  useId,
+  useMemo,
+} from "react";
 
 import classNames from "classnames";
 import { Trash2 } from "lucide-react";
@@ -24,10 +32,14 @@ export function AnswerGroup({ children }: AnswerGroupProps) {
   const { variant } = useAuthentication();
   const { id } = useProblem();
 
-  const rng = new Rng(`r#answers#${variant}#${id}`);
-
-  const answers = Children.toArray(children);
-  if (import.meta.env.PROD) rng.shuffle(answers);
+  const answers = useMemo(() => {
+    const answers = Children.toArray(children);
+    if (variant) {
+      const rng = new Rng(`r#answers#${variant}#${id}`);
+      if (import.meta.env.PROD) rng.shuffle(answers);
+    }
+    return answers;
+  }, [variant, id, children]);
 
   return (
     <form

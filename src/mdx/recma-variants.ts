@@ -1,5 +1,3 @@
-import process from "node:process";
-
 import { AssignmentProperty, Program } from "estree";
 import { builders as b, is, traverse } from "estree-toolkit";
 import { upperFirst } from "lodash-es";
@@ -55,11 +53,6 @@ function injectLocalVariables(ast: Program, problemId: number) {
         (name) => (name.length === 1 || name !== upperFirst(name)) && !wellKnownGlobals.has(name),
       );
 
-      let variant = 0;
-      if (process.env.QUIZMS_VARIANT) {
-        variant = hash(`b#problem#${process.env.QUIZMS_VARIANT}#${problemId}`);
-      }
-
       const node = path.node!;
       if (node.id?.name === "_createMdxContent") {
         node.body.body.unshift(
@@ -71,7 +64,7 @@ function injectLocalVariables(ast: Program, problemId: number) {
                 b.logicalExpression(
                   "??",
                   b.memberExpression(b.identifier("props"), b.identifier("variant"), false, true),
-                  b.literal(variant),
+                  b.literal(0),
                 ),
                 b.memberExpression(
                   b.logicalExpression(

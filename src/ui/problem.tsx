@@ -4,6 +4,7 @@ import React, {
   createContext,
   useContext,
   useEffect,
+  useMemo,
   useState,
 } from "react";
 
@@ -41,7 +42,10 @@ ProblemContext.displayName = "ProblemContext";
 export function Problem({ id, points, statement: Statement }: ProblemProps) {
   const { variant } = useAuthentication();
 
-  const variantId = import.meta.env.PROD ? hash(`r#problem#${variant}#${id}`) : 0;
+  const variantId = useMemo(
+    () => (import.meta.env.PROD && variant ? hash(`r#problem#${variant}#${id}`) : 0),
+    [variant, id],
+  );
 
   return (
     <ProblemContext.Provider value={{ id, points, setCorrect: noop }}>

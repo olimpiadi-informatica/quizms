@@ -8,7 +8,7 @@ import { MdxJsxFlowElement } from "mdast-util-mdx-jsx";
 import { Plugin } from "unified";
 import { visit } from "unist-util-visit";
 
-import { Rng, hash } from "~/utils/random";
+import { hash } from "~/utils/random";
 
 import { jsxAttribute } from "./utils";
 
@@ -25,11 +25,6 @@ export default remarkAnswers;
 function parseMultipleAnswerGroup(tree: Root, problemId: number) {
   visit(tree, { type: "list", ordered: false }, (list: List, index, parent: Parent) => {
     if (!list.children.some((c) => c.checked)) return;
-
-    if (process.env.QUIZMS_VARIANT) {
-      const rng = new Rng(`b#answers#${process.env.QUIZMS_VARIANT}#${problemId}`);
-      rng.shuffle(list.children);
-    }
 
     parent.children[index!] = {
       type: "mdxJsxFlowElement",
