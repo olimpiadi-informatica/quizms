@@ -63,7 +63,11 @@ function injectLocalVariables(ast: Program, problemId: number) {
                 "%",
                 b.logicalExpression(
                   "??",
-                  b.memberExpression(b.identifier("props"), b.identifier("variant"), false, true),
+                  b.callExpression(
+                    b.memberExpression(b.identifier("props"), b.identifier("variant"), false, true),
+                    [b.literal(problemId)],
+                    true,
+                  ),
                   b.literal(0),
                 ),
                 b.memberExpression(

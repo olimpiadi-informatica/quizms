@@ -2,20 +2,24 @@ import { Expression, Property } from "estree";
 import { builders as b } from "estree-toolkit";
 import { toJs } from "estree-util-to-js";
 
-export class ExpressionWrapper {
-  constructor(public expr: Expression) {}
-}
+import { hash } from "~/utils/random";
 
-export class FunctionWrapper {
-  constructor(public fn: (...args: any[]) => any) {}
+import { shuffleAnswers } from "./variants";
+
+type ParseOptions = {
+  functionArguments: any[];
+};
+
+export class ExpressionWrapper {
+  constructor(public expr: (options: ParseOptions) => Expression) {}
 }
 
 export function parseFunction(...args: any[]) {
   try {
-    return new ExpressionWrapper(
+    return new ExpressionWrapper((options) =>
       b.callExpression(
         b.memberExpression(b.identifier("React"), b.identifier("createElement")),
-        args.map((arg) => parseValue(arg)),
+        args.map((arg) => parseValue(arg, options)),
       ),
     );
   } catch (e) {
@@ -23,15 +27,12 @@ export function parseFunction(...args: any[]) {
   }
 }
 
-export function parseValue(value: any): Expression {
+export function parseValue(value: any, options: ParseOptions): Expression {
   if (value instanceof ExpressionWrapper) {
-    return value.expr;
-  }
-  if (value instanceof FunctionWrapper) {
-    return value.fn();
+    return value.expr(options);
   }
   if (typeof value === "function") {
-    return b.arrowFunctionExpression([], parseValue(value()));
+    return b.arrowFunctionExpression([], parseValue(value(...options.functionArguments), options));
   }
   if (value === undefined || value === Number.POSITIVE_INFINITY || Number.isNaN(value)) {
     return b.identifier(String(value));
@@ -52,7 +53,7 @@ export function parseValue(value: any): Expression {
   if (typeof value === "symbol") {
     if (value.description && value === Symbol.for(value.description)) {
       return b.callExpression(b.memberExpression(b.identifier("Symbol"), b.identifier("for")), [
-        parseValue(value.description),
+        parseValue(value.description, options),
       ]);
     }
     throw new TypeError(`Only global symbols are supported, got: ${String(value)}`);
@@ -60,12 +61,14 @@ export function parseValue(value: any): Expression {
   if (Array.isArray(value)) {
     const elements: (Expression | null)[] = [];
     for (let i = 0; i < value.length; i += 1) {
-      elements.push(i in value ? parseValue(value[i]) : null);
+      elements.push(i in value ? parseValue(value[i], options) : null);
     }
     return b.arrayExpression(elements);
   }
   if (value instanceof Boolean || value instanceof Number || value instanceof String) {
-    return b.newExpression(b.identifier(value.constructor.name), [parseValue(value.valueOf())]);
+    return b.newExpression(b.identifier(value.constructor.name), [
+      parseValue(value.valueOf(), options),
+    ]);
   }
   if (value instanceof RegExp) {
     return {
@@ -75,11 +78,11 @@ export function parseValue(value: any): Expression {
     };
   }
   if (value instanceof Date) {
-    return b.newExpression(b.identifier("Date"), [parseValue(value.getTime())]);
+    return b.newExpression(b.identifier("Date"), [parseValue(value.getTime(), options)]);
   }
   if (typeof Buffer !== "undefined" && Buffer.isBuffer(value)) {
     return b.callExpression(b.memberExpression(b.identifier("Buffer"), b.identifier("from")), [
-      parseValue([...value]),
+      parseValue([...value], options),
     ]);
   }
   if (
@@ -97,17 +100,19 @@ export function parseValue(value: any): Expression {
     value instanceof Uint16Array ||
     value instanceof Uint32Array
   ) {
-    return b.newExpression(b.identifier(value.constructor.name), [parseValue([...value])]);
+    return b.newExpression(b.identifier(value.constructor.name), [parseValue([...value], options)]);
   }
   if (value instanceof URL || value instanceof URLSearchParams) {
-    return b.newExpression(b.identifier(value.constructor.name), [parseValue(String(value))]);
+    return b.newExpression(b.identifier(value.constructor.name), [
+      parseValue(String(value), options),
+    ]);
   }
   if (typeof value === "object") {
     const properties: Property[] = Reflect.ownKeys(value).map((key) =>
       b.property(
         "init",
-        parseValue(key),
-        parseValue((value as Record<string | symbol, unknown>)[key]),
+        parseValue(key, options),
+        parseValue((value as Record<string | symbol, unknown>)[key], options),
         typeof key !== "string",
       ),
     );
@@ -121,17 +126,27 @@ export function parseValue(value: any): Expression {
   throw new TypeError(`Unsupported value: ${String(value)}`);
 }
 
-export function parseContest(entry: () => ExpressionWrapper): string {
+export function parseContest(entry: () => ExpressionWrapper, variant: string): string {
+  const options = {
+    functionArguments: [
+      {
+        variant: (problemId: number) => hash(`b#problem#${variant}#${problemId}`),
+      },
+    ],
+  };
+
   const tree = entry() as ExpressionWrapper;
   const program = b.program([
     b.exportDefaultDeclaration(
       b.functionDeclaration(
         null,
         [b.identifier("React"), b.identifier("quizms")],
-        b.blockStatement([b.returnStatement(tree.expr)]),
+        b.blockStatement([b.returnStatement(tree.expr(options))]),
       ),
     ),
   ]);
+
+  shuffleAnswers(program, variant);
 
   return toJs(program).value;
 }

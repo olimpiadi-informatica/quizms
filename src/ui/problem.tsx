@@ -17,7 +17,7 @@ import { useContest } from "./contest";
 import { useSection } from "./section";
 
 type StatementProps = {
-  variant?: number;
+  variant?: (id: number) => number;
 };
 
 type ProblemProps = {
@@ -49,7 +49,7 @@ export function Problem({ id, points, statement: Statement }: ProblemProps) {
 
   return (
     <ProblemContext.Provider value={{ id, points, setCorrect: noop }}>
-      <Statement variant={variantId} />
+      <Statement variant={() => variantId} />
       <hr className="last:hidden" />
     </ProblemContext.Provider>
   );
