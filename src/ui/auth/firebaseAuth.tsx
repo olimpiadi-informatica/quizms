@@ -12,7 +12,9 @@ import {
 import { useDocumentData } from "react-firebase-hooks/firestore";
 
 import { decode } from "~/firebase/statement-decode";
-import { User, passwordConverter, statementConverter, userConverter } from "~/firebase/types";
+import { passwordConverter, statementConverter } from "~/firebase/types/statement";
+import { tokenConverter } from "~/firebase/types/token";
+import { User, userConverter } from "~/firebase/types/user";
 import Progress from "~/ui/components/progress";
 import Prose from "~/ui/components/prose";
 

@@ -3,7 +3,7 @@ import React, { ComponentType } from "react";
 import { chacha20poly1305 } from "@noble/ciphers/chacha";
 import { managedNonce } from "@noble/ciphers/webcrypto/utils";
 
-import { Password, Statement } from "~/firebase/types";
+import { Password, Statement } from "~/firebase/types/statement";
 import { components } from "~/ui/mdxComponents";
 import { decompress } from "~/utils/gzip";
 

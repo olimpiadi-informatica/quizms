@@ -10,16 +10,10 @@ import { CollectionReference, collection, doc, getFirestore, setDoc } from "fire
 import { InlineConfig, build, mergeConfig } from "vite";
 
 import { encode } from "~/firebase/statement-encode";
-import {
-  Metadata,
-  Solutions,
-  User,
-  UserSchema,
-  metadataConverter,
-  passwordConverter,
-  statementConverter,
-  userConverter,
-} from "~/firebase/types";
+import { Metadata, metadataConverter } from "~/firebase/types/contest";
+import { Solutions } from "~/firebase/types/solutions";
+import { passwordConverter, statementConverter } from "~/firebase/types/statement";
+import { User, UserSchema, userConverter } from "~/firebase/types/user";
 import { parseContest } from "~/jsx-runtime/parser";
 
 import configs from "./vite/configs";
