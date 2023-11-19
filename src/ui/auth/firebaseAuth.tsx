@@ -1,20 +1,16 @@
-import React, { ComponentType, ReactNode, useCallback, useEffect, useMemo, useState } from "react";
+import React, { ComponentType, ReactNode, useCallback, useEffect, useRef, useState } from "react";
 
-import { FirebaseOptions, initializeApp } from "firebase/app";
-import {
-  Firestore,
-  collection,
-  doc,
-  getDoc,
-  initializeFirestore,
-  persistentLocalCache,
-} from "firebase/firestore";
+import { FirebaseOptions } from "firebase/app";
+import { getAuth, signOut } from "firebase/auth";
+import { collection, doc } from "firebase/firestore";
+import { UserIcon } from "lucide-react";
 import { useDocumentData } from "react-firebase-hooks/firestore";
 
+import FirebaseLogin, { useDb, useUser } from "~/firebase/login";
 import { decode } from "~/firebase/statement-decode";
 import { passwordConverter, statementConverter } from "~/firebase/types/statement";
-import { tokenConverter } from "~/firebase/types/token";
-import { User, userConverter } from "~/firebase/types/user";
+import { AuthenticationProvider } from "~/ui/auth/provider";
+import Modal from "~/ui/components/modal";
 import Progress from "~/ui/components/progress";
 import Prose from "~/ui/components/prose";
 
@@ -24,68 +20,49 @@ type Props = {
   children: ReactNode;
 };
 
-export function FirebaseAuth({ config, header: Header, ...rest }: Props) {
-  const [token, setToken] = useState<string>("");
-  const [user, setUser] = useState<User>();
-  const [error, setError] = useState<string>();
-
-  const disabled = useMemo(() => !/^[a-z-]+$/.test(token), [token]);
-
-  const db = useMemo(() => {
-    const app = initializeApp(config);
-    return initializeFirestore(app, { localCache: persistentLocalCache() });
-  }, [config]);
-
-  const enter = useCallback(async () => {
-    try {
-      const user = await getDoc(doc(db, "users", token).withConverter(userConverter));
-
-      if (user.exists()) {
-        setUser(user.data());
-      } else {
-        setError("Token non valido.");
-      }
-    } catch (e: any) {
-      setError(e.toString());
-    }
-  }, [db, token]);
-
-  if (user) {
-    return (
+export function FirebaseAuth({ config, header: Header, children }: Props) {
+  return (
+    <FirebaseLogin config={config}>
       <Prose>
+        <AuthBar />
         <Header />
-        <AuthInner db={db} user={user} />
+        <AuthInner>{children}</AuthInner>
       </Prose>
-    );
-  }
+    </FirebaseLogin>
+  );
+}
+
+function AuthBar() {
+  const db = useDb();
+  const user = useUser();
+
+  const modalRef = useRef<HTMLDialogElement>(null);
+
+  const logOut = useCallback(async () => {
+    await signOut(getAuth(db.app));
+    window.location.reload();
+  }, [db]);
 
   return (
-    <div className="my-8 flex justify-center">
-      <main className="max-w-md grow p-4">
-        <div className="form-control w-full">
-          <label className="label">
-            <span className="label-text text-lg">Inserisci il token</span>
-          </label>
-          <input
-            type="text"
-            placeholder="nome-cognome-xxxx-xxx"
-            className="input input-bordered w-full max-w-md"
-            onChange={(e) => setToken(e.target.value)}
-            value={token}
-          />
-          <span className="pt-1 text-red-600">{error ?? <>&nbsp;</>}</span>
-        </div>
-        <div className="flex justify-center pt-3">
-          <button className="btn btn-success" disabled={disabled} onClick={enter}>
-            Entra
+    <div className="sticky top-0 z-50 mb-4 flex items-center justify-end gap-3 border-b border-base-content bg-base-100 p-3">
+      <button className="btn btn-ghost no-animation" onClick={() => modalRef.current?.showModal()}>
+        <UserIcon />
+        <span className="uppercase">{user.name}</span>
+      </button>
+      <Modal title="Vuoi cambiare utente?" ref={modalRef}>
+        <div className="text-md flex flex-row justify-center gap-5">
+          <button className="btn btn-error" onClick={logOut}>
+            Cambia utente
           </button>
         </div>
-      </main>
+      </Modal>
     </div>
   );
 }
 
-function AuthInner({ db, user }: { db: Firestore; user: User }) {
+function AuthInner({ children }: { children: ReactNode }) {
+  const db = useDb();
+  const user = useUser();
   const contestRef = collection(db, "users", user.token, "contest");
 
   const [statement, , statementError] = useDocumentData(
