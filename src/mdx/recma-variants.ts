@@ -42,7 +42,7 @@ function findVariants(ast: Program) {
   return variantsFound;
 }
 
-const wellKnownGlobals = new Set(["console", "import", "parseInt"]);
+const wellKnownGlobals = new Set(["console", "import", "parseInt", "undefined"]);
 
 function injectLocalVariables(ast: Program, problemId: number) {
   traverse(ast, {

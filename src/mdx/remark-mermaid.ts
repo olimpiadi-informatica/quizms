@@ -1,6 +1,5 @@
 import { Code, Parent, Root } from "mdast";
 import { createMermaidRenderer } from "mermaid-isomorphic";
-import { chromium } from "playwright";
 import { optimize } from "svgo";
 import { temporaryWrite } from "tempy";
 import { Plugin } from "unified";
