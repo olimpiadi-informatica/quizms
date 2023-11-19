@@ -1,4 +1,4 @@
-import { Message, sha256 } from "js-sha256";
+import { sha256 } from "@noble/hashes/sha256";
 import { RandomGenerator, unsafeUniformIntDistribution, xoroshiro128plus } from "pure-rand";
 
 export class Rng {
@@ -20,8 +20,8 @@ export class Rng {
   };
 }
 
-export function hash(seed: Message): number {
-  const digest = sha256.arrayBuffer(seed);
-  const view = new DataView(digest);
-  return Number(view.getBigUint64(0) & BigInt(Number.MAX_SAFE_INTEGER));
+export function hash(input: Parameters<typeof sha256>[0]): number {
+  const digest = sha256(input);
+  const view = new DataView(digest.buffer, digest.byteOffset, digest.byteLength);
+  return Number(view.getBigUint64(0, true) & BigInt(Number.MAX_SAFE_INTEGER));
 }

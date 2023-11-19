@@ -1,10 +1,11 @@
 import { cwd } from "node:process";
 
 import { InvalidArgumentError, program } from "commander";
+import "dotenv/config";
 
-import bundle from "./bundle";
 import devServer from "./dev";
 import staticExport from "./export";
+import importContest from "./import";
 import pdf from "./pdf";
 
 function safeParseInt(value: string): number {
@@ -16,16 +17,6 @@ function safeParseInt(value: string): number {
 }
 
 function main() {
-  program
-    .command("bundle")
-    .description("Create a bundle with all question.")
-    .argument("[directory]", "The directory of the contest.", cwd())
-    .option("-c, --contest <file>", "The contest file to bundle.", "contest/contest.mdx")
-    .option("-d, --outDir <directory>", "The directory to output the bundle.", "bundle")
-    .option("-s, --secret <secret>", "The secret used to generate the variant of the contest.")
-    .option("-v, --variant <variant>", "The seed used to generate the variant of the contest.")
-    .action((dir, options) => void bundle({ dir, ...options }));
-
   program
     .command("dev")
     .description("Start a development server for the contest.")
@@ -41,6 +32,16 @@ function main() {
     .option("-t, --training", "Embed the questions and the answers in the export.")
     .option("-v, --variant <variant>", "The seed used to generate the variant of the contest.")
     .action((dir, options) => void staticExport({ dir, ...options }));
+
+  program
+    .command("import")
+    .description("Import the contest.")
+    .argument("[directory]", "The directory of the contest.", cwd())
+    .option("-d, --outDir <directory>", "The directory to output the bundle.", "bundle")
+    .option("-c, --contest <contest>", "The contest file to bundle.", "contest/contest.mdx")
+    .option("-s, --secret <secret>", "The secret used to generate the variants.")
+    .option("-f, --file <users>", "The CSV file with users.", "users.csv")
+    .action((dir, options) => void importContest({ dir, ...options }));
 
   program
     .command("pdf")
