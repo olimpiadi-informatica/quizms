@@ -1,22 +1,36 @@
 import { FirestoreDataConverter, Timestamp } from "firebase/firestore";
 import z from "zod";
 
-export const MetadataSchema = z.object({
-  startingTime: z.instanceof(Timestamp).transform((timestamp) => timestamp.toDate()),
-  endingTime: z.instanceof(Timestamp).transform((timestamp) => timestamp.toDate()),
+import { Student, StudentSchema } from "~/firebase/types/student";
+
+export const ContestSchema = z.object({
+  name: z.string(),
+  questionCount: z.coerce.number(),
+  startingWindowStart: z
+    .instanceof(Timestamp)
+    .optional()
+    .transform((ts) => ts?.toDate()),
+  startingWindowEnd: z
+    .instanceof(Timestamp)
+    .optional()
+    .transform((ts) => ts?.toDate()),
+  duration: z.number().optional(),
+  allowStudents: z.boolean().optional(),
+  allowRestart: z.boolean().optional(),
 });
 
-export type Metadata = z.infer<typeof MetadataSchema>;
+export type Contest = z.infer<typeof ContestSchema>;
 
-export const metadataConverter: FirestoreDataConverter<Metadata> = {
-  toFirestore(metadata: Metadata) {
+export const contestConverter: FirestoreDataConverter<Contest> = {
+  toFirestore(data: Contest) {
     return {
-      startingTime: Timestamp.fromDate(metadata.startingTime),
-      endingTime: Timestamp.fromDate(metadata.endingTime),
+      ...data,
+      startingWindowStart: data.startingWindowStart && Timestamp.fromDate(data.startingWindowStart),
+      startingWindowEnd: data.startingWindowEnd && Timestamp.fromDate(data.startingWindowEnd),
     };
   },
   fromFirestore(snapshot) {
     const data = snapshot.data();
-    return MetadataSchema.parse(data);
+    return ContestSchema.parse(data);
   },
 };
