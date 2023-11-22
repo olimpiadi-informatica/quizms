@@ -41,6 +41,7 @@
     "estree-util-to-js": "^2.0",
     "fast-glob": "^3.3",
     "firebase": "^10.6",
+    "firebase-admin": "^11.11",
     "js-interpreter": "^5.0",
     "lodash-es": "^4.17",
     "lowlight": "^3.0",

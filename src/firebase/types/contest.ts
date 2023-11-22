@@ -4,6 +4,7 @@ import z from "zod";
 import { Student, StudentSchema } from "~/firebase/types/student";
 
 export const ContestSchema = z.object({
+  id: z.string(),
   name: z.string(),
   questionCount: z.coerce.number(),
   startingWindowStart: z

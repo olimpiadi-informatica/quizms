@@ -1,130 +1,103 @@
-import { pbkdf2Sync, randomBytes } from "node:crypto";
 import { createReadStream } from "node:fs";
-import { join } from "node:path";
-import process from "node:process";
+import { readFile } from "node:fs/promises";
 import { pipeline } from "node:stream/promises";
 
 import { parse } from "csv";
-import { deleteApp, initializeApp } from "firebase/app";
-import { CollectionReference, collection, doc, getFirestore, setDoc } from "firebase/firestore";
-import { InlineConfig, build, mergeConfig } from "vite";
+import { cert, initializeApp } from "firebase-admin/app";
+import { Auth, getAuth } from "firebase-admin/auth";
+import { getFirestore } from "firebase-admin/firestore";
+import z from "zod";
 
-import { encode } from "~/firebase/statement-encode";
-import { Metadata, metadataConverter } from "~/firebase/types/contest";
-import { Solutions } from "~/firebase/types/solutions";
-import { passwordConverter, statementConverter } from "~/firebase/types/statement";
-import { User, UserSchema, userConverter } from "~/firebase/types/user";
-import { parseContest } from "~/jsx-runtime/parser";
+import { ContestSchema, contestConverter } from "~/firebase/types/contest";
+import { VariantSchema, variantConverter } from "~/firebase/types/variant";
 
-import configs from "./vite/configs";
+const TeacherSchema = z.object({
+  name: z.string(),
+  email: z.string().email(),
+  password: z.string(),
+});
 
-type ImportProps = {
-  dir: string;
-  outDir: string;
-  contest: string;
-  secret?: string;
-  file: string;
-};
+type Teacher = z.infer<typeof TeacherSchema>;
 
-export default async function importContest(options: ImportProps) {
-  const salt = Buffer.from("a4576dd74c98e90e2c69e9e3e9e6605d", "hex");
-  const secret = (
-    options.secret ? pbkdf2Sync(options.secret, salt, 262144, 32, "sha256") : randomBytes(32)
-  ).toString("hex");
+export default async function importContests() {
+  const serviceAccount = JSON.parse(await readFile("serviceAccountKey.json", "utf-8"));
+  const app = initializeApp({
+    credential: cert(serviceAccount),
+  });
+  const auth = getAuth();
+  const db = getFirestore(app);
+  db.settings({ ignoreUndefinedProperties: true });
 
-  const contestSource = await buildBase(options);
-  const { default: contestEntry } = await import(contestSource);
-
-  const db = await initFirebase();
-
+  console.log("Importing contests...");
   await pipeline(
-    createReadStream(join(options.dir, options.file)),
+    createReadStream("contests.csv"),
+    parse({ columns: true }),
+    async function (source) {
+      const promises: Promise<any>[] = [];
+
+      for await (const record of source) {
+        const contest = ContestSchema.parse(record);
+        promises.push(
+          db.doc(`contests/${contest.id}`).withConverter(contestConverter).set(contest),
+        );
+      }
+
+      await Promise.all(promises);
+      console.log(`${promises.length} contests imported!`);
+    },
+  );
+
+  console.log("Importing variants...");
+  {
+    const variants = JSON.parse(await readFile("variants.json", "utf-8"));
+
+    const promises: Promise<any>[] = [];
+
+    for (const [id, record] of Object.entries(variants)) {
+      const variant = VariantSchema.parse(record);
+      promises.push(db.doc(`variants/${id}`).withConverter(variantConverter).set(variant));
+    }
+
+    await Promise.all(promises);
+    console.log(`${promises.length} variants imported!`);
+  }
+
+  console.log("Importing teachers...");
+  await pipeline(
+    createReadStream("teachers.csv"),
     parse({ columns: true }),
     async function (source) {
       const promises: Promise<void>[] = [];
 
       for await (const record of source) {
-        const user = UserSchema.parse(record);
-        const userRef = doc(db, "users", user.token);
-        await setDoc(userRef.withConverter(userConverter), user);
-
-        if (user.role === "student") {
-          promises.push(importStudent(collection(userRef, "contest"), user, contestEntry, secret));
-        }
+        const teacher = TeacherSchema.parse(record);
+        promises.push(importTeacher(auth, teacher));
       }
 
       await Promise.all(promises);
+      console.log(`${promises.length} teachers imported!`);
     },
   );
 
-  await deleteApp(db.app);
+  console.log("All done!");
 }
 
-async function initFirebase() {
-  const config = {
-    apiKey: process.env.API_KEY,
-    authDomain: process.env.AUTH_DOMAIN,
-    projectId: process.env.PROJECT_ID,
-  };
-
-  const app = initializeApp(config);
-  return getFirestore(app);
-}
-
-async function buildBase(options: ImportProps): Promise<string> {
-  process.env.QUIZMS_MODE = "contest";
-
-  const defaultConfig = configs("production", {
-    mdx: {
-      providerImportSource: "quizms/jsx-runtime",
-      jsxImportSource: "quizms",
-    },
-  });
-
-  const outDir = join(options.dir, options.outDir);
-  const fileName = "base-contest";
-
-  const bundleConfig: InlineConfig = {
-    root: join(options.dir, "src"),
-    build: {
-      copyPublicDir: false,
-      outDir,
-      emptyOutDir: true,
-      lib: {
-        entry: options.contest,
-        fileName,
-        formats: ["es"],
-      },
-      minify: false,
-    },
-  };
-
-  await build(mergeConfig(defaultConfig, bundleConfig));
-
-  return join(outDir, `${fileName}.mjs`);
-}
-
-async function importStudent(
-  userRef: CollectionReference,
-  user: User,
-  contestEntry: () => any,
-  secret: string,
-) {
-  const key = Uint8Array.from(randomBytes(32));
-
-  const contest = parseContest(contestEntry, `${secret}-${user.token}`);
-  const statement = await encode(contest, key);
-
-  await setDoc(doc(userRef, "statement").withConverter(statementConverter), statement);
-
-  await setDoc(doc(userRef, "password").withConverter(passwordConverter), key);
-
-  await setDoc(doc(userRef, "solutions"), {} as Solutions);
-
-  await setDoc(doc(userRef, "meta").withConverter(metadataConverter), {
-    startingTime: new Date("2023-11-15T10:00:00"),
-    endingTime: new Date("2024-11-15T10:00:00"),
-  } as Metadata);
-
-  console.log(`\x1b[1;32m✓\x1b[0m user ${user.token} imported`);
+async function importTeacher(auth: Auth, teacher: Teacher) {
+  try {
+    const prevUser = await auth.getUserByEmail(teacher.email);
+    await auth.updateUser(prevUser.uid, {
+      emailVerified: true,
+      password: teacher.password,
+      displayName: teacher.name,
+      disabled: false,
+    });
+  } catch (e) {
+    await auth.createUser({
+      email: teacher.email,
+      emailVerified: true,
+      password: teacher.password,
+      displayName: teacher.name,
+      disabled: false,
+    });
+  }
 }

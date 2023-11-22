@@ -5,7 +5,7 @@ import "dotenv/config";
 
 import devServer from "./dev";
 import staticExport from "./export";
-import importContest from "./import";
+import importContests from "./import";
 import pdf from "./pdf";
 
 function safeParseInt(value: string): number {
@@ -35,13 +35,8 @@ function main() {
 
   program
     .command("import")
-    .description("Import the contest.")
-    .argument("[directory]", "The directory of the contest.", cwd())
-    .option("-d, --outDir <directory>", "The directory to output the bundle.", "bundle")
-    .option("-c, --contest <contest>", "The contest file to bundle.", "contest/contest.mdx")
-    .option("-s, --secret <secret>", "The secret used to generate the variants.")
-    .option("-f, --file <users>", "The CSV file with users.", "users.csv")
-    .action((dir, options) => void importContest({ dir, ...options }));
+    .description("Import the contests, the variants and the teachers.")
+    .action(() => void importContests());
 
   program
     .command("pdf")

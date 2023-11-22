@@ -3,18 +3,19 @@ import { mapValues } from "lodash-es";
 import z from "zod";
 
 export const VariantSchema = z.object({
-  schema: z.record(
-    z.object({
-      type: z.enum(["closed", "text", "number", "score"]),
+  schema: z
+    .object({
+      type: z.enum(["text", "number"]),
       regex: z
         .string()
         .optional()
         .transform((re) => (re ? new RegExp(re) : undefined)),
+      options: z.string().array().optional(),
       pointsCorrect: z.number().optional(),
       pointsWrong: z.number().optional(),
       pointsBlank: z.number().optional(),
-    }),
-  ),
+    })
+    .array(),
   statement: z
     .custom<Bytes>((value) => value instanceof Bytes)
     .optional()
@@ -28,7 +29,7 @@ export const variantConverter: FirestoreDataConverter<Variant> = {
   toFirestore(data: Variant) {
     return {
       ...data,
-      schema: mapValues(data.schema, (value) => ({
+      schema: data.schema.map((value) => ({
         ...value,
         regex: value.regex?.source,
       })),
