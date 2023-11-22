@@ -1,0 +1,1 @@
+export { TeacherTable } from "./table";

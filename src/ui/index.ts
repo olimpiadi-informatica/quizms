@@ -1,2 +1,3 @@
 export { NoAuth } from "./auth/noAuth";
-export { FirebaseAuth } from "./auth/firebaseAuth";
+// export { FirebaseAuth } from "./auth/firebaseAuth";
+export * from "./teacher";
