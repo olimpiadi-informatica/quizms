@@ -81,7 +81,7 @@ function Navbar({ user }: { user: User }) {
   }, [db]);
 
   return (
-    <div className="sticky top-0 z-50 mb-4 flex items-center justify-end gap-3 border-b border-base-content bg-base-100 p-3">
+    <div className="sticky top-0 z-50 mb-4 flex items-center justify-end gap-3 border-b border-base-content bg-base-100 p-2">
       <button className="btn btn-ghost no-animation" onClick={() => modalRef.current?.showModal()}>
         <UserIcon />
         <span className="uppercase">{user.displayName || "Utente anonimo"}</span>
