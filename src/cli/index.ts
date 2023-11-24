@@ -36,7 +36,12 @@ function main() {
   program
     .command("import")
     .description("Import the contests, the variants and the teachers.")
-    .action(() => void importContests());
+    .option("-t, --teachers", "Import the teachers.")
+    .option("-s, --schools", "Import the schools.")
+    .option("-c, --contests", "Import the contests.")
+    .option("-v, --variants", "Import the variants.")
+    .option("-a, --all", "Import everything.")
+    .action((options) => void importContests(options));
 
   program
     .command("pdf")

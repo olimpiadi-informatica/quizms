@@ -5,21 +5,33 @@ import { pipeline } from "node:stream/promises";
 import { parse } from "csv";
 import { cert, initializeApp } from "firebase-admin/app";
 import { Auth, getAuth } from "firebase-admin/auth";
-import { getFirestore } from "firebase-admin/firestore";
+import { Firestore, getFirestore } from "firebase-admin/firestore";
 import z from "zod";
 
-import { ContestSchema, contestConverter } from "~/firebase/types/contest";
-import { VariantSchema, variantConverter } from "~/firebase/types/variant";
+import { contestConverter, schoolConverter, variantConverter } from "~/firebase/converters";
+import { contestSchema } from "~/models/contest";
+import { schoolSchema } from "~/models/school";
+import { teacherSchema as baseTeacherSchema } from "~/models/teacher";
+import { variantSchema } from "~/models/variant";
+import validate from "~/utils/validate";
 
-const TeacherSchema = z.object({
-  name: z.string(),
+const teacherSchema = baseTeacherSchema.extend({
+  externalId: z.coerce.number(),
   email: z.string().email(),
   password: z.string(),
 });
 
-type Teacher = z.infer<typeof TeacherSchema>;
+type Teacher = z.infer<typeof teacherSchema>;
 
-export default async function importContests() {
+type ImportOptions = {
+  teachers?: boolean;
+  schools?: boolean;
+  contests?: boolean;
+  variants?: boolean;
+  all?: boolean;
+};
+
+export default async function importContests(options: ImportOptions) {
   const serviceAccount = JSON.parse(await readFile("serviceAccountKey.json", "utf-8"));
   const app = initializeApp({
     credential: cert(serviceAccount),
@@ -28,33 +40,35 @@ export default async function importContests() {
   const db = getFirestore(app);
   db.settings({ ignoreUndefinedProperties: true });
 
-  console.log("Importing contests...");
-  await pipeline(
-    createReadStream("contests.csv"),
-    parse({ columns: true }),
-    async function (source) {
-      const promises: Promise<any>[] = [];
+  if (options.all || options.contests) {
+    console.log("Importing contests...");
+    await pipeline(
+      createReadStream("contests.csv"),
+      parse({ columns: true }),
+      async function (source) {
+        const promises: Promise<any>[] = [];
 
-      for await (const record of source) {
-        const contest = ContestSchema.parse(record);
-        promises.push(
-          db.doc(`contests/${contest.id}`).withConverter(contestConverter).set(contest),
-        );
-      }
+        for await (const record of source) {
+          const contest = validate(contestSchema, record);
+          promises.push(
+            db.doc(`contests/${contest.id}`).withConverter(contestConverter).set(contest),
+          );
+        }
 
-      await Promise.all(promises);
-      console.log(`${promises.length} contests imported!`);
-    },
-  );
+        await Promise.all(promises);
+        console.log(`${promises.length} contests imported!`);
+      },
+    );
+  }
 
-  console.log("Importing variants...");
-  {
+  if (options.all || options.variants) {
+    console.log("Importing variants...");
     const variants = JSON.parse(await readFile("variants.json", "utf-8"));
 
     const promises: Promise<any>[] = [];
 
     for (const [id, record] of Object.entries(variants)) {
-      const variant = VariantSchema.parse(record);
+      const variant = validate(variantSchema, record);
       promises.push(db.doc(`variants/${id}`).withConverter(variantConverter).set(variant));
     }
 
@@ -62,37 +76,55 @@ export default async function importContests() {
     console.log(`${promises.length} variants imported!`);
   }
 
-  console.log("Importing teachers...");
-  await pipeline(
-    createReadStream("teachers.csv"),
-    parse({ columns: true }),
-    async function (source) {
-      const promises: Promise<void>[] = [];
+  if (options.all || options.teachers) {
+    console.log("Importing teachers...");
+    await pipeline(
+      createReadStream("teachers.csv"),
+      parse({ columns: true }),
+      async function (source) {
+        const promises: Promise<void>[] = [];
 
-      for await (const record of source) {
-        const teacher = TeacherSchema.parse(record);
-        promises.push(importTeacher(auth, teacher));
-      }
+        for await (const record of source) {
+          const teacher = validate(teacherSchema, record);
+          promises.push(importTeacher(auth, db, teacher));
+        }
 
-      await Promise.all(promises);
-      console.log(`${promises.length} teachers imported!`);
-    },
-  );
+        await Promise.all(promises);
+        console.log(`${promises.length} teachers imported!`);
+      },
+    );
+  }
+
+  if (options.all || options.schools) {
+    console.log("Importing schools...");
+    const schools = JSON.parse(await readFile("schools.json", "utf-8"));
+
+    const promises: Promise<any>[] = [];
+
+    for (const [id, record] of Object.entries(schools)) {
+      const school = validate(schoolSchema, record);
+      promises.push(db.doc(`schools/${id}`).withConverter(schoolConverter).set(school));
+    }
+
+    await Promise.all(promises);
+    console.log(`${promises.length} schools imported!`);
+  }
 
   console.log("All done!");
 }
 
-async function importTeacher(auth: Auth, teacher: Teacher) {
+async function importTeacher(auth: Auth, db: Firestore, teacher: Teacher) {
+  let user;
   try {
     const prevUser = await auth.getUserByEmail(teacher.email);
-    await auth.updateUser(prevUser.uid, {
+    user = await auth.updateUser(prevUser.uid, {
       emailVerified: true,
       password: teacher.password,
       displayName: teacher.name,
       disabled: false,
     });
   } catch (e) {
-    await auth.createUser({
+    user = await auth.createUser({
       email: teacher.email,
       emailVerified: true,
       password: teacher.password,
@@ -100,4 +132,9 @@ async function importTeacher(auth: Auth, teacher: Teacher) {
       disabled: false,
     });
   }
+
+  await db.doc(`teachers/${user.uid}`).set({
+    externalId: teacher.externalId,
+    school: teacher.school,
+  });
 }

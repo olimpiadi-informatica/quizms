@@ -14,32 +14,32 @@ service cloud.firestore {
         }
 
         function isTeacher() {
-            return request.auth != null && request.auth.token.isTeacher != null;
+            return request.auth != null && request.auth.token.emailVerified;
         }
 
         function getStudent(uid) {
             return get(/databases/$(database)/documents/students/$(uid)).data;
         }
 
-        function getSchoolContest(student) {
-            return get(/databases/$(database)/documents/schools/$(student.school)/contests/$(student.contest)).data;
+        function getSchool(id) {
+            return get(/databases/$(database)/documents/schools/$(id)).data;
         }
 
         function isMyStudent(student) {
-            return isTeacher() && getSchoolContest(student).teacher == request.auth.uid;
+            return isTeacher() && getSchool(student.school).teacher == request.auth.uid;
         }
 
         match /constests/{contest} {
             allow read: if request.auth != null;
         }
 
-        match /schools/{school}/contests/{contest} {
-            function isMySchoolContest() {
+        match /schools/{school} {
+            function isMySchool() {
                 let student = getStudent(request.auth.uid);
-                return student.school == school && student.contest == contest;
+                return student.school == school;
             }
 
-            allow read: if isAuthenticated(resource.data.teacher) || isMySchoolContest();
+            allow read: if isAuthenticated(resource.data.teacher) || isMySchool();
             allow update: if isAuthenticated(resource.data.teacher);
         }
 
@@ -67,13 +67,17 @@ service cloud.firestore {
             allow create: if isAuthenticated(resource.data.uid) && hasTimestamp();
         }
 
+        match /teachers/{teacher} {
+            allow read: if isAuthenticated(teacher);
+        }
+
         match /variants/{variant} {
             function isMyVariant(variant) {
                 let student = getStudent(request.auth.uid);
-                let contest = getSchoolContest(student);
+                let school = getSchool(student.school);
                 return student.variant == variant
-                    && contest.startingTime != null
-                    && contest.startingTime <= request.time;
+                    && school.startingTime != null
+                    && school.startingTime <= request.time;
             }
 
             allow read: if isMyVariant(variant) || isTeacher();
