@@ -2,9 +2,10 @@ import z from "zod";
 
 export const studentSchema = z
   .object({
+    id: z.string(),
     name: z.string(),
     surname: z.string(),
-    classYear: z.number(),
+    classYear: z.coerce.number(),
     classSection: z.string(),
     birthDate: z.date(),
     school: z.string(),

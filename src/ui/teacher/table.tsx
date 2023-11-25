@@ -1,13 +1,15 @@
-import React, { CSSProperties, ChangeEvent, useEffect, useRef, useState } from "react";
+import React, { ChangeEvent, Suspense, useRef, useState } from "react";
 
 import classNames from "classnames";
 import { formatISO } from "date-fns";
 import { range } from "lodash-es";
 
+import { studentConverter } from "~/firebase/converters";
+import { useCollection, useDocument } from "~/firebase/hooks";
 import { Contest } from "~/models/contest";
 import { Student } from "~/models/student";
 import { Variant } from "~/models/variant";
-import Progress from "~/ui/components/progress";
+import Loading from "~/ui/components/loading";
 
 import { useTeacher } from "./provider";
 
@@ -17,81 +19,70 @@ export function TeacherTable() {
   const [selectedContest, setSelectedContest] = useState(Object.values(contests)[0].id);
 
   return (
-    <div>
-      <div role="tablist" className="not-prose tabs-boxed tabs mb-5 justify-center">
-        {Object.values(contests).map((contest) => (
-          <a
-            role="tab"
-            key={contest.id}
-            className={classNames("tab", contest.id == selectedContest && "tab-active")}
-            onClick={() => setSelectedContest(contest.id)}>
-            {contest.name}
-          </a>
-        ))}
+    <>
+      <div className="mb-5 flex justify-center">
+        <div role="tablist" className="tabs-boxed tabs grow justify-center lg:max-w-3xl">
+          {Object.values(contests).map((contest) => (
+            <a
+              role="tab"
+              key={contest.id}
+              className={classNames("tab", contest.id == selectedContest && "tab-active")}
+              onClick={() => setSelectedContest(contest.id)}>
+              {contest.name}
+            </a>
+          ))}
+        </div>
       </div>
-      <Table contest={contests[selectedContest]} />
-    </div>
+      <div className="min-h-0 flex-auto overflow-auto">
+        <Suspense fallback={<Loading className="h-full" />}>
+          <Table contest={contests[selectedContest]} />
+        </Suspense>
+      </div>
+    </>
   );
 }
 
 function Table({ contest }: { contest: Contest }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [padding, setPadding] = useState<CSSProperties>({ paddingLeft: 16, paddingRight: 16 });
-  const [loadingTable, setLoading] = useState(true);
+  const { school } = useTeacher();
 
-  useEffect(() => {
-    function onResize() {
-      if (ref.current?.offsetLeft) {
-        setPadding({
-          paddingLeft: Math.min(ref.current.offsetLeft, 160),
-          paddingRight: Math.min(ref.current.offsetLeft, 160),
-        });
-      }
-    }
-
-    onResize();
-    setLoading(!ref.current);
-
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
-  }, [ref]);
+  // TODO: extract firebase login
+  const students = useCollection("students", studentConverter, {
+    school: school.id,
+    contest: contest.id,
+  });
 
   return (
-    <div className="not-prose" ref={ref}>
-      {loadingTable && <Loading />}
-      {!loadingTable && (
-        <div
-          className="relative inset-y-0 left-1/2 w-screen -translate-x-1/2 overflow-x-auto"
-          style={padding}>
-          <table className="table">
-            <thead>
-              <tr>
-                <th>Nome</th>
-                <th>Cognome</th>
-                <th>Classe</th>
-                <th>Sezione</th>
-                <th>Data di nascita</th>
-                <th>Variante</th>
-                {range(contest.questionCount).map((i) => (
-                  <th key={i}>{i + 1}</th>
-                ))}
-                <th>Abilitato</th>
-              </tr>
-            </thead>
-            <tbody>
-              {range(3).map((i) => (
-                <StudentRow key={i} contest={contest} />
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </div>
+    <table className="table">
+      <thead className="sticky top-0 bg-base-100">
+        <tr>
+          <th>Nome</th>
+          <th>Cognome</th>
+          <th>Classe</th>
+          <th>Sezione</th>
+          <th>Data di nascita</th>
+          <th>Variante</th>
+          {range(contest.questionCount).map((i) => (
+            <th key={i}>{i + 1}</th>
+          ))}
+          <th>Abilitato</th>
+        </tr>
+      </thead>
+      <tbody>
+        {students!.map((student) => (
+          <StudentRow key={student.id} contest={contest} studentId={student.id!} />
+        ))}
+      </tbody>
+    </table>
   );
 }
 
-function StudentRow({ contest }: { contest: Contest }) {
-  const [student, setStudent] = useState<Student>({});
+type StudentRowProps = {
+  contest: Contest;
+  studentId: string;
+};
+
+function StudentRow({ contest, studentId }: StudentRowProps) {
+  const [student, setStudent] = useDocument(`students/${studentId}`, studentConverter);
 
   const { variants } = useTeacher();
   const variant = variants[student.variant ?? ""];
@@ -100,18 +91,18 @@ function StudentRow({ contest }: { contest: Contest }) {
     ? formatISO(student.birthDate, { representation: "date" })
     : "";
   const setBirthDate = (e: ChangeEvent<HTMLInputElement>) => {
-    setStudent((student) => ({
+    setStudent({
       ...student,
       birthDate: e.target.value ? new Date(e.target.value) : undefined,
-    }));
+    });
   };
 
   const setDisabled = (e: ChangeEvent<HTMLInputElement>) => {
-    setStudent((student) => ({ ...student, disabled: !e.target.checked }));
+    setStudent({ ...student, disabled: !e.target.checked });
   };
 
   const setField = (field: keyof Student) => (e: ChangeEvent<HTMLInputElement>) => {
-    setStudent((student) => ({ ...student, [field]: e.target.value }));
+    setStudent({ ...student, [field]: e.target.value });
   };
 
   return (
@@ -215,7 +206,6 @@ function Answer({ question, disabled }: { question?: Variant["schema"][0]; disab
 
     if (isValid(newValue)) {
       const sibling = ref.current?.nextElementSibling?.firstElementChild as HTMLInputElement;
-      console.log("focus", sibling);
       if (sibling) sibling.focus();
     }
   };
@@ -234,13 +224,5 @@ function Answer({ question, disabled }: { question?: Variant["schema"][0]; disab
         onBlur={() => setBlur(true)}
       />
     </td>
-  );
-}
-
-function Loading() {
-  return (
-    <div className="m-auto my-64 w-64">
-      <Progress>Caricamento in corso...</Progress>
-    </div>
   );
 }

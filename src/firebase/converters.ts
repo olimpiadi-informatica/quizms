@@ -1,3 +1,4 @@
+import { DocumentSnapshot } from "@firebase/firestore";
 import { Bytes, FirestoreDataConverter, Timestamp, serverTimestamp } from "firebase/firestore";
 import { cloneDeepWith, mapValues } from "lodash-es";
 import z, {
@@ -7,6 +8,7 @@ import z, {
   ZodObject,
   ZodOptional,
   ZodRecord,
+  ZodType,
   ZodTypeAny,
 } from "zod";
 
@@ -14,9 +16,11 @@ import { Contest, contestSchema } from "~/models/contest";
 import { School, schoolSchema } from "~/models/school";
 import { Student, studentSchema } from "~/models/student";
 import { Submission, submissionSchema } from "~/models/submission";
+import { Teacher, teacherSchema } from "~/models/teacher";
 import { Variant, variantSchema } from "~/models/variant";
+import validate from "~/utils/validate";
 
-function convertToFirestore(data: object) {
+function convertToFirestore({ id, ...data }: Record<string, any>) {
   return cloneDeepWith(data, (value) => {
     if (value instanceof RegExp) {
       return value.source;
@@ -27,10 +31,13 @@ function convertToFirestore(data: object) {
     if (value instanceof Date) {
       return Timestamp.fromDate(value);
     }
+    if (value === undefined) {
+      return null;
+    }
   });
 }
 
-function toFirebaseSchema(schema: ZodTypeAny): ZodTypeAny {
+function toFirebaseSchemaField(schema: ZodTypeAny): ZodTypeAny {
   if (schema instanceof ZodDate) {
     return z
       .instanceof(Timestamp)
@@ -41,34 +48,39 @@ function toFirebaseSchema(schema: ZodTypeAny): ZodTypeAny {
   // TODO: regex
 
   if (schema instanceof ZodObject) {
-    return z.object(mapValues(schema.shape, (field) => toFirebaseSchema(field)));
+    return z.object(mapValues(schema.shape, (field) => toFirebaseSchemaField(field)));
   }
   if (schema instanceof ZodRecord) {
-    return z.record(toFirebaseSchema(schema.element));
+    return z.record(toFirebaseSchemaField(schema.element));
   }
   if (schema instanceof ZodArray) {
-    return toFirebaseSchema(schema.element).array();
+    return toFirebaseSchemaField(schema.element).array();
   }
   if (schema instanceof ZodOptional) {
-    return toFirebaseSchema(schema.unwrap()).optional();
+    return toFirebaseSchemaField(schema.unwrap()).optional();
   }
   if (schema instanceof ZodNullable) {
-    return toFirebaseSchema(schema.unwrap()).nullable();
+    return toFirebaseSchemaField(schema.unwrap()).nullable();
   }
   return schema;
+}
+
+function parse<T>(schema: ZodType<T>, snapshot: DocumentSnapshot): T {
+  const data = { ...snapshot.data(), id: snapshot.id };
+  return validate(toFirebaseSchemaField(schema), data);
 }
 
 export const contestConverter: FirestoreDataConverter<Contest> = {
   toFirestore: (data) => convertToFirestore(data),
   fromFirestore(snapshot) {
-    return toFirebaseSchema(contestSchema).parse(snapshot.data());
+    return parse(contestSchema, snapshot);
   },
 };
 
 export const schoolConverter: FirestoreDataConverter<School> = {
   toFirestore: (data) => convertToFirestore(data),
   fromFirestore(snapshot) {
-    return toFirebaseSchema(schoolSchema).parse(snapshot.data());
+    return parse(schoolSchema, snapshot);
   },
 };
 
@@ -80,7 +92,7 @@ export const studentConverter: FirestoreDataConverter<Student> = {
     };
   },
   fromFirestore(snapshot) {
-    return toFirebaseSchema(studentSchema).parse(snapshot.data());
+    return parse(studentSchema, snapshot);
   },
 };
 
@@ -92,20 +104,20 @@ export const submissionConverter: FirestoreDataConverter<Submission> = {
     };
   },
   fromFirestore(snapshot) {
-    return toFirebaseSchema(submissionSchema).parse(snapshot.data());
+    return parse(submissionSchema, snapshot);
   },
 };
 
-export const teacherConverter: FirestoreDataConverter<{ school: string }> = {
+export const teacherConverter: FirestoreDataConverter<Omit<Teacher, "name">> = {
   toFirestore: (data) => data,
   fromFirestore(snapshot) {
-    return z.object({ school: z.string() }).parse(snapshot.data());
+    return parse(teacherSchema.omit({ name: true }), snapshot);
   },
 };
 
 export const variantConverter: FirestoreDataConverter<Variant> = {
   toFirestore: (data) => convertToFirestore(data),
   fromFirestore(snapshot) {
-    return toFirebaseSchema(variantSchema).parse(snapshot.data());
+    return parse(variantSchema, snapshot);
   },
 };

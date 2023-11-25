@@ -1,24 +1,19 @@
-import React, { ReactNode, useCallback, useRef, useState } from "react";
+import React, { ReactNode, useCallback, useState } from "react";
 
 import classNames from "classnames";
 import { FirebaseOptions } from "firebase/app";
 import { User, getAuth, signOut } from "firebase/auth";
-import { collection, doc, getDoc, getDocs } from "firebase/firestore";
-import { GraduationCap, UserIcon } from "lucide-react";
-import { ErrorBoundary, FallbackProps } from "react-error-boundary";
-import { useSignInWithEmailAndPassword } from "react-firebase-hooks/auth";
-import z from "zod";
 
-import { contestConverter, schoolConverter, teacherConverter } from "~/firebase/converters";
+import {
+  contestConverter,
+  schoolConverter,
+  teacherConverter,
+  variantConverter,
+} from "~/firebase/converters";
+import { useCollection, useDocument, useSignInWithPassword } from "~/firebase/hooks";
 import { FirebaseLogin, useDb } from "~/firebase/login";
-import { contestSchema } from "~/models/contest";
-import { schoolSchema } from "~/models/school";
-import { teacherSchema } from "~/models/teacher";
-import { variantSchema } from "~/models/variant";
-import Modal from "~/ui/components/modal";
-import useSuspense from "~/ui/components/suspense";
+import { Layout } from "~/ui/teacher/layout";
 import { TeacherProvider } from "~/ui/teacher/provider";
-import validate from "~/utils/validate";
 
 export function FirebaseTeacherLogin({
   config,
@@ -38,11 +33,10 @@ function TeacherLogin({ children }: { children: ReactNode }) {
   const db = useDb();
   const auth = getAuth(db.app);
 
-  const [signInWithEmailAndPassword, , loading, error] = useSignInWithEmailAndPassword(auth);
-
+  const { signInWithPassword, loading, error } = useSignInWithPassword();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const signIn = () => signInWithEmailAndPassword(email, password);
+  const signIn = () => signInWithPassword(email, password);
 
   if (auth.currentUser) {
     return <TeacherInner user={auth.currentUser}>{children}</TeacherInner>;
@@ -90,80 +84,29 @@ function TeacherLogin({ children }: { children: ReactNode }) {
 function TeacherInner({ user, children }: { user: User; children: ReactNode }) {
   const db = useDb();
 
-  const { teacher, school, contests, variants } = useSuspense(async function loadTeacherProvider() {
-    const teacherRef = doc(db, "teachers", user.uid).withConverter(teacherConverter);
-    const teacherSnap = await getDoc(teacherRef);
-    const teacher = validate(teacherSchema, {
-      ...teacherSnap.data(),
-      name: user.displayName,
-    });
+  const [teacher] = useDocument(`teachers/${user.uid}`, teacherConverter);
+  const [school] = useDocument(`schools/${teacher.school}`, schoolConverter);
+  const contests = useCollection("contests", contestConverter);
+  const variants = useCollection("variants", variantConverter);
 
-    const schoolRef = doc(db, "schools", teacher.school).withConverter(schoolConverter);
-    const schoolSnap = await getDoc(schoolRef);
-    const school = validate(schoolSchema, schoolSnap.data());
+  const teacherWithName = { ...teacher, name: user.displayName ?? "Utente anonimo" };
 
-    const contestsRef = collection(db, "contests").withConverter(contestConverter);
-    const contestsSnap = await getDocs(contestsRef);
-    const contests = validate(
-      z.record(contestSchema),
-      Object.fromEntries(contestsSnap.docs.map((doc) => [doc.id, doc.data()])),
-    );
-
-    const variantsRef = collection(db, "variants");
-    const variantsSnap = await getDocs(variantsRef);
-    const variants = validate(
-      z.record(variantSchema),
-      Object.fromEntries(variantsSnap.docs.map((doc) => [doc.id, doc.data()])),
-    );
-
-    return { teacher, school, contests, variants };
-  });
-
-  return (
-    <TeacherProvider name={teacher.name} school={school} contests={contests} variants={variants}>
-      <div>
-        <Navbar name={teacher.name} school={school.name} />
-        <ErrorBoundary FallbackComponent={ErrorView}>
-          <VerifiedUserWrapper user={user}>{children}</VerifiedUserWrapper>
-        </ErrorBoundary>
-      </div>
-    </TeacherProvider>
-  );
-}
-
-function Navbar({ name, school }: { name?: string; school?: string }) {
-  const db = useDb();
-
-  const modalRef = useRef<HTMLDialogElement>(null);
-
-  const logOut = useCallback(async () => {
+  const logout = useCallback(async () => {
     await signOut(getAuth(db.app));
     window.location.reload();
   }, [db]);
 
   return (
-    <div className="not-prose sticky top-0 z-50 mb-4 border-b border-base-content">
-      <div className="absolute inset-y-0 left-1/2 -z-10 w-screen -translate-x-1/2 overflow-x-auto bg-base-100" />
-      <div className="flex items-center justify-between py-2">
-        <div className="flex gap-2">
-          <GraduationCap className="h-full pt-1" />
-          {school}
-        </div>
-        <button
-          className="btn btn-ghost no-animation"
-          onClick={() => modalRef.current?.showModal()}>
-          <UserIcon />
-          <span className="uppercase">{name || "Utente anonimo"}</span>
-        </button>
-      </div>
-      <Modal title="Vuoi cambiare utente?" ref={modalRef}>
-        <div className="text-md mt-5 flex flex-row justify-center">
-          <button className="btn btn-error" onClick={logOut}>
-            Cambia utente
-          </button>
-        </div>
-      </Modal>
-    </div>
+    <TeacherProvider
+      teacher={teacherWithName}
+      school={school}
+      contests={Object.fromEntries(contests.map((c) => [c.id, c]))}
+      variants={Object.fromEntries(variants.map((v) => [v.id, v]))}
+      logout={logout}>
+      <Layout>
+        <VerifiedUserWrapper user={user}>{children}</VerifiedUserWrapper>
+      </Layout>
+    </TeacherProvider>
   );
 }
 
@@ -172,12 +115,4 @@ function VerifiedUserWrapper({ user, children }: { user: User; children: ReactNo
     throw new Error("Utente non autorizzato");
   }
   return children;
-}
-
-function ErrorView({ error }: FallbackProps) {
-  return (
-    <div className="m-auto my-64 w-64">
-      <p className="text-red-500">{error.message}</p>
-    </div>
-  );
 }

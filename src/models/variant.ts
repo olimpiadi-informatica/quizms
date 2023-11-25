@@ -1,6 +1,7 @@
 import z from "zod";
 
 export const variantSchema = z.object({
+  id: z.string(),
   schema: z
     .object({
       type: z.enum(["text", "number"]),
