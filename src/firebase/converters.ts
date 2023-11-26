@@ -86,9 +86,11 @@ export const schoolConverter: FirestoreDataConverter<School> = {
 
 export const studentConverter: FirestoreDataConverter<Student> = {
   toFirestore(data) {
+    const converted = convertToFirestore(data);
     return {
-      ...convertToFirestore(data),
-      createdAt: serverTimestamp(),
+      ...converted,
+      createdAt: converted.createdAt ?? serverTimestamp(),
+      updatedAt: serverTimestamp(),
     };
   },
   fromFirestore(snapshot) {
@@ -100,7 +102,7 @@ export const submissionConverter: FirestoreDataConverter<Submission> = {
   toFirestore(data: Submission) {
     return {
       ...convertToFirestore(data),
-      timestamp: serverTimestamp(),
+      submittedAt: serverTimestamp(),
     };
   },
   fromFirestore(snapshot) {

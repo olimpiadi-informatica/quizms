@@ -1,8 +1,8 @@
 rules_version = '2';
 service cloud.firestore {
     match /databases/{database}/documents {
-        function hasTimestamp() {
-            return request.resource.data.timestamp == request.time;
+        function hasTimestamp(field) {
+            return request.resource.data[field] == request.time;
         }
 
         function isAuthenticated(id) {
@@ -13,58 +13,84 @@ service cloud.firestore {
             return request.resource.data.diff(resource.data).affectedKeys();
         }
 
+        function isStudent() {
+            return request.auth != null && request.auth.token.firebase.sign_in_provider == 'anonymous';
+        }
+
         function isTeacher() {
-            return request.auth != null && request.auth.token.emailVerified;
+            return request.auth != null && request.auth.token.email_verified;
         }
 
         function getStudent(uid) {
-            return get(/databases/$(database)/documents/students/$(uid)).data;
+            return get(/databases/$(database)/documents/students/$(uid));
+        }
+
+        function getTeacher(uid) {
+            return get(/databases/$(database)/documents/teachers/$(uid));
         }
 
         function getSchool(id) {
-            return get(/databases/$(database)/documents/schools/$(id)).data;
+            return get(/databases/$(database)/documents/schools/$(id));
         }
 
-        function isMyStudent(student) {
-            return isTeacher() && getSchool(student.school).teacher == request.auth.uid;
+        function isStudentSchool(school, token) {
+            let student = getStudent(request.auth.uid);
+            return student != null && (student.data.school == school || student.data.token == token);
         }
 
-        match /constests/{contest} {
+        function isTeacherSchool(school) {
+            let teacher = getTeacher(request.auth.uid);
+            return teacher != null && teacher.data.school == school;
+        }
+
+        match /contests/{contest} {
             allow read: if request.auth != null;
         }
 
         match /schools/{school} {
-            function isMySchool() {
-                let student = getStudent(request.auth.uid);
-                return student.school == school;
-            }
-
-            allow read: if isAuthenticated(resource.data.teacher) || isMySchool();
-            allow update: if isAuthenticated(resource.data.teacher);
-        }
-
-        match /schools/{school}/requests/{request} { // TODO
-            allow read: if false;
-        }
-
-        match /solutions/{contest} {
-            allow read: if false;
+            allow read: if isStudentSchool(school, resource.data.token) || isTeacherSchool(school);
+            allow update: if isTeacherSchool(school);
         }
 
         match /students/{student} {
-            function checkStudentHash(data) {
+            function checkVariant(data) {
                 let joined = [data.name, data.surname, data.birthData, data.school, data.classYear, data.classSection].join('$');
-                return data.variant == sha256(joined).toHexString()[0: 3];
+                return data.variant == hashing.sha256(joined).toHexString()[0: 3];
             }
 
-            allow read: if isAuthenticated(student) || isMyStudent(resource.data);
-            allow create: if (isAuthenticated(student) && checkStudentHash(request.resource.data)) || isMyStudent(request.resource.data);
-            allow update: if isMyStudent(resource.data);
+            function checkToken(school) {
+                return school != null
+                    && school.data.token != null
+                    && school.data.token == request.resource.data.token;
+            }
+
+            function canStudentCreate() {
+                let school = getSchool(request.resource.data.school);
+                return isAuthenticated(student)
+                    && (school == null || checkToken(school))
+                    && checkVariant(request.resource.data);
+            }
+
+            function canBeUpdated() {
+                let keys = affectedKeys();
+                return !('createdAt' in keys)
+                    && (!('school' in keys) || checkToken(getSchool(request.resource.data.token)))
+                    && hasTimestamp('updatedAt');
+            }
+
+            allow read: if isAuthenticated(student) || isTeacherSchool(resource.data.school);
+            allow create: if (canStudentCreate() || isTeacherSchool(request.resource.data.school)) && hasTimestamp('createdAt');
+            allow update: if (isAuthenticated(student) || isTeacherSchool(resource.data.school)) && canBeUpdated();
         }
 
         match /submissions/{submission} {
-            allow read: if isAuthenticated(resource.data.uid) || isMyStudent(resource.data.uid);
-            allow create: if isAuthenticated(resource.data.uid) && hasTimestamp();
+            function isMyStudentSubmission() {
+                let student = getStudent(request.data.uid);
+                return student != null && isTeacherSchool(student.data.school);
+            }
+
+            allow read: if isAuthenticated(resource.data.uid) || isMyStudentSubmission();
+            allow create: if isAuthenticated(request.resource.data.uid) && hasTimestamp('submittedAt');
         }
 
         match /teachers/{teacher} {
@@ -74,10 +100,16 @@ service cloud.firestore {
         match /variants/{variant} {
             function isMyVariant(variant) {
                 let student = getStudent(request.auth.uid);
+                return student != null
+                    && student.data.variant == variant
+                    && isMyContestStarted(student.data);
+            }
+
+            function isMyContestStarted(student) {
                 let school = getSchool(student.school);
-                return student.variant == variant
-                    && school.startingTime != null
-                    && school.startingTime <= request.time;
+                return school != null
+                    && school.data.startingTime != null
+                    && school.data.startingTime <= request.time;
             }
 
             allow read: if isMyVariant(variant) || isTeacher();

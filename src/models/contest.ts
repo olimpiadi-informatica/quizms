@@ -6,9 +6,9 @@ export const contestSchema = z.object({
   questionCount: z.coerce.number().int().positive(),
   startingWindowStart: z.date().optional(),
   startingWindowEnd: z.date().optional(),
-  duration: z.number().optional(),
-  allowStudents: z.boolean().optional(),
-  allowRestart: z.boolean().optional(),
+  duration: z.coerce.number().positive().optional(),
+  allowStudentRegistration: z.boolean().default(false),
+  allowRestart: z.boolean().default(false),
 });
 
 export type Contest = z.infer<typeof contestSchema>;

@@ -10,64 +10,81 @@ import {
   doc,
   getDoc,
   getDocs,
+  orderBy as orderByField,
   query,
   setDoc,
   where,
 } from "firebase/firestore";
-import { SWRConfiguration } from "swr";
-import useSWR from "swr/immutable";
+import useSWR, { SWRConfiguration } from "swr";
 
 import { useDb } from "~/firebase/login";
 
 const swrConfig: SWRConfiguration = {
+  revalidateOnMount: true,
   shouldRetryOnError: false,
   suspense: true,
 };
 
-export function useDocument<T>(path: string, converter: FirestoreDataConverter<T>) {
+export function useDocument<T>(
+  path: string,
+  id: string,
+  converter: FirestoreDataConverter<T>,
+  initialData?: T,
+) {
   const db = useDb();
-  const ref = doc(db, path).withConverter(converter);
+  const ref = doc(db, path, id).withConverter(converter);
 
-  const { data, mutate, error } = useSWR<T>(path, () => fetcher(ref), swrConfig);
+  const { data, mutate, error } = useSWR<T>(`${path}/${id}`, () => fetcher(ref), {
+    ...swrConfig,
+    fallbackData: initialData,
+  });
   if (error) throw error;
 
-  const updateDocument = (newData: T) => {
-    void mutate(
-      async () => {
-        await setDoc(ref, newData);
-        return newData;
-      },
-      {
-        optimisticData: newData,
-        revalidate: false,
-        rollbackOnError: true,
-        throwOnError: true,
-      },
-    );
-  };
+  const updateDocument = useCallback(
+    (newData: T) => {
+      void mutate(
+        async () => {
+          await setDoc(ref, newData);
+          return newData;
+        },
+        {
+          optimisticData: newData,
+          revalidate: false,
+          rollbackOnError: true,
+          throwOnError: true,
+        },
+      );
+    },
+    [mutate, ref],
+  );
 
   return [data as T, updateDocument] as const;
 
   async function fetcher<T>(ref: DocumentReference<T>) {
     const snapshot = await getDoc(ref);
-    if (!snapshot.exists()) throw new Error(`Document \`${ref.path}\` does not exist.`);
-    return snapshot.data()!;
+    if (!snapshot.exists()) {
+      if (initialData) return initialData as T;
+      throw new Error(`Document \`${ref.path}\` does not exist.`);
+    }
+    return snapshot.data({ serverTimestamps: "estimate" });
   }
 }
 
 export function useCollection<T>(
   path: string,
   converter: FirestoreDataConverter<T>,
+  orderBy?: string,
   constraints?: Record<string, string>,
 ) {
   const db = useDb();
+  const ref = collection(db, path).withConverter(converter);
   const q = query(
-    collection(db, path).withConverter(converter),
+    ref,
+    ...(orderBy ? [orderByField(orderBy)] : []),
     ...Object.entries(constraints ?? {}).map(([k, v]) => where(k, "==", v)),
   );
 
   const key = `${path}?${new URLSearchParams(constraints)}`;
-
   const { data, error } = useSWR<T[]>(key, () => fetcher(q), swrConfig);
   if (error) throw error;
 
@@ -75,7 +92,7 @@ export function useCollection<T>(
 
   async function fetcher<T>(ref: Query<T>) {
     const snapshot = await getDocs(ref);
-    return snapshot.docs.map((doc) => doc.data());
+    return snapshot.docs.map((doc) => doc.data({ serverTimestamps: "estimate" }));
   }
 }
 

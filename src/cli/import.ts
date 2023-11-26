@@ -15,8 +15,8 @@ import { teacherSchema as baseTeacherSchema } from "~/models/teacher";
 import { variantSchema } from "~/models/variant";
 import validate from "~/utils/validate";
 
-const teacherSchema = baseTeacherSchema.extend({
-  externalId: z.coerce.number(),
+const teacherSchema = baseTeacherSchema.omit({ id: true }).extend({
+  externalId: z.coerce.number().optional(),
   email: z.string().email(),
   password: z.string(),
 });
@@ -43,7 +43,7 @@ export default async function importContests(options: ImportOptions) {
   if (options.all || options.contests) {
     console.log("Importing contests...");
     await pipeline(
-      createReadStream("contests.csv"),
+      createReadStream("data/contests.csv"),
       parse({ columns: true }),
       async function (source) {
         const promises: Promise<any>[] = [];
@@ -63,12 +63,12 @@ export default async function importContests(options: ImportOptions) {
 
   if (options.all || options.variants) {
     console.log("Importing variants...");
-    const variants = JSON.parse(await readFile("variants.json", "utf-8"));
+    const variants = JSON.parse(await readFile("data/variants.json", "utf-8"));
 
     const promises: Promise<any>[] = [];
 
     for (const [id, record] of Object.entries(variants)) {
-      const variant = validate(variantSchema, record);
+      const variant = validate(variantSchema, { id, ...record });
       promises.push(db.doc(`variants/${id}`).withConverter(variantConverter).set(variant));
     }
 
@@ -79,7 +79,7 @@ export default async function importContests(options: ImportOptions) {
   if (options.all || options.teachers) {
     console.log("Importing teachers...");
     await pipeline(
-      createReadStream("teachers.csv"),
+      createReadStream("data/teachers.csv"),
       parse({ columns: true }),
       async function (source) {
         const promises: Promise<void>[] = [];
@@ -97,7 +97,7 @@ export default async function importContests(options: ImportOptions) {
 
   if (options.all || options.schools) {
     console.log("Importing schools...");
-    const schools = JSON.parse(await readFile("schools.json", "utf-8"));
+    const schools = JSON.parse(await readFile("data/schools.json", "utf-8"));
 
     const promises: Promise<any>[] = [];
 

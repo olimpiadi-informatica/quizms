@@ -8,7 +8,6 @@ import { ErrorBoundary, FallbackProps } from "react-error-boundary";
 
 import { useAuth } from "~/firebase/hooks";
 import Loading from "~/ui/components/loading";
-import Progress from "~/ui/components/progress";
 
 type Props = {
   config: FirebaseOptions;

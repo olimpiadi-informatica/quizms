@@ -84,8 +84,8 @@ function TeacherLogin({ children }: { children: ReactNode }) {
 function TeacherInner({ user, children }: { user: User; children: ReactNode }) {
   const db = useDb();
 
-  const [teacher] = useDocument(`teachers/${user.uid}`, teacherConverter);
-  const [school] = useDocument(`schools/${teacher.school}`, schoolConverter);
+  const [teacher] = useDocument("teachers", user.uid, teacherConverter);
+  const [school] = useDocument("schools", teacher.school, schoolConverter);
   const contests = useCollection("contests", contestConverter);
   const variants = useCollection("variants", variantConverter);
 
@@ -100,8 +100,8 @@ function TeacherInner({ user, children }: { user: User; children: ReactNode }) {
     <TeacherProvider
       teacher={teacherWithName}
       school={school}
-      contests={Object.fromEntries(contests.map((c) => [c.id, c]))}
-      variants={Object.fromEntries(variants.map((v) => [v.id, v]))}
+      contests={contests}
+      variants={variants}
       logout={logout}>
       <Layout>
         <VerifiedUserWrapper user={user}>{children}</VerifiedUserWrapper>

@@ -11,9 +11,9 @@ type TeacherProviderProps = {
   /** Scuola dell'insegnante */
   school: School;
   /** Contest attivi */
-  contests: Record<string, Contest>;
+  contests: Contest[];
   /** Varianti dei contest */
-  variants: Record<string, Variant>;
+  variants: Variant[];
   /** Funzione per effettuare il logout */
   logout: () => Promise<void>;
 };

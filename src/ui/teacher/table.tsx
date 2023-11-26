@@ -1,8 +1,8 @@
-import React, { ChangeEvent, Suspense, useRef, useState } from "react";
+import React, { ChangeEvent, Suspense, useEffect, useRef, useState } from "react";
 
 import classNames from "classnames";
 import { formatISO } from "date-fns";
-import { range } from "lodash-es";
+import { isEmpty, range } from "lodash-es";
 
 import { studentConverter } from "~/firebase/converters";
 import { useCollection, useDocument } from "~/firebase/hooks";
@@ -16,18 +16,18 @@ import { useTeacher } from "./provider";
 export function TeacherTable() {
   const { contests } = useTeacher();
 
-  const [selectedContest, setSelectedContest] = useState(Object.values(contests)[0].id);
+  const [selectedContest, setSelectedContest] = useState(0);
 
   return (
     <>
       <div className="mb-5 flex justify-center">
         <div role="tablist" className="tabs-boxed tabs grow justify-center lg:max-w-3xl">
-          {Object.values(contests).map((contest) => (
+          {contests.map((contest, i) => (
             <a
               role="tab"
               key={contest.id}
-              className={classNames("tab", contest.id == selectedContest && "tab-active")}
-              onClick={() => setSelectedContest(contest.id)}>
+              className={classNames("tab", i == selectedContest && "tab-active")}
+              onClick={() => setSelectedContest(i)}>
               {contest.name}
             </a>
           ))}
@@ -45,11 +45,35 @@ export function TeacherTable() {
 function Table({ contest }: { contest: Contest }) {
   const { school } = useTeacher();
 
-  // TODO: extract firebase login
-  const students = useCollection("students", studentConverter, {
+  // TODO: extract firebase logic
+  const students = useCollection("students", studentConverter, "createdAt", {
     school: school.id,
     contest: contest.id,
   });
+
+  const [newStudents, setNewStudents] = useState<Student[]>([]);
+
+  function checkEmptyStudents(students: Student[]) {
+    return students.some(({ id, school, contest, createdAt, ...rest }) => isEmpty(rest));
+  }
+
+  useEffect(() => {
+    if (!checkEmptyStudents(newStudents)) {
+      setNewStudents((prev) => {
+        if (checkEmptyStudents(prev)) return prev; // TODO: avoid race condition
+        return [
+          ...prev,
+          {
+            id: window.crypto.randomUUID(),
+            school: school.id,
+            contest: contest.id,
+          },
+        ];
+      });
+    }
+  }, [newStudents]);
+
+  console.log({ newStudents });
 
   return (
     <table className="table">
@@ -68,8 +92,11 @@ function Table({ contest }: { contest: Contest }) {
         </tr>
       </thead>
       <tbody>
-        {students!.map((student) => (
-          <StudentRow key={student.id} contest={contest} studentId={student.id!} />
+        {students.map((student) => (
+          <StudentRow key={student.id} contest={contest} initialStudent={student} />
+        ))}
+        {newStudents.map((student) => (
+          <StudentRow key={student.id} contest={contest} initialStudent={student} />
         ))}
       </tbody>
     </table>
@@ -78,14 +105,20 @@ function Table({ contest }: { contest: Contest }) {
 
 type StudentRowProps = {
   contest: Contest;
-  studentId: string;
+  initialStudent: Student;
 };
 
-function StudentRow({ contest, studentId }: StudentRowProps) {
-  const [student, setStudent] = useDocument(`students/${studentId}`, studentConverter);
+function StudentRow({ contest, initialStudent }: StudentRowProps) {
+  // TODO: extract firebase logic
+  const [student, setStudent] = useDocument(
+    "students",
+    initialStudent.id,
+    studentConverter,
+    initialStudent,
+  );
 
   const { variants } = useTeacher();
-  const variant = variants[student.variant ?? ""];
+  const variant = variants.find((variant) => variant.id == student.variant);
 
   const birthDate = student.birthDate
     ? formatISO(student.birthDate, { representation: "date" })
