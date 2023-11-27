@@ -11,11 +11,10 @@ export const studentSchema = z
     token: z.string(),
     variant: z.string(),
     disabled: z.boolean().default(false),
-
     school: z.string(),
-
-    createdAt: z.date().optional(),
-    updatedAt: z.date().optional(),
+    answers: z.array(z.string()),
+    createdAt: z.date(),
+    updatedAt: z.date(),
   })
   .partial()
   .extend({

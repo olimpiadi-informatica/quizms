@@ -10,12 +10,14 @@ import {
   doc,
   getDoc,
   getDocs,
-  orderBy as orderByField,
+  limit,
+  orderBy,
   query,
   setDoc,
   where,
 } from "firebase/firestore";
-import useSWR, { SWRConfiguration } from "swr";
+import { compact, isNil, omitBy } from "lodash-es";
+import useSWR, { MutatorOptions, SWRConfiguration } from "swr";
 
 import { useDb } from "~/firebase/login";
 
@@ -25,19 +27,17 @@ const swrConfig: SWRConfiguration = {
   suspense: true,
 };
 
-export function useDocument<T>(
-  path: string,
-  id: string,
-  converter: FirestoreDataConverter<T>,
-  initialData?: T,
-) {
+const mutationConfig: MutatorOptions = {
+  revalidate: false,
+  rollbackOnError: true,
+  populateCache: true,
+};
+
+export function useDocument<T>(path: string, id: string, converter: FirestoreDataConverter<T>) {
   const db = useDb();
   const ref = doc(db, path, id).withConverter(converter);
 
-  const { data, mutate, error } = useSWR<T>(`${path}/${id}`, () => fetcher(ref), {
-    ...swrConfig,
-    fallbackData: initialData,
-  });
+  const { data, mutate, error } = useSWR<T>(`${path}/${id}`, () => fetcher(ref), swrConfig);
   if (error) throw error;
 
   const updateDocument = useCallback(
@@ -47,12 +47,7 @@ export function useDocument<T>(
           await setDoc(ref, newData);
           return newData;
         },
-        {
-          optimisticData: newData,
-          revalidate: false,
-          rollbackOnError: true,
-          throwOnError: true,
-        },
+        { ...mutationConfig, optimisticData: newData },
       );
     },
     [mutate, ref],
@@ -63,32 +58,71 @@ export function useDocument<T>(
   async function fetcher<T>(ref: DocumentReference<T>) {
     const snapshot = await getDoc(ref);
     if (!snapshot.exists()) {
-      if (initialData) return initialData as T;
       throw new Error(`Document \`${ref.path}\` does not exist.`);
     }
     return snapshot.data({ serverTimestamps: "estimate" });
   }
 }
 
-export function useCollection<T>(
+export function useCollection<T extends { id: string }>(
   path: string,
   converter: FirestoreDataConverter<T>,
-  orderBy?: string,
-  constraints?: Record<string, string>,
+  options?: {
+    constraints?: Record<string, string>;
+    orderBy?: string;
+    orderByDesc?: string;
+    limit?: number;
+  },
 ) {
   const db = useDb();
   const ref = collection(db, path).withConverter(converter);
   const q = query(
     ref,
-    ...(orderBy ? [orderByField(orderBy)] : []),
-    ...Object.entries(constraints ?? {}).map(([k, v]) => where(k, "==", v)),
+    ...Object.entries(options?.constraints ?? {}).map(([k, v]) => where(k, "==", v)),
+    ...compact([
+      options?.orderBy && orderBy(options.orderBy),
+      options?.orderByDesc && orderBy(options.orderByDesc, "desc"),
+      options?.limit && limit(options.limit),
+    ]),
   );
 
-  const key = `${path}?${new URLSearchParams(constraints)}`;
-  const { data, error } = useSWR<T[]>(key, () => fetcher(q), swrConfig);
+  const params = omitBy(
+    {
+      ...options?.constraints,
+      orderBy: options?.orderBy,
+      orderByDesc: options?.orderByDesc,
+      limit: options?.limit?.toString(),
+    },
+    isNil,
+  ) as Record<string, string>;
+
+  const key = `${path}?${new URLSearchParams(params)}`;
+  const { data, mutate, error } = useSWR<T[]>(key, () => fetcher(q), swrConfig);
   if (error) throw error;
 
-  return data as T[];
+  const setDocument = useCallback(
+    (newDoc: T) => {
+      // TODO: orderBy, limit
+      function merge(prev: T[] | undefined) {
+        if (!prev) return [newDoc];
+        const index = prev.findIndex((doc) => doc.id === newDoc.id);
+        if (index === -1) return [...prev, newDoc];
+        return prev.map((doc, i) => (i === index ? newDoc : doc));
+      }
+
+      void mutate(
+        async (prev) => {
+          const docRef = doc(ref, newDoc.id);
+          await setDoc(docRef, newDoc);
+          return merge(prev);
+        },
+        { ...mutationConfig, optimisticData: merge },
+      );
+    },
+    [mutate, ref],
+  );
+
+  return [data as T[], setDocument] as const;
 
   async function fetcher<T>(ref: Query<T>) {
     const snapshot = await getDocs(ref);

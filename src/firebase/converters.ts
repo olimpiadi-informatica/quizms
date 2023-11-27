@@ -1,5 +1,10 @@
-import { DocumentSnapshot } from "@firebase/firestore";
-import { Bytes, FirestoreDataConverter, Timestamp, serverTimestamp } from "firebase/firestore";
+import {
+  Bytes,
+  DocumentSnapshot,
+  FirestoreDataConverter,
+  Timestamp,
+  serverTimestamp,
+} from "firebase/firestore";
 import { cloneDeepWith, mapValues } from "lodash-es";
 import z, {
   ZodArray,
@@ -86,10 +91,8 @@ export const schoolConverter: FirestoreDataConverter<School> = {
 
 export const studentConverter: FirestoreDataConverter<Student> = {
   toFirestore(data) {
-    const converted = convertToFirestore(data);
     return {
-      ...converted,
-      createdAt: converted.createdAt ?? serverTimestamp(),
+      ...convertToFirestore(data),
       updatedAt: serverTimestamp(),
     };
   },

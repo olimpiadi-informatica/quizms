@@ -1,8 +1,9 @@
 import React, { ReactNode, useRef } from "react";
 
 import { GraduationCap, UserIcon } from "lucide-react";
-import { ErrorBoundary, FallbackProps } from "react-error-boundary";
+import { ErrorBoundary } from "react-error-boundary";
 
+import Error from "~/ui/components/error";
 import Modal from "~/ui/components/modal";
 import { useTeacher } from "~/ui/teacher/provider";
 
@@ -14,7 +15,7 @@ export function Layout({ children }: { children: ReactNode }) {
           <Navbar />
         </div>
       </div>
-      <ErrorBoundary FallbackComponent={ErrorView}>{children}</ErrorBoundary>
+      <ErrorBoundary FallbackComponent={Error}>{children}</ErrorBoundary>
     </div>
   );
 }
@@ -47,14 +48,6 @@ function Navbar() {
           </button>
         </div>
       </Modal>
-    </div>
-  );
-}
-
-function ErrorView({ error }: FallbackProps) {
-  return (
-    <div className="m-auto my-64 w-64">
-      <p className="text-red-500">{error.message}</p>
     </div>
   );
 }

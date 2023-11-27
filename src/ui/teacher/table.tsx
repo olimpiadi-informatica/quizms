@@ -1,11 +1,11 @@
-import React, { ChangeEvent, Suspense, useEffect, useRef, useState } from "react";
+import React, { ChangeEvent, Suspense, useRef, useState } from "react";
 
 import classNames from "classnames";
 import { formatISO } from "date-fns";
-import { isEmpty, range } from "lodash-es";
+import { constant, range, times } from "lodash-es";
 
 import { studentConverter } from "~/firebase/converters";
-import { useCollection, useDocument } from "~/firebase/hooks";
+import { useCollection } from "~/firebase/hooks";
 import { Contest } from "~/models/contest";
 import { Student } from "~/models/student";
 import { Variant } from "~/models/variant";
@@ -33,7 +33,7 @@ export function TeacherTable() {
           ))}
         </div>
       </div>
-      <div className="min-h-0 flex-auto overflow-auto">
+      <div className="min-h-0 flex-auto overflow-scroll pb-[25vh]">
         <Suspense fallback={<Loading className="h-full" />}>
           <Table contest={contests[selectedContest]} />
         </Suspense>
@@ -46,34 +46,30 @@ function Table({ contest }: { contest: Contest }) {
   const { school } = useTeacher();
 
   // TODO: extract firebase logic
-  const students = useCollection("students", studentConverter, "createdAt", {
-    school: school.id,
-    contest: contest.id,
+  const [students, setStudent] = useCollection("students", studentConverter, {
+    constraints: {
+      school: school.id,
+      contest: contest.id,
+    },
+    orderBy: "createdAt",
   });
 
-  const [newStudents, setNewStudents] = useState<Student[]>([]);
+  const newStudentId = useRef(window.crypto.randomUUID());
 
-  function checkEmptyStudents(students: Student[]) {
-    return students.some(({ id, school, contest, createdAt, ...rest }) => isEmpty(rest));
-  }
+  const allStudents: Student[] = [
+    ...students,
+    {
+      id: newStudentId.current,
+      contest: contest.id,
+      school: school.id,
+      createdAt: new Date(),
+    },
+  ];
 
-  useEffect(() => {
-    if (!checkEmptyStudents(newStudents)) {
-      setNewStudents((prev) => {
-        if (checkEmptyStudents(prev)) return prev; // TODO: avoid race condition
-        return [
-          ...prev,
-          {
-            id: window.crypto.randomUUID(),
-            school: school.id,
-            contest: contest.id,
-          },
-        ];
-      });
-    }
-  }, [newStudents]);
-
-  console.log({ newStudents });
+  const setStudentAndUpdateId = (student: Student) => {
+    setStudent(student);
+    newStudentId.current = window.crypto.randomUUID();
+  };
 
   return (
     <table className="table">
@@ -88,15 +84,17 @@ function Table({ contest }: { contest: Contest }) {
           {range(contest.questionCount).map((i) => (
             <th key={i}>{i + 1}</th>
           ))}
-          <th>Abilitato</th>
+          <th>Escludi</th>
         </tr>
       </thead>
       <tbody>
-        {students.map((student) => (
-          <StudentRow key={student.id} contest={contest} initialStudent={student} />
-        ))}
-        {newStudents.map((student) => (
-          <StudentRow key={student.id} contest={contest} initialStudent={student} />
+        {allStudents.map((student) => (
+          <StudentRow
+            key={student.id}
+            contest={contest}
+            student={student}
+            setStudent={setStudentAndUpdateId}
+          />
         ))}
       </tbody>
     </table>
@@ -105,18 +103,11 @@ function Table({ contest }: { contest: Contest }) {
 
 type StudentRowProps = {
   contest: Contest;
-  initialStudent: Student;
+  student: Student;
+  setStudent: (student: Student) => void;
 };
 
-function StudentRow({ contest, initialStudent }: StudentRowProps) {
-  // TODO: extract firebase logic
-  const [student, setStudent] = useDocument(
-    "students",
-    initialStudent.id,
-    studentConverter,
-    initialStudent,
-  );
-
+function StudentRow({ contest, student, setStudent }: StudentRowProps) {
   const { variants } = useTeacher();
   const variant = variants.find((variant) => variant.id == student.variant);
 
@@ -126,16 +117,33 @@ function StudentRow({ contest, initialStudent }: StudentRowProps) {
   const setBirthDate = (e: ChangeEvent<HTMLInputElement>) => {
     setStudent({
       ...student,
-      birthDate: e.target.value ? new Date(e.target.value) : undefined,
+      birthDate: e.target.valueAsDate ?? undefined,
     });
   };
 
+  const setClassYear = (e: ChangeEvent<HTMLInputElement>) => {
+    if (e.target.value === "") {
+      setStudent({ ...student, classYear: undefined });
+    } else {
+      const classYear = Number(e.target.value);
+      if (1 <= classYear && classYear <= 5) {
+        setStudent({ ...student, classYear });
+      }
+    }
+  };
+
   const setDisabled = (e: ChangeEvent<HTMLInputElement>) => {
-    setStudent({ ...student, disabled: !e.target.checked });
+    setStudent({ ...student, disabled: e.target.checked });
   };
 
   const setField = (field: keyof Student) => (e: ChangeEvent<HTMLInputElement>) => {
     setStudent({ ...student, [field]: e.target.value });
+  };
+
+  const setAnswer = (index: number) => (value: string) => {
+    const answers = [...(student.answers ?? times(contest.questionCount, constant("")))];
+    answers[index] = value;
+    setStudent({ ...student, answers });
   };
 
   return (
@@ -163,10 +171,10 @@ function StudentRow({ contest, initialStudent }: StudentRowProps) {
       <td>
         <input
           className="input input-ghost input-xs"
-          type="number"
+          type="text"
           placeholder="Classe"
           value={student.classYear ?? ""}
-          onChange={setField("classYear")}
+          onChange={setClassYear}
           disabled={student.disabled}
         />
       </td>
@@ -201,14 +209,20 @@ function StudentRow({ contest, initialStudent }: StudentRowProps) {
         />
       </td>
       {range(contest.questionCount).map((i) => (
-        <Answer key={i} question={variant?.schema[i]} disabled={student.disabled} />
+        <Answer
+          key={i}
+          question={variant?.schema?.[i]}
+          value={student.answers?.[i] ?? ""}
+          setValue={setAnswer(i)}
+          disabled={student.disabled}
+        />
       ))}
       <td>
         <div className="flex justify-center">
           <input
             className="checkbox"
             type="checkbox"
-            checked={!student.disabled}
+            checked={student.disabled}
             onChange={setDisabled}
             tabIndex={-1}
           />
@@ -218,10 +232,19 @@ function StudentRow({ contest, initialStudent }: StudentRowProps) {
   );
 }
 
-function Answer({ question, disabled }: { question?: Variant["schema"][0]; disabled?: boolean }) {
+function Answer({
+  question,
+  value,
+  setValue,
+  disabled,
+}: {
+  question?: Variant["schema"][0];
+  value: string;
+  setValue: (value: string) => void;
+  disabled?: boolean;
+}) {
   const ref = useRef<HTMLTableCellElement>(null);
 
-  const [value, setValue] = useState("");
   const [blur, setBlur] = useState(false);
 
   function isPartiallyValid(value: string) {

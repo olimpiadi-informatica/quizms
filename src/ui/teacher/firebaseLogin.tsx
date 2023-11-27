@@ -86,8 +86,8 @@ function TeacherInner({ user, children }: { user: User; children: ReactNode }) {
 
   const [teacher] = useDocument("teachers", user.uid, teacherConverter);
   const [school] = useDocument("schools", teacher.school, schoolConverter);
-  const contests = useCollection("contests", contestConverter);
-  const variants = useCollection("variants", variantConverter);
+  const [contests] = useCollection("contests", contestConverter);
+  const [variants] = useCollection("variants", variantConverter);
 
   const teacherWithName = { ...teacher, name: user.displayName ?? "Utente anonimo" };
 
