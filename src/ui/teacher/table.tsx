@@ -1,8 +1,9 @@
-import React, { ChangeEvent, Suspense, useRef, useState } from "react";
+import React, { ChangeEvent, Suspense, useMemo, useRef, useState } from "react";
 
 import classNames from "classnames";
 import { formatISO } from "date-fns";
 import { constant, range, times } from "lodash-es";
+import { Check } from "lucide-react";
 
 import { studentConverter } from "~/firebase/converters";
 import { useCollection } from "~/firebase/hooks";
@@ -75,6 +76,7 @@ function Table({ contest }: { contest: Contest }) {
     <table className="table">
       <thead className="sticky top-0 bg-base-100">
         <tr>
+          <th></th>
           <th>Nome</th>
           <th>Cognome</th>
           <th>Classe</th>
@@ -146,8 +148,24 @@ function StudentRow({ contest, student, setStudent }: StudentRowProps) {
     setStudent({ ...student, answers });
   };
 
+  const isComplete = useMemo(() => {
+    let answers = range(contest.questionCount).every((i) => student.answers?.[i]);
+    let fields: (keyof Student)[] = [
+      "name",
+      "surname",
+      "classYear",
+      "classSection",
+      "birthDate",
+      "variant",
+    ];
+    return answers && fields.every((f) => student[f]);
+  }, [student]);
+
   return (
     <tr>
+      <td>
+        <Check className={classNames("text-success", !isComplete && "opacity-0")} />
+      </td>
       <td>
         <input
           className="input input-ghost input-xs"
