@@ -35,7 +35,7 @@ export function TeacherTable() {
         </div>
       </div>
       <div className="min-h-0 flex-auto overflow-scroll pb-[25vh]">
-        <Suspense fallback={<Loading className="h-full" />}>
+        <Suspense fallback={<Loading />}>
           <Table contest={contests[selectedContest]} />
         </Suspense>
       </div>

@@ -26,17 +26,19 @@ export function FirebaseLogin({ config, children }: Props) {
 
   return (
     <FirebaseContext.Provider value={db}>
-      <ErrorBoundary FallbackComponent={Error}>
-        <Suspense fallback={<Loading className="h-screen" />}>
-          <AuthWrapper>{children}</AuthWrapper>
-        </Suspense>
-      </ErrorBoundary>
+      <div className="h-screen">
+        <ErrorBoundary FallbackComponent={Error}>
+          <Suspense fallback={<Loading />}>
+            <AuthWrapper>{children}</AuthWrapper>
+          </Suspense>
+        </ErrorBoundary>
+      </div>
     </FirebaseContext.Provider>
   );
 }
 
 function AuthWrapper({ children }: { children: ReactNode }) {
-  useAuth();
+  const user = useAuth();
   return children;
 }
 

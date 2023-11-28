@@ -1,7 +1,14 @@
 import { useCallback, useState } from "react";
 
 import { FirebaseError } from "firebase/app";
-import { Auth, User, getAuth, onAuthStateChanged, signInWithEmailAndPassword } from "firebase/auth";
+import {
+  Auth,
+  User,
+  UserCredential,
+  getAuth,
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+} from "firebase/auth";
 import {
   DocumentReference,
   FirestoreDataConverter,
@@ -16,7 +23,7 @@ import {
   setDoc,
   where,
 } from "firebase/firestore";
-import { compact, isNil, omitBy } from "lodash-es";
+import { compact } from "lodash-es";
 import useSWR, { MutatorOptions, SWRConfiguration } from "swr";
 
 import { useDb } from "~/firebase/login";
@@ -86,15 +93,12 @@ export function useCollection<T extends { id: string }>(
     ]),
   );
 
-  const params = omitBy(
-    {
-      ...options?.constraints,
-      orderBy: options?.orderBy,
-      orderByDesc: options?.orderByDesc,
-      limit: options?.limit?.toString(),
-    },
-    isNil,
-  ) as Record<string, string>;
+  const params = {
+    ...options?.constraints,
+    orderBy: options?.orderBy,
+    orderByDesc: options?.orderByDesc,
+    limit: options?.limit?.toString(),
+  } as Record<string, string>;
 
   const key = `${path}?${new URLSearchParams(params)}`;
   const { data, mutate, error } = useSWR<T[]>(key, () => fetcher(q), swrConfig);
@@ -131,15 +135,30 @@ export function useCollection<T extends { id: string }>(
 }
 
 export function useAuth() {
+  const params = new URLSearchParams(window.location.search);
+  const email = params.get("email");
+  const password = params.get("password");
+
   const db = useDb();
   const auth = getAuth(db.app);
 
-  const { data, error } = useSWR<User | null>("firebase/auth", () => fetcher(auth), swrConfig);
+  const key = `firebase/auth?${params}`;
+  const { data, error } = useSWR<User | null>(key, () => fetcher(auth, email, password), swrConfig);
   if (error) throw error;
 
   return data as User | null;
 
-  function fetcher(auth: Auth) {
+  async function fetcher(auth: Auth, email: string | null, password: string | null) {
+    if (email && password) {
+      let credential: UserCredential | undefined = undefined;
+      try {
+        credential = await signInWithEmailAndPassword(auth, email, password);
+      } catch (e) {}
+
+      window.history.replaceState(null, "", window.location.pathname);
+      if (credential) return credential.user;
+    }
+
     return new Promise<User | null>((resolve, reject) => {
       const unsubscribe = onAuthStateChanged(auth, {
         next: (user) => {

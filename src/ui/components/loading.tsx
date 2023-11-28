@@ -4,9 +4,9 @@ import classNames from "classnames";
 
 import Progress from "./progress";
 
-export default function Loading({ className }: { className?: string }) {
+export default function Loading() {
   return (
-    <div className={classNames("flex items-center", className)}>
+    <div className="flex h-full items-center">
       <div className="flex grow flex-col items-center">
         <Progress>
           <p className="pb-1">Caricamento in corso...</p>

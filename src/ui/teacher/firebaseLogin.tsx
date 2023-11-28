@@ -103,16 +103,7 @@ function TeacherInner({ user, children }: { user: User; children: ReactNode }) {
       contests={contests}
       variants={variants}
       logout={logout}>
-      <Layout>
-        <VerifiedUserWrapper user={user}>{children}</VerifiedUserWrapper>
-      </Layout>
+      <Layout>{children}</Layout>
     </TeacherProvider>
   );
-}
-
-function VerifiedUserWrapper({ user, children }: { user: User; children: ReactNode }) {
-  if (!user.emailVerified) {
-    throw new Error("Utente non autorizzato");
-  }
-  return children;
 }
