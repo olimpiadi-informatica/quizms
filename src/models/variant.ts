@@ -8,8 +8,8 @@ export const variantSchema = z.object({
       regex: z.instanceof(RegExp).optional(),
       options: z.string().array().nonempty().optional(),
       pointsCorrect: z.number().optional(),
-      pointsWrong: z.number().optional(),
       pointsBlank: z.number().optional(),
+      pointsWrong: z.number().optional(),
     })
     .array(),
   statement: z.instanceof(Uint8Array).optional(),

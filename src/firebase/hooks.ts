@@ -153,7 +153,9 @@ export function useAuth() {
       let credential: UserCredential | undefined = undefined;
       try {
         credential = await signInWithEmailAndPassword(auth, email, password);
-      } catch (e) {}
+      } catch (e) {
+        console.warn("Failed to sign in with precompiled credentials.");
+      }
 
       window.history.replaceState(null, "", window.location.pathname);
       if (credential) return credential.user;

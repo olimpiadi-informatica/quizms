@@ -1,7 +1,5 @@
 import React from "react";
 
-import classNames from "classnames";
-
 import Progress from "./progress";
 
 export default function Loading() {

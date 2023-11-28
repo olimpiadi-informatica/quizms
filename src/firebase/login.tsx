@@ -38,7 +38,7 @@ export function FirebaseLogin({ config, children }: Props) {
 }
 
 function AuthWrapper({ children }: { children: ReactNode }) {
-  const user = useAuth();
+  useAuth();
   return children;
 }
 
