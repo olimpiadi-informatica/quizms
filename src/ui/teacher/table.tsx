@@ -111,7 +111,9 @@ type StudentRowProps = {
 
 function StudentRow({ contest, student, setStudent }: StudentRowProps) {
   const { variants } = useTeacher();
-  const variant = variants.find((variant) => variant.id == student.variant);
+  const variant = variants.find(
+    (variant) => variant.contest === contest.id && variant.id == student.variant,
+  );
 
   const birthDate = student.birthDate
     ? formatISO(student.birthDate, { representation: "date" })
@@ -158,7 +160,7 @@ function StudentRow({ contest, student, setStudent }: StudentRowProps) {
       "birthDate",
       "variant",
     ];
-    return answers && fields.every((f) => student[f]);
+    return answers && fields.every((f) => student[f]) && !student.disabled;
   }, [student]);
 
   return (
