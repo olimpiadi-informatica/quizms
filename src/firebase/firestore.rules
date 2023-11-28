@@ -13,20 +13,12 @@ service cloud.firestore {
             return request.resource.data.diff(resource.data).affectedKeys();
         }
 
-        function isStudent() {
-            return request.auth != null && request.auth.token.firebase.sign_in_provider == 'anonymous';
-        }
-
         function isTeacher() {
             return request.auth != null && request.auth.token.email_verified;
         }
 
         function getStudent(uid) {
             return get(/databases/$(database)/documents/students/$(uid));
-        }
-
-        function getTeacher(uid) {
-            return get(/databases/$(database)/documents/teachers/$(uid));
         }
 
         function getSchool(id) {
@@ -38,9 +30,9 @@ service cloud.firestore {
             return student != null && (student.data.school == school || student.data.token == token);
         }
 
-        function isTeacherSchool(school) {
-            let teacher = getTeacher(request.auth.uid);
-            return teacher != null && teacher.data.school == school;
+        function isTeacherSchool(schoolId) {
+            let school = getSchool(schoolId);
+            return school != null && isAuthenticated(school.data.teacher);
         }
 
         match /contests/{contest} {
@@ -48,14 +40,14 @@ service cloud.firestore {
         }
 
         match /schools/{school} {
-            allow read: if isStudentSchool(school, resource.data.token) || isTeacherSchool(school);
-            allow update: if isTeacherSchool(school);
+            allow read: if isStudentSchool(school, resource.data.token) || isAuthenticated(resource.data.teacher);
+            allow update: if isAuthenticated(resource.data.teacher);
         }
 
         match /students/{student} {
-            function checkVariant(data) {
+            function checkVariant(data, variant) {
                 let joined = [data.name, data.surname, data.birthData, data.school, data.classYear, data.classSection].join('$');
-                return data.variant == hashing.sha256(joined).toHexString()[0: 3];
+                return variant == hashing.sha256(joined).toHexString()[0: 3];
             }
 
             function checkToken(school) {
@@ -68,7 +60,8 @@ service cloud.firestore {
                 let school = getSchool(request.resource.data.school);
                 return isAuthenticated(student)
                     && (school == null || checkToken(school))
-                    && checkVariant(request.resource.data);
+                    && request.resource.data.personalInformation != null
+                    && checkVariant(request.resource.data.personalInformation, request.resource.data.variant);
             }
 
             function canBeUpdated() {
@@ -91,10 +84,6 @@ service cloud.firestore {
 
             allow read: if isAuthenticated(resource.data.uid) || isMyStudentSubmission(resource.data.uid);
             allow create: if (isAuthenticated(request.resource.data.uid) || isMyStudentSubmission(request.resource.data.uid)) && hasTimestamp('submittedAt');
-        }
-
-        match /teachers/{teacher} {
-            allow read: if isAuthenticated(teacher);
         }
 
         match /variants/{variant} {

@@ -2,16 +2,13 @@ import z from "zod";
 
 export const studentSchema = z
   .object({
-    name: z.string(),
-    surname: z.string(),
-    classYear: z.coerce.number(),
-    classSection: z.string(),
-    birthDate: z.date(),
+    personalInformation: z.record(z.union([z.string(), z.number(), z.date()]).optional()),
     contest: z.string(),
+    school: z.string(),
     token: z.string(),
+
     variant: z.string(),
     disabled: z.boolean().default(false),
-    school: z.string(),
     answers: z.array(z.string()),
     createdAt: z.date(),
     updatedAt: z.date(),

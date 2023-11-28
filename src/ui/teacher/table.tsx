@@ -1,7 +1,6 @@
 import React, { ChangeEvent, Suspense, useMemo, useRef, useState } from "react";
 
 import classNames from "classnames";
-import { formatISO } from "date-fns";
 import { constant, range, times } from "lodash-es";
 import { Check } from "lucide-react";
 
@@ -13,6 +12,7 @@ import { Variant } from "~/models/variant";
 import Loading from "~/ui/components/loading";
 
 import { useTeacher } from "./provider";
+import { TableBooleanField, TableField } from "./tableFields";
 
 export function TeacherTable() {
   const { contests } = useTeacher();
@@ -79,12 +79,10 @@ function Table({ contest }: { contest: Contest }) {
       <thead className="sticky top-0 bg-base-100">
         <tr>
           <th></th>
-          <th>Nome</th>
-          <th>Cognome</th>
-          <th>Classe</th>
-          <th>Sezione</th>
-          <th>Data di nascita</th>
-          <th>Variante</th>
+          {contest.personalInformation.map((field) => (
+            <th key={field.name}>{field.label}</th>
+          ))}
+          {contest.hasVariants && <th>Variante</th>}
           {range(contest.questionCount).map((i) => (
             <th key={i}>{i + 1}</th>
           ))}
@@ -117,35 +115,6 @@ function StudentRow({ contest, student, setStudent }: StudentRowProps) {
     (variant) => variant.contest === contest.id && variant.id == student.variant,
   );
 
-  const birthDate = student.birthDate
-    ? formatISO(student.birthDate, { representation: "date" })
-    : "";
-  const setBirthDate = (e: ChangeEvent<HTMLInputElement>) => {
-    setStudent({
-      ...student,
-      birthDate: e.target.valueAsDate ?? undefined,
-    });
-  };
-
-  const setClassYear = (e: ChangeEvent<HTMLInputElement>) => {
-    if (e.target.value === "") {
-      setStudent({ ...student, classYear: undefined });
-    } else {
-      const classYear = Number(e.target.value);
-      if (1 <= classYear && classYear <= 5) {
-        setStudent({ ...student, classYear });
-      }
-    }
-  };
-
-  const setDisabled = (e: ChangeEvent<HTMLInputElement>) => {
-    setStudent({ ...student, disabled: e.target.checked });
-  };
-
-  const setField = (field: keyof Student) => (e: ChangeEvent<HTMLInputElement>) => {
-    setStudent({ ...student, [field]: e.target.value });
-  };
-
   const setAnswer = (index: number) => (value: string) => {
     const answers = [...(student.answers ?? times(contest.questionCount, constant("")))];
     answers[index] = value;
@@ -154,82 +123,33 @@ function StudentRow({ contest, student, setStudent }: StudentRowProps) {
 
   const isComplete = useMemo(() => {
     const answers = range(contest.questionCount).every((i) => student.answers?.[i]);
-    const fields: (keyof Student)[] = [
-      "name",
-      "surname",
-      "classYear",
-      "classSection",
-      "birthDate",
-      "variant",
-    ];
-    return answers && fields.every((f) => student[f]) && !student.disabled;
-  }, [student, contest.questionCount]);
+    const personalInformation = contest.personalInformation.every(
+      (f) => student.personalInformation?.[f.name],
+    );
+    return answers && personalInformation && !student.disabled;
+  }, [student, contest.questionCount, contest.personalInformation]);
 
   return (
     <tr>
       <td>
         <Check className={classNames("text-success", !isComplete && "opacity-0")} />
       </td>
-      <td>
-        <input
-          className="input input-ghost input-xs"
-          type="text"
-          placeholder="Nome"
-          value={student.name ?? ""}
-          onChange={setField("name")}
-          disabled={student.disabled}
+      {contest.personalInformation.map((field) => (
+        <TableField
+          key={field.name}
+          {...field}
+          data={student.personalInformation ?? {}}
+          setData={(info) => setStudent({ ...student, personalInformation: info })}
         />
-      </td>
-      <td>
-        <input
-          className="input input-ghost input-xs"
-          type="text"
-          placeholder="Cognome"
-          value={student.surname ?? ""}
-          onChange={setField("surname")}
-          disabled={student.disabled}
-        />
-      </td>
-      <td>
-        <input
-          className="input input-ghost input-xs"
-          type="text"
-          placeholder="Classe"
-          value={student.classYear ?? ""}
-          onChange={setClassYear}
-          disabled={student.disabled}
-        />
-      </td>
-      <td>
-        <input
-          className="input input-ghost input-xs"
-          type="text"
-          placeholder="Sezione"
-          value={student.classSection ?? ""}
-          onChange={setField("classSection")}
-          disabled={student.disabled}
-        />
-      </td>
-      <td>
-        <input
-          className="input input-ghost input-xs"
-          type="date"
-          placeholder="Data di nascita"
-          value={birthDate}
-          onChange={setBirthDate}
-          disabled={student.disabled}
-        />
-      </td>
-      <td>
-        <input
-          className="input input-ghost input-xs"
-          type="text"
-          placeholder="Variante"
-          value={student.variant ?? ""}
-          onChange={setField("variant")}
-          disabled={student.disabled}
-        />
-      </td>
+      ))}
+      <TableField
+        name="variant"
+        type="text"
+        label="Variante"
+        data={student}
+        setData={setStudent}
+        disabled={student.disabled}
+      />
       {range(contest.questionCount).map((i) => (
         <Answer
           key={i}
@@ -239,17 +159,12 @@ function StudentRow({ contest, student, setStudent }: StudentRowProps) {
           disabled={student.disabled}
         />
       ))}
-      <td>
-        <div className="flex justify-center">
-          <input
-            className={classNames("checkbox", student.disabled && "checkbox-error")}
-            type="checkbox"
-            checked={student.disabled ?? false}
-            onChange={setDisabled}
-            tabIndex={-1}
-          />
-        </div>
-      </td>
+      <TableBooleanField
+        className={student.disabled && "checkbox-error"}
+        name="disabled"
+        data={student}
+        setData={setStudent}
+      />
     </tr>
   );
 }

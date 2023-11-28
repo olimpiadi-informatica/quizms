@@ -139,7 +139,7 @@ export function parseContest(entry: () => ExpressionWrapper, variant: string): s
   const program = b.program([
     b.exportDefaultDeclaration(
       b.functionDeclaration(
-        null,
+        b.identifier("Contest"),
         [b.identifier("React"), b.identifier("quizms")],
         b.blockStatement([b.returnStatement(tree.expr(options))]),
       ),

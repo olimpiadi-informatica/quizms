@@ -2,12 +2,9 @@ import React, { ReactNode, createContext, useContext } from "react";
 
 import { Contest } from "~/models/contest";
 import { School } from "~/models/school";
-import { Teacher } from "~/models/teacher";
 import { Variant } from "~/models/variant";
 
 type TeacherProviderProps = {
-  /** Nome dell'insegnante */
-  teacher: Teacher;
   /** Scuola dell'insegnante */
   school: School;
   /** Contest attivi */

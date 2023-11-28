@@ -1,33 +1,28 @@
-import { createReadStream } from "node:fs";
 import { readFile } from "node:fs/promises";
-import { pipeline } from "node:stream/promises";
 
-import { parse } from "csv";
-import { cert, initializeApp } from "firebase-admin/app";
-import { Auth, getAuth } from "firebase-admin/auth";
-import { Firestore, getFirestore } from "firebase-admin/firestore";
-import z from "zod";
+import { cert, deleteApp, initializeApp } from "firebase-admin/app";
+import { getAuth } from "firebase-admin/auth";
+import { getFirestore } from "firebase-admin/firestore";
+import z, { ZodType } from "zod";
 
-import { contestConverter, schoolConverter, variantConverter } from "~/firebase/converters";
+import {
+  contestConverter,
+  schoolConverter,
+  solutionConverter,
+  variantConverter,
+} from "~/firebase/converters";
 import { contestSchema } from "~/models/contest";
 import { schoolSchema } from "~/models/school";
-import { teacherSchema as baseTeacherSchema } from "~/models/teacher";
+import { solutionSchema } from "~/models/solution";
 import { variantSchema } from "~/models/variant";
 import validate from "~/utils/validate";
 
-const teacherSchema = baseTeacherSchema.omit({ id: true }).extend({
-  externalId: z.coerce.number().optional(),
-  email: z.string().email(),
-  password: z.string(),
-});
-
-type Teacher = z.infer<typeof teacherSchema>;
-
 type ImportOptions = {
-  teachers?: boolean;
+  users?: boolean;
   schools?: boolean;
   contests?: boolean;
   variants?: boolean;
+  solutions?: boolean;
   all?: boolean;
 };
 
@@ -42,99 +37,110 @@ export default async function importContests(options: ImportOptions) {
 
   if (options.all || options.contests) {
     console.log("Importing contests...");
-    await pipeline(
-      createReadStream("data/contests.csv"),
-      parse({ columns: true }),
-      async function (source) {
-        const promises: Promise<any>[] = [];
+    const contests = JSON.parse(await readFile("data/contests.json", "utf-8"));
 
-        for await (const record of source) {
-          const contest = validate(contestSchema, record);
-          promises.push(
-            db.doc(`contests/${contest.id}`).withConverter(contestConverter).set(contest),
-          );
-        }
-
-        await Promise.all(promises);
-        console.log(`${promises.length} contests imported!`);
-      },
+    const res = await Promise.all(
+      Object.entries(contests).map(async ([id, record]) => {
+        const contest = validateOrExit(contestSchema, record, { id });
+        await db.doc(`contests/${contest.id}`).withConverter(contestConverter).set(contest);
+      }),
     );
+    console.log(`${res.length} contests imported!`);
   }
 
   if (options.all || options.variants) {
     console.log("Importing variants...");
     const variants = JSON.parse(await readFile("data/variants.json", "utf-8"));
 
-    const promises: Promise<any>[] = [];
-
-    for (const [id, record] of Object.entries(variants)) {
-      const variant = validate(variantSchema, { id, ...record });
-      promises.push(db.doc(`variants/${id}`).withConverter(variantConverter).set(variant));
-    }
-
-    await Promise.all(promises);
-    console.log(`${promises.length} variants imported!`);
+    const res = await Promise.all(
+      Object.entries(variants).map(async ([id, record]) => {
+        const variant = validateOrExit(variantSchema, record, { id });
+        await db.doc(`variants/${id}`).withConverter(variantConverter).set(variant);
+      }),
+    );
+    console.log(`${res.length} variants imported!`);
   }
 
-  if (options.all || options.teachers) {
-    console.log("Importing teachers...");
-    await pipeline(
-      createReadStream("data/teachers.csv"),
-      parse({ columns: true }),
-      async function (source) {
-        const promises: Promise<void>[] = [];
+  if (options.all || options.users) {
+    console.log("Importing users...");
+    const teachers = JSON.parse(await readFile("data/users.json", "utf-8"));
 
-        for await (const record of source) {
-          const teacher = validate(teacherSchema, record);
-          promises.push(importTeacher(auth, db, teacher));
+    const res = await Promise.all(
+      Object.entries(teachers).map(async ([email, record]) => {
+        const user = validateOrExit(userSchema, record, { email });
+
+        const prevUser = await auth.getUserByEmail(user.email).catch(() => undefined);
+        if (!prevUser) {
+          await auth.createUser({
+            email: user.email,
+            emailVerified: true,
+            password: user.password,
+            displayName: user.name,
+            disabled: false,
+          });
         }
-
-        await Promise.all(promises);
-        console.log(`${promises.length} teachers imported!`);
-      },
+      }),
     );
+    console.log(`${res.length} users imported!`);
   }
 
   if (options.all || options.schools) {
     console.log("Importing schools...");
     const schools = JSON.parse(await readFile("data/schools.json", "utf-8"));
 
-    const promises: Promise<any>[] = [];
+    const res = await Promise.all(
+      Object.entries(schools).map(async ([id, record]) => {
+        const school = validateOrExit(schoolSchema, record, { id });
+        const user = await auth.getUserByEmail(school.teacher);
+        await db
+          .doc(`schools/${school.id}`)
+          .withConverter(schoolConverter)
+          .set({
+            ...school,
+            teacher: user.uid,
+          });
+      }),
+    );
+    console.log(`${res.length} schools imported!`);
+  }
 
-    for (const [id, record] of Object.entries(schools)) {
-      const school = validate(schoolSchema, record);
-      promises.push(db.doc(`schools/${id}`).withConverter(schoolConverter).set(school));
-    }
+  if (options.all || options.solutions) {
+    console.log("Importing solutions...");
+    const variants = JSON.parse(await readFile("data/solutions.json", "utf-8"));
 
-    await Promise.all(promises);
-    console.log(`${promises.length} schools imported!`);
+    const res = await Promise.all(
+      Object.entries(variants).map(async ([id, record]) => {
+        const variant = validateOrExit(solutionSchema, record, { id });
+        await db.doc(`solutions/${id}`).withConverter(solutionConverter).set(variant);
+      }),
+    );
+    console.log(`${res.length} solutions imported!`);
   }
 
   console.log("All done!");
+  await deleteApp(app);
 }
 
-async function importTeacher(auth: Auth, db: Firestore, teacher: Teacher) {
-  let user;
-  try {
-    const prevUser = await auth.getUserByEmail(teacher.email);
-    user = await auth.updateUser(prevUser.uid, {
-      emailVerified: true,
-      password: teacher.password,
-      displayName: teacher.name,
-      disabled: false,
-    });
-  } catch (e) {
-    user = await auth.createUser({
-      email: teacher.email,
-      emailVerified: true,
-      password: teacher.password,
-      displayName: teacher.name,
-      disabled: false,
-    });
-  }
+const userSchema = z.object({
+  name: z.string(),
+  email: z.string().email(),
+  password: z.string(),
+});
 
-  await db.doc(`teachers/${user.uid}`).set({
-    externalId: teacher.externalId,
-    school: teacher.school,
-  });
+function validateOrExit<P extends object, T extends P>(
+  schema: ZodType<T>,
+  value: any,
+  extra?: P,
+): T {
+  try {
+    return validate(
+      z
+        .record(z.any())
+        .transform((record) => ({ ...extra, ...record }))
+        .pipe(schema),
+      value,
+    );
+  } catch (e) {
+    process.exit(1);
+  }
 }

@@ -15,13 +15,14 @@ import z, {
   ZodRecord,
   ZodType,
   ZodTypeAny,
+  ZodUnion,
 } from "zod";
 
 import { Contest, contestSchema } from "~/models/contest";
 import { School, schoolSchema } from "~/models/school";
+import { Solution, solutionSchema } from "~/models/solution";
 import { Student, studentSchema } from "~/models/student";
 import { Submission, submissionSchema } from "~/models/submission";
-import { Teacher, teacherSchema } from "~/models/teacher";
 import { Variant, variantSchema } from "~/models/variant";
 import validate from "~/utils/validate";
 
@@ -67,6 +68,9 @@ function toFirebaseSchemaField(schema: ZodTypeAny): ZodTypeAny {
   if (schema instanceof ZodNullable) {
     return toFirebaseSchemaField(schema.unwrap()).nullable();
   }
+  if (schema instanceof ZodUnion) {
+    return z.union(schema.options.map((option: ZodTypeAny) => toFirebaseSchemaField(option)));
+  }
   return schema;
 }
 
@@ -86,6 +90,13 @@ export const schoolConverter: FirestoreDataConverter<School> = {
   toFirestore: (data) => convertToFirestore(data),
   fromFirestore(snapshot) {
     return parse(schoolSchema, snapshot);
+  },
+};
+
+export const solutionConverter: FirestoreDataConverter<Solution> = {
+  toFirestore: (data) => convertToFirestore(data),
+  fromFirestore(snapshot) {
+    return parse(solutionSchema, snapshot);
   },
 };
 
@@ -110,13 +121,6 @@ export const submissionConverter: FirestoreDataConverter<Submission> = {
   },
   fromFirestore(snapshot) {
     return parse(submissionSchema, snapshot);
-  },
-};
-
-export const teacherConverter: FirestoreDataConverter<Omit<Teacher, "name">> = {
-  toFirestore: (data) => data,
-  fromFirestore(snapshot) {
-    return parse(teacherSchema.omit({ name: true }), snapshot);
   },
 };
 

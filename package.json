@@ -33,7 +33,6 @@
     "blockly": "^10.0",
     "classnames": "^2.3",
     "commander": "^11.0",
-    "csv": "^6.3",
     "date-fns": "^2.30",
     "dotenv": "^16.3",
     "esbuild": "^0.19",

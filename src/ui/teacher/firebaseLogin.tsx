@@ -4,13 +4,8 @@ import classNames from "classnames";
 import { FirebaseOptions } from "firebase/app";
 import { User, getAuth, signOut } from "firebase/auth";
 
-import {
-  contestConverter,
-  schoolConverter,
-  teacherConverter,
-  variantConverter,
-} from "~/firebase/converters";
-import { useCollection, useDocument, useSignInWithPassword } from "~/firebase/hooks";
+import { contestConverter, schoolConverter, variantConverter } from "~/firebase/converters";
+import { useCollection, useSignInWithPassword } from "~/firebase/hooks";
 import { FirebaseLogin, useDb } from "~/firebase/login";
 import { Layout } from "~/ui/teacher/layout";
 import { TeacherProvider } from "~/ui/teacher/provider";
@@ -84,12 +79,12 @@ function TeacherLogin({ children }: { children: ReactNode }) {
 function TeacherInner({ user, children }: { user: User; children: ReactNode }) {
   const db = useDb();
 
-  const [teacher] = useDocument("teachers", user.uid, teacherConverter);
-  const [school] = useDocument("schools", teacher.school, schoolConverter);
+  const [schools] = useCollection("schools", schoolConverter, {
+    constraints: { teacher: user.uid },
+    limit: 1,
+  });
   const [contests] = useCollection("contests", contestConverter);
   const [variants] = useCollection("variants", variantConverter);
-
-  const teacherWithName = { ...teacher, name: user.displayName ?? "Utente anonimo" };
 
   const logout = useCallback(async () => {
     await signOut(getAuth(db.app));
@@ -97,12 +92,7 @@ function TeacherInner({ user, children }: { user: User; children: ReactNode }) {
   }, [db]);
 
   return (
-    <TeacherProvider
-      teacher={teacherWithName}
-      school={school}
-      contests={contests}
-      variants={variants}
-      logout={logout}>
+    <TeacherProvider school={schools[0]} contests={contests} variants={variants} logout={logout}>
       <Layout>{children}</Layout>
     </TeacherProvider>
   );
