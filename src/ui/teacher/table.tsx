@@ -21,19 +21,21 @@ export function TeacherTable() {
 
   return (
     <>
-      <div className="mb-5 flex justify-center">
-        <div role="tablist" className="tabs-boxed tabs grow justify-center lg:max-w-3xl">
-          {contests.map((contest, i) => (
-            <a
-              role="tab"
-              key={contest.id}
-              className={classNames("tab", i == selectedContest && "tab-active")}
-              onClick={() => setSelectedContest(i)}>
-              {contest.name}
-            </a>
-          ))}
+      {contests.length >= 2 && (
+        <div className="m-5 flex justify-center">
+          <div role="tablist" className="tabs-boxed tabs justify-center">
+            {contests.map((contest, i) => (
+              <a
+                role="tab"
+                key={contest.id}
+                className={classNames("tab", i == selectedContest && "tab-active")}
+                onClick={() => setSelectedContest(i)}>
+                {contest.name}
+              </a>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
       <div className="min-h-0 flex-auto overflow-scroll pb-[25vh]">
         <Suspense fallback={<Loading />}>
           <Table contest={contests[selectedContest]} />
@@ -151,8 +153,8 @@ function StudentRow({ contest, student, setStudent }: StudentRowProps) {
   };
 
   const isComplete = useMemo(() => {
-    let answers = range(contest.questionCount).every((i) => student.answers?.[i]);
-    let fields: (keyof Student)[] = [
+    const answers = range(contest.questionCount).every((i) => student.answers?.[i]);
+    const fields: (keyof Student)[] = [
       "name",
       "surname",
       "classYear",
@@ -161,7 +163,7 @@ function StudentRow({ contest, student, setStudent }: StudentRowProps) {
       "variant",
     ];
     return answers && fields.every((f) => student[f]) && !student.disabled;
-  }, [student]);
+  }, [student, contest.questionCount]);
 
   return (
     <tr>
@@ -240,9 +242,9 @@ function StudentRow({ contest, student, setStudent }: StudentRowProps) {
       <td>
         <div className="flex justify-center">
           <input
-            className="checkbox"
+            className={classNames("checkbox", student.disabled && "checkbox-error")}
             type="checkbox"
-            checked={student.disabled}
+            checked={student.disabled ?? false}
             onChange={setDisabled}
             tabIndex={-1}
           />

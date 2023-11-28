@@ -1,53 +1,30 @@
-import React, { ReactNode, useRef } from "react";
+import React, { ReactNode } from "react";
 
-import { GraduationCap, UserIcon } from "lucide-react";
+import { User } from "lucide-react";
 import { ErrorBoundary } from "react-error-boundary";
 
 import Error from "~/ui/components/error";
-import Modal from "~/ui/components/modal";
 import { useTeacher } from "~/ui/teacher/provider";
 
 export function Layout({ children }: { children: ReactNode }) {
+  const { teacher, logout } = useTeacher();
+
   return (
-    <div className="flex h-screen flex-col px-4" /* TODO: dvh */>
-      <div className="flex justify-center">
-        <div className="grow lg:max-w-3xl">
-          <Navbar />
+    <div className="flex h-screen flex-col">
+      <div className="navbar flex-none bg-primary text-primary-content">
+        <div className="dropdown max-w-full flex-none">
+          <div tabIndex={0} role="button" className="btn btn-ghost no-animation w-full flex-nowrap">
+            <User className="flex-none" />
+            <div className="truncate uppercase">{teacher.name || "Utente anonimo"}</div>
+          </div>
+          <ul className="menu dropdown-content menu-sm z-[1] mt-3 w-52 rounded-box bg-base-300 p-2 text-base-content shadow-lg">
+            <li>
+              <button onClick={logout}>Cambia utente</button>
+            </li>
+          </ul>
         </div>
       </div>
       <ErrorBoundary FallbackComponent={Error}>{children}</ErrorBoundary>
-    </div>
-  );
-}
-
-function Navbar() {
-  const { teacher, school, logout } = useTeacher();
-
-  const modalRef = useRef<HTMLDialogElement>(null);
-
-  return (
-    <div className="mb-4 border-b border-base-content">
-      <div className="flex flex-wrap items-center justify-between py-2">
-        <div className="flex items-center gap-2 px-4 py-3">
-          <GraduationCap className="h-full" />
-          <span className="text-sm font-semibold uppercase">
-            {school?.name ?? "Nessuna scuola"}
-          </span>
-        </div>
-        <button
-          className="btn btn-ghost no-animation"
-          onClick={() => modalRef.current?.showModal()}>
-          <UserIcon />
-          <span className="uppercase">{teacher.name || "Utente anonimo"}</span>
-        </button>
-      </div>
-      <Modal title="Vuoi cambiare utente?" ref={modalRef}>
-        <div className="text-md mt-5 flex flex-row justify-center">
-          <button className="btn btn-error" onClick={logout}>
-            Cambia utente
-          </button>
-        </div>
-      </Modal>
     </div>
   );
 }

@@ -16,6 +16,7 @@ module.exports = {
     },
   },
   daisyui: {
+    themes: ["cupcake", "dark"],
     logs: false,
   },
   plugins: [
@@ -24,7 +25,7 @@ module.exports = {
     plugin(({ addBase }) => {
       addBase({
         "@media print": {
-          ":root": daisyFunctions.convertColorFormat(daisyThemes["[data-theme=light]"]),
+          ":root": daisyFunctions.convertColorFormat(daisyThemes["light"]),
         },
       });
     }),
