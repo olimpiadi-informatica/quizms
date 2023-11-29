@@ -23,7 +23,7 @@ export function TeacherTable() {
     <>
       {contests.length >= 2 && (
         <div className="m-5 flex justify-center">
-          <div role="tablist" className="tabs-boxed tabs justify-center">
+          <div role="tablist" className="tabs-boxed tabs flex flex-wrap justify-center">
             {contests.map((contest, i) => (
               <a
                 role="tab"
@@ -140,6 +140,7 @@ function StudentRow({ contest, student, setStudent }: StudentRowProps) {
           {...field}
           data={student.personalInformation ?? {}}
           setData={(info) => setStudent({ ...student, personalInformation: info })}
+          disabled={student.disabled}
         />
       ))}
       <TableField

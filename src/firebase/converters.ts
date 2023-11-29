@@ -9,7 +9,7 @@ import { cloneDeepWith, mapValues } from "lodash-es";
 import z, {
   ZodArray,
   ZodDate,
-  ZodNullable,
+  ZodDefault,
   ZodObject,
   ZodOptional,
   ZodRecord,
@@ -63,10 +63,13 @@ function toFirebaseSchemaField(schema: ZodTypeAny): ZodTypeAny {
     return toFirebaseSchemaField(schema.element).array();
   }
   if (schema instanceof ZodOptional) {
-    return toFirebaseSchemaField(schema.unwrap()).optional();
+    return z.preprocess(
+      (val) => val ?? undefined,
+      toFirebaseSchemaField(schema.unwrap()).optional(),
+    );
   }
-  if (schema instanceof ZodNullable) {
-    return toFirebaseSchemaField(schema.unwrap()).nullable();
+  if (schema instanceof ZodDefault) {
+    return toFirebaseSchemaField(schema.removeDefault().optional()).pipe(schema);
   }
   if (schema instanceof ZodUnion) {
     return z.union(schema.options.map((option: ZodTypeAny) => toFirebaseSchemaField(option)));
@@ -81,23 +84,17 @@ function parse<T>(schema: ZodType<T>, snapshot: DocumentSnapshot): T {
 
 export const contestConverter: FirestoreDataConverter<Contest> = {
   toFirestore: (data) => convertToFirestore(data),
-  fromFirestore(snapshot) {
-    return parse(contestSchema, snapshot);
-  },
+  fromFirestore: (snapshot) => parse(contestSchema, snapshot) as Contest,
 };
 
 export const schoolConverter: FirestoreDataConverter<School> = {
   toFirestore: (data) => convertToFirestore(data),
-  fromFirestore(snapshot) {
-    return parse(schoolSchema, snapshot);
-  },
+  fromFirestore: (snapshot) => parse(schoolSchema, snapshot),
 };
 
 export const solutionConverter: FirestoreDataConverter<Solution> = {
   toFirestore: (data) => convertToFirestore(data),
-  fromFirestore(snapshot) {
-    return parse(solutionSchema, snapshot);
-  },
+  fromFirestore: (snapshot) => parse(solutionSchema, snapshot),
 };
 
 export const studentConverter: FirestoreDataConverter<Student> = {
@@ -107,9 +104,7 @@ export const studentConverter: FirestoreDataConverter<Student> = {
       updatedAt: serverTimestamp(),
     };
   },
-  fromFirestore(snapshot) {
-    return parse(studentSchema, snapshot);
-  },
+  fromFirestore: (snapshot) => parse(studentSchema, snapshot),
 };
 
 export const submissionConverter: FirestoreDataConverter<Submission> = {
@@ -119,14 +114,10 @@ export const submissionConverter: FirestoreDataConverter<Submission> = {
       submittedAt: serverTimestamp(),
     };
   },
-  fromFirestore(snapshot) {
-    return parse(submissionSchema, snapshot);
-  },
+  fromFirestore: (snapshot) => parse(submissionSchema, snapshot),
 };
 
 export const variantConverter: FirestoreDataConverter<Variant> = {
   toFirestore: (data) => convertToFirestore(data),
-  fromFirestore(snapshot) {
-    return parse(variantSchema, snapshot);
-  },
+  fromFirestore: (snapshot) => parse(variantSchema, snapshot),
 };
