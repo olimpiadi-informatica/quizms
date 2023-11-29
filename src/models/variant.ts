@@ -7,6 +7,7 @@ export const variantSchema = z.object({
       type: z.enum(["text", "number"]),
       regex: z.instanceof(RegExp).optional(),
       options: z.string().array().nonempty().optional(),
+      blankOption: z.string().optional(),
       pointsCorrect: z.number().optional(),
       pointsBlank: z.number().optional(),
       pointsWrong: z.number().optional(),

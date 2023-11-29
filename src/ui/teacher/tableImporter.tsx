@@ -2,7 +2,7 @@ import React, { Ref, forwardRef, useRef, useState } from "react";
 
 import { times } from "lodash-es";
 import { ArrowUpFromLine } from "lucide-react";
-import { ParseResult, parse } from "papaparse";
+import { parse } from "papaparse";
 import z, { ZodTypeAny } from "zod";
 
 import { studentConverter } from "~/firebase/converters";
@@ -117,7 +117,9 @@ async function importStudents(
   const schema = z
     .tuple([
       ...(personalInformation as [ZodTypeAny, ...ZodTypeAny[]]),
-      z.enum(variants.map((variant) => variant.id) as [string, ...string[]]),
+      z.enum(
+        variants.filter((v) => v.contest == contest.id).map((v) => v.id) as [string, ...string[]],
+      ),
       ...times(contest.questionCount, () => z.any()),
     ])
     .transform((value) => ({

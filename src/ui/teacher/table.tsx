@@ -1,7 +1,7 @@
 import React, { ChangeEvent, Suspense, useMemo, useRef, useState } from "react";
 
 import classNames from "classnames";
-import { constant, range, times } from "lodash-es";
+import { constant, range, times, zip } from "lodash-es";
 import { Check, Upload } from "lucide-react";
 
 import { studentConverter } from "~/firebase/converters";
@@ -47,7 +47,7 @@ export function TeacherTable() {
       </div>
       <div className="min-h-0 flex-auto overflow-scroll pb-[25vh]">
         <Suspense fallback={<Loading />}>
-          <Table contest={contests[selectedContest]} />
+          <Table contest={contests[selectedContest]} variants={variants} />
         </Suspense>
       </div>
       <ImportModal
@@ -60,7 +60,7 @@ export function TeacherTable() {
   );
 }
 
-function Table({ contest }: { contest: Contest }) {
+function Table({ contest, variants }: { contest: Contest; variants: Variant[] }) {
   const { school } = useTeacher();
 
   // TODO: extract firebase logic
@@ -101,6 +101,7 @@ function Table({ contest }: { contest: Contest }) {
           {range(contest.questionCount).map((i) => (
             <th key={i}>{i + 1}</th>
           ))}
+          <th>Punteggio</th>
           <th>Escludi</th>
         </tr>
       </thead>
@@ -109,6 +110,7 @@ function Table({ contest }: { contest: Contest }) {
           <StudentRow
             key={student.id}
             contest={contest}
+            variants={variants}
             student={student}
             setStudent={setStudentAndUpdateId}
           />
@@ -120,15 +122,15 @@ function Table({ contest }: { contest: Contest }) {
 
 type StudentRowProps = {
   contest: Contest;
+  variants: Variant[];
   student: Student;
   setStudent: (student: Student) => void;
 };
 
-function StudentRow({ contest, student, setStudent }: StudentRowProps) {
-  const { variants } = useTeacher();
-  const variant = variants.find(
-    (variant) => variant.contest === contest.id && variant.id == student.variant,
-  );
+function StudentRow({ contest, variants, student, setStudent }: StudentRowProps) {
+  const { solutions } = useTeacher();
+  const variant = variants.find((v) => v.contest == contest.id && v.id == student.variant);
+  const solution = solutions.find((s) => s.id == student.variant)?.answers;
 
   const setAnswer = (index: number) => (value: string) => {
     const answers = [...(student.answers ?? times(contest.questionCount, constant("")))];
@@ -143,6 +145,32 @@ function StudentRow({ contest, student, setStudent }: StudentRowProps) {
     );
     return answers && personalInformation && !student.disabled;
   }, [student, contest.questionCount, contest.personalInformation]);
+
+  const points = useMemo(() => {
+    if (!student?.answers || !variant?.schema || !solution) return NaN;
+    return zip(variant.schema, student.answers, solution).reduce(
+      (acc, [schema, answer, solution]) => {
+        if (
+          schema?.pointsCorrect === undefined ||
+          schema?.pointsBlank === undefined ||
+          schema?.pointsWrong === undefined ||
+          answer === undefined ||
+          solution === undefined
+        ) {
+          return NaN;
+        }
+
+        if (answer === solution) {
+          return acc + schema.pointsCorrect;
+        }
+        if (answer === undefined || answer === schema?.blankOption) {
+          return acc + schema.pointsBlank;
+        }
+        return acc + schema.pointsWrong;
+      },
+      0,
+    );
+  }, [variant, student, solution]);
 
   return (
     <tr>
@@ -176,6 +204,9 @@ function StudentRow({ contest, student, setStudent }: StudentRowProps) {
           disabled={student.disabled}
         />
       ))}
+      <td className="px-0.5">
+        <div className="flex justify-center">{!isNaN(points) && points}</div>
+      </td>
       <TableBooleanField
         className={student.disabled && "checkbox-error"}
         name="disabled"
@@ -192,7 +223,7 @@ function Answer({
   setValue,
   disabled,
 }: {
-  question?: Variant["schema"][0];
+  question?: Variant["schema"][number];
   value: string;
   setValue: (value: string) => void;
   disabled?: boolean;

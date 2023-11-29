@@ -2,6 +2,7 @@ import React, { ReactNode, createContext, useContext } from "react";
 
 import { Contest } from "~/models/contest";
 import { School } from "~/models/school";
+import { Solution } from "~/models/solution";
 import { Variant } from "~/models/variant";
 
 type TeacherProviderProps = {
@@ -11,6 +12,8 @@ type TeacherProviderProps = {
   contests: Contest[];
   /** Varianti dei contest */
   variants: Variant[];
+  /** Soluzioni delle varianti */
+  solutions: Solution[];
   /** Funzione per effettuare il logout */
   logout: () => Promise<void>;
 };

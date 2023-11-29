@@ -44,6 +44,10 @@ service cloud.firestore {
             allow update: if isAuthenticated(resource.data.teacher);
         }
 
+        match /solutions/{solution} {
+            allow read: if isTeacher();
+        }
+
         match /students/{student} {
             function checkVariant(data, variant) {
                 let joined = [data.name, data.surname, data.birthData, data.school, data.classYear, data.classSection].join('$');
