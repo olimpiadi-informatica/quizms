@@ -2,7 +2,7 @@ import React, { ChangeEvent, Suspense, useMemo, useRef, useState } from "react";
 
 import classNames from "classnames";
 import { constant, range, times } from "lodash-es";
-import { Check } from "lucide-react";
+import { Check, Upload } from "lucide-react";
 
 import { studentConverter } from "~/firebase/converters";
 import { useCollection } from "~/firebase/hooks";
@@ -13,34 +13,49 @@ import Loading from "~/ui/components/loading";
 
 import { useTeacher } from "./provider";
 import { TableBooleanField, TableField } from "./tableFields";
+import { ImportModal } from "./tableImporter";
 
 export function TeacherTable() {
-  const { contests } = useTeacher();
-
+  const { contests, variants, school } = useTeacher();
   const [selectedContest, setSelectedContest] = useState(0);
+  const modalRef = useRef<HTMLDialogElement>(null);
 
   return (
     <>
-      {contests.length >= 2 && (
-        <div className="m-5 flex justify-center">
-          <div role="tablist" className="tabs-boxed tabs flex flex-wrap justify-center">
-            {contests.map((contest, i) => (
-              <a
-                role="tab"
-                key={contest.id}
-                className={classNames("tab", i == selectedContest && "tab-active")}
-                onClick={() => setSelectedContest(i)}>
-                {contest.name}
-              </a>
-            ))}
+      <div className="flex items-center justify-between">
+        {contests.length >= 2 && (
+          <div className="m-5 flex justify-center">
+            <div role="tablist" className="tabs-boxed tabs flex flex-wrap justify-center">
+              {contests.map((contest, i) => (
+                <a
+                  role="tab"
+                  key={contest.id}
+                  className={classNames("tab", i == selectedContest && "tab-active")}
+                  onClick={() => setSelectedContest(i)}>
+                  {contest.name}
+                </a>
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )}
+        <button
+          className="btn btn-primary btn-sm mx-5 h-10"
+          onClick={() => modalRef.current?.showModal()}>
+          <Upload />
+          <div className="hidden md:block">Importa studenti</div>
+        </button>
+      </div>
       <div className="min-h-0 flex-auto overflow-scroll pb-[25vh]">
         <Suspense fallback={<Loading />}>
           <Table contest={contests[selectedContest]} />
         </Suspense>
       </div>
+      <ImportModal
+        ref={modalRef}
+        contest={contests[selectedContest]}
+        variants={variants}
+        school={school}
+      />
     </>
   );
 }

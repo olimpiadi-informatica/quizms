@@ -105,7 +105,7 @@ export function useCollection<T extends { id: string }>(
   if (error) throw error;
 
   const setDocument = useCallback(
-    (newDoc: T) => {
+    async (newDoc: T) => {
       // TODO: orderBy, limit
       function merge(prev: T[] | undefined) {
         if (!prev) return [newDoc];
@@ -114,7 +114,7 @@ export function useCollection<T extends { id: string }>(
         return prev.map((doc, i) => (i === index ? newDoc : doc));
       }
 
-      void mutate(
+      await mutate(
         async (prev) => {
           const docRef = doc(ref, newDoc.id);
           await setDoc(docRef, newDoc);
