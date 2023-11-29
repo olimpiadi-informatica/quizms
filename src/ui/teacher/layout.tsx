@@ -1,17 +1,21 @@
-import React, { ReactNode } from "react";
+import React, { ReactNode, useRef } from "react";
 
-import { GraduationCap } from "lucide-react";
+import { BadgeInfo, GraduationCap } from "lucide-react";
 import { ErrorBoundary } from "react-error-boundary";
 
 import Error from "~/ui/components/error";
+import Modal from "~/ui/components/modal";
 import { useTeacher } from "~/ui/teacher/provider";
 
 export function Layout({ children }: { children: ReactNode }) {
-  const { school, logout } = useTeacher();
+  const { contests, school, logout } = useTeacher();
+  const instructions = contests[0].instructions;
+
+  const modalRef = useRef<HTMLDialogElement>(null);
 
   return (
     <div className="flex h-screen flex-col">
-      <div className="navbar flex-none bg-primary text-primary-content">
+      <div className="navbar flex-none justify-between bg-primary text-primary-content">
         <div className="dropdown max-w-full flex-none">
           <div tabIndex={0} role="button" className="btn btn-ghost no-animation w-full flex-nowrap">
             <GraduationCap className="flex-none" />
@@ -23,8 +27,20 @@ export function Layout({ children }: { children: ReactNode }) {
             </li>
           </ul>
         </div>
+        {instructions && (
+          <div>
+            <button
+              className="btn btn-circle btn-ghost"
+              onClick={() => modalRef.current?.showModal()}>
+              <BadgeInfo size={28} />
+            </button>
+          </div>
+        )}
       </div>
       <ErrorBoundary FallbackComponent={Error}>{children}</ErrorBoundary>
+      <Modal ref={modalRef} title="Istruzioni per la gara">
+        <div className="mt-2 whitespace-pre-wrap">{instructions}</div>
+      </Modal>
     </div>
   );
 }

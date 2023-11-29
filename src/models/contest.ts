@@ -23,6 +23,8 @@ export const contestSchema = z.object({
   hasVariants: z.boolean().default(true),
   allowStudentRegistration: z.boolean().default(false),
   allowRestart: z.boolean().default(false),
+
+  instructions: z.string().optional(),
 });
 
 export type Contest = z.infer<typeof contestSchema>;
