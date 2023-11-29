@@ -90,19 +90,23 @@ function Table({ contest, variants }: { contest: Contest; variants: Variant[] })
   };
 
   return (
-    <table className="table">
-      <thead className="sticky top-0 bg-base-100">
+    <table className="table table-pin-rows table-pin-cols">
+      <thead>
         <tr>
-          <th></th>
-          {contest.personalInformation.map((field) => (
-            <th key={field.name}>{field.label}</th>
-          ))}
-          {contest.hasVariants && <th>Variante</th>}
+          <td></td>
+          {contest.personalInformation.map((field) =>
+            field.pinned ? (
+              <th key={field.name}>{field.label}</th>
+            ) : (
+              <td key={field.name}>{field.label}</td>
+            ),
+          )}
+          {contest.hasVariants && <td>Variante</td>}
           {range(contest.questionCount).map((i) => (
-            <th key={i}>{i + 1}</th>
+            <td key={i}>{i + 1}</td>
           ))}
-          <th>Punteggio</th>
-          <th>Escludi</th>
+          <td>Punteggio</td>
+          <td>Escludi</td>
         </tr>
       </thead>
       <tbody>

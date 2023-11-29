@@ -12,6 +12,7 @@ type BaseFieldProps<T> = {
   label: string;
   min?: number;
   max?: number;
+  pinned?: boolean;
   disabled?: boolean;
   data: T;
   setData: (value: T) => void;
@@ -19,7 +20,20 @@ type BaseFieldProps<T> = {
   className?: Parameters<typeof classNames>[0];
 };
 
-export function TableField<T extends Record<string, any>>({
+export function TableField<T extends Record<string, any>>(props: BaseFieldProps<T>) {
+  const { pinned, ...rest } = props;
+  return pinned ? (
+    <th className="px-0.5 font-normal">
+      <TableFieldInner {...rest} />
+    </th>
+  ) : (
+    <td className="px-0.5">
+      <TableFieldInner {...rest} />
+    </td>
+  );
+}
+
+function TableFieldInner<T extends Record<string, any>>({
   name,
   type,
   label,
@@ -60,22 +74,20 @@ export function TableField<T extends Record<string, any>>({
   };
 
   return (
-    <td className="px-0.5">
-      <div className="flex justify-center">
-        <input
-          name={name}
-          className={classNames("input input-ghost input-xs", size && widths[size], className)}
-          type={type === "number" ? "text" : type}
-          placeholder={size !== "xs" ? label : undefined}
-          value={value}
-          onChange={onChange}
-          disabled={disabled}
-          min={min}
-          max={max}
-          autoComplete="off"
-        />
-      </div>
-    </td>
+    <div className="flex justify-center">
+      <input
+        name={name}
+        className={classNames("input input-ghost input-xs", size && widths[size], className)}
+        type={type === "number" ? "text" : type}
+        placeholder={size !== "xs" ? label : undefined}
+        value={value}
+        onChange={onChange}
+        disabled={disabled}
+        min={min}
+        max={max}
+        autoComplete="off"
+      />
+    </div>
   );
 }
 

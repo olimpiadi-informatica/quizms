@@ -15,6 +15,7 @@ export const contestSchema = z.object({
       label: z.string(),
       type: z.enum(["text", "number", "date"]),
       size: z.enum(["xs", "sm", "md", "lg", "xl"]).optional(),
+      pinned: z.boolean().optional(),
       min: z.number().optional(),
       max: z.number().optional(),
     }),
