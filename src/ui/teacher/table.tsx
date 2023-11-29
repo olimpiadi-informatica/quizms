@@ -1,8 +1,8 @@
-import React, { ChangeEvent, Suspense, useMemo, useRef, useState } from "react";
+import React, { Suspense, useMemo, useRef, useState } from "react";
 
 import classNames from "classnames";
-import { constant, range, times, zip } from "lodash-es";
-import { Check, Upload } from "lucide-react";
+import { get, range } from "lodash-es";
+import { ChevronDown, ChevronUp, ChevronsUpDown, Upload } from "lucide-react";
 
 import { studentConverter } from "~/firebase/converters";
 import { useCollection } from "~/firebase/hooks";
@@ -12,8 +12,8 @@ import { Variant } from "~/models/variant";
 import Loading from "~/ui/components/loading";
 
 import { useTeacher } from "./provider";
-import { TableBooleanField, TableField } from "./tableFields";
-import { ImportModal } from "./tableImporter";
+import ImportModal from "./tableImporter";
+import TableRow from "./tableRow";
 
 export function TeacherTable() {
   const { contests, variants, school } = useTeacher();
@@ -74,20 +74,54 @@ function Table({ contest, variants }: { contest: Contest; variants: Variant[] })
 
   const newStudentId = useRef(window.crypto.randomUUID());
 
-  const allStudents: Student[] = [
-    ...students,
-    {
-      id: newStudentId.current,
-      contest: contest.id,
-      school: school.id,
-      createdAt: new Date(),
-    },
-  ];
-
   const setStudentAndUpdateId = (student: Student) => {
-    setStudent(student);
+    void setStudent(student);
     newStudentId.current = window.crypto.randomUUID();
   };
+
+  const [sortedField, setSortedField] = useState<[string, boolean | undefined]>(["", undefined]);
+
+  const getSorted = (field: string) => {
+    if (field === sortedField[0]) return sortedField[1];
+    return undefined;
+  };
+
+  const setSorted = (field: string) => (sorted?: boolean) => {
+    setSortedField([field, sorted]);
+  };
+
+  console.log(sortedField);
+
+  const allStudents: Student[] = useMemo(() => {
+    const sortedStudents = students.slice();
+    sortedStudents.sort((a, b) => {
+      const fa = get(a, sortedField[0]);
+      const fb = get(b, sortedField[0]);
+
+      if (sortedField[1] === undefined || (fa === undefined && fb === undefined)) {
+        return comp(a.createdAt, b.createdAt, false);
+      }
+
+      if (fa === undefined) return 1;
+      if (fb === undefined) return -1;
+      return comp(fa, fb, !sortedField[1]);
+
+      function comp(a: any, b: any, reverse: boolean) {
+        if (a === b) return 0;
+        return (a < b ? -1 : 1) * (reverse ? -1 : 1);
+      }
+    });
+
+    return [
+      ...sortedStudents,
+      {
+        id: newStudentId.current,
+        contest: contest.id,
+        school: school.id,
+        createdAt: new Date(),
+      },
+    ];
+  }, [students, sortedField, contest, school]);
 
   return (
     <table className="table table-pin-rows table-pin-cols">
@@ -96,22 +130,49 @@ function Table({ contest, variants }: { contest: Contest; variants: Variant[] })
           <td></td>
           {contest.personalInformation.map((field) =>
             field.pinned ? (
-              <th key={field.name}>{field.label}</th>
+              <th key={field.name}>
+                <SortedField
+                  sorted={getSorted(`personalInformation.${field.name}`)}
+                  setSorted={setSorted(`personalInformation.${field.name}`)}
+                  label={field.label}
+                />
+              </th>
             ) : (
-              <td key={field.name}>{field.label}</td>
+              <td key={field.name}>
+                <SortedField
+                  sorted={getSorted(`personalInformation.${field.name}`)}
+                  setSorted={setSorted(`personalInformation.${field.name}`)}
+                  label={field.label}
+                />
+              </td>
             ),
           )}
-          {contest.hasVariants && <td>Variante</td>}
+          {contest.hasVariants && (
+            <td>
+              <SortedField
+                sorted={getSorted("variant")}
+                setSorted={setSorted("variant")}
+                label="Variante"
+              />
+            </td>
+          )}
           {range(contest.questionCount).map((i) => (
             <td key={i}>{i + 1}</td>
           ))}
-          <td>Punteggio</td>
+          <th>
+            {/* <SortedField
+              sorted={getSorted("Punteggio")}
+              setSorted={setSorted("Punteggio")}
+              label="Punteggio"
+            /> */}
+            Punteggio
+          </th>
           <td>Escludi</td>
         </tr>
       </thead>
       <tbody>
         {allStudents.map((student) => (
-          <StudentRow
+          <TableRow
             key={student.id}
             contest={contest}
             variants={variants}
@@ -124,150 +185,27 @@ function Table({ contest, variants }: { contest: Contest; variants: Variant[] })
   );
 }
 
-type StudentRowProps = {
-  contest: Contest;
-  variants: Variant[];
-  student: Student;
-  setStudent: (student: Student) => void;
+type SortedFieldProps = {
+  label: string;
+  sorted?: boolean;
+  setSorted: (sorted?: boolean) => void;
 };
 
-function StudentRow({ contest, variants, student, setStudent }: StudentRowProps) {
-  const { solutions } = useTeacher();
-  const variant = variants.find((v) => v.contest == contest.id && v.id == student.variant);
-  const solution = solutions.find((s) => s.id == student.variant)?.answers;
-
-  const setAnswer = (index: number) => (value: string) => {
-    const answers = [...(student.answers ?? times(contest.questionCount, constant("")))];
-    answers[index] = value;
-    setStudent({ ...student, answers });
-  };
-
-  const isComplete = useMemo(() => {
-    const answers = range(contest.questionCount).every((i) => student.answers?.[i]);
-    const personalInformation = contest.personalInformation.every(
-      (f) => student.personalInformation?.[f.name],
-    );
-    return answers && personalInformation && !student.disabled;
-  }, [student, contest.questionCount, contest.personalInformation]);
-
-  const points = useMemo(() => {
-    if (!student?.answers || !variant?.schema || !solution) return NaN;
-    return zip(variant.schema, student.answers, solution).reduce(
-      (acc, [schema, answer, solution]) => {
-        if (
-          schema?.pointsCorrect === undefined ||
-          schema?.pointsBlank === undefined ||
-          schema?.pointsWrong === undefined ||
-          answer === undefined ||
-          solution === undefined
-        ) {
-          return NaN;
-        }
-
-        if (answer === solution) {
-          return acc + schema.pointsCorrect;
-        }
-        if (answer === undefined || answer === schema?.blankOption) {
-          return acc + schema.pointsBlank;
-        }
-        return acc + schema.pointsWrong;
-      },
-      0,
-    );
-  }, [variant, student, solution]);
-
-  return (
-    <tr>
-      <td>
-        <Check className={classNames("text-success", !isComplete && "opacity-0")} />
-      </td>
-      {contest.personalInformation.map((field) => (
-        <TableField
-          key={field.name}
-          {...field}
-          data={student.personalInformation ?? {}}
-          setData={(info) => setStudent({ ...student, personalInformation: info })}
-          disabled={student.disabled}
-        />
-      ))}
-      <TableField
-        name="variant"
-        type="text"
-        label="Variante"
-        size="md"
-        data={student}
-        setData={setStudent}
-        disabled={student.disabled}
-      />
-      {range(contest.questionCount).map((i) => (
-        <Answer
-          key={i}
-          question={variant?.schema?.[i]}
-          value={student.answers?.[i] ?? ""}
-          setValue={setAnswer(i)}
-          disabled={student.disabled}
-        />
-      ))}
-      <td className="px-0.5">
-        <div className="flex justify-center">{!isNaN(points) && points}</div>
-      </td>
-      <TableBooleanField
-        className={student.disabled && "checkbox-error"}
-        name="disabled"
-        data={student}
-        setData={setStudent}
-      />
-    </tr>
-  );
-}
-
-function Answer({
-  question,
-  value,
-  setValue,
-  disabled,
-}: {
-  question?: Variant["schema"][number];
-  value: string;
-  setValue: (value: string) => void;
-  disabled?: boolean;
-}) {
-  const ref = useRef<HTMLTableCellElement>(null);
-
-  const [blur, setBlur] = useState(false);
-
-  function isPartiallyValid(value: string) {
-    return question?.options?.some((option) => option.startsWith(value)) ?? true;
-  }
-
-  function isValid(value: string) {
-    return question?.options?.includes(value) ?? true;
-  }
-
-  const onChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setBlur(false);
-    const newValue = e.target.value.toUpperCase(); // TODO: this is not always correct
-    if (isPartiallyValid(newValue)) setValue(newValue);
-
-    if (isValid(newValue)) {
-      const sibling = ref.current?.nextElementSibling?.firstElementChild as HTMLInputElement;
-      if (sibling) sibling.focus();
-    }
+function SortedField({ label, sorted, setSorted }: SortedFieldProps) {
+  const onClick = () => {
+    if (sorted === undefined) setSorted(true);
+    if (sorted === true) setSorted(false);
+    if (sorted === false) setSorted(undefined);
   };
 
   return (
-    <td className="px-0.5" ref={ref}>
-      <input
-        className={classNames(
-          "input input-ghost input-xs w-10",
-          blur && !isValid(value) && "input-error",
-        )}
-        type={question?.type ?? "text"}
-        disabled={disabled || !question}
-        value={value}
-        onChange={onChange}
-        onBlur={() => setBlur(true)}
-      />
-    </td>
+    <div className="flex items-center gap-1">
+      <span>{label}</span>
+      <button onClick={onClick}>
+        {sorted === true && <ChevronUp size={16} />}
+        {sorted === false && <ChevronDown size={16} />}
+        {sorted === undefined && <ChevronsUpDown size={16} />}
+      </button>
+    </div>
   );
 }

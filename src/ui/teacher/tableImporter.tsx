@@ -14,7 +14,7 @@ import { Variant } from "~/models/variant";
 import Modal from "~/ui/components/modal";
 import validate from "~/utils/validate";
 
-export const ImportModal = forwardRef(function ImportModal(
+const ImportModal = forwardRef(function ImportModal(
   { contest, variants, school }: { contest: Contest; variants: Variant[]; school: School },
   ref: Ref<HTMLDialogElement> | null,
 ) {
@@ -95,6 +95,8 @@ export const ImportModal = forwardRef(function ImportModal(
     </Modal>
   );
 });
+
+export default ImportModal;
 
 async function importStudents(
   file: string,
