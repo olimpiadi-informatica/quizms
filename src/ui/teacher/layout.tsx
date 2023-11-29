@@ -17,7 +17,7 @@ export function Layout({ children }: { children: ReactNode }) {
             <GraduationCap className="flex-none" />
             <div className="truncate uppercase">{school?.name || "Scuola invalida"}</div>
           </div>
-          <ul className="menu dropdown-content menu-sm z-[1] mt-3 w-52 rounded-box bg-base-300 p-2 text-base-content shadow-lg">
+          <ul className="menu dropdown-content menu-sm z-30 mt-3 w-52 rounded-box bg-base-300 p-2 text-base-content shadow-lg">
             <li>
               <button onClick={logout}>Cambia utente</button>
             </li>

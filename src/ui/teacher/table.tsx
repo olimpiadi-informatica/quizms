@@ -48,12 +48,7 @@ export function TeacherTable() {
       <div className="min-h-0 flex-auto overflow-scroll pb-[25vh]">
         <Suspense fallback={<Loading />}>
           <Table contest={contests[selectedContest]} variants={variants} />
-          <ImportModal
-            ref={modalRef}
-            contest={contests[selectedContest]}
-            variants={variants}
-            school={school}
-          />
+          <ImportModal ref={modalRef} contest={contests[selectedContest]} school={school} />
         </Suspense>
       </div>
     </>
@@ -89,8 +84,6 @@ function Table({ contest, variants }: { contest: Contest; variants: Variant[] })
   const setSorted = (field: string) => (sorted?: boolean) => {
     setSortedField([field, sorted]);
   };
-
-  console.log(sortedField);
 
   const allStudents: Student[] = useMemo(() => {
     const sortedStudents = students.slice();
@@ -159,14 +152,7 @@ function Table({ contest, variants }: { contest: Contest; variants: Variant[] })
           {range(contest.questionCount).map((i) => (
             <td key={i}>{i + 1}</td>
           ))}
-          <th>
-            {/* <SortedField
-              sorted={getSorted("Punteggio")}
-              setSorted={setSorted("Punteggio")}
-              label="Punteggio"
-            /> */}
-            Punteggio
-          </th>
+          <th>Punteggio</th>
           <td>Escludi</td>
         </tr>
       </thead>

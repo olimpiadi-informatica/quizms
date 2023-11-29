@@ -66,7 +66,7 @@ function TableFieldInner<T extends Record<string, any>>({
   };
 
   const widths = {
-    xs: "w-10",
+    xs: "w-12",
     sm: "w-16",
     md: "w-20",
     lg: "w-24",

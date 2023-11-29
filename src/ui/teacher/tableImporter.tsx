@@ -1,8 +1,8 @@
 import React, { Ref, forwardRef, useRef, useState } from "react";
 
-import { times } from "lodash-es";
+import { parse as parseDate } from "date-fns";
 import { ArrowUpFromLine } from "lucide-react";
-import { parse } from "papaparse";
+import { parse as parseCSV } from "papaparse";
 import z, { ZodTypeAny } from "zod";
 
 import { studentConverter } from "~/firebase/converters";
@@ -10,12 +10,11 @@ import { useCollection } from "~/firebase/hooks";
 import { Contest } from "~/models/contest";
 import { School } from "~/models/school";
 import { Student, studentSchema } from "~/models/student";
-import { Variant } from "~/models/variant";
 import Modal from "~/ui/components/modal";
 import validate from "~/utils/validate";
 
 const ImportModal = forwardRef(function ImportModal(
-  { contest, variants, school }: { contest: Contest; variants: Variant[]; school: School },
+  { contest, school }: { contest: Contest; school: School },
   ref: Ref<HTMLDialogElement> | null,
 ) {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -53,7 +52,7 @@ const ImportModal = forwardRef(function ImportModal(
     setError(undefined);
     setLoading(true);
     try {
-      await importStudents(file ?? "", contest, variants, school, addStudent);
+      await importStudents(file ?? "", contest, school, addStudent);
       if (ref && "current" in ref) {
         ref.current?.close();
       }
@@ -76,13 +75,13 @@ const ImportModal = forwardRef(function ImportModal(
       </div>
       Seguite da {contest.questionCount} colonne per le risposte. <br />I campi{" "}
       <b>{dates.length > 0 && dates.join(", ")}</b> devono essere nel formato{" "}
-      <span className="whitespace-nowrap font-bold">YYYY-MM-DD</span>, ad esempio{" "}
-      <span className="whitespace-nowrap">2023-01-31</span>.
-      <div className="mt-5 flex max-w-full flex-col items-center gap-3">
+      <span className="whitespace-nowrap font-bold">DD/MM/YYYY</span>, ad esempio{" "}
+      <span className="whitespace-nowrap">14/03/2023</span>.
+      <div className="mt-5 flex flex-col items-center gap-3">
         <input
           ref={inputRef}
           type="file"
-          className="file-input file-input-bordered file-input-primary"
+          className="file-input file-input-bordered file-input-primary max-w-full"
           accept="text/csv"
           onChange={(e) => onChange(e.target.files?.[0])}
         />
@@ -102,7 +101,6 @@ export default ImportModal;
 async function importStudents(
   file: string,
   contest: Contest,
-  variants: Variant[],
   school: School,
   addStudent: (student: Student) => Promise<void>,
 ) {
@@ -118,30 +116,34 @@ async function importStudents(
   });
 
   const schema = z
-    .tuple([
-      ...(personalInformation as [ZodTypeAny, ...ZodTypeAny[]]),
-      z.enum(
-        variants.filter((v) => v.contest == contest.id).map((v) => v.id) as [string, ...string[]],
-      ),
-      ...times(contest.questionCount, () => z.any()),
-    ])
-    .transform((value) => ({
+    .array(z.string())
+    .length(personalInformation.length + 1 + contest.questionCount)
+    .transform<Student>((value) => ({
       id: window.crypto.randomUUID(),
       personalInformation: Object.fromEntries(
-        contest.personalInformation.map((field, i) => [field.name, value[i]]),
+        contest.personalInformation.map((field, i) => {
+          if (field.type === "date") {
+            return [
+              field.name,
+              value[i] ? parseDate(value[i], "dd/MM/yyyy", new Date()) : undefined,
+            ];
+          }
+          if (field.type === "number") {
+            return [field.name, value[i] ? Number(value[i]) : undefined];
+          }
+          return [field.name, value[i]];
+        }),
       ),
       contest: contest.id,
       school: school.id,
-
       variant: value[contest.personalInformation.length],
       answers: value.slice(contest.personalInformation.length + 1),
-
       createdAt: new Date(),
     }))
     .pipe(studentSchema)
     .array();
 
-  const records = parse(file, {
+  const records = parseCSV(file, {
     skipEmptyLines: true,
   });
   if (records.errors?.length) {
