@@ -147,6 +147,7 @@ function StudentRow({ contest, student, setStudent }: StudentRowProps) {
         name="variant"
         type="text"
         label="Variante"
+        size="md"
         data={student}
         setData={setStudent}
         disabled={student.disabled}

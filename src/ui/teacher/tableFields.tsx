@@ -15,6 +15,7 @@ type BaseFieldProps<T> = {
   disabled?: boolean;
   data: T;
   setData: (value: T) => void;
+  size?: "xs" | "sm" | "md" | "lg" | "xl";
   className?: Parameters<typeof classNames>[0];
 };
 
@@ -24,6 +25,7 @@ export function TableField<T extends Record<string, any>>({
   label,
   min,
   max,
+  size,
   disabled,
   data,
   setData,
@@ -47,16 +49,28 @@ export function TableField<T extends Record<string, any>>({
     setData({ ...data, [name]: val });
   };
 
+  const widths = {
+    xs: "w-10",
+    sm: "w-16",
+    md: "w-20",
+    lg: "w-24",
+    xl: "w-28",
+  };
+
   return (
-    <td>
+    <td className="px-0.5">
       <div className="flex justify-center">
         <input
-          className={classNames("input input-ghost input-xs", className)}
+          name={name}
+          className={classNames("input input-ghost input-xs", size && widths[size], className)}
           type={type}
-          placeholder={label}
+          placeholder={size !== "xs" ? label : undefined}
           value={value}
           onChange={onChange}
           disabled={disabled}
+          min={min}
+          max={max}
+          autoComplete="off"
         />
       </div>
     </td>

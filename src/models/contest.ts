@@ -14,6 +14,7 @@ export const contestSchema = z.object({
       name: z.string(),
       label: z.string(),
       type: z.enum(["text", "number", "date"]),
+      size: z.enum(["xs", "sm", "md", "lg", "xl"]).optional(),
       min: z.number().optional(),
       max: z.number().optional(),
     }),
