@@ -48,14 +48,14 @@ export function TeacherTable() {
       <div className="min-h-0 flex-auto overflow-scroll pb-[25vh]">
         <Suspense fallback={<Loading />}>
           <Table contest={contests[selectedContest]} variants={variants} />
+          <ImportModal
+            ref={modalRef}
+            contest={contests[selectedContest]}
+            variants={variants}
+            school={school}
+          />
         </Suspense>
       </div>
-      <ImportModal
-        ref={modalRef}
-        contest={contests[selectedContest]}
-        variants={variants}
-        school={school}
-      />
     </>
   );
 }

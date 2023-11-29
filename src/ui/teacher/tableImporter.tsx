@@ -76,8 +76,9 @@ const ImportModal = forwardRef(function ImportModal(
       </div>
       Seguite da {contest.questionCount} colonne per le risposte. <br />I campi{" "}
       <b>{dates.length > 0 && dates.join(", ")}</b> devono essere nel formato{" "}
-      <span className="whitespace-nowrap font-bold">YYYY-MM-DD</span>.
-      <div className="mx-5 mt-5 flex flex-col items-center gap-3">
+      <span className="whitespace-nowrap font-bold">YYYY-MM-DD</span>, ad esempio{" "}
+      <span className="whitespace-nowrap">2023-01-31</span>.
+      <div className="mt-5 flex max-w-full flex-col items-center gap-3">
         <input
           ref={inputRef}
           type="file"
