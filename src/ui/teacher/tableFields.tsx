@@ -44,6 +44,8 @@ export function TableField<T extends Record<string, any>>({
       const num = Number(val);
       if ((min ?? -Infinity) <= num && num <= (max ?? Infinity)) {
         val = num;
+      } else {
+        return;
       }
     }
     setData({ ...data, [name]: val });
@@ -63,7 +65,7 @@ export function TableField<T extends Record<string, any>>({
         <input
           name={name}
           className={classNames("input input-ghost input-xs", size && widths[size], className)}
-          type={type}
+          type={type === "number" ? "text" : type}
           placeholder={size !== "xs" ? label : undefined}
           value={value}
           onChange={onChange}
