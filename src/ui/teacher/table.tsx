@@ -7,6 +7,7 @@ import { ChevronDown, ChevronUp, ChevronsUpDown, Upload } from "lucide-react";
 import { studentConverter } from "~/firebase/converters";
 import { useCollection } from "~/firebase/hooks";
 import { Contest } from "~/models/contest";
+import { score } from "~/models/score";
 import { Student } from "~/models/student";
 import { Variant } from "~/models/variant";
 import Loading from "~/ui/components/loading";
@@ -56,7 +57,7 @@ export function TeacherTable() {
 }
 
 function Table({ contest, variants }: { contest: Contest; variants: Variant[] }) {
-  const { school } = useTeacher();
+  const { school, solutions } = useTeacher();
 
   // TODO: extract firebase logic
   const [students, setStudent] = useCollection("students", studentConverter, {
@@ -79,6 +80,7 @@ function Table({ contest, variants }: { contest: Contest; variants: Variant[] })
       contest.personalInformation.map((field) => [`personalInformation.${field.name}`, undefined]),
     ),
     variant: undefined,
+    points: undefined,
     createdAt: false,
   });
 
@@ -94,8 +96,8 @@ function Table({ contest, variants }: { contest: Contest; variants: Variant[] })
     sortedStudents.sort((a, b) => {
       for (const [field, sorted] of Object.entries(sortedFields)) {
         if (sorted === undefined) continue;
-        const fa = get(a, field);
-        const fb = get(b, field);
+        const fa = field === "points" ? score(a, variants, solutions) : get(a, field);
+        const fb = field === "points" ? score(b, variants, solutions) : get(b, field);
         if (fa === undefined && fb === undefined) continue;
         if (fa === undefined) return 1;
         if (fb === undefined) return -1;
@@ -153,7 +155,13 @@ function Table({ contest, variants }: { contest: Contest; variants: Variant[] })
               {i + 1}
             </td>
           ))}
-          <th>Punteggio</th>
+          <th>
+            <SortedField
+              sorted={sortedFields[`points`]}
+              setSorted={setSorted(`points`)}
+              label="Punteggio"
+            />
+          </th>
           <td>Escludi</td>
         </tr>
       </thead>

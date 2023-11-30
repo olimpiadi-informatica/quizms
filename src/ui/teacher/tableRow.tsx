@@ -5,6 +5,7 @@ import { constant, range, times, zip } from "lodash-es";
 import { Check } from "lucide-react";
 
 import { Contest } from "~/models/contest";
+import { score } from "~/models/score";
 import { Student } from "~/models/student";
 import { Variant } from "~/models/variant";
 
@@ -37,31 +38,7 @@ export default function TableRow({ contest, variants, student, setStudent }: Stu
     return answers && personalInformation && !student.disabled;
   }, [student, contest.questionCount, contest.personalInformation]);
 
-  const points = useMemo(() => {
-    if (!student?.answers || !variant?.schema || !solution) return NaN;
-    return zip(variant.schema, student.answers, solution).reduce(
-      (acc, [schema, answer, solution]) => {
-        if (
-          schema?.pointsCorrect === undefined ||
-          schema?.pointsBlank === undefined ||
-          schema?.pointsWrong === undefined ||
-          answer === undefined ||
-          solution === undefined
-        ) {
-          return NaN;
-        }
-
-        if (answer === solution) {
-          return acc + schema.pointsCorrect;
-        }
-        if (answer === undefined || answer === schema?.blankOption) {
-          return acc + schema.pointsBlank;
-        }
-        return acc + schema.pointsWrong;
-      },
-      0,
-    );
-  }, [variant, student, solution]);
+  const points = score(variant?.schema, student.answers, solution);
 
   return (
     <tr>
