@@ -150,7 +150,9 @@ function Table({ contest, variants }: { contest: Contest; variants: Variant[] })
             </td>
           )}
           {range(contest.questionCount).map((i) => (
-            <td key={i}>{i + 1}</td>
+            <td key={i} className={classNames(i % 4 === 3 && "pr-8")}>
+              {i + 1}
+            </td>
           ))}
           <th>Punteggio</th>
           <td>Escludi</td>

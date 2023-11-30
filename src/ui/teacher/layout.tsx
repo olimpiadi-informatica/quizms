@@ -14,7 +14,7 @@ export function Layout({ children }: { children: ReactNode }) {
   const modalRef = useRef<HTMLDialogElement>(null);
   useEffect(() => {
     modalRef.current?.showModal();
-  }, [modalRef.current]);
+  }, [modalRef]);
 
   return (
     <div className="flex h-screen flex-col">
@@ -42,7 +42,7 @@ export function Layout({ children }: { children: ReactNode }) {
       </div>
       <ErrorBoundary FallbackComponent={Error}>{children}</ErrorBoundary>
       <Modal ref={modalRef} title="Istruzioni per la gara">
-        <div className="mt-2 whitespace-pre-wrap">{instructions}</div>
+        <div className="prose mt-2 whitespace-pre-wrap">{instructions}</div>
       </Modal>
     </div>
   );
