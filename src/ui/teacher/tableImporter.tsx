@@ -1,6 +1,7 @@
 import React, { Ref, forwardRef, useRef, useState } from "react";
 
 import { parse as parseDate } from "date-fns";
+import { range } from "lodash-es";
 import { ArrowUpFromLine } from "lucide-react";
 import { parse as parseCSV } from "papaparse";
 import z, { ZodTypeAny } from "zod";
@@ -19,8 +20,7 @@ const ImportModal = forwardRef(function ImportModal(
 ) {
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const fields = contest.personalInformation.map((field) => field.label);
-  fields.push("Variante");
+  const labels = contest.personalInformation.map((field) => field.label);
 
   const dates = contest.personalInformation
     .filter((field) => field.type === "date")
@@ -68,30 +68,39 @@ const ImportModal = forwardRef(function ImportModal(
 
   return (
     <Modal ref={ref} title="Importa studenti">
-      Importa gli studenti da un file. Il file deve essere in formato <b>CSV</b> e le colonne devono
-      essere, in ordine:
-      <div className="my-1 flex justify-center rounded-box bg-base-200 px-3 py-2">
-        <p>{fields.join(", ")}</p>
+      <div className="prose mt-2">
+        <p>
+          Importa gli studenti da un file. Il file deve essere in formato <b>CSV</b> e le colonne
+          devono essere, in ordine:
+        </p>
+        <p className="flex justify-center rounded-box bg-base-200 px-3 py-2">
+          <span>{labels.join(", ")}</span>
+        </p>
+        <p>
+          In aggiunta, è possibile aggiungere una colonna <b>{/* TODO */ "Codice"}</b>, seguita da{" "}
+          {contest.questionCount} colonne per le risposte.
+        </p>
+        <p>
+          I campi <b>{dates.length > 0 && dates.join(", ")}</b> devono essere nel formato{" "}
+          <span className="whitespace-nowrap font-bold">DD/MM/YYYY</span>, ad esempio{" "}
+          <span className="whitespace-nowrap">14/03/2023</span>.
+        </p>
+        <div className="mt-5 flex flex-col items-center gap-3">
+          <input
+            ref={inputRef}
+            type="file"
+            className="file-input file-input-bordered file-input-primary max-w-full"
+            accept="text/csv"
+            onChange={(e) => onChange(e.target.files?.[0])}
+          />
+          <button className="btn btn-primary" type="button" onClick={onClick} disabled={!file}>
+            {loading && <span className="loading loading-spinner" />}
+            {!loading && <ArrowUpFromLine />}
+            Importa
+          </button>
+        </div>
+        <div className="text-error">{error?.message}</div>
       </div>
-      Seguite da {contest.questionCount} colonne per le risposte. <br />I campi{" "}
-      <b>{dates.length > 0 && dates.join(", ")}</b> devono essere nel formato{" "}
-      <span className="whitespace-nowrap font-bold">DD/MM/YYYY</span>, ad esempio{" "}
-      <span className="whitespace-nowrap">14/03/2023</span>.
-      <div className="mt-5 flex flex-col items-center gap-3">
-        <input
-          ref={inputRef}
-          type="file"
-          className="file-input file-input-bordered file-input-primary max-w-full"
-          accept="text/csv"
-          onChange={(e) => onChange(e.target.files?.[0])}
-        />
-        <button className="btn btn-primary" type="button" onClick={onClick} disabled={!file}>
-          {loading && <span className="loading loading-spinner" />}
-          {!loading && <ArrowUpFromLine />}
-          Importa
-        </button>
-      </div>
-      <div className="text-error">{error?.message}</div>
     </Modal>
   );
 });
@@ -117,7 +126,7 @@ async function importStudents(
 
   const schema = z
     .array(z.string())
-    .length(personalInformation.length + 1 + contest.questionCount)
+    .min(personalInformation.length)
     .transform<Student>((value) => ({
       id: window.crypto.randomUUID(),
       personalInformation: Object.fromEntries(
@@ -137,7 +146,9 @@ async function importStudents(
       contest: contest.id,
       school: school.id,
       variant: value[contest.personalInformation.length],
-      answers: value.slice(contest.personalInformation.length + 1),
+      answers: range(contest.questionCount).map(
+        (i) => value[contest.personalInformation.length + 1 + i],
+      ),
       createdAt: new Date(),
     }))
     .pipe(studentSchema)
