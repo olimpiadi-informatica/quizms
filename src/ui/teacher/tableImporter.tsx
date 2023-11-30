@@ -140,14 +140,14 @@ async function importStudents(
           if (field.type === "number") {
             return [field.name, value[i] ? Number(value[i]) : undefined];
           }
-          return [field.name, value[i]];
+          return [field.name, value[i].trim()];
         }),
       ),
       contest: contest.id,
       school: school.id,
-      variant: value[contest.personalInformation.length] || undefined,
+      variant: value[contest.personalInformation.length]?.trim() || undefined,
       answers: range(contest.questionCount).map(
-        (i) => value[contest.personalInformation.length + 1 + i] || undefined,
+        (i) => value[contest.personalInformation.length + 1 + i]?.trim() ?? "",
       ),
       createdAt: new Date(),
     }))
