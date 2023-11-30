@@ -74,47 +74,46 @@ function Table({ contest, variants }: { contest: Contest; variants: Variant[] })
     newStudentId.current = window.crypto.randomUUID();
   };
 
-  const [sortedField, setSortedField] = useState<[string, boolean | undefined]>(["", undefined]);
-
-  const getSorted = (field: string) => {
-    if (field === sortedField[0]) return sortedField[1];
-    return undefined;
-  };
+  const [sortedFields, setSortedFields] = useState<Record<string, boolean | undefined>>({
+    ...Object.fromEntries(
+      contest.personalInformation.map((field) => [`personalInformation.${field.name}`, undefined]),
+    ),
+    variant: undefined,
+    createdAt: false,
+  });
 
   const setSorted = (field: string) => (sorted?: boolean) => {
-    setSortedField([field, sorted]);
+    setSortedFields((prev) => ({
+      ...prev,
+      [field]: sorted,
+    }));
   };
 
   const allStudents: Student[] = useMemo(() => {
     const sortedStudents = students.slice();
     sortedStudents.sort((a, b) => {
-      const fa = get(a, sortedField[0]);
-      const fb = get(b, sortedField[0]);
-
-      if (sortedField[1] === undefined || (fa === undefined && fb === undefined)) {
-        return comp(a.createdAt, b.createdAt, false);
+      for (const [field, sorted] of Object.entries(sortedFields)) {
+        if (sorted === undefined) continue;
+        const fa = get(a, field);
+        const fb = get(b, field);
+        if (fa === undefined && fb === undefined) continue;
+        if (fa === undefined) return 1;
+        if (fb === undefined) return -1;
+        if (fa < fb) return sorted ? 1 : -1;
+        if (fa > fb) return sorted ? -1 : 1;
       }
-
-      if (fa === undefined) return 1;
-      if (fb === undefined) return -1;
-      return comp(fa, fb, !sortedField[1]);
-
-      function comp(a: any, b: any, reverse: boolean) {
-        if (a === b) return 0;
-        return (a < b ? -1 : 1) * (reverse ? -1 : 1);
-      }
+      return 0;
     });
 
-    return [
-      ...sortedStudents,
-      {
-        id: newStudentId.current,
-        contest: contest.id,
-        school: school.id,
-        createdAt: new Date(),
-      },
-    ];
-  }, [students, sortedField, contest, school]);
+    sortedStudents.push({
+      id: newStudentId.current,
+      contest: contest.id,
+      school: school.id,
+      createdAt: new Date(),
+    });
+
+    return sortedStudents;
+  }, [students, contest, school, sortedFields]);
 
   return (
     <table className="table table-pin-rows table-pin-cols">
@@ -125,7 +124,7 @@ function Table({ contest, variants }: { contest: Contest; variants: Variant[] })
             field.pinned ? (
               <th key={field.name}>
                 <SortedField
-                  sorted={getSorted(`personalInformation.${field.name}`)}
+                  sorted={sortedFields[`personalInformation.${field.name}`]}
                   setSorted={setSorted(`personalInformation.${field.name}`)}
                   label={field.label}
                 />
@@ -133,7 +132,7 @@ function Table({ contest, variants }: { contest: Contest; variants: Variant[] })
             ) : (
               <td key={field.name}>
                 <SortedField
-                  sorted={getSorted(`personalInformation.${field.name}`)}
+                  sorted={sortedFields[`personalInformation.${field.name}`]}
                   setSorted={setSorted(`personalInformation.${field.name}`)}
                   label={field.label}
                 />
@@ -143,7 +142,7 @@ function Table({ contest, variants }: { contest: Contest; variants: Variant[] })
           {contest.hasVariants && (
             <td>
               <SortedField
-                sorted={getSorted("variant")}
+                sorted={sortedFields["variant"]}
                 setSorted={setSorted("variant")}
                 label="Variante"
               />
@@ -181,17 +180,17 @@ type SortedFieldProps = {
 
 function SortedField({ label, sorted, setSorted }: SortedFieldProps) {
   const onClick = () => {
-    if (sorted === undefined) setSorted(true);
-    if (sorted === true) setSorted(false);
-    if (sorted === false) setSorted(undefined);
+    if (sorted === undefined) setSorted(false);
+    if (sorted === false) setSorted(true);
+    if (sorted === true) setSorted(undefined);
   };
 
   return (
     <div className="flex items-center gap-1">
       <span>{label}</span>
       <button onClick={onClick}>
-        {sorted === true && <ChevronUp size={16} />}
-        {sorted === false && <ChevronDown size={16} />}
+        {sorted === false && <ChevronUp size={16} />}
+        {sorted === true && <ChevronDown size={16} />}
         {sorted === undefined && <ChevronsUpDown size={16} />}
       </button>
     </div>

@@ -147,7 +147,7 @@ async function importStudents(
       school: school.id,
       variant: value[contest.personalInformation.length] || undefined,
       answers: range(contest.questionCount).map(
-        (i) => value[contest.personalInformation.length + 1 + i],
+        (i) => value[contest.personalInformation.length + 1 + i] || undefined,
       ),
       createdAt: new Date(),
     }))
