@@ -80,6 +80,7 @@ export default function TableRow({ contest, variants, student, setStudent }: Stu
         name="disabled"
         data={student}
         setData={setStudent}
+        tabIndex={-1}
       />
     </tr>
   );

@@ -14,6 +14,7 @@ type BaseFieldProps<T> = {
   max?: number;
   pinned?: boolean;
   disabled?: boolean;
+  tabIndex?: number;
   data: T;
   setData: (value: T) => void;
   size?: "xs" | "sm" | "md" | "lg" | "xl";
@@ -41,6 +42,7 @@ function TableFieldInner<T extends Record<string, any>>({
   max,
   size,
   disabled,
+  tabIndex,
   data,
   setData,
   className,
@@ -86,6 +88,7 @@ function TableFieldInner<T extends Record<string, any>>({
         min={min}
         max={max}
         autoComplete="off"
+        tabIndex={tabIndex}
       />
     </div>
   );
@@ -96,6 +99,7 @@ type BooleanFieldProps<T> = Omit<BaseFieldProps<T>, "type" | "min" | "max" | "la
 export function TableBooleanField<T extends Record<string, any>>({
   name,
   disabled,
+  tabIndex,
   data,
   setData,
   className,
@@ -113,6 +117,7 @@ export function TableBooleanField<T extends Record<string, any>>({
           checked={data[name] ?? false}
           onChange={onChange}
           disabled={disabled}
+          tabIndex={tabIndex}
         />
       </div>
     </td>
