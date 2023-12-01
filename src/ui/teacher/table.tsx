@@ -65,7 +65,6 @@ function Table({ contest, variants }: { contest: Contest; variants: Variant[] })
       school: school.id,
       contest: contest.id,
     },
-    orderBy: "createdAt",
   });
 
   const newStudentId = useRef(window.crypto.randomUUID());

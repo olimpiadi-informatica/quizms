@@ -1,7 +1,7 @@
 import React, { ChangeEvent, useMemo, useRef, useState } from "react";
 
 import classNames from "classnames";
-import { constant, range, times, zip } from "lodash-es";
+import { constant, range, times } from "lodash-es";
 import { Check } from "lucide-react";
 
 import { Contest } from "~/models/contest";
@@ -22,7 +22,6 @@ type StudentRowProps = {
 export default function TableRow({ contest, variants, student, setStudent }: StudentRowProps) {
   const { solutions } = useTeacher();
   const variant = variants.find((v) => v.contest == contest.id && v.id == student.variant);
-  const solution = solutions.find((s) => s.id == student.variant)?.answers;
 
   const setAnswer = (index: number) => (value: string) => {
     const answers = [...(student.answers ?? times(contest.questionCount, constant("")))];
@@ -38,7 +37,7 @@ export default function TableRow({ contest, variants, student, setStudent }: Stu
     return answers && personalInformation && !student.disabled;
   }, [student, contest.questionCount, contest.personalInformation]);
 
-  const points = score(variant?.schema, student.answers, solution);
+  const points = score(student, variants, solutions);
 
   return (
     <tr>
@@ -73,7 +72,7 @@ export default function TableRow({ contest, variants, student, setStudent }: Stu
         />
       ))}
       <th className="px-0.5">
-        <div className="flex justify-center">{!isNaN(points) && points}</div>
+        <div className="flex justify-center">{points}</div>
       </th>
       <TableBooleanField
         className={student.disabled && "checkbox-error"}
