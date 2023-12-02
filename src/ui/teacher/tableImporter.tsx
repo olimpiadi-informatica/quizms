@@ -35,6 +35,7 @@ const ImportModal = forwardRef(function ImportModal(
       school: school.id,
       contest: contest.id,
     },
+    orderBy: "createdAt",
   });
 
   const onChange = async (file?: File) => {

@@ -22,10 +22,10 @@ export function score(student: Student, variants: Variant[], solutions: Solution
       return NaN;
     }
 
-    if (answer === sol) {
+    if (answer.toUpperCase() === sol.toUpperCase()) {
       return acc + schema.pointsCorrect;
     }
-    if (answer === undefined || answer === schema?.blankOption) {
+    if (answer.toUpperCase() === schema?.blankOption?.toUpperCase()) {
       return acc + schema.pointsBlank;
     }
     return acc + schema.pointsWrong;

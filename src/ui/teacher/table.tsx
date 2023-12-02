@@ -1,8 +1,11 @@
-import React, { Suspense, useMemo, useRef, useState } from "react";
+import React, { Suspense, lazy, useMemo, useRef, useState } from "react";
 
+import { CellEditRequestEvent, ColDef } from "ag-grid-community";
 import classNames from "classnames";
-import { get, range } from "lodash-es";
-import { ChevronDown, ChevronUp, ChevronsUpDown, Upload } from "lucide-react";
+import { format, isEqual as isEqualDate } from "date-fns";
+import { it as dateLocaleIT } from "date-fns/locale";
+import { cloneDeep, compact, range, set } from "lodash-es";
+import { AlertTriangle, Upload } from "lucide-react";
 
 import { studentConverter } from "~/firebase/converters";
 import { useCollection } from "~/firebase/hooks";
@@ -14,7 +17,11 @@ import Loading from "~/ui/components/loading";
 
 import { useTeacher } from "./provider";
 import ImportModal from "./tableImporter";
-import TableRow from "./tableRow";
+
+import "ag-grid-community/styles/ag-grid.css";
+import "ag-grid-community/styles/ag-theme-quartz.css";
+
+const AgGridReact = lazy(() => import("ag-grid-react").then((m) => ({ default: m.AgGridReact })));
 
 export function TeacherTable() {
   const { contests, variants, school } = useTeacher();
@@ -46,9 +53,9 @@ export function TeacherTable() {
           <div className="hidden md:block">Importa studenti</div>
         </button>
       </div>
-      <div className="min-h-0 flex-auto overflow-scroll pb-[25vh]">
+      <div className="min-h-0 flex-auto overflow-scroll">
         <Suspense fallback={<Loading />}>
-          <Table contest={contests[selectedContest]} variants={variants} />
+          <Table key={selectedContest} contest={contests[selectedContest]} variants={variants} />
           <ImportModal ref={modalRef} contest={contests[selectedContest]} school={school} />
         </Suspense>
       </div>
@@ -65,6 +72,7 @@ function Table({ contest, variants }: { contest: Contest; variants: Variant[] })
       school: school.id,
       contest: contest.id,
     },
+    orderBy: "createdAt",
   });
 
   const newStudentId = useRef(window.crypto.randomUUID());
@@ -74,132 +82,171 @@ function Table({ contest, variants }: { contest: Contest; variants: Variant[] })
     newStudentId.current = window.crypto.randomUUID();
   };
 
-  const [sortedFields, setSortedFields] = useState<Record<string, boolean | undefined>>({
-    ...Object.fromEntries(
-      contest.personalInformation.map((field) => [`personalInformation.${field.name}`, undefined]),
-    ),
-    variant: undefined,
-    points: undefined,
-    createdAt: false,
-  });
-
-  const setSorted = (field: string) => (sorted?: boolean) => {
-    setSortedFields((prev) => ({
-      ...prev,
-      [field]: sorted,
-    }));
-  };
-
-  const allStudents: Student[] = useMemo(() => {
-    const sortedStudents = students.slice();
-    sortedStudents.sort((a, b) => {
-      for (const [field, sorted] of Object.entries(sortedFields)) {
-        if (sorted === undefined) continue;
-        const fa = field === "points" ? score(a, variants, solutions) : get(a, field);
-        const fb = field === "points" ? score(b, variants, solutions) : get(b, field);
-        if (fa === undefined && fb === undefined) continue;
-        if (fa === undefined) return 1;
-        if (fb === undefined) return -1;
-        if (fa < fb) return sorted ? 1 : -1;
-        if (fa > fb) return sorted ? -1 : 1;
-      }
-      return 0;
-    });
-
-    sortedStudents.push({
+  const allStudents = [
+    ...students,
+    {
       id: newStudentId.current,
       contest: contest.id,
       school: school.id,
       createdAt: new Date(),
-    });
+    },
+  ];
 
-    return sortedStudents;
-  }, [students, contest, school, sortedFields]);
+  const widths = {
+    xs: 100,
+    sm: 125,
+    md: 150,
+    lg: 200,
+    xl: 250,
+  };
 
-  return (
-    <table className="table table-pin-rows table-pin-cols">
-      <thead>
-        <tr>
-          <td></td>
-          {contest.personalInformation.map((field) =>
-            field.pinned ? (
-              <th key={field.name}>
-                <SortedField
-                  sorted={sortedFields[`personalInformation.${field.name}`]}
-                  setSorted={setSorted(`personalInformation.${field.name}`)}
-                  label={field.label}
-                />
-              </th>
-            ) : (
-              <td key={field.name}>
-                <SortedField
-                  sorted={sortedFields[`personalInformation.${field.name}`]}
-                  setSorted={setSorted(`personalInformation.${field.name}`)}
-                  label={field.label}
-                />
-              </td>
-            ),
-          )}
-          {contest.hasVariants && (
-            <td>
-              <SortedField
-                sorted={sortedFields["variant"]}
-                setSorted={setSorted("variant")}
-                label="Variante"
-              />
-            </td>
-          )}
-          {range(contest.questionCount).map((i) => (
-            <td key={i} className={classNames(i % 4 === 3 && "pr-8")}>
-              {i + 1}
-            </td>
-          ))}
-          <th>
-            <SortedField
-              sorted={sortedFields[`points`]}
-              setSorted={setSorted(`points`)}
-              label="Punteggio"
-            />
-          </th>
-          <td>Escludi</td>
-        </tr>
-      </thead>
-      <tbody>
-        {allStudents.map((student) => (
-          <TableRow
-            key={student.id}
-            contest={contest}
-            variants={variants}
-            student={student}
-            setStudent={setStudentAndUpdateId}
-          />
-        ))}
-      </tbody>
-    </table>
+  const colDefs = useMemo(
+    (): ColDef[] =>
+      compact([
+        ...contest.personalInformation.map(
+          (field, i): ColDef => ({
+            field: `personalInformation.${field.name}`,
+            headerName: field.label,
+            pinned: field.pinned,
+            cellDataType: field.type,
+            sortable: true,
+            filter: true,
+            resizable: true,
+            editable: true,
+            width: widths[field.size ?? "md"],
+            equals: field.type === "date" ? isEqualDate : undefined,
+            cellRenderer: ({ api, data, value }) => {
+              const student = data as Student;
+              if (field.type === "date" && value) {
+                return format(value, "P", { locale: dateLocaleIT });
+              }
+              if (
+                i === 0 &&
+                field.type === "text" &&
+                !isComplete(student, contest) &&
+                !isEmpty(student, contest) &&
+                !student.disabled &&
+                !api.getSelectedRows().some((s: Student) => s.id === student.id)
+              ) {
+                return (
+                  <>
+                    {value} <AlertTriangle className="mb-1 inline-block text-warning" size={16} />
+                  </>
+                );
+              }
+              return value;
+            },
+          }),
+        ),
+        contest.hasVariants && {
+          field: "variant",
+          headerName: "Codice", // TODO: rename to "Variante"
+          sortable: true,
+          filter: true,
+          resizable: true,
+          editable: true,
+          width: 100,
+        },
+        ...range(contest.questionCount).map(
+          (i): ColDef => ({
+            field: `answers.${i}`,
+            headerName: String(i + 1),
+            sortable: false,
+            resizable: true,
+            editable: true,
+            width: 50 + (i % 4 === 3 ? 15 : 0),
+          }),
+        ),
+        {
+          headerName: "Punti",
+          pinned: "right",
+          sortable: true,
+          filter: true,
+          resizable: true,
+          width: 100,
+          valueGetter: ({ data }) => score(data, variants, solutions),
+        },
+        {
+          field: "disabled",
+          headerName: "Escludi",
+          cellDataType: "boolean",
+          filter: true,
+          resizable: true,
+          editable: true,
+          width: 100,
+          valueGetter: ({ data }) => data.disabled ?? false,
+        },
+      ]),
+    [contest, variants, solutions, widths],
   );
-}
 
-type SortedFieldProps = {
-  label: string;
-  sorted?: boolean;
-  setSorted: (sorted?: boolean) => void;
-};
+  const onCellEditRequest = (ev: CellEditRequestEvent) => {
+    let value = ev.newValue;
+    const [field, subfield] = ev.colDef.field!.split(".");
+    if (field === "personalInformation") {
+      const schema = contest.personalInformation.find((f) => f.name === subfield);
+      if (
+        schema?.type === "number" &&
+        (value < (schema?.min ?? -Infinity) || value > (schema?.max ?? Infinity))
+      ) {
+        value = undefined;
+      }
+    }
+    if (field === "variant") {
+      if (!variants.some((v) => v.id === value && v.contest === contest.id)) {
+        value = undefined;
+      }
+    }
+    if (field === "answers") {
+      value = value?.toUpperCase();
 
-function SortedField({ label, sorted, setSorted }: SortedFieldProps) {
-  const onClick = () => {
-    if (sorted === undefined) setSorted(false);
-    if (sorted === false) setSorted(true);
-    if (sorted === true) setSorted(undefined);
+      const variant = variants.find(
+        (v) => v.id === (ev.data as Student).variant && v.contest === contest.id,
+      );
+      const schema = variant?.schema[Number(subfield)];
+
+      const isValid = schema?.options?.includes(value) ?? true;
+      if (!isValid) value = undefined;
+    }
+
+    const student = cloneDeep(ev.data as Student);
+    set(student, ev.colDef.field!, value);
+    setStudentAndUpdateId(student);
+
+    ev.api.refreshCells();
   };
 
   return (
-    <div className="flex items-center gap-1">
-      <span>{label}</span>
-      <button onClick={onClick}>
-        {sorted === false && <ChevronUp size={16} />}
-        {sorted === true && <ChevronDown size={16} />}
-        {sorted === undefined && <ChevronsUpDown size={16} />}
-      </button>
+    <div className="ag-theme-quartz-auto-dark h-full p-2">
+      <AgGridReact
+        rowData={allStudents}
+        getRowId={(row) => (row.data as Student).id}
+        columnDefs={colDefs}
+        singleClickEdit={true}
+        readOnlyEdit={true}
+        rowSelection="single"
+        onCellEditRequest={onCellEditRequest}
+      />
     </div>
+  );
+}
+
+function isComplete(student: Student, contest: Contest) {
+  return (
+    contest.personalInformation.every((field) => {
+      return student.personalInformation?.[field.name];
+    }) &&
+    student.variant &&
+    range(contest.questionCount).every((i) => student.answers?.[i])
+  );
+}
+
+function isEmpty(student: Student, contest: Contest) {
+  return (
+    contest.personalInformation.every((field) => {
+      return !student.personalInformation?.[field.name];
+    }) &&
+    !student.variant &&
+    range(contest.questionCount).every((i) => !student.answers?.[i])
   );
 }

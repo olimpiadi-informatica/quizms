@@ -31,6 +31,12 @@ body {
   @apply z-30;
 }
 
+.ag-theme-quartz-auto-dark {
+  --ag-background-color: theme(colors.base-100);
+  --ag-header-background-color: theme(colors.base-100);
+  --ag-foreground-color: var(--bc);
+}
+
 .blocklyHtmlInput {
   @apply bg-white;
 }
