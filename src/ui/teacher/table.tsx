@@ -4,8 +4,8 @@ import { CellEditRequestEvent, ColDef } from "ag-grid-community";
 import classNames from "classnames";
 import { format, isEqual as isEqualDate } from "date-fns";
 import { it as dateLocaleIT } from "date-fns/locale";
-import { cloneDeep, compact, range, set } from "lodash-es";
-import { AlertTriangle, Upload } from "lucide-react";
+import { cloneDeep, compact, range, set, sumBy } from "lodash-es";
+import { AlertTriangle, Upload, Users } from "lucide-react";
 
 import { studentConverter } from "~/firebase/converters";
 import { useCollection } from "~/firebase/hooks";
@@ -46,6 +46,11 @@ export function TeacherTable() {
             </div>
           </div>
         )}
+        <div className="hidden flex-none md:block">
+          <Suspense>
+            <Counter contest={contests[selectedContest]} />
+          </Suspense>
+        </div>
         <button
           className="btn btn-primary btn-sm mx-5 h-10"
           onClick={() => modalRef.current?.showModal()}>
@@ -60,6 +65,24 @@ export function TeacherTable() {
         </Suspense>
       </div>
     </>
+  );
+}
+
+function Counter({ contest }: { contest: Contest }) {
+  const { school } = useTeacher();
+  const [students] = useCollection("students", studentConverter, {
+    constraints: {
+      school: school.id,
+      contest: contest.id,
+    },
+    orderBy: "createdAt",
+  });
+
+  return (
+    <div className="mx-5 flex h-10 items-center gap-2 rounded-btn bg-primary px-3 text-primary-content">
+      <Users />
+      {sumBy(students, (s) => Number(!s.disabled))} studenti
+    </div>
   );
 }
 
