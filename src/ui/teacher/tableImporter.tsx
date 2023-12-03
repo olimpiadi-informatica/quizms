@@ -4,8 +4,7 @@ import { parse as parseDate } from "date-fns";
 import { range } from "lodash-es";
 import { ArrowUpFromLine } from "lucide-react";
 import { parse as parseCSV } from "papaparse";
-import z, { ZodType, ZodTypeAny } from "zod";
-import { ZodTypeDef } from "zod/lib/types";
+import z from "zod";
 
 import { studentConverter } from "~/firebase/converters";
 import { useCollection } from "~/firebase/hooks";

@@ -11,7 +11,7 @@ import {
   solutionConverter,
   variantConverter,
 } from "~/firebase/convertersAdmin";
-import { Contest, contestSchema } from "~/models/contest";
+import { contestSchema } from "~/models/contest";
 import { schoolSchema } from "~/models/school";
 import { solutionSchema } from "~/models/solution";
 import { variantSchema } from "~/models/variant";
@@ -41,7 +41,7 @@ export default async function importContests(options: ImportOptions) {
 
     const res = await Promise.all(
       Object.entries(contests).map(async ([id, record]) => {
-        const contest: Contest = validateOrExit(contestSchema, record, { id });
+        const contest = validateOrExit(contestSchema, record, { id });
         await db.doc(`contests/${contest.id}`).withConverter(contestConverter).set(contest);
       }),
     );
@@ -127,13 +127,13 @@ const userSchema = z.object({
   password: z.string(),
 });
 
-function validateOrExit<P extends object, T extends P>(
-  schema: ZodType<T>,
-  value: any,
-  extra?: P,
-): T {
+function validateOrExit<In, Out, Extra extends In>(
+  schema: ZodType<Out, any, In>,
+  value: In,
+  extra?: Extra,
+): Out {
   try {
-    return validate(
+    return validate<any, Out>(
       z
         .record(z.any())
         .transform((record) => ({ ...extra, ...record }))
