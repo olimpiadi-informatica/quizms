@@ -1,6 +1,6 @@
 import React, { Suspense, lazy, useMemo, useRef, useState } from "react";
 
-import { CellEditRequestEvent, ColDef } from "ag-grid-community";
+import { CellEditRequestEvent, ColDef, ICellRendererParams } from "ag-grid-community";
 import classNames from "classnames";
 import { format, isEqual as isEqualDate } from "date-fns";
 import { it as dateLocaleIT } from "date-fns/locale";
@@ -100,9 +100,9 @@ function Table({ contest, variants }: { contest: Contest; variants: Variant[] })
 
   const newStudentId = useRef(window.crypto.randomUUID());
 
-  const setStudentAndUpdateId = (student: Student) => {
-    void setStudent(student);
+  const setStudentAndUpdateId = async (student: Student) => {
     newStudentId.current = window.crypto.randomUUID();
+    await setStudent(student);
   };
 
   const allStudents = [
@@ -115,13 +115,16 @@ function Table({ contest, variants }: { contest: Contest; variants: Variant[] })
     },
   ];
 
-  const widths = {
-    xs: 100,
-    sm: 125,
-    md: 150,
-    lg: 200,
-    xl: 250,
-  };
+  const widths = useMemo(
+    () => ({
+      xs: 100,
+      sm: 125,
+      md: 150,
+      lg: 200,
+      xl: 250,
+    }),
+    [],
+  );
 
   const colDefs = useMemo(
     (): ColDef[] =>
@@ -138,18 +141,17 @@ function Table({ contest, variants }: { contest: Contest; variants: Variant[] })
             editable: true,
             width: widths[field.size ?? "md"],
             equals: field.type === "date" ? isEqualDate : undefined,
-            cellRenderer: ({ api, data, value }) => {
-              const student = data as Student;
+            cellRenderer: ({ api, data, value }: ICellRendererParams<Student>) => {
               if (field.type === "date" && value) {
                 return format(value, "P", { locale: dateLocaleIT });
               }
               if (
                 i === 0 &&
                 field.type === "text" &&
-                !isComplete(student, contest) &&
-                !isEmpty(student, contest) &&
-                !student.disabled &&
-                !api.getSelectedRows().some((s: Student) => s.id === student.id)
+                !isComplete(data!, contest) &&
+                !isEmpty(data!, contest) &&
+                !data?.disabled &&
+                !api.getSelectedRows().some((s: Student) => s.id === data?.id)
               ) {
                 return (
                   <>
@@ -203,7 +205,7 @@ function Table({ contest, variants }: { contest: Contest; variants: Variant[] })
     [contest, variants, solutions, widths],
   );
 
-  const onCellEditRequest = (ev: CellEditRequestEvent) => {
+  const onCellEditRequest = async (ev: CellEditRequestEvent) => {
     let value = ev.newValue;
     const [field, subfield] = ev.colDef.field!.split(".");
     if (field === "personalInformation") {
@@ -234,9 +236,9 @@ function Table({ contest, variants }: { contest: Contest; variants: Variant[] })
 
     const student = cloneDeep(ev.data as Student);
     set(student, ev.colDef.field!, value);
-    setStudentAndUpdateId(student);
+    await setStudentAndUpdateId(student);
 
-    ev.api.refreshCells();
+    ev.api.refreshCells({ force: true });
   };
 
   return (
