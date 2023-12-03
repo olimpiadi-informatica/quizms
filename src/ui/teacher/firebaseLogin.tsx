@@ -12,8 +12,9 @@ import {
 } from "~/firebase/converters";
 import { useCollection, useSignInWithPassword } from "~/firebase/hooks";
 import { FirebaseLogin, useDb } from "~/firebase/login";
-import { Layout } from "~/ui/teacher/layout";
-import { TeacherProvider } from "~/ui/teacher/provider";
+
+import { Layout } from "./layout";
+import { TeacherProvider } from "./provider";
 
 export function FirebaseTeacherLogin({
   config,

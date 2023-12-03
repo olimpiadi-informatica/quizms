@@ -17,10 +17,9 @@ type AuthProviderProps = {
   variant?: number;
   /** Flag che indica se la prova è terminata */
   terminated: boolean;
-  children: ReactNode;
 };
 
-const AuthenticationContext = createContext<Omit<AuthProviderProps, "children">>({
+const AuthenticationContext = createContext<AuthProviderProps>({
   answers: {},
   setAnswer: () => {},
   submit: () => {},
@@ -31,7 +30,10 @@ const AuthenticationContext = createContext<Omit<AuthProviderProps, "children">>
 });
 AuthenticationContext.displayName = "AuthenticationContext";
 
-export function AuthenticationProvider({ children, ...rest }: AuthProviderProps) {
+export function AuthenticationProvider({
+  children,
+  ...rest
+}: AuthProviderProps & { children: ReactNode }) {
   return (
     <AuthenticationContext.Provider value={{ ...rest }}>{children}</AuthenticationContext.Provider>
   );

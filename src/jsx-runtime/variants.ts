@@ -1,4 +1,4 @@
-import { Expression, Program } from "estree";
+import { Program } from "estree";
 import { is, traverse } from "estree-toolkit";
 import { Node } from "estree-toolkit/dist/estree";
 

@@ -26,7 +26,7 @@ import {
 import { compact } from "lodash-es";
 import useSWR, { MutatorOptions, SWRConfiguration } from "swr";
 
-import { useDb } from "~/firebase/login";
+import { useDb } from "./login";
 
 const swrConfig: SWRConfiguration = {
   revalidateOnMount: true,

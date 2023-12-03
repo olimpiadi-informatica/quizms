@@ -5,7 +5,8 @@ import { ErrorBoundary } from "react-error-boundary";
 
 import Error from "~/ui/components/error";
 import Modal from "~/ui/components/modal";
-import { useTeacher } from "~/ui/teacher/provider";
+
+import { useTeacher } from "./provider";
 
 export function Layout({ children }: { children: ReactNode }) {
   const { contests, school, logout } = useTeacher();

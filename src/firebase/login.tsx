@@ -5,9 +5,10 @@ import { browserLocalPersistence, debugErrorMap, initializeAuth } from "firebase
 import { Firestore, initializeFirestore, persistentLocalCache } from "firebase/firestore";
 import { ErrorBoundary } from "react-error-boundary";
 
-import { useAuth } from "~/firebase/hooks";
 import Error from "~/ui/components/error";
 import Loading from "~/ui/components/loading";
+
+import { useAuth } from "./hooks";
 
 type Props = {
   config: FirebaseOptions;

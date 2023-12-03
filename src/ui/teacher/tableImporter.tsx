@@ -4,7 +4,8 @@ import { parse as parseDate } from "date-fns";
 import { range } from "lodash-es";
 import { ArrowUpFromLine } from "lucide-react";
 import { parse as parseCSV } from "papaparse";
-import z, { ZodTypeAny } from "zod";
+import z, { ZodType, ZodTypeAny } from "zod";
+import { ZodTypeDef } from "zod/lib/types";
 
 import { studentConverter } from "~/firebase/converters";
 import { useCollection } from "~/firebase/hooks";
@@ -113,20 +114,9 @@ async function importStudents(
   school: School,
   addStudent: (student: Student) => Promise<void>,
 ) {
-  const personalInformation = contest.personalInformation.map((field): ZodTypeAny => {
-    if (field.type == "text") {
-      return z.string();
-    } else if (field.type == "number") {
-      return z.coerce.number();
-    } else if (field.type == "date") {
-      return z.coerce.date().min(new Date("1900-01-01"));
-    }
-    return z.any();
-  });
-
   const schema = z
     .array(z.string())
-    .min(personalInformation.length)
+    .min(contest.personalInformation.length)
     .transform<Student>((value) => ({
       id: window.crypto.randomUUID(),
       personalInformation: Object.fromEntries(
