@@ -5,7 +5,7 @@ import {
   Timestamp,
   serverTimestamp,
 } from "firebase/firestore";
-import { cloneDeepWith, mapValues } from "lodash-es";
+import { cloneDeepWith, mapValues, omit } from "lodash-es";
 import z, {
   ZodArray,
   ZodDate,
@@ -26,8 +26,8 @@ import { Submission, submissionSchema } from "~/models/submission";
 import { Variant, variantSchema } from "~/models/variant";
 import validate from "~/utils/validate";
 
-function convertToFirestore({ id, ...data }: Record<string, any>) {
-  return cloneDeepWith(data, (value) => {
+function convertToFirestore(data: Record<string, any>) {
+  return cloneDeepWith(omit(data, "id"), (value) => {
     if (value instanceof RegExp) {
       return value.source;
     }
@@ -43,7 +43,7 @@ function convertToFirestore({ id, ...data }: Record<string, any>) {
   });
 }
 
-function toFirebaseSchemaField(schema: ZodTypeAny): ZodTypeAny {
+function toFirebaseSchema(schema: ZodTypeAny): ZodTypeAny {
   if (schema instanceof ZodDate) {
     return z
       .instanceof(Timestamp)
@@ -54,37 +54,34 @@ function toFirebaseSchemaField(schema: ZodTypeAny): ZodTypeAny {
   // TODO: regex
 
   if (schema instanceof ZodObject) {
-    return z.object(mapValues(schema.shape, (field) => toFirebaseSchemaField(field)));
+    return z.object(mapValues(schema.shape, (field) => toFirebaseSchema(field)));
   }
   if (schema instanceof ZodRecord) {
-    return z.record(toFirebaseSchemaField(schema.element));
+    return z.record(toFirebaseSchema(schema.element));
   }
   if (schema instanceof ZodArray) {
-    return toFirebaseSchemaField(schema.element).array();
+    return toFirebaseSchema(schema.element).array();
   }
   if (schema instanceof ZodOptional) {
-    return z.preprocess(
-      (val) => val ?? undefined,
-      toFirebaseSchemaField(schema.unwrap()).optional(),
-    );
+    return z.preprocess((val) => val ?? undefined, toFirebaseSchema(schema.unwrap()).optional());
   }
   if (schema instanceof ZodDefault) {
-    return toFirebaseSchemaField(schema.removeDefault().optional()).pipe(schema);
+    return toFirebaseSchema(schema.removeDefault()).pipe(schema);
   }
   if (schema instanceof ZodUnion) {
-    return z.union(schema.options.map((option: ZodTypeAny) => toFirebaseSchemaField(option)));
+    return z.union(schema.options.map((option: ZodTypeAny) => toFirebaseSchema(option)));
   }
   return schema;
 }
 
-function parse<T>(schema: ZodType<T>, snapshot: DocumentSnapshot): T {
+function parse<T>(schema: ZodType<T, any, any>, snapshot: DocumentSnapshot): T {
   const data = { ...snapshot.data(), id: snapshot.id };
-  return validate(toFirebaseSchemaField(schema), data);
+  return validate(toFirebaseSchema(schema), data);
 }
 
 export const contestConverter: FirestoreDataConverter<Contest> = {
   toFirestore: (data) => convertToFirestore(data),
-  fromFirestore: (snapshot) => parse(contestSchema, snapshot) as Contest,
+  fromFirestore: (snapshot) => parse(contestSchema, snapshot),
 };
 
 export const schoolConverter: FirestoreDataConverter<School> = {
