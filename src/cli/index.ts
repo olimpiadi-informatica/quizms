@@ -3,9 +3,10 @@ import { cwd } from "node:process";
 import { InvalidArgumentError, program } from "commander";
 import "dotenv/config";
 
+import firebaseCommand from "~/cli/firebase";
+
 import devServer from "./dev";
 import staticExport from "./export";
-import importContests from "./import";
 import pdf from "./pdf";
 
 function safeParseInt(value: string): number {
@@ -34,23 +35,14 @@ function main() {
     .action((dir, options) => void staticExport({ dir, ...options }));
 
   program
-    .command("import")
-    .description("Import the contests, the variants and the teachers.")
-    .option("-u, --users", "Import the users.")
-    .option("-s, --schools", "Import the schools.")
-    .option("-c, --contests", "Import the contests.")
-    .option("-v, --variants", "Import the variants.")
-    .option("-z, --solutions", "Import the solutions.")
-    .option("-a, --all", "Import everything.")
-    .action((options) => void importContests(options));
-
-  program
     .command("pdf")
     .description("Create a PDF of the contest.")
     .argument("[directory]", "The directory of the contest.", cwd())
     .option("-d, --outDir <directory>", "The directory to output the PDF.", "pdf")
     .option("-v, --variant <variant>", "The seed used to generate the variant of the contest.")
     .action((dir, options) => void pdf({ dir, ...options }));
+
+  program.addCommand(firebaseCommand());
 
   program.parse();
 }

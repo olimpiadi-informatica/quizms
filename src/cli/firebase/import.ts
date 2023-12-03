@@ -10,8 +10,8 @@ import {
   schoolConverter,
   solutionConverter,
   variantConverter,
-} from "~/firebase/converters";
-import { contestSchema } from "~/models/contest";
+} from "~/firebase/convertersAdmin";
+import { Contest, contestSchema } from "~/models/contest";
 import { schoolSchema } from "~/models/school";
 import { solutionSchema } from "~/models/solution";
 import { variantSchema } from "~/models/variant";
@@ -41,7 +41,7 @@ export default async function importContests(options: ImportOptions) {
 
     const res = await Promise.all(
       Object.entries(contests).map(async ([id, record]) => {
-        const contest = validateOrExit(contestSchema, record, { id });
+        const contest: Contest = validateOrExit(contestSchema, record, { id });
         await db.doc(`contests/${contest.id}`).withConverter(contestConverter).set(contest);
       }),
     );
