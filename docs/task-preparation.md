@@ -74,6 +74,8 @@ Per definire le varianti bisogna dichiarare un array di oggetti, dove ogni ogget
 - [JavaScript](#javascript);
 - [Python](#python);
 
+Il nome delle variabili **deve** iniziare con una lettera minuscola.
+
 Per sostituire le variabili nel testo bisogna specificare il nome della variabile tra parentesi graffe:
 ```md
 Il valore di `x` è {x}.
