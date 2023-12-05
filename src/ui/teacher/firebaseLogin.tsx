@@ -85,7 +85,7 @@ function TeacherLogin({ children }: { children: ReactNode }) {
 function TeacherInner({ user, children }: { user: User; children: ReactNode }) {
   const db = useDb();
 
-  const [schools] = useCollection("schools", schoolConverter, {
+  const [schools, setSchool] = useCollection("schools", schoolConverter, {
     constraints: { teacher: user.uid },
     limit: 1,
   });
@@ -101,6 +101,7 @@ function TeacherInner({ user, children }: { user: User; children: ReactNode }) {
   return (
     <TeacherProvider
       school={schools[0]}
+      setSchool={setSchool}
       contests={contests}
       variants={variants}
       solutions={solutions}

@@ -8,6 +8,7 @@ export const schoolSchema = z.object({
   token: z.string().optional(),
   startingTime: z.date().optional(),
   variants: z.record(z.string()).optional(),
+  finalized: z.boolean().optional().default(false),
 });
 
 export type School = z.infer<typeof schoolSchema>;

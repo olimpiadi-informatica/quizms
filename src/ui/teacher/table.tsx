@@ -1,19 +1,21 @@
-import React, { Suspense, lazy, useMemo, useRef, useState } from "react";
+import React, { Ref, Suspense, forwardRef, lazy, useMemo, useRef, useState } from "react";
 
 import { CellEditRequestEvent, ColDef, ICellRendererParams } from "ag-grid-community";
 import classNames from "classnames";
 import { format, isEqual as isEqualDate } from "date-fns";
 import { it as dateLocaleIT } from "date-fns/locale";
 import { cloneDeep, compact, range, set, sumBy } from "lodash-es";
-import { AlertTriangle, Upload, Users } from "lucide-react";
+import { AlertTriangle, FileCheck, Upload, Users } from "lucide-react";
 
 import { studentConverter } from "~/firebase/converters";
 import { useCollection } from "~/firebase/hooks";
 import { Contest } from "~/models/contest";
+import { School } from "~/models/school";
 import { score } from "~/models/score";
 import { Student } from "~/models/student";
 import { Variant } from "~/models/variant";
 import Loading from "~/ui/components/loading";
+import Modal from "~/ui/components/modal";
 
 import { useTeacher } from "./provider";
 import ImportModal from "./tableImporter";
@@ -24,15 +26,16 @@ import "ag-grid-community/styles/ag-theme-quartz.css";
 const AgGridReact = lazy(() => import("ag-grid-react").then((m) => ({ default: m.AgGridReact })));
 
 export function TeacherTable() {
-  const { contests, variants, school } = useTeacher();
+  const { contests, variants, school, setSchool } = useTeacher();
   const [selectedContest, setSelectedContest] = useState(0);
-  const modalRef = useRef<HTMLDialogElement>(null);
+  const importRef = useRef<HTMLDialogElement>(null);
+  const finalizeRef = useRef<HTMLDialogElement>(null);
 
   return (
     <>
-      <div className="flex items-center justify-between">
+      <div className="m-5 flex items-center justify-between gap-5">
         {contests.length >= 2 && (
-          <div className="m-5 flex justify-center">
+          <div className="flex justify-center">
             <div role="tablist" className="tabs-boxed tabs flex flex-wrap justify-center">
               {contests.map((contest, i) => (
                 <a
@@ -46,22 +49,37 @@ export function TeacherTable() {
             </div>
           </div>
         )}
-        <div className="hidden flex-none md:block">
-          <Suspense>
-            <Counter contest={contests[selectedContest]} />
-          </Suspense>
+        <div className="flex flex-none gap-5">
+          <div className="hidden md:block">
+            <Suspense>
+              <div className="flex h-10 items-center gap-2 rounded-btn bg-primary px-3 text-primary-content">
+                <Users />
+                <Counter contest={contests[selectedContest]} />
+                <div className="hidden lg:block"> studenti</div>
+              </div>
+            </Suspense>
+          </div>
+          <button
+            className="btn btn-primary btn-sm h-10"
+            onClick={() => importRef.current?.showModal()}>
+            <Upload />
+            <div className="hidden lg:block">Importa studenti</div>
+          </button>
+          {!school.finalized && (
+            <button
+              className="btn btn-primary btn-sm h-10"
+              onClick={() => finalizeRef.current?.showModal()}>
+              <FileCheck />
+              <div className="hidden lg:block">Finalizza</div>
+            </button>
+          )}
+          <FinalizeModal ref={finalizeRef} />
         </div>
-        <button
-          className="btn btn-primary btn-sm mx-5 h-10"
-          onClick={() => modalRef.current?.showModal()}>
-          <Upload />
-          <div className="hidden md:block">Importa studenti</div>
-        </button>
       </div>
       <div className="min-h-0 flex-auto overflow-scroll">
         <Suspense fallback={<Loading />}>
           <Table key={selectedContest} contest={contests[selectedContest]} variants={variants} />
-          <ImportModal ref={modalRef} contest={contests[selectedContest]} school={school} />
+          <ImportModal ref={importRef} contest={contests[selectedContest]} school={school} />
         </Suspense>
       </div>
     </>
@@ -78,13 +96,35 @@ function Counter({ contest }: { contest: Contest }) {
     orderBy: "createdAt",
   });
 
-  return (
-    <div className="mx-5 flex h-10 items-center gap-2 rounded-btn bg-primary px-3 text-primary-content">
-      <Users />
-      {sumBy(students, (s) => Number(!s.disabled))} studenti
-    </div>
-  );
+  return sumBy(students, (s) => Number(isComplete(s, contest)));
 }
+
+const FinalizeModal = forwardRef(function FinalizeModal(
+  _: object,
+  ref: Ref<HTMLDialogElement> | null,
+) {
+  const { school, setSchool } = useTeacher();
+
+  const finalize = async () => {
+    await setSchool({ ...school, finalized: true });
+    window.location.reload();
+  };
+
+  return (
+    <Modal ref={ref} title="Finalizza scuola">
+      <p className="mb-3">
+        <strong className="text-error">Attenzione:</strong> questa operazione è irreversibile.
+      </p>
+      <p className="mb-3">Finalizzando non sarà più possibile modificare i dati degli studenti.</p>
+      <div className="flex justify-center gap-5">
+        <button className="btn btn-error" onClick={finalize}>
+          Conferma
+        </button>
+        <button className="btn btn-neutral">Annulla</button>
+      </div>
+    </Modal>
+  );
+});
 
 function Table({ contest, variants }: { contest: Contest; variants: Variant[] }) {
   const { school, solutions } = useTeacher();
@@ -112,7 +152,7 @@ function Table({ contest, variants }: { contest: Contest; variants: Variant[] })
       contest: contest.id,
       school: school.id,
       createdAt: new Date(),
-    },
+    } as Student,
   ];
 
   const widths = useMemo(
@@ -138,7 +178,7 @@ function Table({ contest, variants }: { contest: Contest; variants: Variant[] })
             sortable: true,
             filter: true,
             resizable: true,
-            editable: true,
+            editable: !school.finalized,
             width: widths[field.size ?? "md"],
             equals: field.type === "date" ? isEqualDate : undefined,
             cellRenderer: ({ api, data, value }: ICellRendererParams<Student>) => {
@@ -169,7 +209,7 @@ function Table({ contest, variants }: { contest: Contest; variants: Variant[] })
           sortable: true,
           filter: true,
           resizable: true,
-          editable: true,
+          editable: !school.finalized,
           width: 100,
         },
         ...range(contest.questionCount).map(
@@ -178,7 +218,7 @@ function Table({ contest, variants }: { contest: Contest; variants: Variant[] })
             headerName: String(i + 1),
             sortable: false,
             resizable: true,
-            editable: true,
+            editable: !school.finalized,
             width: 50 + (i % 4 === 3 ? 15 : 0),
           }),
         ),
@@ -197,7 +237,7 @@ function Table({ contest, variants }: { contest: Contest; variants: Variant[] })
           cellDataType: "boolean",
           filter: true,
           resizable: true,
-          editable: true,
+          editable: !school.finalized,
           width: 100,
           valueGetter: ({ data }) => data.disabled ?? false,
         },
@@ -257,12 +297,13 @@ function Table({ contest, variants }: { contest: Contest; variants: Variant[] })
 }
 
 function isComplete(student: Student, contest: Contest) {
-  return (
+  return Boolean(
     contest.personalInformation.every((field) => {
       return student.personalInformation?.[field.name];
     }) &&
-    student.variant &&
-    range(contest.questionCount).every((i) => student.answers?.[i])
+      student.variant &&
+      range(contest.questionCount).every((i) => student.answers?.[i]) &&
+      !student.disabled,
   );
 }
 
