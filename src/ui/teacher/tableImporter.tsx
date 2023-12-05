@@ -68,7 +68,7 @@ const ImportModal = forwardRef(function ImportModal(
 
   return (
     <Modal ref={ref} title="Importa studenti">
-      <div className="prose mt-2">
+      <div className="prose">
         <p>
           Importa gli studenti da un file. Il file deve essere in formato <b>CSV</b> e le colonne
           devono essere, in ordine:

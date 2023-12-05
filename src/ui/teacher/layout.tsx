@@ -43,7 +43,7 @@ export function Layout({ children }: { children: ReactNode }) {
       </div>
       <ErrorBoundary FallbackComponent={Error}>{children}</ErrorBoundary>
       <Modal ref={modalRef} title="Istruzioni per la gara">
-        <div className="prose mt-2 whitespace-pre-wrap">{instructions}</div>
+        <div className="prose whitespace-pre-wrap">{instructions}</div>
       </Modal>
     </div>
   );

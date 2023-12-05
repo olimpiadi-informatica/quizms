@@ -17,7 +17,7 @@ export default forwardRef(function Modal(
           aria-label="Chiudi">
           ✕
         </button>
-        <h3 className="mt-0 text-lg font-bold">{title}</h3>
+        <h3 className="mb-3 mt-0 text-lg font-bold">{title}</h3>
         {children}
       </form>
       <form method="dialog" className="modal-backdrop">
