@@ -4,6 +4,11 @@ code {
   @apply !px-0.5;
 }
 
+code::before,
+code::after {
+  @apply !content-none;
+}
+
 pre {
   @apply !bg-base-200 !pl-5 !text-base-content;
 }
