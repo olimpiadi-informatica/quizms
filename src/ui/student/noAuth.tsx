@@ -103,17 +103,20 @@ export function NoAuth({ header: Header, contestName, duration, children }: Auth
       submit={() => setSubmitted(true)}
       reset={reset}
       terminated={submitted}>
-      {import.meta.env.PROD && !startTime ? (
-        <div className="flex h-screen justify-center">
-          <div className="flex flex-col justify-center">
-            <button className="btn btn-success btn-lg" onClick={start}>
-              Inizia
-            </button>
+      <Layout>
+        <Header />
+        {import.meta.env.PROD && !startTime ? (
+          <div className="flex h-screen justify-center">
+            <div className="flex flex-col justify-center">
+              <button className="btn btn-success btn-lg" onClick={start}>
+                Inizia
+              </button>
+            </div>
           </div>
-        </div>
-      ) : (
-        <Layout>{children}</Layout>
-      )}
+        ) : (
+          children
+        )}
+      </Layout>
     </StudentProvider>
   );
 }

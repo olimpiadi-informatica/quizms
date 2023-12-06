@@ -198,9 +198,7 @@ const SubmitModal = forwardRef(function SubmitModal(_, ref: Ref<HTMLDialogElemen
         <button className="btn btn-outline btn-neutral" onClick={close}>
           Annulla
         </button>
-        <button className="btn btn-error" onClick={confirm}>
-          Conferma
-        </button>
+        <button className="btn btn-error" /* TODO onClick={} */>Conferma</button>
       </div>
     </Modal>
   );
