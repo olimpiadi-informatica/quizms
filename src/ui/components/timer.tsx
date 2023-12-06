@@ -1,16 +1,22 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
-import { differenceInSeconds, isAfter } from "date-fns";
+import { add, differenceInMilliseconds, differenceInSeconds, isAfter } from "date-fns";
+import { milliseconds } from "date-fns/esm";
 
 import Progress from "./progress";
 
 type TimerProps = {
   startTime?: Date;
-  endTime?: Date;
+  duration?: Duration;
 };
 
-export default function Timer({ startTime, endTime }: TimerProps) {
+export default function Timer({ startTime, duration }: TimerProps) {
   const [currentTime, setCurrentTime] = useState(new Date());
+
+  const endTime = useMemo(
+    () => startTime && duration && add(startTime, duration),
+    [startTime, duration],
+  );
 
   useEffect(() => {
     if (!endTime) return;
@@ -24,7 +30,7 @@ export default function Timer({ startTime, endTime }: TimerProps) {
     return () => clearInterval(id);
   }, [endTime]);
 
-  if (!startTime || !endTime) {
+  if (!startTime || !duration) {
     return (
       <Progress className="w-20">
         <div className="font-mono">--:--</div>
@@ -32,14 +38,13 @@ export default function Timer({ startTime, endTime }: TimerProps) {
     );
   }
 
-  const duration = differenceInSeconds(endTime, startTime);
-  const timeLeft = Math.max(differenceInSeconds(endTime, currentTime), 0);
+  const timeLeft = Math.max(differenceInSeconds(endTime!, currentTime), 0);
 
   const minutes = Math.floor(timeLeft / 60);
   const seconds = timeLeft % 60;
 
   return (
-    <Progress percentage={(1 - timeLeft / duration) * 100} className="w-20">
+    <Progress percentage={(1 - timeLeft / (milliseconds(duration) / 1000)) * 100} className="w-20">
       <div className="countdown font-mono">
         <span style={{ "--value": minutes } as any} />:
         <span style={{ "--value": seconds } as any} />

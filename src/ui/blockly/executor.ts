@@ -152,10 +152,7 @@ class Executor {
   };
 }
 
-export default function useExecutor(
-  workspace: WorkspaceSvg | undefined,
-  initialInput: string,
-): [Executor | undefined, string, boolean] {
+export default function useExecutor(workspace: WorkspaceSvg | undefined, initialInput: string) {
   const [output, setOutput] = useState("");
   const [executor, setExecutor] = useState<Executor>();
   const [exited, setExited] = useState(false);
@@ -169,5 +166,5 @@ export default function useExecutor(
     }
   }, [workspace, initialInput]);
 
-  return [executor, output, exited];
+  return [executor, output, exited] as const;
 }

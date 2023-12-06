@@ -40,7 +40,7 @@ service cloud.firestore {
         }
 
         match /schools/{school} {
-            allow read: if isStudentSchool(school, resource.data.token) || isAuthenticated(resource.data.teacher);
+            allow read: if isStudentSchool(school, resource.data.token) || isTeacher();
             allow update: if isAuthenticated(resource.data.teacher) && affectedKeys().hasOnly(['token', 'startingTime', 'finalized']);
         }
 

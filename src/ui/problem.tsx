@@ -12,43 +12,44 @@ import { noop } from "lodash-es";
 
 import { hash } from "~/utils/random";
 
-import { useAuthentication } from "./auth/provider";
 import { useContest } from "./contest";
-import { useSection } from "./section";
+import { useStudent } from "./student/provider";
 
 type StatementProps = {
   variant?: (id: number) => number;
 };
 
 type ProblemProps = {
-  id: string;
+  index: number;
   points: [number, number, number];
   statement: ComponentType<StatementProps>;
 };
 
 type ProblemContextProps = {
   id?: string;
+  index?: string | number;
   points: [number, number, number];
   setCorrect: (value: string) => void;
 };
 
 const ProblemContext = createContext<ProblemContextProps>({
   id: undefined,
+  index: undefined,
   points: [0, 0, 0],
   setCorrect: () => {},
 });
 ProblemContext.displayName = "ProblemContext";
 
-export function Problem({ id, points, statement: Statement }: ProblemProps) {
-  const { variant } = useAuthentication();
+export function Problem({ index, points, statement: Statement }: ProblemProps) {
+  const { variant } = useStudent();
 
   const variantId = useMemo(
-    () => (import.meta.env.PROD && variant ? hash(`r#problem#${variant}#${id}`) : 0),
-    [variant, id],
+    () => (import.meta.env.PROD && variant ? hash(`r#problem#${variant}#${index}`) : 0),
+    [variant, index],
   );
 
   return (
-    <ProblemContext.Provider value={{ id, points, setCorrect: noop }}>
+    <ProblemContext.Provider value={{ index, points, setCorrect: noop }}>
       <Statement variant={() => variantId} />
       <hr className="last:hidden" />
     </ProblemContext.Provider>
@@ -56,26 +57,26 @@ export function Problem({ id, points, statement: Statement }: ProblemProps) {
 }
 
 type SubProblemProps = {
-  subId?: string;
+  id: string;
+  subIndex: number;
   children: ReactNode;
 };
 
-export function SubProblem({ subId, children }: SubProblemProps) {
-  const { id, points } = useContext(ProblemContext);
-  const newId = subId ? `${id}.${subId}` : id!;
+export function SubProblem({ id, subIndex, children }: SubProblemProps) {
+  const { index, points } = useContext(ProblemContext);
+  const newIndex = subIndex ? `${index}.${subIndex}` : `${index}`;
 
   const { registerProblem } = useContest();
-  const section = useSection();
   const [correct, setCorrect] = useState<string>();
 
   useEffect(() => {
-    registerProblem({ id: newId, section, correct, points });
-  }, [registerProblem, newId, section, correct, points]);
+    registerProblem({ id: newIndex, correct, points });
+  }, [registerProblem, newIndex, correct, points]);
 
   return (
-    <ProblemContext.Provider value={{ id: newId, points, setCorrect }}>
+    <ProblemContext.Provider value={{ id, index: newIndex, points, setCorrect }}>
       <div className="subproblem">
-        <h3>Domanda {newId}</h3>
+        <h3>Domanda {newIndex}</h3>
         {children}
       </div>
     </ProblemContext.Provider>

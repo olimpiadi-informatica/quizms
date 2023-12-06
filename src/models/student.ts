@@ -9,7 +9,7 @@ export const studentSchema = z
 
     variant: z.string(),
     disabled: z.boolean().default(false),
-    answers: z.array(z.string().optional()),
+    answers: z.record(z.string().optional()),
     createdAt: z.date(),
     updatedAt: z.date(),
   })

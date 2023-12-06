@@ -1,16 +1,18 @@
+import { compact } from "lodash-es";
 import { Root, TopLevelContent } from "mdast";
 import { MdxJsxFlowElement } from "mdast-util-mdx-jsx";
 import "mdast-util-mdxjs-esm";
 import { Plugin } from "unified";
 import { visit } from "unist-util-visit";
 
+import { hash } from "~/utils/random";
+
 import { jsxAttribute } from "./utils";
 
 const remarkProblemIds: Plugin<[], Root> = () => {
-  return (tree: Root) => {
+  return (tree: Root, file) => {
     assignProblemIds(tree);
-    assignSectionIds(tree);
-    parseSubProblems(tree);
+    parseSubProblems(tree, hash(file.value));
   };
 };
 
@@ -19,18 +21,11 @@ export default remarkProblemIds;
 function assignProblemIds(tree: Root) {
   let problemIndex = 1;
   visit(tree, { type: "mdxJsxFlowElement", name: "Problem" }, (node: MdxJsxFlowElement) => {
-    node.attributes.push(jsxAttribute("id", problemIndex++));
+    node.attributes.push(jsxAttribute("index", problemIndex++));
   });
 }
 
-function assignSectionIds(tree: Root) {
-  let sectionIndex = 1;
-  visit(tree, { type: "mdxJsxFlowElement", name: "Section" }, (node: MdxJsxFlowElement) => {
-    node.attributes.push(jsxAttribute("id", sectionIndex++));
-  });
-}
-
-function parseSubProblems(tree: Root) {
+function parseSubProblems(tree: Root, problemId: number) {
   let subProblems = 0;
   visit(tree, { type: "mdxJsxFlowElement", name: "AnswerGroup" }, () => {
     subProblems++;
@@ -47,11 +42,14 @@ function parseSubProblems(tree: Root) {
     }
 
     if (contents.at(-1)?.type !== "mdxJsxFlowElement") {
-      const attr = subProblems > 1 && jsxAttribute("subId", id++);
+      const attributes = compact([
+        jsxAttribute("id", problemId ^ id),
+        subProblems > 1 && jsxAttribute("subIndex", id++),
+      ]);
       contents.push({
         type: "mdxJsxFlowElement",
         name: "SubProblem",
-        attributes: attr ? [attr] : [],
+        attributes,
         children: [],
       } as MdxJsxFlowElement);
     }

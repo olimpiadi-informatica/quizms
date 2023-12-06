@@ -10,7 +10,6 @@ import { AlertTriangle, FileCheck, Upload, Users } from "lucide-react";
 import { studentConverter } from "~/firebase/converters";
 import { useCollection } from "~/firebase/hooks";
 import { Contest } from "~/models/contest";
-import { School } from "~/models/school";
 import { score } from "~/models/score";
 import { Student } from "~/models/student";
 import { Variant } from "~/models/variant";
@@ -26,7 +25,7 @@ import "ag-grid-community/styles/ag-theme-quartz.css";
 const AgGridReact = lazy(() => import("ag-grid-react").then((m) => ({ default: m.AgGridReact })));
 
 export function TeacherTable() {
-  const { contests, variants, school, setSchool } = useTeacher();
+  const { contests, variants, school } = useTeacher();
   const [selectedContest, setSelectedContest] = useState(0);
   const importRef = useRef<HTMLDialogElement>(null);
   const finalizeRef = useRef<HTMLDialogElement>(null);
@@ -242,7 +241,7 @@ function Table({ contest, variants }: { contest: Contest; variants: Variant[] })
           valueGetter: ({ data }) => data.disabled ?? false,
         },
       ]),
-    [contest, variants, solutions, widths],
+    [contest, variants, solutions, widths, school.finalized],
   );
 
   const onCellEditRequest = async (ev: CellEditRequestEvent) => {

@@ -13,8 +13,8 @@ import { Trash2 } from "lucide-react";
 
 import { Rng } from "~/utils/random";
 
-import { useAnswer, useAuthentication } from "./auth/provider";
 import { useProblem } from "./problem";
+import { useStudent } from "./student/provider";
 
 type AnswerContextProps = {
   id: string;
@@ -29,14 +29,14 @@ type AnswerGroupProps = {
 };
 
 export function AnswerGroup({ children }: AnswerGroupProps) {
-  const { variant } = useAuthentication();
+  const { variant } = useStudent();
   const { id } = useProblem();
 
   const answers = useMemo(() => {
     const answers = Children.toArray(children);
-    if (variant) {
+    if (import.meta.env.PROD && variant) {
       const rng = new Rng(`r#answers#${variant}#${id}`);
-      if (import.meta.env.PROD) rng.shuffle(answers);
+      rng.shuffle(answers);
     }
     return answers;
   }, [variant, id, children]);
@@ -64,8 +64,13 @@ type AnswerProps = {
 export function Answer({ correct, children }: AnswerProps) {
   const { id } = useContext(AnswerContext);
   const { id: problemId, setCorrect } = useProblem();
-  const [answer, setAnswer] = useAnswer(problemId!);
-  const { terminated } = useAuthentication();
+  const { student, setStudent, terminated } = useStudent();
+
+  const answer = student.answers?.[problemId!];
+  const setAnswer = async (value: string | undefined) => {
+    await setStudent({ ...student, answers: { ...student.answers, [problemId!]: value } });
+  };
+
   const answerId = useId();
 
   useEffect(() => {
@@ -124,8 +129,12 @@ type OpenAnswerProps = {
 
 export function OpenAnswer({ correct, type }: OpenAnswerProps) {
   const { id: problemId, setCorrect } = useProblem();
-  const [answer, setAnswer] = useAnswer(problemId!);
-  const { terminated } = useAuthentication();
+  const { student, setStudent, terminated } = useStudent();
+
+  const answer = student.answers?.[problemId!];
+  const setAnswer = async (value: string | undefined) => {
+    await setStudent({ ...student, answers: { ...student.answers, [problemId!]: value } });
+  };
 
   useEffect(() => {
     if (correct !== undefined) {
@@ -157,7 +166,7 @@ export function OpenAnswer({ correct, type }: OpenAnswerProps) {
 }
 
 export function Explanation({ children }: { children: ReactNode }) {
-  const { terminated } = useAuthentication();
+  const { terminated } = useStudent();
   if (!terminated) return null;
   return (
     <div className="explanation my-5 rounded-xl bg-base-200 print:hidden">

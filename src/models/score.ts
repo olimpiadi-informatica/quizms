@@ -2,7 +2,7 @@ import { zip } from "lodash-es";
 
 import { Solution } from "~/models/solution";
 import { Student } from "~/models/student";
-import { Variant } from "~/models/variant";
+import { Schema, Variant } from "~/models/variant";
 
 export function score(student: Student, variants: Variant[], solutions: Solution[]) {
   const answers = student.answers;
@@ -34,7 +34,7 @@ export function score(student: Student, variants: Variant[], solutions: Solution
   return isNaN(points) ? undefined : points;
 }
 
-export function maxScore(schema?: Variant["schema"]) {
+export function maxScore(schema?: Schema) {
   if (!schema) return NaN;
   return schema.reduce((acc, schema) => {
     if (schema?.pointsCorrect === undefined) return NaN;

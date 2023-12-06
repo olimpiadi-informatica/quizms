@@ -11,16 +11,16 @@ import React, {
   useState,
 } from "react";
 
+import { add } from "date-fns";
 import { isNil, sortBy, sumBy } from "lodash-es";
 
-import { useAuthentication } from "./auth/provider";
 import Modal from "./components/modal";
 import Progress from "./components/progress";
 import Timer from "./components/timer";
+import { useStudent } from "./student/provider";
 
 type Problem = {
   id: string;
-  section: string;
   correct: string | undefined;
   points: [number, number, number];
 };
@@ -35,7 +35,7 @@ const ContestContext = createContext<ContestContextProps>({
 ContestContext.displayName = "ContestContext";
 
 export function Contest({ children }: { children: ReactNode }) {
-  const { answers, terminated } = useAuthentication();
+  const { student, terminated } = useStudent();
   const [problems, setProblems] = useState<Record<string, Problem>>({});
 
   const registerProblem = useCallback((problem: Problem) => {
@@ -45,14 +45,11 @@ export function Contest({ children }: { children: ReactNode }) {
     }));
   }, []);
 
-  const progress = useMemo(() => {
-    const total = sumBy(Object.values(problems), "points[0]");
-    const user = sumBy(
-      Object.values(problems).filter(({ id }) => answers[id] !== undefined),
-      "points[0]",
-    );
-    return Math.round((user / total) * 100);
-  }, [answers, problems]);
+  const progress = Math.round(
+    (sumBy(Object.values(student.answers ?? {}), (s) => Number(!!s)) /
+      Object.values(problems).length) *
+      100,
+  );
 
   const [resultShown, setResultShown] = useState(false);
   const ref = useRef<HTMLDialogElement>(null);
@@ -70,28 +67,27 @@ export function Contest({ children }: { children: ReactNode }) {
         <main>{children}</main>
         <StickyFooter progress={progress} />
       </div>
-      <CompletedModal ref={ref} problems={problems} answers={answers} />
+      <CompletedModal ref={ref} problems={problems} />
     </ContestContext.Provider>
   );
 }
 
-type ModalProps = {
-  ref: Ref<HTMLDialogElement>;
-  problems: Record<string, Problem>;
-  answers: Record<string, string | undefined>;
-};
-
 const CompletedModal = forwardRef(function CompletedModal(
-  { problems, answers }: ModalProps,
+  { problems }: { problems: Record<string, Problem> },
   ref: Ref<HTMLDialogElement>,
 ) {
+  const { student } = useStudent();
+
+  const sortedProblems = Object.values(problems);
+  sortedProblems.sort((a, b) => a.id.localeCompare(b.id, undefined, { numeric: true }));
+
   const calcPoints = useCallback(
     (problem: Problem) => {
-      if (answers[problem.id] === undefined) return problem.points[1];
-      if (answers[problem.id] === problem.correct) return problem.points[0];
+      if (student.answers?.[problem.id] === undefined) return problem.points[1];
+      if (student.answers[problem.id] === problem.correct) return problem.points[0];
       return problem.points[2];
     },
-    [answers],
+    [student.answers],
   );
 
   const score = useMemo(() => {
@@ -99,8 +95,9 @@ const CompletedModal = forwardRef(function CompletedModal(
       Object.values(problems)
         .map((p) => p.correct)
         .some(isNil)
-    )
+    ) {
       return undefined;
+    }
     return sumBy(Object.values(problems), calcPoints);
   }, [problems, calcPoints]);
 
@@ -127,10 +124,10 @@ const CompletedModal = forwardRef(function CompletedModal(
                 </tr>
               </thead>
               <tbody>
-                {sortBy(problems, "id").map((problem) => (
+                {sortedProblems.map((problem) => (
                   <tr key={problem.id}>
                     <td>{problem.id}</td>
-                    <td>{answers[problem.id] ?? "-"}</td>
+                    <td>{student.answers?.[problem.id] ?? "-"}</td>
                     <td>{problem.correct}</td>
                     <td>{calcPoints(problem)}</td>
                   </tr>
@@ -150,7 +147,12 @@ type FooterProps = {
 
 function StickyFooter({ progress }: FooterProps) {
   const ref = useRef<HTMLDialogElement>(null);
-  const { startTime, endTime, reset, terminated } = useAuthentication();
+  const { contest, school, reset, terminated } = useStudent();
+
+  const endingTime = useMemo(
+    () => school.startingTime && add(school.startingTime, { minutes: contest.duration }),
+    [school.startingTime, contest.duration],
+  );
 
   return (
     <div className="sticky bottom-0 z-[100] border-t border-base-content print:hidden">
@@ -162,7 +164,7 @@ function StickyFooter({ progress }: FooterProps) {
               <span className="font-mono">00:00</span>
             </Progress>
           )}
-          {!terminated && <Timer startTime={startTime} endTime={endTime} />}
+          {!terminated && <Timer startTime={school.startingTime} endTime={endingTime} />}
           <Progress className="min-w-[5rem]" percentage={progress}>
             <span className="hidden xs:inline">Risposte date: </span>
             {progress}%
@@ -187,16 +189,7 @@ function StickyFooter({ progress }: FooterProps) {
 }
 
 const SubmitModal = forwardRef(function SubmitModal(_, ref: Ref<HTMLDialogElement>) {
-  const { submit } = useAuthentication();
-
-  const close = useCallback(() => {
-    if (ref && "current" in ref && ref.current) ref.current.close();
-  }, [ref]);
-
-  const confirm = useCallback(() => {
-    submit();
-    close();
-  }, [submit, close]);
+  const { submit } = useStudent();
 
   return (
     <Modal ref={ref} title="Confermi di voler terminare?">

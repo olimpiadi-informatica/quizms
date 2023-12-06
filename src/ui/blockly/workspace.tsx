@@ -78,7 +78,7 @@ export default function Workspace({ initialBlocks, example, debug }: BlocklyProp
         executor?.setCode(js);
 
         if (debug?.logJs) {
-          console.log(js);
+          console.info(js);
         }
       }
     },
@@ -88,7 +88,7 @@ export default function Workspace({ initialBlocks, example, debug }: BlocklyProp
   const onJsonChange = useCallback(
     (json: object) => {
       if (debug?.logBlocks) {
-        console.log(JSON.stringify(json, null, 2));
+        console.info(JSON.stringify(json, null, 2));
       }
     },
     [debug?.logBlocks],
