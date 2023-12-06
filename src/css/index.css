@@ -5,6 +5,10 @@
 @tailwind components;
 @tailwind utilities;
 
+html {
+  @apply overflow-y-hidden;
+}
+
 body {
   @apply min-w-[360px];
 }
@@ -34,7 +38,7 @@ body {
 .ag-theme-quartz-auto-dark {
   --ag-background-color: theme(colors.base-100);
   --ag-header-background-color: theme(colors.base-100);
-  --ag-foreground-color: var(--bc);
+  --ag-foreground-color: theme(colors.base-content);
 }
 
 .blocklyHtmlInput {
