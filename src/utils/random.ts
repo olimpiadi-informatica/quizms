@@ -1,6 +1,8 @@
 import { sha256 } from "@noble/hashes/sha256";
 import { RandomGenerator, unsafeUniformIntDistribution, xoroshiro128plus } from "pure-rand";
 
+import { wordlist } from "./wordlist";
+
 export class Rng {
   private readonly rng: RandomGenerator;
 
@@ -24,4 +26,16 @@ export function hash(input: Parameters<typeof sha256>[0]): number {
   const digest = sha256(input);
   const view = new DataView(digest.buffer, digest.byteOffset, digest.byteLength);
   return Number(view.getBigUint64(0, true) & BigInt(Number.MAX_SAFE_INTEGER));
+}
+
+function getRandomInt(max: number) {
+  return Math.floor(Math.random() * max);
+}
+
+export function randomToken(): string {
+  const tokens = [];
+  for (let i = 0; i < 3; i++) {
+    tokens.push(wordlist[getRandomInt(wordlist.length)]);
+  }
+  return tokens.join("-");
 }
