@@ -47,7 +47,7 @@ const remarkHighlight: Plugin<[], Root> = () => {
           jsxAttribute("code", (template.body[0] as Directive).expression),
           jsxAttribute("inline", code.type === "inlineCode"),
           jsxAttribute("language", lang),
-          jsxAttribute("noLineNumbers", params.noLineNumbers !== "false"),
+          jsxAttribute("noLineNumbers", params.noLineNumbers),
         ],
       } as MdxJsxFlowElement;
     });
