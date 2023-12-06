@@ -69,6 +69,7 @@ const SyntaxHighlighter = SyntaxHighlighterBuilder(
 type Props = {
   code: string;
   inline?: boolean;
+  noLineNumbers?: boolean;
   language: string;
 };
 
@@ -87,12 +88,12 @@ function InlineCode({ code, language }: Omit<Props, "inline">) {
   );
 }
 
-function BlockCode({ code, language }: Omit<Props, "inline">) {
+function BlockCode({ code, language, noLineNumbers }: Omit<Props, "inline">) {
   return (
     <SyntaxHighlighter
       language={language in languages ? language : "text"}
       wrapLines={true}
-      showLineNumbers={true}
+      showLineNumbers={!noLineNumbers}
       useInlineStyles={false}>
       {code}
     </SyntaxHighlighter>
