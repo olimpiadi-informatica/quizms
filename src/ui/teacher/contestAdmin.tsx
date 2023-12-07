@@ -234,7 +234,7 @@ export function ContestsAdminPage() {
                 key={school.id}
                 className={classNames("tab", i == selectedContest && "tab-active")}
                 onClick={() => setSelectedContest(i)}>
-                {contests.find((contest) => contest.id === schools[selectedContest].contestId)!.name}
+                {contests.find((contest) => contest.id === schools[i].contestId)!.name}
               </a>
             ))}
           </div>
