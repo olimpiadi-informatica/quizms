@@ -75,7 +75,7 @@ export function Layout({ children }: { children: ReactNode }) {
         </div>
       </div>
       <ErrorBoundary FallbackComponent={Error}>
-        <div className="overflow-y-scroll">
+        <div className="screen:overflow-y-scroll">
           <Prose>{children}</Prose>
         </div>
       </ErrorBoundary>
