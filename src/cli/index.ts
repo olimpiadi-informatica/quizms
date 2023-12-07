@@ -39,7 +39,13 @@ function main() {
     .description("create a PDF of the contest.")
     .argument("[directory]", "The directory of the contest.", cwd())
     .option("-d, --outDir <directory>", "The directory to output the PDF.", "pdf")
-    .option("-v, --variant <variant>", "The seed used to generate the variant of the contest.")
+    .option("-p, --port <port>", "The port to use for the server.", safeParseInt, 1234)
+    .option(
+      "-c, --contest <contest>",
+      "The relative path of the contest to print.",
+      "contest/contest.mdx",
+    )
+    .option("-n, --count <count>", "The amount of variants to generate.", safeParseInt, 100)
     .action((dir, options) => void pdf({ dir, ...options }));
 
   program.addCommand(firebaseCommand());
