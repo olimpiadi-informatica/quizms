@@ -100,11 +100,9 @@ function ContestData(props: {
   const [time, setTime] = useState(Date.now());
   useEffect(() => {
     const d: Date = undoTimeLimit < new Date() ? school.startingTime! : undoTimeLimit;
-    console.log(d.toTimeString(), differenceInMilliseconds(d, Date.now()));
     const interval = setTimeout(
       () => {
         setTime(Date.now());
-        console.log("fatto 1");
       },
       differenceInMilliseconds(d, Date.now()) + 1000,
     );
@@ -182,12 +180,10 @@ function ContestAdmin(props: {
         school.startingTime < new Date()
           ? addMinutes(school.startingTime, contest.duration!)
           : school.startingTime;
-      console.log(d.toLocaleTimeString());
       if (d > new Date()) {
         const interval = setTimeout(
           () => {
             setTime(Date.now());
-            console.log("fatto 2");
           },
           differenceInMilliseconds(d, Date.now()) + 1000,
         );
