@@ -9,6 +9,7 @@ import React, {
   useState,
 } from "react";
 
+import classNames from "classnames";
 import {
   addMinutes,
   addSeconds,
@@ -221,23 +222,29 @@ function ContestAdmin(props: {
 
 export function ContestsAdminPage() {
   const { contests, variants, schools, setSchool } = useTeacher();
-  //   const [time, setTime] = useState(Date.now());
-  //   useEffect(() => {
-  //     const interval = setInterval(() => setTime(Date.now()), 1000);
-  //     return () => {
-  //       clearInterval(interval);
-  //     };
-  //   }, []);
+  const [selectedContest, setSelectedContest] = useState(0);
   return (
     <>
-      {schools.map((school) => {
-        const contest = contests.find((contest) => contest.id === school.contestId);
-        return (
-          <div className="border-2">
-            <ContestAdmin school={school} setSchool={setSchool} contest={contest!} />
+      {schools.length >= 2 && (
+        <div className="flex justify-center">
+          <div role="tablist" className="tabs-boxed tabs flex flex-wrap justify-center">
+            {schools.map((school, i) => (
+              <a
+                role="tab"
+                key={school.id}
+                className={classNames("tab", i == selectedContest && "tab-active")}
+                onClick={() => setSelectedContest(i)}>
+                {contests.find((contest) => contest.id === schools[selectedContest].contestId)!.name}
+              </a>
+            ))}
           </div>
-        );
-      })}
+        </div>
+      )}
+      <Suspense>
+        <div className="border-2">
+          <ContestAdmin school={schools[selectedContest]} setSchool={setSchool} contest={contests.find((contest) => contest.id === schools[selectedContest].contestId)!} />
+        </div>
+      </Suspense>
     </>
   );
 }
