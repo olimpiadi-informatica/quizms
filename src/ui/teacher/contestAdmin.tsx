@@ -222,7 +222,7 @@ function ContestAdmin(props: {
 
 export function ContestsAdminPage() {
   const { contests, variants, schools, setSchool } = useTeacher();
-  const [selectedContest, setSelectedContest] = useState(0);
+  const [selectedContest, setSelectedContest] = useState(-1);
   return (
     <>
       {schools.length >= 2 && (
@@ -240,15 +240,19 @@ export function ContestsAdminPage() {
           </div>
         </div>
       )}
-      <Suspense>
-        <div className="border-2">
-          <ContestAdmin
-            school={schools[selectedContest]}
-            setSchool={setSchool}
-            contest={contests.find((contest) => contest.id === schools[selectedContest].contestId)!}
-          />
-        </div>
-      </Suspense>
+      {selectedContest != -1 && (
+        <Suspense>
+          <div className="border-2">
+            <ContestAdmin
+              school={schools[selectedContest]}
+              setSchool={setSchool}
+              contest={
+                contests.find((contest) => contest.id === schools[selectedContest].contestId)!
+              }
+            />
+          </div>
+        </Suspense>
+      )}
     </>
   );
 }

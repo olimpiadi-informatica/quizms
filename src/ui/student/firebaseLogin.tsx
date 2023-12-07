@@ -47,7 +47,7 @@ function StudentLogin({ children }: { children: ReactNode }) {
   //   if (auth.currentUser) {
   //     return <TeacherInner user={auth.currentUser}>{children}</TeacherInner>;
   //   }
-  const [selectedContest, setSelectedContest] = useState(0);
+  const [selectedContest, setSelectedContest] = useState(-1);
   const [student, setStudent] = useState<Student>({ id: window.crypto.randomUUID() });
 
   return (
@@ -61,6 +61,7 @@ function StudentLogin({ children }: { children: ReactNode }) {
             className="select select-bordered w-full max-w-xs"
             value={selectedContest}
             onChange={(e: any) => setSelectedContest(e.target.value)}>
+            <option value={-1}></option>
             {contests.map((contest, i) => (
               <option key={contest.id} value={i}>
                 {contest.name}
@@ -69,31 +70,32 @@ function StudentLogin({ children }: { children: ReactNode }) {
           </select>
         </div>
 
-        {contests[selectedContest].personalInformation.map((pi) => {
-          const value = student.personalInformation?.[pi.name];
-          return (
-            <div className="form-control w-full">
-              <label className="label">
-                <span className="label-text text-lg">{pi.label}</span>
-              </label>
-              <input
-                type={pi.type}
-                placeholder={"Inserisci " + pi.label}
-                className="input input-bordered w-full max-w-md"
-                onChange={(e) => {
-                  let info: any = student.personalInformation ?? {};
-                  info[pi.name] = e.target.value;
-                  setStudent({ ...student, personalInformation: info });
-                }}
-                value={
-                  value instanceof Date
-                    ? format(value, "P", { locale: dateLocaleIT })
-                    : (value as string) ?? ""
-                }
-              />
-            </div>
-          );
-        })}
+        {selectedContest != -1 &&
+          contests[selectedContest].personalInformation.map((pi) => {
+            const value = student.personalInformation?.[pi.name];
+            return (
+              <div className="form-control w-full">
+                <label className="label">
+                  <span className="label-text text-lg">{pi.label}</span>
+                </label>
+                <input
+                  type={pi.type}
+                  placeholder={"Inserisci " + pi.label}
+                  className="input input-bordered w-full max-w-md"
+                  onChange={(e) => {
+                    let info: any = student.personalInformation ?? {};
+                    info[pi.name] = e.target.value;
+                    setStudent({ ...student, personalInformation: info });
+                  }}
+                  value={
+                    value instanceof Date
+                      ? format(value, "P", { locale: dateLocaleIT })
+                      : (value as string) ?? ""
+                  }
+                />
+              </div>
+            );
+          })}
 
         <span className="pt-1 text-red-600">{error?.message ?? <>&nbsp;</>}</span>
         <div className="flex justify-center pt-3">
