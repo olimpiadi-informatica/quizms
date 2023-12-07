@@ -26,7 +26,7 @@ export function shuffleProblems(program: Program, variant: string) {
       const node = path.node!;
       const [comp, props, ...children] = node.arguments;
       if (isQuizmsComponent("Section", comp)) {
-        const rng = new Rng(`b#problems#${variant}#${id}`);
+        const rng = new Rng(`b#section#${variant}#${id}`);
         rng.shuffle(children);
         node.arguments = [comp, props, ...children];
       }
