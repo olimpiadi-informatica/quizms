@@ -1,5 +1,6 @@
 import React, { ReactNode, Ref, forwardRef, useCallback, useMemo, useRef } from "react";
 
+import { addMinutes } from "date-fns";
 import { isNil, sumBy } from "lodash-es";
 import { User } from "lucide-react";
 import { ErrorBoundary } from "react-error-boundary";
@@ -47,7 +48,13 @@ export function Layout({ children }: { children: ReactNode }) {
           <div className="flex-none px-3">
             {terminated && <span className="font-mono">00:00</span>}
             {!terminated && (
-              <Timer startTime={school.startingTime} duration={{ minutes: contest.duration }} />
+              <Timer
+                endTime={
+                  school.startingTime && contest.duration
+                    ? addMinutes(school.startingTime, contest.duration)
+                    : undefined
+                }
+              />
             )}
           </div>
           <div className="h-full flex-none py-0.5">

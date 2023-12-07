@@ -3,17 +3,11 @@ import React, { useEffect, useMemo, useState } from "react";
 import { add, differenceInSeconds, isAfter } from "date-fns";
 
 type TimerProps = {
-  startTime?: Date;
-  duration?: Duration;
+  endTime?: Date;
 };
 
-export default function Timer({ startTime, duration }: TimerProps) {
+export default function Timer({ endTime }: TimerProps) {
   const [currentTime, setCurrentTime] = useState(new Date());
-
-  const endTime = useMemo(
-    () => startTime && duration && add(startTime, duration),
-    [startTime, duration],
-  );
 
   useEffect(() => {
     if (!endTime) return;
@@ -27,7 +21,7 @@ export default function Timer({ startTime, duration }: TimerProps) {
     return () => clearInterval(id);
   }, [endTime]);
 
-  if (!startTime || !duration) {
+  if (!endTime) {
     return <div className="font-mono">--:--</div>;
   }
 
