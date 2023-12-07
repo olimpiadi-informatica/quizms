@@ -14,7 +14,7 @@ type StudentProviderProps = {
   /** Scuola dello studente */
   school: School;
   /** Variante della prova */
-  variant: number;
+  variant: string;
   /** Funzione per terminare la prova e inviare le risposte */
   submit: () => void;
   /** Funzione per resettare le risposte e ricominciare la prova (opzionale) */
