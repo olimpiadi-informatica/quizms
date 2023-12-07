@@ -52,12 +52,12 @@ export function Contest({ children }: { children: ReactNode }) {
     }
   }, [terminated, resultShown]);
 
-  console.log(terminated, resultShown);
-
   return (
     <ContestContext.Provider value={{ registerProblem }}>
       <div className="contest break-before-page">
-        <main>{children}</main>
+        <main className="gap-x-10 [column-rule:solid_1px_var(--tw-prose-hr)] print:columns-2">
+          {children}
+        </main>
       </div>
       <CompletedModal ref={ref} problems={problems} />
     </ContestContext.Provider>

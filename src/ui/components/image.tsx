@@ -15,7 +15,7 @@ type Props = {
 export default function Image({ src, alt, title }: Props) {
   return (
     <img
-      className="max-h-screen min-w-0 p-4 first:rounded-l-xl last:rounded-r-xl dark:bg-white"
+      className="max-h-screen min-w-0 p-4 first:rounded-l-xl last:rounded-r-xl dark:bg-white print:max-w-full"
       src={src.src}
       width={src.width}
       height={src.height}

@@ -27,7 +27,7 @@ export function Layout({ children }: { children: ReactNode }) {
 
   return (
     <div className="flex h-screen flex-col">
-      <div className="navbar flex-none justify-between bg-base-300 text-base-content">
+      <div className="navbar flex-none justify-between bg-base-300 text-base-content print:hidden">
         <div className="dropdown max-w-full flex-none">
           <div tabIndex={0} role="button" className="btn btn-ghost no-animation w-full flex-nowrap">
             <User className="flex-none" />

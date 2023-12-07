@@ -45,7 +45,7 @@ export function AnswerGroup({ children }: AnswerGroupProps) {
     <form
       className={classNames(
         "answer-group my-5 break-before-avoid break-inside-avoid rounded-xl",
-        "bg-base-200 px-3 py-3 prose-p:my-1 print:border print:border-[var(--tw-prose-hr)]",
+        "flex-wrap bg-base-200 p-3 prose-p:my-1 print:flex print:border print:border-[var(--tw-prose-hr)] print:p-1",
       )}>
       {answers.map((answer, i) => (
         <AnswerContext.Provider key={i} value={{ id: String.fromCharCode(65 + i) }}>
@@ -82,7 +82,7 @@ export function Answer({ correct, children }: AnswerProps) {
   return (
     <div
       className={classNames(
-        "answer relative my-1 flex rounded-lg pl-2 pr-1 hover:bg-base-300",
+        "answer relative my-1 flex rounded-lg pl-2 pr-1 hover:bg-base-300 print:mr-4",
         terminated && {
           "border-2 border-success": correct === true,
           "border-2 border-error": answer === id && correct === false,
@@ -92,7 +92,7 @@ export function Answer({ correct, children }: AnswerProps) {
         id={answerId}
         checked={answer === id}
         className={classNames(
-          "radio radio-sm my-auto mr-4 bg-base-100 disabled:opacity-90",
+          "radio radio-sm my-auto mr-4 bg-base-100 disabled:opacity-90 print:mr-2",
           terminated &&
             answer === id && {
               "radio-success": correct === true,
@@ -103,7 +103,7 @@ export function Answer({ correct, children }: AnswerProps) {
         type="radio"
         disabled={terminated}
       />
-      <div className="my-auto w-8 screen:hidden">{id})</div>
+      <div className="my-auto w-6 screen:hidden">{id})</div>
       <label htmlFor={answerId} className="grow">
         {children}
       </label>

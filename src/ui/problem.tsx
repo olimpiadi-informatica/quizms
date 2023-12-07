@@ -75,7 +75,7 @@ export function SubProblem({ id, subIndex, children }: SubProblemProps) {
 
   return (
     <ProblemContext.Provider value={{ id, index: newIndex, points, setCorrect }}>
-      <div className="subproblem">
+      <div className="subproblem break-inside-avoid">
         <h3>Domanda {newIndex}</h3>
         {children}
       </div>
