@@ -19,6 +19,8 @@ type StudentProviderProps = {
   submit: () => void;
   /** Funzione per resettare le risposte e ricominciare la prova (opzionale) */
   reset?: () => void;
+  /** Funzione per cambiare utente */
+  logout?: () => void;
   /** Flag che indica se la prova è terminata */
   terminated: boolean;
 };

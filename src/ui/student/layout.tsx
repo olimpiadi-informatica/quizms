@@ -16,7 +16,7 @@ import { useStudent } from "./provider";
 export function Layout({ children }: { children: ReactNode }) {
   const submitRef = useRef<HTMLDialogElement>(null);
 
-  const { contest, student, reset, school, terminated } = useStudent();
+  const { contest, student, reset, school, terminated, logout } = useStudent();
 
   const name = student.personalInformation?.name as string;
   const surname = student.personalInformation?.surname as string;
@@ -35,11 +35,13 @@ export function Layout({ children }: { children: ReactNode }) {
               {name} {surname}
             </div>
           </div>
-          <ul className="menu dropdown-content menu-sm z-30 mt-3 w-52 rounded-box bg-base-300 p-2 text-base-content shadow-lg">
-            <li>
-              <button /* onClick={ TODO } */>Cambia utente</button>
-            </li>
-          </ul>
+          {logout && (
+            <ul className="menu dropdown-content menu-sm z-30 mt-3 w-52 rounded-box bg-base-300 p-2 text-base-content shadow-lg">
+              <li>
+                <button onClick={logout}>Cambia utente</button>
+              </li>
+            </ul>
+          )}
         </div>
         <div className="h-full gap-3" /*  TODO: disable on contest start */>
           <Progress className="hidden min-w-[5rem] sm:block" percentage={progress}>
