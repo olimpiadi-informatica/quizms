@@ -8,7 +8,7 @@ import { Variant } from "~/models/variant";
 
 type TeacherProviderProps = {
   /** Scuola dell'insegnante */
-  school: School;
+  schools: School[];
   /** Funzione per modificare i dati della scuola */
   setSchool: (school: School) => Promise<void>;
   /** Studenti della scuola */

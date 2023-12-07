@@ -17,7 +17,7 @@ export default function Timer({ endTime }: TimerProps) {
       if (isAfter(now, endTime)) {
         clearInterval(id);
       }
-    }, 1000);
+    }, 100);
     return () => clearInterval(id);
   }, [endTime]);
 
