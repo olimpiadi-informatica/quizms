@@ -6,16 +6,21 @@ import { ArrowUpFromLine } from "lucide-react";
 import { parse as parseCSV } from "papaparse";
 import z from "zod";
 
-import { studentConverter } from "~/firebase/converters";
-import { useCollection } from "~/firebase/hooks";
 import { Contest } from "~/models/contest";
 import { School } from "~/models/school";
 import { Student, studentSchema } from "~/models/student";
 import Modal from "~/ui/components/modal";
+import { useTeacher } from "~/ui/teacher/provider";
 import validate from "~/utils/validate";
 
 const ImportModal = forwardRef(function ImportModal(
-  { contest, school }: { contest: Contest; school: School },
+  {
+    contest,
+    school,
+  }: {
+    contest: Contest;
+    school: School;
+  },
   ref: Ref<HTMLDialogElement> | null,
 ) {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -30,13 +35,7 @@ const ImportModal = forwardRef(function ImportModal(
   const [error, setError] = useState<Error>();
   const [loading, setLoading] = useState(false);
 
-  const [, addStudent] = useCollection("students", studentConverter, {
-    constraints: {
-      school: school.id,
-      contest: contest.id,
-    },
-    orderBy: "createdAt",
-  });
+  const { setStudent } = useTeacher();
 
   const onChange = async (file?: File) => {
     setError(undefined);
@@ -52,7 +51,7 @@ const ImportModal = forwardRef(function ImportModal(
     setError(undefined);
     setLoading(true);
     try {
-      await importStudents(file ?? "", contest, school, addStudent);
+      await importStudents(file ?? "", contest, school, setStudent);
       if (ref && "current" in ref) {
         ref.current?.close();
       }
@@ -77,7 +76,7 @@ const ImportModal = forwardRef(function ImportModal(
           <span>{labels.join(", ")}</span>
         </p>
         <p>
-          In aggiunta, è possibile aggiungere una colonna <b>{/* TODO */ "Codice"}</b>, seguita da{" "}
+          In aggiunta, è possibile aggiungere una colonna <b>Variante</b>, seguita da{" "}
           {contest.questionCount} colonne per le risposte.
         </p>
         <p>

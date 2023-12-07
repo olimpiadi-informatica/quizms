@@ -1,9 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 
-import { add, differenceInMilliseconds, differenceInSeconds, isAfter } from "date-fns";
-import { milliseconds } from "date-fns/esm";
-
-import Progress from "./progress";
+import { add, differenceInSeconds, isAfter } from "date-fns";
 
 type TimerProps = {
   startTime?: Date;
@@ -31,11 +28,7 @@ export default function Timer({ startTime, duration }: TimerProps) {
   }, [endTime]);
 
   if (!startTime || !duration) {
-    return (
-      <Progress className="w-20">
-        <div className="font-mono">--:--</div>
-      </Progress>
-    );
+    return <div className="font-mono">--:--</div>;
   }
 
   const timeLeft = Math.max(differenceInSeconds(endTime!, currentTime), 0);
@@ -44,11 +37,9 @@ export default function Timer({ startTime, duration }: TimerProps) {
   const seconds = timeLeft % 60;
 
   return (
-    <Progress percentage={(1 - timeLeft / (milliseconds(duration) / 1000)) * 100} className="w-20">
-      <div className="countdown font-mono">
-        <span style={{ "--value": minutes } as any} />:
-        <span style={{ "--value": seconds } as any} />
-      </div>
-    </Progress>
+    <div className="countdown font-mono">
+      <span style={{ "--value": minutes } as any} />:
+      <span style={{ "--value": seconds } as any} />
+    </div>
   );
 }

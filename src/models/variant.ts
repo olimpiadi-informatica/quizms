@@ -4,6 +4,8 @@ export const variantSchema = z.object({
   id: z.string(),
   schema: z.record(
     z.object({
+      id: z.string(),
+      index: z.number(),
       type: z.enum(["text", "number"]),
       regex: z.instanceof(RegExp).optional(),
       options: z.string().array().nonempty().optional(),

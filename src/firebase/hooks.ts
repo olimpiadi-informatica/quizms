@@ -71,11 +71,15 @@ export function useDocument<T>(path: string, id: string, converter: FirestoreDat
   }
 }
 
-export function useCollection<T extends { id: string }>(
+export function useCollection<
+  T extends {
+    id: string;
+  },
+>(
   path: string,
   converter: FirestoreDataConverter<T>,
   options?: {
-    constraints?: Record<string, string>;
+    constraints?: Record<string, string | string[]>;
     orderBy?: string;
     orderByDesc?: string;
     limit?: number;
@@ -85,7 +89,9 @@ export function useCollection<T extends { id: string }>(
   const ref = collection(db, path).withConverter(converter);
   const q = query(
     ref,
-    ...Object.entries(options?.constraints ?? {}).map(([k, v]) => where(k, "==", v)),
+    ...Object.entries(options?.constraints ?? {}).map(([k, v]) =>
+      where(k, Array.isArray(v) ? "in" : "==", v),
+    ),
     ...compact([
       options?.orderBy && orderBy(options.orderBy),
       options?.orderByDesc && orderBy(options.orderByDesc, "desc"),

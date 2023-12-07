@@ -32,7 +32,7 @@ function parseMultipleAnswerGroup(tree: Root, problemId: number) {
       attributes: [],
       children: list.children.map((child): MdxJsxFlowElement => {
         const attr =
-          (process.env.NODE_ENV === "development" || process.env.QUIZMS_MODE === "training") &&
+          (process.env.QUIZMS_MODE === "development" || process.env.QUIZMS_MODE === "training") &&
           jsxAttribute("correct", child.checked);
 
         return {

@@ -7,8 +7,6 @@ import { it as dateLocaleIT } from "date-fns/locale";
 import { cloneDeep, compact, range, set, sumBy } from "lodash-es";
 import { AlertTriangle, FileCheck, Upload, Users } from "lucide-react";
 
-import { studentConverter } from "~/firebase/converters";
-import { useCollection } from "~/firebase/hooks";
 import { Contest } from "~/models/contest";
 import { score } from "~/models/score";
 import { Student } from "~/models/student";
@@ -86,16 +84,8 @@ export function TeacherTable() {
 }
 
 function Counter({ contest }: { contest: Contest }) {
-  const { school } = useTeacher();
-  const [students] = useCollection("students", studentConverter, {
-    constraints: {
-      school: school.id,
-      contest: contest.id,
-    },
-    orderBy: "createdAt",
-  });
-
-  return sumBy(students, (s) => Number(isComplete(s, contest)));
+  const { students } = useTeacher();
+  return sumBy(students, (s) => Number(s.contest === contest.id && isComplete(s, contest)));
 }
 
 const FinalizeModal = forwardRef(function FinalizeModal(
@@ -126,16 +116,7 @@ const FinalizeModal = forwardRef(function FinalizeModal(
 });
 
 function Table({ contest, variants }: { contest: Contest; variants: Variant[] }) {
-  const { school, solutions } = useTeacher();
-
-  // TODO: extract firebase logic
-  const [students, setStudent] = useCollection("students", studentConverter, {
-    constraints: {
-      school: school.id,
-      contest: contest.id,
-    },
-    orderBy: "createdAt",
-  });
+  const { school, solutions, students, setStudent } = useTeacher();
 
   const newStudentId = useRef(window.crypto.randomUUID());
 
@@ -145,7 +126,7 @@ function Table({ contest, variants }: { contest: Contest; variants: Variant[] })
   };
 
   const allStudents = [
-    ...students,
+    ...students.filter((s) => s.contest === contest.id),
     {
       id: newStudentId.current,
       contest: contest.id,
@@ -212,6 +193,7 @@ function Table({ contest, variants }: { contest: Contest; variants: Variant[] })
           width: 100,
         },
         ...range(contest.questionCount).map(
+          // TODO: fix answers
           (i): ColDef => ({
             field: `answers.${i}`,
             headerName: String(i + 1),

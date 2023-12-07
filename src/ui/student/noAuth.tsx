@@ -21,14 +21,21 @@ import { StudentProvider } from "./provider";
 type AuthProps = {
   contestName: string;
   duration: number;
+  questionCount?: number;
   children: ReactNode;
 
   // Da rimuovere
   header: ComponentType<any>;
 };
 
-export function NoAuth({ header: Header, contestName, duration, children }: AuthProps) {
-  const [variant, setVariant] = useLocalStorage("variant", 0);
+export function NoAuth({
+  header: Header,
+  contestName,
+  duration,
+  questionCount,
+  children,
+}: AuthProps) {
+  const [variant, setVariant] = useLocalStorage("variant", "0");
   const [submitted, setSubmitted] = useLocalStorage("submit", false);
 
   const [startTime, setStartTime] = useLocalStorage<Date | undefined>(
@@ -50,13 +57,13 @@ export function NoAuth({ header: Header, contestName, duration, children }: Auth
   const start = useCallback(() => {
     const now = new Date();
     setStartTime(now);
-    setVariant(import.meta.env.PROD ? Math.random() * Number.MAX_SAFE_INTEGER : 0);
+    setVariant((import.meta.env.PROD ? Math.random() * Number.MAX_SAFE_INTEGER : 0).toString());
   }, [setStartTime, setVariant]);
 
   const mockContest: Contest = {
     id: "",
     name: contestName,
-    questionCount: 0,
+    questionCount: questionCount ?? 0,
     duration,
     personalInformation: [
       { name: "name", label: "Nome", type: "text" },

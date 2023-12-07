@@ -8,6 +8,7 @@ import {
   contestConverter,
   schoolConverter,
   solutionConverter,
+  studentConverter,
   variantConverter,
 } from "~/firebase/converters";
 import { useCollection, useSignInWithPassword } from "~/firebase/hooks";
@@ -93,6 +94,16 @@ function TeacherInner({ user, children }: { user: User; children: ReactNode }) {
   const [variants] = useCollection("variants", variantConverter);
   const [solutions] = useCollection("solutions", solutionConverter);
 
+  const school = schools[0];
+
+  const [students, setStudent] = useCollection("students", studentConverter, {
+    constraints: {
+      school: school.id,
+      contest: contests.map((contest) => contest.id),
+    },
+    orderBy: "createdAt",
+  });
+
   const logout = useCallback(async () => {
     await signOut(getAuth(db.app));
     window.location.reload();
@@ -100,8 +111,10 @@ function TeacherInner({ user, children }: { user: User; children: ReactNode }) {
 
   return (
     <TeacherProvider
-      school={schools[0]}
+      school={school}
       setSchool={setSchool}
+      students={students}
+      setStudent={setStudent}
       contests={contests}
       variants={variants}
       solutions={solutions}

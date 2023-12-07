@@ -11,12 +11,9 @@ import React, {
   useState,
 } from "react";
 
-import { add } from "date-fns";
-import { isNil, sortBy, sumBy } from "lodash-es";
+import { isNil, sumBy } from "lodash-es";
 
 import Modal from "./components/modal";
-import Progress from "./components/progress";
-import Timer from "./components/timer";
 import { useStudent } from "./student/provider";
 
 type Problem = {
@@ -35,7 +32,7 @@ const ContestContext = createContext<ContestContextProps>({
 ContestContext.displayName = "ContestContext";
 
 export function Contest({ children }: { children: ReactNode }) {
-  const { student, terminated } = useStudent();
+  const { terminated } = useStudent();
   const [problems, setProblems] = useState<Record<string, Problem>>({});
 
   const registerProblem = useCallback((problem: Problem) => {
@@ -44,12 +41,6 @@ export function Contest({ children }: { children: ReactNode }) {
       [problem.id]: problem,
     }));
   }, []);
-
-  const progress = Math.round(
-    (sumBy(Object.values(student.answers ?? {}), (s) => Number(!!s)) /
-      Object.values(problems).length) *
-      100,
-  );
 
   const [resultShown, setResultShown] = useState(false);
   const ref = useRef<HTMLDialogElement>(null);
@@ -61,11 +52,12 @@ export function Contest({ children }: { children: ReactNode }) {
     }
   }, [terminated, resultShown]);
 
+  console.log(terminated, resultShown);
+
   return (
     <ContestContext.Provider value={{ registerProblem }}>
       <div className="contest break-before-page">
         <main>{children}</main>
-        <StickyFooter progress={progress} />
       </div>
       <CompletedModal ref={ref} problems={problems} />
     </ContestContext.Provider>
@@ -137,69 +129,6 @@ const CompletedModal = forwardRef(function CompletedModal(
           </div>
         </>
       )}
-    </Modal>
-  );
-});
-
-type FooterProps = {
-  progress: number;
-};
-
-function StickyFooter({ progress }: FooterProps) {
-  const ref = useRef<HTMLDialogElement>(null);
-  const { contest, school, reset, terminated } = useStudent();
-
-  const endingTime = useMemo(
-    () => school.startingTime && add(school.startingTime, { minutes: contest.duration }),
-    [school.startingTime, contest.duration],
-  );
-
-  return (
-    <div className="sticky bottom-0 z-[100] border-t border-base-content print:hidden">
-      <div className="relative">
-        <div className="absolute inset-y-0 left-1/2 -z-10 w-[max(calc(100vw-2rem),360px)] -translate-x-1/2 bg-base-100" />
-        <div className="flex justify-between p-3">
-          {terminated && (
-            <Progress className="w-20" percentage={100}>
-              <span className="font-mono">00:00</span>
-            </Progress>
-          )}
-          {!terminated && <Timer startTime={school.startingTime} endTime={endingTime} />}
-          <Progress className="min-w-[5rem]" percentage={progress}>
-            <span className="hidden xs:inline">Risposte date: </span>
-            {progress}%
-          </Progress>
-          {terminated && reset ? (
-            <button className="btn btn-warning" onClick={reset}>
-              Ricomincia
-            </button>
-          ) : (
-            <button
-              className="btn btn-success"
-              onClick={() => ref.current?.showModal()}
-              disabled={terminated}>
-              Termina
-            </button>
-          )}
-        </div>
-      </div>
-      <SubmitModal ref={ref} />
-    </div>
-  );
-}
-
-const SubmitModal = forwardRef(function SubmitModal(_, ref: Ref<HTMLDialogElement>) {
-  const { submit } = useStudent();
-
-  return (
-    <Modal ref={ref} title="Confermi di voler terminare?">
-      <p>Confermando non potrai più modificare le tue risposte.</p>
-      <div className="text-md flex flex-row justify-center gap-5">
-        <button className="btn btn-outline btn-neutral" onClick={close}>
-          Annulla
-        </button>
-        <button className="btn btn-error" /* TODO onClick={} */>Conferma</button>
-      </div>
     </Modal>
   );
 });
