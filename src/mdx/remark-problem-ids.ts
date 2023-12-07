@@ -12,7 +12,7 @@ import { jsxAttribute } from "./utils";
 const remarkProblemIds: Plugin<[], Root> = () => {
   return (tree: Root, file) => {
     assignProblemIds(tree);
-    parseSubProblems(tree, hash(file.value));
+    parseSubProblems(tree);
   };
 };
 
@@ -21,11 +21,11 @@ export default remarkProblemIds;
 function assignProblemIds(tree: Root) {
   let problemIndex = 1;
   visit(tree, { type: "mdxJsxFlowElement", name: "Problem" }, (node: MdxJsxFlowElement) => {
-    node.attributes.push(jsxAttribute("index", problemIndex++));
+    node.attributes.push(jsxAttribute("id", problemIndex++));
   });
 }
 
-function parseSubProblems(tree: Root, problemId: number) {
+function parseSubProblems(tree: Root) {
   let subProblems = 0;
   visit(tree, { type: "mdxJsxFlowElement", name: "AnswerGroup" }, () => {
     subProblems++;
@@ -42,10 +42,7 @@ function parseSubProblems(tree: Root, problemId: number) {
     }
 
     if (contents.at(-1)?.type !== "mdxJsxFlowElement") {
-      const attributes = compact([
-        jsxAttribute("id", problemId ^ id),
-        subProblems > 1 && jsxAttribute("subIndex", id++),
-      ]);
+      const attributes = subProblems > 1 ? [jsxAttribute("subId", id++)] : [];
       contents.push({
         type: "mdxJsxFlowElement",
         name: "SubProblem",
