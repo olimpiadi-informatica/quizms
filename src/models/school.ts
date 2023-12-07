@@ -2,6 +2,7 @@ import z from "zod";
 
 export const schoolSchema = z.object({
   id: z.string(),
+  schoolId: z.string(),
   externalId: z.string().optional(),
   name: z.string(),
   teacher: z.string(),
@@ -9,6 +10,7 @@ export const schoolSchema = z.object({
   startingTime: z.date().optional(),
   variants: z.record(z.string()).optional(),
   finalized: z.boolean().optional().default(false),
+  contestId: z.string(),
 });
 
 export type School = z.infer<typeof schoolSchema>;

@@ -12,6 +12,7 @@ export const studentSchema = z
     answers: z.record(z.string().optional()),
     createdAt: z.date(),
     updatedAt: z.date(),
+    startedAt: z.date(),
   })
   .partial()
   .extend({
