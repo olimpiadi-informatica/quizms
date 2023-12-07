@@ -47,6 +47,14 @@ export function NoAuth({
     () => startTime && add(startTime, { minutes: duration }),
     [startTime, duration],
   );
+  const [student, setStudent] = useLocalStorage<Student>("student", {
+    id: "",
+    personalInformation: {
+      name: "Utente",
+      surname: "anonimo",
+    },
+    answers: {},
+  });
 
   useEffect(() => {
     if (!endTime) return;
@@ -76,22 +84,13 @@ export function NoAuth({
 
   const mockSchool: School = {
     id: "",
-    schoolId: "finto id",
+    schoolId: "",
+    contestId: "",
     name: "Nessuna scuola",
     teacher: "",
     startingTime: startTime,
     finalized: false,
-    contestId: "id-finto",
   };
-
-  const [student, setStudent] = useState<Student>({
-    id: "",
-    personalInformation: {
-      name: "Utente",
-      surname: "anonimo",
-    },
-    answers: {},
-  });
 
   const reset = useCallback(() => {
     setSubmitted(false);

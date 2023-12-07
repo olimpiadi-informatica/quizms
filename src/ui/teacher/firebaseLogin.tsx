@@ -93,11 +93,9 @@ function TeacherInner({ user, children }: { user: User; children: ReactNode }) {
   const [variants] = useCollection("variants", variantConverter);
   const [solutions] = useCollection("solutions", solutionConverter);
 
-  const school = schools[0];
-
   const [students, setStudent] = useCollection("students", studentConverter, {
     constraints: {
-      school: school.id,
+      school: schools[0].id,
       contest: contests.map((contest) => contest.id),
     },
     orderBy: "createdAt",
