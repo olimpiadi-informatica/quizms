@@ -23,7 +23,7 @@ import "ag-grid-community/styles/ag-theme-quartz.css";
 const AgGridReact = lazy(() => import("ag-grid-react").then((m) => ({ default: m.AgGridReact })));
 
 export function TeacherTable() {
-  const { contests, variants, school } = useTeacher();
+  const { contests, variants, schools } = useTeacher();
   const [selectedContest, setSelectedContest] = useState(0);
   const importRef = useRef<HTMLDialogElement>(null);
   const finalizeRef = useRef<HTMLDialogElement>(null);

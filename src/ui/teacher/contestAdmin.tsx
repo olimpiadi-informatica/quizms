@@ -88,29 +88,6 @@ function StartContest(props: {
   );
 }
 
-function Token(props: { school: School; setSchool: (school: School) => void }) {
-  const modalRef = useRef<HTMLDialogElement>(null);
-  return (
-    <>
-      <p>Token scuola: {props.school.token}</p>
-      <button className="btn btn-primary" onClick={() => modalRef.current?.showModal()}>
-        rigenera token
-      </button>
-      <Modal ref={modalRef} title="conferma">
-        <div className="text-md flex flex-row justify-center gap-5">
-          Sei sicuro di voler generare un nuovo token?
-          <button
-            className="btn-confirm btn"
-            onClick={() => props.setSchool({ ...props.school, token: randomToken() })}>
-            conferma
-          </button>
-          <button className="btn btn-error">annulla</button>
-        </div>
-      </Modal>
-    </>
-  );
-}
-
 function ContestData(props: {
   school: School;
   contest: Contest;
@@ -120,15 +97,21 @@ function ContestData(props: {
   const modalRef = useRef<HTMLDialogElement>(null);
   const undoTimeLimit = addMinutes(school.startingTime!, -1);
 
-//   const [time, setTime] = useState(Date.now());
-    // useEffect(() => {
-    //   let d: Date = undoTimeLimit < new Date() ? school.startingTime! : undoTimeLimit;
-    //   console.log
-    //   const interval = setTimeout(() => setTime(Date.now()), differenceInMilliseconds(d, Date.now()));
-    //   return () => {
-    //     clearInterval(interval);
-    //   };
-    // }, []);
+  const [time, setTime] = useState(Date.now());
+  useEffect(() => {
+    const d: Date = undoTimeLimit < new Date() ? school.startingTime! : undoTimeLimit;
+    console.log(d.toTimeString(), differenceInMilliseconds(d, Date.now()));
+    const interval = setTimeout(
+      () => {
+        setTime(Date.now());
+        console.log("fatto 1");
+      },
+      differenceInMilliseconds(d, Date.now()) + 1000,
+    );
+    return () => {
+      clearInterval(interval);
+    };
+  }, [time]);
 
   if (contestFinished(school, contest)) {
     return (
@@ -191,11 +174,29 @@ function ContestAdmin(props: {
   contest: Contest;
 }) {
   const { school, setSchool, contest } = props;
+
+  const [time, setTime] = useState(Date.now());
   useEffect(() => {
-    if (!school.token) {
-      setSchool({ ...school, token: randomToken() });
+    if (school.startingTime) {
+      const d: Date =
+        school.startingTime < new Date()
+          ? addMinutes(school.startingTime, contest.duration!)
+          : school.startingTime;
+      console.log(d.toLocaleTimeString());
+      if (d > new Date()) {
+        const interval = setTimeout(
+          () => {
+            setTime(Date.now());
+            console.log("fatto 2");
+          },
+          differenceInMilliseconds(d, Date.now()) + 1000,
+        );
+        return () => {
+          clearInterval(interval);
+        };
+      }
     }
-  }, [school.token]);
+  }, [school.startingTime, time]);
 
   if (!contest.startingWindowEnd || !contest.startingWindowStart) {
     throw new Error("data inizio e fine del contest non specificate");
@@ -224,17 +225,17 @@ function ContestAdmin(props: {
 
 export function ContestsAdminPage() {
   const { contests, variants, schools, setSchool } = useTeacher();
-  const [time, setTime] = useState(Date.now());
-  useEffect(() => {
-    const interval = setInterval(() => setTime(Date.now()), 1000);
-    return () => {
-      clearInterval(interval);
-    };
-  }, []);
+  //   const [time, setTime] = useState(Date.now());
+  //   useEffect(() => {
+  //     const interval = setInterval(() => setTime(Date.now()), 1000);
+  //     return () => {
+  //       clearInterval(interval);
+  //     };
+  //   }, []);
   return (
     <>
       {schools.map((school) => {
-        let contest = contests.find((contest) => contest.id === school.contestId);
+        const contest = contests.find((contest) => contest.id === school.contestId);
         return (
           <div className="border-2">
             <ContestAdmin school={school} setSchool={setSchool} contest={contest!} />

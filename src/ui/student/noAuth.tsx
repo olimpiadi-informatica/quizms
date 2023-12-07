@@ -61,7 +61,7 @@ export function NoAuth({
   }, [setStartTime, setVariant]);
 
   const mockContest: Contest = {
-    id: "",
+    id: "id-finto",
     name: contestName,
     questionCount: questionCount ?? 0,
     duration,
@@ -76,10 +76,12 @@ export function NoAuth({
 
   const mockSchool: School = {
     id: "",
+    schoolId: "finto id",
     name: "Nessuna scuola",
     teacher: "",
     startingTime: startTime,
     finalized: false,
+    contestId: "id-finto",
   };
 
   const [student, setStudent] = useState<Student>({

@@ -24,7 +24,7 @@ export function PrintAuth({ header: Header, contestName, children }: AuthProps) 
   const startTime = undefined;
 
   const mockContest: Contest = {
-    id: "",
+    id: "id-finto",
     name: contestName,
     questionCount: 0,
     personalInformation: [
@@ -38,10 +38,12 @@ export function PrintAuth({ header: Header, contestName, children }: AuthProps) 
 
   const mockSchool: School = {
     id: "",
+    schoolId: "finto id",
     name: "Nessuna scuola",
     teacher: "",
     startingTime: startTime,
     finalized: false,
+    contestId: "id-finto",
   };
 
   const student: Student = {
