@@ -41,9 +41,6 @@ export default function (mode: "development" | "production", options?: Options):
       fs: {
         allow: [".", fileURLToPath(new URL("../..", import.meta.url))],
       },
-			proxy: {
-				"/variant.js": "http://localhost:3001",
-			},
     },
   };
 }

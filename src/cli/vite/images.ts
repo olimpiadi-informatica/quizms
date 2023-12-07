@@ -226,7 +226,7 @@ function emitFile(
   header?: string,
 ) {
   let src: string;
-  if (isBuild && process.env.QUIZMS_MODE !== "contest") {
+  if (isBuild && process.env.QUIZMS_MODE !== "contest" && process.env.QUIZMS_MODE !== "pdf") {
     const id = ctx.emitFile({
       type: "asset",
       name: basename(path, extname(path)) + image.format,

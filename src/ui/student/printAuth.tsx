@@ -1,7 +1,4 @@
-import React, {
-  ComponentType,
-  ReactNode,
-} from "react";
+import React, { ComponentType, ReactNode } from "react";
 
 import { Contest } from "~/models/contest";
 import { School } from "~/models/school";
@@ -20,11 +17,11 @@ type AuthProps = {
 };
 
 export function PrintAuth({ header: Header, contestName, children }: AuthProps) {
-	const urlParams = new URLSearchParams(window.location.search);
-	const variant = urlParams.get("variant")??"";
-	const submitted = false;
+  const urlParams = new URLSearchParams(window.location.search);
+  const variant = urlParams.get("variant") ?? "";
+  const submitted = false;
 
-	const startTime = undefined;
+  const startTime = undefined;
 
   const mockContest: Contest = {
     id: "",
@@ -47,7 +44,7 @@ export function PrintAuth({ header: Header, contestName, children }: AuthProps) 
     finalized: false,
   };
 
-	const student: Student = {
+  const student: Student = {
     id: "",
     personalInformation: {},
     answers: {},
@@ -62,7 +59,7 @@ export function PrintAuth({ header: Header, contestName, children }: AuthProps) 
       variant={variant}
       submit={() => {}}
       terminated={submitted}>
-        <Layout>{children}</Layout>
+      <Layout>{children}</Layout>
     </StudentProvider>
   );
 }
