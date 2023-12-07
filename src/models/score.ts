@@ -11,33 +11,44 @@ export function score(student: Student, variants: Variant[], solutions: Solution
   const schema = variant?.schema;
 
   if (!schema || !answers || !solution) return undefined;
-  const points = zip(schema, answers, solution).reduce((acc, [schema, answer, sol]) => {
+
+  let points = 0;
+  for (const id in schema) {
+    const problem = schema[id];
+    const answer = answers[id];
+    const sol = solution[id];
+
     if (
-      schema?.pointsCorrect === undefined ||
-      schema?.pointsBlank === undefined ||
-      schema?.pointsWrong === undefined ||
+      problem.pointsCorrect === undefined ||
+      problem.pointsBlank === undefined ||
+      problem.pointsWrong === undefined ||
       answer === undefined ||
       sol === undefined
     ) {
-      return NaN;
+      return undefined;
     }
 
     if (answer.toUpperCase() === sol.toUpperCase()) {
-      return acc + schema.pointsCorrect;
+      points += problem.pointsCorrect;
+    } else if (answer.toUpperCase() === problem.blankOption?.toUpperCase()) {
+      points += problem.pointsBlank;
+    } else {
+      points += problem.pointsWrong;
     }
-    if (answer.toUpperCase() === schema?.blankOption?.toUpperCase()) {
-      return acc + schema.pointsBlank;
-    }
-    return acc + schema.pointsWrong;
-  }, 0);
+  }
 
-  return isNaN(points) ? undefined : points;
+  return points;
 }
 
 export function maxScore(schema?: Schema) {
-  if (!schema) return NaN;
-  return schema.reduce((acc, schema) => {
-    if (schema?.pointsCorrect === undefined) return NaN;
-    return acc + schema.pointsCorrect;
-  }, 0);
+  if (!schema) return undefined;
+  let points = 0;
+  for (const id in schema) {
+    const problem = schema[id];
+    if (problem.pointsCorrect === undefined) {
+      return undefined;
+    }
+    points += problem.pointsCorrect;
+  }
+  return points;
 }

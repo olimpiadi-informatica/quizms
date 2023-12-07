@@ -2,17 +2,19 @@ import z from "zod";
 
 export const studentSchema = z
   .object({
+    uid: z.string(),
     personalInformation: z.record(z.union([z.string(), z.number(), z.date()]).optional()),
-    contest: z.string(),
+
     school: z.string(),
     token: z.string(),
+    startedAt: z.date(),
 
     variant: z.string(),
     disabled: z.boolean().default(false),
     answers: z.record(z.string().optional()),
+
     createdAt: z.date(),
     updatedAt: z.date(),
-    startedAt: z.date(),
   })
   .partial()
   .extend({
@@ -20,3 +22,10 @@ export const studentSchema = z
   });
 
 export type Student = z.infer<typeof studentSchema>;
+
+export const studentMappingSchema = z.object({
+  id: z.string(),
+  studentId: z.string(),
+});
+
+export type StudentMapping = z.infer<typeof studentMappingSchema>;
