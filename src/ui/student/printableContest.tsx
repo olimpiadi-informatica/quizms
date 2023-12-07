@@ -10,9 +10,12 @@ export function PrintableContest() {
   const variant = student.variant;
   const url = `/variant.js?variant=${variant}`;
 
-  import(/* @vite-ignore */ url).then(({ default: contest }) => {
-    setContest(() => contest(React, components));
-  });
+  useEffect(() => {
+    import(/* @vite-ignore */ url).then(({ default: contest }) => {
+      setContest(() => contest(React, components));
+    });
+  }, []);
+
   if (Contest) return Contest;
   return <></>;
 }
