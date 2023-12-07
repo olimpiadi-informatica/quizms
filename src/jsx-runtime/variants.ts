@@ -18,7 +18,19 @@ export function shuffleAnswers(program: Program, variant: string) {
   });
 }
 
-export function shuffleProblems(program: Program) {}
+export function shuffleProblems(program: Program, variant: string) {
+  traverse(program, {
+    CallExpression(path) {
+      const node = path.node!;
+      const [comp, props, ...children] = node.arguments;
+      if (isSection(comp)) {
+        const rng = new Rng(`b#problems#${variant}#${/* TODO */ 42}`);
+        rng.shuffle(children);
+        node.arguments = [comp, props, ...children];
+      }
+    },
+  });
+}
 
 function isAnswerGroup(expr?: Node) {
   return (
@@ -27,5 +39,15 @@ function isAnswerGroup(expr?: Node) {
     expr.object.name === "quizms" &&
     is.identifier(expr.property) &&
     expr.property.name === "AnswerGroup"
+  );
+}
+
+function isSection(expr?: Node) {
+  return (
+    is.memberExpression(expr) &&
+    is.identifier(expr.object) &&
+    expr.object.name === "quizms" &&
+    is.identifier(expr.property) &&
+    expr.property.name === "Section"
   );
 }
