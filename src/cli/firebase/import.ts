@@ -36,7 +36,7 @@ export default async function importContests(options: ImportOptions) {
   db.settings({ ignoreUndefinedProperties: true });
 
   if (options.all || options.contests) {
-    console.log("Importing contests...");
+    console.info("Importing contests...");
     const contests = JSON.parse(await readFile("data/contests.json", "utf-8"));
 
     const res = await Promise.all(
@@ -45,11 +45,11 @@ export default async function importContests(options: ImportOptions) {
         await db.doc(`contests/${contest.id}`).withConverter(contestConverter).set(contest);
       }),
     );
-    console.log(`${res.length} contests imported!`);
+    console.info(`${res.length} contests imported!`);
   }
 
   if (options.all || options.variants) {
-    console.log("Importing variants...");
+    console.info("Importing variants...");
     const variants = JSON.parse(await readFile("data/variants.json", "utf-8"));
 
     const res = await Promise.all(
@@ -58,11 +58,11 @@ export default async function importContests(options: ImportOptions) {
         await db.doc(`variants/${id}`).withConverter(variantConverter).set(variant);
       }),
     );
-    console.log(`${res.length} variants imported!`);
+    console.info(`${res.length} variants imported!`);
   }
 
   if (options.all || options.users) {
-    console.log("Importing users...");
+    console.info("Importing users...");
     const teachers = JSON.parse(await readFile("data/users.json", "utf-8"));
 
     const res = await Promise.all(
@@ -81,31 +81,33 @@ export default async function importContests(options: ImportOptions) {
         }
       }),
     );
-    console.log(`${res.length} users imported!`);
+    console.info(`${res.length} users imported!`);
   }
 
   if (options.all || options.schools) {
-    console.log("Importing schools...");
+    console.info("Importing schools...");
     const schools = JSON.parse(await readFile("data/schools.json", "utf-8"));
 
     const res = await Promise.all(
-      Object.entries(schools).map(async ([id, record]) => {
-        const school = validateOrExit(schoolSchema, record, { id });
+      schools.map(async (record: any) => {
+        console.log(record);
+        const school = validateOrExit(schoolSchema.omit({ id: true }), record);
         const user = await auth.getUserByEmail(school.teacher);
         await db
-          .doc(`schools/${school.id}`)
+          .collection("schools")
           .withConverter(schoolConverter)
-          .set({
+          .add({
+            id: "",
             ...school,
             teacher: user.uid,
           });
       }),
     );
-    console.log(`${res.length} schools imported!`);
+    console.info(`${res.length} schools imported!`);
   }
 
   if (options.all || options.solutions) {
-    console.log("Importing solutions...");
+    console.info("Importing solutions...");
     const variants = JSON.parse(await readFile("data/solutions.json", "utf-8"));
 
     const res = await Promise.all(
@@ -114,10 +116,10 @@ export default async function importContests(options: ImportOptions) {
         await db.doc(`solutions/${id}`).withConverter(solutionConverter).set(variant);
       }),
     );
-    console.log(`${res.length} solutions imported!`);
+    console.info(`${res.length} solutions imported!`);
   }
 
-  console.log("All done!");
+  console.info("All done!");
   await deleteApp(app);
 }
 
