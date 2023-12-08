@@ -97,11 +97,24 @@ function StudentLogin({ children }: { children: ReactNode }) {
             );
           })}
 
+        <div className="form-control w-full">
+          <label className="label">
+            <span className="label-text text-lg">Codice scuola</span>
+          </label>
+          <input
+            type="text"
+            placeholder="Inserisci codice scuola"
+            className="input input-bordered w-full max-w-md"
+            onChange={(e) => setStudent({ ...student, token: e.target.value })}
+            value={student.token}
+          />
+        </div>
+
         <span className="pt-1 text-red-600">{error?.message ?? <>&nbsp;</>}</span>
         <div className="flex justify-center pt-3">
           <button className="btn btn-success" onClick={signIn}>
             <span className={classNames("loading loading-spinner", !loading && "hidden")}></span>
-            Accedi
+            Inizia
           </button>
         </div>
       </main>

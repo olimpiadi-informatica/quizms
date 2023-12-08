@@ -8,6 +8,7 @@ import { cloneDeep, compact, range, set, sumBy } from "lodash-es";
 import { AlertTriangle, FileCheck, Upload, Users } from "lucide-react";
 
 import { Contest } from "~/models/contest";
+import { School } from "~/models/school";
 import { score } from "~/models/score";
 import { Student } from "~/models/student";
 import { Variant } from "~/models/variant";
@@ -28,6 +29,7 @@ export function TeacherTable() {
   const importRef = useRef<HTMLDialogElement>(null);
   const finalizeRef = useRef<HTMLDialogElement>(null);
 
+  const school = schools.find((sch) => sch.contestId === contests[selectedContest].id)!;
   return (
     <>
       <div className="m-5 flex items-center justify-between gap-5">
@@ -70,12 +72,17 @@ export function TeacherTable() {
               <div className="hidden lg:block">Finalizza</div>
             </button>
           )}
-          <FinalizeModal ref={finalizeRef} />
+          <FinalizeModal ref={finalizeRef} school={school} />
         </div>
       </div>
       <div className="min-h-0 flex-auto overflow-scroll">
         <Suspense fallback={<Loading />}>
-          <Table key={selectedContest} contest={contests[selectedContest]} variants={variants} />
+          <Table
+            key={selectedContest}
+            contest={contests[selectedContest]}
+            variants={variants}
+            school={school}
+          />
           <ImportModal ref={importRef} contest={contests[selectedContest]} school={school} />
         </Suspense>
       </div>
@@ -84,18 +91,22 @@ export function TeacherTable() {
 }
 
 function Counter({ contest }: { contest: Contest }) {
-  const { students } = useTeacher();
-  return sumBy(students, (s) => Number(s.contest === contest.id && isComplete(s, contest)));
+  const { students, schools } = useTeacher();
+  return sumBy(students, (s) => {
+    const school = schools.find((sch) => sch.id === s.school);
+    if (!school) return 0;
+    return Number(school.contestId === contest.id && isComplete(s, contest));
+  });
 }
 
 const FinalizeModal = forwardRef(function FinalizeModal(
-  _: object,
+  props: { school: School },
   ref: Ref<HTMLDialogElement> | null,
 ) {
-  const { school, setSchool } = useTeacher();
+  const { schools, setSchool } = useTeacher();
 
   const finalize = async () => {
-    await setSchool({ ...school, finalized: true });
+    await setSchool({ ...props.school, finalized: true });
     window.location.reload();
   };
 
@@ -115,8 +126,16 @@ const FinalizeModal = forwardRef(function FinalizeModal(
   );
 });
 
-function Table({ contest, variants }: { contest: Contest; variants: Variant[] }) {
-  const { school, solutions, students, setStudent } = useTeacher();
+function Table({
+  school,
+  contest,
+  variants,
+}: {
+  school: School;
+  contest: Contest;
+  variants: Variant[];
+}) {
+  const { schools, solutions, students, setStudent } = useTeacher();
 
   const newStudentId = useRef(window.crypto.randomUUID());
 
@@ -126,7 +145,7 @@ function Table({ contest, variants }: { contest: Contest; variants: Variant[] })
   };
 
   const allStudents = [
-    ...students.filter((s) => s.contest === contest.id),
+    ...students.filter((s) => s.school === school.id),
     {
       id: newStudentId.current,
       contest: contest.id,
