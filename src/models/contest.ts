@@ -3,7 +3,7 @@ import z from "zod";
 export const contestSchema = z.object({
   id: z.string(),
   name: z.string(),
-  problemIds: z.string().array(),
+  problemIds: z.coerce.string().array(),
 
   startingWindowStart: z.coerce.date().optional(),
   startingWindowEnd: z.coerce.date().optional(),

@@ -1,16 +1,13 @@
-import { compact } from "lodash-es";
 import { Root, TopLevelContent } from "mdast";
 import { MdxJsxFlowElement } from "mdast-util-mdx-jsx";
 import "mdast-util-mdxjs-esm";
 import { Plugin } from "unified";
 import { visit } from "unist-util-visit";
 
-import { hash } from "~/utils/random";
-
 import { jsxAttribute } from "./utils";
 
 const remarkProblemIds: Plugin<[], Root> = () => {
-  return (tree: Root, file) => {
+  return (tree: Root) => {
     assignProblemIds(tree);
     parseSubProblems(tree);
   };

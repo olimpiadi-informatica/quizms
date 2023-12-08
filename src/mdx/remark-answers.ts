@@ -8,13 +8,11 @@ import { MdxJsxFlowElement } from "mdast-util-mdx-jsx";
 import { Plugin } from "unified";
 import { visit } from "unist-util-visit";
 
-import { hash } from "~/utils/random";
-
 import { jsxAttribute } from "./utils";
 
 const remarkAnswers: Plugin<[], Root> = () => {
-  return (tree: Root, file) => {
-    parseMultipleAnswerGroup(tree, hash(file.value));
+  return (tree: Root) => {
+    parseMultipleAnswerGroup(tree);
     parseOpenAnswerGroup(tree);
     parseExplanation(tree);
   };
@@ -22,7 +20,7 @@ const remarkAnswers: Plugin<[], Root> = () => {
 
 export default remarkAnswers;
 
-function parseMultipleAnswerGroup(tree: Root, problemId: number) {
+function parseMultipleAnswerGroup(tree: Root) {
   visit(tree, { type: "list", ordered: false }, (list: List, index, parent: Parent) => {
     if (!list.children.some((c) => c.checked)) return;
 
