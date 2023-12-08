@@ -29,14 +29,11 @@ function parseMultipleAnswerGroup(tree: Root) {
       name: "AnswerGroup",
       attributes: [],
       children: list.children.map((child): MdxJsxFlowElement => {
-        const attr =
-          (process.env.QUIZMS_MODE === "development" || process.env.QUIZMS_MODE === "training") &&
-          jsxAttribute("correct", child.checked);
-
+        const attr = jsxAttribute("correct", child.checked);
         return {
           type: "mdxJsxFlowElement",
           name: "Answer",
-          attributes: compact([attr]),
+          attributes: [attr],
           children: child.children,
         } as MdxJsxFlowElement;
       }),
@@ -69,11 +66,10 @@ function parseOpenAnswerGroup(tree: Root) {
       sourceType: "module",
     });
 
-    const attributes = compact([
+    const attributes = [
       jsxAttribute("type", "text"),
-      (process.env.NODE_ENV === "development" || process.env.QUIZMS_MODE === "training") &&
-        jsxAttribute("correct", (template.body[0] as Directive).expression),
-    ]);
+      jsxAttribute("correct", (template.body[0] as Directive).expression),
+    ];
 
     parent!.children[index!] = {
       type: "mdxJsxFlowElement",

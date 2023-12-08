@@ -4,7 +4,7 @@ import { toJs } from "estree-util-to-js";
 
 import { hash } from "~/utils/random";
 
-import { shuffleAnswers, shuffleProblems } from "./variants";
+import { shuffleAnswers, shuffleProblems , getAnswers } from "./variants";
 
 type ParseOptions = {
   functionArguments: any[];
@@ -148,6 +148,7 @@ export function parseContest(entry: () => ExpressionWrapper, variant: string): s
 
   shuffleProblems(program, variant);
   shuffleAnswers(program, variant);
+  console.log(getAnswers(program, true));
 
   return toJs(program).value;
 }
