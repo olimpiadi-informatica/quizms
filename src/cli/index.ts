@@ -40,6 +40,7 @@ function main() {
     .argument("[directory]", "The directory of the contest.", cwd())
     .option("-d, --outDir <directory>", "The directory to output the PDF.", "pdf")
     .option("-p, --port <port>", "The port to use for the server.", safeParseInt, 1234)
+    .option("-s, --server", "Do not print, only serve the pages")
     .option(
       "-c, --contest <contest>",
       "The relative path of the contest to print.",

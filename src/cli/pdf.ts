@@ -118,12 +118,16 @@ export type PdfOptions = {
   port: number;
   count: number;
   contest: string;
+  server?: boolean;
 };
 
 export default async function pdf(options: PdfOptions) {
-  console.log(options);
   const server = await pdfServer(options.dir, options.contest, options.port);
   const variant_ids = [...Array(options.count).keys()].map((x) => x.toString());
-  await printVariants(variant_ids, options.outDir, options.port);
-  server.close();
+
+  if (!options.server)
+  {
+    await printVariants(variant_ids, options.outDir, options.port);
+    server.close();
+  }
 }
