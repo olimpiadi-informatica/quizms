@@ -71,7 +71,7 @@ function TeacherLogin({ children }: { children: ReactNode }) {
             value={password}
           />
         </div>
-        <span className="pt-1 text-red-600">{error?.message ?? <>&nbsp;</>}</span>
+        <span className="pt-1 text-error">{error?.message ?? <>&nbsp;</>}</span>
         <div className="flex justify-center pt-3">
           <button className="btn btn-success" onClick={signIn}>
             <span className={classNames("loading loading-spinner", !loading && "hidden")}></span>

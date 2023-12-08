@@ -21,9 +21,9 @@ import z, {
 import { Contest, contestSchema } from "~/models/contest";
 import { School, schoolSchema } from "~/models/school";
 import { Solution, solutionSchema } from "~/models/solution";
-import { Student, studentSchema } from "~/models/student";
+import { Student, StudentMapping, studentMappingSchema, studentSchema } from "~/models/student";
 import { Submission, submissionSchema } from "~/models/submission";
-import { Variant, variantSchema } from "~/models/variant";
+import { Variant, VariantMapping, variantMappingSchema, variantSchema } from "~/models/variant";
 import validate from "~/utils/validate";
 
 function convertToFirestore(data: Record<string, any>) {
@@ -104,6 +104,11 @@ export const studentConverter: FirestoreDataConverter<Student> = {
   fromFirestore: (snapshot) => parse(studentSchema, snapshot),
 };
 
+export const studentMappingConverter: FirestoreDataConverter<StudentMapping> = {
+  toFirestore: (data) => convertToFirestore(data),
+  fromFirestore: (snapshot) => parse(studentMappingSchema, snapshot),
+};
+
 export const submissionConverter: FirestoreDataConverter<Submission> = {
   toFirestore(data: Submission) {
     return {
@@ -117,4 +122,9 @@ export const submissionConverter: FirestoreDataConverter<Submission> = {
 export const variantConverter: FirestoreDataConverter<Variant> = {
   toFirestore: (data) => convertToFirestore(data),
   fromFirestore: (snapshot) => parse(variantSchema, snapshot),
+};
+
+export const variantMappingConverter: FirestoreDataConverter<VariantMapping> = {
+  toFirestore: (data) => convertToFirestore(data),
+  fromFirestore: (snapshot) => parse(variantMappingSchema, snapshot),
 };

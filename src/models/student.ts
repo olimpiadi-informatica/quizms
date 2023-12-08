@@ -5,6 +5,7 @@ export const studentSchema = z
     uid: z.string(),
     personalInformation: z.record(z.union([z.string(), z.number(), z.date()]).optional()),
 
+    contest: z.string(),
     school: z.string(),
     token: z.string(),
     startedAt: z.date(),

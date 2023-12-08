@@ -7,6 +7,7 @@ import {
   UserCredential,
   getAuth,
   onAuthStateChanged,
+  signInAnonymously,
   signInWithEmailAndPassword,
 } from "firebase/auth";
 import {
@@ -167,22 +168,26 @@ export function useAuth() {
       if (credential) return credential.user;
     }
 
-    return new Promise<User | null>((resolve, reject) => {
-      const unsubscribe = onAuthStateChanged(auth, {
-        next: (user) => {
-          resolve(user);
-          unsubscribe();
-        },
-        error: (error) => {
-          reject(error);
-          unsubscribe();
-        },
-        complete: () => {
-          resolve(null);
-          unsubscribe();
-        },
-      });
-    });
+    return waitAuth(auth);
+  }
+}
+
+export function useAnonymousAuth() {
+  const db = useDb();
+  const auth = getAuth(db.app);
+
+  const { data, error } = useSWR<User | null>(
+    "firebase/anonymousAuth",
+    () => fetcher(auth),
+    swrConfig,
+  );
+  if (error) throw error;
+
+  return data as User;
+
+  async function fetcher(auth: Auth) {
+    const credential = await signInAnonymously(auth);
+    return credential.user;
   }
 }
 
@@ -208,4 +213,23 @@ export function useSignInWithPassword() {
   );
 
   return { signInWithPassword, loading, error };
+}
+
+function waitAuth(auth: Auth) {
+  return new Promise<User | null>((resolve, reject) => {
+    const unsubscribe = onAuthStateChanged(auth, {
+      next: (user) => {
+        resolve(user);
+        unsubscribe();
+      },
+      error: (error) => {
+        reject(error);
+        unsubscribe();
+      },
+      complete: () => {
+        resolve(null);
+        unsubscribe();
+      },
+    });
+  });
 }

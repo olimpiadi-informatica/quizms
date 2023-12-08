@@ -14,20 +14,16 @@ service cloud.firestore {
         }
 
         function isTeacher() {
-            return request.auth != null && request.auth.token.email_verified;
+            return exists(/databases/$(database)/documents/teachers/$(request.auth.uid));
         }
 
         function getStudent(uid) {
-            return get(/databases/$(database)/documents/students/$(uid));
+            let data = get(/databases/$(database)/documents/studentMapping/$(uid)).data;
+            return get(/databases/$(database)/documents/students/$(data.studentId));
         }
 
         function getSchool(id) {
             return get(/databases/$(database)/documents/schools/$(id));
-        }
-
-        function isStudentSchool(school, token) {
-            let student = getStudent(request.auth.uid);
-            return student != null && (student.data.school == school || student.data.token == token);
         }
 
         function isTeacherSchool(schoolId) {
@@ -40,6 +36,11 @@ service cloud.firestore {
         }
 
         match /schools/{school} {
+            function isStudentSchool(school, token) {
+                let student = getStudent(request.auth.uid);
+                return student != null && (student.data.school == school || student.data.token == token);
+            }
+
             allow read: if isStudentSchool(school, resource.data.token) || isTeacher();
             allow update: if isAuthenticated(resource.data.teacher) && affectedKeys().hasOnly(['token', 'startingTime', 'finalized']);
         }
@@ -63,7 +64,7 @@ service cloud.firestore {
             }
 
             function checkVariant(data) {
-                let hash = data.contest + '-' + studentHash(data.personalInformation)[0: 3];
+                let hash = data.contest + '-' + studentHash(data)[0: 3];
                 let mapping = get(/databases/$(database)/documents/variantMapping/$(hash));
                 return mapping != null
                     && mapping.data.variant == data.variant;
@@ -71,15 +72,17 @@ service cloud.firestore {
 
             function canStudentCreate() {
                 return isAuthenticated(request.resource.data.uid)
-                    && checkToken(getSchool(request.resource.data.school))
+                    && !('school' in request.resource.data)
                     && request.resource.data.personalInformation != null
+                    && request.resource.data.contest != null
                     && checkVariant(request.resource.data);
             }
 
             function canStudentUpdate() {
                 let keys = affectedKeys();
                 return isAuthenticated(resource.data.uid)
-                    && !keys.hasAny(['uid', 'personalInformation', 'school', 'token', 'startedAt', 'variant', 'createdAt'])
+                    && !keys.hasAny(['uid', 'personalInformation', 'token', 'variant', 'createdAt'])
+                    && (!keys.hasAny(['school', 'startedAt']) || checkToken(getSchool(request.resource.data.school)))
                     && hasTimestamp('updatedAt');
             }
 
@@ -95,22 +98,34 @@ service cloud.firestore {
             allow update: if canStudentUpdate() || canTeacherUpdate();
         }
 
-        match /studentMapping/{hash} {
+        match /studentMapping/{id} {
             function canCreate() {
-                let student = getStudent(request.resource.data.studentId);
+                let student = get(/databases/$(database)/documents/students/$(request.resource.data.studentId));
                 return student != null
                     && isAuthenticated(student.data.uid)
-                    && student.data.personalInformation != null
-                    && studentHash(student.data.personalInformation) == hash;
+                    && (canCreateByUid(student) || canCreateByHash(student));
+            }
+
+            function canCreateByUid(student) {
+                return isAuthenticated(id);
+            }
+
+            function canCreateByHash(student) {
+                return student.data.personalInformation != null
+                    && studentHash(student.data) == id;
             }
 
             allow get: if request.auth != null;
-            allow create: if canCreate();
+            allow create, update: if canCreate();
         }
 
         match /submissions/{submission} {
             allow get: if isAuthenticated(resource.data.uid);
             allow create: if isAuthenticated(request.resource.data.uid) && hasTimestamp('submittedAt');
+        }
+
+        match /teachers/{teacher} {
+            allow read: if request.auth != null && request.auth.token.email_verified;
         }
 
         match /variants/{variant} {

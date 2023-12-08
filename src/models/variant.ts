@@ -21,3 +21,7 @@ export const variantSchema = z.object({
 
 export type Variant = z.infer<typeof variantSchema>;
 export type Schema = Variant["schema"];
+
+export const variantMappingSchema = z.object({ id: z.string(), variant: z.string() });
+
+export type VariantMapping = z.infer<typeof variantMappingSchema>;
