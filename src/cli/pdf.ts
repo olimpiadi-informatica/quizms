@@ -125,8 +125,7 @@ export default async function pdf(options: PdfOptions) {
   const server = await pdfServer(options.dir, options.contest, options.port);
   const variant_ids = [...Array(options.count).keys()].map((x) => x.toString());
 
-  if (!options.server)
-  {
+  if (!options.server) {
     await printVariants(variant_ids, options.outDir, options.port);
     server.close();
   }

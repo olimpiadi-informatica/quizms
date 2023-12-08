@@ -6,6 +6,7 @@ Per testare il codice durante lo sviluppo:
 
 - clonare il contest da testare (si farà riferimento a `CONTEST` come il nome della cartella in cui si trova)
 - clonare `quizms`
+
 ```sh
 git clone ssh://git@git.olinfo.it:10022/bortoz/quizms.git
 ```

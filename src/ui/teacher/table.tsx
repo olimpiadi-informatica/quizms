@@ -91,7 +91,7 @@ export function TeacherTable() {
 }
 
 function Counter({ school, contest }: { school: School; contest: Contest }) {
-  const { students, schools } = useTeacher();
+  const { students } = useTeacher();
   return sumBy(students, (s) => {
     return Number(school.contestId === contest.id && isComplete(s, contest));
   });
@@ -133,7 +133,7 @@ function Table({
   contest: Contest;
   variants: Variant[];
 }) {
-  const { schools, contests, solutions, students, setStudent } = useTeacher();
+  const { solutions, students, setStudent } = useTeacher();
 
   const newStudentId = useRef(window.crypto.randomUUID());
 

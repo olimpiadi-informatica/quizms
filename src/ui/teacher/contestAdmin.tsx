@@ -205,7 +205,7 @@ function ContestAdmin(props: {
 }
 
 export function ContestsAdminPage() {
-  const { contests, variants, schools, setSchool } = useTeacher();
+  const { contests, schools, setSchool } = useTeacher();
   const [selectedContest, setSelectedContest] = useState(-1);
   return (
     <>
