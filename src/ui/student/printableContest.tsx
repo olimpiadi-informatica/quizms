@@ -7,14 +7,14 @@ import { useStudent } from "./provider";
 export function PrintableContest() {
   const [Contest, setContest] = useState<ComponentType>();
   const student = useStudent();
-  const variant = student.variant;
-  const url = `/variant.js?variant=${variant}`;
 
   useEffect(() => {
-    import(/* @vite-ignore */ url).then(({ default: contest }) => {
-      setContest(() => contest(React, components));
-    });
-  }, []);
+    import(/* @vite-ignore */ `/variant.js?variant=${student.variant}`).then(
+      ({ default: contest }) => {
+        setContest(() => contest(React, components));
+      },
+    );
+  }, [student.variant]);
 
   if (Contest) return Contest;
   return <></>;

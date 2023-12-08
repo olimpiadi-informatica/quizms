@@ -1,6 +1,6 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 
-import { add, differenceInSeconds, isAfter } from "date-fns";
+import { differenceInSeconds, isAfter } from "date-fns";
 
 type TimerProps = {
   endTime?: Date;

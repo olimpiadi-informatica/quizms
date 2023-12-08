@@ -9,7 +9,7 @@ import React, {
 } from "react";
 
 import { add, differenceInMilliseconds } from "date-fns";
-import { isFunction } from "lodash-es";
+import { isFunction, range } from "lodash-es";
 
 import { Contest } from "~/models/contest";
 import { School } from "~/models/school";
@@ -71,7 +71,7 @@ export function NoAuth({
   const mockContest: Contest = {
     id: "id-finto",
     name: contestName,
-    questionCount: questionCount ?? 0,
+    problemIds: range(questionCount ?? 0).map((i) => i.toString()),
     duration,
     personalInformation: [
       { name: "name", label: "Nome", type: "text" },

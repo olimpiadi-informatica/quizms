@@ -26,7 +26,7 @@ export function PrintAuth({ header: Header, contestName, children }: AuthProps) 
   const mockContest: Contest = {
     id: "id-finto",
     name: contestName,
-    questionCount: 0,
+    problemIds: [],
     personalInformation: [
       { name: "name", label: "Nome", type: "text" },
       { name: "surname", label: "Cognome", type: "text" },

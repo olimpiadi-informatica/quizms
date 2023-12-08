@@ -1,5 +1,3 @@
-import { zip } from "lodash-es";
-
 import { Solution } from "~/models/solution";
 import { Student } from "~/models/student";
 import { Schema, Variant } from "~/models/variant";

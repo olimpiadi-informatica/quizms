@@ -1,7 +1,6 @@
 import React, { Ref, forwardRef, useRef, useState } from "react";
 
 import { parse as parseDate } from "date-fns";
-import { range } from "lodash-es";
 import { ArrowUpFromLine } from "lucide-react";
 import { parse as parseCSV } from "papaparse";
 import z from "zod";
@@ -9,6 +8,7 @@ import z from "zod";
 import { Contest } from "~/models/contest";
 import { School } from "~/models/school";
 import { Student, studentSchema } from "~/models/student";
+import { Variant } from "~/models/variant";
 import Modal from "~/ui/components/modal";
 import { useTeacher } from "~/ui/teacher/provider";
 import validate from "~/utils/validate";
@@ -35,7 +35,7 @@ const ImportModal = forwardRef(function ImportModal(
   const [error, setError] = useState<Error>();
   const [loading, setLoading] = useState(false);
 
-  const { setStudent } = useTeacher();
+  const { variants, setStudent } = useTeacher();
 
   const onChange = async (file?: File) => {
     setError(undefined);
@@ -51,7 +51,7 @@ const ImportModal = forwardRef(function ImportModal(
     setError(undefined);
     setLoading(true);
     try {
-      await importStudents(file ?? "", contest, school, setStudent);
+      await importStudents(file ?? "", contest, variants, school, setStudent);
       if (ref && "current" in ref) {
         ref.current?.close();
       }
@@ -77,7 +77,7 @@ const ImportModal = forwardRef(function ImportModal(
         </p>
         <p>
           In aggiunta, è possibile aggiungere una colonna <b>Variante</b>, seguita da{" "}
-          {contest.questionCount} colonne per le risposte.
+          {contest.problemIds.length} colonne per le risposte.
         </p>
         <p>
           I campi <b>{dates.length > 0 && dates.join(", ")}</b> devono essere nel formato{" "}
@@ -109,36 +109,63 @@ export default ImportModal;
 async function importStudents(
   file: string,
   contest: Contest,
+  variants: Variant[],
   school: School,
   addStudent: (student: Student) => Promise<void>,
 ) {
   const schema = z
-    .array(z.string())
+    .array(z.string().trim())
     .min(contest.personalInformation.length)
-    .transform<Student>((value) => ({
-      id: window.crypto.randomUUID(),
-      personalInformation: Object.fromEntries(
-        contest.personalInformation.map((field, i) => {
-          if (field.type === "date") {
-            return [
-              field.name,
-              value[i] ? parseDate(value[i], "dd/MM/yyyy", new Date()) : undefined,
-            ];
-          }
-          if (field.type === "number") {
-            return [field.name, value[i] ? Number(value[i]) : undefined];
-          }
-          return [field.name, value[i].trim()];
-        }),
-      ),
-      contest: contest.id,
-      school: school.id,
-      variant: value[contest.personalInformation.length]?.trim() || undefined,
-      answers: range(contest.questionCount).map(
-        (i) => value[contest.personalInformation.length + 1 + i]?.trim() ?? "",
-      ),
-      createdAt: new Date(),
-    }))
+    .transform<Student>((value, ctx) => {
+      const variantId = value[contest.personalInformation.length];
+
+      if (variantId) {
+        const variant = variants.find((v) => v.id === variantId && v.contest === contest.id);
+        if (!variant) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: [contest.personalInformation.length],
+            message: `La variante ${variantId} non è valida`,
+          });
+          return z.NEVER;
+        }
+      } else if (value.slice(contest.personalInformation.length).some((v) => v)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: [contest.personalInformation.length],
+          message: `Variante mancante`,
+        });
+        return z.NEVER;
+      }
+
+      return {
+        id: window.crypto.randomUUID(),
+        personalInformation: Object.fromEntries(
+          contest.personalInformation.map((field, i) => {
+            if (field.type === "date") {
+              return [
+                field.name,
+                value[i] ? parseDate(value[i], "dd/MM/yyyy", new Date()) : undefined,
+              ];
+            }
+            if (field.type === "number") {
+              return [field.name, value[i] ? Number(value[i]) : undefined];
+            }
+            return [field.name, value[i].trim()];
+          }),
+        ),
+        contest: contest.id,
+        school: school.id,
+        variant: variantId,
+        answers: Object.fromEntries(
+          contest.problemIds.map((id, i) => [
+            id,
+            value[contest.personalInformation.length + 1 + i],
+          ]),
+        ),
+        createdAt: new Date(),
+      };
+    })
     .pipe(studentSchema)
     .array();
 

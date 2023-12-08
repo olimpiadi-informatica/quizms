@@ -1,7 +1,7 @@
-import React, { ReactNode, Ref, forwardRef, useCallback, useMemo, useRef } from "react";
+import React, { ReactNode, Ref, forwardRef, useEffect, useRef } from "react";
 
 import { addMinutes } from "date-fns";
-import { isNil, sumBy } from "lodash-es";
+import { sumBy } from "lodash-es";
 import { User } from "lucide-react";
 import { ErrorBoundary } from "react-error-boundary";
 
@@ -22,8 +22,18 @@ export function Layout({ children }: { children: ReactNode }) {
   const surname = student.personalInformation?.surname as string;
 
   const progress = Math.round(
-    (sumBy(Object.values(student.answers ?? {}), (s) => Number(!!s)) / contest.questionCount) * 100,
+    (sumBy(Object.values(student.answers ?? {}), (s) => Number(!!s)) / contest.problemIds.length) *
+      100,
   );
+
+  useEffect(() => {
+    if (process.env.QUIZMS_MODE === "contest") {
+      console.log(
+        "%cAprire la console è severamente vietato dal regolamento. Questo incidente verrà segnalato agli amministratori del sito e al tuo insegnante. Qualsiasi tentativo di manomettere la piattaforma comporta la squalifica.",
+        "color: #ff0000",
+      );
+    }
+  }, []);
 
   return (
     <div className="flex h-screen flex-col">

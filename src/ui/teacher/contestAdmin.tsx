@@ -1,23 +1,7 @@
-import React, {
-  Ref,
-  Suspense,
-  forwardRef,
-  lazy,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { Suspense, useEffect, useRef, useState } from "react";
 
 import classNames from "classnames";
-import {
-  addMinutes,
-  addSeconds,
-  differenceInMilliseconds,
-  differenceInMinutes,
-  differenceInSeconds,
-} from "date-fns";
-import { differenceInSecondsWithOptions } from "date-fns/fp";
+import { addMinutes, differenceInMilliseconds, differenceInSeconds } from "date-fns";
 
 import { Contest } from "~/models/contest";
 import { School } from "~/models/school";

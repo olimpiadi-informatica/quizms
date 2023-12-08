@@ -4,7 +4,7 @@ import { CellEditRequestEvent, ColDef, ICellRendererParams } from "ag-grid-commu
 import classNames from "classnames";
 import { format, isEqual as isEqualDate } from "date-fns";
 import { it as dateLocaleIT } from "date-fns/locale";
-import { cloneDeep, compact, range, set, sumBy } from "lodash-es";
+import { cloneDeep, compact, set, sumBy } from "lodash-es";
 import { AlertTriangle, FileCheck, Upload, Users } from "lucide-react";
 
 import { Contest } from "~/models/contest";
@@ -101,7 +101,7 @@ const FinalizeModal = forwardRef(function FinalizeModal(
   props: { school: School },
   ref: Ref<HTMLDialogElement> | null,
 ) {
-  const { schools, setSchool } = useTeacher();
+  const { setSchool } = useTeacher();
 
   const finalize = async () => {
     await setSchool({ ...props.school, finalized: true });
@@ -202,18 +202,17 @@ function Table({
         ),
         contest.hasVariants && {
           field: "variant",
-          headerName: "Codice", // TODO: rename to "Variante"
+          headerName: "Variante",
           sortable: true,
           filter: true,
           resizable: true,
           editable: !school.finalized,
           width: 100,
         },
-        ...range(contest.questionCount).map(
-          // TODO: fix answers
-          (i): ColDef => ({
-            field: `answers.${i}`,
-            headerName: String(i + 1),
+        ...contest.problemIds.map(
+          (id, i): ColDef => ({
+            field: `answers.${id}`,
+            headerName: String(id),
             sortable: false,
             resizable: true,
             editable: !school.finalized,
@@ -300,7 +299,7 @@ function isComplete(student: Student, contest: Contest) {
       return student.personalInformation?.[field.name];
     }) &&
       student.variant &&
-      range(contest.questionCount).every((i) => student.answers?.[i]) &&
+      contest.problemIds.every((id) => student.answers?.[id]) &&
       !student.disabled,
   );
 }
@@ -311,6 +310,6 @@ function isEmpty(student: Student, contest: Contest) {
       return !student.personalInformation?.[field.name];
     }) &&
     !student.variant &&
-    range(contest.questionCount).every((i) => !student.answers?.[i])
+    contest.problemIds.every((id) => !student.answers?.[id])
   );
 }
