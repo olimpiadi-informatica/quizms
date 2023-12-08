@@ -34,7 +34,7 @@ function insideContestWindow(contest: Contest) {
 
 function canStartContest(school: School, contest: Contest) {
   if (school.startingTime) {
-    return contest.allowRestart && contestFinished(school, contest);
+    return contest.allowRestart && contestFinished(school, contest) && insideContestWindow(contest);
   }
   return insideContestWindow(contest);
 }
@@ -49,13 +49,12 @@ function StartContest(props: {
   setSchool: (school: School) => void;
 }) {
   const modalRef = useRef<HTMLDialogElement>(null);
-  const [token, setToken] = useState(randomToken());
+  const [token, setToken] = useState("");
   const [schools] = useCollection("schools", schoolConverter, {
     constraints: { token: token },
   });
   useEffect(() => {
-    console.log(schools);
-    if (schools.length) {
+    if (schools.length || token == "") {
       let x = randomToken();
       while (x == token) {
         x = randomToken();
@@ -227,7 +226,6 @@ function ContestAdmin(props: {
       };
     }
   }, [school.startingTime, time, contest.duration]);
-
   if (!contest.startingWindowEnd || !contest.startingWindowStart) {
     throw new Error("data inizio e fine del contest non specificate");
   }
@@ -251,7 +249,7 @@ function ContestAdmin(props: {
           {/* contest info */}
           <div className="flex flex-row justify-between p-0">
             <div className="flex flex-col justify-center">
-              <button className="btn btn-lg btn-warning text-xl">
+              <button className="btn btn-warning btn-lg text-xl">
                 Scarica testo per prova cartacea
               </button>
             </div>
@@ -271,7 +269,11 @@ function ContestAdmin(props: {
         </div>
       </div>
 
-      <div className={((canStartContest(school, contest) || canUndoContest(school)) ? "row-span-2" : "") + " col-span-5 card bg-base-100 shadow-xl shadow-indigo-500/10"}>
+      <div
+        className={
+          (canStartContest(school, contest) || canUndoContest(school) ? "row-span-2" : "") +
+          " card col-span-5 bg-base-100 shadow-xl shadow-indigo-500/10"
+        }>
         <div className="card-body">
           <h2 className="card-title">Gestione Gara</h2>
           {/* contest data */}
@@ -285,15 +287,15 @@ function ContestAdmin(props: {
 
       {/* show the button only if needed */}
       {(canStartContest(school, contest) || canUndoContest(school)) && (
-      <div className="col-span-2 bg-base-100 shadow-xl shadow-indigo-500/20">
-        {/* contest buttons */}
-        {canStartContest(school, contest) && (
-          <StartContest school={school} contest={contest} setSchool={setSchool} key={school.id} />
-        )}
-        {canUndoContest(school) && (
-          <StopContest school={school} contest={contest} setSchool={setSchool} />
-        )}
-      </div>
+        <div className="col-span-2 bg-base-100 shadow-xl shadow-indigo-500/20">
+          {/* contest buttons */}
+          {canStartContest(school, contest) && (
+            <StartContest school={school} contest={contest} setSchool={setSchool} key={school.id} />
+          )}
+          {canUndoContest(school) && (
+            <StopContest school={school} contest={contest} setSchool={setSchool} />
+          )}
+        </div>
       )}
       <div className="col-span-2 bg-base-100 shadow-xl shadow-indigo-500/20">
         <button

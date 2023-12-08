@@ -85,7 +85,7 @@ export default async function exportAnswersCli(options: ExportAnswersOptions) {
   const answersFilePath = join(options.outDir, options.outFile);
   await writeFile(answersFilePath, JSON.stringify(answers), "utf-8");
 
-  for (let variantId of variantIds) {
+  for (const variantId of variantIds) {
     const variant = variants[variantId];
     const variantFilePath = join(options.outDir, `${variantId}.js`);
     await writeFile(variantFilePath, variant, "utf-8");
