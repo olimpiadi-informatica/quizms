@@ -62,11 +62,18 @@ service cloud.firestore {
                     && school.data.startingTime == request.resource.data.startedAt;
             }
 
+            function checkVariant(data) {
+                let hash = data.contest + '-' + studentHash(data.personalInformation)[0: 3];
+                let mapping = get(/databases/$(database)/documents/variantMapping/$(hash));
+                return mapping != null
+                    && mapping.data.variant == data.variant;
+            }
+
             function canStudentCreate() {
                 return isAuthenticated(request.resource.data.uid)
                     && checkToken(getSchool(request.resource.data.school))
                     && request.resource.data.personalInformation != null
-                    && studentHash(request.resource.data.personalInformation)[0: 3] == request.resource.data.variant;
+                    && checkVariant(request.resource.data);
             }
 
             function canStudentUpdate() {
@@ -115,6 +122,10 @@ service cloud.firestore {
             }
 
             allow read: if canStudentReadVariant(variant) || isTeacher();
+        }
+
+        match /variantMapping/{hash} {
+            allow read: if request.auth != null;
         }
     }
 }
