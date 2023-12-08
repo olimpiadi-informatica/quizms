@@ -142,19 +142,19 @@ function ContestData(props: {
   if (contestRunning(school, contest)) {
     return (
       <div className="grid grid-flow-row grid-cols-2 justify-center gap-4">
-        <div className="mx-auto flex flex-col items-center justify-center gap-2 text-2xl">
-          Gara iniziata alle ore {school.startingTime?.toLocaleTimeString()}
-        </div>
-        <div className="mx-auto flex flex-col items-center justify-center gap-2 text-center">
-          La gara terminerà alle{" "}
-          {addMinutes(school.startingTime!, contest.duration!).toLocaleTimeString()}. Tempo
-          rimanente: <Timer endTime={addMinutes(school.startingTime!, contest.duration!)} />
-        </div>
-        <div className="card col-span-3 mx-auto flex flex-col items-center justify-center gap-2 text-center text-2xl">
+        <div className="card mx-auto flex flex-col items-center justify-center gap-2 text-center text-2xl">
           <div className="card-body">
             <h2 className="card-title">Codice</h2>
             {props.school.token}
           </div>
+        </div>
+        <div className="row-span-2 mx-auto flex flex-col items-center justify-center gap-2 text-center">
+          La gara terminerà alle{" "}
+          {addMinutes(school.startingTime!, contest.duration!).toLocaleTimeString()}. Tempo
+          rimanente: <Timer endTime={addMinutes(school.startingTime!, contest.duration!)} />
+        </div>
+        <div className="mx-auto flex flex-col items-center justify-center gap-2 text-2xl">
+          Gara iniziata alle ore {school.startingTime?.toLocaleTimeString()}
         </div>
       </div>
     );
@@ -171,7 +171,7 @@ function ContestData(props: {
       <div
         className={
           "col-span- flex flex-col" +
-          (canUndoContest(school) ? "1" : "3") +
+          (canUndoContest(school) ? "1" : "2") +
           " card mx-auto items-center justify-center gap-2 text-center text-2xl"
         }>
         <div className="card-body">
@@ -235,8 +235,8 @@ function ContestAdmin(props: {
     throw new Error("durata del contest non specificata");
   }
   return (
-    <div className="grid grid-flow-row grid-cols-3 gap-4">
-      <div className="card bg-base-100 shadow-xl">
+    <div className="grid grid-flow-row grid-cols-7 gap-4">
+      <div className="card col-span-2 bg-base-100 shadow-xl shadow-indigo-500/10">
         <div className="card-body">
           <h2 className="card-title">Informazioni Scuola</h2>
           {/* school info */}
@@ -245,13 +245,13 @@ function ContestAdmin(props: {
         </div>
       </div>
 
-      <div className="card col-span-2 bg-base-100 shadow-xl">
-        <div className="card-body">
+      <div className="card col-span-5 bg-base-100 shadow-xl shadow-indigo-500/10">
+        <div className="card-body pb-0">
           <h2 className="card-title">Informazioni Gara</h2>
           {/* contest info */}
-          <div className="flex flex-row justify-between">
-            <div className="flex flex-col p-4">
-              <button className="btn btn-warning h-full w-full text-xl">
+          <div className="flex flex-row justify-between p-0">
+            <div className="flex flex-col justify-center">
+              <button className="btn btn-lg btn-warning text-xl">
                 Scarica testo per prova cartacea
               </button>
             </div>
@@ -271,12 +271,7 @@ function ContestAdmin(props: {
         </div>
       </div>
 
-      <div
-        className={
-          "col-span-" +
-          (canStartContest(school, contest) || canUndoContest(school) ? "2" : "3") +
-          " card bg-base-100 shadow-xl"
-        }>
+      <div className={((canStartContest(school, contest) || canUndoContest(school)) ? "row-span-2" : "") + " col-span-5 card bg-base-100 shadow-xl shadow-indigo-500/10"}>
         <div className="card-body">
           <h2 className="card-title">Gestione Gara</h2>
           {/* contest data */}
@@ -285,26 +280,28 @@ function ContestAdmin(props: {
           ) : (
             <ContestData school={school} contest={contest} setSchool={setSchool} />
           )}
-          <button
-            className="btn btn-warning h-full w-full text-xl"
-            onClick={() => (window.location.href = "students.html")}>
-            Gestisci studenti e risposte
-          </button>
         </div>
       </div>
 
-      {/* show the col only if needed */}
+      {/* show the button only if needed */}
       {(canStartContest(school, contest) || canUndoContest(school)) && (
-        <div className="col-span-1 bg-base-100 shadow-xl">
-          {/* contest buttons */}
-          {canStartContest(school, contest) && (
-            <StartContest school={school} contest={contest} setSchool={setSchool} key={school.id} />
-          )}
-          {canUndoContest(school) && (
-            <StopContest school={school} contest={contest} setSchool={setSchool} />
-          )}
-        </div>
+      <div className="col-span-2 bg-base-100 shadow-xl shadow-indigo-500/20">
+        {/* contest buttons */}
+        {canStartContest(school, contest) && (
+          <StartContest school={school} contest={contest} setSchool={setSchool} key={school.id} />
+        )}
+        {canUndoContest(school) && (
+          <StopContest school={school} contest={contest} setSchool={setSchool} />
+        )}
+      </div>
       )}
+      <div className="col-span-2 bg-base-100 shadow-xl shadow-indigo-500/20">
+        <button
+          className="btn btn-info h-full w-full text-xl"
+          onClick={() => (window.location.href = "students.html")}>
+          Gestisci studenti e risposte
+        </button>
+      </div>
     </div>
   );
 }
@@ -333,7 +330,7 @@ export function ContestsAdminPage() {
       )}
       {selectedContest != -1 && (
         <Suspense>
-          <div className="container-fluid overflow-y-scroll">
+          <div className="container-fluid h-full overflow-y-scroll">
             <div className="container m-5 mx-auto text-lg">
               <ContestAdmin
                 school={schools[selectedContest]}
