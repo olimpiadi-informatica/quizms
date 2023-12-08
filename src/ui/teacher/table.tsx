@@ -149,6 +149,7 @@ function Table({
       contest: contest.id,
       school: school.id,
       createdAt: new Date(),
+      answers: {},
     } as Student,
   ];
 
@@ -265,7 +266,7 @@ function Table({
       const variant = variants.find(
         (v) => v.id === (ev.data as Student).variant && v.contest === contest.id,
       );
-      const schema = variant?.schema[Number(subfield)];
+      const schema = variant?.schema[subfield];
 
       const isValid = schema?.options?.includes(value) ?? true;
       if (!isValid) value = undefined;
