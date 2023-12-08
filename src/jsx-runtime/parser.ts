@@ -1,4 +1,4 @@
-import { Expression, Property } from "estree";
+import { Expression, Program, Property } from "estree";
 import { builders as b } from "estree-toolkit";
 import { toJs } from "estree-util-to-js";
 
@@ -126,7 +126,7 @@ export function parseValue(value: any, options: ParseOptions): Expression {
   throw new TypeError(`Unsupported value: ${String(value)}`);
 }
 
-export function parseContest(entry: () => ExpressionWrapper, variant: string): string {
+export function createContestAst(entry: () => ExpressionWrapper, variant: string): Program {
   const options = {
     functionArguments: [
       {
@@ -148,6 +148,13 @@ export function parseContest(entry: () => ExpressionWrapper, variant: string): s
 
   shuffleProblems(program, variant);
   shuffleAnswers(program, variant);
+  return program;
+}
 
-  return toJs(program).value;
+export function parseContest(entry: () => ExpressionWrapper, variant: string): string {
+  const contestAst = createContestAst(entry, variant);
+  /* TODO: read environment to decide whether to strip answers*/
+  getAnswers(contestAst, true);
+
+  return toJs(contestAst).value;
 }

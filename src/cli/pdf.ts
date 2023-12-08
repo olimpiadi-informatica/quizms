@@ -8,6 +8,7 @@ import { InlineConfig, build, mergeConfig } from "vite";
 
 import { parseContest } from "~/jsx-runtime/parser";
 
+import readVariantIds from "./read-variant-ids";
 import configs from "./vite/configs";
 
 async function pdfServer(dir: string, contest: string, port: number) {
@@ -66,8 +67,7 @@ async function pdfServer(dir: string, contest: string, port: number) {
 
   app.get("/variant.js", (req, res) => {
     res.setHeader("content-type", "text/javascript");
-    const secret = "casarin";
-    res.send(parseContest(contestJsx, `${secret}-${req.query.variant}`));
+    res.send(parseContest(contestJsx, `${req.query.variant}`));
   });
 
   app.use(express.static(serverDir));
@@ -115,15 +115,16 @@ export async function printVariants(variant_ids: string[], outDir: string, serve
 export type PdfOptions = {
   dir: string;
   outDir: string;
-  port: number;
-  count: number;
+  variants: string;
+  secret: string;
   contest: string;
   server?: boolean;
+  port: number;
 };
 
 export default async function pdf(options: PdfOptions) {
   const server = await pdfServer(options.dir, options.contest, options.port);
-  const variant_ids = [...Array(options.count).keys()].map((x) => x.toString());
+  const variant_ids = await readVariantIds(options.variants, options.secret);
 
   if (!options.server) {
     await printVariants(variant_ids, options.outDir, options.port);

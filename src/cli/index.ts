@@ -7,6 +7,7 @@ import firebaseCommand from "~/cli/firebase";
 
 import devServer from "./dev";
 import staticExport from "./export";
+import exportAnswersCli from "./export-answers";
 import pdf from "./pdf";
 
 function safeParseInt(value: string): number {
@@ -39,15 +40,38 @@ function main() {
     .description("create a PDF of the contest.")
     .argument("[directory]", "The directory of the contest.", cwd())
     .option("-d, --outDir <directory>", "The directory to output the PDF.", "pdf")
-    .option("-p, --port <port>", "The port to use for the server.", safeParseInt, 1234)
-    .option("-s, --server", "Do not print, only serve the pages")
+    .option(
+      "-v, --variants <variants>",
+      "The relative path of the json containing the variant ids",
+      "data/variants.json",
+    )
+    .option("-k, --secret <secret>", "Secret to prepend to the variant ids", "")
     .option(
       "-c, --contest <contest>",
       "The relative path of the contest to print.",
       "contest/contest.mdx",
     )
-    .option("-n, --count <count>", "The amount of variants to generate.", safeParseInt, 100)
+    .option("-s, --server", "Do not print, only serve the pages")
+    .option("-p, --port <port>", "The port to use for the server.", safeParseInt, 1234)
     .action((dir, options) => void pdf({ dir, ...options }));
+
+  program
+    .command("export-answers")
+    .description("export the answers of the contest.")
+    .argument("[directory]", "The directory of the contest.", cwd())
+    .option("-o, --outFile <outFile>", "The path to write the answers in", "answers.json")
+    .option(
+      "-v, --variants <variants>",
+      "The relative path of the json containing the variant ids",
+      "data/variants.json",
+    )
+    .option("-k, --secret <secret>", "Secret to prepend to the variant ids", "")
+    .option(
+      "-c, --contest <contest>",
+      "The relative path of the contest to export answers of.",
+      "contest/contest.mdx",
+    )
+    .action((dir, options) => void exportAnswersCli({ dir, ...options }));
 
   program.addCommand(firebaseCommand());
 
