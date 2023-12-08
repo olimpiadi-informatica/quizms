@@ -1,7 +1,7 @@
 import React, { Suspense, useEffect, useRef, useState } from "react";
 
 import classNames from "classnames";
-import { addMinutes, differenceInMilliseconds, differenceInSeconds } from "date-fns";
+import { add, addMinutes, differenceInMilliseconds, differenceInSeconds } from "date-fns";
 
 import { Contest } from "~/models/contest";
 import { School } from "~/models/school";
@@ -49,10 +49,10 @@ function StartContest(props: {
   const modalRef = useRef<HTMLDialogElement>(null);
   return (
     <>
-      <button className="btn-confirm btn" onClick={() => modalRef.current?.showModal()}>
-        inizia
+      <button className="btn btn-success h-full w-full text-xl" onClick={() => modalRef.current?.showModal()}>
+        Inizia contest!
       </button>
-      <Modal ref={modalRef} title="conferma">
+      <Modal ref={modalRef} title="Conferma">
         <div className="text-md flex flex-row justify-center gap-5">
           Sei sicuro di voler iniziare il contest?
           <button
@@ -64,9 +64,37 @@ function StartContest(props: {
                 token: randomToken(),
               });
             }}>
-            conferma
+            SÌ
           </button>
-          <button className="btn btn-error">annulla</button>
+          <button className="btn btn-error">NO</button>
+        </div>
+      </Modal>
+    </>
+  );
+}
+
+function StopContest(props: {
+  school: School;
+  contest: Contest;
+  setSchool: (school: School) => void;
+}) {
+  const modalRef = useRef<HTMLDialogElement>(null);
+  return (
+    <>
+      <button className="btn btn-error h-full w-full text-xl" onClick={() => modalRef.current?.showModal()}>
+        Annulla inizio gara
+      </button>
+      <Modal ref={modalRef} title="Conferma">
+        <div className="text-md flex flex-row justify-center gap-5">
+          Sei sicuro di voler annullare l'inizio della gara?
+          <button
+            className="btn-confirm btn"
+            onClick={() =>
+              props.setSchool({ ...props.school, token: undefined, startingTime: undefined })
+            }>
+            SÌ
+          </button>
+          <button className="btn btn-error">NO</button>
         </div>
       </Modal>
     </>
@@ -82,72 +110,55 @@ function ContestData(props: {
   const modalRef = useRef<HTMLDialogElement>(null);
   const undoTimeLimit = addMinutes(school.startingTime!, -1);
 
-  const [time, setTime] = useState(Date.now());
-  useEffect(() => {
-    const d: Date = undoTimeLimit < new Date() ? school.startingTime! : undoTimeLimit;
-    const interval = setTimeout(
-      () => {
-        setTime(Date.now());
-      },
-      differenceInMilliseconds(d, Date.now()) + 1000,
-    );
-    return () => {
-      clearInterval(interval);
-    };
-  }, [time]);
-
   if (contestFinished(school, contest)) {
     return (
       <>
-        <p> Gara iniziata alle ore {school.startingTime?.toLocaleTimeString()}</p>
+        <p>Gara iniziata alle ore {school.startingTime?.toLocaleTimeString()}</p>
         <p>La gara è terminata</p>
       </>
     );
   }
   if (contestRunning(school, contest)) {
     return (
-      <>
-        <p> Gara iniziata alle ore {school.startingTime?.toLocaleTimeString()}</p>
-        <p>
-          La gara terminerà alle{" "}
-          {addMinutes(school.startingTime!, contest.duration!).toLocaleTimeString()}. Tempo
-          rimanente:{" "}
-        </p>
-
-        <Timer endTime={addMinutes(school.startingTime!, contest.duration!)} />
-      </>
+      <div className="grid grid-flow-row grid-cols-2 justify-center gap-4">
+        <div className="flex flex-col gap-2 mx-auto items-center justify-center text-2xl">
+          Gara iniziata alle ore {school.startingTime?.toLocaleTimeString()}
+        </div>
+        <div className="flex flex-col gap-2 mx-auto items-center justify-center text-center">
+        La gara terminerà alle {addMinutes(school.startingTime!, contest.duration!).toLocaleTimeString()}. Tempo
+          rimanente: <Timer endTime={addMinutes(school.startingTime!, contest.duration!)} />
+        </div>
+        <div className="flex flex-col col-span-3 gap-2 card mx-auto items-center justify-center text-center text-2xl">
+          <div className="card-body">
+            <h2 className="card-title">Token scuola</h2>
+            {props.school.token}
+          </div>
+        </div>
+      </div>
     );
   }
 
   return (
-    <>
-      <p>La gara inizierà alle {school.startingTime?.toLocaleTimeString()}, tra </p>
-      <Timer endTime={school.startingTime} />
-      <p>Token scuola: {props.school.token}</p>
+    <div className="grid grid-flow-row grid-cols-2 justify-center gap-4">
+      <div className="flex flex-col gap-2 mx-auto items-center justify-center text-2xl">
+        La gara inizierà alle {school.startingTime?.toLocaleTimeString()}
+      </div>
+      <div className="flex flex-col gap-2 mx-auto items-center justify-center text-center">
+        Inizio gara in <Timer endTime={school.startingTime} />
+      </div>
+      <div className={"flex flex-col col-span-" + (canUndoContest(school) ? "1" : "3") + " card gap-2 mx-auto items-center justify-center text-center text-2xl"}>
+        <div className="card-body">
+          <h2 className="card-title">Token scuola</h2>
+          {props.school.token}
+        </div>
+      </div>
       {canUndoContest(school) && (
-        <>
-          <p> Se ti sei sbagliato, puoi cancellare la gara cliccando il bottone nei prossimi </p>
+        <div className="flex flex-col gap-2 mx-auto items-center justify-center text-center">
+          <p>Se ti sei sbagliato, puoi ancora annullare l'inizio della gara cliccando il bottone entro i prossimi</p>
           <Timer endTime={undoTimeLimit} />
-          <p> minuti</p>
-          <button className="btn btn-error" onClick={() => modalRef.current?.showModal()}>
-            Cancella gara
-          </button>
-          <Modal ref={modalRef} title="conferma">
-            <div className="text-md flex flex-row justify-center gap-5">
-              Sei sicuro di voler cancellare la gara?
-              <button
-                className="btn-confirm btn"
-                onClick={() =>
-                  props.setSchool({ ...props.school, token: undefined, startingTime: undefined })
-                }>
-                conferma
-              </button>
-              <button className="btn btn-error">annulla</button>
-            </div>
-          </Modal>
-        </>
+        </div>
       )}
-    </>
+    </div>
   );
 }
 
@@ -159,25 +170,29 @@ function ContestAdmin(props: {
   const { school, setSchool, contest } = props;
 
   const [time, setTime] = useState(Date.now());
+  // refresh the page when the page should change
   useEffect(() => {
     if (school.startingTime) {
-      const d: Date =
-        school.startingTime < new Date()
-          ? addMinutes(school.startingTime, contest.duration!)
-          : school.startingTime;
-      if (d > new Date()) {
-        const interval = setTimeout(
-          () => {
-            setTime(Date.now());
-          },
-          differenceInMilliseconds(d, Date.now()) + 1000,
-        );
-        return () => {
-          clearInterval(interval);
-        };
+      const refresh_dates: Date[] = [school.startingTime, addMinutes(school.startingTime, contest.duration!), addMinutes(school.startingTime, -1)];
+      let timeouts: NodeJS.Timeout[] = [];
+      for (const d of refresh_dates) {
+        if (d > new Date()) {
+          const interval = setTimeout(
+            () => {
+              setTime(Date.now());
+            },
+            differenceInMilliseconds(d, Date.now()) + 1000,
+          );
+          timeouts.push(interval);
+        }
       }
+      return () => {
+        for (const interval of timeouts) {
+          clearInterval(interval);
+        }
+      };
     }
-  }, [school.startingTime, time]);
+  }, [school.startingTime, time, contest.duration]);
 
   if (!contest.startingWindowEnd || !contest.startingWindowStart) {
     throw new Error("data inizio e fine del contest non specificate");
@@ -186,19 +201,65 @@ function ContestAdmin(props: {
     throw new Error("durata del contest non specificata");
   }
   return (
-    <div>
-      <p>Contest: {contest.name}</p>
-      <p>Scuola: {school.name}</p>
-      {/* <Token school={school} setSchool={setSchool} /> */}
-      <p>starting window start: {contest.startingWindowStart?.toLocaleTimeString("it-IT")}</p>
-      <p>starting window end: {contest.startingWindowEnd?.toLocaleTimeString("it-IT")}</p>
-      {!school.startingTime ? (
-        <p> Gara non ancora iniziata</p>
-      ) : (
-        <ContestData school={school} contest={contest} setSchool={setSchool} />
-      )}
-      {canStartContest(school, contest) && (
-        <StartContest school={school} contest={contest} setSchool={setSchool} />
+    <div className="grid grid-flow-row grid-cols-3 gap-4">
+      <div className="card bg-base-100 shadow-xl">
+        <div className="card-body">
+          <h2 className="card-title">Informazioni Scuola</h2>
+          {/* school info */}
+          <p>{school.name}</p>
+          {/* <Token school={school} setSchool={setSchool} /> */}
+        </div>
+      </div>
+
+      <div className="col-span-2 card bg-base-100 shadow-xl">
+        <div className="card-body">
+          <h2 className="card-title">Informazioni Gara</h2>
+          {/* contest info */}
+          <div className="flex flex-row justify-between">
+            <div className="flex flex-col p-4">
+              <button className="btn btn-warning w-full h-full text-xl">
+                Scarica il testo della gara
+              </button>
+            </div>
+            <div className="flex flex-col card">
+              <div className="card-body">
+                <h2 className="card-title">Inizio finestra di gara</h2>
+                {contest.startingWindowStart?.toLocaleTimeString("it-IT")}
+              </div>
+            </div>
+            <div className="flex flex-col card">
+              <div className="card-body">
+                <h2 className="card-title">Fine finestra di gara</h2>
+                {contest.startingWindowEnd?.toLocaleTimeString("it-IT")}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className={"col-span-" + (canStartContest(school, contest) || canUndoContest(school) ? "2" : "3") + " card bg-base-100 shadow-xl"}>
+        <div className="card-body">
+          <h2 className="card-title">Stato Gara</h2>
+          {/* contest data */}
+          {!school.startingTime ? (
+            <p>La gara non è ancora iniziata!</p>
+          ) : (
+            <ContestData school={school} contest={contest} setSchool={setSchool} />
+          )}
+        </div>
+      </div>
+
+      {/* show the col only if needed */}
+      {(canStartContest(school, contest) || canUndoContest(school)) && (
+        <div className="col-span-1 bg-base-100 shadow-xl">
+          {/* contest buttons */}
+          {canStartContest(school, contest) && (
+            <StartContest school={school} contest={contest} setSchool={setSchool} />
+          )}
+          {canUndoContest(school) && (
+            <StopContest school={school} contest={contest} setSchool={setSchool} />
+          )}
+        </div>
       )}
     </div>
   );
@@ -210,8 +271,8 @@ export function ContestsAdminPage() {
   return (
     <>
       {schools.length >= 2 && (
-        <div className="flex justify-center">
-          <div role="tablist" className="tabs-boxed tabs flex flex-wrap justify-center">
+        <div className="flex w-full justify-center">
+          <div role="tablist" className="tabs-boxed tabs-lg tabs flex flex-wrap justify-center w-full">
             {schools.map((school, i) => (
               <a
                 role="tab"
@@ -226,14 +287,16 @@ export function ContestsAdminPage() {
       )}
       {selectedContest != -1 && (
         <Suspense>
-          <div className="border-2">
-            <ContestAdmin
-              school={schools[selectedContest]}
-              setSchool={setSchool}
-              contest={
-                contests.find((contest) => contest.id === schools[selectedContest].contestId)!
-              }
-            />
+          <div className="container-fluid overflow-y-scroll">
+            <div className="container mx-auto m-5 text-lg">
+              <ContestAdmin
+                school={schools[selectedContest]}
+                setSchool={setSchool}
+                contest={
+                  contests.find((contest) => contest.id === schools[selectedContest].contestId)!
+                }
+              />
+            </div>
           </div>
         </Suspense>
       )}
