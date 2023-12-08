@@ -148,7 +148,6 @@ export function parseContest(entry: () => ExpressionWrapper, variant: string): s
 
   shuffleProblems(program, variant);
   shuffleAnswers(program, variant);
-  console.log(getAnswers(program, true));
 
   return toJs(program).value;
 }
