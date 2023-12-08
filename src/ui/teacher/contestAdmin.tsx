@@ -3,6 +3,8 @@ import React, { Suspense, useEffect, useRef, useState } from "react";
 import classNames from "classnames";
 import { add, addMinutes, differenceInMilliseconds, differenceInSeconds } from "date-fns";
 
+import { schoolConverter } from "~/firebase/converters";
+import { useCollection } from "~/firebase/hooks";
 import { Contest } from "~/models/contest";
 import { School } from "~/models/school";
 import { randomToken } from "~/utils/random";
@@ -47,6 +49,21 @@ function StartContest(props: {
   setSchool: (school: School) => void;
 }) {
   const modalRef = useRef<HTMLDialogElement>(null);
+  const [token, setToken] = useState(randomToken());
+  const [schools] = useCollection("schools", schoolConverter, {
+    constraints: { token: token },
+  });
+  useEffect(() => {
+    console.log(schools);
+    if (schools.length) {
+      let x = randomToken();
+      while (x == token) {
+        x = randomToken();
+      }
+      setToken(x);
+    }
+  }, [token, schools]);
+
   return (
     <>
       <button
@@ -63,7 +80,7 @@ function StartContest(props: {
               props.setSchool({
                 ...props.school,
                 startingTime: addMinutes(new Date(), 3),
-                token: randomToken(),
+                token: token,
               });
             }}>
             SÌ
@@ -191,7 +208,7 @@ function ContestAdmin(props: {
         addMinutes(school.startingTime, contest.duration!),
         addMinutes(school.startingTime, -1),
       ];
-      let timeouts: NodeJS.Timeout[] = [];
+      const timeouts: NodeJS.Timeout[] = [];
       for (const d of refresh_dates) {
         if (d > new Date()) {
           const interval = setTimeout(
@@ -281,7 +298,7 @@ function ContestAdmin(props: {
         <div className="col-span-1 bg-base-100 shadow-xl">
           {/* contest buttons */}
           {canStartContest(school, contest) && (
-            <StartContest school={school} contest={contest} setSchool={setSchool} />
+            <StartContest school={school} contest={contest} setSchool={setSchool} key={school.id} />
           )}
           {canUndoContest(school) && (
             <StopContest school={school} contest={contest} setSchool={setSchool} />

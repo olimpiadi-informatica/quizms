@@ -99,11 +99,11 @@ function StudentLogin({ children }: { children: ReactNode }) {
 
         <div className="form-control w-full">
           <label className="label">
-            <span className="label-text text-lg">Codice scuola</span>
+            <span className="label-text text-lg">Codice</span>
           </label>
           <input
             type="text"
-            placeholder="Inserisci codice scuola"
+            placeholder="Inserisci Codice"
             className="input input-bordered w-full max-w-md"
             onChange={(e) => setStudent({ ...student, token: e.target.value })}
             value={student.token}

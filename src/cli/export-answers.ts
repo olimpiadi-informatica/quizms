@@ -44,7 +44,7 @@ export async function exportAnswers(dir: string, contest: string, variant_ids: s
   const { default: contestJsx } = await import(/* vite-ignore */ contestURL.toString());
 
   const answers: { [key: string]: { [key: string]: string } } = {};
-  for (let variant_id of variant_ids) {
+  for (const variant_id of variant_ids) {
     const variantAst = createContestAst(contestJsx, variant_id);
     const variantAnswers = getAnswers(variantAst, false);
     answers[variant_id] = variantAnswers;

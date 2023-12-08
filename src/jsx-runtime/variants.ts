@@ -43,7 +43,7 @@ export function shuffleProblems(program: Program, variant: string) {
   });
 }
 
-export function getAnswers(program: Program, remove: Boolean) {
+export function getAnswers(program: Program, remove: boolean) {
   let probId = 0,
     subId = 0,
     ansId = 0;
@@ -89,8 +89,8 @@ export function getAnswers(program: Program, remove: Boolean) {
   });
 
   const flatAnswers: { [key: string]: string } = ({} = {});
-  for (let probId in answers) {
-    for (let subId in answers[probId]) {
+  for (const probId in answers) {
+    for (const subId in answers[probId]) {
       if (size(answers[probId]) == 1) {
         flatAnswers[`${probId}`] = answers[probId][subId];
       } else {
