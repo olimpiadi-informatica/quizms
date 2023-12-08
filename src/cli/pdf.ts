@@ -103,7 +103,7 @@ export async function printVariants(variant_ids: string[], outDir: string, serve
   const chunkSize = 10;
   for (let i = 0; i < variant_ids.length; i += chunkSize) {
     const tasks = [];
-    for (let variant_id of variant_ids.slice(i, i + chunkSize)) {
+    for (const variant_id of variant_ids.slice(i, i + chunkSize)) {
       tasks.push(printVariant(context, variant_id.toString(), outDir, serverPort));
     }
     await Promise.all(tasks);

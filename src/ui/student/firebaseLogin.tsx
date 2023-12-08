@@ -83,7 +83,7 @@ function StudentLogin({ children }: { children: ReactNode }) {
                   placeholder={"Inserisci " + pi.label}
                   className="input input-bordered w-full max-w-md"
                   onChange={(e) => {
-                    let info: any = student.personalInformation ?? {};
+                    const info: any = student.personalInformation ?? {};
                     info[pi.name] = e.target.value;
                     setStudent({ ...student, personalInformation: info });
                   }}

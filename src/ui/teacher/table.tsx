@@ -25,24 +25,24 @@ const AgGridReact = lazy(() => import("ag-grid-react").then((m) => ({ default: m
 
 export function TeacherTable() {
   const { contests, variants, schools } = useTeacher();
-  const [selectedContest, setSelectedContest] = useState(0);
+  const [selectedSchool, setSelectedSchool] = useState(0);
   const importRef = useRef<HTMLDialogElement>(null);
   const finalizeRef = useRef<HTMLDialogElement>(null);
 
-  const school = schools.find((sch) => sch.contestId === contests[selectedContest].id)!;
+  const contest = contests.find((c) => c.id === schools[selectedSchool].contestId)!;
   return (
     <>
       <div className="m-5 flex items-center justify-between gap-5">
         {contests.length >= 2 && (
           <div className="flex justify-center">
             <div role="tablist" className="tabs-boxed tabs flex flex-wrap justify-center">
-              {contests.map((contest, i) => (
+              {schools.map((school, i) => (
                 <a
                   role="tab"
-                  key={contest.id}
-                  className={classNames("tab", i == selectedContest && "tab-active")}
-                  onClick={() => setSelectedContest(i)}>
-                  {contest.name}
+                  key={school.id}
+                  className={classNames("tab", i == selectedSchool && "tab-active")}
+                  onClick={() => setSelectedSchool(i)}>
+                  {contests.find((c) => c.id == school.contestId)!.name}
                 </a>
               ))}
             </div>
@@ -53,7 +53,7 @@ export function TeacherTable() {
             <Suspense>
               <div className="flex h-10 items-center gap-2 rounded-btn bg-primary px-3 text-primary-content">
                 <Users />
-                <Counter contest={contests[selectedContest]} />
+                <Counter school={schools[selectedSchool]} contest={contest} />
                 <div className="hidden lg:block"> studenti</div>
               </div>
             </Suspense>
@@ -64,7 +64,7 @@ export function TeacherTable() {
             <Upload />
             <div className="hidden lg:block">Importa studenti</div>
           </button>
-          {!school.finalized && (
+          {!schools[selectedSchool].finalized && (
             <button
               className="btn btn-primary btn-sm h-10"
               onClick={() => finalizeRef.current?.showModal()}>
@@ -72,29 +72,27 @@ export function TeacherTable() {
               <div className="hidden lg:block">Finalizza</div>
             </button>
           )}
-          <FinalizeModal ref={finalizeRef} school={school} />
+          <FinalizeModal ref={finalizeRef} school={schools[selectedSchool]} />
         </div>
       </div>
       <div className="min-h-0 flex-auto overflow-scroll">
         <Suspense fallback={<Loading />}>
           <Table
-            key={selectedContest}
-            contest={contests[selectedContest]}
+            key={selectedSchool}
+            contest={contest}
             variants={variants}
-            school={school}
+            school={schools[selectedSchool]}
           />
-          <ImportModal ref={importRef} contest={contests[selectedContest]} school={school} />
+          <ImportModal ref={importRef} school={schools[selectedSchool]} contest={contest} />
         </Suspense>
       </div>
     </>
   );
 }
 
-function Counter({ contest }: { contest: Contest }) {
+function Counter({ school, contest }: { school: School; contest: Contest }) {
   const { students, schools } = useTeacher();
   return sumBy(students, (s) => {
-    const school = schools.find((sch) => sch.id === s.school);
-    if (!school) return 0;
     return Number(school.contestId === contest.id && isComplete(s, contest));
   });
 }
@@ -135,7 +133,7 @@ function Table({
   contest: Contest;
   variants: Variant[];
 }) {
-  const { schools, solutions, students, setStudent } = useTeacher();
+  const { schools, contests, solutions, students, setStudent } = useTeacher();
 
   const newStudentId = useRef(window.crypto.randomUUID());
 
