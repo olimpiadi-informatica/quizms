@@ -1,4 +1,4 @@
-import React, { ComponentType, ReactNode } from "react";
+import React, { ReactNode } from "react";
 
 import { Contest } from "~/models/contest";
 import { School } from "~/models/school";
@@ -11,12 +11,9 @@ type AuthProps = {
   contestName: string;
   duration: number;
   children: ReactNode;
-
-  // Da rimuovere
-  header: ComponentType<any>;
 };
 
-export function PrintAuth({ header: Header, contestName, children }: AuthProps) {
+export function PrintAuth({ contestName, children }: AuthProps) {
   const urlParams = new URLSearchParams(window.location.search);
   const variant = urlParams.get("variant") ?? "";
   const submitted = false;

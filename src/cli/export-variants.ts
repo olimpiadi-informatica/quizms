@@ -12,19 +12,15 @@ import { getAnswers } from "~/jsx-runtime/variants";
 import readVariantIds from "./read-variant-ids";
 import configs from "./vite/configs";
 
-type answersDict = {
-  [key: string]: { [key: string]: string };
-};
+type AnswersDict = Record<string, Record<string, string>>;
 
-type variantsDict = {
-  [key: string]: string;
-};
+type VariantsDict = Record<string, string>;
 
 export async function exportAnswers(
   dir: string,
   contest: string,
   variant_ids: string[],
-): Promise<[answersDict, variantsDict]> {
+): Promise<[AnswersDict, VariantsDict]> {
   process.env.QUIZMS_MODE = "pdf";
 
   const defaultConfig = configs("production", {
@@ -56,12 +52,11 @@ export async function exportAnswers(
   const contestURL = pathToFileURL(contestPath);
   const { default: contestJsx } = await import(/* vite-ignore */ contestURL.toString());
 
-  const answers: answersDict = {};
-  const variants: variantsDict = {};
+  const answers: AnswersDict = {};
+  const variants: VariantsDict = {};
   for (const variant_id of variant_ids) {
     const variantAst = createContestAst(contestJsx, variant_id);
-    const variantAnswers = getAnswers(variantAst, true);
-    answers[variant_id] = variantAnswers;
+    answers[variant_id] = getAnswers(variantAst, true);
     variants[variant_id] = toJs(variantAst).value;
   }
   return [answers, variants];
@@ -80,7 +75,7 @@ export default async function exportAnswersCli(options: ExportAnswersOptions) {
   const variantIds = await readVariantIds(options.variants, options.secret);
   const [answers, variants] = await exportAnswers(options.dir, options.contest, variantIds);
 
-  mkdir(options.outDir, { recursive: true });
+  await mkdir(options.outDir, { recursive: true });
 
   const answersFilePath = join(options.outDir, options.outFile);
   await writeFile(answersFilePath, JSON.stringify(answers), "utf-8");

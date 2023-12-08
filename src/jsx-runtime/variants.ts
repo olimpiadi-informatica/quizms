@@ -47,11 +47,11 @@ export function getAnswers(program: Program, remove: boolean) {
   let probId = 0,
     subId = 0,
     ansId = 0;
-  const answers: { [key: string]: { [key: string]: string } } = {};
+  const answers: Record<string, Record<string, string>> = {};
   traverse(program, {
     CallExpression(path) {
       const node = path.node!;
-      const [comp, props, ...children] = node.arguments;
+      const [comp, props] = node.arguments;
       if (isQuizmsComponent("Problem", comp)) {
         probId++;
         answers[probId.toString()] = {};
@@ -88,7 +88,7 @@ export function getAnswers(program: Program, remove: boolean) {
     },
   });
 
-  const flatAnswers: { [key: string]: string } = ({} = {});
+  const flatAnswers: Record<string, string> = {};
   for (const probId in answers) {
     for (const subId in answers[probId]) {
       if (size(answers[probId]) == 1) {

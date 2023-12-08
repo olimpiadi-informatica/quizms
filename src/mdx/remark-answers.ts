@@ -2,7 +2,6 @@ import process from "node:process";
 
 import { Parser } from "acorn";
 import { Directive } from "estree";
-import { compact } from "lodash-es";
 import { Blockquote, List, Paragraph, Parent, Root } from "mdast";
 import { MdxJsxFlowElement } from "mdast-util-mdx-jsx";
 import { Plugin } from "unified";

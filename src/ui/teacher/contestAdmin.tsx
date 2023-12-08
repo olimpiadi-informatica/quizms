@@ -1,7 +1,7 @@
 import React, { Suspense, useEffect, useRef, useState } from "react";
 
 import classNames from "classnames";
-import { add, addMinutes, differenceInMilliseconds, differenceInSeconds } from "date-fns";
+import { addMinutes, differenceInMilliseconds, differenceInSeconds } from "date-fns";
 
 import { schoolConverter } from "~/firebase/converters";
 import { useCollection } from "~/firebase/hooks";
@@ -106,7 +106,7 @@ function StopContest(props: {
       </button>
       <Modal ref={modalRef} title="Conferma">
         <div className="text-md flex flex-row justify-center gap-5">
-          Sei sicuro di voler annullare l'inizio della gara?
+          Sei sicuro di voler annullare l&apos;inizio della gara?
           <button
             className="btn-confirm btn"
             onClick={() =>
@@ -127,7 +127,6 @@ function ContestData(props: {
   setSchool: (school: School) => void;
 }) {
   const { school, contest } = props;
-  const modalRef = useRef<HTMLDialogElement>(null);
   const undoTimeLimit = addMinutes(school.startingTime!, -1);
 
   if (contestFinished(school, contest)) {
@@ -181,7 +180,7 @@ function ContestData(props: {
       {canUndoContest(school) && (
         <div className="mx-auto flex flex-col items-center justify-center gap-2 text-center">
           <p>
-            Se ti sei sbagliato, puoi ancora annullare l'inizio della gara cliccando il bottone
+            Se ti sei sbagliato, puoi ancora annullare l&apos;inizio della gara cliccando il bottone
             entro i prossimi
           </p>
           <Timer endTime={undoTimeLimit} />
