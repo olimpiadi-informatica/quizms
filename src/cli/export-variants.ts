@@ -56,7 +56,8 @@ export async function exportAnswers(
   const contestURL = pathToFileURL(contestPath);
   const { default: contestJsx } = await import(/* vite-ignore */ contestURL.toString());
 
-  const answers: { [key: string]: { [key: string]: string } } = {};
+  const answers: answersDict = {};
+  const variants: variantsDict = {};
   for (const variant_id of variant_ids) {
     const variantAst = createContestAst(contestJsx, variant_id);
     const variantAnswers = getAnswers(variantAst, true);
