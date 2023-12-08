@@ -49,8 +49,10 @@ function StartContest(props: {
   const modalRef = useRef<HTMLDialogElement>(null);
   return (
     <>
-      <button className="btn btn-success h-full w-full text-xl" onClick={() => modalRef.current?.showModal()}>
-        Inizia contest!
+      <button
+        className="btn btn-success h-full w-full text-xl"
+        onClick={() => modalRef.current?.showModal()}>
+        Inizia prova online
       </button>
       <Modal ref={modalRef} title="Conferma">
         <div className="text-md flex flex-row justify-center gap-5">
@@ -81,7 +83,9 @@ function StopContest(props: {
   const modalRef = useRef<HTMLDialogElement>(null);
   return (
     <>
-      <button className="btn btn-error h-full w-full text-xl" onClick={() => modalRef.current?.showModal()}>
+      <button
+        className="btn btn-error h-full w-full text-xl"
+        onClick={() => modalRef.current?.showModal()}>
         Annulla inizio gara
       </button>
       <Modal ref={modalRef} title="Conferma">
@@ -121,16 +125,17 @@ function ContestData(props: {
   if (contestRunning(school, contest)) {
     return (
       <div className="grid grid-flow-row grid-cols-2 justify-center gap-4">
-        <div className="flex flex-col gap-2 mx-auto items-center justify-center text-2xl">
+        <div className="mx-auto flex flex-col items-center justify-center gap-2 text-2xl">
           Gara iniziata alle ore {school.startingTime?.toLocaleTimeString()}
         </div>
-        <div className="flex flex-col gap-2 mx-auto items-center justify-center text-center">
-        La gara terminerà alle {addMinutes(school.startingTime!, contest.duration!).toLocaleTimeString()}. Tempo
+        <div className="mx-auto flex flex-col items-center justify-center gap-2 text-center">
+          La gara terminerà alle{" "}
+          {addMinutes(school.startingTime!, contest.duration!).toLocaleTimeString()}. Tempo
           rimanente: <Timer endTime={addMinutes(school.startingTime!, contest.duration!)} />
         </div>
-        <div className="flex flex-col col-span-3 gap-2 card mx-auto items-center justify-center text-center text-2xl">
+        <div className="card col-span-3 mx-auto flex flex-col items-center justify-center gap-2 text-center text-2xl">
           <div className="card-body">
-            <h2 className="card-title">Token scuola</h2>
+            <h2 className="card-title">Codice</h2>
             {props.school.token}
           </div>
         </div>
@@ -140,21 +145,29 @@ function ContestData(props: {
 
   return (
     <div className="grid grid-flow-row grid-cols-2 justify-center gap-4">
-      <div className="flex flex-col gap-2 mx-auto items-center justify-center text-2xl">
+      <div className="mx-auto flex flex-col items-center justify-center gap-2 text-2xl">
         La gara inizierà alle {school.startingTime?.toLocaleTimeString()}
       </div>
-      <div className="flex flex-col gap-2 mx-auto items-center justify-center text-center">
+      <div className="mx-auto flex flex-col items-center justify-center gap-2 text-center">
         Inizio gara in <Timer endTime={school.startingTime} />
       </div>
-      <div className={"flex flex-col col-span-" + (canUndoContest(school) ? "1" : "3") + " card gap-2 mx-auto items-center justify-center text-center text-2xl"}>
+      <div
+        className={
+          "col-span- flex flex-col" +
+          (canUndoContest(school) ? "1" : "3") +
+          " card mx-auto items-center justify-center gap-2 text-center text-2xl"
+        }>
         <div className="card-body">
-          <h2 className="card-title">Token scuola</h2>
+          <h2 className="card-title">Codice</h2>
           {props.school.token}
         </div>
       </div>
       {canUndoContest(school) && (
-        <div className="flex flex-col gap-2 mx-auto items-center justify-center text-center">
-          <p>Se ti sei sbagliato, puoi ancora annullare l'inizio della gara cliccando il bottone entro i prossimi</p>
+        <div className="mx-auto flex flex-col items-center justify-center gap-2 text-center">
+          <p>
+            Se ti sei sbagliato, puoi ancora annullare l'inizio della gara cliccando il bottone
+            entro i prossimi
+          </p>
           <Timer endTime={undoTimeLimit} />
         </div>
       )}
@@ -173,7 +186,11 @@ function ContestAdmin(props: {
   // refresh the page when the page should change
   useEffect(() => {
     if (school.startingTime) {
-      const refresh_dates: Date[] = [school.startingTime, addMinutes(school.startingTime, contest.duration!), addMinutes(school.startingTime, -1)];
+      const refresh_dates: Date[] = [
+        school.startingTime,
+        addMinutes(school.startingTime, contest.duration!),
+        addMinutes(school.startingTime, -1),
+      ];
       let timeouts: NodeJS.Timeout[] = [];
       for (const d of refresh_dates) {
         if (d > new Date()) {
@@ -211,23 +228,23 @@ function ContestAdmin(props: {
         </div>
       </div>
 
-      <div className="col-span-2 card bg-base-100 shadow-xl">
+      <div className="card col-span-2 bg-base-100 shadow-xl">
         <div className="card-body">
           <h2 className="card-title">Informazioni Gara</h2>
           {/* contest info */}
           <div className="flex flex-row justify-between">
             <div className="flex flex-col p-4">
-              <button className="btn btn-warning w-full h-full text-xl">
-                Scarica il testo della gara
+              <button className="btn btn-warning h-full w-full text-xl">
+                Scarica testo per prova cartacea
               </button>
             </div>
-            <div className="flex flex-col card">
+            <div className="card flex flex-col">
               <div className="card-body">
                 <h2 className="card-title">Inizio finestra di gara</h2>
                 {contest.startingWindowStart?.toLocaleTimeString("it-IT")}
               </div>
             </div>
-            <div className="flex flex-col card">
+            <div className="card flex flex-col">
               <div className="card-body">
                 <h2 className="card-title">Fine finestra di gara</h2>
                 {contest.startingWindowEnd?.toLocaleTimeString("it-IT")}
@@ -237,15 +254,25 @@ function ContestAdmin(props: {
         </div>
       </div>
 
-      <div className={"col-span-" + (canStartContest(school, contest) || canUndoContest(school) ? "2" : "3") + " card bg-base-100 shadow-xl"}>
+      <div
+        className={
+          "col-span-" +
+          (canStartContest(school, contest) || canUndoContest(school) ? "2" : "3") +
+          " card bg-base-100 shadow-xl"
+        }>
         <div className="card-body">
-          <h2 className="card-title">Stato Gara</h2>
+          <h2 className="card-title">Gestione Gara</h2>
           {/* contest data */}
           {!school.startingTime ? (
             <p>La gara non è ancora iniziata!</p>
           ) : (
             <ContestData school={school} contest={contest} setSchool={setSchool} />
           )}
+          <button
+            className="btn btn-warning h-full w-full text-xl"
+            onClick={() => (window.location.href = "students.html")}>
+            Gestisci studenti e risposte
+          </button>
         </div>
       </div>
 
@@ -272,7 +299,9 @@ export function ContestsAdminPage() {
     <>
       {schools.length >= 2 && (
         <div className="flex w-full justify-center">
-          <div role="tablist" className="tabs-boxed tabs-lg tabs flex flex-wrap justify-center w-full">
+          <div
+            role="tablist"
+            className="tabs-boxed tabs tabs-lg flex w-full flex-wrap justify-center">
             {schools.map((school, i) => (
               <a
                 role="tab"
@@ -288,7 +317,7 @@ export function ContestsAdminPage() {
       {selectedContest != -1 && (
         <Suspense>
           <div className="container-fluid overflow-y-scroll">
-            <div className="container mx-auto m-5 text-lg">
+            <div className="container m-5 mx-auto text-lg">
               <ContestAdmin
                 school={schools[selectedContest]}
                 setSchool={setSchool}

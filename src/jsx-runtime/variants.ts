@@ -1,7 +1,7 @@
 import { Program } from "estree";
 import { is, traverse } from "estree-toolkit";
 import { Node } from "estree-toolkit/dist/estree";
-import { size } from "lodash-es"
+import { size } from "lodash-es";
 
 import { Rng } from "~/utils/random";
 
@@ -44,8 +44,10 @@ export function shuffleProblems(program: Program, variant: string) {
 }
 
 export function getAnswers(program: Program, remove: Boolean) {
-  let probId = 0, subId = 0, ansId = 0;
-  const answers: {[key: string]: {[key: string]: string} } = {}
+  let probId = 0,
+    subId = 0,
+    ansId = 0;
+  const answers: { [key: string]: { [key: string]: string } } = {};
   traverse(program, {
     CallExpression(path) {
       const node = path.node!;
@@ -63,7 +65,7 @@ export function getAnswers(program: Program, remove: Boolean) {
         ansId++;
         for (const prop of props.properties) {
           if (getPropertyKey(prop) == "correct" && getPropertyVal(prop) === true) {
-            answers[probId.toString()][subId.toString()] = String.fromCharCode(64 + ansId); 
+            answers[probId.toString()][subId.toString()] = String.fromCharCode(64 + ansId);
           }
         }
         if (remove) {
@@ -86,14 +88,12 @@ export function getAnswers(program: Program, remove: Boolean) {
     },
   });
 
-  const flatAnswers: {[key: string]: string} = {} = {}
-  for (let probId in answers)
-  {
+  const flatAnswers: { [key: string]: string } = ({} = {});
+  for (let probId in answers) {
     for (let subId in answers[probId]) {
       if (size(answers[probId]) == 1) {
         flatAnswers[`${probId}`] = answers[probId][subId];
-      }
-      else {
+      } else {
         flatAnswers[`${probId}.${subId}`] = answers[probId][subId];
       }
     }
@@ -102,31 +102,23 @@ export function getAnswers(program: Program, remove: Boolean) {
 }
 
 function getPropertyKey(property: Node) {
-  if(is.property(property) &&
-    is.literal(property.key) &&
-    is.literal(property.value)) {
+  if (is.property(property) && is.literal(property.key) && is.literal(property.value)) {
     return property.key.value;
-  }
-  else {
+  } else {
     return undefined;
   }
 }
 
 function getPropertyVal(property: Node) {
-  if(is.property(property) &&
-    is.literal(property.key) &&
-    is.literal(property.value)) {
+  if (is.property(property) && is.literal(property.key) && is.literal(property.value)) {
     return property.value.value;
-  }
-  else {
+  } else {
     return undefined;
   }
 }
 
 function setPropertyVal(property: Node, value: string | number) {
-  if(is.property(property) &&
-    is.literal(property.key) &&
-    is.literal(property.value)) {
+  if (is.property(property) && is.literal(property.key) && is.literal(property.value)) {
     property.value.value = value;
   }
 }

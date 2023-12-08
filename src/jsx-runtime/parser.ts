@@ -4,7 +4,7 @@ import { toJs } from "estree-util-to-js";
 
 import { hash } from "~/utils/random";
 
-import { shuffleAnswers, shuffleProblems , getAnswers } from "./variants";
+import { getAnswers, shuffleAnswers, shuffleProblems } from "./variants";
 
 type ParseOptions = {
   functionArguments: any[];
