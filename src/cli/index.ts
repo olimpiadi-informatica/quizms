@@ -7,7 +7,7 @@ import firebaseCommand from "~/cli/firebase";
 
 import devServer from "./dev";
 import staticExport from "./export";
-import exportAnswersCli from "./export-answers";
+import exportVariantsCli from "./export-variants";
 import pdf from "./pdf";
 
 function safeParseInt(value: string): number {
@@ -56,10 +56,19 @@ function main() {
     .action((dir, options) => void pdf({ dir, ...options }));
 
   program
-    .command("export-answers")
-    .description("export the answers of the contest.")
+    .command("export-variants")
+    .description("generate the variants and export them with the answers.")
     .argument("[directory]", "The directory of the contest.", cwd())
-    .option("-o, --outFile <outFile>", "The path to write the answers in", "answers.json")
+    .option(
+      "-d, --outDir <directory>",
+      "The directory to output the variants and the answers.",
+      "variants",
+    )
+    .option(
+      "-o, --outFile <outFile>",
+      "The name of the file to write the answers in",
+      "answers.json",
+    )
     .option(
       "-v, --variants <variants>",
       "The relative path of the json containing the variant ids",
@@ -71,7 +80,7 @@ function main() {
       "The relative path of the contest to export answers of.",
       "contest/contest.mdx",
     )
-    .action((dir, options) => void exportAnswersCli({ dir, ...options }));
+    .action((dir, options) => void exportVariantsCli({ dir, ...options }));
 
   program.addCommand(firebaseCommand());
 
