@@ -6,7 +6,15 @@ import { format } from "date-fns";
 import { it as dateLocaleIT } from "date-fns/locale";
 import { FirebaseOptions } from "firebase/app";
 import { getAuth, signOut } from "firebase/auth";
-import { Firestore, doc, getDoc, runTransaction, setDoc } from "firebase/firestore";
+import {
+  Firestore,
+  doc,
+  getDoc,
+  getDocs,
+  runTransaction,
+  setDoc,
+  updateDoc,
+} from "firebase/firestore";
 
 import {
   contestConverter,
@@ -14,6 +22,7 @@ import {
   schoolMappingConverter,
   studentConverter,
   studentMappingConverter,
+  studentRestoreConverter,
   variantMappingConverter,
 } from "~/firebase/converters";
 import { useAnonymousAuth, useCollection, useDocument } from "~/firebase/hooks";
@@ -23,7 +32,10 @@ import { Student } from "~/models/student";
 import { Layout } from "./layout";
 import { StudentProvider } from "./provider";
 
-class DuplicateStudentError extends Error {}
+class DuplicateStudentError extends Error {
+  studentId: string = "";
+  schoolId: string = "";
+}
 
 export function FirebaseStudentLogin({
   config,
@@ -88,7 +100,7 @@ function StudentLogin({ header, children }: { header: ComponentType<any>; childr
       setStudent(newStudent);
     } catch (e) {
       if (e instanceof DuplicateStudentError) {
-        console.error("Student already exists");
+        await createStudentRestore(db, e.studentId, e.schoolId, student);
       } else {
         setError(e as Error);
       }
@@ -226,6 +238,26 @@ function StudentInner({
   );
 }
 
+async function createStudentRestore(
+  db: Firestore,
+  studentId: string,
+  schoolId: string,
+  curStudent: Omit<Student, "id">,
+) {
+  const auth = getAuth(db.app);
+  const uid = auth.currentUser!.uid;
+  console.log("createStudentRestore", uid, studentId, schoolId, curStudent);
+
+  await setDoc(doc(db, "studentRestore", uid).withConverter(studentRestoreConverter), {
+    id: uid,
+    studentId: studentId,
+    schoolId: schoolId,
+    name: curStudent.personalInformation!.name,
+    surname: curStudent.personalInformation!.surname,
+  });
+  console.log("createStudentRestore1");
+}
+
 async function createStudent(db: Firestore, student: Student) {
   student.id = window.crypto.randomUUID();
 
@@ -281,7 +313,10 @@ async function createStudent(db: Firestore, student: Student) {
   await runTransaction(db, async (trans) => {
     const mapping = await trans.get(hashMappingRef);
     if (mapping.exists()) {
-      throw new DuplicateStudentError("Studente già registrato");
+      const duplicateError = new DuplicateStudentError("Studente già registrato");
+      duplicateError.studentId = mapping.data().studentId;
+      duplicateError.schoolId = student.school!;
+      throw duplicateError;
     }
     trans.set(hashMappingRef, { id: hash, studentId: student.id });
   });
