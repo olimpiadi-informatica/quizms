@@ -10,10 +10,8 @@ import {
   Firestore,
   doc,
   getDoc,
-  getDocs,
   runTransaction,
   setDoc,
-  updateDoc,
 } from "firebase/firestore";
 
 import {

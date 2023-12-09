@@ -10,7 +10,15 @@ import {
   roundToNearestMinutes,
 } from "date-fns";
 import { it as dateLocaleIT } from "date-fns/locale";
-import { Firestore, deleteDoc, doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import {
+  Firestore,
+  deleteDoc,
+  doc,
+  getDoc,
+  serverTimestamp,
+  setDoc,
+  updateDoc,
+} from "firebase/firestore";
 import { groupBy } from "lodash-es";
 
 import {
@@ -223,6 +231,7 @@ function StudentRestoreButton({ studentRestore }: { studentRestore: StudentResto
       if (code == String(hash(request.id) % 1000).padStart(3, "0")) {
         await updateDoc(doc(db, "students", request.studentId).withConverter(studentConverter), {
           uid: request.id,
+          updatedAt: serverTimestamp(),
         });
       }
     }
