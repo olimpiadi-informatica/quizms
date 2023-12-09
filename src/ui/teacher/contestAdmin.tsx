@@ -3,7 +3,8 @@ import React, { Suspense, useEffect, useRef, useState } from "react";
 import classNames from "classnames";
 import { assert } from "console";
 import { addMinutes, differenceInMilliseconds, differenceInSeconds } from "date-fns";
-import { Firestore, doc, getDoc } from "firebase/firestore";
+import { Firestore, deleteDoc, doc, getDoc, updateDoc } from "firebase/firestore";
+import { groupBy } from "lodash-es";
 
 import {
   schoolConverter,
@@ -15,8 +16,8 @@ import { useCollection } from "~/firebase/hooks";
 import { useDb } from "~/firebase/login";
 import { Contest } from "~/models/contest";
 import { School } from "~/models/school";
-import { Student } from "~/models/student";
-import { randomToken } from "~/utils/random";
+import { Student, StudentRestore } from "~/models/student";
+import { hash, randomToken } from "~/utils/random";
 
 import Modal from "../components/modal";
 import Timer from "../components/timer";
@@ -206,6 +207,69 @@ function ContestData(props: {
   );
 }
 
+function StudentRestoreButton(props: { db: Firestore; studentRestore: StudentRestore[] }) {
+  const { db, studentRestore } = props;
+  const modalRef = useRef<HTMLDialogElement>(null);
+  const [code, setCode] = useState("");
+  const targetCodes = studentRestore.map((request) =>
+    String(hash(request.id) % 1000).padStart(3, "0"),
+  );
+  console.log(targetCodes);
+  const approve = async () => {
+    for (const request of studentRestore) {
+      if (code == String(hash(request.id) % 1000).padStart(3, "0")) {
+        await updateDoc(doc(db, "students", request.studentId), {
+          uid: request.id,
+        });
+      }
+    }
+    await reject();
+  };
+  const reject = async () => {
+    await Promise.all(
+      studentRestore.map((request) => {
+        deleteDoc(doc(db, "studentRestore", request.id));
+      }),
+    );
+  };
+  return (
+    <>
+      <button
+        className="btn btn-success h-full w-full text-xl"
+        onClick={() => modalRef.current?.showModal()}>
+        Richiesta di accesso {studentRestore[0].name} {studentRestore[0].surname}
+      </button>
+      <Modal ref={modalRef} title="Conferma">
+        <div className="text-md flex flex-row justify-center gap-5">
+          Vuoi approvare il tentativo di accesso di {studentRestore[0].name}{" "}
+          {studentRestore[0].surname}? codice: {targetCodes.toString()}
+          <label className="form-control w-full max-w-xs">
+            <div className="label">
+              <span className="label-text">Codice di conferma</span>
+            </div>
+            <input
+              type="number"
+              placeholder="Type here"
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+              className="input input-bordered w-full max-w-xs"
+            />
+          </label>
+          <button
+            className="btn-confirm btn"
+            onClick={approve}
+            disabled={!targetCodes.includes(code)}>
+            Approva
+          </button>
+          <button className="btn btn-error" onClick={reject}>
+            Rigetta
+          </button>
+        </div>
+      </Modal>
+    </>
+  );
+}
+
 function StudentRestoreList(props: { school: School }) {
   const { school } = props;
   const [studentRestore, setStudentRestore] = useCollection(
@@ -216,6 +280,8 @@ function StudentRestoreList(props: { school: School }) {
     },
   );
 
+  const db = useDb();
+
   return (
     <>
       {studentRestore.length > 0 && (
@@ -223,13 +289,11 @@ function StudentRestoreList(props: { school: School }) {
           <div className="card-body pb-0">
             <h2 className="card-title">Student restore</h2>
             <div className="flex flex-row justify-between p-0">
-              {studentRestore.map((request, i) => {
-                return (
-                  <button className="btn btn-warning btn-lg text-xl">
-                    Richiesta di accesso {request.name} {request.surname}
-                  </button>
-                );
-              })}
+              {Object.entries(groupBy(studentRestore, (request) => request.studentId)).map(
+                (requests) => (
+                  <StudentRestoreButton studentRestore={requests[1]} db={db} />
+                ),
+              )}
             </div>
           </div>
         </div>

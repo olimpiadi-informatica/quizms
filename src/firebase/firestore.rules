@@ -35,8 +35,7 @@ service cloud.firestore {
             let student = get(/databases/$(database)/documents/students/$(studentId));
             return student != null
                 && student.data.school != null
-                && getSchool(student.data.school) != null
-                && isTeacherSchool(getSchool(student.data.school))
+                && isTeacherSchool(student.data.school)
         }
 
         match /contests/{contest} {
@@ -149,7 +148,7 @@ service cloud.firestore {
             }
             allow read: if isTeacher() || request.auth.uid == uid;
             allow create,update: if canStudentCreate();
-            allow delete: if isMyStudent(request.resource.data.studentId);
+            allow delete: if isMyStudent(resource.data.studentId);
         }
 
         match /submissions/{submission} {
