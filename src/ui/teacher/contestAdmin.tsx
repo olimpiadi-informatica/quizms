@@ -210,7 +210,7 @@ function ContestData({ contest, school }: { school: School; contest: Contest }) 
 }
 
 function StudentRestoreButton({ studentRestore }: { studentRestore: StudentRestore[] }) {
-  const { db } = useDb();
+  const db = useDb();
 
   const modalRef = useRef<HTMLDialogElement>(null);
   const [code, setCode] = useState("");
