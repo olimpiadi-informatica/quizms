@@ -200,7 +200,9 @@ function ContestData({ contest, school }: { school: School; contest: Contest }) 
   if (contestFinished(school, contest)) {
     return (
       <div className="flex flex-col gap-3">
-        <p>Gara iniziata alle ore {format(endTime, "HH:mm", { locale: dateLocaleIT })}.</p>
+        <p>
+          Gara iniziata alle ore {format(school.startingTime!, "HH:mm", { locale: dateLocaleIT })}.
+        </p>
         <p>La gara è terminata.</p>
       </div>
     );
@@ -216,7 +218,7 @@ function ContestData({ contest, school }: { school: School; contest: Contest }) 
           Tempo rimanente: <Timer endTime={endTime} />
         </p>
         <div className="mx-auto flex flex-col items-center justify-center gap-2 text-2xl">
-          Gara iniziata alle ore {format(endTime, "HH:mm")}.
+          Gara iniziata alle ore {format(school.startingTime!, "HH:mm")}.
         </div>
       </div>
     );
