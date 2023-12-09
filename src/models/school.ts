@@ -14,3 +14,11 @@ export const schoolSchema = z.object({
 });
 
 export type School = z.infer<typeof schoolSchema>;
+
+export const schoolMappingSchema = z.object({
+  id: z.string(),
+  school: z.string(),
+  startingTime: z.date(),
+});
+
+export type SchoolMapping = z.infer<typeof schoolMappingSchema>;

@@ -45,6 +45,11 @@ service cloud.firestore {
             allow update: if isAuthenticated(resource.data.teacher) && affectedKeys().hasOnly(['token', 'startingTime', 'finalized']);
         }
 
+        match /schoolMapping/{token} {
+            allow read: if request.auth != null;
+            allow create: if isTeacher() && isTeacherSchool(request.resource.data.school);
+        }
+
         match /solutions/{solution} {
             allow read: if isTeacher();
         }
@@ -56,7 +61,8 @@ service cloud.firestore {
         }
 
         match /students/{student} {
-            function checkToken(school) {
+            function checkToken(schoolId) {
+                let school = getSchool(schoolId);
                 return school != null
                     && school.data.token != null
                     && school.data.token == request.resource.data.token
@@ -72,17 +78,17 @@ service cloud.firestore {
 
             function canStudentCreate() {
                 return isAuthenticated(request.resource.data.uid)
-                    && !('school' in request.resource.data)
+                    && request.resource.data.school != null
                     && request.resource.data.personalInformation != null
                     && request.resource.data.contest != null
+                    && checkToken(request.resource.data.school)
                     && checkVariant(request.resource.data);
             }
 
             function canStudentUpdate() {
                 let keys = affectedKeys();
                 return isAuthenticated(resource.data.uid)
-                    && !keys.hasAny(['uid', 'personalInformation', 'token', 'variant', 'createdAt'])
-                    && (!keys.hasAny(['school', 'startedAt']) || checkToken(getSchool(request.resource.data.school)))
+                    && keys.hasOnly(['answers', 'updatedAt'])
                     && hasTimestamp('updatedAt');
             }
 

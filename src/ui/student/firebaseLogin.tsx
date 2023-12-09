@@ -5,6 +5,7 @@ import classNames from "classnames";
 import { format } from "date-fns";
 import { it as dateLocaleIT } from "date-fns/locale";
 import { FirebaseOptions } from "firebase/app";
+import { getAuth, signOut } from "firebase/auth";
 import {
   Firestore,
   collection,
@@ -20,6 +21,7 @@ import {
 import {
   contestConverter,
   schoolConverter,
+  schoolMappingConverter,
   studentConverter,
   studentMappingConverter,
   variantMappingConverter,
@@ -61,8 +63,7 @@ function StudentLogin({ header, children }: { header: ComponentType<any>; childr
     limit: 1,
   });
 
-  const [student, setStudent] = useState<Student>({
-    id: window.crypto.randomUUID(),
+  const [student, setStudent] = useState<Omit<Student, "id">>({
     uid: user.uid,
     personalInformation: {
       name: "Carlo",
@@ -92,7 +93,7 @@ function StudentLogin({ header, children }: { header: ComponentType<any>; childr
     setLoading(true);
     setError(undefined);
     try {
-      await createStudent(db, student);
+      const s = await createStudent(db, { id: window.crypto.randomUUID(), ...student });
     } catch (e) {
       if (e instanceof DuplicateStudentError) {
         console.error("Student already exists");
@@ -192,11 +193,19 @@ function StudentInner({
   header: ComponentType<any>;
   children: ReactNode;
 }) {
+  const db = useDb();
+  const auth = getAuth(db.app);
+
   console.log("Fetch contest", student.contest);
   const [contest] = useDocument("contests", student.contest!, contestConverter);
 
   console.log("Fetch school", student.school);
   const [school] = useDocument("schools", student.school!, schoolConverter);
+
+  const logout = async () => {
+    await signOut(getAuth(db.app));
+    window.location.reload();
+  };
 
   console.log(student);
   return (
@@ -208,6 +217,7 @@ function StudentInner({
       variant="0"
       submit={() => {}}
       reset={() => {}}
+      logout={logout}
       terminated={false}>
       <Layout>
         <Header />
@@ -241,27 +251,28 @@ async function createStudent(db: Firestore, student: Student) {
   }
   student.variant = variantMapping.data().variant;
 
+  const schoolMappingRef = doc(db, "schoolMapping", student.token!).withConverter(
+    schoolMappingConverter,
+  );
+  const schoolMapping = await getDoc(schoolMappingRef);
+  if (!schoolMapping.exists()) {
+    throw new Error("Codice non valido");
+  }
+  const schoolId = schoolMapping.data()?.school;
+
+  const schoolRef = doc(db, "schools", schoolId).withConverter(schoolConverter);
+  const school = await getDoc(schoolRef);
+  if (!school.exists()) {
+    throw new Error("Scuola non trovata");
+  }
+  student.school = school.id;
+  student.startedAt = school.data().startingTime;
+
   const studentRef = doc(db, "students", student.id).withConverter(studentConverter);
   await setDoc(studentRef, student);
 
   const mappingRef = doc(db, "studentMapping", student.uid!).withConverter(studentMappingConverter);
   await setDoc(mappingRef, { id: student.uid, studentId: student.id });
-
-  const schoolsRef = collection(db, "schools").withConverter(schoolConverter);
-  const q = query(schoolsRef, where("token", "==", student.token));
-  const schools = await getDocs(q);
-
-  if (schools.empty) {
-    throw new Error("Codice non valido");
-  }
-  if (schools.size > 1) {
-    throw new Error("Collisione, contattare gli amministratori della piattaforma");
-  }
-
-  const school = schools.docs[0].data();
-  student.school = school.id;
-  student.startedAt = school.startingTime;
-  await setDoc(studentRef, student);
 
   const hashMappingRef = doc(db, "studentMapping", hash).withConverter(studentMappingConverter);
   await runTransaction(db, async (trans) => {
@@ -271,4 +282,6 @@ async function createStudent(db: Firestore, student: Student) {
     }
     trans.set(hashMappingRef, { id: hash, studentId: student.id });
   });
+
+  return student;
 }
