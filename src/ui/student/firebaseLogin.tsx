@@ -1,4 +1,4 @@
-import React, { ComponentType, ReactNode, useState } from "react";
+import React, { ComponentType, ReactNode, useRef, useState } from "react";
 
 import { sha256 } from "@noble/hashes/sha256";
 import classNames from "classnames";
@@ -6,13 +6,7 @@ import { format } from "date-fns";
 import { it as dateLocaleIT } from "date-fns/locale";
 import { FirebaseOptions } from "firebase/app";
 import { getAuth, signOut } from "firebase/auth";
-import {
-  Firestore,
-  doc,
-  getDoc,
-  runTransaction,
-  setDoc,
-} from "firebase/firestore";
+import { Firestore, doc, getDoc, runTransaction, setDoc } from "firebase/firestore";
 
 import {
   contestConverter,
@@ -26,7 +20,9 @@ import {
 import { useAnonymousAuth, useCollection, useDocument } from "~/firebase/hooks";
 import { FirebaseLogin, useDb } from "~/firebase/login";
 import { Student } from "~/models/student";
+import { hash } from "~/utils/random";
 
+import Modal from "../components/modal";
 import { Layout } from "./layout";
 import { StudentProvider } from "./provider";
 
@@ -81,6 +77,7 @@ function StudentLogin({ header, children }: { header: ComponentType<any>; childr
   const [error, setError] = useState<Error>();
 
   const [loading, setLoading] = useState(false);
+  const modalRef = useRef<HTMLDialogElement>(null);
 
   if (students[0]) {
     return (
@@ -99,6 +96,7 @@ function StudentLogin({ header, children }: { header: ComponentType<any>; childr
     } catch (e) {
       if (e instanceof DuplicateStudentError) {
         await createStudentRestore(db, e.studentId, e.schoolId, student);
+        modalRef.current?.showModal();
       } else {
         setError(e as Error);
       }
@@ -189,6 +187,18 @@ function StudentLogin({ header, children }: { header: ComponentType<any>; childr
             </div>
           </>
         )}
+
+        <Modal ref={modalRef} title="Attenzione">
+          <p>
+            Il tuo account è già presente su un'altro dispositivo. Per trasferire l'accesso al
+            dispositivo corrente comunica al tuo insegnante il codice seguente:
+          </p>
+          <div className="flex justify-center pt-3">
+            <span className="pt-1 font-mono text-3xl">
+              {String(hash(getAuth(db.app).currentUser!.uid) % 1000).padStart(3, "0")}
+            </span>
+          </div>
+        </Modal>
       </form>
     </div>
   );
