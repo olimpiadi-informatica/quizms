@@ -21,7 +21,14 @@ import z, {
 import { Contest, contestSchema } from "~/models/contest";
 import { School, SchoolMapping, schoolMappingSchema, schoolSchema } from "~/models/school";
 import { Solution, solutionSchema } from "~/models/solution";
-import { Student, StudentMapping, studentMappingSchema, studentSchema, studentRestoreSchema, StudentRestore } from "~/models/student";
+import {
+  Student,
+  StudentMapping,
+  StudentRestore,
+  studentMappingSchema,
+  studentRestoreSchema,
+  studentSchema,
+} from "~/models/student";
 import { Submission, submissionSchema } from "~/models/submission";
 import { Variant, VariantMapping, variantMappingSchema, variantSchema } from "~/models/variant";
 import validate from "~/utils/validate";
@@ -90,8 +97,8 @@ export const schoolConverter: FirestoreDataConverter<School> = {
 };
 
 export const studentRestoreConverter: FirestoreDataConverter<StudentRestore> = {
-    toFirestore: (data) => convertToFirestore(data),
-    fromFirestore: (snapshot) => parse(studentRestoreSchema, snapshot),
+  toFirestore: (data) => convertToFirestore(data),
+  fromFirestore: (snapshot) => parse(studentRestoreSchema, snapshot),
 };
 
 export const schoolMappingConverter: FirestoreDataConverter<SchoolMapping> = {

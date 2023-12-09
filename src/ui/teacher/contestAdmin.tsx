@@ -1,8 +1,9 @@
 import React, { Suspense, useEffect, useRef, useState } from "react";
 
 import classNames from "classnames";
+import { assert } from "console";
 import { addMinutes, differenceInMilliseconds, differenceInSeconds } from "date-fns";
-import { doc } from "firebase/firestore";
+import { Firestore, doc, getDoc } from "firebase/firestore";
 
 import {
   schoolConverter,
@@ -14,6 +15,7 @@ import { useCollection } from "~/firebase/hooks";
 import { useDb } from "~/firebase/login";
 import { Contest } from "~/models/contest";
 import { School } from "~/models/school";
+import { Student } from "~/models/student";
 import { randomToken } from "~/utils/random";
 
 import Modal from "../components/modal";
@@ -204,49 +206,37 @@ function ContestData(props: {
   );
 }
 
-// function StudentRestoreList(props: { school: School }) {
-//     const { school } = props;
-//     const db = useDb();
-//     const studentRef = doc(db, "studentRestore").withConverter(studentConverter);
+function StudentRestoreList(props: { school: School }) {
+  const { school } = props;
+  const [studentRestore, setStudentRestore] = useCollection(
+    "studentRestore",
+    studentRestoreConverter,
+    {
+      constraints: { schoolId: school.id },
+    },
+  );
 
-//     const [studentRestore, setStudentRestore] = useCollection(
-//       "studentRestore",
-//       studentRestoreConverter,
-//       {
-//         constraints: { schoolId: school.id },
-//       },
-//     );
-//     return (
-//       <>
-//         {studentRestore.length > 0 && (
-//           <div className="card col-span-5 bg-base-100 shadow-xl shadow-indigo-500/10">
-//             <div className="card-body pb-0">
-//               <h2 className="card-title">Student restore</h2>
-//               {/* contest info */}
-//               <div className="flex flex-row justify-between p-0">
-//                 {studentRestore.map((request) => {
-//                   const studentRef = doc(db, "students", request.studentId).withConverter(
-//                     studentConverter,
-//                   );
-//                   const student = await getDoc(studentRef);
-//                   return (
-//                     <button className="btn btn-warning btn-lg text-xl">
-//                       gestisci studente {getDoc()}
-//                       <p>
-//                         {" "}
-//                         {request.studentId} {request.id}
-//                       </p>
-//                       Scarica testo per prova cartacea
-//                     </button>
-//                   );
-//                 })}
-//               </div>
-//             </div>
-//           </div>
-//         )}
-//       </>
-//     );
-//   }
+  return (
+    <>
+      {studentRestore.length > 0 && (
+        <div className="card col-span-5 bg-base-100 shadow-xl shadow-indigo-500/10">
+          <div className="card-body pb-0">
+            <h2 className="card-title">Student restore</h2>
+            <div className="flex flex-row justify-between p-0">
+              {studentRestore.map((request, i) => {
+                return (
+                  <button className="btn btn-warning btn-lg text-xl">
+                    Richiesta di accesso {request.name} {request.surname}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
 
 function ContestAdmin(props: {
   school: School;
@@ -360,7 +350,7 @@ function ContestAdmin(props: {
           Gestisci studenti e risposte
         </button>
       </div>
-      {/* <StudentRestoreList school={school} /> */}
+      <StudentRestoreList school={school} />
     </div>
   );
 }
