@@ -1,9 +1,9 @@
 import React, { ReactNode, Suspense, createContext, useContext, useMemo } from "react";
 
 import { FirebaseOptions, initializeApp } from "firebase/app";
-import { browserLocalPersistence, debugErrorMap, initializeAuth } from "firebase/auth";
+import { browserLocalPersistence, debugErrorMap, getAuth, initializeAuth } from "firebase/auth";
 import { Firestore, initializeFirestore, persistentLocalCache } from "firebase/firestore";
-import { ErrorBoundary } from "react-error-boundary";
+import { ErrorBoundary, FallbackProps } from "react-error-boundary";
 
 import Error from "~/ui/components/error";
 import Loading from "~/ui/components/loading";
@@ -28,7 +28,7 @@ export function FirebaseLogin({ config, children }: Props) {
   return (
     <FirebaseContext.Provider value={db}>
       <div className="h-screen overflow-y-auto">
-        <ErrorBoundary FallbackComponent={Error}>
+        <ErrorBoundary FallbackComponent={ErrorLogout}>
           <Suspense fallback={<Loading />}>
             <AuthWrapper>{children}</AuthWrapper>
           </Suspense>
@@ -48,4 +48,16 @@ FirebaseContext.displayName = "FirebaseContext";
 
 export function useDb() {
   return useContext(FirebaseContext)!;
+}
+
+export default function ErrorLogout({ error, resetErrorBoundary }: FallbackProps) {
+  const db = useDb();
+  const auth = getAuth(db.app);
+
+  const onReset = async () => {
+    await auth.signOut();
+    resetErrorBoundary();
+  };
+
+  return <Error error={error} resetErrorBoundary={onReset} />;
 }
