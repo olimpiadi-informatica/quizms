@@ -53,7 +53,8 @@ function StudentLogin({ header, children }: { header: ComponentType<any>; childr
     limit: 1,
   });
 
-  const [student, setStudent] = useState<Omit<Student, "id">>({
+  const [student, setStudent] = useState<Student>({
+    id: window.crypto.randomUUID(),
     uid: user.uid,
     personalInformation: {
       name: "Carlo",
@@ -83,7 +84,8 @@ function StudentLogin({ header, children }: { header: ComponentType<any>; childr
     setLoading(true);
     setError(undefined);
     try {
-      await createStudent(db, { id: window.crypto.randomUUID(), ...student });
+      const newStudent = await createStudent(db, { ...student });
+      setStudent(newStudent);
     } catch (e) {
       if (e instanceof DuplicateStudentError) {
         console.error("Student already exists");
@@ -93,6 +95,14 @@ function StudentLogin({ header, children }: { header: ComponentType<any>; childr
     }
     setLoading(false);
   };
+
+  if (student.startedAt) {
+    return (
+      <StudentInner header={header} student={student}>
+        {children}
+      </StudentInner>
+    );
+  }
 
   return (
     <div className="my-8 flex justify-center overflow-y-auto">
@@ -217,6 +227,8 @@ function StudentInner({
 }
 
 async function createStudent(db: Firestore, student: Student) {
+  student.id = window.crypto.randomUUID();
+
   const hash = [
     ...sha256(
       [
@@ -240,6 +252,8 @@ async function createStudent(db: Firestore, student: Student) {
   }
   student.variant = variantMapping.data().variant;
 
+  console.log("Variant found!", student.variant);
+
   const schoolMappingRef = doc(db, "schoolMapping", student.token!).withConverter(
     schoolMappingConverter,
   );
@@ -251,14 +265,17 @@ async function createStudent(db: Firestore, student: Student) {
   student.school = schoolMappingData.school;
   student.startedAt = schoolMappingData.startingTime;
 
-  console.log({ schoolMappingData, student });
-  console.log(schoolMappingData.startingTime.toISOString());
+  console.log("School found!", student.school);
 
   const studentRef = doc(db, "students", student.id).withConverter(studentConverter);
   await setDoc(studentRef, student);
 
+  console.log("Student updated!", student);
+
   const mappingRef = doc(db, "studentMapping", student.uid!).withConverter(studentMappingConverter);
   await setDoc(mappingRef, { id: student.uid, studentId: student.id });
+
+  console.log("Mapping updated!", student);
 
   const hashMappingRef = doc(db, "studentMapping", hash).withConverter(studentMappingConverter);
   await runTransaction(db, async (trans) => {
@@ -268,6 +285,8 @@ async function createStudent(db: Firestore, student: Student) {
     }
     trans.set(hashMappingRef, { id: hash, studentId: student.id });
   });
+
+  console.log("Mapping updated again!", student);
 
   return student;
 }

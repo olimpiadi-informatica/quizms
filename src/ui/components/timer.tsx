@@ -22,7 +22,7 @@ export default function Timer({ endTime }: TimerProps) {
   }, [endTime]);
 
   if (!endTime) {
-    return <div className="font-mono">--:--</div>;
+    return <span className="font-mono">--:--</span>;
   }
 
   const timeLeft = Math.max(differenceInSeconds(endTime!, currentTime), 0);
@@ -31,9 +31,9 @@ export default function Timer({ endTime }: TimerProps) {
   const seconds = timeLeft % 60;
 
   return (
-    <div className="countdown font-mono">
+    <span className="countdown font-mono">
       <span style={{ "--value": minutes } as any} />:
       <span style={{ "--value": seconds } as any} />
-    </div>
+    </span>
   );
 }

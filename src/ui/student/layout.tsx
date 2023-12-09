@@ -58,16 +58,10 @@ export function Layout({ children }: { children: ReactNode }) {
             {progress}%
           </Progress>
           <div className="flex-none px-3">
-            {terminated && <span className="font-mono">00:00</span>}
-            {!terminated && (
-              <Timer
-                endTime={
-                  school.startingTime && contest.duration
-                    ? addMinutes(school.startingTime, contest.duration)
-                    : undefined
-                }
-              />
+            {(terminated || !school.startingTime || !contest.duration) && (
+              <span className="font-mono">00:00</span>
             )}
+            {!terminated && <Timer endTime={addMinutes(school.startingTime!, contest.duration!)} />}
           </div>
           <div className="h-full flex-none py-0.5">
             {terminated && reset ? (
