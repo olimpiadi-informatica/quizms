@@ -18,6 +18,7 @@ import {
   schoolMappingConverter,
   studentRestoreConverter,
 } from "~/firebase/converters";
+import { studentConverter } from "~/firebase/converters";
 import { useCollection } from "~/firebase/hooks";
 import { useDb } from "~/firebase/login";
 import { Contest } from "~/models/contest";
@@ -57,7 +58,7 @@ function canUndoContest(school: School) {
   return school.startingTime && new Date() < addMinutes(school.startingTime, -1);
 }
 
-function StartContest({ school, contest }: { school: School; contest: Contest }) {
+function StartContest({ school }: { school: School }) {
   const db = useDb();
   const { setSchool } = useTeacher();
 
@@ -128,7 +129,7 @@ async function generateToken(db: Firestore, prevSchool: School) {
   return school;
 }
 
-function StopContest({ school, contest }: { school: School; contest: Contest }) {
+function StopContest({ school }: { school: School }) {
   const { setSchool } = useTeacher();
   const modalRef = useRef<HTMLDialogElement>(null);
 
@@ -196,12 +197,12 @@ function ContestData({ contest, school }: { school: School; contest: Contest }) 
       </p>
       <p>La gara inizierà alle ore {format(school.startingTime!, "HH:mm")}.</p>
       <p>
-        Tempo rimanente all'inizio: <Timer endTime={school.startingTime} />
+        Tempo rimanente all&apos;inizio: <Timer endTime={school.startingTime} />
       </p>
       {canUndoContest(school) && (
         <p>
           Se ti sei sbagliato, puoi ancora annullare l&apos;inizio della gara fino a un minuto prima
-          dell'inizio.
+          dell&apos;inizio.
         </p>
       )}
     </div>
@@ -219,7 +220,7 @@ function StudentRestoreButton(props: { db: Firestore; studentRestore: StudentRes
   const approve = async () => {
     for (const request of studentRestore) {
       if (code == String(hash(request.id) % 1000).padStart(3, "0")) {
-        await updateDoc(doc(db, "students", request.studentId), {
+        await updateDoc(doc(db, "students", request.studentId).withConverter(studentConverter), {
           uid: request.id,
         });
       }
@@ -273,13 +274,9 @@ function StudentRestoreButton(props: { db: Firestore; studentRestore: StudentRes
 
 function StudentRestoreList(props: { school: School }) {
   const { school } = props;
-  const [studentRestore, setStudentRestore] = useCollection(
-    "studentRestore",
-    studentRestoreConverter,
-    {
-      constraints: { schoolId: school.id },
-    },
-  );
+  const [studentRestore] = useCollection("studentRestore", studentRestoreConverter, {
+    constraints: { schoolId: school.id },
+  });
 
   const db = useDb();
 
@@ -291,8 +288,8 @@ function StudentRestoreList(props: { school: School }) {
             <h2 className="card-title">Student restore</h2>
             <div className="flex flex-row justify-between p-0">
               {Object.entries(groupBy(studentRestore, (request) => request.studentId)).map(
-                (requests) => (
-                  <StudentRestoreButton studentRestore={requests[1]} db={db} />
+                (requests, i) => (
+                  <StudentRestoreButton studentRestore={requests[1]} db={db} key={i} />
                 ),
               )}
             </div>
@@ -303,12 +300,8 @@ function StudentRestoreList(props: { school: School }) {
   );
 }
 
-function ContestAdmin(props: {
-  school: School;
-  setSchool: (school: School) => void;
-  contest: Contest;
-}) {
-  const { school, setSchool, contest } = props;
+function ContestAdmin(props: { school: School; contest: Contest }) {
+  const { school, contest } = props;
   const [time, setTime] = useState(new Date());
 
   // refresh the page when the page should change
@@ -372,10 +365,8 @@ function ContestAdmin(props: {
           )}
           <div className="mt-2 flex flex-wrap justify-center gap-3">
             {/* contest buttons */}
-            {canStartContest(school, contest) && (
-              <StartContest school={school} contest={contest} key={school.id} />
-            )}
-            {canUndoContest(school) && <StopContest school={school} contest={contest} />}
+            {canStartContest(school, contest) && <StartContest school={school} key={school.id} />}
+            {canUndoContest(school) && <StopContest school={school} />}
             <button
               className="btn btn-info"
               onClick={() => (window.location.href = "students.html") /* TODO */}>
@@ -390,7 +381,7 @@ function ContestAdmin(props: {
 }
 
 export function ContestsAdminPage() {
-  const { contests, schools, setSchool } = useTeacher();
+  const { contests, schools } = useTeacher();
   const [selectedContest, setSelectedContest] = useState(0);
   return (
     <>
@@ -414,7 +405,6 @@ export function ContestsAdminPage() {
       {selectedContest != -1 && (
         <ContestAdmin
           school={schools[selectedContest]}
-          setSchool={setSchool}
           contest={contests.find((contest) => contest.id === schools[selectedContest].contestId)!}
         />
       )}

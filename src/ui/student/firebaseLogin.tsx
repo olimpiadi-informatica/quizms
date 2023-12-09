@@ -83,7 +83,7 @@ function StudentLogin({ header, children }: { header: ComponentType<any>; childr
     setLoading(true);
     setError(undefined);
     try {
-      const s = await createStudent(db, { id: window.crypto.randomUUID(), ...student });
+      await createStudent(db, { id: window.crypto.randomUUID(), ...student });
     } catch (e) {
       if (e instanceof DuplicateStudentError) {
         console.error("Student already exists");
@@ -184,7 +184,6 @@ function StudentInner({
   children: ReactNode;
 }) {
   const db = useDb();
-  const auth = getAuth(db.app);
 
   console.log("Fetch contest", student.contest);
   const [contest] = useDocument("contests", student.contest!, contestConverter);

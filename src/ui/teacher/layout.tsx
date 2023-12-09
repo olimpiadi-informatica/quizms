@@ -1,4 +1,4 @@
-import React, { ReactNode, useEffect, useRef } from "react";
+import React, { ReactNode, useRef } from "react";
 
 import { BadgeInfo, GraduationCap } from "lucide-react";
 import { ErrorBoundary } from "react-error-boundary";
