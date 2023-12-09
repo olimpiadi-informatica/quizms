@@ -17,6 +17,7 @@ export default function firebaseCommand() {
     .option("-v, --variants", "Import the variants.")
     .option("-z, --solutions", "Import the solutions.")
     .option("-m, --mappings", "Import the variant mappings.")
+    .option("-d, --delete", "Delete existings collections")
     .option("-a, --all", "Import everything.")
     .action((options) => void importContests(options));
 
