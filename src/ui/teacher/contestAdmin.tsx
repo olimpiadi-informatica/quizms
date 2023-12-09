@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { Suspense, useEffect, useRef, useState } from "react";
 
 import classNames from "classnames";
 import {
@@ -167,15 +167,15 @@ function ContestData({ contest, school }: { school: School; contest: Contest }) 
 
   if (contestFinished(school, contest)) {
     return (
-      <>
-        <p>Gara iniziata alle ore {school.startingTime?.toLocaleTimeString()}.</p>
-        <p>La gara è terminata</p>
-      </>
+      <div className="flex flex-col gap-3">
+        <p>Gara iniziata alle ore {format(endTime, "HH:mm", { locale: dateLocaleIT })}.</p>
+        <p>La gara è terminata.</p>
+      </div>
     );
   }
   if (contestRunning(school, contest)) {
     return (
-      <div>
+      <div className="flex flex-col gap-3">
         <p>
           <b>Codice:</b> <span className="text-mono">{school.token}</span>
         </p>
@@ -184,7 +184,7 @@ function ContestData({ contest, school }: { school: School; contest: Contest }) 
           Tempo rimanente: <Timer endTime={endTime} />
         </p>
         <div className="mx-auto flex flex-col items-center justify-center gap-2 text-2xl">
-          Gara iniziata alle ore {format(endTime, "HH:mm")}
+          Gara iniziata alle ore {format(endTime, "HH:mm")}.
         </div>
       </div>
     );
@@ -209,14 +209,15 @@ function ContestData({ contest, school }: { school: School; contest: Contest }) 
   );
 }
 
-function StudentRestoreButton(props: { db: Firestore; studentRestore: StudentRestore[] }) {
-  const { db, studentRestore } = props;
+function StudentRestoreButton({ studentRestore }: { studentRestore: StudentRestore[] }) {
+  const { db } = useDb();
+
   const modalRef = useRef<HTMLDialogElement>(null);
   const [code, setCode] = useState("");
   const targetCodes = studentRestore.map((request) =>
     String(hash(request.id) % 1000).padStart(3, "0"),
   );
-  console.log(targetCodes);
+
   const approve = async () => {
     for (const request of studentRestore) {
       if (code == String(hash(request.id) % 1000).padStart(3, "0")) {
@@ -227,6 +228,7 @@ function StudentRestoreButton(props: { db: Firestore; studentRestore: StudentRes
     }
     await reject();
   };
+
   const reject = async () => {
     await Promise.all(
       studentRestore.map((request) => {
@@ -234,36 +236,39 @@ function StudentRestoreButton(props: { db: Firestore; studentRestore: StudentRes
       }),
     );
   };
+
   return (
     <>
-      <button
-        className="btn btn-success h-full w-full text-xl"
-        onClick={() => modalRef.current?.showModal()}>
+      <button className="btn btn-success" onClick={() => modalRef.current?.showModal()}>
         Richiesta di accesso {studentRestore[0].name} {studentRestore[0].surname}
       </button>
       <Modal ref={modalRef} title="Conferma">
-        <div className="text-md flex flex-row justify-center gap-5">
-          Vuoi approvare il tentativo di accesso di {studentRestore[0].name}{" "}
-          {studentRestore[0].surname}? codice: {targetCodes.toString()}
-          <label className="form-control w-full max-w-xs">
-            <div className="label">
-              <span className="label-text">Codice di conferma</span>
-            </div>
-            <input
-              type="number"
-              placeholder="Type here"
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
-              className="input input-bordered w-full max-w-xs"
-            />
-          </label>
+        <p>
+          {studentRestore[0].name} {studentRestore[0].surname} sta cercando di accedere alla gara.
+          Per approvarlo, inserisci il codice di conferma che gli è stato mostrato.
+        </p>
+        <p className="text-warning">Codice: {targetCodes}</p>
+        <label className="form-control w-full">
+          <div className="label">
+            <span className="label-text">Codice di conferma</span>
+          </div>
+          <input
+            type="number"
+            placeholder="Inserisci codice"
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
+            className="input input-bordered w-full"
+          />
+        </label>
+        <div className="mt-3 flex flex-row justify-center gap-3">
           <button
-            className="btn-confirm btn"
+            className="btn btn-error"
             onClick={approve}
-            disabled={!targetCodes.includes(code)}>
+            disabled={!targetCodes.includes(code)}
+            type="button">
             Approva
           </button>
-          <button className="btn btn-error" onClick={reject}>
+          <button className="btn" onClick={reject}>
             Rigetta
           </button>
         </div>
@@ -278,25 +283,18 @@ function StudentRestoreList(props: { school: School }) {
     constraints: { schoolId: school.id },
   });
 
-  const db = useDb();
+  if (studentRestore.length === 0) {
+    return <>Nessuna richiesta</>;
+  }
 
   return (
-    <>
-      {studentRestore.length > 0 && (
-        <div className="card col-span-5 bg-base-100 shadow-xl shadow-indigo-500/10">
-          <div className="card-body pb-0">
-            <h2 className="card-title">Student restore</h2>
-            <div className="flex flex-row justify-between p-0">
-              {Object.entries(groupBy(studentRestore, (request) => request.studentId)).map(
-                (requests, i) => (
-                  <StudentRestoreButton studentRestore={requests[1]} db={db} key={i} />
-                ),
-              )}
-            </div>
-          </div>
-        </div>
+    <div className="flex flex-col items-start gap-3">
+      {Object.entries(groupBy(studentRestore, (request) => request.studentId)).map(
+        (requests, i) => (
+          <StudentRestoreButton studentRestore={requests[1]} key={i} />
+        ),
       )}
-    </>
+    </div>
   );
 }
 
@@ -375,7 +373,14 @@ function ContestAdmin(props: { school: School; contest: Contest }) {
           </div>
         </div>
       </div>
-      <StudentRestoreList school={school} />
+      <div className="card bg-base-200 shadow-lg">
+        <div className="card-body">
+          <h2 className="card-title">Richieste di accesso</h2>
+          <Suspense fallback={<p className="loading loading-spinner" />}>
+            <StudentRestoreList school={school} />
+          </Suspense>
+        </div>
+      </div>
     </div>
   );
 }
