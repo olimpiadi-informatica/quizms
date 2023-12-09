@@ -4,7 +4,11 @@ import classNames from "classnames";
 import { addMinutes, differenceInMilliseconds, differenceInSeconds } from "date-fns";
 import { doc } from "firebase/firestore";
 
-import { schoolConverter, studentRestoreConverter } from "~/firebase/converters";
+import {
+  schoolConverter,
+  schoolMappingConverter,
+  studentRestoreConverter,
+} from "~/firebase/converters";
 import { studentConverter } from "~/firebase/converters";
 import { useCollection } from "~/firebase/hooks";
 import { useDb } from "~/firebase/login";
@@ -56,6 +60,7 @@ function StartContest(props: {
   const [schools] = useCollection("schools", schoolConverter, {
     constraints: { token: token },
   });
+  const [schoolMapping, setSchoolMapping] = useCollection("schoolMapping", schoolMappingConverter);
   useEffect(() => {
     if (schools.length || token == "") {
       let x = randomToken();
@@ -79,10 +84,16 @@ function StartContest(props: {
           <button
             className="btn-confirm btn"
             onClick={() => {
+              const startingTime = addMinutes(new Date(), 3);
               props.setSchool({
                 ...props.school,
-                startingTime: addMinutes(new Date(), 3),
+                startingTime: startingTime,
                 token: token,
+              });
+              setSchoolMapping({
+                id: token,
+                startingTime: startingTime,
+                school: props.school.id,
               });
             }}>
             SI
@@ -193,49 +204,50 @@ function ContestData(props: {
   );
 }
 
-function StudentRestoreList(props: { school: School }) {
-  const { school } = props;
-  const db = useDb();
-  const studentRef = doc(db, "studentRestore").withConverter(studentConverter);
+// function StudentRestoreList(props: { school: School }) {
+//     const { school } = props;
+//     const db = useDb();
+//     const studentRef = doc(db, "studentRestore").withConverter(studentConverter);
 
-  const [studentRestore, setStudentRestore] = useCollection(
-    "studentRestore",
-    studentRestoreConverter,
-    {
-      constraints: { schoolId: school.id },
-    },
-  );
-  return (
-    <>
-      {studentRestore.length > 0 && (
-        <div className="card col-span-5 bg-base-100 shadow-xl shadow-indigo-500/10">
-          <div className="card-body pb-0">
-            <h2 className="card-title">Student restore</h2>
-            {/* contest info */}
-            <div className="flex flex-row justify-between p-0">
-              {studentRestore.map((request) => {
-                const studentRef = doc(db, "students", request.studentId).withConverter(
-                  studentConverter,
-                );
-                const student = await getDoc(studentRef);
-                return (
-                  <button className="btn btn-warning btn-lg text-xl">
-                    gestisci studente {getDoc()}
-                    <p>
-                      {" "}
-                      {request.studentId} {request.id}
-                    </p>
-                    Scarica testo per prova cartacea
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      )}
-    </>
-  );
-}
+//     const [studentRestore, setStudentRestore] = useCollection(
+//       "studentRestore",
+//       studentRestoreConverter,
+//       {
+//         constraints: { schoolId: school.id },
+//       },
+//     );
+//     return (
+//       <>
+//         {studentRestore.length > 0 && (
+//           <div className="card col-span-5 bg-base-100 shadow-xl shadow-indigo-500/10">
+//             <div className="card-body pb-0">
+//               <h2 className="card-title">Student restore</h2>
+//               {/* contest info */}
+//               <div className="flex flex-row justify-between p-0">
+//                 {studentRestore.map((request) => {
+//                   const studentRef = doc(db, "students", request.studentId).withConverter(
+//                     studentConverter,
+//                   );
+//                   const student = await getDoc(studentRef);
+//                   return (
+//                     <button className="btn btn-warning btn-lg text-xl">
+//                       gestisci studente {getDoc()}
+//                       <p>
+//                         {" "}
+//                         {request.studentId} {request.id}
+//                       </p>
+//                       Scarica testo per prova cartacea
+//                     </button>
+//                   );
+//                 })}
+//               </div>
+//             </div>
+//           </div>
+//         )}
+//       </>
+//     );
+//   }
+
 function ContestAdmin(props: {
   school: School;
   setSchool: (school: School) => void;
@@ -348,7 +360,7 @@ function ContestAdmin(props: {
           Gestisci studenti e risposte
         </button>
       </div>
-      <StudentRestoreList school={school} />
+      {/* <StudentRestoreList school={school} /> */}
     </div>
   );
 }
