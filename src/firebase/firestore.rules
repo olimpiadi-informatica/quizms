@@ -114,7 +114,11 @@ service cloud.firestore {
             }
 
             allow read: if isAuthenticated(resource.data.uid) || isTeacherSchool(resource.data.school);
-            allow create: if (canStudentCreate() || isTeacherSchool(request.resource.data.school)) /* TODO && hasTimestamp('createdAt') */;
+            allow create: if (canStudentCreate() || isTeacherSchool(request.resource.data.school)) /* TODO && 
+            
+            
+            
+            ('createdAt') */;
             allow update: if canStudentUpdate() || canTeacherUpdate();
         }
 
@@ -143,7 +147,7 @@ service cloud.firestore {
             function canStudentCreate() {
               let student = get(/databases/$(database)/documents/students/$(request.resource.data.studentId));
               return student != null
-                  && student.data.schoolId == request.resource.data.schoolId
+                  && student.data.school == request.resource.data.schoolId
                   && request.auth.uid == uid;
             }
             allow read: if isTeacher() || request.auth.uid == uid;
