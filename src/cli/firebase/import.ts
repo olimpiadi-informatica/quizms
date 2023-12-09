@@ -4,6 +4,7 @@ import { cwd } from "node:process";
 import { cert, deleteApp, initializeApp } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 import { getFirestore } from "firebase-admin/firestore";
+import { range } from "lodash-es";
 import z, { ZodType } from "zod";
 
 import { exportVariants } from "~/cli/export-variants";
@@ -13,6 +14,7 @@ import {
   schoolConverter,
   solutionConverter,
   variantConverter,
+  variantMappingConverter,
 } from "~/firebase/convertersAdmin";
 import { contestSchema } from "~/models/contest";
 import { schoolSchema } from "~/models/school";
@@ -54,11 +56,7 @@ export default async function importContests(options: ImportOptions) {
   if (options.all || options.variants) {
     console.info("Importing variants...");
     const variantIds = await readVariantIds("data/variants.json", ""); /* TODO set secret */
-    const [solutions, variants] = await exportVariants(
-      cwd(),
-      "src/contest/contest.mdx",
-      variantIds,
-    );
+    const { solutions, variants } = await exportVariants(cwd(), "contest/contest.mdx", variantIds);
 
     const res = await Promise.all(
       Object.entries(variants).map(async ([id, record]) => {
@@ -67,6 +65,20 @@ export default async function importContests(options: ImportOptions) {
       }),
     );
     console.info(`${res.length} variants imported!`);
+    const prefix = "fibonacci-secondarie";
+    await Promise.all(
+      range(4096).map(async (i) => {
+        const suffix = Buffer.from([i / 256, i % 256])
+          .toString("hex")
+          .slice(1)
+          .toUpperCase();
+        const id = `${prefix}-${suffix}`;
+        await db.doc(`variantMapping/${id}`).withConverter(variantMappingConverter).set({
+          id,
+          variant: "0",
+        });
+      }),
+    );
   }
 
   if (options.all || options.users) {

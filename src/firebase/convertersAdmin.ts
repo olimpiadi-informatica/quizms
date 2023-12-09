@@ -22,7 +22,7 @@ import { School, schoolSchema } from "~/models/school";
 import { Solution, solutionSchema } from "~/models/solution";
 import { Student, studentSchema } from "~/models/student";
 import { Submission, submissionSchema } from "~/models/submission";
-import { Variant, variantSchema } from "~/models/variant";
+import { Variant, VariantMapping, variantSchema } from "~/models/variant";
 import validate from "~/utils/validate";
 
 function convertToFirestore(data: Record<string, any>) {
@@ -116,4 +116,9 @@ export const submissionConverter: FirestoreDataConverter<Submission> = {
 export const variantConverter: FirestoreDataConverter<Variant> = {
   toFirestore: (data) => convertToFirestore(data),
   fromFirestore: (snapshot) => parse(variantSchema, snapshot),
+};
+
+export const variantMappingConverter: FirestoreDataConverter<VariantMapping> = {
+  toFirestore: (data) => convertToFirestore(data),
+  fromFirestore: (snapshot) => parse(variantMappingSchema, snapshot),
 };
