@@ -59,7 +59,6 @@ service cloud.firestore {
                   && school.data.token == token
                   && school.data.startingTime == request.resource.data.startingTime;
             }
-            allow list: if isTeacher();
             allow get: if request.auth != null;
             allow create: if isTeacher() && isTeacherSchool(request.resource.data.school) && checkToken(request.resource.data.school);
         }
@@ -114,17 +113,13 @@ service cloud.firestore {
             }
 
             allow read: if isAuthenticated(resource.data.uid) || isTeacherSchool(resource.data.school);
-            allow create: if (canStudentCreate() || isTeacherSchool(request.resource.data.school)) /* TODO && 
-            
-            
-            
-            ('createdAt') */;
+            allow create: if (canStudentCreate() || isTeacherSchool(request.resource.data.school)) /* TODO && hasTimestamp('createdAt') */;
             allow update: if canStudentUpdate() || canTeacherUpdate();
         }
 
         match /studentMapping/{id} {
             function canCreate() {
-                let student = get(/databases/$(database)/documents/students/$(request.resource.data.studentId));
+                let student = getAfter(/databases/$(database)/documents/students/$(request.resource.data.studentId));
                 return student != null
                     && isAuthenticated(student.data.uid)
                     && (canCreateByUid(student) || canCreateByHash(student));

@@ -299,7 +299,9 @@ async function createStudent(db: Firestore, student: Student) {
 
   console.log("School found!", student.school);
 
+  const studentRef = doc(db, "students", student.id).withConverter(studentConverter);
   const hashMappingRef = doc(db, "studentMapping", hash).withConverter(studentMappingConverter);
+
   await runTransaction(db, async (trans) => {
     const mapping = await trans.get(hashMappingRef);
     if (mapping.exists()) {
@@ -308,15 +310,14 @@ async function createStudent(db: Firestore, student: Student) {
       duplicateError.schoolId = student.school!;
       throw duplicateError;
     }
+
+    trans.set(studentRef, student);
+
     trans.set(hashMappingRef, { id: hash, studentId: student.id });
   });
 
-  console.log("Mapping updated!", student);
-
-  const studentRef = doc(db, "students", student.id).withConverter(studentConverter);
-  await setDoc(studentRef, student);
-
   console.log("Student updated!", student);
+  console.log("Mapping updated!", student);
 
   const mappingRef = doc(db, "studentMapping", student.uid!).withConverter(studentMappingConverter);
   await setDoc(mappingRef, { id: student.uid, studentId: student.id });
