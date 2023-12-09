@@ -42,6 +42,7 @@ import { hash, randomToken } from "~/utils/random";
 import Modal from "../components/modal";
 import Timer from "../components/timer";
 import { useTeacher } from "./provider";
+import modal from "../components/modal";
 
 function contestFinished(school: School, contest: Contest) {
   return (
@@ -116,7 +117,7 @@ function StartContest({ school }: { school: School }) {
 
 async function generateToken(db: Firestore, prevSchool: School) {
   const token = randomToken();
-  const startingTime = roundToNearestMinutes(addSeconds(addMinutes(new Date(), 3), 30));
+  const startingTime = roundToNearestMinutes(addSeconds(addMinutes(new Date(), 30), 30));
 
   const school: School = {
     ...prevSchool,
@@ -154,15 +155,15 @@ function StopContest({ school }: { school: School }) {
   const undoContestStart = async () => {
     setLoading(true);
 
-
     // delete all student connected to token
-    const q = query(collection(db, "students"), where("token", "==", school.token));
+    const q = query(collection(db, "students"), where("school", "==", school.id), where("token", "==", school.token));
 
     const students = await getDocs(q);
     await students.forEach((student) => {
+        console.log(student.id)
         deleteDoc(doc(db, "students", student.id).withConverter(studentConverter));
     });
-    
+
     await setSchool({ ...school, token: undefined, startingTime: undefined });
 
     setLoading(false);

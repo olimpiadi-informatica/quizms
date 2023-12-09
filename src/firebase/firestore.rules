@@ -115,6 +115,7 @@ service cloud.firestore {
             allow read: if isAuthenticated(resource.data.uid) || isTeacherSchool(resource.data.school);
             allow create: if (canStudentCreate() || isTeacherSchool(request.resource.data.school)) /* TODO && hasTimestamp('createdAt') */;
             allow update: if canStudentUpdate() || canTeacherUpdate();
+            allow delete: if isTeacherSchool(resource.data.school);
         }
 
         match /studentMapping/{id} {
