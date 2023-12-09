@@ -30,3 +30,9 @@ export const studentMappingSchema = z.object({
 });
 
 export type StudentMapping = z.infer<typeof studentMappingSchema>;
+
+export const studentRestoreSchema = z.object({
+  id: z.string(), // uid identificativo della sessione
+  studentId: z.string(), // identificativo dello studente a cui ci si vuole loggare
+  schoolId: z.string(), // scuola dello studente
+});
