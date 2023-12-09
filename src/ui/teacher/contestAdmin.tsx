@@ -15,6 +15,7 @@ import {
   deleteDoc,
   doc,
   getDoc,
+  runTransaction,
   serverTimestamp,
   setDoc,
   updateDoc,
@@ -122,16 +123,18 @@ async function generateToken(db: Firestore, prevSchool: School) {
   const schoolMappingsRef = doc(db, "schoolMapping", token).withConverter(schoolMappingConverter);
   const schoolRef = doc(db, "schools", school.id).withConverter(schoolConverter);
 
-  // TODO: transazione
-  const prevMapping = await getDoc(schoolMappingsRef);
-  if (prevMapping.exists()) {
-    throw new Error("Token già esistente");
-  }
-  await setDoc(schoolRef, school);
-  await setDoc(schoolMappingsRef, {
-    id: token,
-    school: school.id,
-    startingTime,
+  await runTransaction(db, async (trans) => {
+    const mapping = await trans.get(schoolMappingsRef);
+    if (mapping.exists()) {
+      throw new Error("Token già esistente");
+    }
+
+    trans.set(schoolRef, school);
+    trans.set(schoolMappingsRef, {
+      id: token,
+      school: school.id,
+      startingTime,
+    });
   });
 
   return school;

@@ -54,7 +54,7 @@ service cloud.firestore {
 
         match /schoolMapping/{token} {
             function checkToken(schoolId) {
-              let school = get(/databases/$(database)/documents/schools/$(schoolId));
+              let school = getAfter(/databases/$(database)/documents/schools/$(schoolId));
               return school != null
                   && school.data.token == token
                   && school.data.startingTime == request.resource.data.startingTime;
