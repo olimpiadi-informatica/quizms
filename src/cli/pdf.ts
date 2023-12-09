@@ -7,11 +7,12 @@ import { temporaryDirectory } from "tempy";
 import { InlineConfig, build, mergeConfig } from "vite";
 
 import { parseContest } from "~/jsx-runtime/parser";
+import { ContestConfig } from "~/models/generation-config";
 
-import readVariantIds from "./read-variant-ids";
+import loadGenerationConfig from "./load-generation-config";
 import configs from "./vite/configs";
 
-async function pdfServer(dir: string, contest: string, port: number) {
+async function pdfServer(dir: string, config: ContestConfig, port: number) {
   process.env.QUIZMS_MODE = "pdf";
 
   const defaultConfig = configs("production", {
@@ -32,7 +33,7 @@ async function pdfServer(dir: string, contest: string, port: number) {
       outDir,
       emptyOutDir: true,
       lib: {
-        entry: contest,
+        entry: config.entry,
         fileName,
         formats: ["es"],
       },
@@ -62,12 +63,12 @@ async function pdfServer(dir: string, contest: string, port: number) {
 
   const app = express();
   const server = app.listen(port, () => {
-    console.log(`Server listening on port ${port}`);
+    console.info(`Server listening on port ${port}`);
   });
 
   app.get("/variant.js", (req, res) => {
     res.setHeader("content-type", "text/javascript");
-    res.send(parseContest(contestJsx, `${req.query.variant}`));
+    res.send(parseContest(contestJsx, `${req.query.variant}`, config));
   });
 
   app.use(express.static(serverDir));
@@ -76,14 +77,16 @@ async function pdfServer(dir: string, contest: string, port: number) {
 
 async function printVariant(
   context: BrowserContext,
-  variant_id: string,
+  secret: string,
+  variantId: string,
   outDir: string,
   serverPort: number,
 ) {
   const page = await context.newPage();
-  const url = `localhost:${serverPort}/print.html?variant=${variant_id}`;
-  const path = `${outDir}/variant_${variant_id}.pdf`;
-  console.info(`Printing variant ${variant_id}`);
+  const seed = `${secret}${variantId}`;
+  const url = `localhost:${serverPort}/print.html?variant=${seed}`;
+  const path = `${outDir}/${variantId}.pdf`;
+  console.info(`Printing variant with seed ${seed}`);
   await page.goto(url, { waitUntil: "load" });
   for (const img of await page.getByRole("img").all()) {
     await img.isVisible();
@@ -93,18 +96,18 @@ async function printVariant(
     path,
     format: "a4",
   });
-  console.info(`Printed variant ${variant_id} to file ${path}`);
+  console.info(`Printed variant with seed ${seed} to file ${path}`);
   await page.close();
 }
 
-export async function printVariants(variant_ids: string[], outDir: string, serverPort: number) {
+export async function printVariants(config: ContestConfig, outDir: string, serverPort: number) {
   const browser = await chromium.launch({ headless: true });
   const context = await browser.newContext();
   const chunkSize = 10;
-  for (let i = 0; i < variant_ids.length; i += chunkSize) {
+  for (let i = 0; i < config.variantIds.length; i += chunkSize) {
     const tasks = [];
-    for (const variant_id of variant_ids.slice(i, i + chunkSize)) {
-      tasks.push(printVariant(context, variant_id.toString(), outDir, serverPort));
+    for (const variantId of config.variantIds.slice(i, i + chunkSize)) {
+      tasks.push(printVariant(context, config.secret, variantId, outDir, serverPort));
     }
     await Promise.all(tasks);
   }
@@ -114,20 +117,23 @@ export async function printVariants(variant_ids: string[], outDir: string, serve
 
 export type PdfOptions = {
   dir: string;
+  config: string;
   outDir: string;
-  variants: string;
-  secret: string;
-  contest: string;
-  server?: boolean;
+  contestId: string;
+  server: boolean;
   port: number;
 };
 
 export default async function pdf(options: PdfOptions) {
-  const server = await pdfServer(options.dir, options.contest, options.port);
-  const variant_ids = await readVariantIds(options.variants, options.secret);
+  const config = await loadGenerationConfig(options.config);
+  const server = await pdfServer(options.dir, config[options.contestId], options.port);
 
   if (!options.server) {
-    await printVariants(variant_ids, options.outDir, options.port);
+    await printVariants(
+      config[options.contestId],
+      join(options.outDir, options.contestId),
+      options.port,
+    );
     server.close();
   }
 }

@@ -8,7 +8,7 @@ import { range } from "lodash-es";
 import z, { ZodType } from "zod";
 
 import { exportVariants } from "~/cli/export-variants";
-import readVariantIds from "~/cli/read-variant-ids";
+import loadGenerationConfig from "~/cli/load-generation-config";
 import {
   contestConverter,
   schoolConverter,
@@ -23,6 +23,7 @@ import { variantSchema } from "~/models/variant";
 import validate from "~/utils/validate";
 
 type ImportOptions = {
+  config: string;
   users?: boolean;
   schools?: boolean;
   contests?: boolean;
@@ -32,6 +33,8 @@ type ImportOptions = {
 };
 
 export default async function importContests(options: ImportOptions) {
+  const config = await loadGenerationConfig(options.config);
+
   const serviceAccount = JSON.parse(await readFile("serviceAccountKey.json", "utf-8"));
   const app = initializeApp({
     credential: cert(serviceAccount),
@@ -51,34 +54,6 @@ export default async function importContests(options: ImportOptions) {
       }),
     );
     console.info(`${res.length} contests imported!`);
-  }
-
-  if (options.all || options.variants) {
-    console.info("Importing variants...");
-    const variantIds = await readVariantIds("data/variants.json", ""); /* TODO set secret */
-    const { solutions, variants } = await exportVariants(cwd(), "contest/contest.mdx", variantIds);
-
-    const res = await Promise.all(
-      Object.entries(variants).map(async ([id, record]) => {
-        const variant = validateOrExit(variantSchema, record, { id });
-        await db.doc(`variants/${id}`).withConverter(variantConverter).set(variant);
-      }),
-    );
-    console.info(`${res.length} variants imported!`);
-    const prefix = "fibonacci-secondarie";
-    await Promise.all(
-      range(4096).map(async (i) => {
-        const suffix = Buffer.from([i / 256, i % 256])
-          .toString("hex")
-          .slice(1)
-          .toUpperCase();
-        const id = `${prefix}-${suffix}`;
-        await db.doc(`variantMapping/${id}`).withConverter(variantMappingConverter).set({
-          id,
-          variant: "0",
-        });
-      }),
-    );
   }
 
   if (options.all || options.users) {
@@ -110,7 +85,6 @@ export default async function importContests(options: ImportOptions) {
 
     const res = await Promise.all(
       schools.map(async (record: any) => {
-        console.log(record);
         const school = validateOrExit(schoolSchema.omit({ id: true }), record);
         const user = await auth.getUserByEmail(school.teacher);
         await db
@@ -126,17 +100,50 @@ export default async function importContests(options: ImportOptions) {
     console.info(`${res.length} schools imported!`);
   }
 
-  if (options.all || options.solutions) {
-    console.info("Importing solutions...");
-    const variants = JSON.parse(await readFile("data/solutions.json", "utf-8"));
+  console.log(config);
+  if (options.all || options.variants || options.solutions) {
+    for (const [contestId, contest] of Object.entries(config)) {
+      const { solutions, variants } = await exportVariants(cwd(), contest);
 
-    const res = await Promise.all(
-      Object.entries(variants).map(async ([id, record]) => {
-        const variant = validateOrExit(solutionSchema, record, { id });
-        await db.doc(`solutions/${id}`).withConverter(solutionConverter).set(variant);
-      }),
-    );
-    console.info(`${res.length} solutions imported!`);
+      if (options.all || options.variants) {
+        console.info("Importing variants...");
+
+        const res = await Promise.all(
+          Object.entries(variants).map(async ([id, record]) => {
+            const variant = validateOrExit(variantSchema, record, { id });
+            await db.doc(`variants/${id}`).withConverter(variantConverter).set(variant);
+          }),
+        );
+        console.info(`${res.length} variants imported!`);
+
+        const prefix = contestId;
+        const res2 = await Promise.all(
+          range(4096).map(async (i) => {
+            const suffix = Buffer.from([i / 256, i % 256])
+              .toString("hex")
+              .slice(1)
+              .toUpperCase();
+            const id = `${prefix}-${suffix}`;
+            await db.doc(`variantMapping/${id}`).withConverter(variantMappingConverter).set({
+              id,
+              variant: "0" /* TODO: randomizzare questa variabile */,
+            });
+          }),
+        );
+        console.info(`${res2.length} variant mappings imported!`);
+      }
+
+      if (options.all || options.solutions) {
+        console.info("Importing solutions...");
+        const res = await Promise.all(
+          Object.entries(solutions).map(async ([id, record]) => {
+            const variant = validateOrExit(solutionSchema, record, { id });
+            await db.doc(`solutions/${id}`).withConverter(solutionConverter).set(variant);
+          }),
+        );
+        console.info(`${res.length} solutions imported!`);
+      }
+    }
   }
 
   console.info("All done!");

@@ -10,6 +10,7 @@ export default function firebaseCommand() {
   command
     .command("import")
     .description("import the contests, the variants and the teachers.")
+    .option("-g, --config <config>", "Specify generation config", "data/generation.json")
     .option("-u, --users", "Import the users.")
     .option("-s, --schools", "Import the schools.")
     .option("-c, --contests", "Import the contests.")

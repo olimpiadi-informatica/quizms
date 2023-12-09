@@ -119,7 +119,6 @@ export function getAnswers(program: Program, remove: boolean) {
     for (const subId in answers[probId]) {
       const id = size(answers[probId]) == 1 ? `${probId}` : `${probId}.${subId}`;
       flatAnswers[id] = answers[probId][subId];
-      console.log(id, probId, `${probId}.${subId}`);
       flatSchema[id] = schema[probId][subId];
       flatSchema[id].id = id;
     }

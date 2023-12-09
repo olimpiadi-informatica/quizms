@@ -2,6 +2,7 @@ import { Expression, Program, Property } from "estree";
 import { builders as b } from "estree-toolkit";
 import { toJs } from "estree-util-to-js";
 
+import { ContestConfig } from "~/models/generation-config";
 import { hash } from "~/utils/random";
 
 import { getAnswers, shuffleAnswers, shuffleProblems } from "./variants";
@@ -126,7 +127,11 @@ export function parseValue(value: any, options: ParseOptions): Expression {
   throw new TypeError(`Unsupported value: ${String(value)}`);
 }
 
-export function createContestAst(entry: () => ExpressionWrapper, variant: string): Program {
+export function shuffleContest(
+  entry: () => ExpressionWrapper,
+  variant: string,
+  config?: ContestConfig,
+): Program {
   const options = {
     functionArguments: [
       {
@@ -146,13 +151,21 @@ export function createContestAst(entry: () => ExpressionWrapper, variant: string
     ),
   ]);
 
-  shuffleProblems(program, variant);
-  shuffleAnswers(program, variant);
+  if (!config || config.shuffleProblems) {
+    shuffleProblems(program, variant);
+  }
+  if (!config || config.shuffleAnswers) {
+    shuffleAnswers(program, variant);
+  }
   return program;
 }
 
-export function parseContest(entry: () => ExpressionWrapper, variant: string): string {
-  const contestAst = createContestAst(entry, variant);
+export function parseContest(
+  entry: () => ExpressionWrapper,
+  variant: string,
+  config?: ContestConfig,
+): string {
+  const contestAst = shuffleContest(entry, variant, config);
   /* TODO: read environment to decide whether to strip answers*/
   getAnswers(contestAst, true);
 

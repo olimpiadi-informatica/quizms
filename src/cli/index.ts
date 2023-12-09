@@ -39,18 +39,13 @@ function main() {
     .command("pdf")
     .description("create a PDF of the contest.")
     .argument("[directory]", "The directory of the contest.", cwd())
+    .option(
+      "-g, --config <config>",
+      "The relative path of the generation config",
+      "data/generation.json",
+    )
     .option("-d, --outDir <directory>", "The directory to output the PDF.", "pdf")
-    .option(
-      "-v, --variants <variants>",
-      "The relative path of the json containing the variant ids",
-      "data/variants.json",
-    )
-    .option("-k, --secret <secret>", "Secret to prepend to the variant ids", "")
-    .option(
-      "-c, --contest <contest>",
-      "The relative path of the contest to print.",
-      "contest/contest.mdx",
-    )
+    .option("-c, --contestId <contestId>", "The id of the contest to print", "BORTOLIN")
     .option("-s, --server", "Do not print, only serve the pages")
     .option("-p, --port <port>", "The port to use for the server.", safeParseInt, 1234)
     .action((dir, options) => void pdf({ dir, ...options }));
@@ -60,26 +55,16 @@ function main() {
     .description("generate the variants and their relative solutions.")
     .argument("[directory]", "The directory of the contest.", cwd())
     .option(
+      "-g, --config <config>",
+      "The relative path of the generation config",
+      "data/generation.json",
+    )
+    .option(
       "-d, --outDir <directory>",
       "The directory to output the variants and the solutions.",
       "variants",
     )
-    .option(
-      "-o, --outFile <outFile>",
-      "The name of the file to write the solutions in",
-      "solutions.json",
-    )
-    .option(
-      "-v, --variants <variants>",
-      "The relative path of the json containing the variant ids",
-      "data/variants.json",
-    )
-    .option("-k, --secret <secret>", "Secret to prepend to the variant ids", "")
-    .option(
-      "-c, --contest <contest>",
-      "The relative path of the contest to export solutions of.",
-      "contest/contest.mdx",
-    )
+    .option("-c, --contest <contestId>", "The id of the contest to print")
     .action((dir, options) => void exportVariantsCli({ dir, ...options }));
 
   program.addCommand(firebaseCommand());

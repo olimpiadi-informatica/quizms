@@ -6,18 +6,18 @@ import { toJs } from "estree-util-to-js";
 import { temporaryDirectory } from "tempy";
 import { InlineConfig, build, mergeConfig } from "vite";
 
-import { createContestAst } from "~/jsx-runtime/parser";
+import { shuffleContest } from "~/jsx-runtime/parser";
 import { getAnswers } from "~/jsx-runtime/variants";
+import { ContestConfig } from "~/models/generation-config";
 import { Solution } from "~/models/solution";
 import { Variant } from "~/models/variant";
 
-import readVariantIds from "./read-variant-ids";
+import loadGenerationConfig from "./load-generation-config";
 import configs from "./vite/configs";
 
 export async function exportVariants(
   dir: string,
-  contest: string,
-  variant_ids: string[],
+  config: ContestConfig,
 ): Promise<{ solutions: Record<string, Solution>; variants: Record<string, Variant> }> {
   process.env.QUIZMS_MODE = "pdf";
 
@@ -38,7 +38,7 @@ export async function exportVariants(
       outDir,
       emptyOutDir: true,
       lib: {
-        entry: contest,
+        entry: config.entry,
         fileName,
         formats: ["es"],
       },
@@ -52,8 +52,8 @@ export async function exportVariants(
 
   const solutions: Record<string, Solution> = {};
   const variants: Record<string, Variant> = {};
-  for (const variant_id of variant_ids) {
-    const variantAst = createContestAst(contestJsx, variant_id);
+  for (const variant_id of config.variantIds) {
+    const variantAst = shuffleContest(contestJsx, variant_id);
     const { answers, schema } = getAnswers(variantAst, true);
     variants[variant_id] = {
       id: variant_id,
@@ -71,25 +71,23 @@ export async function exportVariants(
 
 export type ExportVariantsOptions = {
   dir: string;
+  config: string;
   outDir: string;
-  outFile: string;
-  variants: string;
-  secret: string;
-  contest: string;
+  contestId?: string;
 };
 
 export default async function exportVariantsCli(options: ExportVariantsOptions) {
-  const variantIds = await readVariantIds(options.variants, options.secret);
-  const { solutions, variants } = await exportVariants(options.dir, options.contest, variantIds);
-
-  await mkdir(options.outDir, { recursive: true });
-
-  const solutionsFilePath = join(options.outDir, options.outFile);
-  await writeFile(solutionsFilePath, JSON.stringify(solutions), "utf-8");
-
-  for (const variantId of variantIds) {
-    const variant = variants[variantId];
-    const variantFilePath = join(options.outDir, `${variantId}.json`);
-    await writeFile(variantFilePath, JSON.stringify(variant), "utf-8");
+  const config = await loadGenerationConfig(join(options.dir, options.config));
+  const contestIds = options.contestId ? [options.contestId] : Object.keys(config);
+  for (const contestId of contestIds) {
+    const { solutions, variants } = await exportVariants(options.dir, config[contestId]);
+    const outDir = join(options.outDir, contestId);
+    await mkdir(outDir, { recursive: true });
+    const solutionsFilePath = join(outDir, "answers.json");
+    await writeFile(solutionsFilePath, JSON.stringify(solutions), "utf-8");
+    for (const [variantId, variant] of Object.entries(variants)) {
+      const variantFilePath = join(outDir, `${variantId}.json`);
+      await writeFile(variantFilePath, JSON.stringify(variant), "utf-8");
+    }
   }
 }
