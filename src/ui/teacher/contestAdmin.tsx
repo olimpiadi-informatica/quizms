@@ -12,13 +12,17 @@ import {
 import { it as dateLocaleIT } from "date-fns/locale";
 import {
   Firestore,
+  collection,
   deleteDoc,
   doc,
   getDoc,
+  getDocs,
+  query,
   runTransaction,
   serverTimestamp,
   setDoc,
   updateDoc,
+  where,
 } from "firebase/firestore";
 import { groupBy } from "lodash-es";
 
@@ -145,10 +149,22 @@ function StopContest({ school }: { school: School }) {
   const modalRef = useRef<HTMLDialogElement>(null);
 
   const [loading, setLoading] = useState(false);
+  const db = useDb();
 
-  const undo = async () => {
+  const undoContestStart = async () => {
     setLoading(true);
+
+
+    // delete all student connected to token
+    const q = query(collection(db, "students"), where("token", "==", school.token));
+
+    const students = await getDocs(q);
+    await students.forEach((student) => {
+        deleteDoc(doc(db, "students", student.id).withConverter(studentConverter));
+    });
+    
     await setSchool({ ...school, token: undefined, startingTime: undefined });
+
     setLoading(false);
   };
 
@@ -160,7 +176,7 @@ function StopContest({ school }: { school: School }) {
       <Modal ref={modalRef} title="Conferma">
         <p>Sei sicuro di voler annullare l&apos;inizio della gara?</p>
         <div className="mt-3 flex flex-row justify-center gap-3">
-          <button className="btn btn-warning" onClick={undo} disabled={loading}>
+          <button className="btn btn-warning" onClick={undoContestStart} disabled={loading}>
             <span className={classNames("loading loading-spinner", !loading && "hidden")}></span>
             Conferma
           </button>
