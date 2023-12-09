@@ -1,10 +1,13 @@
 import { readFile } from "node:fs/promises";
+import { cwd } from "node:process";
 
 import { cert, deleteApp, initializeApp } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 import { getFirestore } from "firebase-admin/firestore";
 import z, { ZodType } from "zod";
 
+import { exportVariants } from "~/cli/export-variants";
+import readVariantIds from "~/cli/read-variant-ids";
 import {
   contestConverter,
   schoolConverter,
@@ -50,7 +53,12 @@ export default async function importContests(options: ImportOptions) {
 
   if (options.all || options.variants) {
     console.info("Importing variants...");
-    const variants = JSON.parse(await readFile("data/variants.json", "utf-8"));
+    const variantIds = await readVariantIds("data/variants.json", ""); /* TODO set secret */
+    const [solutions, variants] = await exportVariants(
+      cwd(),
+      "src/contest/contest.mdx",
+      variantIds,
+    );
 
     const res = await Promise.all(
       Object.entries(variants).map(async ([id, record]) => {

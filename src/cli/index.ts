@@ -57,17 +57,17 @@ function main() {
 
   program
     .command("export-variants")
-    .description("generate the variants and export them with the answers.")
+    .description("generate the variants and their relative solutions.")
     .argument("[directory]", "The directory of the contest.", cwd())
     .option(
       "-d, --outDir <directory>",
-      "The directory to output the variants and the answers.",
+      "The directory to output the variants and the solutions.",
       "variants",
     )
     .option(
       "-o, --outFile <outFile>",
-      "The name of the file to write the answers in",
-      "answers.json",
+      "The name of the file to write the solutions in",
+      "solutions.json",
     )
     .option(
       "-v, --variants <variants>",
@@ -77,7 +77,7 @@ function main() {
     .option("-k, --secret <secret>", "Secret to prepend to the variant ids", "")
     .option(
       "-c, --contest <contest>",
-      "The relative path of the contest to export answers of.",
+      "The relative path of the contest to export solutions of.",
       "contest/contest.mdx",
     )
     .action((dir, options) => void exportVariantsCli({ dir, ...options }));

@@ -8,19 +8,17 @@ import { InlineConfig, build, mergeConfig } from "vite";
 
 import { createContestAst } from "~/jsx-runtime/parser";
 import { getAnswers } from "~/jsx-runtime/variants";
+import { Solution } from "~/models/solution";
+import { Variant } from "~/models/variant";
 
 import readVariantIds from "./read-variant-ids";
 import configs from "./vite/configs";
 
-type AnswersDict = Record<string, Record<string, string>>;
-
-type VariantsDict = Record<string, string>;
-
-export async function exportAnswers(
+export async function exportVariants(
   dir: string,
   contest: string,
   variant_ids: string[],
-): Promise<[AnswersDict, VariantsDict]> {
+): Promise<{ solutions: Record<string, Solution>; variants: Record<string, Variant> }> {
   process.env.QUIZMS_MODE = "pdf";
 
   const defaultConfig = configs("production", {
@@ -52,17 +50,26 @@ export async function exportAnswers(
   const contestURL = pathToFileURL(contestPath);
   const { default: contestJsx } = await import(/* vite-ignore */ contestURL.toString());
 
-  const answers: AnswersDict = {};
-  const variants: VariantsDict = {};
+  const solutions: Record<string, Solution> = {};
+  const variants: Record<string, Variant> = {};
   for (const variant_id of variant_ids) {
     const variantAst = createContestAst(contestJsx, variant_id);
-    answers[variant_id] = getAnswers(variantAst, true);
-    variants[variant_id] = toJs(variantAst).value;
+    const { answers, schema } = getAnswers(variantAst, true);
+    variants[variant_id] = {
+      id: variant_id,
+      schema,
+      statement: toJs(variantAst).value,
+      contest: "",
+    };
+    solutions[variant_id] = {
+      id: variant_id,
+      answers,
+    };
   }
-  return [answers, variants];
+  return { solutions, variants };
 }
 
-export type ExportAnswersOptions = {
+export type ExportVariantsOptions = {
   dir: string;
   outDir: string;
   outFile: string;
@@ -71,18 +78,18 @@ export type ExportAnswersOptions = {
   contest: string;
 };
 
-export default async function exportAnswersCli(options: ExportAnswersOptions) {
+export default async function exportVariantsCli(options: ExportVariantsOptions) {
   const variantIds = await readVariantIds(options.variants, options.secret);
-  const [answers, variants] = await exportAnswers(options.dir, options.contest, variantIds);
+  const { solutions, variants } = await exportVariants(options.dir, options.contest, variantIds);
 
   await mkdir(options.outDir, { recursive: true });
 
-  const answersFilePath = join(options.outDir, options.outFile);
-  await writeFile(answersFilePath, JSON.stringify(answers), "utf-8");
+  const solutionsFilePath = join(options.outDir, options.outFile);
+  await writeFile(solutionsFilePath, JSON.stringify(solutions), "utf-8");
 
   for (const variantId of variantIds) {
     const variant = variants[variantId];
-    const variantFilePath = join(options.outDir, `${variantId}.js`);
-    await writeFile(variantFilePath, variant, "utf-8");
+    const variantFilePath = join(options.outDir, `${variantId}.json`);
+    await writeFile(variantFilePath, JSON.stringify(variant), "utf-8");
   }
 }

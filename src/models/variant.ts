@@ -5,7 +5,6 @@ export const variantSchema = z.object({
   schema: z.record(
     z.object({
       id: z.string(),
-      index: z.number(),
       type: z.enum(["text", "number"]),
       regex: z.instanceof(RegExp).optional(),
       options: z.string().array().nonempty().optional(),
@@ -15,7 +14,7 @@ export const variantSchema = z.object({
       pointsWrong: z.number().optional(),
     }),
   ),
-  statement: z.instanceof(Uint8Array).optional(),
+  statement: z.string(),
   contest: z.string(),
 });
 

@@ -3,6 +3,7 @@ import { is, traverse } from "estree-toolkit";
 import { Node } from "estree-toolkit/dist/estree";
 import { size } from "lodash-es";
 
+import { Schema } from "~/models/variant";
 import { Rng } from "~/utils/random";
 
 export function shuffleAnswers(program: Program, variant: string) {
@@ -47,7 +48,9 @@ export function getAnswers(program: Program, remove: boolean) {
   let probId = 0,
     subId = 0,
     ansId = 0;
+  let [pointsCorrect, pointsBlank, pointsWrong] = [0, 0, 0];
   const answers: Record<string, Record<string, string>> = {};
+  const schema: Record<string, Schema> = {};
   traverse(program, {
     CallExpression(path) {
       const node = path.node!;
@@ -55,17 +58,39 @@ export function getAnswers(program: Program, remove: boolean) {
       if (isQuizmsComponent("Problem", comp)) {
         probId++;
         answers[probId.toString()] = {};
+        schema[probId.toString()] = {};
         subId = 0;
+
+        if (is.objectExpression(props)) {
+          for (const prop of props.properties) {
+            if (is.property(prop) && is.literal(prop.key) && prop.key.value == "points") {
+              if (is.arrayExpression(prop.value)) {
+                [pointsCorrect, pointsBlank, pointsWrong] = prop.value.elements.map((x) => x.value);
+              }
+            }
+          }
+        }
       }
       if (isQuizmsComponent("SubProblem", comp)) {
         subId++;
         ansId = 0;
+        schema[probId.toString()][subId.toString()] = {
+          id: "",
+          type: "text",
+          pointsCorrect,
+          pointsBlank,
+          pointsWrong,
+        };
       }
       if (isQuizmsComponent("Answer", comp) && is.objectExpression(props)) {
         ansId++;
+        const answerLabel = String.fromCharCode(64 + ansId);
+        if (schema[probId.toString()][subId.toString()].options)
+          schema[probId.toString()][subId.toString()].options!.push(answerLabel);
+        else schema[probId.toString()][subId.toString()].options = [answerLabel];
         for (const prop of props.properties) {
           if (getPropertyKey(prop) == "correct" && getPropertyVal(prop) === true) {
-            answers[probId.toString()][subId.toString()] = String.fromCharCode(64 + ansId);
+            answers[probId.toString()][subId.toString()] = answerLabel;
           }
         }
         if (remove) {
@@ -89,16 +114,17 @@ export function getAnswers(program: Program, remove: boolean) {
   });
 
   const flatAnswers: Record<string, string> = {};
+  const flatSchema: Schema = {};
   for (const probId in answers) {
     for (const subId in answers[probId]) {
-      if (size(answers[probId]) == 1) {
-        flatAnswers[`${probId}`] = answers[probId][subId];
-      } else {
-        flatAnswers[`${probId}.${subId}`] = answers[probId][subId];
-      }
+      const id = size(answers[probId]) == 1 ? `${probId}` : `${probId}.${subId}`;
+      flatAnswers[id] = answers[probId][subId];
+      console.log(id, probId, `${probId}.${subId}`);
+      flatSchema[id] = schema[probId][subId];
+      flatSchema[id].id = id;
     }
   }
-  return flatAnswers;
+  return { answers: flatAnswers, schema: flatSchema };
 }
 
 function getPropertyKey(property: Node) {
