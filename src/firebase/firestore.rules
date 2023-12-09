@@ -32,7 +32,7 @@ service cloud.firestore {
         }
 
         function isMyStudent(studentId) {
-            let student = get(/databases/$(database)/documents/students/$(studentId))
+            let student = get(/databases/$(database)/documents/students/$(studentId));
             return student != null
                 && student.data.school != null
                 && getSchool(student.data.school) != null
@@ -60,7 +60,7 @@ service cloud.firestore {
                   && school.data.token == token
                   && school.data.startingTime == request.resource.data.startingTime;
             }
-            allow list = isTeacher();
+            allow list: if isTeacher();
             allow get: if request.auth != null;
             allow create: if isTeacher() && isTeacherSchool(request.resource.data.school) && checkToken(request.resource.data.school);
         }
@@ -142,13 +142,13 @@ service cloud.firestore {
 
         match /studentRestore/{uid} {
             function canStudentCreate() {
-              let student = get(/databases/$(database)/documents/students/$(request.resource.data.studentId))
+              let student = get(/databases/$(database)/documents/students/$(request.resource.data.studentId));
               return student != null
-                  && student.data.token == request.resource.data.token
+                  && student.data.schoolId == request.resource.data.schoolId
                   && request.auth.uid == uid;
             }
             allow read: if isTeacher() || request.auth.uid == uid;
-            allow create: if canStudentCreate();
+            allow create,update: if canStudentCreate();
             allow delete: if isMyStudent(request.resource.data.studentId);
         }
 

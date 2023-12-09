@@ -36,3 +36,4 @@ export const studentRestoreSchema = z.object({
   studentId: z.string(), // identificativo dello studente a cui ci si vuole loggare
   schoolId: z.string(), // scuola dello studente
 });
+export type StudentRestore = z.infer<typeof studentRestoreSchema>;
