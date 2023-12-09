@@ -1,4 +1,4 @@
-import React, { ComponentType, ReactNode, useRef, useState } from "react";
+import React, { ComponentType, ReactNode, Suspense, useRef, useState } from "react";
 
 import { sha256 } from "@noble/hashes/sha256";
 import classNames from "classnames";
@@ -6,7 +6,16 @@ import { format } from "date-fns";
 import { it as dateLocaleIT } from "date-fns/locale";
 import { FirebaseOptions } from "firebase/app";
 import { getAuth, signOut } from "firebase/auth";
-import { Firestore, doc, getDoc, runTransaction, setDoc } from "firebase/firestore";
+import {
+  Firestore,
+  doc,
+  getDoc,
+  getDocs,
+  runTransaction,
+  setDoc,
+  updateDoc,
+} from "firebase/firestore";
+import { ErrorBoundary } from "react-error-boundary";
 
 import {
   contestConverter,
@@ -15,16 +24,18 @@ import {
   studentConverter,
   studentMappingConverter,
   studentRestoreConverter,
+  variantConverter,
   variantMappingConverter,
 } from "~/firebase/converters";
 import { useAnonymousAuth, useCollection, useDocument } from "~/firebase/hooks";
 import { FirebaseLogin, useDb } from "~/firebase/login";
 import { Student } from "~/models/student";
+import { RemoteContest } from "~/ui";
 import { hash } from "~/utils/random";
 
 import Modal from "../components/modal";
 import { Layout } from "./layout";
-import { StudentProvider } from "./provider";
+import { StudentProvider, useStudent } from "./provider";
 
 class DuplicateStudentError extends Error {
   studentId: string = "";
@@ -33,33 +44,31 @@ class DuplicateStudentError extends Error {
 
 export function FirebaseStudentLogin({
   config,
-  children,
   header,
 }: {
   config: FirebaseOptions;
-  children: ReactNode;
   header: ComponentType<any>; // TODO: rimuovimi
 }) {
   return (
     <FirebaseLogin config={config}>
-      <StudentLogin header={header}>{children}</StudentLogin>
+      <StudentLogin header={header} />
     </FirebaseLogin>
   );
 }
 
-function StudentLogin({ header, children }: { header: ComponentType<any>; children: ReactNode }) {
+function StudentLogin({ header }: { header: ComponentType<any> }) {
   const db = useDb();
 
   const user = useAnonymousAuth();
   const [contests] = useCollection("contests", contestConverter);
-  const [students] = useCollection("students", studentConverter, {
+  const [students, setStudent] = useCollection("students", studentConverter, {
     constraints: {
       uid: user.uid,
     },
     limit: 1,
   });
 
-  const [student, setStudent] = useState<Student>({
+  const [student, setLocalStudent] = useState<Student>({
     id: window.crypto.randomUUID(),
     uid: user.uid,
     personalInformation: {
@@ -75,16 +84,11 @@ function StudentLogin({ header, children }: { header: ComponentType<any>; childr
   const contest = contests.find((c) => c.id === student.contest);
 
   const [error, setError] = useState<Error>();
-
   const [loading, setLoading] = useState(false);
   const modalRef = useRef<HTMLDialogElement>(null);
 
-  if (students[0]) {
-    return (
-      <StudentInner header={header} student={students[0]}>
-        {children}
-      </StudentInner>
-    );
+  if (students[0]?.startedAt) {
+    return <StudentInner header={header} student={students[0]} setStudent={setStudent} />;
   }
 
   const start = async () => {
@@ -92,7 +96,7 @@ function StudentLogin({ header, children }: { header: ComponentType<any>; childr
     setError(undefined);
     try {
       const newStudent = await createStudent(db, { ...student });
-      setStudent(newStudent);
+      await setStudent(newStudent);
     } catch (e) {
       if (e instanceof DuplicateStudentError) {
         await createStudentRestore(db, e.studentId, e.schoolId, student);
@@ -104,14 +108,6 @@ function StudentLogin({ header, children }: { header: ComponentType<any>; childr
     setLoading(false);
   };
 
-  if (student.startedAt) {
-    return (
-      <StudentInner header={header} student={student}>
-        {children}
-      </StudentInner>
-    );
-  }
-
   return (
     <div className="my-8 flex justify-center overflow-y-auto">
       <form className="max-w-md grow p-4">
@@ -122,7 +118,8 @@ function StudentLogin({ header, children }: { header: ComponentType<any>; childr
           <select
             className="select select-bordered w-full"
             value={student.contest ?? -1}
-            onChange={(e) => setStudent({ ...student, contest: e.target.value })}
+            onChange={(e) => setLocalStudent({ ...student, contest: e.target.value })}
+            disabled={loading}
             required>
             <option value={-1} disabled>
               Seleziona una gara
@@ -149,7 +146,7 @@ function StudentLogin({ header, children }: { header: ComponentType<any>; childr
                 onChange={(e) => {
                   const info: any = student.personalInformation ?? {};
                   info[pi.name] = e.target.value;
-                  setStudent({ ...student, personalInformation: info });
+                  setLocalStudent({ ...student, personalInformation: info });
                 }}
                 value={
                   value instanceof Date
@@ -172,7 +169,7 @@ function StudentLogin({ header, children }: { header: ComponentType<any>; childr
                 type="text"
                 placeholder="Inserisci codice"
                 className="input input-bordered w-full max-w-md"
-                onChange={(e) => setStudent({ ...student, token: e.target.value })}
+                onChange={(e) => setLocalStudent({ ...student, token: e.target.value })}
                 value={student.token ?? ""}
                 required
               />
@@ -206,12 +203,12 @@ function StudentLogin({ header, children }: { header: ComponentType<any>; childr
 
 function StudentInner({
   student,
+  setStudent,
   header: Header,
-  children,
 }: {
   student: Student;
+  setStudent: (student: Student) => Promise<void>;
   header: ComponentType<any>;
-  children: ReactNode;
 }) {
   const db = useDb();
 
@@ -232,15 +229,17 @@ function StudentInner({
       contest={contest}
       school={school}
       student={student}
-      setStudent={async () => {}}
-      variant="0"
+      setStudent={setStudent} // TODO: add submission
       submit={() => {}}
-      reset={() => {}}
       logout={logout}
       terminated={false}>
       <Layout>
         <Header />
-        {children}
+        <ErrorBoundary fallback={<>La gara non è ancora iniziata</>}>
+          <Suspense fallback={<>Caricamento...</>}>
+            <ContestInner />
+          </Suspense>
+        </ErrorBoundary>
       </Layout>
     </StudentProvider>
   );
@@ -320,7 +319,6 @@ async function createStudent(db: Firestore, student: Student) {
     }
 
     trans.set(studentRef, student);
-
     trans.set(hashMappingRef, { id: hash, studentId: student.id });
   });
 
@@ -333,4 +331,14 @@ async function createStudent(db: Firestore, student: Student) {
   console.log("Mapping updated again!", student);
 
   return student;
+}
+
+function ContestInner() {
+  const { student } = useStudent();
+
+  const [variant] = useDocument("variants", student.variant!, variantConverter);
+  const blob = new Blob([variant.statement], { type: "text/javascript" });
+  const url = URL.createObjectURL(blob);
+
+  return <RemoteContest url={url} />;
 }

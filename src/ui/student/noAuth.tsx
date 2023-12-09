@@ -54,6 +54,7 @@ export function NoAuth({
       surname: "anonimo",
     },
     answers: {},
+    variant: "0",
   });
 
   useEffect(() => {
@@ -65,7 +66,10 @@ export function NoAuth({
   const start = useCallback(() => {
     const now = new Date();
     setStartTime(now);
-    setVariant((import.meta.env.PROD ? Math.random() * Number.MAX_SAFE_INTEGER : 0).toString());
+    setStudent((student) => ({
+      ...student,
+      variant: (import.meta.env.PROD ? Math.random() * Number.MAX_SAFE_INTEGER : 0).toString(),
+    }));
   }, [setStartTime, setVariant]);
 
   const mockContest: Contest = {
@@ -107,7 +111,6 @@ export function NoAuth({
       school={mockSchool}
       student={student}
       setStudent={async (s) => setStudent(s)}
-      variant={variant}
       submit={() => setSubmitted(true)}
       reset={reset}
       terminated={submitted}>

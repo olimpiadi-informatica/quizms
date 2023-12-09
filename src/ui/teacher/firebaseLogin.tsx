@@ -46,7 +46,7 @@ function TeacherLogin({ children }: { children: ReactNode }) {
 
   return (
     <div className="my-8 flex justify-center">
-      <main className="max-w-md grow p-4">
+      <form className="max-w-md grow p-4">
         <div className="form-control w-full">
           <label className="label">
             <span className="label-text text-lg">Email</span>
@@ -78,7 +78,7 @@ function TeacherLogin({ children }: { children: ReactNode }) {
             Accedi
           </button>
         </div>
-      </main>
+      </form>
     </div>
   );
 }
