@@ -2,9 +2,12 @@ import React, { Suspense, useEffect, useRef, useState } from "react";
 
 import classNames from "classnames";
 import { addMinutes, differenceInMilliseconds, differenceInSeconds } from "date-fns";
+import { doc } from "firebase/firestore";
 
-import { schoolConverter } from "~/firebase/converters";
+import { schoolConverter, studentRestoreConverter } from "~/firebase/converters";
+import { studentConverter } from "~/firebase/converters";
 import { useCollection } from "~/firebase/hooks";
+import { useDb } from "~/firebase/login";
 import { Contest } from "~/models/contest";
 import { School } from "~/models/school";
 import { randomToken } from "~/utils/random";
@@ -82,7 +85,7 @@ function StartContest(props: {
                 token: token,
               });
             }}>
-            SÌ
+            SI
           </button>
           <button className="btn btn-error">NO</button>
         </div>
@@ -112,7 +115,7 @@ function StopContest(props: {
             onClick={() =>
               props.setSchool({ ...props.school, token: undefined, startingTime: undefined })
             }>
-            SÌ
+            SI
           </button>
           <button className="btn btn-error">NO</button>
         </div>
@@ -190,13 +193,55 @@ function ContestData(props: {
   );
 }
 
+function StudentRestoreList(props: { school: School }) {
+  const { school } = props;
+  const db = useDb();
+  const studentRef = doc(db, "studentRestore").withConverter(studentConverter);
+
+  const [studentRestore, setStudentRestore] = useCollection(
+    "studentRestore",
+    studentRestoreConverter,
+    {
+      constraints: { schoolId: school.id },
+    },
+  );
+  return (
+    <>
+      {studentRestore.length > 0 && (
+        <div className="card col-span-5 bg-base-100 shadow-xl shadow-indigo-500/10">
+          <div className="card-body pb-0">
+            <h2 className="card-title">Student restore</h2>
+            {/* contest info */}
+            <div className="flex flex-row justify-between p-0">
+              {studentRestore.map((request) => {
+                const studentRef = doc(db, "students", request.studentId).withConverter(
+                  studentConverter,
+                );
+                const student = await getDoc(studentRef);
+                return (
+                  <button className="btn btn-warning btn-lg text-xl">
+                    gestisci studente {getDoc()}
+                    <p>
+                      {" "}
+                      {request.studentId} {request.id}
+                    </p>
+                    Scarica testo per prova cartacea
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
 function ContestAdmin(props: {
   school: School;
   setSchool: (school: School) => void;
   contest: Contest;
 }) {
   const { school, setSchool, contest } = props;
-
   const [time, setTime] = useState(Date.now());
   // refresh the page when the page should change
   useEffect(() => {
@@ -303,6 +348,7 @@ function ContestAdmin(props: {
           Gestisci studenti e risposte
         </button>
       </div>
+      <StudentRestoreList school={school} />
     </div>
   );
 }
