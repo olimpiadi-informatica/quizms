@@ -6,17 +6,7 @@ import { format } from "date-fns";
 import { it as dateLocaleIT } from "date-fns/locale";
 import { FirebaseOptions } from "firebase/app";
 import { getAuth, signOut } from "firebase/auth";
-import {
-  Firestore,
-  collection,
-  doc,
-  getDoc,
-  getDocs,
-  query,
-  runTransaction,
-  setDoc,
-  where,
-} from "firebase/firestore";
+import { Firestore, doc, getDoc, runTransaction, setDoc } from "firebase/firestore";
 
 import {
   contestConverter,
@@ -258,15 +248,12 @@ async function createStudent(db: Firestore, student: Student) {
   if (!schoolMapping.exists()) {
     throw new Error("Codice non valido");
   }
-  const schoolId = schoolMapping.data()?.school;
+  const schoolMappingData = schoolMapping.data();
+  student.school = schoolMappingData.school;
+  student.startedAt = schoolMappingData.startingTime;
 
-  const schoolRef = doc(db, "schools", schoolId).withConverter(schoolConverter);
-  const school = await getDoc(schoolRef);
-  if (!school.exists()) {
-    throw new Error("Scuola non trovata");
-  }
-  student.school = school.id;
-  student.startedAt = school.data().startingTime;
+  console.log({ schoolMappingData, student });
+  console.log(schoolMappingData.startingTime.toISOString());
 
   const studentRef = doc(db, "students", student.id).withConverter(studentConverter);
   await setDoc(studentRef, student);

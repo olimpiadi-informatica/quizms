@@ -12,9 +12,9 @@ export function Layout({ children }: { children: ReactNode }) {
   const { contests, schools, logout } = useTeacher();
   const instructions = contests[0].instructions;
   const modalRef = useRef<HTMLDialogElement>(null);
-  useEffect(() => {
+  /* useEffect(() => {
     modalRef.current?.showModal();
-  }, [modalRef]);
+  }, [modalRef]); */
 
   return (
     <div className="flex h-screen flex-col">
