@@ -45,7 +45,7 @@ function main() {
       "data/generation.json",
     )
     .option("-d, --outDir <directory>", "The directory to output the PDF.", "pdf")
-    .option("-c, --contestId <contestId>", "The id of the contest to print", "BORTOLIN")
+    .option("-c, --contestId <contestId>", "The id of the contest to print")
     .option("-s, --server", "Do not print, only serve the pages")
     .option("-p, --port <port>", "The port to use for the server.", safeParseInt, 1234)
     .action((dir, options) => void pdf({ dir, ...options }));
