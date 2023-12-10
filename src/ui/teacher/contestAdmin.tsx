@@ -270,6 +270,7 @@ function StudentRestoreButton({ studentRestore }: { studentRestore: StudentResto
         deleteDoc(doc(db, "studentRestore", request.id));
       }),
     );
+    modalRef.current?.close();
   };
 
   return (
