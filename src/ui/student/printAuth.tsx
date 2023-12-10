@@ -47,6 +47,7 @@ export function PrintAuth({ contestName, children }: AuthProps) {
     id: "",
     personalInformation: {},
     answers: {},
+    variant,
   };
 
   return (
@@ -55,7 +56,6 @@ export function PrintAuth({ contestName, children }: AuthProps) {
       school={mockSchool}
       student={student}
       setStudent={async () => {}}
-      variant={variant}
       submit={() => {}}
       terminated={submitted}>
       <Layout>{children}</Layout>

@@ -17,7 +17,7 @@ export function RemoteContest({ url }: { url: string }) {
     import(/* @vite-ignore */ variantUrl.href).then(({ default: contest }) => {
       setContest(() => () => contest(React, components));
     });
-  }, [url, student.variant]);
+  }, [url, student.variant, variantUrl.href]);
 
   if (Contest) return <Contest />;
   return undefined;

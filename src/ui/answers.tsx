@@ -29,17 +29,17 @@ type AnswerGroupProps = {
 };
 
 export function AnswerGroup({ children }: AnswerGroupProps) {
-  const { variant } = useStudent();
+  const { student } = useStudent();
   const { id } = useProblem();
 
   const answers = useMemo(() => {
     const answers = Children.toArray(children);
-    if (import.meta.env.PROD && variant) {
-      const rng = new Rng(`r#answers#${variant}#${id}`);
+    if (import.meta.env.PROD && student.variant) {
+      const rng = new Rng(`r#answers#${student.variant}#${id}`);
       rng.shuffle(answers);
     }
     return answers;
-  }, [variant, id, children]);
+  }, [student.variant, id, children]);
 
   return (
     <form

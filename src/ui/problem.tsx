@@ -2,7 +2,6 @@ import React, {
   ComponentType,
   ReactNode,
   createContext,
-  memo,
   useContext,
   useEffect,
   useMemo,

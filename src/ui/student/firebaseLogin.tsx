@@ -1,4 +1,4 @@
-import React, { ComponentType, ReactNode, Suspense, useEffect, useRef, useState } from "react";
+import React, { ComponentType, Suspense, useEffect, useRef, useState } from "react";
 
 import { sha256 } from "@noble/hashes/sha256";
 import classNames from "classnames";
@@ -6,16 +6,7 @@ import { differenceInMilliseconds, format } from "date-fns";
 import { it as dateLocaleIT } from "date-fns/locale";
 import { FirebaseOptions } from "firebase/app";
 import { getAuth, signOut } from "firebase/auth";
-import {
-  Firestore,
-  doc,
-  getDoc,
-  getDocs,
-  runTransaction,
-  setDoc,
-  updateDoc,
-} from "firebase/firestore";
-import { ErrorBoundary } from "react-error-boundary";
+import { Firestore, doc, getDoc, runTransaction, setDoc } from "firebase/firestore";
 
 import {
   contestConverter,
@@ -191,8 +182,8 @@ function StudentLogin({ header }: { header: ComponentType<any> }) {
 
         <Modal ref={modalRef} title="Attenzione">
           <p>
-            Il tuo account è già presente su un'altro dispositivo. Per trasferire l'accesso al
-            dispositivo corrente comunica al tuo insegnante il seguente codice di conferma:
+            Il tuo account è già presente su un&apos;altro dispositivo. Per trasferire
+            l&apos;accesso al dispositivo corrente comunica al tuo insegnante il codice seguente:
           </p>
           <div className="flex justify-center pt-3">
             <span className="pt-1 font-mono text-3xl">
@@ -233,7 +224,7 @@ function StudentInner({
       differenceInMilliseconds(school.startingTime!, new Date()) + 1000 + Math.random() * 1000,
     );
     return () => clearTimeout(id);
-  }, []);
+  }, [school.startingTime]);
   console.log("StudentInner3");
 
   return (

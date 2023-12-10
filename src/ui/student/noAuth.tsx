@@ -35,7 +35,6 @@ export function NoAuth({
   questionCount,
   children,
 }: AuthProps) {
-  const [variant, setVariant] = useLocalStorage("variant", "0");
   const [submitted, setSubmitted] = useLocalStorage("submit", false);
 
   const [startTime, setStartTime] = useLocalStorage<Date | undefined>(
@@ -70,7 +69,7 @@ export function NoAuth({
       ...student,
       variant: (import.meta.env.PROD ? Math.random() * Number.MAX_SAFE_INTEGER : 0).toString(),
     }));
-  }, [setStartTime, setVariant]);
+  }, [setStartTime, setStudent]);
 
   const mockContest: Contest = {
     id: "id-finto",
