@@ -1,4 +1,6 @@
-import { ComponentType } from "react";
+import { ComponentType, memo } from "react";
+
+import { isEqual } from "lodash-es";
 
 import { Answer, AnswerGroup, Explanation, OpenAnswer } from "./answers";
 import Blockly from "./blockly/workspaceWrapper";
@@ -13,11 +15,11 @@ export const components: Record<string, ComponentType<any>> = {
   Answer,
   AnswerGroup,
   Blockly,
-  Code,
+  Code: memo(Code),
   Contest,
   Explanation,
-  Image,
-  MathExpr,
+  Image: memo(Image),
+  MathExpr: memo(MathExpr),
   OpenAnswer,
   Problem,
   Section,

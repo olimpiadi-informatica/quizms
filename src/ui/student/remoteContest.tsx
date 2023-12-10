@@ -1,4 +1,4 @@
-import React, { ComponentType, useEffect, useState } from "react";
+import React, { ComponentType, memo, useEffect, useState } from "react";
 
 import { components } from "~/ui/mdxComponents";
 
@@ -15,9 +15,13 @@ export function RemoteContest({ url }: { url: string }) {
 
   useEffect(() => {
     import(/* @vite-ignore */ variantUrl.href).then(({ default: contest }) => {
-      setContest(() => () => contest(React, components));
+      setContest(() =>
+        memo(() => {
+          return contest(React, components);
+        }),
+      );
     });
-  }, [url, student.variant, variantUrl.href]);
+  }, [variantUrl.href]);
 
   if (Contest) return <Contest />;
   return undefined;

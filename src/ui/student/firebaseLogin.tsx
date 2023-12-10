@@ -1,4 +1,4 @@
-import React, { ComponentType, Suspense, useEffect, useRef, useState } from "react";
+import React, { ComponentType, Suspense, useEffect, useMemo, useRef, useState } from "react";
 
 import { sha256 } from "@noble/hashes/sha256";
 import classNames from "classnames";
@@ -352,8 +352,10 @@ function ContestInner() {
 
   const [variant] = useDocument("variants", student.variant!, variantConverter);
 
-  const blob = new Blob([variant.statement], { type: "text/javascript" });
-  const url = URL.createObjectURL(blob);
+  const url = useMemo(() => {
+    const blob = new Blob([variant.statement], { type: "text/javascript" });
+    return URL.createObjectURL(blob);
+  }, [variant.statement]);
 
   return <RemoteContest url={url} />;
 }
