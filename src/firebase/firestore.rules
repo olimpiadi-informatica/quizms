@@ -74,6 +74,16 @@ service cloud.firestore {
         }
 
         match /students/{student} {
+
+            function checkEndingTime(schoolId) {
+                let school = getSchool(schoolId);
+                let contest = get(/databases/$(database)/documents/contests/$(school.data.contestId));
+                let startingTime = school.data.startingTime.toMillis();
+                let totalTime = contest.data.duration * 60000 + 30000;
+                let endingTime = startingTime + totalTime;
+                return request.time.toMillis() <= endingTime;
+            }
+
             function checkToken(schoolId) {
                 let school = getSchool(schoolId);
                 return school != null
@@ -101,6 +111,8 @@ service cloud.firestore {
             function canStudentUpdate() {
                 let keys = affectedKeys();
                 return isAuthenticated(resource.data.uid)
+                    && checkToken(resource.data.school)
+                    && checkEndingTime(resource.data.school)
                     && keys.hasOnly(['answers', 'updatedAt'])
                     && hasTimestamp('updatedAt');
             }
