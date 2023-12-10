@@ -269,6 +269,7 @@ async function createStudentRestore(
     id: uid,
     studentId: studentId,
     schoolId: schoolId,
+    token: curStudent.token,
     name: curStudent.personalInformation!.name,
     surname: curStudent.personalInformation!.surname,
   });

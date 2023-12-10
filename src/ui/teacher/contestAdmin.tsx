@@ -15,7 +15,6 @@ import {
   collection,
   deleteDoc,
   doc,
-  getDoc,
   getDocs,
   query,
   runTransaction,
@@ -40,7 +39,6 @@ import { StudentRestore } from "~/models/student";
 import { hash, randomToken } from "~/utils/random";
 
 import Modal from "../components/modal";
-import modal from "../components/modal";
 import Timer from "../components/timer";
 import { useTeacher } from "./provider";
 
@@ -328,7 +326,7 @@ function StudentRestoreButton({ studentRestore }: { studentRestore: StudentResto
 function StudentRestoreList(props: { school: School }) {
   const { school } = props;
   const [studentRestore] = useCollection("studentRestore", studentRestoreConverter, {
-    constraints: { schoolId: school.id },
+    constraints: { schoolId: school.id, token: school.token ?? "" },
   });
 
   if (studentRestore.length === 0) {

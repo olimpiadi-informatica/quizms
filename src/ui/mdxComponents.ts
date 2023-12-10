@@ -1,7 +1,5 @@
 import { ComponentType, memo } from "react";
 
-import { isEqual } from "lodash-es";
-
 import { Answer, AnswerGroup, Explanation, OpenAnswer } from "./answers";
 import Blockly from "./blockly/workspaceWrapper";
 import Code from "./components/code";
