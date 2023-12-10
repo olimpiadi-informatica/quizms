@@ -43,12 +43,12 @@ service cloud.firestore {
         }
 
         match /schools/{school} {
-            function isStudentSchool(school, token) {
+            function isStudentSchool() {
                 let student = getStudent(request.auth.uid);
-                return student != null && (student.data.school == school || student.data.token == token);
+                return student != null && isAuthenticated(student.data.uid) && student.data.school == school && student.data.token == resource.data.token;
             }
 
-            allow read: if isStudentSchool(school, resource.data.token) || isTeacher();
+            allow read: if isStudentSchool() || isTeacher();
             allow update: if isAuthenticated(resource.data.teacher) && affectedKeys().hasOnly(['token', 'startingTime', 'finalized']);
         }
 
@@ -123,13 +123,13 @@ service cloud.firestore {
                 let student = getAfter(/databases/$(database)/documents/students/$(request.resource.data.studentId));
                 return student != null
                     && isAuthenticated(student.data.uid)
-                    && (canCreateByUid(student) || canCreateByHash(student));
+                    && (canCreateByUid() || canCreateByHash(student));
             }
             function canCreateTeacher() {
                 return isTeacher() && isMyStudent(request.resource.data.studentId);
             }
 
-            function canCreateByUid(student) {
+            function canCreateByUid() {
                 return isAuthenticated(id);
             }
 
@@ -144,10 +144,10 @@ service cloud.firestore {
 
         match /studentRestore/{uid} {
             function canStudentCreate() {
-              let student = get(/databases/$(database)/documents/students/$(request.resource.data.studentId));
-              return student != null
-                  && student.data.school == request.resource.data.schoolId
-                  && request.auth.uid == uid;
+                let student = get(/databases/$(database)/documents/students/$(request.resource.data.studentId));
+                return student != null
+                    && student.data.school == request.resource.data.schoolId
+                    && request.auth.uid == uid;
             }
             allow read: if isTeacher() || request.auth.uid == uid;
             allow create,update: if canStudentCreate();
@@ -168,6 +168,7 @@ service cloud.firestore {
             function canStudentReadVariant(variant) {
                 let student = getStudent(request.auth.uid);
                 return student != null
+                    && isAuthenticated(student.data.uid)
                     && student.data.variant == variant
                     && student.data.startedAt <= request.time;
             }
