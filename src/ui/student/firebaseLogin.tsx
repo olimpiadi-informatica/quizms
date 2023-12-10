@@ -215,10 +215,12 @@ function StudentInner({
   header: ComponentType<any>;
 }) {
   const db = useDb();
-
+  console.log("StudentInner1");
   const [contest] = useDocument("contests", student.contest!, contestConverter);
+  console.log("StudentInner2", student);
   const [school] = useDocument("schools", student.school!, schoolConverter);
 
+  console.log("StudentInner2");
   const logout = async () => {
     await signOut(getAuth(db.app));
     window.location.reload();
@@ -232,6 +234,7 @@ function StudentInner({
     );
     return () => clearTimeout(id);
   }, []);
+  console.log("StudentInner3");
 
   return (
     <StudentProvider
