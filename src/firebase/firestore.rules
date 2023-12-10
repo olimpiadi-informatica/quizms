@@ -130,7 +130,7 @@ service cloud.firestore {
                 return isTeacher() && isMyStudent(request.resource.data.studentId);
             }
 
-            allow get: if request.auth != null;
+            allow read: if request.auth != null;
             allow create, update: if canCreateStudent() || canCreateTeacher();
             allow delete: if isMyStudent(resource.data.studentId);
         }
@@ -146,7 +146,7 @@ service cloud.firestore {
                 return isTeacher() && isMyStudent(request.resource.data.studentId);
             }
 
-            allow get: if request.auth != null;
+            allow read: if request.auth != null;
             allow create, update: if canCreateStudent() || canCreateTeacher();
             allow delete: if isMyStudent(resource.data.studentId);
         }
