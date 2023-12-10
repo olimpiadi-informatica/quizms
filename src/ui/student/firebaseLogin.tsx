@@ -192,7 +192,7 @@ function StudentLogin({ header }: { header: ComponentType<any> }) {
         <Modal ref={modalRef} title="Attenzione">
           <p>
             Il tuo account è già presente su un'altro dispositivo. Per trasferire l'accesso al
-            dispositivo corrente comunica al tuo insegnante il codice seguente:
+            dispositivo corrente comunica al tuo insegnante il seguente codice di conferma:
           </p>
           <div className="flex justify-center pt-3">
             <span className="pt-1 font-mono text-3xl">
