@@ -119,11 +119,14 @@ service cloud.firestore {
         }
 
         match /studentMapping/{id} {
-            function canCreate() {
+            function canCreateStudent() {
                 let student = getAfter(/databases/$(database)/documents/students/$(request.resource.data.studentId));
                 return student != null
                     && isAuthenticated(student.data.uid)
                     && (canCreateByUid(student) || canCreateByHash(student));
+            }
+            function canCreateTeacher() {
+                return isTeacher() && isMyStudent(request.resource.data.studentId);
             }
 
             function canCreateByUid(student) {
@@ -136,7 +139,7 @@ service cloud.firestore {
             }
 
             allow get: if request.auth != null;
-            allow create, update: if canCreate();
+            allow create, update: if canCreateStudent() || canCreateTeacher();
         }
 
         match /studentRestore/{uid} {
