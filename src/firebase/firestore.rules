@@ -18,7 +18,7 @@ service cloud.firestore {
         }
 
         function getStudent(uid) {
-            let data = get(/databases/$(database)/documents/studentMapping/$(uid)).data;
+            let data = get(/databases/$(database)/documents/studentMappingUid/$(uid)).data;
             return get(/databases/$(database)/documents/students/$(data.studentId));
         }
 
@@ -118,24 +118,32 @@ service cloud.firestore {
             allow delete: if isTeacherSchool(resource.data.school);
         }
 
-        match /studentMapping/{id} {
+        match /studentMappingHash/{id} {
             function canCreateStudent() {
                 let student = getAfter(/databases/$(database)/documents/students/$(request.resource.data.studentId));
                 return student != null
                     && isAuthenticated(student.data.uid)
-                    && (canCreateByUid() || canCreateByHash(student));
+                    && student.data.personalInformation != null
+                    && studentHash(student.data) == id;
             }
             function canCreateTeacher() {
                 return isTeacher() && isMyStudent(request.resource.data.studentId);
             }
 
-            function canCreateByUid() {
-                return isAuthenticated(id);
-            }
+            allow get: if request.auth != null;
+            allow create, update: if canCreateStudent() || canCreateTeacher();
+            allow delete: if isMyStudent(resource.data.studentId);
+        }
 
-            function canCreateByHash(student) {
-                return student.data.personalInformation != null
-                    && studentHash(student.data) == id;
+        match /studentMappingUid/{id} {
+            function canCreateStudent() {
+                let student = getAfter(/databases/$(database)/documents/students/$(request.resource.data.studentId));
+                return student != null
+                    && isAuthenticated(student.data.uid)
+                    && isAuthenticated(id);
+            }
+            function canCreateTeacher() {
+                return isTeacher() && isMyStudent(request.resource.data.studentId);
             }
 
             allow get: if request.auth != null;
