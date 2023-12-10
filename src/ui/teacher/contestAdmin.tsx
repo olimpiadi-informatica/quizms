@@ -260,18 +260,18 @@ function StudentRestoreButton({ studentRestore }: { studentRestore: StudentResto
           updatedAt: serverTimestamp(),
         });
         const q = query(
-          collection(db, "studentMapping"),
+          collection(db, "studentMappingUid"),
           where("studentId", "==", request.studentId),
         );
         const mappings = await getDocs(q);
         mappings.forEach((mapping) => {
-          deleteDoc(doc(db, "studentMapping", mapping.id));
+          deleteDoc(doc(db, "studentMappingUid", mapping.id));
         });
 
-        await setDoc(doc(db, "studentMapping", request.id), {
+        await setDoc(doc(db, "studentMappingUid", request.id), {
           studentId: request.studentId,
         });
-        
+
       }
     }
     await reject();

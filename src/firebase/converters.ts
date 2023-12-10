@@ -23,9 +23,11 @@ import { School, SchoolMapping, schoolMappingSchema, schoolSchema } from "~/mode
 import { Solution, solutionSchema } from "~/models/solution";
 import {
   Student,
-  StudentMapping,
+  StudentMappingHash,
+  StudentMappingUid,
   StudentRestore,
-  studentMappingSchema,
+  studentMappingHashSchema,
+  studentMappingUidSchema,
   studentRestoreSchema,
   studentSchema,
 } from "~/models/student";
@@ -121,10 +123,16 @@ export const studentConverter: FirestoreDataConverter<Student> = {
   fromFirestore: (snapshot) => parse(studentSchema, snapshot),
 };
 
-export const studentMappingConverter: FirestoreDataConverter<StudentMapping> = {
+export const studentMappingHashConverter: FirestoreDataConverter<StudentMappingHash> = {
   toFirestore: (data) => convertToFirestore(data),
-  fromFirestore: (snapshot) => parse(studentMappingSchema, snapshot),
+  fromFirestore: (snapshot) => parse(studentMappingHashSchema, snapshot),
 };
+
+
+export const studentMappingUidConverter: FirestoreDataConverter<StudentMappingUid> = {
+    toFirestore: (data) => convertToFirestore(data),
+    fromFirestore: (snapshot) => parse(studentMappingUidSchema, snapshot),
+  };
 
 export const submissionConverter: FirestoreDataConverter<Submission> = {
   toFirestore(data: Submission) {
