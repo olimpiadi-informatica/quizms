@@ -9,11 +9,13 @@ export function RemoteContest({ url }: { url: string }) {
   const { student } = useStudent();
 
   const variantUrl = new URL(url, import.meta.url);
-  variantUrl.searchParams.set("variant", student.variant ?? "0");
+  if (variantUrl.protocol !== "blob:") {
+    variantUrl.searchParams.set("variant", student.variant ?? "0");
+  }
 
   useEffect(() => {
     import(/* @vite-ignore */ variantUrl.href).then(({ default: contest }) => {
-      setContest(() => contest(React, components));
+      setContest(() => () => contest(React, components));
     });
   }, [url, student.variant]);
 

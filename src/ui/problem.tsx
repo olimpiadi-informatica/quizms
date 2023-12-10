@@ -2,6 +2,7 @@ import React, {
   ComponentType,
   ReactNode,
   createContext,
+  memo,
   useContext,
   useEffect,
   useMemo,
@@ -39,11 +40,12 @@ const ProblemContext = createContext<ProblemContextProps>({
 ProblemContext.displayName = "ProblemContext";
 
 export function Problem({ id, points, statement: Statement }: ProblemProps) {
-  const { variant } = useStudent();
+  const { student } = useStudent();
 
   const variantId = useMemo(
-    () => (import.meta.env.PROD && variant ? hash(`r#problem#${variant}#${id}`) : 0),
-    [variant, id],
+    () =>
+      import.meta.env.PROD && student.variant ? hash(`r#problem#${student.variant}#${id}`) : 0,
+    [student.variant, id],
   );
 
   return (

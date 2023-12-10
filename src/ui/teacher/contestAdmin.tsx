@@ -231,11 +231,11 @@ function ContestData({ contest, school }: { school: School; contest: Contest }) 
       </p>
       <p>La gara inizierà alle ore {format(school.startingTime!, "HH:mm")}.</p>
       <p>
-        Tempo rimanente all&apos;inizio: <Timer endTime={school.startingTime} />
+        Tempo rimanente all&apos;inizio: <Timer endTime={school.startingTime!} />
       </p>
       {canUndoContest(school) && (
         <p>
-          Se ti sei sbagliato, puoi ancora annullare l&apos;inizio della gara fino a un minuto prima
+          Se ti sei sbagliato, puoi ancora annullare la gara fino a un minuto prima
           dell&apos;inizio.
         </p>
       )}

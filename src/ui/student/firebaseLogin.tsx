@@ -1,8 +1,8 @@
-import React, { ComponentType, ReactNode, Suspense, useRef, useState } from "react";
+import React, { ComponentType, ReactNode, Suspense, useEffect, useRef, useState } from "react";
 
 import { sha256 } from "@noble/hashes/sha256";
 import classNames from "classnames";
-import { format } from "date-fns";
+import { differenceInMilliseconds, format } from "date-fns";
 import { it as dateLocaleIT } from "date-fns/locale";
 import { FirebaseOptions } from "firebase/app";
 import { getAuth, signOut } from "firebase/auth";
@@ -31,6 +31,8 @@ import { useAnonymousAuth, useCollection, useDocument } from "~/firebase/hooks";
 import { FirebaseLogin, useDb } from "~/firebase/login";
 import { Student } from "~/models/student";
 import { RemoteContest } from "~/ui";
+import Loading from "~/ui/components/loading";
+import Timer from "~/ui/components/timer";
 import { hash } from "~/utils/random";
 
 import Modal from "../components/modal";
@@ -148,6 +150,7 @@ function StudentLogin({ header }: { header: ComponentType<any> }) {
                   info[pi.name] = e.target.value;
                   setLocalStudent({ ...student, personalInformation: info });
                 }}
+                disabled={loading}
                 value={
                   value instanceof Date
                     ? format(value, "P", { locale: dateLocaleIT })
@@ -171,6 +174,7 @@ function StudentLogin({ header }: { header: ComponentType<any> }) {
                 className="input input-bordered w-full max-w-md"
                 onChange={(e) => setLocalStudent({ ...student, token: e.target.value })}
                 value={student.token ?? ""}
+                disabled={loading}
                 required
               />
             </div>
@@ -212,10 +216,7 @@ function StudentInner({
 }) {
   const db = useDb();
 
-  console.log("Fetch contest", student.contest);
   const [contest] = useDocument("contests", student.contest!, contestConverter);
-
-  console.log("Fetch school", student.school);
   const [school] = useDocument("schools", student.school!, schoolConverter);
 
   const logout = async () => {
@@ -223,7 +224,15 @@ function StudentInner({
     window.location.reload();
   };
 
-  console.log(student);
+  const [started, setStarted] = useState(false);
+  useEffect(() => {
+    const id = setTimeout(
+      () => setStarted(true),
+      differenceInMilliseconds(school.startingTime!, new Date()) + 1000 + Math.random() * 1000,
+    );
+    return () => clearTimeout(id);
+  }, []);
+
   return (
     <StudentProvider
       contest={contest}
@@ -235,11 +244,21 @@ function StudentInner({
       terminated={false}>
       <Layout>
         <Header />
-        <ErrorBoundary fallback={<>La gara non è ancora iniziata</>}>
-          <Suspense fallback={<>Caricamento...</>}>
+        {!started && (
+          <div className="flex h-screen justify-center">
+            <div className="flex items-center justify-center text-2xl">
+              La gara inizierà tra
+              <span className="px-2">
+                <Timer endTime={school.startingTime!} />
+              </span>
+            </div>
+          </div>
+        )}
+        {started && (
+          <Suspense fallback={<Loading />}>
             <ContestInner />
           </Suspense>
-        </ErrorBoundary>
+        )}
       </Layout>
     </StudentProvider>
   );
@@ -337,6 +356,7 @@ function ContestInner() {
   const { student } = useStudent();
 
   const [variant] = useDocument("variants", student.variant!, variantConverter);
+
   const blob = new Blob([variant.statement], { type: "text/javascript" });
   const url = URL.createObjectURL(blob);
 
