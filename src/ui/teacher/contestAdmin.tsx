@@ -259,9 +259,19 @@ function StudentRestoreButton({ studentRestore }: { studentRestore: StudentResto
           uid: request.id,
           updatedAt: serverTimestamp(),
         });
+        const q = query(
+          collection(db, "studentMapping"),
+          where("studentId", "==", request.studentId),
+        );
+        const mappings = await getDocs(q);
+        mappings.forEach((mapping) => {
+          deleteDoc(doc(db, "studentMapping", mapping.id));
+        });
+
         await setDoc(doc(db, "studentMapping", request.id), {
           studentId: request.studentId,
         });
+        
       }
     }
     await reject();
