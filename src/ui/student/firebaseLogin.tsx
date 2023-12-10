@@ -13,8 +13,8 @@ import {
   schoolConverter,
   schoolMappingConverter,
   studentConverter,
-  studentMappingUidConverter,
   studentMappingHashConverter,
+  studentMappingUidConverter,
   studentRestoreConverter,
   variantConverter,
   variantMappingConverter,
@@ -317,7 +317,9 @@ async function createStudent(db: Firestore, student: Student) {
   console.log("School found!", student.school);
 
   const studentRef = doc(db, "students", student.id).withConverter(studentConverter);
-  const hashMappingRef = doc(db, "studentMappingHash", hash).withConverter(studentMappingHashConverter);
+  const hashMappingRef = doc(db, "studentMappingHash", hash).withConverter(
+    studentMappingHashConverter,
+  );
 
   await runTransaction(db, async (trans) => {
     const mapping = await trans.get(hashMappingRef);
@@ -335,7 +337,9 @@ async function createStudent(db: Firestore, student: Student) {
   console.log("Student updated!", student);
   console.log("Mapping updated!", student);
 
-  const mappingRef = doc(db, "studentMappingUid", student.uid!).withConverter(studentMappingUidConverter);
+  const mappingRef = doc(db, "studentMappingUid", student.uid!).withConverter(
+    studentMappingUidConverter,
+  );
   await setDoc(mappingRef, { id: student.uid, studentId: student.id });
 
   console.log("Mapping updated again!", student);

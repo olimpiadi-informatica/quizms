@@ -271,7 +271,6 @@ function StudentRestoreButton({ studentRestore }: { studentRestore: StudentResto
         await setDoc(doc(db, "studentMappingUid", request.id), {
           studentId: request.studentId,
         });
-
       }
     }
     await reject();

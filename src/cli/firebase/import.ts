@@ -35,7 +35,7 @@ type ImportOptions = {
 
 async function deleteCollection(db: Firestore, collectionPath: string) {
   const collectionRef = db.collection(collectionPath);
-  const query = collectionRef.orderBy('__name__').limit(400);
+  const query = collectionRef.orderBy("__name__").limit(400);
 
   return new Promise<void>((resolve, reject) => {
     deleteQueryBatch(db, query, resolve).catch(reject);
@@ -181,8 +181,8 @@ export default async function importContests(options: ImportOptions) {
             const id = `${prefix}-${suffix}`;
             await db.doc(`variantMapping/${id}`).withConverter(variantMappingConverter).set({
               id,
-              variant: "0" /* TODO: randomizzare questa variabile *///,
-            /*});
+              variant: "0" /* TODO: randomizzare questa variabile */ //,
+        /*});
           }),
         );
         console.info(`${res2.length} variant mappings imported!`);*/

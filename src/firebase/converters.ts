@@ -128,11 +128,10 @@ export const studentMappingHashConverter: FirestoreDataConverter<StudentMappingH
   fromFirestore: (snapshot) => parse(studentMappingHashSchema, snapshot),
 };
 
-
 export const studentMappingUidConverter: FirestoreDataConverter<StudentMappingUid> = {
-    toFirestore: (data) => convertToFirestore(data),
-    fromFirestore: (snapshot) => parse(studentMappingUidSchema, snapshot),
-  };
+  toFirestore: (data) => convertToFirestore(data),
+  fromFirestore: (snapshot) => parse(studentMappingUidSchema, snapshot),
+};
 
 export const submissionConverter: FirestoreDataConverter<Submission> = {
   toFirestore(data: Submission) {
