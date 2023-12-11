@@ -166,7 +166,10 @@ service cloud.firestore {
         match /studentRestore/{uid} {
             function canStudentCreate() {
                 let student = get(/databases/$(database)/documents/students/$(request.resource.data.studentId));
-                return student != null
+                let school = getSchool(request.resource.data.schoolId);
+                return school != null
+                    && student != null
+                    && school.data.token == request.resource.data.token
                     && student.data.school == request.resource.data.schoolId
                     && request.auth.uid == uid;
             }
