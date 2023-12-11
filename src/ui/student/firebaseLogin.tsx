@@ -36,6 +36,8 @@ class DuplicateStudentError extends Error {
   schoolId: string = "";
 }
 
+class InvalidTokenError extends Error {}
+
 export function FirebaseStudentLogin({
   config,
   header,
@@ -93,8 +95,12 @@ function StudentLogin({ header }: { header: ComponentType<any> }) {
       await setStudent(newStudent);
     } catch (e) {
       if (e instanceof DuplicateStudentError) {
-        await createStudentRestore(db, e.studentId, e.schoolId, student);
-        modalRef.current?.showModal();
+        try {
+          await createStudentRestore(db, e.studentId, e.schoolId, student);
+          modalRef.current?.showModal();
+        } catch (e) {
+          setError(e as Error);
+        }
       } else {
         setError(e as Error);
       }
@@ -261,24 +267,36 @@ async function createStudentRestore(
   schoolId: string,
   curStudent: Omit<Student, "id">,
 ) {
+  // In this case the users want to log in as an already existing student
+  // If it fails, it means that the token is too old
   const auth = getAuth(db.app);
   const uid = auth.currentUser!.uid;
   console.log("createStudentRestore", uid, studentId, schoolId, curStudent);
 
-  await setDoc(doc(db, "studentRestore", uid).withConverter(studentRestoreConverter), {
-    id: uid,
-    studentId: studentId,
-    schoolId: schoolId,
-    token: curStudent.token,
-    name: curStudent.personalInformation!.name,
-    surname: curStudent.personalInformation!.surname,
-  });
+  try {
+    await setDoc(doc(db, "studentRestore", uid).withConverter(studentRestoreConverter), {
+      id: uid,
+      studentId: studentId,
+      schoolId: schoolId,
+      token: curStudent.token,
+      name: curStudent.personalInformation!.name,
+      surname: curStudent.personalInformation!.surname,
+    });
+  } catch (e) {
+    throw new InvalidTokenError("Codice scaduto");
+  }
   console.log("createStudentRestore1");
 }
 
 async function createStudent(db: Firestore, student: Student) {
+  // to create the student we first need to find
+  // - the variant assigned to the student
+  // - the school of the student
+  // Then, we need to check that there is no other student with the same personalInformation and token already in the db
   student.id = window.crypto.randomUUID();
 
+  // Get the variant assigned to the student
+  // An entry should always exists in variantMapping
   const hash = [
     ...sha256(
       [
@@ -304,12 +322,14 @@ async function createStudent(db: Firestore, student: Student) {
 
   console.log("Variant found!", student.variant);
 
+  // Check that the token exists and get the school id (needed to create the student)
+  // If the mapping exists, the token can still be too old
   const schoolMappingRef = doc(db, "schoolMapping", student.token!).withConverter(
     schoolMappingConverter,
   );
   const schoolMapping = await getDoc(schoolMappingRef);
   if (!schoolMapping.exists()) {
-    throw new Error("Codice non valido");
+    throw new InvalidTokenError("Codice non valido");
   }
   const schoolMappingData = schoolMapping.data();
   student.school = schoolMappingData.school;
@@ -317,34 +337,41 @@ async function createStudent(db: Firestore, student: Student) {
 
   console.log("School found!", student.school);
 
+  // Try to create the new student:
+  // - check that there is no identical hash already in "studentMappingHash"
+  // - create the student
+  // - create the mappings to the student (uid -> studentId and hash -> studentId)
+  // If we fail creating the student, it means that the token is too old (since it actually exists in SchoolMapping)
   const studentRef = doc(db, "students", student.id).withConverter(studentConverter);
   const hashMappingRef = doc(db, "studentMappingHash", hash).withConverter(
     studentMappingHashConverter,
   );
+  const uidMappingRef = doc(db, "studentMappingUid", student.uid!).withConverter(
+    studentMappingUidConverter,
+  );
+  try {
+    await runTransaction(db, async (trans) => {
+      const mapping = await trans.get(hashMappingRef);
+      if (mapping.exists()) {
+        const duplicateError = new DuplicateStudentError("Studente già registrato");
+        duplicateError.studentId = mapping.data().studentId;
+        duplicateError.schoolId = student.school!;
+        throw duplicateError;
+      }
 
-  await runTransaction(db, async (trans) => {
-    const mapping = await trans.get(hashMappingRef);
-    if (mapping.exists()) {
-      const duplicateError = new DuplicateStudentError("Studente già registrato");
-      duplicateError.studentId = mapping.data().studentId;
-      duplicateError.schoolId = student.school!;
-      throw duplicateError;
+      trans.set(studentRef, student);
+      trans.set(hashMappingRef, { id: hash, studentId: student.id });
+      trans.set(uidMappingRef, { id: student.uid, studentId: student.id });
+    });
+  } catch (e) {
+    if (e instanceof DuplicateStudentError) {
+      throw e;
     }
-
-    trans.set(studentRef, student);
-    trans.set(hashMappingRef, { id: hash, studentId: student.id });
-  });
+    throw new InvalidTokenError("Codice scaduto");
+  }
 
   console.log("Student updated!", student);
   console.log("Mapping updated!", student);
-
-  const mappingRef = doc(db, "studentMappingUid", student.uid!).withConverter(
-    studentMappingUidConverter,
-  );
-  await setDoc(mappingRef, { id: student.uid, studentId: student.id });
-
-  console.log("Mapping updated again!", student);
-
   return student;
 }
 
