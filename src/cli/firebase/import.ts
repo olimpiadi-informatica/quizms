@@ -4,7 +4,6 @@ import { cwd } from "node:process";
 import { cert, deleteApp, initializeApp } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 import { Firestore, Query, getFirestore } from "firebase-admin/firestore";
-import { range } from "lodash-es";
 import z, { ZodType } from "zod";
 
 import { exportVariants } from "~/cli/export-variants";
@@ -14,7 +13,6 @@ import {
   schoolConverter,
   solutionConverter,
   variantConverter,
-  variantMappingConverter,
 } from "~/firebase/convertersAdmin";
 import { contestSchema } from "~/models/contest";
 import { schoolSchema } from "~/models/school";

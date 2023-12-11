@@ -1,5 +1,6 @@
 import React, { Suspense, useEffect, useRef, useState } from "react";
 
+import { sha256 } from "@noble/hashes/sha256";
 import classNames from "classnames";
 import {
   addMinutes,
@@ -28,6 +29,8 @@ import { groupBy } from "lodash-es";
 import {
   schoolConverter,
   schoolMappingConverter,
+  studentMappingHashConverter,
+  studentMappingUidConverter,
   studentRestoreConverter,
 } from "~/firebase/converters";
 import { studentConverter } from "~/firebase/converters";
@@ -35,7 +38,7 @@ import { useCollection } from "~/firebase/hooks";
 import { useDb } from "~/firebase/login";
 import { Contest } from "~/models/contest";
 import { School } from "~/models/school";
-import { StudentRestore } from "~/models/student";
+import { Student, StudentRestore } from "~/models/student";
 import { hash, randomToken } from "~/utils/random";
 
 import Modal from "../components/modal";
@@ -143,6 +146,23 @@ async function generateToken(db: Firestore, prevSchool: School) {
   return school;
 }
 
+function studentHash(student: Student) {
+  return [
+    ...sha256(
+      [
+        student.personalInformation!.name,
+        student.personalInformation!.surname,
+        student.personalInformation!.classYear,
+        student.personalInformation!.classSection,
+        student.token,
+      ].join("$"),
+    ),
+  ]
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("")
+    .toUpperCase();
+}
+
 function StopContest({ school }: { school: School }) {
   const { setSchool } = useTeacher();
   const modalRef = useRef<HTMLDialogElement>(null);
@@ -161,9 +181,21 @@ function StopContest({ school }: { school: School }) {
     );
 
     const students = await getDocs(q);
-    await students.forEach((student) => {
+    await students.forEach(async (student) => {
+      await deleteDoc(
+        doc(db, "studentMappingUid", student.data().uid).withConverter(studentMappingUidConverter),
+      );
+      await deleteDoc(
+        doc(
+          db,
+          "studentMappingHash",
+          studentHash({ id: student.id, ...student.data() }),
+        ).withConverter(studentMappingHashConverter),
+      );
+    });
+    await students.forEach(async (student) => {
       console.log(student.id);
-      deleteDoc(doc(db, "students", student.id).withConverter(studentConverter));
+      await deleteDoc(doc(db, "students", student.id).withConverter(studentConverter));
     });
 
     await setSchool({ ...school, token: undefined, startingTime: undefined });
