@@ -19,6 +19,7 @@ import z, {
 } from "zod";
 
 import { Contest, contestSchema } from "~/models/contest";
+import { Pdf, pdfSchema } from "~/models/pdf";
 import { School, SchoolMapping, schoolMappingSchema, schoolSchema } from "~/models/school";
 import { Solution, solutionSchema } from "~/models/solution";
 import {
@@ -32,6 +33,7 @@ import {
   studentSchema,
 } from "~/models/student";
 import { Submission, submissionSchema } from "~/models/submission";
+import { ZodBytes } from "~/models/types";
 import { Variant, VariantMapping, variantMappingSchema, variantSchema } from "~/models/variant";
 import validate from "~/utils/validate";
 
@@ -59,7 +61,12 @@ function toFirebaseSchema(schema: ZodTypeAny): ZodTypeAny {
       .transform((ts) => ts.toDate())
       .pipe(schema);
   }
-  // TODO: bytes
+  if (schema instanceof ZodBytes) {
+    return z
+      .custom<Bytes>((bytes) => bytes instanceof Bytes)
+      .transform((bytes) => bytes.toUint8Array())
+      .pipe(schema);
+  }
   // TODO: regex
 
   if (schema instanceof ZodObject) {
@@ -87,6 +94,11 @@ function parse<T>(schema: ZodType<T, any, any>, snapshot: DocumentSnapshot): T {
   const data = { ...snapshot.data(), id: snapshot.id };
   return validate(toFirebaseSchema(schema), data);
 }
+
+export const pdfConverter: FirestoreDataConverter<Pdf> = {
+  toFirestore: (data) => convertToFirestore(data),
+  fromFirestore: (snapshot) => parse(pdfSchema, snapshot),
+};
 
 export const contestConverter: FirestoreDataConverter<Contest> = {
   toFirestore: (data) => convertToFirestore(data),
