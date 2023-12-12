@@ -50,6 +50,7 @@
     "mermaid-isomorphic": "^2.1",
     "mini-svg-data-uri": "^1.4",
     "papaparse": "^5.4.1",
+    "pdf-lib": "^1.17.1",
     "playwright": "^1.36",
     "prop-types": "^15.8",
     "pure-rand": "^6.0",

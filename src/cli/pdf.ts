@@ -1,7 +1,10 @@
-import { join } from "node:path";
+import { readFileSync } from "node:fs";
+import { mkdir, writeFile } from "node:fs/promises";
+import { dirname, join } from "node:path";
 import { pathToFileURL } from "node:url";
 
 import express from "express";
+import { PDFDocument } from "pdf-lib";
 import { BrowserContext, chromium } from "playwright";
 import { temporaryDirectory } from "tempy";
 import { InlineConfig, build, mergeConfig } from "vite";
@@ -77,15 +80,12 @@ async function pdfServer(dir: string, config: ContestConfig, port: number) {
 
 async function printVariant(
   context: BrowserContext,
-  secret: string,
-  variantId: string,
-  outDir: string,
+  seed: string,
+  path: string,
   serverPort: number,
 ) {
   const page = await context.newPage();
-  const seed = `${secret}${variantId}`;
   const url = `localhost:${serverPort}/print.html?variant=${seed}`;
-  const path = `${outDir}/${variantId}.pdf`;
   console.info(`Printing variant with seed ${seed}`);
   await page.goto(url, { waitUntil: "load" });
   for (const img of await page.getByRole("img").all()) {
@@ -105,14 +105,61 @@ export async function printVariants(config: ContestConfig, outDir: string, serve
   const context = await browser.newContext();
   const chunkSize = 10;
   for (let i = 0; i < config.variantIds.length; i += chunkSize) {
-    const tasks = [];
-    for (const variantId of config.variantIds.slice(i, i + chunkSize)) {
-      tasks.push(printVariant(context, config.secret, variantId, outDir, serverPort));
-    }
-    await Promise.all(tasks);
+    await Promise.all(
+      config.variantIds.slice(i, i + chunkSize).map(async (variantId) => {
+        const seed = `${config.secret}${variantId}`;
+        const path = join(outDir, "raw", `${variantId}.pdf`);
+        await printVariant(context, seed, path, serverPort);
+      }),
+    );
   }
   await context.close();
   await browser.close();
+}
+
+async function addText(
+  inputPath: string,
+  outputPath: string,
+  variantId: string,
+  contestName: string,
+) {
+  const pdfFile = readFileSync(inputPath);
+
+  const doc = await PDFDocument.load(pdfFile);
+  const pages = doc.getPages();
+  const fontOptions = {
+    size: 17,
+  };
+  for (const pageNum in pages) {
+    console.log(pageNum, typeof pageNum);
+    const page = pages[pageNum];
+    const { width, height } = page.getSize();
+    page.drawText((parseInt(pageNum) + 1).toString(), {
+      x: 10,
+      y: 10,
+      ...fontOptions,
+    });
+    page.drawText(`${contestName} - Variante ${variantId}`, {
+      x: 10,
+      y: height - fontOptions.size - 10,
+      ...fontOptions,
+    });
+  }
+  await mkdir(dirname(outputPath), { recursive: true });
+  await writeFile(outputPath, await doc.save());
+}
+
+async function addAllText(config: ContestConfig, outDir: string) {
+  const chunkSize = 10;
+  for (let i = 0; i < config.variantIds.length; i += chunkSize) {
+    await Promise.all(
+      config.variantIds.slice(i, i + chunkSize).map(async (variantId) => {
+        const inputPath = join(outDir, config.id, "raw", `${variantId}.pdf`);
+        const outputPath = join(outDir, config.id, "final", `${variantId}.pdf`);
+        await addText(inputPath, outputPath, variantId, config.name);
+      }),
+    );
+  }
 }
 
 export type PdfOptions = {
@@ -126,14 +173,16 @@ export type PdfOptions = {
 
 export default async function pdf(options: PdfOptions) {
   const config = await loadGenerationConfig(options.config);
-  const server = await pdfServer(options.dir, config[options.contestId], options.port);
+  const contest = config[options.contestId];
+  //const server = await pdfServer(options.dir, contest, options.port);
 
   if (!options.server) {
-    await printVariants(
-      config[options.contestId],
-      join(options.outDir, options.contestId),
-      options.port,
-    );
-    server.close();
+    //await printVariants(
+    //contest,
+    //join(options.outDir, options.contestId),
+    //options.port,
+    //);
+    addAllText(contest, options.outDir);
+    //server.close();
   }
 }

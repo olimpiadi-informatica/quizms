@@ -3,6 +3,7 @@ import z from "zod";
 export const generationConfigSchema = z.record(
   z.object({
     id: z.string(),
+    name: z.string(),
     variantIds: z.coerce.string().array(),
     secret: z.string(),
     entry: z.string(),
