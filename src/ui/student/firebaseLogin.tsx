@@ -91,6 +91,11 @@ function StudentLogin({ header }: { header: ComponentType<any> }) {
     return <StudentInner header={header} student={students[0]} setStudent={setStudent} />;
   }
 
+  const completed =
+    Object.keys(contest?.personalInformation ?? {}).every(
+      (p) => student.personalInformation?.[p],
+    ) && !!student.token;
+
   const start = async () => {
     setLoading(true);
     setError(undefined);
@@ -187,7 +192,7 @@ function StudentLogin({ header }: { header: ComponentType<any> }) {
                   className="btn btn-success"
                   onClick={start}
                   type="button"
-                  disabled={loading}>
+                  disabled={loading || !completed}>
                   <span
                     className={classNames("loading loading-spinner", !loading && "hidden")}></span>
                   Inizia
@@ -195,19 +200,18 @@ function StudentLogin({ header }: { header: ComponentType<any> }) {
               </div>
             </>
           )}
-
-          <Modal ref={modalRef} title="Attenzione">
-            <p>
-              Il tuo account è già presente su un&apos;altro dispositivo. Per trasferire
-              l&apos;accesso al dispositivo corrente comunica al tuo insegnante il codice seguente:
-            </p>
-            <div className="flex justify-center pt-3">
-              <span className="pt-1 font-mono text-3xl">
-                {String(hash(getAuth(db.app).currentUser!.uid) % 1000).padStart(3, "0")}
-              </span>
-            </div>
-          </Modal>
         </form>
+        <Modal ref={modalRef} title="Attenzione">
+          <p>
+            Il tuo account è già presente su un&apos;altro dispositivo. Per trasferire
+            l&apos;accesso al dispositivo corrente comunica al tuo insegnante il codice seguente:
+          </p>
+          <div className="flex justify-center pt-3">
+            <span className="pt-1 font-mono text-3xl">
+              {String(hash(getAuth(db.app).currentUser!.uid) % 1000).padStart(3, "0")}
+            </span>
+          </div>
+        </Modal>
       </div>
     </div>
   );
