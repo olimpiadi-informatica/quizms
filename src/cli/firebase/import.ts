@@ -4,6 +4,7 @@ import { cwd } from "node:process";
 import { cert, deleteApp, initializeApp } from "firebase-admin/app";
 import { Auth, getAuth } from "firebase-admin/auth";
 import { Firestore, Query, getFirestore } from "firebase-admin/firestore";
+import { range } from "lodash-es";
 import z, { ZodType } from "zod";
 
 import { exportVariants } from "~/cli/export-variants";
@@ -14,9 +15,11 @@ import {
   solutionConverter,
   teacherConverter,
   variantConverter,
+  variantMappingConverter,
 } from "~/firebase/convertersAdmin";
 import { contestSchema } from "~/models/contest";
 import { schoolSchema } from "~/models/school";
+import { Rng } from "~/utils/random";
 import validate from "~/utils/validate";
 
 type ImportOptions = {
@@ -174,13 +177,20 @@ export default async function importContests(options: ImportOptions) {
   }
 
   if (options.all || options.variants || options.solutions) {
-    for (const contest of Object.values(config)) {
-      if (options.delete) {
+    if (options.delete) {
+      if (options.all || options.variants) {
         console.info("Deleting variants...");
         await deleteCollection(db, "variants");
-        //await deleteCollection(db, "variantMapping");
+        await deleteCollection(db, "variantMapping");
         console.info("Deleted variants!");
       }
+      if (options.all || options.solutions) {
+        console.info("Deleting solutions...");
+        await deleteCollection(db, "solutions");
+        console.info("Deleted solutions!");
+      }
+    }
+    for (const contest of Object.values(config)) {
       const { solutions, variants } = await exportVariants(cwd(), contest);
 
       if (options.all || options.variants) {
@@ -193,8 +203,9 @@ export default async function importContests(options: ImportOptions) {
         );
         console.info(`${res.length} variants imported!`);
 
-        /*console.info("Importing variant mappings...");
-        const prefix = contestId;
+        console.info("Importing variant mappings...");
+        const prefix = contest.id;
+        const rng = new Rng(`${contest.secret}${contest.id}`);
         const res2 = await Promise.all(
           range(4096).map(async (i) => {
             const suffix = Buffer.from([i / 256, i % 256])
@@ -202,21 +213,22 @@ export default async function importContests(options: ImportOptions) {
               .slice(1)
               .toUpperCase();
             const id = `${prefix}-${suffix}`;
-            await db.doc(`variantMapping/${id}`).withConverter(variantMappingConverter).set({
-              id,
-              variant: "0" /* TODO: randomizzare questa variabile */ //,
-        /*});
+            await db
+              .doc(`variantMapping/${id}`)
+              .withConverter(variantMappingConverter)
+              .set({
+                id,
+                variant:
+                  contest.variantIds[
+                    rng.randInt(0, contest.variantIds.length)
+                  ] /* TODO: randomizzare questa variabile */, //,
+              });
           }),
         );
-        console.info(`${res2.length} variant mappings imported!`);*/
+        console.info(`${res2.length} variant mappings imported!`);
       }
 
       if (options.all || options.solutions) {
-        if (options.delete) {
-          console.info("Deleting solutions...");
-          await deleteCollection(db, "solutions");
-          console.info("Deleted solutions!");
-        }
         console.info("Importing solutions...");
         const res = await Promise.all(
           Object.entries(solutions).map(async ([id, solution]) => {

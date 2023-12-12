@@ -13,6 +13,7 @@ export default async function loadGenConfig(configPath: string) {
   const configJson: any = await readJson(configPath);
   for (const contestId of Object.keys(configJson)) {
     const contest = configJson[contestId];
+    contest.id = contestId;
     if (typeof contest.variantIds == "string") {
       contest.variantIds = await readJson(contest.variantIds);
     }
