@@ -110,96 +110,102 @@ function StudentLogin({ header }: { header: ComponentType<any> }) {
   };
 
   return (
-    <div className="my-8 flex justify-center overflow-y-auto">
-      <form className="max-w-md grow p-4">
-        <div className="form-control w-full">
-          <label className="label">
-            <span className="label-text text-lg">Gara</span>
-          </label>
-          <select
-            className="select select-bordered w-full"
-            value={student.contest ?? -1}
-            onChange={(e) => setLocalStudent({ ...student, contest: e.target.value })}
-            disabled={loading}
-            required>
-            <option value={-1} disabled>
-              Seleziona una gara
-            </option>
-            {contests.map((contest) => (
-              <option key={contest.id} value={contest.id}>
-                {contest.name}
+    <div className="h-full py-8">
+      <div className="flex h-full justify-center overflow-y-auto">
+        <form className="max-w-md grow p-4">
+          <div className="form-control w-full">
+            <label className="label">
+              <span className="label-text text-lg">Gara</span>
+            </label>
+            <select
+              className="select select-bordered w-full"
+              value={student.contest ?? -1}
+              onChange={(e) => setLocalStudent({ ...student, contest: e.target.value })}
+              disabled={loading}
+              required>
+              <option value={-1} disabled>
+                Seleziona una gara
               </option>
-            ))}
-          </select>
-        </div>
-
-        {contest?.personalInformation.map((pi) => {
-          const value = student.personalInformation?.[pi.name];
-          return (
-            <div key={pi.name} className="form-control w-full">
-              <label className="label">
-                <span className="label-text text-lg">{pi.label}</span>
-              </label>
-              <input
-                type={pi.type}
-                placeholder={"Inserisci " + pi.label}
-                className="input input-bordered w-full max-w-md"
-                onChange={(e) => {
-                  const info: any = student.personalInformation ?? {};
-                  info[pi.name] = e.target.value;
-                  setLocalStudent({ ...student, personalInformation: info });
-                }}
-                disabled={loading}
-                value={
-                  value instanceof Date
-                    ? format(value, "P", { locale: dateLocaleIT })
-                    : (value as string) ?? ""
-                }
-                required
-              />
-            </div>
-          );
-        })}
-
-        {contest && (
-          <>
-            <div className="form-control w-full">
-              <label className="label">
-                <span className="label-text text-lg">Codice</span>
-              </label>
-              <input
-                type="text"
-                placeholder="Inserisci codice"
-                className="input input-bordered w-full max-w-md"
-                onChange={(e) => setLocalStudent({ ...student, token: e.target.value })}
-                value={student.token ?? ""}
-                disabled={loading}
-                required
-              />
-            </div>
-            <span className="pt-1 text-error">{error?.message ?? <>&nbsp;</>}</span>
-            <div className="flex justify-center pt-3">
-              <button className="btn btn-success" onClick={start} type="button" disabled={loading}>
-                <span
-                  className={classNames("loading loading-spinner", !loading && "hidden")}></span>
-                Inizia
-              </button>
-            </div>
-          </>
-        )}
-
-        <Modal ref={modalRef} title="Attenzione">
-          <p>
-            Il tuo account è già presente su un&apos;altro dispositivo. Per trasferire
-            l&apos;accesso al dispositivo corrente comunica al tuo insegnante il codice seguente:
-          </p>
-          <div className="flex justify-center pt-3">
-            <span className="pt-1 font-mono text-3xl">
-              {String(hash(getAuth(db.app).currentUser!.uid) % 1000).padStart(3, "0")}
-            </span>
+              {contests.map((contest) => (
+                <option key={contest.id} value={contest.id}>
+                  {contest.name}
+                </option>
+              ))}
+            </select>
           </div>
-        </Modal>
-      </form>
+
+          {contest?.personalInformation.map((pi) => {
+            const value = student.personalInformation?.[pi.name];
+            return (
+              <div key={pi.name} className="form-control w-full">
+                <label className="label">
+                  <span className="label-text text-lg">{pi.label}</span>
+                </label>
+                <input
+                  type={pi.type}
+                  placeholder={"Inserisci " + pi.label}
+                  className="input input-bordered w-full max-w-md"
+                  onChange={(e) => {
+                    const info: any = student.personalInformation ?? {};
+                    info[pi.name] = e.target.value;
+                    setLocalStudent({ ...student, personalInformation: info });
+                  }}
+                  disabled={loading}
+                  value={
+                    value instanceof Date
+                      ? format(value, "P", { locale: dateLocaleIT })
+                      : (value as string) ?? ""
+                  }
+                  required
+                />
+              </div>
+            );
+          })}
+
+          {contest && (
+            <>
+              <div className="form-control w-full">
+                <label className="label">
+                  <span className="label-text text-lg">Codice</span>
+                </label>
+                <input
+                  type="text"
+                  placeholder="Inserisci codice"
+                  className="input input-bordered w-full max-w-md"
+                  onChange={(e) => setLocalStudent({ ...student, token: e.target.value })}
+                  value={student.token ?? ""}
+                  disabled={loading}
+                  required
+                />
+              </div>
+              <span className="pt-1 text-error">{error?.message ?? <>&nbsp;</>}</span>
+              <div className="flex justify-center pt-3">
+                <button
+                  className="btn btn-success"
+                  onClick={start}
+                  type="button"
+                  disabled={loading}>
+                  <span
+                    className={classNames("loading loading-spinner", !loading && "hidden")}></span>
+                  Inizia
+                </button>
+              </div>
+            </>
+          )}
+
+          <Modal ref={modalRef} title="Attenzione">
+            <p>
+              Il tuo account è già presente su un&apos;altro dispositivo. Per trasferire
+              l&apos;accesso al dispositivo corrente comunica al tuo insegnante il codice seguente:
+            </p>
+            <div className="flex justify-center pt-3">
+              <span className="pt-1 font-mono text-3xl">
+                {String(hash(getAuth(db.app).currentUser!.uid) % 1000).padStart(3, "0")}
+              </span>
+            </div>
+          </Modal>
+        </form>
+      </div>
     </div>
   );
 }
