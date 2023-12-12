@@ -1,4 +1,4 @@
-import React, { Suspense, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import { sha256 } from "@noble/hashes/sha256";
 import classNames from "classnames";
@@ -34,8 +34,8 @@ import {
   studentRestoreConverter,
 } from "~/firebase/converters";
 import { studentConverter } from "~/firebase/converters";
-import { useCollection } from "~/firebase/hooks";
 import { useDb } from "~/firebase/login";
+import { useCollectionSnapshot } from "~/firebase/snapshotHooks";
 import { Contest } from "~/models/contest";
 import { School } from "~/models/school";
 import { Student, StudentRestore } from "~/models/student";
@@ -118,7 +118,7 @@ function StartContest({ school }: { school: School }) {
 
 async function generateToken(db: Firestore, prevSchool: School) {
   const token = randomToken();
-  const startingTime = roundToNearestMinutes(addSeconds(addMinutes(new Date(), 30), 30));
+  const startingTime = roundToNearestMinutes(addSeconds(addMinutes(new Date(), 1), 30));
 
   const school: School = {
     ...prevSchool,
@@ -278,11 +278,14 @@ function StudentRestoreButton({ studentRestore }: { studentRestore: StudentResto
 
   const modalRef = useRef<HTMLDialogElement>(null);
   const [code, setCode] = useState("");
+  const [loading, setLoading] = useState(false);
+
   const targetCodes = studentRestore.map((request) =>
     String(hash(request.id) % 1000).padStart(3, "0"),
   );
 
   const approve = async () => {
+    setLoading(true);
     for (const request of studentRestore) {
       if (code == String(hash(request.id) % 1000).padStart(3, "0")) {
         await updateDoc(doc(db, "students", request.studentId).withConverter(studentConverter), {
@@ -303,6 +306,8 @@ function StudentRestoreButton({ studentRestore }: { studentRestore: StudentResto
         });
       }
     }
+    setLoading(false);
+
     await reject();
   };
 
@@ -344,6 +349,7 @@ function StudentRestoreButton({ studentRestore }: { studentRestore: StudentResto
             onClick={approve}
             disabled={!targetCodes.includes(code)}
             type="button">
+            <span className={classNames("loading loading-spinner", !loading && "hidden")} />
             Approva
           </button>
           <button className="btn" onClick={reject}>
@@ -357,7 +363,7 @@ function StudentRestoreButton({ studentRestore }: { studentRestore: StudentResto
 
 function StudentRestoreList(props: { school: School }) {
   const { school } = props;
-  const [studentRestore] = useCollection("studentRestore", studentRestoreConverter, {
+  const studentRestore = useCollectionSnapshot("studentRestore", studentRestoreConverter, {
     constraints: { schoolId: school.id, token: school.token ?? "" },
   });
 
