@@ -220,7 +220,7 @@ export default async function importContests(options: ImportOptions) {
                 id,
                 variant:
                   contest.variantIds[
-                    rng.randInt(0, contest.variantIds.length)
+                    rng.randInt(0, contest.variantIds.length - 1)
                   ] /* TODO: randomizzare questa variabile */, //,
               });
           }),
