@@ -11,6 +11,7 @@ import { Student, studentSchema } from "~/models/student";
 import { Variant } from "~/models/variant";
 import Modal from "~/ui/components/modal";
 import { useTeacher } from "~/ui/teacher/provider";
+import { randomId } from "~/utils/random";
 import validate from "~/utils/validate";
 
 const ImportModal = forwardRef(function ImportModal(
@@ -139,7 +140,7 @@ async function importStudents(
       }
 
       return {
-        id: window.crypto.randomUUID(),
+        id: randomId(),
         personalInformation: Object.fromEntries(
           contest.personalInformation.map((field, i) => {
             if (field.type === "date") {

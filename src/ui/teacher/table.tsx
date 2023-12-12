@@ -14,6 +14,7 @@ import { Student } from "~/models/student";
 import { Variant } from "~/models/variant";
 import Loading from "~/ui/components/loading";
 import Modal from "~/ui/components/modal";
+import { randomId } from "~/utils/random";
 
 import { useTeacher } from "./provider";
 import ImportModal from "./tableImporter";
@@ -135,10 +136,10 @@ function Table({
 }) {
   const { solutions, students, setStudent } = useTeacher();
 
-  const newStudentId = useRef(window.crypto.randomUUID());
+  const newStudentId = useRef(randomId());
 
   const setStudentAndUpdateId = async (student: Student) => {
-    newStudentId.current = window.crypto.randomUUID();
+    newStudentId.current = randomId();
     await setStudent(student);
   };
 

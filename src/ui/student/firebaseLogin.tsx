@@ -25,7 +25,7 @@ import { Student } from "~/models/student";
 import { RemoteContest } from "~/ui";
 import Loading from "~/ui/components/loading";
 import Timer from "~/ui/components/timer";
-import { hash } from "~/utils/random";
+import { hash, randomId } from "~/utils/random";
 
 import Modal from "../components/modal";
 import { Layout } from "./layout";
@@ -59,14 +59,14 @@ function StudentLogin({ header }: { header: ComponentType<any> }) {
   const [contests] = useCollection("contests", contestConverter);
   const [students, setStudent] = useCollection("students", studentConverter, {
     constraints: {
-      uid: user.uid,
+      uid: user?.uid,
     },
     limit: 1,
   });
 
   const [student, setLocalStudent] = useState<Student>({
-    id: window.crypto.randomUUID(),
-    uid: user.uid,
+    id: randomId(),
+    uid: user?.uid,
     personalInformation: {
       name: "Carlo",
       surname: "Collodel",
@@ -293,7 +293,7 @@ async function createStudent(db: Firestore, student: Student) {
   // - the variant assigned to the student
   // - the school of the student
   // Then, we need to check that there is no other student with the same personalInformation and token already in the db
-  student.id = window.crypto.randomUUID();
+  student.id = randomId();
 
   // Get the variant assigned to the student
   // An entry should always exists in variantMapping

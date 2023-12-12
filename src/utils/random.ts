@@ -39,3 +39,10 @@ export function randomToken(): string {
   }
   return tokens.join("-");
 }
+
+export function randomId() {
+  return (
+    window?.crypto?.randomUUID?.() ??
+    `${getRandomInt(Number.MAX_SAFE_INTEGER)}-${getRandomInt(Number.MAX_SAFE_INTEGER)}`
+  );
+}
