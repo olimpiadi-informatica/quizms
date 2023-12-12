@@ -149,7 +149,7 @@ export default async function importContests(options: ImportOptions) {
 
   console.log(config);
   if (options.all || options.variants || options.solutions) {
-    for (const [contestId, contest] of Object.entries(config)) {
+    for (const contest of Object.values(config)) {
       if (options.delete) {
         console.info("Deleting variants...");
         await deleteCollection(db, "variants");

@@ -22,7 +22,7 @@ import { School, schoolSchema } from "~/models/school";
 import { Solution, solutionSchema } from "~/models/solution";
 import { Student, studentSchema } from "~/models/student";
 import { Submission, submissionSchema } from "~/models/submission";
-import { Variant, VariantMapping, variantSchema } from "~/models/variant";
+import { Variant, VariantMapping, variantMappingSchema, variantSchema } from "~/models/variant";
 import validate from "~/utils/validate";
 
 function convertToFirestore(data: Record<string, any>) {

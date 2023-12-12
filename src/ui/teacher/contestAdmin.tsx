@@ -361,15 +361,15 @@ function StudentRestoreList(props: { school: School }) {
     constraints: { schoolId: school.id, token: school.token ?? "" },
   });
 
-  if (studentRestore.length === 0) {
-    return <>Nessuna richiesta</>;
+  if (!studentRestore || studentRestore.length === 0) {
+    return <>Nessuna richiesta.</>;
   }
 
   return (
     <div className="flex flex-col items-start gap-3">
       {Object.entries(groupBy(studentRestore, (request) => request.studentId)).map(
-        (requests, i) => (
-          <StudentRestoreButton studentRestore={requests[1]} key={i} />
+        ([id, requests]) => (
+          <StudentRestoreButton studentRestore={requests} key={id} />
         ),
       )}
     </div>
@@ -416,7 +416,7 @@ function ContestAdmin(props: { school: School; contest: Contest }) {
   }
 
   return (
-    <div className="flex flex-col gap-5 p-5">
+    <div className="flex flex-col gap-5 p-5 pb-32">
       <div className="card bg-base-200 shadow-lg">
         <div className="card-body">
           <h2 className="card-title">Informazioni Gara</h2>
@@ -454,9 +454,7 @@ function ContestAdmin(props: { school: School; contest: Contest }) {
       <div className="card bg-base-200 shadow-lg">
         <div className="card-body">
           <h2 className="card-title">Richieste di accesso</h2>
-          <Suspense fallback={<p className="loading loading-spinner" />}>
-            <StudentRestoreList school={school} />
-          </Suspense>
+          <StudentRestoreList school={school} />
         </div>
       </div>
     </div>

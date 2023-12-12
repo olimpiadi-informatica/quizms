@@ -16,7 +16,7 @@ export function RemoteContest({ url }: { url: string }) {
   useEffect(() => {
     import(/* @vite-ignore */ variantUrl.href).then(({ default: contest }) => {
       setContest(() =>
-        memo(() => {
+        memo(function Contest() {
           return contest(React, components);
         }),
       );

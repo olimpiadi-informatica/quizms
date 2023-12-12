@@ -26,7 +26,7 @@ export function Layout({ children }: { children: ReactNode }) {
           </div>
           <ul className="menu dropdown-content menu-sm z-30 mt-3 w-52 rounded-box bg-base-300 p-2 text-base-content shadow-lg">
             <li>
-              <button onClick={logout}>Cambia utente</button>
+              <button onClick={logout}>Cambia scuola</button>
             </li>
           </ul>
         </div>
@@ -40,10 +40,12 @@ export function Layout({ children }: { children: ReactNode }) {
           </div>
         )}
       </div>
-      <ErrorBoundary FallbackComponent={Error}>{children}</ErrorBoundary>
-      <Modal ref={modalRef} title="Istruzioni per la gara">
-        <div className="prose whitespace-pre-wrap">{instructions}</div>
-      </Modal>
+      <div className="flex flex-auto flex-col overflow-y-auto">
+        <ErrorBoundary FallbackComponent={Error}>{children}</ErrorBoundary>
+        <Modal ref={modalRef} title="Istruzioni per la gara">
+          <div className="prose whitespace-pre-wrap">{instructions}</div>
+        </Modal>
+      </div>
     </div>
   );
 }

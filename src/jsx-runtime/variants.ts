@@ -65,7 +65,9 @@ export function getAnswers(program: Program, remove: boolean) {
           for (const prop of props.properties) {
             if (is.property(prop) && is.literal(prop.key) && prop.key.value == "points") {
               if (is.arrayExpression(prop.value)) {
-                [pointsCorrect, pointsBlank, pointsWrong] = prop.value.elements.map((x) => x.value);
+                [pointsCorrect, pointsBlank, pointsWrong] = prop.value.elements.map(
+                  (x) => x?.value,
+                );
               }
             }
           }
