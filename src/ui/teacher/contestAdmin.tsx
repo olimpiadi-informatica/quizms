@@ -331,7 +331,6 @@ function StudentRestoreButton({ studentRestore }: { studentRestore: StudentResto
           {studentRestore[0].name} {studentRestore[0].surname} sta cercando di accedere alla gara.
           Per approvarlo, inserisci il codice di conferma che gli è stato mostrato.
         </p>
-        <p className="text-warning">Codice: {targetCodes}</p>
         <label className="form-control w-full">
           <div className="label">
             <span className="label-text">Codice di conferma</span>
@@ -470,7 +469,7 @@ function ContestAdmin(props: { school: School; contest: Contest }) {
 
 export function ContestsAdminPage() {
   const { contests, schools } = useTeacher();
-  const [selectedContest, setSelectedContest] = useState(0);
+  const [selectedContest, setSelectedContest] = useState(contests.length === 0 ? 0 : -1);
   return (
     <>
       {schools.length >= 2 && (
@@ -495,6 +494,11 @@ export function ContestsAdminPage() {
           school={schools[selectedContest]}
           contest={contests.find((contest) => contest.id === schools[selectedContest].contestId)!}
         />
+      )}
+      {selectedContest == -1 && (
+        <div className="flex h-full flex-col items-center justify-center">
+          Nessuna gara selezionata.
+        </div>
       )}
     </>
   );
