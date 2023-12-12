@@ -2,11 +2,19 @@ import React, { ComponentType, Suspense, useEffect, useMemo, useRef, useState } 
 
 import { sha256 } from "@noble/hashes/sha256";
 import classNames from "classnames";
-import { differenceInMilliseconds, format } from "date-fns";
+import { addMinutes, differenceInMilliseconds, format } from "date-fns";
 import { it as dateLocaleIT } from "date-fns/locale";
 import { FirebaseOptions } from "firebase/app";
 import { getAuth, signOut } from "firebase/auth";
-import { Firestore, doc, getDoc, runTransaction, setDoc } from "firebase/firestore";
+import {
+  Firestore,
+  addDoc,
+  collection,
+  doc,
+  getDoc,
+  runTransaction,
+  setDoc,
+} from "firebase/firestore";
 
 import {
   contestConverter,
@@ -16,6 +24,7 @@ import {
   studentMappingHashConverter,
   studentMappingUidConverter,
   studentRestoreConverter,
+  submissionConverter,
   variantConverter,
   variantMappingConverter,
 } from "~/firebase/converters";
@@ -68,13 +77,7 @@ function StudentLogin({ header }: { header: ComponentType<any> }) {
   const [student, setLocalStudent] = useState<Student>({
     id: randomId(),
     uid: user?.uid,
-    personalInformation: {
-      name: "Carlo",
-      surname: "Collodel",
-      classYear: "5",
-      classSection: "B",
-    },
-    contest: contests[0]?.id,
+    personalInformation: {},
     answers: {},
     createdAt: new Date(),
   });
@@ -229,6 +232,7 @@ function StudentInner({
   };
 
   const getNow = useTime();
+
   const [started, setStarted] = useState(false);
   useEffect(() => {
     const id = setTimeout(
@@ -238,15 +242,34 @@ function StudentInner({
     return () => clearTimeout(id);
   }, [school.startingTime]);
 
+  const [terminated, setTerminated] = useState(false);
+  useEffect(() => {
+    const id = setTimeout(
+      () => setTerminated(true),
+      differenceInMilliseconds(addMinutes(school.startingTime!, contest.duration!), getNow()),
+    );
+    return () => clearTimeout(id);
+  }, [school.startingTime, contest.duration]);
+
+  const setStudentAndSubmit = async (student: Student) => {
+    await setStudent(student);
+
+    const ref = collection(db, "submissions").withConverter(submissionConverter);
+    await addDoc(ref, {
+      uid: student.uid!,
+      answers: student.answers!,
+    });
+  };
+
   return (
     <StudentProvider
       contest={contest}
       school={school}
       student={student}
-      setStudent={setStudent} // TODO: add submission
-      submit={() => {}}
+      setStudent={setStudentAndSubmit}
+      submit={logout}
       logout={logout}
-      terminated={false}>
+      terminated={terminated}>
       <Layout>
         <Header />
         {!started && (

@@ -70,6 +70,7 @@ export function Layout({ children }: { children: ReactNode }) {
             ) : (
               <button
                 className="btn btn-success btn-sm h-full"
+                disabled={terminated}
                 onClick={() => submitRef.current?.showModal()}>
                 Termina
               </button>
@@ -89,7 +90,7 @@ export function Layout({ children }: { children: ReactNode }) {
 }
 
 const SubmitModal = forwardRef(function SubmitModal(_, ref: Ref<HTMLDialogElement>) {
-  const { submit, logout } = useStudent();
+  const { submit } = useStudent();
 
   return (
     <Modal ref={ref} title="Confermi di voler terminare?">
@@ -98,14 +99,7 @@ const SubmitModal = forwardRef(function SubmitModal(_, ref: Ref<HTMLDialogElemen
         <button className="btn btn-outline btn-neutral" onClick={close}>
           Annulla
         </button>
-        <button
-          className="btn btn-error"
-          onClick={() => {
-            submit();
-            if (logout) {
-              logout();
-            }
-          }}>
+        <button className="btn btn-error" onClick={() => submit()}>
           Conferma
         </button>
       </div>

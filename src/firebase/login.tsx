@@ -7,6 +7,7 @@ import { ErrorBoundary, FallbackProps } from "react-error-boundary";
 
 import Error from "~/ui/components/error";
 import Loading from "~/ui/components/loading";
+import useTime from "~/ui/components/time";
 
 import { useAuth } from "./hooks";
 
@@ -40,6 +41,7 @@ export function FirebaseLogin({ config, children }: Props) {
 
 function AuthWrapper({ children }: { children: ReactNode }) {
   useAuth();
+  useTime();
   return children;
 }
 
