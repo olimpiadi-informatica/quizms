@@ -24,6 +24,7 @@ import { FirebaseLogin, useDb } from "~/firebase/login";
 import { Student } from "~/models/student";
 import { RemoteContest } from "~/ui";
 import Loading from "~/ui/components/loading";
+import useTime from "~/ui/components/time";
 import Timer from "~/ui/components/timer";
 import { hash, randomId } from "~/utils/random";
 
@@ -221,11 +222,12 @@ function StudentInner({
     window.location.reload();
   };
 
+  const getNow = useTime();
   const [started, setStarted] = useState(false);
   useEffect(() => {
     const id = setTimeout(
       () => setStarted(true),
-      differenceInMilliseconds(school.startingTime!, new Date()) + 1000 + Math.random() * 1000,
+      differenceInMilliseconds(school.startingTime!, getNow()) + 1000 + Math.random() * 1000,
     );
     return () => clearTimeout(id);
   }, [school.startingTime]);
