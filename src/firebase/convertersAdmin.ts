@@ -22,6 +22,7 @@ import { School, schoolSchema } from "~/models/school";
 import { Solution, solutionSchema } from "~/models/solution";
 import { Student, studentSchema } from "~/models/student";
 import { Submission, submissionSchema } from "~/models/submission";
+import { Teacher, teacherSchema } from "~/models/teacher";
 import { Variant, VariantMapping, variantMappingSchema, variantSchema } from "~/models/variant";
 import validate from "~/utils/validate";
 
@@ -121,4 +122,9 @@ export const variantConverter: FirestoreDataConverter<Variant> = {
 export const variantMappingConverter: FirestoreDataConverter<VariantMapping> = {
   toFirestore: (data) => convertToFirestore(data),
   fromFirestore: (snapshot) => parse(variantMappingSchema, snapshot),
+};
+
+export const teacherConverter: FirestoreDataConverter<Teacher> = {
+  toFirestore: (data) => convertToFirestore(data),
+  fromFirestore: (snapshot) => parse(teacherSchema, snapshot),
 };

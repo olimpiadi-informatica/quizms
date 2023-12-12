@@ -2,7 +2,7 @@ import { readFile } from "node:fs/promises";
 import { cwd } from "node:process";
 
 import { cert, deleteApp, initializeApp } from "firebase-admin/app";
-import { getAuth } from "firebase-admin/auth";
+import { Auth, getAuth } from "firebase-admin/auth";
 import { Firestore, Query, getFirestore } from "firebase-admin/firestore";
 import z, { ZodType } from "zod";
 
@@ -12,12 +12,11 @@ import {
   contestConverter,
   schoolConverter,
   solutionConverter,
+  teacherConverter,
   variantConverter,
 } from "~/firebase/convertersAdmin";
 import { contestSchema } from "~/models/contest";
 import { schoolSchema } from "~/models/school";
-import { solutionSchema } from "~/models/solution";
-import { variantSchema } from "~/models/variant";
 import validate from "~/utils/validate";
 
 type ImportOptions = {
@@ -30,6 +29,16 @@ type ImportOptions = {
   delete?: boolean;
   all?: boolean;
 };
+
+async function getAllUsers(auth: Auth) {
+  let listResults = await auth.listUsers(1000);
+  const uids = listResults.users.map((user) => user.uid);
+  while (listResults.pageToken) {
+    listResults = await auth.listUsers(1000, listResults.pageToken);
+    listResults.users.forEach((user) => uids.push(user.uid));
+  }
+  return uids;
+}
 
 async function deleteCollection(db: Firestore, collectionPath: string) {
   const collectionRef = db.collection(collectionPath);
@@ -95,9 +104,15 @@ export default async function importContests(options: ImportOptions) {
 
   if (options.all || options.users) {
     if (options.delete) {
-      console.info("Deleting users...");
-      /* TODO boh non so come fare */
-      console.info("Deleted users!");
+      console.info("Deleting users and teachers...");
+      const uids = await getAllUsers(auth);
+      await auth.deleteUsers(uids);
+      await deleteCollection(db, "teachers");
+      await deleteCollection(db, "students");
+      await deleteCollection(db, "studentMappingUid");
+      await deleteCollection(db, "studentMappingHash");
+      await deleteCollection(db, "studentRestore");
+      console.info("Deleted users and teachers!");
     }
     console.info("Importing users...");
     const teachers = JSON.parse(await readFile("data/users.json", "utf-8"));
@@ -108,16 +123,26 @@ export default async function importContests(options: ImportOptions) {
 
         const prevUser = await auth.getUserByEmail(user.email).catch(() => undefined);
         if (!prevUser) {
-          await auth.createUser({
+          const newUser = await auth.createUser({
             email: user.email,
             emailVerified: true,
             password: user.password,
             displayName: user.name,
             disabled: false,
           });
+          await db
+            .doc(`teachers/${newUser.uid}`)
+            .withConverter(teacherConverter)
+            .set({ id: newUser.uid });
+        } else {
+          await db
+            .doc(`teachers/${prevUser.uid}`)
+            .withConverter(teacherConverter)
+            .set({ id: prevUser.uid });
         }
       }),
     );
+
     console.info(`${res.length} users imported!`);
   }
 
@@ -125,6 +150,7 @@ export default async function importContests(options: ImportOptions) {
     if (options.delete) {
       console.info("Deleting schools...");
       await deleteCollection(db, "schools");
+      await deleteCollection(db, "schoolMapping");
       console.info("Deleted schools!");
     }
     console.info("Importing schools...");
@@ -147,12 +173,12 @@ export default async function importContests(options: ImportOptions) {
     console.info(`${res.length} schools imported!`);
   }
 
-  console.log(config);
   if (options.all || options.variants || options.solutions) {
     for (const contest of Object.values(config)) {
       if (options.delete) {
         console.info("Deleting variants...");
         await deleteCollection(db, "variants");
+        //await deleteCollection(db, "variantMapping");
         console.info("Deleted variants!");
       }
       const { solutions, variants } = await exportVariants(cwd(), contest);
@@ -161,8 +187,7 @@ export default async function importContests(options: ImportOptions) {
         console.info("Importing variants...");
 
         const res = await Promise.all(
-          Object.entries(variants).map(async ([id, record]) => {
-            const variant = validateOrExit(variantSchema, record, { id });
+          Object.entries(variants).map(async ([id, variant]) => {
             await db.doc(`variants/${id}`).withConverter(variantConverter).set(variant);
           }),
         );
@@ -194,9 +219,8 @@ export default async function importContests(options: ImportOptions) {
         }
         console.info("Importing solutions...");
         const res = await Promise.all(
-          Object.entries(solutions).map(async ([id, record]) => {
-            const variant = validateOrExit(solutionSchema, record, { id });
-            await db.doc(`solutions/${id}`).withConverter(solutionConverter).set(variant);
+          Object.entries(solutions).map(async ([id, solution]) => {
+            await db.doc(`solutions/${id}`).withConverter(solutionConverter).set(solution);
           }),
         );
         console.info(`${res.length} solutions imported!`);
