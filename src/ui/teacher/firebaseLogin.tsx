@@ -90,6 +90,7 @@ function TeacherInner({ user, children }: { user: User; children: ReactNode }) {
 
   const [schools, setSchool] = useCollection("schools", schoolConverter, {
     constraints: { teacher: user.uid },
+    subscribe: true,
   });
   const [contests] = useCollection("contests", contestConverter);
   const [variants] = useCollection("variants", variantConverter);

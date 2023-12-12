@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { FirebaseError } from "firebase/app";
 import {
@@ -19,12 +19,14 @@ import {
   getDoc,
   getDocs,
   limit,
+  onSnapshot,
   orderBy,
   query,
   setDoc,
   where,
 } from "firebase/firestore";
 import { compact } from "lodash-es";
+import { useErrorBoundary } from "react-error-boundary";
 import useSWR, { MutatorOptions, SWRConfiguration } from "swr";
 
 import { useDb } from "./login";
@@ -41,12 +43,21 @@ const mutationConfig: MutatorOptions = {
   populateCache: true,
 };
 
-export function useDocument<T>(path: string, id: string, converter: FirestoreDataConverter<T>) {
+export function useDocument<T>(
+  path: string,
+  id: string,
+  converter: FirestoreDataConverter<T>,
+  options?: {
+    subscribe?: boolean;
+  },
+) {
   const db = useDb();
+  const { showBoundary } = useErrorBoundary();
+
   const ref = doc(db, path, id).withConverter(converter);
 
   const { data, mutate, error } = useSWR<T>(`${path}/${id}`, () => fetcher(ref), swrConfig);
-  if (error) throw error;
+  if (error) showBoundary(error);
 
   const updateDocument = useCallback(
     (newData: T) => {
@@ -61,10 +72,25 @@ export function useDocument<T>(path: string, id: string, converter: FirestoreDat
     [mutate, ref],
   );
 
+  useEffect(() => {
+    if (!options?.subscribe) return;
+    const unsubscribe = onSnapshot(
+      ref,
+      async (snap) => {
+        console.log("snapshot", snap.data());
+        await mutate(snap.data());
+      },
+      (error) => showBoundary(error),
+    );
+    return () => unsubscribe();
+  }, []);
+
   return [data as T, updateDocument] as const;
 
   async function fetcher<T>(ref: DocumentReference<T>) {
-    const snapshot = await getDoc(ref);
+    const snapshot = await getDoc(ref).catch((error) => {
+      throw error;
+    });
     if (!snapshot.exists()) {
       throw new Error(`Document \`${ref.path}\` does not exist.`);
     }
@@ -84,9 +110,12 @@ export function useCollection<
     orderBy?: string;
     orderByDesc?: string;
     limit?: number;
+    subscribe?: boolean;
   },
 ) {
   const db = useDb();
+  const { showBoundary } = useErrorBoundary();
+
   const ref = collection(db, path).withConverter(converter);
   const q = query(
     ref,
@@ -109,7 +138,7 @@ export function useCollection<
 
   const key = `${path}?${new URLSearchParams(params)}`;
   const { data, mutate, error } = useSWR<T[]>(key, () => fetcher(q), swrConfig);
-  if (error) throw error;
+  if (error) showBoundary(error);
 
   const setDocument = useCallback(
     async (newDoc: T) => {
@@ -133,10 +162,30 @@ export function useCollection<
     [mutate, ref],
   );
 
+  useEffect(() => {
+    if (!options?.subscribe) return;
+    const unsubscribe = onSnapshot(
+      q,
+      async (snap) => {
+        console.log(
+          "snapshot",
+          key,
+          snap.docs.map((doc) => doc.data()),
+        );
+        await mutate(snap.docs.map((doc) => doc.data()));
+      },
+      (error) => showBoundary(error),
+    );
+    return () => unsubscribe();
+  }, []);
+
   return [data as T[], setDocument] as const;
 
   async function fetcher<T>(ref: Query<T>) {
-    const snapshot = await getDocs(ref);
+    const snapshot = await getDocs(ref).catch((error) => {
+      console.log("fetch col failed", error, key);
+      throw error;
+    });
     return snapshot.docs.map((doc) => doc.data({ serverTimestamps: "estimate" }));
   }
 }

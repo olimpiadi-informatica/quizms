@@ -224,7 +224,7 @@ function StudentInner({
 }) {
   const db = useDb();
   const [contest] = useDocument("contests", student.contest!, contestConverter);
-  const [school] = useDocument("schools", student.school!, schoolConverter);
+  const [school] = useDocument("schools", student.school!, schoolConverter, { subscribe: true });
 
   const logout = async () => {
     await signOut(getAuth(db.app));
@@ -256,6 +256,7 @@ function StudentInner({
 
     const ref = collection(db, "submissions").withConverter(submissionConverter);
     await addDoc(ref, {
+      id: "",
       uid: student.uid!,
       answers: student.answers!,
     });

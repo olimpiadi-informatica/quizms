@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { Suspense, useEffect, useRef, useState } from "react";
 
 import { sha256 } from "@noble/hashes/sha256";
 import classNames from "classnames";
@@ -34,11 +34,12 @@ import {
   studentRestoreConverter,
 } from "~/firebase/converters";
 import { studentConverter } from "~/firebase/converters";
+import { useCollection } from "~/firebase/hooks";
 import { useDb } from "~/firebase/login";
-import { useCollectionSnapshot } from "~/firebase/snapshotHooks";
 import { Contest } from "~/models/contest";
 import { School } from "~/models/school";
 import { Student, StudentRestore } from "~/models/student";
+import Loading from "~/ui/components/loading";
 import { hash, randomToken } from "~/utils/random";
 
 import Modal from "../components/modal";
@@ -182,22 +183,28 @@ function StopContest({ school }: { school: School }) {
     );
 
     const students = await getDocs(q);
-    await students.forEach(async (student) => {
-      await deleteDoc(
-        doc(db, "studentMappingUid", student.data().uid).withConverter(studentMappingUidConverter),
-      );
-      await deleteDoc(
-        doc(
-          db,
-          "studentMappingHash",
-          studentHash({ id: student.id, ...student.data() }),
-        ).withConverter(studentMappingHashConverter),
-      );
-    });
-    await students.forEach(async (student) => {
-      console.log(student.id);
-      await deleteDoc(doc(db, "students", student.id).withConverter(studentConverter));
-    });
+    await Promise.all(
+      students.docs.map(async (student) => {
+        await deleteDoc(
+          doc(db, "studentMappingUid", student.data().uid).withConverter(
+            studentMappingUidConverter,
+          ),
+        );
+        await deleteDoc(
+          doc(
+            db,
+            "studentMappingHash",
+            studentHash({ id: student.id, ...student.data() }),
+          ).withConverter(studentMappingHashConverter),
+        );
+      }),
+    );
+    await Promise.all(
+      students.docs.map(async (student) => {
+        console.log(student.id);
+        await deleteDoc(doc(db, "students", student.id).withConverter(studentConverter));
+      }),
+    );
 
     await setSchool({ ...school, token: undefined, startingTime: undefined });
 
@@ -363,8 +370,9 @@ function StudentRestoreButton({ studentRestore }: { studentRestore: StudentResto
 
 function StudentRestoreList(props: { school: School }) {
   const { school } = props;
-  const studentRestore = useCollectionSnapshot("studentRestore", studentRestoreConverter, {
+  const [studentRestore] = useCollection("studentRestore", studentRestoreConverter, {
     constraints: { schoolId: school.id, token: school.token ?? "" },
+    subscribe: true,
   });
 
   if (!studentRestore || studentRestore.length === 0) {
@@ -460,7 +468,9 @@ function ContestAdmin(props: { school: School; contest: Contest }) {
       <div className="card bg-base-200 shadow-lg">
         <div className="card-body">
           <h2 className="card-title">Richieste di accesso</h2>
-          <StudentRestoreList school={school} />
+          <Suspense fallback={<Loading />}>
+            <StudentRestoreList school={school} />
+          </Suspense>
         </div>
       </div>
     </div>
