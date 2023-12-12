@@ -303,7 +303,6 @@ async function createStudentRestore(
   // If it fails, it means that the token is too old
   const auth = getAuth(db.app);
   const uid = auth.currentUser!.uid;
-  console.log("createStudentRestore", uid, studentId, schoolId, curStudent);
 
   try {
     await setDoc(doc(db, "studentRestore", uid).withConverter(studentRestoreConverter), {
@@ -317,7 +316,6 @@ async function createStudentRestore(
   } catch (e) {
     throw new InvalidTokenError("Codice scaduto");
   }
-  console.log("createStudentRestore1");
 }
 
 async function createStudent(db: Firestore, student: Student) {
@@ -352,8 +350,6 @@ async function createStudent(db: Firestore, student: Student) {
   }
   student.variant = variantMapping.data().variant;
 
-  console.log("Variant found!", student.variant);
-
   // Check that the token exists and get the school id (needed to create the student)
   // If the mapping exists, the token can still be too old
   const schoolMappingRef = doc(db, "schoolMapping", student.token!).withConverter(
@@ -369,8 +365,6 @@ async function createStudent(db: Firestore, student: Student) {
   }
   student.school = schoolMappingData.school;
   student.startedAt = schoolMappingData.startingTime;
-
-  console.log("School found!", student.school);
 
   // Try to create the new student:
   // - check that there is no identical hash already in "studentMappingHash"
@@ -405,8 +399,6 @@ async function createStudent(db: Firestore, student: Student) {
     throw new InvalidTokenError("Codice scaduto");
   }
 
-  console.log("Student updated!", student);
-  console.log("Mapping updated!", student);
   return student;
 }
 

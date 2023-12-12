@@ -38,9 +38,7 @@ function TeacherLogin({ children }: { children: ReactNode }) {
   const { signInWithPassword, loading, error } = useSignInWithPassword();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const signIn = () => {
-    console.log(signInWithPassword(email, password));
-  };
+  const signIn = () => signInWithPassword(email, password);
 
   if (auth.currentUser) {
     return <TeacherInner user={auth.currentUser}>{children}</TeacherInner>;

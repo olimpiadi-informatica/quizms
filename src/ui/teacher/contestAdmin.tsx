@@ -201,7 +201,6 @@ function StopContest({ school }: { school: School }) {
     );
     await Promise.all(
       students.docs.map(async (student) => {
-        console.log(student.id);
         await deleteDoc(doc(db, "students", student.id).withConverter(studentConverter));
       }),
     );

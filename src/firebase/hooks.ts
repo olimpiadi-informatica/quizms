@@ -76,10 +76,7 @@ export function useDocument<T>(
     if (!options?.subscribe) return;
     const unsubscribe = onSnapshot(
       ref,
-      async (snap) => {
-        console.log("snapshot", snap.data());
-        await mutate(snap.data());
-      },
+      (snap) => mutate(snap.data()),
       (error) => showBoundary(error),
     );
     return () => unsubscribe();
@@ -167,11 +164,6 @@ export function useCollection<
     const unsubscribe = onSnapshot(
       q,
       async (snap) => {
-        console.log(
-          "snapshot",
-          key,
-          snap.docs.map((doc) => doc.data()),
-        );
         await mutate(snap.docs.map((doc) => doc.data()));
       },
       (error) => showBoundary(error),
@@ -183,7 +175,6 @@ export function useCollection<
 
   async function fetcher<T>(ref: Query<T>) {
     const snapshot = await getDocs(ref).catch((error) => {
-      console.log("fetch col failed", error, key);
       throw error;
     });
     return snapshot.docs.map((doc) => doc.data({ serverTimestamps: "estimate" }));

@@ -27,7 +27,7 @@ export function Layout({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (import.meta.env.QUIZMS_MODE === "contest") {
-      console.log(
+      console.error(
         "%cAprire la console è severamente vietato dal regolamento. Questo incidente verrà segnalato agli amministratori del sito e al tuo insegnante. Qualsiasi tentativo di manomettere la piattaforma comporta la squalifica.",
         "color: #ff0000",
       );
