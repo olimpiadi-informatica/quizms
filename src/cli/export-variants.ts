@@ -59,7 +59,7 @@ export async function exportVariants(
       id: variant_id,
       schema,
       statement: toJs(variantAst).value,
-      contest: "",
+      contest: config.id,
     };
     solutions[variant_id] = {
       id: variant_id,
