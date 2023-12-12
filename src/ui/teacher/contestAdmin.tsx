@@ -458,7 +458,7 @@ function ContestAdmin(props: { school: School; contest: Contest }) {
             {canUndoContest(school) && <StopContest school={school} />}
             <button
               className="btn btn-info"
-              onClick={() => (window.location.href = "students.html") /* TODO */}>
+              onClick={() => (window.location.href = "students/") /* TODO */}>
               Gestisci studenti e risposte
             </button>
           </div>
