@@ -18,6 +18,7 @@ export type School = z.infer<typeof schoolSchema>;
 export const schoolMappingSchema = z.object({
   id: z.string(),
   school: z.string(),
+  contestId: z.string(),
   startingTime: z.date(),
 });
 

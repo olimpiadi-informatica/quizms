@@ -57,7 +57,8 @@ service cloud.firestore {
               let school = getAfter(/databases/$(database)/documents/schools/$(schoolId));
               return school != null
                   && school.data.token == token
-                  && school.data.startingTime == request.resource.data.startingTime;
+                  && school.data.startingTime == request.resource.data.startingTime
+                  && school.data.contestId == request.resource.data.contestId;
             }
             allow get: if request.auth != null;
             allow create: if isTeacher() && isTeacherSchool(request.resource.data.school) && checkToken(request.resource.data.school);
@@ -89,7 +90,8 @@ service cloud.firestore {
                 return school != null
                     && school.data.token != null
                     && school.data.token == request.resource.data.token
-                    && school.data.startingTime == request.resource.data.startedAt;
+                    && school.data.startingTime == request.resource.data.startedAt
+                    && school.data.contestId == request.resource.data.contest;
             }
 
             function checkVariant(data) {

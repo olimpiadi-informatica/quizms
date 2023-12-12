@@ -140,6 +140,7 @@ async function generateToken(db: Firestore, prevSchool: School) {
       id: token,
       school: school.id,
       startingTime,
+      contestId: school.contestId,
     });
   });
 
