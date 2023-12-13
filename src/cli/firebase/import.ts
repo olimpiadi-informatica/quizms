@@ -188,6 +188,13 @@ export default async function importContests(options: ImportOptions) {
 
     const res = await Promise.all(
       schools.map(async (record: any) => {
+        const contestId = record.contestId;
+        const allVariantIds = config[contestId].pdfVariantIds.slice();
+        const seed = `#schools#${config[contestId].secret}#${record.schoolId}#${record.contestId}#`;
+        const rng = new Rng(seed);
+        rng.shuffle(allVariantIds);
+        const pdfCount = config[contestId].pdfPerSchool;
+        record.pdfVariants = allVariantIds.slice(0, pdfCount);
         const school = validateOrExit(schoolSchema.omit({ id: true }), record);
         const user = await auth.getUserByEmail(school.teacher);
         await db
@@ -230,6 +237,7 @@ export default async function importContests(options: ImportOptions) {
         );
         console.info(`${res.length} variants imported!`);
 
+        const variantIds = contest.variantIds.filter((x) => !contest.pdfVariantIds.includes(x));
         console.info("Importing variant mappings...");
         const prefix = contest.id;
         const rng = new Rng(`#variantMappings#${contest.secret}#`);
@@ -245,10 +253,7 @@ export default async function importContests(options: ImportOptions) {
               .withConverter(variantMappingConverter)
               .set({
                 id,
-                variant:
-                  contest.variantIds[
-                    rng.randInt(0, contest.variantIds.length - 1)
-                  ] /* TODO: randomizzare questa variabile */, //,
+                variant: variantIds[rng.randInt(0, contest.variantIds.length - 1)],
               });
           }),
         );
