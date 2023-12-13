@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { pathToFileURL } from "node:url";
+import { toJs } from "estree-util-to-js";
 
 import express from "express";
 import { PDFDocument } from "pdf-lib";
@@ -9,7 +10,8 @@ import { BrowserContext, chromium } from "playwright";
 import { temporaryDirectory } from "tempy";
 import { InlineConfig, build, mergeConfig } from "vite";
 
-import { parseContest } from "~/jsx-runtime/parser";
+import { shuffleContest } from "~/jsx-runtime/parser";
+import { getAnswers } from "~/jsx-runtime/variants";
 import { ContestConfig } from "~/models/generation-config";
 
 import loadGenerationConfig from "./load-generation-config";
@@ -71,7 +73,12 @@ async function pdfServer(dir: string, config: ContestConfig, port: number) {
 
   app.get("/variant.js", (req, res) => {
     res.setHeader("content-type", "text/javascript");
-    res.send(parseContest(contestJsx, `${req.query.variant}`, config));
+    const contestAst = shuffleContest(contestJsx, `${req.query.variant}`, config)
+    const {answers, schema} = getAnswers(contestAst, false);
+    console.log(`VARIANT: ${req.query.variant}`);
+    console.log("ANSWERS:");
+    console.log(answers);
+    res.send(toJs(contestAst).value);
   });
 
   app.use(express.static(serverDir));
