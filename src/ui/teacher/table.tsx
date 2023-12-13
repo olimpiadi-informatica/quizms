@@ -11,7 +11,7 @@ import React, {
 
 import { CellEditRequestEvent, ColDef, ICellRendererParams } from "ag-grid-community";
 import classNames from "classnames";
-import { addMinutes, format, isEqual as isEqualDate } from "date-fns";
+import { addMinutes, differenceInMilliseconds, format, isEqual as isEqualDate } from "date-fns";
 import { it as dateLocaleIT } from "date-fns/locale";
 import { cloneDeep, compact, set, sumBy } from "lodash-es";
 import { AlertTriangle, FileCheck, Upload, Users } from "lucide-react";
@@ -208,7 +208,7 @@ function Table({
 
   const [, setTime] = useState(getNow);
   useEffect(() => {
-    const id = setTimeout(() => setTime(getNow));
+    const id = setTimeout(() => setTime(getNow), differenceInMilliseconds(getNow(), new Date()));
     return () => clearTimeout(id);
   }, [getNow]);
 
