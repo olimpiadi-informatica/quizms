@@ -4,6 +4,7 @@ export const generationConfigSchema = z.record(
   z.object({
     id: z.string(),
     name: z.string(),
+    longName: z.string().optional(),
     variantIds: z.coerce.string().array(),
     pdfVariantIds: z.coerce.string().array(),
     pdfPerSchool: z.number(),

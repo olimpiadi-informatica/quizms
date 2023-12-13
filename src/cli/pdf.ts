@@ -64,7 +64,7 @@ async function pdfServer(dir: string, config: ContestConfig, port: number) {
   const contestURL = pathToFileURL(contestPath);
   const { default: contestJsx } = await import(/* vite-ignore */ contestURL.toString());
 
-  await build(mergeConfig(defaultConfig, serverConfig));
+  await build(mergeConfig(configs("development"), serverConfig));
 
   const app = express();
   const server = app.listen(port, () => {
@@ -74,10 +74,10 @@ async function pdfServer(dir: string, config: ContestConfig, port: number) {
   app.get("/variant.js", (req, res) => {
     res.setHeader("content-type", "text/javascript");
     const contestAst = shuffleContest(contestJsx, `${req.query.variant}`, config);
-    const { answers } = getAnswers(contestAst, false);
-    console.log(`VARIANT: ${req.query.variant}`);
-    console.log("ANSWERS:");
-    console.log(answers);
+    // const { answers } = getAnswers(contestAst, false);
+    // console.log(`VARIANT: ${req.query.variant}`);
+    // console.log("ANSWERS:");
+    // console.log(answers);
     res.send(toJs(contestAst).value);
   });
 
@@ -88,17 +88,18 @@ async function pdfServer(dir: string, config: ContestConfig, port: number) {
 async function printVariant(
   context: BrowserContext,
   seed: string,
+  contest: string,
   path: string,
   serverPort: number,
 ) {
   const page = await context.newPage();
-  const url = `localhost:${serverPort}/print.html?variant=${seed}`;
+  const url = `localhost:${serverPort}/print.html?variant=${seed}&contest=${contest}`;
   console.info(`Printing variant with seed ${seed}`);
   await page.goto(url, { waitUntil: "load" });
   for (const img of await page.getByRole("img").all()) {
     await img.isVisible();
   }
-  await page.waitForTimeout(10 * 1000);
+  await page.waitForTimeout(200);
   await page.pdf({
     path,
     format: "a4",
@@ -116,7 +117,7 @@ export async function printVariants(config: ContestConfig, outDir: string, serve
       config.pdfVariantIds.slice(i, i + chunkSize).map(async (variantId) => {
         const seed = `${config.secret}${variantId}`;
         const path = join(outDir, "raw", `${variantId}.pdf`);
-        await printVariant(context, seed, path, serverPort);
+        await printVariant(context, seed, config.id, path, serverPort);
       }),
     );
   }
@@ -145,11 +146,11 @@ async function addText(
       y: 10,
       ...fontOptions,
     });
-    page.drawText(`${contestName} - Variante ${variantId}`, {
+    /* page.drawText(`${contestName} - Variante ${variantId}`, {
       x: 10,
       y: height - fontOptions.size - 10,
       ...fontOptions,
-    });
+    }); */
   }
   await mkdir(dirname(outputPath), { recursive: true });
   await writeFile(outputPath, await doc.save());

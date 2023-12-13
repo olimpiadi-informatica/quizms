@@ -44,8 +44,8 @@ export function AnswerGroup({ children }: AnswerGroupProps) {
   return (
     <form
       className={classNames(
-        "answer-group my-5 break-before-avoid break-inside-avoid rounded-xl",
-        "flex-wrap bg-base-200 p-3 prose-p:my-1 print:flex print:border print:border-[var(--tw-prose-hr)] print:p-1",
+        "answer-group my-5 flex-wrap rounded-xl bg-base-200 p-3",
+        "prose-p:my-1 print:flex print:border print:border-[var(--tw-prose-hr)] print:p-1",
       )}>
       {answers.map((answer, i) => (
         <AnswerContext.Provider key={i} value={{ id: String.fromCharCode(65 + i) }}>
