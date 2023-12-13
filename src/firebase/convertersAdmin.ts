@@ -4,7 +4,6 @@ import {
   FirestoreDataConverter,
   Timestamp,
 } from "firebase-admin/firestore";
-import { Bytes } from "firebase/firestore";
 import { cloneDeepWith, mapValues, omit } from "lodash-es";
 import z, {
   ZodArray,
@@ -25,7 +24,6 @@ import { Solution, solutionSchema } from "~/models/solution";
 import { Student, studentSchema } from "~/models/student";
 import { Submission, submissionSchema } from "~/models/submission";
 import { Teacher, teacherSchema } from "~/models/teacher";
-import { ZodBytes } from "~/models/types";
 import { Variant, VariantMapping, variantMappingSchema, variantSchema } from "~/models/variant";
 import validate from "~/utils/validate";
 

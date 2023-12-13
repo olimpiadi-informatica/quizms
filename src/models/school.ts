@@ -11,7 +11,7 @@ export const schoolSchema = z.object({
   variants: z.record(z.string()).optional(),
   finalized: z.boolean().optional().default(false),
   contestId: z.string(),
-  pdfVariants: z.array(z.string()),
+  pdfVariants: z.array(z.string()).optional(),
 });
 
 export type School = z.infer<typeof schoolSchema>;

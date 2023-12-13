@@ -80,7 +80,7 @@ export function useDocument<T>(
       (error) => showBoundary(error),
     );
     return () => unsubscribe();
-  }, []);
+  }, [mutate, options?.subscribe, ref, showBoundary]);
 
   return [data as T, updateDocument] as const;
 
@@ -169,7 +169,7 @@ export function useCollection<
       (error) => showBoundary(error),
     );
     return () => unsubscribe();
-  }, []);
+  }, [mutate, q, options?.subscribe, ref, showBoundary]);
 
   return [data as T[], setDocument] as const;
 

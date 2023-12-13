@@ -28,3 +28,23 @@ export const contestSchema = z.object({
 });
 
 export type Contest = z.infer<typeof contestSchema>;
+
+export function parsePersonalInformation(
+  value: any,
+  schema?: Contest["personalInformation"][number],
+) {
+  if (!schema) return value;
+  switch (schema.type) {
+    case "text":
+      return value;
+    case "number": {
+      const unbounded = Number(value);
+      if ((schema?.min ?? -Infinity) <= unbounded && unbounded <= (schema?.max ?? Infinity)) {
+        return unbounded;
+      }
+      return;
+    }
+    case "date":
+      return new Date(value);
+  }
+}

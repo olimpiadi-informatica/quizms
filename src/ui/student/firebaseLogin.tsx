@@ -1,9 +1,16 @@
-import React, { ComponentType, Suspense, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  ChangeEvent,
+  ComponentType,
+  Suspense,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 import { sha256 } from "@noble/hashes/sha256";
 import classNames from "classnames";
-import { addMinutes, differenceInMilliseconds, format } from "date-fns";
-import { it as dateLocaleIT } from "date-fns/locale";
+import { addMinutes, differenceInMilliseconds, formatISO } from "date-fns";
 import { FirebaseOptions } from "firebase/app";
 import { getAuth, signOut } from "firebase/auth";
 import {
@@ -30,6 +37,7 @@ import {
 } from "~/firebase/converters";
 import { useAnonymousAuth, useCollection, useDocument } from "~/firebase/hooks";
 import { FirebaseLogin, useDb } from "~/firebase/login";
+import { parsePersonalInformation } from "~/models/contest";
 import { Student } from "~/models/student";
 import { RemoteContest } from "~/ui";
 import Loading from "~/ui/components/loading";
@@ -64,6 +72,7 @@ export function FirebaseStudentLogin({
 
 function StudentLogin({ header }: { header: ComponentType<any> }) {
   const db = useDb();
+  const getNow = useTime();
 
   const user = useAnonymousAuth();
   const [contests] = useCollection("contests", contestConverter);
@@ -79,7 +88,7 @@ function StudentLogin({ header }: { header: ComponentType<any> }) {
     uid: user?.uid,
     personalInformation: {},
     answers: {},
-    createdAt: new Date(),
+    createdAt: getNow(),
   });
   const contest = contests.find((c) => c.id === student.contest);
 
@@ -92,9 +101,10 @@ function StudentLogin({ header }: { header: ComponentType<any> }) {
   }
 
   const completed =
-    Object.keys(contest?.personalInformation ?? {}).every(
-      (p) => student.personalInformation?.[p],
-    ) && !!student.token;
+    contest?.personalInformation?.every((p) => student.personalInformation?.[p.name]) &&
+    !!student.token;
+
+  console.log(contest?.personalInformation, student.personalInformation, completed);
 
   const start = async () => {
     setLoading(true);
@@ -142,28 +152,37 @@ function StudentLogin({ header }: { header: ComponentType<any> }) {
             </select>
           </div>
 
-          {contest?.personalInformation.map((pi) => {
-            const value = student.personalInformation?.[pi.name];
+          {contest?.personalInformation.map((field) => {
+            const value = student.personalInformation?.[field.name];
+            const formattedValue =
+              value instanceof Date
+                ? formatISO(value, { representation: "date" })
+                : (value as string) ?? "";
+
+            const onChange = (e: ChangeEvent<HTMLInputElement>) => {
+              console.log(e.target.value, e.target.valueAsDate);
+              const value = parsePersonalInformation(e.target.value, field);
+              setLocalStudent((student) => ({
+                ...student,
+                personalInformation: {
+                  ...student.personalInformation,
+                  [field.name]: value,
+                },
+              }));
+            };
+
             return (
-              <div key={pi.name} className="form-control w-full">
+              <div key={field.name} className="form-control w-full">
                 <label className="label">
-                  <span className="label-text text-lg">{pi.label}</span>
+                  <span className="label-text text-lg">{field.label}</span>
                 </label>
                 <input
-                  type={pi.type}
-                  placeholder={"Inserisci " + pi.label}
+                  type={field.type}
+                  placeholder={"Inserisci " + field.label}
                   className="input input-bordered w-full max-w-md"
-                  onChange={(e) => {
-                    const info: any = student.personalInformation ?? {};
-                    info[pi.name] = e.target.value;
-                    setLocalStudent({ ...student, personalInformation: info });
-                  }}
+                  onChange={onChange}
                   disabled={loading}
-                  value={
-                    value instanceof Date
-                      ? format(value, "P", { locale: dateLocaleIT })
-                      : (value as string) ?? ""
-                  }
+                  value={formattedValue}
                   required
                 />
               </div>
@@ -244,7 +263,7 @@ function StudentInner({
       differenceInMilliseconds(school.startingTime!, getNow()) + 1000 + Math.random() * 1000,
     );
     return () => clearTimeout(id);
-  }, [school.startingTime]);
+  }, [school.startingTime, getNow]);
 
   const [terminated, setTerminated] = useState(false);
   useEffect(() => {
@@ -253,7 +272,7 @@ function StudentInner({
       differenceInMilliseconds(addMinutes(school.startingTime!, contest.duration!), getNow()),
     );
     return () => clearTimeout(id);
-  }, [school.startingTime, contest.duration]);
+  }, [school.startingTime, contest.duration, getNow]);
 
   const setStudentAndSubmit = async (student: Student) => {
     await setStudent(student);
@@ -407,9 +426,21 @@ async function createStudent(db: Firestore, student: Student) {
 }
 
 function ContestInner() {
-  const { student } = useStudent();
+  const { student, setStudent } = useStudent();
 
   const [variant] = useDocument("variants", student.variant!, variantConverter);
+
+  useEffect(() => {
+    void setStudent({
+      ...student,
+      answers: Object.fromEntries(
+        Object.entries(variant.schema).map(([id, s]) => [
+          id,
+          student.answers?.[id] ?? s.blankOption,
+        ]),
+      ),
+    });
+  }, [setStudent, student, variant.schema]);
 
   const url = useMemo(() => {
     const blob = new Blob([variant.statement], { type: "text/javascript" });

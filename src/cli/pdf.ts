@@ -132,7 +132,7 @@ async function addText(
   };
   for (const pageNum in pages) {
     const page = pages[pageNum];
-    const { width, height } = page.getSize();
+    const { height } = page.getSize();
     page.drawText((parseInt(pageNum) + 1).toString(), {
       x: 10,
       y: 10,

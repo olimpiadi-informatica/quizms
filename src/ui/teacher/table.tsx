@@ -7,7 +7,7 @@ import { it as dateLocaleIT } from "date-fns/locale";
 import { cloneDeep, compact, set, sumBy } from "lodash-es";
 import { AlertTriangle, FileCheck, Upload, Users } from "lucide-react";
 
-import { Contest } from "~/models/contest";
+import { Contest, parsePersonalInformation } from "~/models/contest";
 import { School } from "~/models/school";
 import { score } from "~/models/score";
 import { Student } from "~/models/student";
@@ -249,12 +249,7 @@ function Table({
     const [field, subfield] = ev.colDef.field!.split(".");
     if (field === "personalInformation") {
       const schema = contest.personalInformation.find((f) => f.name === subfield);
-      if (
-        schema?.type === "number" &&
-        (value < (schema?.min ?? -Infinity) || value > (schema?.max ?? Infinity))
-      ) {
-        value = undefined;
-      }
+      value = parsePersonalInformation(schema, value);
     }
     if (field === "variant") {
       if (!variants.some((v) => v.id === value && v.contest === contest.id)) {

@@ -11,6 +11,7 @@ import {
   roundToNearestMinutes,
 } from "date-fns";
 import { it as dateLocaleIT } from "date-fns/locale";
+import { saveAs } from "file-saver";
 import {
   Firestore,
   collection,
@@ -392,11 +393,12 @@ function StudentRestoreList(props: { school: School }) {
   );
 }
 
-async function downloadStatement(db: Firestore, school: School) {
+async function downloadStatement(db: Firestore, contest: Contest, school: School) {
   const q = query(
     collection(db, "pdfs"),
     where(documentId(), "in", school.pdfVariants),
   ).withConverter(pdfConverter);
+
   const statements = await getDocs(q);
   const pdf = await PDFDocument.create();
   for (const statement of statements.docs) {
@@ -409,19 +411,7 @@ async function downloadStatement(db: Firestore, school: School) {
   }
 
   const blob = new Blob([await pdf.save()]);
-  const url = window.URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.setAttribute("download", `FileName.pdf`);
-
-  // Append to html link element page
-  document.body.appendChild(link);
-
-  // Start download
-  link.click();
-
-  // Clean up and remove the link
-  link.parentNode!.removeChild(link);
+  saveAs(blob, `${contest.id}-${school.schoolId}.pdf`);
 }
 
 function ContestAdmin(props: { school: School; contest: Contest }) {
@@ -475,7 +465,9 @@ function ContestAdmin(props: { school: School; contest: Contest }) {
           {format(contest.startingWindowEnd, "HH:mm", { locale: dateLocaleIT })} del{" "}
           {format(contest.startingWindowStart, "d LLLL", { locale: dateLocaleIT })}.
           <div className="mt-2 flex justify-center">
-            <button className="btn btn-warning" onClick={() => downloadStatement(db, school)}>
+            <button
+              className="btn btn-warning"
+              onClick={() => downloadStatement(db, contest, school)}>
               Scarica testo per prova cartacea
             </button>
           </div>

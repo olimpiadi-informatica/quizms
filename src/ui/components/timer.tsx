@@ -29,7 +29,7 @@ export default function Timer(props: TimerProps) {
       }
     }, 100);
     return () => clearInterval(id);
-  }, [endTime]);
+  }, [endTime, getNow]);
 
   if (!endTime) {
     return <span className="font-mono">--:--</span>;
