@@ -57,8 +57,9 @@ export default function ErrorLogout({ error, resetErrorBoundary }: FallbackProps
   const auth = getAuth(db.app);
 
   const onReset = async () => {
+    console.log("signing out");
     await auth.signOut();
-    resetErrorBoundary();
+    window.location.reload();
   };
 
   return <Error error={error} resetErrorBoundary={onReset} />;
