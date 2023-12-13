@@ -5,6 +5,7 @@ export const generationConfigSchema = z.record(
     id: z.string(),
     name: z.string(),
     variantIds: z.coerce.string().array(),
+    pdfVariantIds: z.coerce.string().array(),
     secret: z.string(),
     entry: z.string(),
     shuffleProblems: z.boolean(),

@@ -104,9 +104,9 @@ export async function printVariants(config: ContestConfig, outDir: string, serve
   const browser = await chromium.launch({ headless: true });
   const context = await browser.newContext();
   const chunkSize = 10;
-  for (let i = 0; i < config.variantIds.length; i += chunkSize) {
+  for (let i = 0; i < config.pdfVariantIds.length; i += chunkSize) {
     await Promise.all(
-      config.variantIds.slice(i, i + chunkSize).map(async (variantId) => {
+      config.pdfVariantIds.slice(i, i + chunkSize).map(async (variantId) => {
         const seed = `${config.secret}${variantId}`;
         const path = join(outDir, "raw", `${variantId}.pdf`);
         await printVariant(context, seed, path, serverPort);
@@ -131,7 +131,6 @@ async function addText(
     size: 17,
   };
   for (const pageNum in pages) {
-    console.log(pageNum, typeof pageNum);
     const page = pages[pageNum];
     const { width, height } = page.getSize();
     page.drawText((parseInt(pageNum) + 1).toString(), {
@@ -151,11 +150,11 @@ async function addText(
 
 async function addAllText(config: ContestConfig, outDir: string) {
   const chunkSize = 10;
-  for (let i = 0; i < config.variantIds.length; i += chunkSize) {
+  for (let i = 0; i < config.pdfVariantIds.length; i += chunkSize) {
     await Promise.all(
-      config.variantIds.slice(i, i + chunkSize).map(async (variantId) => {
+      config.pdfVariantIds.slice(i, i + chunkSize).map(async (variantId) => {
         const inputPath = join(outDir, config.id, "raw", `${variantId}.pdf`);
-        const outputPath = join(outDir, config.id, "final", `${variantId}.pdf`);
+        const outputPath = join(outDir, "final", `${variantId}.pdf`);
         await addText(inputPath, outputPath, variantId, config.name);
       }),
     );
@@ -174,15 +173,11 @@ export type PdfOptions = {
 export default async function pdf(options: PdfOptions) {
   const config = await loadGenerationConfig(options.config);
   const contest = config[options.contestId];
-  //const server = await pdfServer(options.dir, contest, options.port);
+  const server = await pdfServer(options.dir, contest, options.port);
 
   if (!options.server) {
-    //await printVariants(
-    //contest,
-    //join(options.outDir, options.contestId),
-    //options.port,
-    //);
+    await printVariants(contest, join(options.outDir, options.contestId), options.port);
     addAllText(contest, options.outDir);
-    //server.close();
+    server.close();
   }
 }

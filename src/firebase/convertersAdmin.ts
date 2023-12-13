@@ -19,6 +19,7 @@ import z, {
 } from "zod";
 
 import { Contest, contestSchema } from "~/models/contest";
+import { Pdf, pdfSchema } from "~/models/pdf";
 import { School, schoolSchema } from "~/models/school";
 import { Solution, solutionSchema } from "~/models/solution";
 import { Student, studentSchema } from "~/models/student";
@@ -128,4 +129,9 @@ export const variantMappingConverter: FirestoreDataConverter<VariantMapping> = {
 export const teacherConverter: FirestoreDataConverter<Teacher> = {
   toFirestore: (data) => convertToFirestore(data),
   fromFirestore: (snapshot) => parse(teacherSchema, snapshot),
+};
+
+export const pdfConverter: FirestoreDataConverter<Pdf> = {
+  toFirestore: (data) => convertToFirestore(data),
+  fromFirestore: (snapshot) => parse(pdfSchema, snapshot),
 };

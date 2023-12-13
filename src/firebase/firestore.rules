@@ -205,5 +205,9 @@ service cloud.firestore {
         match /variantMapping/{hash} {
             allow read: if request.auth != null;
         }
+
+        match /pdfs/{variant} {
+            allow read: if request.auth != null && request.auth.token.email_verified;
+        }
     }
 }

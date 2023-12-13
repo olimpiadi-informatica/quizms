@@ -17,8 +17,15 @@ export default async function loadGenConfig(configPath: string) {
     if (typeof contest.variantIds == "string") {
       contest.variantIds = await readJson(contest.variantIds);
     }
+    if (typeof contest.pdfVariantIds == "string") {
+      contest.pdfVariantIds = await readJson(contest.pdfVariantIds);
+    }
   }
   const config = validateOrExit(generationConfigSchema, configJson);
+  for (const contest of Object.values(config)) {
+    contest.pdfVariantIds = [...new Set(contest.pdfVariantIds)];
+    contest.variantIds = [...new Set([...contest.variantIds, ...contest.pdfVariantIds])];
+  }
   return config;
 }
 

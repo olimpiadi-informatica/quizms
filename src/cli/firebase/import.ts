@@ -1,4 +1,6 @@
+import { readFileSync } from "node:fs";
 import { readFile } from "node:fs/promises";
+import { join } from "node:path";
 import { cwd } from "node:process";
 
 import { cert, deleteApp, initializeApp } from "firebase-admin/app";
@@ -11,6 +13,7 @@ import { exportVariants } from "~/cli/export-variants";
 import loadGenerationConfig from "~/cli/load-generation-config";
 import {
   contestConverter,
+  pdfConverter,
   schoolConverter,
   solutionConverter,
   teacherConverter,
@@ -30,6 +33,7 @@ type ImportOptions = {
   variants?: boolean;
   solutions?: boolean;
   delete?: boolean;
+  pdfs?: boolean;
   all?: boolean;
 };
 
@@ -149,6 +153,29 @@ export default async function importContests(options: ImportOptions) {
     console.info(`${res.length} users imported!`);
   }
 
+  if (options.all || options.pdfs) {
+    if (options.delete) {
+      console.info("Deleting pdfs...");
+      await deleteCollection(db, "pdfs");
+      console.info("Deleted pdfs!");
+    }
+    console.info("Importing pdfs...");
+    for (const contest of Object.values(config)) {
+      const variantIds = contest.pdfVariantIds;
+      const res = await Promise.all(
+        variantIds.map(async (variantId) => {
+          const path = join("pdf/final", `${variantId}.pdf`);
+          const pdfFile = readFileSync(path);
+          await db.doc(`pdfs/${variantId}`).withConverter(pdfConverter).set({
+            id: variantId,
+            statement: pdfFile,
+          });
+        }),
+      );
+      console.info(`${res.length} pdfs imported!`);
+    }
+  }
+
   if (options.all || options.schools) {
     if (options.delete) {
       console.info("Deleting schools...");
@@ -205,7 +232,7 @@ export default async function importContests(options: ImportOptions) {
 
         console.info("Importing variant mappings...");
         const prefix = contest.id;
-        const rng = new Rng(`${contest.secret}${contest.id}`);
+        const rng = new Rng(`#variantMappings#${contest.secret}#`);
         const res2 = await Promise.all(
           range(4096).map(async (i) => {
             const suffix = Buffer.from([i / 256, i % 256])
