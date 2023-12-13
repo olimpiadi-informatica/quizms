@@ -1,8 +1,17 @@
-import React, { Ref, Suspense, forwardRef, lazy, useMemo, useRef, useState } from "react";
+import React, {
+  Ref,
+  Suspense,
+  forwardRef,
+  lazy,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 import { CellEditRequestEvent, ColDef, ICellRendererParams } from "ag-grid-community";
 import classNames from "classnames";
-import { format, isEqual as isEqualDate } from "date-fns";
+import { addMinutes, format, isEqual as isEqualDate } from "date-fns";
 import { it as dateLocaleIT } from "date-fns/locale";
 import { cloneDeep, compact, set, sumBy } from "lodash-es";
 import { AlertTriangle, FileCheck, Upload, Users } from "lucide-react";
@@ -14,6 +23,7 @@ import { Student } from "~/models/student";
 import { Variant } from "~/models/variant";
 import Loading from "~/ui/components/loading";
 import Modal from "~/ui/components/modal";
+import useTime from "~/ui/components/time";
 import { randomId } from "~/utils/random";
 
 import { useTeacher } from "./provider";
@@ -165,6 +175,19 @@ function Table({
     [],
   );
 
+  const getNow = useTime();
+
+  const [time, setTime] = useState(getNow);
+  useEffect(() => {
+    const id = setTimeout(() => setTime(getNow));
+    return () => clearTimeout(id);
+  }, []);
+
+  const isContestRunning =
+    !!school.startingTime &&
+    !!contest.duration &&
+    addMinutes(school.startingTime, contest.duration) >= getNow();
+
   const colDefs = useMemo(
     (): ColDef[] =>
       compact([
@@ -177,7 +200,7 @@ function Table({
             sortable: true,
             filter: true,
             resizable: true,
-            editable: !school.finalized,
+            editable: !isContestRunning && !school.finalized,
             width: widths[field.size ?? "md"],
             equals: field.type === "date" ? isEqualDate : undefined,
             cellRenderer: ({ api, data, value }: ICellRendererParams<Student>) => {
@@ -208,7 +231,7 @@ function Table({
           sortable: true,
           filter: true,
           resizable: true,
-          editable: !school.finalized,
+          editable: !isContestRunning && !school.finalized,
           width: 100,
         },
         ...contest.problemIds.map(
@@ -217,7 +240,7 @@ function Table({
             headerName: String(id),
             sortable: false,
             resizable: true,
-            editable: !school.finalized,
+            editable: !isContestRunning && !school.finalized,
             width: 50 + (i % 4 === 3 ? 15 : 0),
           }),
         ),
@@ -236,7 +259,7 @@ function Table({
           cellDataType: "boolean",
           filter: true,
           resizable: true,
-          editable: !school.finalized,
+          editable: !isContestRunning && !school.finalized,
           width: 100,
           valueGetter: ({ data }) => data.disabled ?? false,
         },
