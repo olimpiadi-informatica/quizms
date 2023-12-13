@@ -45,6 +45,6 @@ export function parsePersonalInformation(
       return;
     }
     case "date":
-      return new Date(value);
+      return value ? new Date(value) : undefined;
   }
 }
