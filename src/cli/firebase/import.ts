@@ -237,7 +237,6 @@ export default async function importContests(options: ImportOptions) {
         );
         console.info(`${res.length} variants imported!`);
 
-        const variantIds = contest.variantIds.filter((x) => !contest.pdfVariantIds.includes(x));
         console.info("Importing variant mappings...");
         const prefix = contest.id;
         const rng = new Rng(`#variantMappings#${contest.secret}#`);
@@ -253,7 +252,7 @@ export default async function importContests(options: ImportOptions) {
               .withConverter(variantMappingConverter)
               .set({
                 id,
-                variant: variantIds[rng.randInt(0, contest.variantIds.length - 1)],
+                variant: contest.variantIds[rng.randInt(0, contest.variantIds.length - 1)],
               });
           }),
         );
