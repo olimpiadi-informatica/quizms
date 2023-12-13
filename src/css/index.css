@@ -41,6 +41,11 @@ body {
   --ag-foreground-color: theme(colors.base-content);
 }
 
+.ag-header-cell,
+.ag-cell {
+  --ag-cell-horizontal-padding: 0.5rem;
+}
+
 .blocklyHtmlInput {
   @apply bg-white;
 }

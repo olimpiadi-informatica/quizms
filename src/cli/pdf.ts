@@ -2,8 +2,8 @@ import { readFileSync } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { pathToFileURL } from "node:url";
-import { toJs } from "estree-util-to-js";
 
+import { toJs } from "estree-util-to-js";
 import express from "express";
 import { PDFDocument } from "pdf-lib";
 import { BrowserContext, chromium } from "playwright";
@@ -73,8 +73,8 @@ async function pdfServer(dir: string, config: ContestConfig, port: number) {
 
   app.get("/variant.js", (req, res) => {
     res.setHeader("content-type", "text/javascript");
-    const contestAst = shuffleContest(contestJsx, `${req.query.variant}`, config)
-    const {answers, schema} = getAnswers(contestAst, false);
+    const contestAst = shuffleContest(contestJsx, `${req.query.variant}`, config);
+    const { answers } = getAnswers(contestAst, false);
     console.log(`VARIANT: ${req.query.variant}`);
     console.log("ANSWERS:");
     console.log(answers);
@@ -184,7 +184,7 @@ export default async function pdf(options: PdfOptions) {
 
   if (!options.server) {
     await printVariants(contest, join(options.outDir, options.contestId), options.port);
-    addAllText(contest, options.outDir);
+    await addAllText(contest, options.outDir);
     server.close();
   }
 }

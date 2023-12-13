@@ -139,7 +139,7 @@ const FinalizeModal = forwardRef(function FinalizeModal(
           <i>{props.contest?.name}</i>.
         </p>
         <p>
-          Se hai capito e sei d'accordo, scrivi &ldquo;<i>{correctConfirm}</i>&rdquo;.
+          Se hai capito e sei d&apos;accordo, scrivi &ldquo;<i>{correctConfirm}</i>&rdquo;.
         </p>
         <p>
           <input
@@ -206,11 +206,11 @@ function Table({
 
   const getNow = useTime();
 
-  const [time, setTime] = useState(getNow);
+  const [, setTime] = useState(getNow);
   useEffect(() => {
     const id = setTimeout(() => setTime(getNow));
     return () => clearTimeout(id);
-  }, []);
+  }, [getNow]);
 
   const isContestRunning =
     !!school.startingTime &&
@@ -293,7 +293,7 @@ function Table({
           valueGetter: ({ data }) => data.disabled ?? false,
         },
       ]),
-    [contest, variants, solutions, widths, school.finalized],
+    [contest, variants, solutions, widths, school.finalized, isContestRunning],
   );
 
   const onCellEditRequest = async (ev: CellEditRequestEvent) => {
