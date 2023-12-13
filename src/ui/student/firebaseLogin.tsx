@@ -423,21 +423,9 @@ async function createStudent(db: Firestore, student: Student) {
 }
 
 function ContestInner() {
-  const { student, setStudent } = useStudent();
+  const { student } = useStudent();
 
   const [variant] = useDocument("variants", student.variant!, variantConverter);
-
-  useEffect(() => {
-    void setStudent({
-      ...student,
-      answers: Object.fromEntries(
-        Object.entries(variant.schema).map(([id, s]) => [
-          id,
-          student.answers?.[id] ?? s.blankOption,
-        ]),
-      ),
-    });
-  }, [setStudent, student, variant.schema]);
 
   const url = useMemo(() => {
     const blob = new Blob([variant.statement], { type: "text/javascript" });

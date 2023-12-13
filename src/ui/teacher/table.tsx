@@ -210,15 +210,15 @@ function Table({
     !!contest.duration &&
     addMinutes(school.startingTime, contest.duration);
 
+  const isContestRunning = 0 && endTime && getNow() <= endTime;
+
   const [, setTime] = useState(getNow);
   useEffect(() => {
-    if (!endTime) return;
+    if (!isContestRunning) return;
     const now = getNow();
-    const id = setTimeout(() => setTime(getNow), differenceInMilliseconds(now, endTime));
+    const id = setTimeout(() => setTime(getNow), differenceInMilliseconds(endTime, now));
     return () => clearTimeout(id);
   }, [getNow, endTime]);
-
-  const isContestRunning = endTime && getNow() <= endTime;
 
   const colDefs = useMemo(
     (): ColDef[] =>
