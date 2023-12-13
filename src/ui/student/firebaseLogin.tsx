@@ -104,8 +104,6 @@ function StudentLogin({ header }: { header: ComponentType<any> }) {
     contest?.personalInformation?.every((p) => student.personalInformation?.[p.name]) &&
     !!student.token;
 
-  console.log(contest?.personalInformation, student.personalInformation, completed);
-
   const start = async () => {
     setLoading(true);
     setError(undefined);
@@ -128,9 +126,9 @@ function StudentLogin({ header }: { header: ComponentType<any> }) {
   };
 
   return (
-    <div className="h-full py-8">
-      <div className="flex h-full justify-center overflow-y-auto">
-        <form className="max-w-md grow p-4">
+    <div className="h-full">
+      <div className="mx-4 flex h-full flex-col items-center justify-center overflow-y-auto">
+        <form className="my-8 w-full max-w-md grow">
           <div className="form-control w-full">
             <label className="label">
               <span className="label-text text-lg">Gara</span>
@@ -160,7 +158,6 @@ function StudentLogin({ header }: { header: ComponentType<any> }) {
                 : (value as string) ?? "";
 
             const onChange = (e: ChangeEvent<HTMLInputElement>) => {
-              console.log(e.target.value, e.target.valueAsDate);
               const value = parsePersonalInformation(e.target.value, field);
               setLocalStudent((student) => ({
                 ...student,

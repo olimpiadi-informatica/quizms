@@ -10,7 +10,7 @@ code::after {
 }
 
 pre {
-  @apply !bg-base-200 !pl-5 !text-base-content;
+  @apply !bg-base-200 !text-base-content screen:!pl-5;
 }
 
 label pre {
