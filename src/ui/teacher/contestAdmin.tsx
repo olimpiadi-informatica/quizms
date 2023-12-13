@@ -19,12 +19,14 @@ import {
   doc,
   documentId,
   getDocs,
+  limit,
   query,
   runTransaction,
   serverTimestamp,
   setDoc,
   updateDoc,
   where,
+  writeBatch,
 } from "firebase/firestore";
 import { groupBy, range } from "lodash-es";
 import { PDFDocument } from "pdf-lib";
@@ -299,22 +301,26 @@ function StudentRestoreButton({ studentRestore }: { studentRestore: StudentResto
     setLoading(true);
     for (const request of studentRestore) {
       if (code == String(hash(request.id) % 1000).padStart(3, "0")) {
-        await updateDoc(doc(db, "students", request.studentId).withConverter(studentConverter), {
-          uid: request.id,
-          updatedAt: serverTimestamp(),
-        });
         const q = query(
           collection(db, "studentMappingUid"),
           where("studentId", "==", request.studentId),
+          limit(400),
         );
-        const mappings = await getDocs(q);
-        mappings.forEach((mapping) => {
-          deleteDoc(doc(db, "studentMappingUid", mapping.id));
-        });
+        const prevMappings = await getDocs(q);
 
-        await setDoc(doc(db, "studentMappingUid", request.id), {
+        const batch = writeBatch(db);
+        batch.update(doc(db, "students", request.studentId).withConverter(studentConverter), {
+          uid: request.id,
+          updatedAt: serverTimestamp(),
+        });
+        batch.set(doc(db, "studentMappingUid", request.id), {
           studentId: request.studentId,
         });
+        prevMappings.forEach((mapping) => {
+          batch.delete(doc(db, "studentMappingUid", mapping.id));
+        });
+
+        await batch.commit();
       }
     }
     setLoading(false);

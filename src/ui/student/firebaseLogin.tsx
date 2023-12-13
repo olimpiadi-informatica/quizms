@@ -2,6 +2,7 @@ import React, {
   ChangeEvent,
   ComponentType,
   Suspense,
+  forwardRef,
   useEffect,
   useMemo,
   useRef,
@@ -217,21 +218,42 @@ function StudentLogin({ header }: { header: ComponentType<any> }) {
             </>
           )}
         </form>
-        <Modal ref={modalRef} title="Attenzione">
-          <p>
-            Il tuo account è già presente su un&apos;altro dispositivo. Per trasferire
-            l&apos;accesso al dispositivo corrente comunica al tuo insegnante il codice seguente:
-          </p>
-          <div className="flex justify-center pt-3">
-            <span className="pt-1 font-mono text-3xl">
-              {String(hash(getAuth(db.app).currentUser!.uid) % 1000).padStart(3, "0")}
-            </span>
-          </div>
-        </Modal>
+        <StudentRestoreModal ref={modalRef} />
       </div>
     </div>
   );
 }
+
+const StudentRestoreModal = forwardRef(function StudentRestoreModal(
+  props,
+  ref: React.Ref<HTMLDialogElement>,
+) {
+  const db = useDb();
+  const auth = getAuth(db.app);
+  const user = auth.currentUser!;
+
+  useCollection("students", studentConverter, {
+    constraints: {
+      uid: user?.uid,
+    },
+    limit: 1,
+    subscribe: true,
+  });
+
+  return (
+    <Modal ref={ref} title="Attenzione">
+      <p>
+        Il tuo account è già presente su un&apos;altro dispositivo. Per trasferire l&apos;accesso al
+        dispositivo corrente comunica al tuo insegnante il codice seguente:
+      </p>
+      <div className="flex justify-center pt-3">
+        <span className="pt-1 font-mono text-3xl">
+          {String(hash(user.uid) % 1000).padStart(3, "0")}
+        </span>
+      </div>
+    </Modal>
+  );
+});
 
 function StudentInner({
   student,
@@ -243,6 +265,8 @@ function StudentInner({
   header: ComponentType<any>;
 }) {
   const db = useDb();
+  console.log("StudentInner", student);
+
   const [contest] = useDocument("contests", student.contest!, contestConverter);
   const [school] = useDocument("schools", student.school!, schoolConverter, { subscribe: true });
 
