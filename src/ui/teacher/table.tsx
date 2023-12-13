@@ -13,7 +13,7 @@ import { CellEditRequestEvent, ColDef, ICellRendererParams } from "ag-grid-commu
 import classNames from "classnames";
 import { addMinutes, differenceInMilliseconds, format, isEqual as isEqualDate } from "date-fns";
 import { it as dateLocaleIT } from "date-fns/locale";
-import { cloneDeep, compact, set, sumBy } from "lodash-es";
+import { cloneDeep, compact, get, set, sumBy } from "lodash-es";
 import { AlertTriangle, FileCheck, Upload, Users } from "lucide-react";
 
 import { Contest, parsePersonalInformation } from "~/models/contest";
@@ -205,17 +205,20 @@ function Table({
   );
 
   const getNow = useTime();
+  const now = getNow();
+  const endTime =
+    !!school.startingTime &&
+    !!contest.duration &&
+    addMinutes(school.startingTime, contest.duration);
 
   const [, setTime] = useState(getNow);
   useEffect(() => {
-    const id = setTimeout(() => setTime(getNow), differenceInMilliseconds(getNow(), new Date()));
+    if (!endTime) return;
+    const id = setTimeout(() => setTime(getNow), differenceInMilliseconds(now, endTime));
     return () => clearTimeout(id);
-  }, [getNow]);
+  }, [getNow, endTime, now]);
 
-  const isContestRunning =
-    !!school.startingTime &&
-    !!contest.duration &&
-    addMinutes(school.startingTime, contest.duration) >= getNow();
+  const isContestRunning = endTime && now <= endTime;
 
   const colDefs = useMemo(
     (): ColDef[] =>
@@ -265,7 +268,8 @@ function Table({
         },
         ...contest.problemIds.map(
           (id, i): ColDef => ({
-            field: `answers.${id}`,
+            field: `answers[${id}]`,
+            valueGetter: ({ data }) => data.answers?.[id],
             headerName: String(id),
             sortable: false,
             resizable: true,
@@ -301,7 +305,7 @@ function Table({
     const [field, subfield] = ev.colDef.field!.split(".");
     if (field === "personalInformation") {
       const schema = contest.personalInformation.find((f) => f.name === subfield);
-      value = parsePersonalInformation(schema, value);
+      value = parsePersonalInformation(value, schema);
     }
     if (field === "variant") {
       if (!variants.some((v) => v.id === value && v.contest === contest.id)) {
