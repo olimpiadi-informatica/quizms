@@ -16,6 +16,7 @@ import {
   collection,
   deleteDoc,
   doc,
+  documentId,
   getDocs,
   query,
   runTransaction,
@@ -24,9 +25,11 @@ import {
   updateDoc,
   where,
 } from "firebase/firestore";
-import { groupBy } from "lodash-es";
+import { groupBy, range } from "lodash-es";
+import { PDFDocument } from "pdf-lib";
 
 import {
+  pdfConverter,
   schoolConverter,
   schoolMappingConverter,
   studentMappingHashConverter,
@@ -389,9 +392,42 @@ function StudentRestoreList(props: { school: School }) {
   );
 }
 
+async function downloadStatement(db: Firestore, school: School) {
+  const q = query(
+    collection(db, "pdfs"),
+    where(documentId(), "in", school.pdfVariants),
+  ).withConverter(pdfConverter);
+  const statements = await getDocs(q);
+  const pdf = await PDFDocument.create();
+  for (const statement of statements.docs) {
+    const otherPdf = await PDFDocument.load(statement.data().statement);
+    const toCopy = range(otherPdf.getPages().length);
+    const pages = await pdf.copyPages(otherPdf, toCopy);
+    for (const page of pages) {
+      pdf.addPage(page);
+    }
+  }
+
+  const blob = new Blob([await pdf.save()]);
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.setAttribute("download", `FileName.pdf`);
+
+  // Append to html link element page
+  document.body.appendChild(link);
+
+  // Start download
+  link.click();
+
+  // Clean up and remove the link
+  link.parentNode!.removeChild(link);
+}
+
 function ContestAdmin(props: { school: School; contest: Contest }) {
   const { school, contest } = props;
   const [time, setTime] = useState(new Date());
+  const db = useDb();
 
   // refresh the page when the page should change
   useEffect(() => {
@@ -439,7 +475,9 @@ function ContestAdmin(props: { school: School; contest: Contest }) {
           {format(contest.startingWindowEnd, "HH:mm", { locale: dateLocaleIT })} del{" "}
           {format(contest.startingWindowStart, "d LLLL", { locale: dateLocaleIT })}.
           <div className="mt-2 flex justify-center">
-            <button className="btn btn-warning">Scarica testo per prova cartacea</button>
+            <button className="btn btn-warning" onClick={() => downloadStatement(db, school)}>
+              Scarica testo per prova cartacea
+            </button>
           </div>
         </div>
       </div>
