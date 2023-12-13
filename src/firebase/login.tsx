@@ -52,12 +52,11 @@ export function useDb() {
   return useContext(FirebaseContext)!;
 }
 
-export default function ErrorLogout({ error, resetErrorBoundary }: FallbackProps) {
+export default function ErrorLogout({ error }: FallbackProps) {
   const db = useDb();
   const auth = getAuth(db.app);
 
   const onReset = async () => {
-    console.log("signing out");
     await auth.signOut();
     window.location.reload();
   };

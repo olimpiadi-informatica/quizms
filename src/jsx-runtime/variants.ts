@@ -44,7 +44,7 @@ export function shuffleProblems(program: Program, variant: string) {
   });
 }
 
-export function getAnswers(program: Program, remove: boolean) {
+export function getAnswers(program: Program, remove: boolean, blankOption?: string) {
   let probId = 0,
     subId = 0,
     ansId = 0;
@@ -65,8 +65,8 @@ export function getAnswers(program: Program, remove: boolean) {
           for (const prop of props.properties) {
             if (is.property(prop) && is.literal(prop.key) && prop.key.value == "points") {
               if (is.arrayExpression(prop.value)) {
-                [pointsCorrect, pointsBlank, pointsWrong] = prop.value.elements.map(
-                  (x) => x?.value,
+                [pointsCorrect, pointsBlank, pointsWrong] = prop.value.elements.map((x) =>
+                  x && "value" in x ? Number(x.value) : 0,
                 );
               }
             }
@@ -82,6 +82,7 @@ export function getAnswers(program: Program, remove: boolean) {
           pointsCorrect,
           pointsBlank,
           pointsWrong,
+          blankOption,
         };
       }
       if (isQuizmsComponent("Answer", comp) && is.objectExpression(props)) {

@@ -100,7 +100,6 @@ function TeacherInner({ user, children }: { user: User; children: ReactNode }) {
       contest: contests.map((contest) => contest.id),
     },
     orderBy: "createdAt",
-    subscribe: true,
   });
 
   const logout = useCallback(async () => {
