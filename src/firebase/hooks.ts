@@ -85,9 +85,7 @@ export function useDocument<T>(
   return [data as T, updateDocument] as const;
 
   async function fetcher<T>(ref: DocumentReference<T>) {
-    const snapshot = await getDoc(ref).catch((error) => {
-      throw error;
-    });
+    const snapshot = await getDoc(ref);
     if (!snapshot.exists()) {
       throw new Error(`Document \`${ref.path}\` does not exist.`);
     }
@@ -174,9 +172,7 @@ export function useCollection<
   return [data as T[], setDocument] as const;
 
   async function fetcher<T>(ref: Query<T>) {
-    const snapshot = await getDocs(ref).catch((error) => {
-      throw error;
-    });
+    const snapshot = await getDocs(ref);
     return snapshot.docs.map((doc) => doc.data({ serverTimestamps: "estimate" }));
   }
 }

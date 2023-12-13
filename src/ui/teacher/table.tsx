@@ -218,7 +218,7 @@ function Table({
     const now = getNow();
     const id = setTimeout(() => setTime(getNow), differenceInMilliseconds(endTime, now));
     return () => clearTimeout(id);
-  }, [getNow, endTime]);
+  }, [getNow, endTime, isContestRunning]);
 
   const colDefs = useMemo(
     (): ColDef[] =>
@@ -239,6 +239,7 @@ function Table({
               if (field.type === "date" && value) {
                 return format(value, "P", { locale: dateLocaleIT });
               }
+              /* TODO: don't work well with online students and blank options
               if (
                 i === 0 &&
                 field.type === "text" &&
@@ -252,7 +253,7 @@ function Table({
                     {value} <AlertTriangle className="mb-1 inline-block text-warning" size={16} />
                   </>
                 );
-              }
+              } */
               return value;
             },
           }),

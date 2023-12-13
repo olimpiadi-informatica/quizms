@@ -54,7 +54,7 @@ export async function exportVariants(
   const variants: Record<string, Variant> = {};
   for (const variant_id of config.variantIds) {
     const variantAst = shuffleContest(contestJsx, variant_id);
-    const { answers, schema } = getAnswers(variantAst, true, config.blankOption);
+    const { answers, schema } = getAnswers(variantAst, true);
     variants[variant_id] = {
       id: variant_id,
       schema,

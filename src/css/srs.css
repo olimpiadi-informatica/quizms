@@ -1,7 +1,7 @@
 @import "srs-theme.less";
 
 code {
-  @apply !px-0.5;
+  @apply !px-0.5 !font-normal;
 }
 
 code::before,
@@ -22,7 +22,7 @@ pre code {
 }
 
 pre code > span {
-  @apply block min-w-fit rounded py-px pr-4 hover:bg-base-300;
+  @apply block min-w-fit whitespace-pre-line rounded py-px pr-4 hover:bg-base-300;
 }
 
 pre code .linenumber {

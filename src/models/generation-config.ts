@@ -11,7 +11,6 @@ export const generationConfigSchema = z.record(
     entry: z.string(),
     shuffleProblems: z.boolean(),
     shuffleAnswers: z.boolean(),
-    blankOption: z.string(),
   }),
 );
 

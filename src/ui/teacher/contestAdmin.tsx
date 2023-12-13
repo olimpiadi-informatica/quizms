@@ -23,8 +23,6 @@ import {
   query,
   runTransaction,
   serverTimestamp,
-  setDoc,
-  updateDoc,
   where,
   writeBatch,
 } from "firebase/firestore";

@@ -44,7 +44,7 @@ export function shuffleProblems(program: Program, variant: string) {
   });
 }
 
-export function getAnswers(program: Program, remove: boolean, blankOption?: string) {
+export function getAnswers(program: Program, remove: boolean) {
   let probId = 0,
     subId = 0,
     ansId = 0;
@@ -82,7 +82,6 @@ export function getAnswers(program: Program, remove: boolean, blankOption?: stri
           pointsCorrect,
           pointsBlank,
           pointsWrong,
-          blankOption,
         };
       }
       if (isQuizmsComponent("Answer", comp) && is.objectExpression(props)) {
