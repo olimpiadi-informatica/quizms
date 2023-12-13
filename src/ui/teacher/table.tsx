@@ -83,7 +83,12 @@ export function TeacherTable() {
               <div className="hidden lg:block">Finalizza</div>
             </button>
           )}
-          <FinalizeModal ref={finalizeRef} school={schools[selectedSchool]} />
+          <FinalizeModal
+            key={contest.id}
+            ref={finalizeRef}
+            school={schools[selectedSchool]}
+            contest={contest}
+          />
         </div>
       </div>
       <div className="min-h-0 flex-auto overflow-scroll">
@@ -109,10 +114,13 @@ function Counter({ school, contest }: { school: School; contest: Contest }) {
 }
 
 const FinalizeModal = forwardRef(function FinalizeModal(
-  props: { school: School },
+  props: { contest: Contest; school: School },
   ref: Ref<HTMLDialogElement> | null,
 ) {
   const { setSchool } = useTeacher();
+  const [confirm, setConfirm] = useState("");
+
+  const correctConfirm = "ho completato l'inserimento degli studenti";
 
   const finalize = async () => {
     await setSchool({ ...props.school, finalized: true });
@@ -121,15 +129,36 @@ const FinalizeModal = forwardRef(function FinalizeModal(
 
   return (
     <Modal ref={ref} title="Finalizza scuola">
-      <p className="mb-3">
-        <strong className="text-error">Attenzione:</strong> questa operazione è irreversibile.
-      </p>
-      <p className="mb-3">Finalizzando non sarà più possibile modificare i dati degli studenti.</p>
-      <div className="flex justify-center gap-5">
-        <button className="btn btn-error" onClick={finalize}>
-          Conferma
-        </button>
-        <button className="btn btn-neutral">Annulla</button>
+      <div className="prose">
+        <p>
+          <strong className="text-error">Attenzione:</strong> questa operazione è irreversibile.
+        </p>
+        <p>
+          Finalizzando <b>non</b> sarà più possibile <b>aggiungere</b> nuovi studenti o{" "}
+          <b>modificare</b> i dati degli studenti in questa scuola per la gara{" "}
+          <i>{props.contest?.name}</i>.
+        </p>
+        <p>
+          Se hai capito e sei d'accordo, scrivi &ldquo;<i>{correctConfirm}</i>&rdquo;.
+        </p>
+        <p>
+          <input
+            type="text"
+            className="input input-bordered w-full px-5"
+            value={confirm}
+            onChange={(e) => setConfirm(e.target.value)}
+          />
+        </p>
+        <div className="flex justify-center gap-5">
+          <button
+            className="btn btn-error"
+            onClick={finalize}
+            disabled={confirm !== correctConfirm}>
+            <AlertTriangle />
+            Conferma
+          </button>
+          <button className="btn btn-neutral">Annulla</button>
+        </div>
       </div>
     </Modal>
   );
