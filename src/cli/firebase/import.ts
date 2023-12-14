@@ -185,8 +185,7 @@ export default async function importContests(options: ImportOptions) {
       console.info("Deleted schools!");
     }
     console.info("Importing schools...");
-    const schools = JSON.parse(await readFile("data/schools.json", "utf-8")).slice(0, 1);
-    console.log(schools);
+    const schools = JSON.parse(await readFile("data/schools.json", "utf-8"));
 
     const res = await Promise.all(
       schools.map(async (record: any) => {

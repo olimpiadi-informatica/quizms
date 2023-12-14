@@ -44,38 +44,42 @@ import { Contest } from "~/models/contest";
 import { School } from "~/models/school";
 import { Student, StudentRestore } from "~/models/student";
 import Loading from "~/ui/components/loading";
+import useTime from "~/ui/components/time";
 import { hash, randomToken } from "~/utils/random";
 
 import Modal from "../components/modal";
 import Timer from "../components/timer";
 import { useTeacher } from "./provider";
 
-function contestFinished(school: School, contest: Contest) {
+function contestFinished(now: Date, school: School, contest: Contest) {
   return (
-    school.startingTime &&
-    differenceInSeconds(new Date(), school.startingTime) > contest.duration! * 60
+    school.startingTime && differenceInSeconds(now, school.startingTime) > contest.duration! * 60
   );
 }
 
-function contestRunning(school: School, contest: Contest) {
+function contestRunning(now: Date, school: School, contest: Contest) {
   return (
-    school.startingTime && !contestFinished(school, contest) && new Date() >= school.startingTime!
+    school.startingTime && !contestFinished(now, school, contest) && now >= school.startingTime!
   );
 }
 
-function insideContestWindow(contest: Contest) {
-  return new Date() >= contest.startingWindowStart! && new Date() <= contest.startingWindowEnd!;
+function insideContestWindow(now: Date, contest: Contest) {
+  return now >= contest.startingWindowStart! && now <= contest.startingWindowEnd!;
 }
 
-function canStartContest(school: School, contest: Contest) {
+function canStartContest(now: Date, school: School, contest: Contest) {
   if (school.startingTime) {
-    return contest.allowRestart && contestFinished(school, contest) && insideContestWindow(contest);
+    return (
+      contest.allowRestart &&
+      contestFinished(now, school, contest) &&
+      insideContestWindow(now, contest)
+    );
   }
-  return insideContestWindow(contest);
+  return insideContestWindow(now, contest);
 }
 
-function canUndoContest(school: School) {
-  return school.startingTime && new Date() < addMinutes(school.startingTime, -1);
+function canUndoContest(now: Date, school: School) {
+  return school.startingTime && now < addMinutes(school.startingTime, -1);
 }
 
 function StartContest({ school }: { school: School }) {
@@ -85,11 +89,12 @@ function StartContest({ school }: { school: School }) {
   const modalRef = useRef<HTMLDialogElement>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error>();
+  const getNow = useTime();
 
   const start = async () => {
     try {
       setLoading(true);
-      const newSchool = await generateToken(db, school);
+      const newSchool = await generateToken(getNow(), db, school);
       await setSchool(newSchool);
     } catch (e) {
       setError(e as Error);
@@ -121,9 +126,9 @@ function StartContest({ school }: { school: School }) {
   );
 }
 
-async function generateToken(db: Firestore, prevSchool: School) {
+async function generateToken(now: Date, db: Firestore, prevSchool: School) {
   const token = randomToken();
-  const startingTime = roundToNearestMinutes(addSeconds(addMinutes(new Date(), 1), 30));
+  const startingTime = roundToNearestMinutes(addSeconds(addMinutes(now, 3), 30));
 
   const school: School = {
     ...prevSchool,
@@ -237,8 +242,10 @@ function StopContest({ school }: { school: School }) {
 
 function ContestData({ contest, school }: { school: School; contest: Contest }) {
   const endTime = addMinutes(school.startingTime!, contest.duration!);
+  const getNow = useTime();
+  const now = getNow();
 
-  if (contestFinished(school, contest)) {
+  if (contestFinished(now, school, contest)) {
     return (
       <div className="flex flex-col gap-3">
         <p>
@@ -248,7 +255,7 @@ function ContestData({ contest, school }: { school: School; contest: Contest }) 
       </div>
     );
   }
-  if (contestRunning(school, contest)) {
+  if (contestRunning(now, school, contest)) {
     return (
       <div className="flex flex-col gap-3">
         <p>
@@ -274,7 +281,7 @@ function ContestData({ contest, school }: { school: School; contest: Contest }) 
       <p>
         Tempo rimanente all&apos;inizio: <Timer endTime={school.startingTime!} />
       </p>
-      {canUndoContest(school) && (
+      {canUndoContest(now, school) && (
         <p>
           Se ti sei sbagliato, puoi ancora annullare la gara fino a un minuto prima
           dell&apos;inizio.
@@ -399,8 +406,11 @@ function StudentRestoreList(props: { school: School }) {
 
 function ContestAdmin(props: { school: School; contest: Contest }) {
   const { school, contest } = props;
-  const [time, setTime] = useState(new Date());
-  const db = useDb();
+
+  const getNow = useTime();
+  const now = getNow();
+
+  const [time, setTime] = useState(now);
 
   // refresh the page when the page should change
   useEffect(() => {
@@ -412,12 +422,12 @@ function ContestAdmin(props: { school: School; contest: Contest }) {
       ];
       const timeouts: NodeJS.Timeout[] = [];
       for (const d of refreshDates) {
-        if (d > new Date()) {
+        if (d > getNow()) {
           const interval = setTimeout(
             () => {
-              setTime(new Date());
+              setTime(getNow);
             },
-            differenceInMilliseconds(d, new Date()) + 1000,
+            differenceInMilliseconds(d, getNow()) + 1000,
           );
           timeouts.push(interval);
         }
@@ -428,7 +438,7 @@ function ContestAdmin(props: { school: School; contest: Contest }) {
         }
       };
     }
-  }, [school.startingTime, time, contest.duration]);
+  }, [school.startingTime, time, getNow, contest.duration]);
 
   if (!contest.startingWindowEnd || !contest.startingWindowStart) {
     throw new Error("Data inizio e fine del contest non specificate");
@@ -463,8 +473,10 @@ function ContestAdmin(props: { school: School; contest: Contest }) {
           )}
           <div className="mt-2 flex flex-wrap justify-center gap-3">
             {/* contest buttons */}
-            {canStartContest(school, contest) && <StartContest school={school} key={school.id} />}
-            {canUndoContest(school) && <StopContest school={school} />}
+            {canStartContest(now, school, contest) && (
+              <StartContest school={school} key={school.id} />
+            )}
+            {canUndoContest(now, school) && <StopContest school={school} />}
             <button
               className="btn btn-info"
               onClick={() => (window.location.href = "students/") /* TODO */}>

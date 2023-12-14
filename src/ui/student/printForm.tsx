@@ -2,7 +2,7 @@ import React from "react";
 
 import { Contest } from "~/models/contest";
 
-export function PrintForm({ contest, variant }: { contest: Contest; variant: number | string }) {
+export function PrintForm({ contest, variant }: { contest: Contest; variant: string }) {
   return (
     <div className="grid grid-cols-2 gap-2 pb-10">
       {contest.personalInformation.map((field) => (

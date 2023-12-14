@@ -11,7 +11,6 @@ import { temporaryDirectory } from "tempy";
 import { InlineConfig, build, mergeConfig } from "vite";
 
 import { shuffleContest } from "~/jsx-runtime/parser";
-import { getAnswers } from "~/jsx-runtime/variants";
 import { ContestConfig } from "~/models/generation-config";
 
 import loadGenerationConfig from "./load-generation-config";
@@ -125,12 +124,7 @@ export async function printVariants(config: ContestConfig, outDir: string, serve
   await browser.close();
 }
 
-async function addText(
-  inputPath: string,
-  outputPath: string,
-  variantId: string,
-  contestName: string,
-) {
+async function addText(inputPath: string, outputPath: string, variantId: string) {
   const pdfFile = readFileSync(inputPath);
 
   const doc = await PDFDocument.load(pdfFile);
@@ -165,7 +159,7 @@ async function addAllText(config: ContestConfig, outDir: string) {
       config.pdfVariantIds.slice(i, i + chunkSize).map(async (variantId) => {
         const inputPath = join(outDir, config.id, "raw", `${variantId}.pdf`);
         const outputPath = join(outDir, "final", `${variantId}.pdf`);
-        await addText(inputPath, outputPath, variantId, config.name);
+        await addText(inputPath, outputPath, variantId);
       }),
     );
   }
