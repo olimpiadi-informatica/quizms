@@ -207,7 +207,12 @@ service cloud.firestore {
         }
 
         match /pdfs/{variant} {
-            allow read: if request.auth != null && request.auth.token.email_verified;
+            allow read: if request.auth != null && isTeacher();
         }
+        
+        match /schema/{variant} {
+            allow read: if request.auth != null && isTeacher();
+        }
+          
     }
 }

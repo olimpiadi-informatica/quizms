@@ -24,7 +24,14 @@ import { Solution, solutionSchema } from "~/models/solution";
 import { Student, studentSchema } from "~/models/student";
 import { Submission, submissionSchema } from "~/models/submission";
 import { Teacher, teacherSchema } from "~/models/teacher";
-import { Variant, VariantMapping, variantMappingSchema, variantSchema } from "~/models/variant";
+import {
+  Schema,
+  Variant,
+  VariantMapping,
+  schemaSchema,
+  variantMappingSchema,
+  variantSchema,
+} from "~/models/variant";
 import validate from "~/utils/validate";
 
 function convertToFirestore(data: Record<string, any>) {
@@ -132,4 +139,9 @@ export const teacherConverter: FirestoreDataConverter<Teacher> = {
 export const pdfConverter: FirestoreDataConverter<Pdf> = {
   toFirestore: (data) => convertToFirestore(data),
   fromFirestore: (snapshot) => parse(pdfSchema, snapshot),
+};
+
+export const variantSchemaConverter: FirestoreDataConverter<Schema> = {
+  toFirestore: (data) => convertToFirestore(data),
+  fromFirestore: (snapshot) => parse(schemaSchema, snapshot),
 };

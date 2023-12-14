@@ -1,19 +1,21 @@
 import z from "zod";
 
+export const schemaSchema = z.record(
+  z.object({
+    id: z.string(),
+    type: z.enum(["text", "number"]),
+    regex: z.instanceof(RegExp).optional(),
+    options: z.string().array().nonempty().optional(),
+    blankOption: z.string().optional(),
+    pointsCorrect: z.number().optional(),
+    pointsBlank: z.number().optional(),
+    pointsWrong: z.number().optional(),
+  }),
+);
+
 export const variantSchema = z.object({
   id: z.string(),
-  schema: z.record(
-    z.object({
-      id: z.string(),
-      type: z.enum(["text", "number"]),
-      regex: z.instanceof(RegExp).optional(),
-      options: z.string().array().nonempty().optional(),
-      blankOption: z.string().optional(),
-      pointsCorrect: z.number().optional(),
-      pointsBlank: z.number().optional(),
-      pointsWrong: z.number().optional(),
-    }),
-  ),
+  schema: schemaSchema,
   statement: z.string(),
   contest: z.string(),
 });

@@ -34,7 +34,14 @@ import {
 } from "~/models/student";
 import { Submission, submissionSchema } from "~/models/submission";
 import { ZodBytes } from "~/models/types";
-import { Variant, VariantMapping, variantMappingSchema, variantSchema } from "~/models/variant";
+import {
+  Schema,
+  Variant,
+  VariantMapping,
+  schemaSchema,
+  variantMappingSchema,
+  variantSchema,
+} from "~/models/variant";
 import validate from "~/utils/validate";
 
 function convertToFirestore(data: Record<string, any>) {
@@ -163,4 +170,9 @@ export const variantConverter: FirestoreDataConverter<Variant> = {
 export const variantMappingConverter: FirestoreDataConverter<VariantMapping> = {
   toFirestore: (data) => convertToFirestore(data),
   fromFirestore: (snapshot) => parse(variantMappingSchema, snapshot),
+};
+
+export const variantSchemaConverter: FirestoreDataConverter<Schema> = {
+  toFirestore: (data) => convertToFirestore(data),
+  fromFirestore: (snapshot) => parse(schemaSchema, snapshot),
 };

@@ -19,6 +19,7 @@ import {
   teacherConverter,
   variantConverter,
   variantMappingConverter,
+  variantSchemaConverter,
 } from "~/firebase/convertersAdmin";
 import { contestSchema } from "~/models/contest";
 import { schoolSchema } from "~/models/school";
@@ -210,6 +211,7 @@ export default async function importContests(options: ImportOptions) {
         console.info("Deleting variants...");
         await deleteCollection(db, "variants");
         await deleteCollection(db, "variantMapping");
+        await deleteCollection(db, "variantSchema");
         console.info("Deleted variants!");
       }
       if (options.all || options.solutions) {
@@ -227,6 +229,7 @@ export default async function importContests(options: ImportOptions) {
         const res = await Promise.all(
           Object.entries(variants).map(async ([id, variant]) => {
             await db.doc(`variants/${id}`).withConverter(variantConverter).set(variant);
+            await db.doc(`schema/${id}`).withConverter(variantSchemaConverter).set(variant.schema);
           }),
         );
         console.info(`${res.length} variants imported!`);
