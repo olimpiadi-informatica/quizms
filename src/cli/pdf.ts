@@ -140,17 +140,19 @@ async function addText(
   };
   for (const pageNum in pages) {
     const page = pages[pageNum];
-    const { height } = page.getSize();
+    const { height, width } = page.getSize();
+    page.scaleContent(0.98, 0.97);
+    page.translateContent(width * 0.01, height * 0.02);
     page.drawText((parseInt(pageNum) + 1).toString(), {
       x: 10,
-      y: 10,
+      y: -10,
       ...fontOptions,
     });
-    /* page.drawText(`${contestName} - Variante ${variantId}`, {
-      x: 10,
-      y: height - fontOptions.size - 10,
+    page.drawText(`Variante ${variantId}`, {
+      x: width - 125,
+      y: -10,
       ...fontOptions,
-    }); */
+    });
   }
   await mkdir(dirname(outputPath), { recursive: true });
   await writeFile(outputPath, await doc.save());

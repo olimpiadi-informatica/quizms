@@ -397,35 +397,6 @@ function StudentRestoreList(props: { school: School }) {
   );
 }
 
-async function downloadStatement(db: Firestore, contest: Contest, school: School) {
-  const q = query(
-    collection(db, "pdfs"),
-    where(documentId(), "in", school.pdfVariants),
-  ).withConverter(pdfConverter);
-
-  const statements = await getDocs(q);
-  const pdf = await PDFDocument.create();
-  for (const statement of statements.docs) {
-    const otherPdf = await PDFDocument.load(statement.data().statement);
-    const toCopy = range(otherPdf.getPages().length);
-    const pages = await pdf.copyPages(otherPdf, toCopy);
-    for (const page of pages) {
-      pdf.addPage(page);
-    }
-    if (pages.length % 2) {
-      const page = pdf.addPage();
-      page.drawText("Pagina lasciata volontariamente vuota", {
-        x: 10,
-        y: 10,
-        size: 17,
-      });
-    }
-  }
-
-  const blob = new Blob([await pdf.save()]);
-  saveAs(blob, `${contest.id}-${school.schoolId}.pdf`);
-}
-
 function ContestAdmin(props: { school: School; contest: Contest }) {
   const { school, contest } = props;
   const [time, setTime] = useState(new Date());
@@ -477,11 +448,7 @@ function ContestAdmin(props: { school: School; contest: Contest }) {
           {format(contest.startingWindowEnd, "HH:mm", { locale: dateLocaleIT })} del{" "}
           {format(contest.startingWindowStart, "d LLLL", { locale: dateLocaleIT })}.
           <div className="mt-2 flex justify-center">
-            <button
-              className="btn btn-warning"
-              onClick={() => downloadStatement(db, contest, school)}>
-              Scarica testo per prova cartacea
-            </button>
+            <DownloadPdfButton school={school} contest={contest} />
           </div>
         </div>
       </div>
@@ -518,29 +485,64 @@ function ContestAdmin(props: { school: School; contest: Contest }) {
   );
 }
 
+function DownloadPdfButton({ school, contest }: { school: School; contest: Contest }) {
+  const db = useDb();
+  const [loading, setLoading] = useState(false);
+
+  const onClick = async () => {
+    setLoading(true);
+
+    const q = query(
+      collection(db, "pdfs"),
+      where(documentId(), "in", school.pdfVariants),
+    ).withConverter(pdfConverter);
+
+    const statements = await getDocs(q);
+    const pdf = await PDFDocument.create();
+    for (const statement of statements.docs) {
+      const otherPdf = await PDFDocument.load(statement.data().statement);
+      const toCopy = range(otherPdf.getPages().length);
+      const pages = await pdf.copyPages(otherPdf, toCopy);
+      for (const page of pages) {
+        pdf.addPage(page);
+      }
+    }
+
+    const blob = new Blob([await pdf.save()]);
+    saveAs(blob, `${contest.id}-${school.schoolId}.pdf`);
+
+    setLoading(false);
+  };
+
+  return (
+    <button className="btn btn-warning" onClick={onClick} disabled={loading}>
+      <span className={classNames("loading loading-spinner", !loading && "hidden")}></span>
+      Scarica testo per prova cartacea
+    </button>
+  );
+}
+
 export function ContestsAdminPage() {
   const { contests, schools } = useTeacher();
   const [selectedContest, setSelectedContest] = useState(schools.length === 1 ? 0 : -1);
 
   return (
     <>
-      {schools.length >= 2 && (
-        <div className="m-5 flex justify-center">
-          <div className="flex justify-center">
-            <div role="tablist" className="tabs-boxed tabs flex w-full flex-wrap justify-center">
-              {schools.map((school, i) => (
-                <a
-                  role="tab"
-                  key={school.id}
-                  className={classNames("tab", i == selectedContest && "tab-active")}
-                  onClick={() => setSelectedContest(i)}>
-                  {contests.find((contest) => contest.id === schools[i].contestId)!.name}
-                </a>
-              ))}
-            </div>
+      <div className="m-5 flex justify-center">
+        <div className="flex justify-center">
+          <div role="tablist" className="tabs-boxed tabs flex w-full flex-wrap justify-center">
+            {schools.map((school, i) => (
+              <a
+                role="tab"
+                key={school.id}
+                className={classNames("tab", i == selectedContest && "tab-active")}
+                onClick={() => setSelectedContest(i)}>
+                {contests.find((contest) => contest.id === schools[i].contestId)!.name}
+              </a>
+            ))}
           </div>
         </div>
-      )}
+      </div>
       {selectedContest != -1 && (
         <ContestAdmin
           school={schools[selectedContest]}
