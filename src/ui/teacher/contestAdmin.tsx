@@ -412,6 +412,14 @@ async function downloadStatement(db: Firestore, contest: Contest, school: School
     for (const page of pages) {
       pdf.addPage(page);
     }
+    if (pages.length % 2) {
+      const page = pdf.addPage();
+      page.drawText("Pagina lasciata volontariamente vuota", {
+        x: 10,
+        y: 10,
+        size: 17,
+      });
+    }
   }
 
   const blob = new Blob([await pdf.save()]);
