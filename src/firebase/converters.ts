@@ -35,10 +35,10 @@ import {
 import { Submission, submissionSchema } from "~/models/submission";
 import { ZodBytes } from "~/models/types";
 import {
-  Schema,
+  SchemaDoc,
   Variant,
   VariantMapping,
-  schemaSchema,
+  schemaDocSchema,
   variantMappingSchema,
   variantSchema,
 } from "~/models/variant";
@@ -172,7 +172,7 @@ export const variantMappingConverter: FirestoreDataConverter<VariantMapping> = {
   fromFirestore: (snapshot) => parse(variantMappingSchema, snapshot),
 };
 
-export const variantSchemaConverter: FirestoreDataConverter<Schema> = {
+export const schemaDocConverter: FirestoreDataConverter<SchemaDoc> = {
   toFirestore: (data) => convertToFirestore(data),
-  fromFirestore: (snapshot) => parse(schemaSchema, snapshot),
+  fromFirestore: (snapshot) => parse(schemaDocSchema, snapshot),
 };

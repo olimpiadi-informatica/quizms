@@ -20,7 +20,7 @@ import { Contest, parsePersonalInformation } from "~/models/contest";
 import { School } from "~/models/school";
 import { score } from "~/models/score";
 import { Student } from "~/models/student";
-import { Variant } from "~/models/variant";
+import { SchemaDoc } from "~/models/variant";
 import Loading from "~/ui/components/loading";
 import Modal from "~/ui/components/modal";
 import useTime from "~/ui/components/time";
@@ -171,7 +171,7 @@ function Table({
 }: {
   school: School;
   contest: Contest;
-  variants: Variant[];
+  variants: SchemaDoc[];
 }) {
   const { solutions, students, setStudent } = useTeacher();
 

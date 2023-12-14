@@ -25,10 +25,10 @@ import { Student, studentSchema } from "~/models/student";
 import { Submission, submissionSchema } from "~/models/submission";
 import { Teacher, teacherSchema } from "~/models/teacher";
 import {
-  Schema,
+  SchemaDoc,
   Variant,
   VariantMapping,
-  schemaSchema,
+  schemaDocSchema,
   variantMappingSchema,
   variantSchema,
 } from "~/models/variant";
@@ -141,7 +141,7 @@ export const pdfConverter: FirestoreDataConverter<Pdf> = {
   fromFirestore: (snapshot) => parse(pdfSchema, snapshot),
 };
 
-export const variantSchemaConverter: FirestoreDataConverter<Schema> = {
+export const schemaDocConverter: FirestoreDataConverter<SchemaDoc> = {
   toFirestore: (data) => convertToFirestore(data),
-  fromFirestore: (snapshot) => parse(schemaSchema, snapshot),
+  fromFirestore: (snapshot) => parse(schemaDocSchema, snapshot),
 };

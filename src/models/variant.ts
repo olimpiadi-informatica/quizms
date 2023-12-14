@@ -13,6 +13,12 @@ export const schemaSchema = z.record(
   }),
 );
 
+export const schemaDocSchema = z.object({
+  id: z.string(),
+  schema: schemaSchema,
+  contest: z.string(),
+});
+
 export const variantSchema = z.object({
   id: z.string(),
   schema: schemaSchema,
@@ -21,7 +27,8 @@ export const variantSchema = z.object({
 });
 
 export type Variant = z.infer<typeof variantSchema>;
-export type Schema = Variant["schema"];
+export type Schema = z.infer<typeof schemaSchema>;
+export type SchemaDoc = z.infer<typeof schemaDocSchema>;
 
 export const variantMappingSchema = z.object({ id: z.string(), variant: z.string() });
 

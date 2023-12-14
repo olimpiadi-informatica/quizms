@@ -14,12 +14,12 @@ import loadGenerationConfig from "~/cli/load-generation-config";
 import {
   contestConverter,
   pdfConverter,
+  schemaDocConverter,
   schoolConverter,
   solutionConverter,
   teacherConverter,
   variantConverter,
   variantMappingConverter,
-  variantSchemaConverter,
 } from "~/firebase/convertersAdmin";
 import { contestSchema } from "~/models/contest";
 import { schoolSchema } from "~/models/school";
@@ -229,7 +229,11 @@ export default async function importContests(options: ImportOptions) {
         const res = await Promise.all(
           Object.entries(variants).map(async ([id, variant]) => {
             await db.doc(`variants/${id}`).withConverter(variantConverter).set(variant);
-            await db.doc(`schema/${id}`).withConverter(variantSchemaConverter).set(variant.schema);
+            await db.doc(`schema/${id}`).withConverter(schemaDocConverter).set({
+              id: variant.id,
+              schema: variant.schema,
+              contest: variant.contest,
+            });
           }),
         );
         console.info(`${res.length} variants imported!`);
