@@ -82,6 +82,7 @@ export function getAnswers(program: Program, remove: boolean) {
           pointsCorrect,
           pointsBlank,
           pointsWrong,
+          blankOption: "-", // TODO
         };
       }
       if (isQuizmsComponent("Answer", comp) && is.objectExpression(props)) {
@@ -105,6 +106,9 @@ export function getAnswers(program: Program, remove: boolean) {
             const correct = getPropertyVal(prop);
             if (typeof correct === "string") {
               answers[probId.toString()][subId.toString()] = correct;
+              if (/^\d+$/.test(correct)) {
+                schema[probId.toString()][subId.toString()].type = "number";
+              }
             }
           }
         }
