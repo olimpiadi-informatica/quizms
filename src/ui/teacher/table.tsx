@@ -210,7 +210,7 @@ function Table({
     !!contest.duration &&
     addMinutes(school.startingTime, contest.duration);
 
-  const isContestRunning = 0 && endTime && getNow() <= endTime;
+  const isContestRunning = endTime && getNow() <= endTime;
 
   const [, setTime] = useState(getNow);
   useEffect(() => {
