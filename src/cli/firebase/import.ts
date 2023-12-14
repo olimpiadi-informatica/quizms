@@ -27,7 +27,7 @@ import validate from "~/utils/validate";
 
 type ImportOptions = {
   config: string;
-  users?: boolean;
+  teachers?: boolean;
   schools?: boolean;
   contests?: boolean;
   variants?: boolean;
@@ -109,7 +109,7 @@ export default async function importContests(options: ImportOptions) {
     console.info(`${res.length} contests imported!`);
   }
 
-  if (options.all || options.users) {
+  if (options.all || options.teachers) {
     if (options.delete) {
       console.info("Deleting users and teachers...");
       const uids = await getAllUsers(auth);
@@ -122,7 +122,7 @@ export default async function importContests(options: ImportOptions) {
       console.info("Deleted users and teachers!");
     }
     console.info("Importing users...");
-    const teachers = JSON.parse(await readFile("data/users.json", "utf-8"));
+    const teachers = JSON.parse(await readFile("data/teachers.json", "utf-8"));
 
     const res = await Promise.all(
       Object.entries(teachers).map(async ([email, record]) => {
@@ -184,17 +184,11 @@ export default async function importContests(options: ImportOptions) {
       console.info("Deleted schools!");
     }
     console.info("Importing schools...");
-    const schools = JSON.parse(await readFile("data/schools.json", "utf-8"));
+    const schools = JSON.parse(await readFile("data/schools.json", "utf-8")).slice(0, 1);
+    console.log(schools);
 
     const res = await Promise.all(
       schools.map(async (record: any) => {
-        const contestId = record.contestId;
-        const allVariantIds = config[contestId].pdfVariantIds.slice();
-        const seed = `#schools#${config[contestId].secret}#${record.schoolId}#${record.contestId}#`;
-        const rng = new Rng(seed);
-        rng.shuffle(allVariantIds);
-        const pdfCount = config[contestId].pdfPerSchool;
-        record.pdfVariants = allVariantIds.slice(0, pdfCount);
         const school = validateOrExit(schoolSchema.omit({ id: true }), record);
         const user = await auth.getUserByEmail(school.teacher);
         await db

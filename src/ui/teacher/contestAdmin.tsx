@@ -512,7 +512,8 @@ function ContestAdmin(props: { school: School; contest: Contest }) {
 
 export function ContestsAdminPage() {
   const { contests, schools } = useTeacher();
-  const [selectedContest, setSelectedContest] = useState(contests.length === 0 ? 0 : -1);
+  const [selectedContest, setSelectedContest] = useState(schools.length === 1 ? 0 : -1);
+
   return (
     <>
       {schools.length >= 2 && (

@@ -21,12 +21,7 @@ export default async function loadGenConfig(configPath: string) {
       contest.pdfVariantIds = await readJson(contest.pdfVariantIds);
     }
   }
-  const config = validateOrExit(generationConfigSchema, configJson);
-  for (const contest of Object.values(config)) {
-    contest.pdfVariantIds = [...new Set(contest.pdfVariantIds)];
-    contest.variantIds = [...new Set([...contest.variantIds, ...contest.pdfVariantIds])];
-  }
-  return config;
+  return validateOrExit(generationConfigSchema, configJson);
 }
 
 function validateOrExit<In, Out, Extra extends In>(

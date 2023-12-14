@@ -21,7 +21,7 @@ export function PrintForm({ contest, variant }: { contest: Contest; variant: num
           <input
             type="text"
             className="input input-bordered w-full max-w-md"
-            value={variant}
+            value={variant.split("-")[1]} // TODO: better fix
             readOnly
           />
         </div>

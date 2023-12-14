@@ -8,10 +8,9 @@ export const schoolSchema = z.object({
   teacher: z.string(),
   token: z.string().optional(),
   startingTime: z.date().optional(),
-  variants: z.record(z.string()).optional(),
   finalized: z.boolean().optional().default(false),
   contestId: z.string(),
-  pdfVariants: z.array(z.string()).optional(),
+  pdfVariants: z.array(z.coerce.string()).optional(),
 });
 
 export type School = z.infer<typeof schoolSchema>;

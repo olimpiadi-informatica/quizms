@@ -23,6 +23,7 @@ import {
   runTransaction,
   setDoc,
 } from "firebase/firestore";
+import { isEqual } from "lodash-es";
 
 import {
   contestConverter,
@@ -59,19 +60,27 @@ class InvalidTokenError extends Error {}
 
 export function FirebaseStudentLogin({
   config,
+  contestFilter,
   header,
 }: {
   config: FirebaseOptions;
+  contestFilter?: string[];
   header: ComponentType<any>; // TODO: rimuovimi
 }) {
   return (
     <FirebaseLogin config={config}>
-      <StudentLogin header={header} />
+      <StudentLogin header={header} contestFilter={contestFilter} />
     </FirebaseLogin>
   );
 }
 
-function StudentLogin({ header }: { header: ComponentType<any> }) {
+function StudentLogin({
+  contestFilter,
+  header,
+}: {
+  contestFilter?: string[];
+  header: ComponentType<any>;
+}) {
   const db = useDb();
   const getNow = useTime();
 
@@ -84,9 +93,14 @@ function StudentLogin({ header }: { header: ComponentType<any> }) {
     limit: 1,
   });
 
+  const filteredContests = contests.filter(
+    (contest) => contestFilter?.includes(contest.id) ?? true,
+  );
+
   const [student, setLocalStudent] = useState<Student>({
     id: randomId(),
     uid: user?.uid,
+    contest: filteredContests.length === 1 ? filteredContests[0].id : undefined,
     personalInformation: {},
     answers: {},
     createdAt: getNow(),
@@ -128,7 +142,7 @@ function StudentLogin({ header }: { header: ComponentType<any> }) {
 
   return (
     <div className="h-full">
-      <div className="mx-4 flex h-full flex-col items-center justify-center overflow-y-auto">
+      <div className="flex h-full flex-col items-center justify-center overflow-y-auto px-4">
         <form className="my-8 w-full max-w-md grow">
           <div className="form-control w-full">
             <label className="label">
@@ -143,7 +157,7 @@ function StudentLogin({ header }: { header: ComponentType<any> }) {
               <option value={-1} disabled>
                 Seleziona una gara
               </option>
-              {contests.map((contest) => (
+              {filteredContests.map((contest) => (
                 <option key={contest.id} value={contest.id}>
                   {contest.name}
                 </option>
@@ -265,7 +279,6 @@ function StudentInner({
   header: ComponentType<any>;
 }) {
   const db = useDb();
-  console.log("StudentInner", student);
 
   const [contest] = useDocument("contests", student.contest!, contestConverter);
   const [school] = useDocument("schools", student.school!, schoolConverter, { subscribe: true });
@@ -295,14 +308,18 @@ function StudentInner({
     return () => clearTimeout(id);
   }, [school.startingTime, contest.duration, getNow]);
 
-  const setStudentAndSubmit = async (student: Student) => {
-    await setStudent(student);
+  const setStudentAndSubmit = async (newStudent: Student) => {
+    if (isEqual(student, newStudent)) return;
+
+    await setStudent(newStudent);
+
+    if (isEqual(student.answers, newStudent.answers)) return;
 
     const ref = collection(db, "submissions").withConverter(submissionConverter);
     await addDoc(ref, {
       id: "",
-      uid: student.uid!,
-      answers: student.answers!,
+      uid: newStudent.uid!,
+      answers: newStudent.answers!,
     });
   };
 
