@@ -97,7 +97,6 @@ function TeacherInner({ user, children }: { user: User; children: ReactNode }) {
   const [students, setStudent] = useCollection("students", studentConverter, {
     constraints: {
       school: schools.map((s) => s.id),
-      contest: contests.map((contest) => contest.id),
     },
     orderBy: "createdAt",
     subscribe: true,
