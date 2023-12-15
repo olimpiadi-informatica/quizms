@@ -96,7 +96,7 @@ export function TeacherTable() {
           />
         </div>
       </div>
-      <div className="min-h-0 flex-auto overflow-scroll">
+      <div className="min-h-0 flex-auto">
         <Suspense fallback={<Loading />}>
           <Table
             key={selectedSchool}
@@ -113,14 +113,6 @@ export function TeacherTable() {
 
 function Counter({ school, contest }: { school: School; contest: Contest }) {
   const { students, variants } = useTeacher();
-  console.log({ school, contest, students });
-  console.log(
-    students.map((s) => [
-      s.school === school.id,
-      !isEmpty(s, contest),
-      !isStudentIncomplete(s, contest, variants),
-    ]),
-  );
 
   return sumBy(students, (s) => {
     return Number(
@@ -236,7 +228,8 @@ function Table({
     return () => clearTimeout(id);
   }, [getNow, endTime, isContestRunning]);
 
-  const TESTID = "scolastiche-test"; // TODO: only for testing
+  const TESTID = "scolastiche-test"; // TODO: revert, only for testing
+  const editable = (!isContestRunning || contest.id == TESTID) && !school.finalized;
 
   const colDefs = useMemo(
     (): ColDef[] =>
@@ -250,7 +243,7 @@ function Table({
             sortable: true,
             filter: true,
             resizable: true,
-            editable: (!isContestRunning || contest.id == TESTID) && !school.finalized,
+            editable,
             width: widths[field.size ?? "md"],
             equals: field.type === "date" ? isEqualDate : undefined,
             tooltipValueGetter: ({ data }: ITooltipParams<Student>) => {
@@ -260,7 +253,6 @@ function Table({
               if (field.type === "date" && value) {
                 return format(value, "P", { locale: dateLocaleIT });
               }
-              // TODO: don't work well with online students and blank options
               if (
                 i === 0 &&
                 field.type === "text" &&
@@ -269,7 +261,11 @@ function Table({
               ) {
                 return (
                   <span>
-                    {value} <AlertTriangle className="mb-1 inline-block text-warning" size={16} />
+                    {value}{" "}
+                    <AlertTriangle
+                      className="mb-1 inline-block cursor-text text-warning"
+                      size={16}
+                    />
                   </span>
                 );
               }
@@ -283,17 +279,18 @@ function Table({
           sortable: true,
           filter: true,
           resizable: true,
-          editable: !isContestRunning && !school.finalized,
+          editable,
           width: 100,
         },
         ...contest.problemIds.map(
           (id, i): ColDef => ({
             field: `answers[${id}]`,
             valueGetter: ({ data }) => data.answers?.[id],
+            tooltipValueGetter: ({ data }) => data.answers?.[id],
             headerName: String(id),
             sortable: false,
             resizable: true,
-            editable: !isContestRunning && !school.finalized,
+            editable,
             width: 50 + (i % 4 === 3 ? 15 : 0),
           }),
         ),
@@ -312,7 +309,7 @@ function Table({
           cellDataType: "boolean",
           filter: true,
           resizable: true,
-          editable: !isContestRunning && !school.finalized,
+          editable,
           width: 100,
           valueGetter: ({ data }) => data.disabled ?? false,
         },

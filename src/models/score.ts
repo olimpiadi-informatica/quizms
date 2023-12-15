@@ -20,16 +20,15 @@ export function score(student: Student, variants: SchemaDoc[], solutions: Soluti
       problem.pointsCorrect === undefined ||
       problem.pointsBlank === undefined ||
       problem.pointsWrong === undefined ||
-      answer === undefined ||
       sol === undefined
     ) {
       return undefined;
     }
 
-    if (answer.toUpperCase() === sol.toUpperCase()) {
-      points += problem.pointsCorrect;
-    } else if (answer.toUpperCase() === problem.blankOption?.toUpperCase()) {
+    if (answer === undefined || answer === "") {
       points += problem.pointsBlank;
+    } else if (answer.toUpperCase() === sol.toUpperCase()) {
+      points += problem.pointsCorrect;
     } else {
       points += problem.pointsWrong;
     }
