@@ -70,21 +70,34 @@ const ImportModal = forwardRef(function ImportModal(
     <Modal ref={ref} title="Importa studenti">
       <div className="prose">
         <p>
-          Importa gli studenti da un file. Il file deve essere in formato <b>CSV</b> e le colonne
-          devono essere, in ordine:
+          Importa gli studenti da un file. Il file deve essere in formato <b>CSV</b> e non deve
+          avere l'intestazione.
         </p>
+        <p>
+          Se stai usando Excel, puoi creare un file CSV andando su &ldquo;<i>Salva con nome</i>
+          &rdquo; e scegliendo come formato di file &ldquo;
+          <i>Valori separati da una virgola (.csv)</i>&rdquo;.
+        </p>
+        <p>Le colonne devono essere, in ordine:</p>
         <p className="flex justify-center rounded-box bg-base-200 px-3 py-2">
           <span>{labels.join(", ")}</span>
         </p>
         <p>
-          In aggiunta, è possibile aggiungere una colonna <b>Variante</b>, seguita da{" "}
+          In aggiunta, è possibile aggiungere{" "}
+          {contest.hasVariants && (
+            <>
+              una colonna <b>Variante</b>, seguita da{" "}
+            </>
+          )}
           {contest.problemIds.length} colonne per le risposte.
         </p>
-        <p>
-          I campi <b>{dates.length > 0 && dates.join(", ")}</b> devono essere nel formato{" "}
-          <span className="whitespace-nowrap font-bold">DD/MM/YYYY</span>, ad esempio{" "}
-          <span className="whitespace-nowrap">14/03/2023</span>.
-        </p>
+        {dates.length > 0 && (
+          <p>
+            I campi <b>{dates.join(", ")}</b> devono essere nel formato{" "}
+            <span className="whitespace-nowrap font-bold">DD/MM/YYYY</span>, ad esempio{" "}
+            <span className="whitespace-nowrap">14/03/2023</span>.
+          </p>
+        )}
         <div className="mt-5 flex flex-col items-center gap-3">
           <input
             ref={inputRef}
@@ -118,7 +131,10 @@ async function importStudents(
     .array(z.string().trim())
     .min(contest.personalInformation.length)
     .transform<Student>((value, ctx) => {
-      const variantId = value[contest.personalInformation.length];
+      const off = contest.personalInformation.length + Number(contest.hasVariants || 0);
+      const variantId = contest.hasVariants
+        ? value[off - 1]
+        : variants.find((v) => v.contest === contest.id && ["1", "2"].includes(v.id))!.id; // TODO: ugly hack
 
       if (variantId) {
         const variant = variants.find((v) => v.id === variantId && v.contest === contest.id);
@@ -158,12 +174,7 @@ async function importStudents(
         contest: contest.id,
         school: school.id,
         variant: variantId,
-        answers: Object.fromEntries(
-          contest.problemIds.map((id, i) => [
-            id,
-            value[contest.personalInformation.length + 1 + i],
-          ]),
-        ),
+        answers: Object.fromEntries(contest.problemIds.map((id, i) => [id, value[off + i]])),
         createdAt: new Date(),
       };
     })

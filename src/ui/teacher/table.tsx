@@ -111,7 +111,10 @@ function Counter({ school, contest }: { school: School; contest: Contest }) {
 
   return sumBy(students, (s) => {
     return Number(
-      s.school === school.id && !isEmpty(s, contest) && !isStudentIncomplete(s, contest, variants),
+      s.school === school.id &&
+        !isEmpty(s, contest) &&
+        !s.disabled &&
+        !isStudentIncomplete(s, contest, variants),
     );
   });
 }
@@ -403,17 +406,16 @@ function isStudentIncomplete(student: Student, contest: Contest, variants: Schem
 
   let variant = variants.find((v) => v.id === student.variant);
 
-  if (contest.hasVariants && !variant) return "Variante mancante";
+  if (contest.hasVariants && !variant) return "variante mancante";
   if (!variant) {
-    console.log(variants);
-    variant = variants.find((v) => v.contest === contest.id)!;
+    variant = variants.find((v) => v.contest === contest.id && ["1", "2"].includes(v.id))!; // TODO: ugly hack
   }
 
   for (const [id, schema] of Object.entries(variant.schema)) {
     const ans = student.answers?.[id];
     if (!ans || ans === schema.blankOption) continue;
     if (schema.type === "number" && !/^\d+$/.test(ans.trim())) {
-      return `Domanda ${id} deve contenere un numero intero`;
+      return `la domanda ${id} deve contenere un numero intero`;
     }
   }
 }
