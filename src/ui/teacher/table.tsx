@@ -417,7 +417,7 @@ function isStudentIncomplete(student: Student, contest: Contest, variants: Schem
 
   let variant = variants.find((v) => v.id === student.variant);
 
-  if (contest.hasVariants && !variant) return "variante mancante";
+  if (contest.hasVariants && !variant) return "Variante mancante";
   if (!variant) {
     variant = variants.find((v) => v.contest === contest.id && ["1", "2"].includes(v.id))!; // TODO: ugly hack
   }
@@ -426,7 +426,7 @@ function isStudentIncomplete(student: Student, contest: Contest, variants: Schem
     const ans = student.answers?.[id];
     if (!ans || ans === schema.blankOption) continue;
     if (schema.type === "number" && !/^\d+$/.test(ans.trim())) {
-      return `la domanda ${id} deve contenere un numero intero`;
+      return `La domanda ${id} deve contenere un numero intero`;
     }
   }
 }
