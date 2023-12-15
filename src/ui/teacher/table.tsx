@@ -329,10 +329,7 @@ function Table({ school, contest }: { school: School; contest: Contest }) {
           filter: true,
           resizable: true,
           width: 100,
-          valueGetter: ({ data }) =>
-            import.meta.env.DEV || TESTID === contest.id
-              ? score(data, variants, solutions)
-              : undefined,
+          valueGetter: ({ data }) => score(data, variants, solutions),
         },
         {
           field: "disabled",
