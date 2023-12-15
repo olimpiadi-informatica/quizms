@@ -141,10 +141,10 @@ const FinalizeModal = forwardRef(function FinalizeModal(
       }
 
       if (!student.disabled) {
-        if (prevStudents.has(studentHash(student))) {
+        if (prevStudents.has(studentHash({ ...student, token: "" }))) {
           return `Lo studente ${name} ${surname} è stato inserito più volte`;
         }
-        prevStudents.add(studentHash(student));
+        prevStudents.add(studentHash({ ...student, token: "" }));
       }
     }
   }, [students, props, variants]);
