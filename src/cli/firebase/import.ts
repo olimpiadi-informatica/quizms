@@ -38,7 +38,7 @@ type ImportOptions = {
   all?: boolean;
 };
 
-async function getAllUsers(auth: Auth) {
+/*async function getAllUsers(auth: Auth) {
   let listResults = await auth.listUsers(1000);
   const uids = listResults.users.map((user) => user.uid);
   while (listResults.pageToken) {
@@ -49,6 +49,7 @@ async function getAllUsers(auth: Auth) {
 }
 
 async function deleteCollection(db: Firestore, collectionPath: string) {
+  return;
   const collectionRef = db.collection(collectionPath);
   const query = collectionRef.orderBy("__name__").limit(400);
 
@@ -79,10 +80,12 @@ async function deleteQueryBatch(db: Firestore, query: Query, resolve: () => void
   process.nextTick(() => {
     deleteQueryBatch(db, query, resolve);
   });
-}
+}*/
 
 export default async function importContests(options: ImportOptions) {
   const config = await loadGenerationConfig(options.config);
+  if (options.delete) return;
+  if (options.all) return;
 
   const serviceAccount = JSON.parse(await readFile("serviceAccountKey.json", "utf-8"));
   const app = initializeApp({
@@ -93,11 +96,11 @@ export default async function importContests(options: ImportOptions) {
   db.settings({ ignoreUndefinedProperties: true });
 
   if (options.all || options.contests) {
-    if (options.delete) {
+    /*if (options.delete) {
       console.info("Deleting contests...");
       await deleteCollection(db, "contests");
       console.info("Deleted contests!");
-    }
+    }*/
     console.info("Importing contests...");
     const contests = JSON.parse(await readFile("data/contests.json", "utf-8"));
 
@@ -111,7 +114,7 @@ export default async function importContests(options: ImportOptions) {
   }
 
   if (options.all || options.teachers) {
-    if (options.delete) {
+    /*if (options.delete) {
       console.info("Deleting users and teachers...");
       const uids = await getAllUsers(auth);
       await auth.deleteUsers(uids);
@@ -121,7 +124,7 @@ export default async function importContests(options: ImportOptions) {
       await deleteCollection(db, "studentMappingHash");
       await deleteCollection(db, "studentRestore");
       console.info("Deleted users and teachers!");
-    }
+    }*/
     console.info("Importing users...");
     const teachers = JSON.parse(await readFile("data/teachers.json", "utf-8"));
 
@@ -155,11 +158,11 @@ export default async function importContests(options: ImportOptions) {
   }
 
   if (options.all || options.pdfs) {
-    if (options.delete) {
+    /*if (options.delete) {
       console.info("Deleting pdfs...");
       await deleteCollection(db, "pdfs");
       console.info("Deleted pdfs!");
-    }
+    }*/
     console.info("Importing pdfs...");
     for (const contest of Object.values(config)) {
       const variantIds = contest.pdfVariantIds;
@@ -178,12 +181,12 @@ export default async function importContests(options: ImportOptions) {
   }
 
   if (options.all || options.schools) {
-    if (options.delete) {
+    /*if (options.delete) {
       console.info("Deleting schools...");
       await deleteCollection(db, "schools");
       await deleteCollection(db, "schoolMapping");
       console.info("Deleted schools!");
-    }
+    }*/
     console.info("Importing schools...");
     const schools = JSON.parse(await readFile("data/schools.json", "utf-8"));
 
@@ -205,7 +208,7 @@ export default async function importContests(options: ImportOptions) {
   }
 
   if (options.all || options.variants || options.solutions) {
-    if (options.delete) {
+    /*if (options.delete) {
       if (options.all || options.variants) {
         console.info("Deleting variants...");
         await deleteCollection(db, "variants");
@@ -218,7 +221,7 @@ export default async function importContests(options: ImportOptions) {
         await deleteCollection(db, "solutions");
         console.info("Deleted solutions!");
       }
-    }
+    }*/
     for (const contest of Object.values(config)) {
       const { solutions, variants } = await exportVariants(cwd(), contest);
 
@@ -261,12 +264,18 @@ export default async function importContests(options: ImportOptions) {
 
       if (options.all || options.solutions) {
         console.info("Importing solutions...");
-        const res = await Promise.all(
-          Object.entries(solutions["online"]).map(async ([id, solution]) => {
+        const res1 = await Promise.all(
+          Object.entries(solutions["offline"]).map(async ([id, solution]) => {
             await db.doc(`solutions/${id}`).withConverter(solutionConverter).set(solution);
           }),
         );
-        console.info(`${res.length} solutions imported!`);
+        const res2 = await Promise.all(
+          Object.entries(solutions["online"]).map(async ([id, solution]) => {
+            if (Object.keys(solutions["offline"]).includes(id)) id = "1" + id;
+            await db.doc(`solutions/${id}`).withConverter(solutionConverter).set(solution);
+          }),
+        );
+        console.info(`${res2.length + res1.length} solutions imported!`);
       }
     }
   }
