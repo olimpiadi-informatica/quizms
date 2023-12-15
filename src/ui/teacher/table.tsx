@@ -219,6 +219,8 @@ function Table({
     const id = setTimeout(() => setTime(getNow), differenceInMilliseconds(endTime, now));
     return () => clearTimeout(id);
   }, [getNow, endTime, isContestRunning]);
+  
+  const TESTID = "scolastiche-test";
 
   const colDefs = useMemo(
     (): ColDef[] =>
@@ -232,7 +234,7 @@ function Table({
             sortable: true,
             filter: true,
             resizable: true,
-            editable: !isContestRunning && !school.finalized,
+            editable: (!isContestRunning || contest.id == TESTID) && !school.finalized,
             width: widths[field.size ?? "md"],
             equals: field.type === "date" ? isEqualDate : undefined,
             cellRenderer: ({ api, data, value }: ICellRendererParams<Student>) => {
@@ -309,7 +311,7 @@ function Table({
       value = parsePersonalInformation(value, schema);
     }
     if (field === "variant") {
-      if (!variants.some((v) => v.id === value && v.contest === contest.id)) {
+      if (!variants.some((v) => v.id === value && (v.contest === contest.id || contest.id == TESTID)) {
         value = undefined;
       }
     }
