@@ -35,7 +35,9 @@ export function AnswerGroup({ children }: AnswerGroupProps) {
   const answers = useMemo(() => {
     const answers = Children.toArray(children);
     if (import.meta.env.PROD && student.variant) {
-      const rng = new Rng(`r#answers#${student.variant}#${id}`);
+      const variant =
+        student.variant == "11" ? "1" : student.variant == "12" ? "2" : student.variant;
+      const rng = new Rng(`r#answers#${variant}#${id}`);
       rng.shuffle(answers);
     }
     return answers;

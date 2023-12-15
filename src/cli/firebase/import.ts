@@ -228,8 +228,8 @@ export default async function importContests(options: ImportOptions) {
       if (options.all || options.variants) {
         console.info("Importing variants...");
 
-        const res = await Promise.all(
-          Object.entries(variants).map(async ([id, variant]) => {
+        const res1 = await Promise.all(
+          Object.entries(variants["offline"]).map(async ([id, variant]) => {
             await db.doc(`variants/${id}`).withConverter(variantConverter).set(variant);
             await db.doc(`schema/${id}`).withConverter(schemaDocConverter).set({
               id: variant.id,
@@ -238,9 +238,20 @@ export default async function importContests(options: ImportOptions) {
             });
           }),
         );
-        console.info(`${res.length} variants imported!`);
+        const res2 = await Promise.all(
+          Object.entries(variants["online"]).map(async ([id, variant]) => {
+            if (Object.keys(variants["offline"]).includes(id)) id = "1" + id;
+            await db.doc(`variants/${id}`).withConverter(variantConverter).set(variant);
+            await db.doc(`schema/${id}`).withConverter(schemaDocConverter).set({
+              id: variant.id,
+              schema: variant.schema,
+              contest: variant.contest,
+            });
+          }),
+        );
+        console.info(`${res1.length + res2.length} variants imported!`);
 
-        console.info("Importing variant mappings...");
+        /*console.info("Importing variant mappings...");
         const prefix = contest.id;
         const rng = new Rng(`#variantMappings#${contest.secret}#`);
         const res2 = await Promise.all(
@@ -259,7 +270,7 @@ export default async function importContests(options: ImportOptions) {
               });
           }),
         );
-        console.info(`${res2.length} variant mappings imported!`);
+        console.info(`${res2.length} variant mappings imported!`);*/
       }
 
       if (options.all || options.solutions) {

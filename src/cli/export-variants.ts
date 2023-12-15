@@ -20,7 +20,7 @@ export async function exportVariants(
   config: ContestConfig,
 ): Promise<{
   solutions: Record<string, Record<string, Solution>>;
-  variants: Record<string, Variant>;
+  variants: Record<string, Record<string, Variant>>;
 }> {
   process.env.QUIZMS_MODE = "pdf";
 
@@ -57,11 +57,14 @@ export async function exportVariants(
     online: {},
     offline: {},
   };
-  const variants: Record<string, Variant> = {};
+  const variants: Record<string, Record<string, Variant>> = {
+    online: {},
+    offline: {},
+  };
   for (const variant_id of config.variantIds) {
     const variantAst = shuffleContest(contestJsx, variant_id);
     const { answers, schema } = getAnswers(variantAst, true);
-    variants[variant_id] = {
+    variants["online"][variant_id] = {
       id: variant_id,
       schema,
       statement: toJs(variantAst).value,
@@ -76,7 +79,7 @@ export async function exportVariants(
     const seed = `${config.secret}${variant_id}`;
     const variantAst = shuffleContest(contestJsx, seed, config);
     const { answers, schema } = getAnswers(variantAst, true);
-    variants[variant_id] = {
+    variants["offline"][variant_id] = {
       id: variant_id,
       schema,
       statement: toJs(variantAst).value,
