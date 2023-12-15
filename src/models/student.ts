@@ -1,3 +1,4 @@
+import { sha256 } from "@noble/hashes/sha256";
 import z from "zod";
 
 export const studentSchema = z
@@ -23,6 +24,23 @@ export const studentSchema = z
   });
 
 export type Student = z.infer<typeof studentSchema>;
+
+export function studentHash(student: Student) {
+  const joined = [
+    student.personalInformation?.name,
+    student.personalInformation?.surname,
+    student.personalInformation?.classYear,
+    student.personalInformation?.classSection,
+    student.token,
+  ]
+    .join("$")
+    .toLowerCase(); // TODO: update firebase rules
+
+  return [...sha256(joined)]
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("")
+    .toUpperCase();
+}
 
 export const studentMappingHashSchema = z.object({
   id: z.string(),

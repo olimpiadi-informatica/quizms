@@ -9,7 +9,6 @@ import React, {
   useState,
 } from "react";
 
-import { sha256 } from "@noble/hashes/sha256";
 import classNames from "classnames";
 import { addMinutes, differenceInMilliseconds, formatISO } from "date-fns";
 import { FirebaseOptions } from "firebase/app";
@@ -40,7 +39,7 @@ import {
 import { useAnonymousAuth, useCollection, useDocument } from "~/firebase/hooks";
 import { FirebaseLogin, useDb } from "~/firebase/login";
 import { parsePersonalInformation } from "~/models/contest";
-import { Student } from "~/models/student";
+import { Student, studentHash } from "~/models/student";
 import { RemoteContest } from "~/ui";
 import Loading from "~/ui/components/loading";
 import useTime from "~/ui/components/time";
@@ -388,20 +387,7 @@ async function createStudent(db: Firestore, student: Student) {
 
   // Get the variant assigned to the student
   // An entry should always exists in variantMapping
-  const hash = [
-    ...sha256(
-      [
-        student.personalInformation!.name,
-        student.personalInformation!.surname,
-        student.personalInformation!.classYear,
-        student.personalInformation!.classSection,
-        student.token,
-      ].join("$"),
-    ),
-  ]
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("")
-    .toUpperCase();
+  const hash = studentHash(student);
   const variant = `${student.contest}-${hash.slice(0, 3)}`;
 
   const variantRef = doc(db, "variantMapping", variant).withConverter(variantMappingConverter);

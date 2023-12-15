@@ -24,7 +24,7 @@ import { AlertTriangle, FileCheck, Upload, Users } from "lucide-react";
 import { Contest, parsePersonalInformation } from "~/models/contest";
 import { School } from "~/models/school";
 import { score } from "~/models/score";
-import { Student } from "~/models/student";
+import { Student, studentHash } from "~/models/student";
 import { SchemaDoc } from "~/models/variant";
 import Loading from "~/ui/components/loading";
 import Modal from "~/ui/components/modal";
@@ -128,17 +128,28 @@ const FinalizeModal = forwardRef(function FinalizeModal(
 
   const error = useMemo(() => {
     const filteredStudents = students.filter((s) => s.school === props.school.id);
+
+    const prevStudents = new Set();
+
     for (const student of filteredStudents) {
+      const { name, surname } = student.personalInformation ?? {};
+
       const reason = isStudentIncomplete(student, props.contest, variants);
       if (reason) {
-        const { name, surname } = student.personalInformation ?? {};
         if (!name || !surname) return "Almeno uno studente non ha nome o cognome";
         return `Lo studente ${name} ${surname} non può essere finalizzato: ${reason}`;
+      }
+
+      if (!student.disabled) {
+        if (prevStudents.has(studentHash(student))) {
+          return `Lo studente ${name} ${surname} è stato inserito più volte`;
+        }
+        prevStudents.add(studentHash(student));
       }
     }
   }, [students, props, variants]);
 
-  const correctConfirm = "tutti gli studenti sono stati corettamente inseriti";
+  const correctConfirm = "tutti gli studenti sono stati correttamente inseriti";
 
   const finalize = async () => {
     await setSchool({ ...props.school, finalized: true });

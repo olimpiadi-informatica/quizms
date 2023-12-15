@@ -71,7 +71,7 @@ const ImportModal = forwardRef(function ImportModal(
       <div className="prose">
         <p>
           Importa gli studenti da un file. Il file deve essere in formato <b>CSV</b> e non deve
-          avere l'intestazione.
+          avere l&apos;intestazione.
         </p>
         <p>
           Se stai usando Excel, puoi creare un file CSV andando su &ldquo;<i>Salva con nome</i>
