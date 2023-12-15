@@ -64,7 +64,7 @@ function main() {
       "The directory to output the variants and the solutions.",
       "variants",
     )
-    .option("-c, --contest <contestId>", "The id of the contest to print")
+    .option("-c, --contestId <contestId>", "The id of the contest to print")
     .action((dir, options) => void exportVariantsCli({ dir, ...options }));
 
   program.addCommand(firebaseCommand());

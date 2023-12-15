@@ -262,7 +262,7 @@ export default async function importContests(options: ImportOptions) {
       if (options.all || options.solutions) {
         console.info("Importing solutions...");
         const res = await Promise.all(
-          Object.entries(solutions).map(async ([id, solution]) => {
+          Object.entries(solutions["online"]).map(async ([id, solution]) => {
             await db.doc(`solutions/${id}`).withConverter(solutionConverter).set(solution);
           }),
         );

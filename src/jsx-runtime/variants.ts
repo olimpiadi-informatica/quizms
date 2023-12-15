@@ -7,14 +7,22 @@ import { Schema } from "~/models/variant";
 import { Rng } from "~/utils/random";
 
 export function shuffleAnswers(program: Program, variant: string) {
-  let id = 0;
+  let id = 0,
+    pid = 0;
   traverse(program, {
     CallExpression(path) {
       const node = path.node!;
       const [comp, props, ...children] = node.arguments;
+      if (isQuizmsComponent("Problem", comp) && is.objectExpression(props)) {
+        pid++;
+      }
       if (isQuizmsComponent("AnswerGroup", comp)) {
-        const rng = new Rng(`b#answers#${variant}#${id++}`);
+        const seed = `b#answers#${variant}#${id++}`;
+        const rng = new Rng(seed);
+        const seed2 = `r#answers#${variant}#${pid}`;
+        const rng2 = new Rng(seed2);
         rng.shuffle(children);
+        rng2.shuffle(children);
         node.arguments = [comp, props, ...children];
       }
     },

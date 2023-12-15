@@ -18,7 +18,10 @@ import configs from "./vite/configs";
 export async function exportVariants(
   dir: string,
   config: ContestConfig,
-): Promise<{ solutions: Record<string, Solution>; variants: Record<string, Variant> }> {
+): Promise<{
+  solutions: Record<string, Record<string, Solution>>;
+  variants: Record<string, Variant>;
+}> {
   process.env.QUIZMS_MODE = "pdf";
 
   const defaultConfig = configs("production", {
@@ -50,7 +53,10 @@ export async function exportVariants(
   const contestURL = pathToFileURL(contestPath);
   const { default: contestJsx } = await import(/* vite-ignore */ contestURL.toString());
 
-  const solutions: Record<string, Solution> = {};
+  const solutions: Record<string, Record<string, Solution>> = {
+    online: {},
+    offline: {},
+  };
   const variants: Record<string, Variant> = {};
   for (const variant_id of config.variantIds) {
     const variantAst = shuffleContest(contestJsx, variant_id);
@@ -61,7 +67,22 @@ export async function exportVariants(
       statement: toJs(variantAst).value,
       contest: config.id,
     };
-    solutions[variant_id] = {
+    solutions["online"][variant_id] = {
+      id: variant_id,
+      answers,
+    };
+  }
+  for (const variant_id of config.pdfVariantIds) {
+    const seed = `${config.secret}${variant_id}`;
+    const variantAst = shuffleContest(contestJsx, seed, config);
+    const { answers, schema } = getAnswers(variantAst, true);
+    variants[variant_id] = {
+      id: variant_id,
+      schema,
+      statement: toJs(variantAst).value,
+      contest: config.id,
+    };
+    solutions["offline"][variant_id] = {
       id: variant_id,
       answers,
     };
