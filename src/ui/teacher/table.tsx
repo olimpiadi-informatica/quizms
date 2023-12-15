@@ -25,7 +25,7 @@ import { Contest, parsePersonalInformation } from "~/models/contest";
 import { School } from "~/models/school";
 import { score } from "~/models/score";
 import { Student } from "~/models/student";
-import { SchemaDoc, Variant } from "~/models/variant";
+import { SchemaDoc } from "~/models/variant";
 import Loading from "~/ui/components/loading";
 import Modal from "~/ui/components/modal";
 import useTime from "~/ui/components/time";
@@ -235,7 +235,7 @@ function Table({
     const id = setTimeout(() => setTime(getNow), differenceInMilliseconds(endTime, now));
     return () => clearTimeout(id);
   }, [getNow, endTime, isContestRunning]);
-  
+
   const TESTID = "scolastiche-test"; // TODO: only for testing
 
   const colDefs = useMemo(
@@ -256,7 +256,7 @@ function Table({
             tooltipValueGetter: ({ data }: ITooltipParams<Student>) => {
               return isStudentIncomplete(data!, contest, variants);
             },
-            cellRenderer: ({ api, data, value, node }: ICellRendererParams<Student>) => {
+            cellRenderer: ({ api, data, value }: ICellRendererParams<Student>) => {
               if (field.type === "date" && value) {
                 return format(value, "P", { locale: dateLocaleIT });
               }
@@ -328,7 +328,9 @@ function Table({
       value = parsePersonalInformation(value, schema);
     }
     if (field === "variant") {
-      if (!variants.some((v) => v.id === value && (v.contest === contest.id || contest.id == TESTID)) {
+      if (
+        !variants.some((v) => v.id === value && (v.contest === contest.id || contest.id == TESTID))
+      ) {
         value = undefined;
       }
     }
