@@ -40,7 +40,7 @@ import "ag-grid-community/styles/ag-theme-quartz.css";
 const AgGridReact = lazy(() => import("ag-grid-react").then((m) => ({ default: m.AgGridReact })));
 
 export function TeacherTable() {
-  const { contests, variants, schools } = useTeacher();
+  const { contests, schools } = useTeacher();
   const [selectedSchool, setSelectedSchool] = useState(0);
   const importRef = useRef<HTMLDialogElement>(null);
   const finalizeRef = useRef<HTMLDialogElement>(null);
@@ -98,12 +98,7 @@ export function TeacherTable() {
       </div>
       <div className="min-h-0 flex-auto">
         <Suspense fallback={<Loading />}>
-          <Table
-            key={selectedSchool}
-            contest={contest}
-            variants={variants}
-            school={schools[selectedSchool]}
-          />
+          <Table key={selectedSchool} contest={contest} school={schools[selectedSchool]} />
           <ImportModal ref={importRef} school={schools[selectedSchool]} contest={contest} />
         </Suspense>
       </div>
@@ -125,10 +120,22 @@ const FinalizeModal = forwardRef(function FinalizeModal(
   props: { contest: Contest; school: School },
   ref: Ref<HTMLDialogElement> | null,
 ) {
-  const { setSchool } = useTeacher();
+  const { students, variants, setSchool } = useTeacher();
   const [confirm, setConfirm] = useState("");
 
-  const correctConfirm = "ho completato l'inserimento degli studenti";
+  const error = useMemo(() => {
+    const filteredStudents = students.filter((s) => s.school === props.school.id);
+    for (const student of filteredStudents) {
+      const reason = isStudentIncomplete(student, props.contest, variants);
+      if (reason) {
+        const { name, surname } = student.personalInformation ?? {};
+        if (!name || !surname) return "Almeno uno studente non ha nome o cognome";
+        return `Lo studente ${name} ${surname} non può essere finalizzato: ${reason}`;
+      }
+    }
+  }, [students, props, variants]);
+
+  const correctConfirm = "tutti gli studenti sono stati corettamente inseriti";
 
   const finalize = async () => {
     await setSchool({ ...props.school, finalized: true });
@@ -137,51 +144,65 @@ const FinalizeModal = forwardRef(function FinalizeModal(
 
   return (
     <Modal ref={ref} title="Finalizza scuola">
-      <div className="prose">
-        <p>
-          <strong className="text-error">Attenzione:</strong> questa operazione è irreversibile.
-        </p>
-        <p>
-          Finalizzando <b>non</b> sarà più possibile <b>aggiungere</b> nuovi studenti o{" "}
-          <b>modificare</b> i dati degli studenti in questa scuola per la gara{" "}
-          <i>{props.contest?.name}</i>.
-        </p>
-        <p>
-          Se hai capito e sei d&apos;accordo, scrivi &ldquo;<i>{correctConfirm}</i>&rdquo;.
-        </p>
-        <p>
-          <input
-            type="text"
-            className="input input-bordered w-full px-5"
-            value={confirm}
-            onChange={(e) => setConfirm(e.target.value)}
-          />
-        </p>
-        <div className="flex justify-center gap-5">
-          <button
-            className="btn btn-error"
-            onClick={finalize}
-            disabled={confirm !== correctConfirm}>
-            <AlertTriangle />
-            Conferma
-          </button>
-          <button className="btn btn-neutral">Annulla</button>
+      {error && (
+        <div className="prose">
+          <p>Non è possibile finalizzare la scuola a causa del seguente errore:</p>
+          <p className="flex justify-center rounded-box bg-base-200 px-3 py-2">{error}</p>
+          <p>
+            Se questo studente è stato aggiunto per errore e vuoi rimuoverlo, puoi usare il pulsante{" "}
+            <i>Cancella</i> nell&apos;ultima colonna.
+          </p>
         </div>
-      </div>
+      )}
+      {!error && (
+        <div className="prose">
+          <p>
+            <strong className="text-error">Attenzione:</strong> questa operazione è irreversibile.
+          </p>
+          <p>
+            Finalizzando <b>non</b> sarà più possibile <b>aggiungere</b> nuovi studenti o{" "}
+            <b>modificare</b> i dati degli studenti in questa scuola per la gara{" "}
+            <i>{props.contest?.name}</i>.
+          </p>
+          <p>
+            Se hai capito e sei d&apos;accordo, scrivi &ldquo;<i>{correctConfirm}</i>&rdquo;.
+          </p>
+          <p>
+            <input
+              type="text"
+              className="input input-bordered w-full px-5"
+              value={confirm}
+              onChange={(e) => setConfirm(e.target.value)}
+            />
+          </p>
+          <div className="flex justify-center gap-5">
+            <button
+              className="btn btn-error"
+              onClick={finalize}
+              disabled={confirm !== correctConfirm}>
+              <AlertTriangle />
+              Conferma
+            </button>
+            <button className="btn btn-neutral">Annulla</button>
+          </div>
+        </div>
+      )}
     </Modal>
   );
 });
 
-function Table({
-  school,
-  contest,
-  variants,
-}: {
-  school: School;
-  contest: Contest;
-  variants: SchemaDoc[];
-}) {
-  const { solutions, students, setStudent } = useTeacher();
+function Table({ school, contest }: { school: School; contest: Contest }) {
+  const { solutions, students, setStudent, variants } = useTeacher();
+
+  const getNow = useTime();
+  const endTime =
+    !!school.startingTime &&
+    !!contest.duration &&
+    addMinutes(school.startingTime, contest.duration);
+  const isContestRunning = endTime && getNow() <= endTime;
+
+  const TESTID = "scolastiche-test"; // TODO: revert, only for testing
+  const editable = (!isContestRunning || contest.id == TESTID) && !school.finalized;
 
   const newStudentId = useRef(randomId());
 
@@ -192,13 +213,17 @@ function Table({
 
   const allStudents = [
     ...students.filter((s) => s.school === school.id),
-    {
-      id: newStudentId.current,
-      contest: contest.id,
-      school: school.id,
-      createdAt: new Date(),
-      answers: {},
-    } as Student,
+    ...(editable
+      ? [
+          {
+            id: newStudentId.current,
+            contest: contest.id,
+            school: school.id,
+            createdAt: new Date(),
+            answers: {},
+          } as Student,
+        ]
+      : []),
   ];
 
   const widths = useMemo(
@@ -212,14 +237,6 @@ function Table({
     [],
   );
 
-  const getNow = useTime();
-  const endTime =
-    !!school.startingTime &&
-    !!contest.duration &&
-    addMinutes(school.startingTime, contest.duration);
-
-  const isContestRunning = endTime && getNow() <= endTime;
-
   const [, setTime] = useState(getNow);
   useEffect(() => {
     if (!isContestRunning) return;
@@ -227,9 +244,6 @@ function Table({
     const id = setTimeout(() => setTime(getNow), differenceInMilliseconds(endTime, now));
     return () => clearTimeout(id);
   }, [getNow, endTime, isContestRunning]);
-
-  const TESTID = "scolastiche-test"; // TODO: revert, only for testing
-  const editable = (!isContestRunning || contest.id == TESTID) && !school.finalized;
 
   const colDefs = useMemo(
     (): ColDef[] =>
@@ -301,20 +315,23 @@ function Table({
           filter: true,
           resizable: true,
           width: 100,
-          valueGetter: ({ data }) => score(data, variants, solutions),
+          valueGetter: ({ data }) =>
+            import.meta.env.DEV || TESTID === contest.id
+              ? score(data, variants, solutions)
+              : undefined,
         },
         {
           field: "disabled",
-          headerName: "Escludi",
+          headerName: "Cancella",
           cellDataType: "boolean",
           filter: true,
           resizable: true,
           editable,
-          width: 100,
+          width: 120,
           valueGetter: ({ data }) => data.disabled ?? false,
         },
       ]),
-    [contest, variants, solutions, widths, school.finalized, isContestRunning],
+    [contest, variants, solutions, widths, editable],
   );
 
   const onCellEditRequest = async (ev: CellEditRequestEvent) => {
@@ -361,6 +378,14 @@ function Table({
         rowSelection="single"
         onCellEditRequest={onCellEditRequest}
         enableBrowserTooltips={true}
+        onGridReady={(ev) => {
+          ev.api.setFilterModel({
+            disabled: {
+              filterType: "text",
+              type: "false",
+            },
+          });
+        }}
       />
     </div>
   );
@@ -376,14 +401,19 @@ function isStudentIncomplete(student: Student, contest: Contest, variants: Schem
     }
   }
 
-  const variant = variants.find((v) => v.id === student.variant);
-  if (!variant) return "Variante mancante";
+  let variant = variants.find((v) => v.id === student.variant);
+
+  if (contest.hasVariants && !variant) return "Variante mancante";
+  if (!variant) {
+    console.log(variants);
+    variant = variants.find((v) => v.contest === contest.id)!;
+  }
 
   for (const [id, schema] of Object.entries(variant.schema)) {
     const ans = student.answers?.[id];
     if (!ans || ans === schema.blankOption) continue;
-    if (schema.type === "number" && !/^\d+$/.test(ans)) {
-      return `Domanda ${id} deve essere un numero intero`;
+    if (schema.type === "number" && !/^\d+$/.test(ans.trim())) {
+      return `Domanda ${id} deve contenere un numero intero`;
     }
   }
 }
