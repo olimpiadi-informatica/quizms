@@ -74,19 +74,21 @@ export function TeacherTable() {
               </div>
             </Suspense>
           </div>
-          <button
-            className="btn btn-primary btn-sm h-10"
-            onClick={() => importRef.current?.showModal()}>
-            <Upload />
-            <div className="hidden lg:block">Importa studenti</div>
-          </button>
           {!schools[selectedSchool].finalized && (
-            <button
-              className="btn btn-primary btn-sm h-10"
-              onClick={() => finalizeRef.current?.showModal()}>
-              <FileCheck />
-              <div className="hidden lg:block">Finalizza</div>
-            </button>
+            <>
+              <button
+                className="btn btn-primary btn-sm h-10"
+                onClick={() => importRef.current?.showModal()}>
+                <Upload />
+                <div className="hidden lg:block">Importa studenti</div>
+              </button>
+              <button
+                className="btn btn-primary btn-sm h-10"
+                onClick={() => finalizeRef.current?.showModal()}>
+                <FileCheck />
+                <div className="hidden lg:block">Finalizza</div>
+              </button>
+            </>
           )}
           <FinalizeModal
             key={contest.id}
