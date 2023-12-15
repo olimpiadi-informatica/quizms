@@ -9,7 +9,12 @@ import React, {
   useState,
 } from "react";
 
-import { CellEditRequestEvent, ColDef, ICellRendererParams } from "ag-grid-community";
+import {
+  CellEditRequestEvent,
+  ColDef,
+  ICellRendererParams,
+  ITooltipParams,
+} from "ag-grid-community";
 import classNames from "classnames";
 import { addMinutes, differenceInMilliseconds, format, isEqual as isEqualDate } from "date-fns";
 import { it as dateLocaleIT } from "date-fns/locale";
@@ -20,7 +25,7 @@ import { Contest, parsePersonalInformation } from "~/models/contest";
 import { School } from "~/models/school";
 import { score } from "~/models/score";
 import { Student } from "~/models/student";
-import { SchemaDoc } from "~/models/variant";
+import { SchemaDoc, Variant } from "~/models/variant";
 import Loading from "~/ui/components/loading";
 import Modal from "~/ui/components/modal";
 import useTime from "~/ui/components/time";
@@ -107,9 +112,20 @@ export function TeacherTable() {
 }
 
 function Counter({ school, contest }: { school: School; contest: Contest }) {
-  const { students } = useTeacher();
+  const { students, variants } = useTeacher();
+  console.log({ school, contest, students });
+  console.log(
+    students.map((s) => [
+      s.school === school.id,
+      !isEmpty(s, contest),
+      !isStudentIncomplete(s, contest, variants),
+    ]),
+  );
+
   return sumBy(students, (s) => {
-    return Number(school.contestId === contest.id && isComplete(s, contest));
+    return Number(
+      s.school === school.id && !isEmpty(s, contest) && !isStudentIncomplete(s, contest, variants),
+    );
   });
 }
 
@@ -220,7 +236,7 @@ function Table({
     return () => clearTimeout(id);
   }, [getNow, endTime, isContestRunning]);
   
-  const TESTID = "scolastiche-test";
+  const TESTID = "scolastiche-test"; // TODO: only for testing
 
   const colDefs = useMemo(
     (): ColDef[] =>
@@ -237,25 +253,26 @@ function Table({
             editable: (!isContestRunning || contest.id == TESTID) && !school.finalized,
             width: widths[field.size ?? "md"],
             equals: field.type === "date" ? isEqualDate : undefined,
-            cellRenderer: ({ api, data, value }: ICellRendererParams<Student>) => {
+            tooltipValueGetter: ({ data }: ITooltipParams<Student>) => {
+              return isStudentIncomplete(data!, contest, variants);
+            },
+            cellRenderer: ({ api, data, value, node }: ICellRendererParams<Student>) => {
               if (field.type === "date" && value) {
                 return format(value, "P", { locale: dateLocaleIT });
               }
-              /* TODO: don't work well with online students and blank options
+              // TODO: don't work well with online students and blank options
               if (
                 i === 0 &&
                 field.type === "text" &&
-                !isComplete(data!, contest) &&
-                !isEmpty(data!, contest) &&
-                !data?.disabled &&
-                !api.getSelectedRows().some((s: Student) => s.id === data?.id)
+                !api.getSelectedRows().some((s: Student) => s.id === data?.id) &&
+                isStudentIncomplete(data!, contest, variants)
               ) {
                 return (
-                  <>
+                  <span>
                     {value} <AlertTriangle className="mb-1 inline-block text-warning" size={16} />
-                  </>
+                  </span>
                 );
-              } */
+              }
               return value;
             },
           }),
@@ -323,7 +340,7 @@ function Table({
       );
       const schema = variant?.schema[subfield];
 
-      const isValid = schema?.options?.includes(value) ?? true;
+      const isValid = value === schema?.blankOption || (schema?.options?.includes(value) ?? true);
       if (!isValid) value = undefined;
     }
 
@@ -344,20 +361,32 @@ function Table({
         readOnlyEdit={true}
         rowSelection="single"
         onCellEditRequest={onCellEditRequest}
+        enableBrowserTooltips={true}
       />
     </div>
   );
 }
 
-function isComplete(student: Student, contest: Contest) {
-  return Boolean(
-    contest.personalInformation.every((field) => {
-      return student.personalInformation?.[field.name];
-    }) &&
-      student.variant &&
-      contest.problemIds.every((id) => student.answers?.[id]) &&
-      !student.disabled,
-  );
+function isStudentIncomplete(student: Student, contest: Contest, variants: SchemaDoc[]) {
+  if (isEmpty(student, contest)) return;
+  if (student.disabled) return;
+
+  for (const field of contest.personalInformation) {
+    if (!student.personalInformation?.[field.name]) {
+      return `${field.label} mancante`;
+    }
+  }
+
+  const variant = variants.find((v) => v.id === student.variant);
+  if (!variant) return "Variante mancante";
+
+  for (const [id, schema] of Object.entries(variant.schema)) {
+    const ans = student.answers?.[id];
+    if (!ans || ans === schema.blankOption) continue;
+    if (schema.type === "number" && !/^\d+$/.test(ans)) {
+      return `Domanda ${id} deve essere un numero intero`;
+    }
+  }
 }
 
 function isEmpty(student: Student, contest: Contest) {
