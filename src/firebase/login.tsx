@@ -52,7 +52,7 @@ export function useDb() {
   return useContext(FirebaseContext)!;
 }
 
-export default function ErrorLogout({ error }: FallbackProps) {
+function ErrorLogout({ error }: FallbackProps) {
   const db = useDb();
   const auth = getAuth(db.app);
 

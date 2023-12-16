@@ -386,7 +386,7 @@ async function createStudent(db: Firestore, student: Student) {
   student.id = randomId();
 
   // Get the variant assigned to the student
-  // An entry should always exists in variantMapping
+  // An entry should always exist in variantMapping
   const hash = studentHash(student);
   const variant = `${student.contest}-${hash.slice(0, 3)}`;
 

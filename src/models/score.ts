@@ -36,16 +36,3 @@ export function score(student: Student, variants: SchemaDoc[], solutions: Soluti
 
   return points;
 }
-
-export function maxScore(schema?: Schema) {
-  if (!schema) return undefined;
-  let points = 0;
-  for (const id in schema) {
-    const problem = schema[id];
-    if (problem.pointsCorrect === undefined) {
-      return undefined;
-    }
-    points += problem.pointsCorrect;
-  }
-  return points;
-}

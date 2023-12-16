@@ -114,8 +114,8 @@ function Counter({ school, contest }: { school: School; contest: Contest }) {
   return sumBy(students, (s) => {
     return Number(
       s.school === school.id &&
-        !isEmpty(s, contest) &&
         !s.disabled &&
+        !isStudentEmpty(s) &&
         !isStudentIncomplete(s, contest, variants),
     );
   });
@@ -336,7 +336,8 @@ function Table({ school, contest }: { school: School; contest: Contest }) {
           filter: true,
           resizable: true,
           width: 100,
-          valueGetter: ({ data }) => score(data, variants, solutions),
+          valueGetter: ({ data }) =>
+            !isStudentEmpty(data) ? score(data, variants, solutions) : "",
         },
         {
           field: "disabled",
@@ -410,7 +411,7 @@ function Table({ school, contest }: { school: School; contest: Contest }) {
 }
 
 function isStudentIncomplete(student: Student, contest: Contest, variants: SchemaDoc[]) {
-  if (isEmpty(student, contest)) return;
+  if (isStudentEmpty(student)) return;
   if (student.disabled) return;
 
   for (const field of contest.personalInformation) {
@@ -429,18 +430,15 @@ function isStudentIncomplete(student: Student, contest: Contest, variants: Schem
   for (const [id, schema] of Object.entries(variant.schema)) {
     const ans = student.answers?.[id];
     if (!ans || ans === schema.blankOption) continue;
-    if (schema.type === "number" && !/^\d+$/.test(ans.trim())) {
+    if (schema.type === "number" && !/^-?\d+$/.test(ans.trim())) {
       return `La domanda ${id} deve contenere un numero intero`;
     }
   }
 }
 
-function isEmpty(student: Student, contest: Contest) {
+function isStudentEmpty(student: Student) {
   return (
-    contest.personalInformation.every((field) => {
-      return !student.personalInformation?.[field.name];
-    }) &&
-    !student.variant &&
-    contest.problemIds.every((id) => !student.answers?.[id])
+    !Object.values(student.personalInformation ?? {}).some(Boolean) &&
+    !Object.values(student.answers ?? {}).some(Boolean)
   );
 }

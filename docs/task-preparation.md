@@ -98,7 +98,7 @@ Il valore di `x` è {x}.
 Il valore di `x+y` è {x+y}.
 ```
 
-Per utilizzare le varibili nelle formule di LaTeX bisogna utilizzare il comando `\js`:
+Per utilizzare le variabili nelle formule di LaTeX bisogna utilizzare il comando `\js`:
 
 ```LaTeX
 $x + y = \js{x+y}$

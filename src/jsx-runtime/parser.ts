@@ -159,15 +159,3 @@ export function shuffleContest(
   }
   return program;
 }
-
-export function parseContest(
-  entry: () => ExpressionWrapper,
-  variant: string,
-  config?: ContestConfig,
-): string {
-  const contestAst = shuffleContest(entry, variant, config);
-  /* TODO: read environment to decide whether to strip answers*/
-  getAnswers(contestAst, true);
-
-  return toJs(contestAst).value;
-}
