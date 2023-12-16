@@ -24,11 +24,13 @@ import { AlertTriangle, FileCheck, Upload, Users } from "lucide-react";
 import { Contest, parsePersonalInformation } from "~/models/contest";
 import { School } from "~/models/school";
 import { score } from "~/models/score";
+import { Solution } from "~/models/solution";
 import { Student, studentHash } from "~/models/student";
 import { SchemaDoc } from "~/models/variant";
 import Loading from "~/ui/components/loading";
 import Modal from "~/ui/components/modal";
 import useTime from "~/ui/components/time";
+import { agGridLocaleIT } from "~/ui/teacher/tableLocale";
 import { randomId } from "~/utils/random";
 
 import { useTeacher } from "./provider";
@@ -247,17 +249,6 @@ function Table({ school, contest }: { school: School; contest: Contest }) {
       : []),
   ];
 
-  const widths = useMemo(
-    () => ({
-      xs: 100,
-      sm: 125,
-      md: 150,
-      lg: 200,
-      xl: 250,
-    }),
-    [],
-  );
-
   const [, setTime] = useState(getNow);
   useEffect(() => {
     if (!isContestRunning) return;
@@ -267,90 +258,8 @@ function Table({ school, contest }: { school: School; contest: Contest }) {
   }, [getNow, endTime, isContestRunning]);
 
   const colDefs = useMemo(
-    (): ColDef[] =>
-      compact([
-        ...contest.personalInformation.map(
-          (field, i): ColDef => ({
-            field: `personalInformation.${field.name}`,
-            headerName: field.label,
-            pinned: field.pinned,
-            cellDataType: field.type,
-            sortable: true,
-            filter: true,
-            resizable: true,
-            editable,
-            width: widths[field.size ?? "md"],
-            equals: field.type === "date" ? isEqualDate : undefined,
-            tooltipValueGetter: ({ data }: ITooltipParams<Student>) => {
-              return isStudentIncomplete(data!, contest, variants);
-            },
-            cellRenderer: ({ api, data, value }: ICellRendererParams<Student>) => {
-              if (field.type === "date" && value) {
-                return format(value, "P", { locale: dateLocaleIT });
-              }
-              if (
-                i === 0 &&
-                field.type === "text" &&
-                !api.getSelectedRows().some((s: Student) => s.id === data?.id) &&
-                isStudentIncomplete(data!, contest, variants)
-              ) {
-                return (
-                  <span>
-                    {value}{" "}
-                    <AlertTriangle
-                      className="mb-1 inline-block cursor-text text-warning"
-                      size={16}
-                    />
-                  </span>
-                );
-              }
-              return value;
-            },
-          }),
-        ),
-        contest.hasVariants && {
-          field: "variant",
-          headerName: "Variante",
-          sortable: true,
-          filter: true,
-          resizable: true,
-          editable,
-          width: 100,
-        },
-        ...contest.problemIds.map(
-          (id, i): ColDef => ({
-            field: `answers[${id}]`,
-            valueGetter: ({ data }) => data.answers?.[id],
-            tooltipValueGetter: ({ data }) => data.answers?.[id],
-            headerName: String(id),
-            sortable: false,
-            resizable: true,
-            editable,
-            width: 50 + (i % 4 === 3 ? 15 : 0),
-          }),
-        ),
-        {
-          headerName: "Punti",
-          pinned: "right",
-          sortable: true,
-          filter: true,
-          resizable: true,
-          width: 100,
-          valueGetter: ({ data }) =>
-            !isStudentEmpty(data) ? score(data, variants, solutions) : "",
-        },
-        {
-          field: "disabled",
-          headerName: "Cancella",
-          cellDataType: "boolean",
-          filter: true,
-          resizable: true,
-          editable,
-          width: 120,
-          valueGetter: ({ data }) => data.disabled ?? false,
-        },
-      ]),
-    [contest, variants, solutions, widths, editable],
+    () => columnDefinition(contest, variants, solutions, editable),
+    [contest, variants, solutions, editable],
   );
 
   const onCellEditRequest = async (ev: CellEditRequestEvent) => {
@@ -397,6 +306,7 @@ function Table({ school, contest }: { school: School; contest: Contest }) {
         rowSelection="single"
         onCellEditRequest={onCellEditRequest}
         enableBrowserTooltips={true}
+        // localeText={agGridLocaleIT}
         onGridReady={(ev) => {
           ev.api.setFilterModel({
             disabled: {
@@ -408,6 +318,103 @@ function Table({ school, contest }: { school: School; contest: Contest }) {
       />
     </div>
   );
+}
+
+function columnDefinition(
+  contest: Contest,
+  variants: SchemaDoc[],
+  solutions: Solution[],
+  editable: boolean,
+): ColDef[] {
+  const widths = {
+    xs: 100,
+    sm: 125,
+    md: 150,
+    lg: 200,
+    xl: 250,
+  };
+
+  const defaultOptions = {
+    sortable: true,
+    filter: true,
+    resizable: true,
+    editable,
+  };
+
+  return [
+    ...contest.personalInformation.map(
+      (field, i): ColDef => ({
+        field: `personalInformation.${field.name}`,
+        headerName: field.label,
+        pinned: field.pinned,
+        cellDataType: field.type,
+        width: widths[field.size ?? "md"],
+        equals: field.type === "date" ? isEqualDate : undefined,
+        ...defaultOptions,
+        tooltipValueGetter: ({ data }: ITooltipParams<Student>) => {
+          return isStudentIncomplete(data!, contest, variants);
+        },
+        cellRenderer: ({ api, data, value }: ICellRendererParams<Student>) => {
+          if (field.type === "date" && value) {
+            return format(value, "P", { locale: dateLocaleIT });
+          }
+          if (
+            i === 0 &&
+            field.type === "text" &&
+            !api.getSelectedRows().some((s: Student) => s.id === data?.id) &&
+            isStudentIncomplete(data!, contest, variants)
+          ) {
+            return (
+              <span>
+                {value}{" "}
+                <AlertTriangle className="mb-1 inline-block cursor-text text-warning" size={16} />
+              </span>
+            );
+          }
+          return value;
+        },
+      }),
+    ),
+    ...(contest.hasVariants
+      ? [
+          {
+            field: "variant",
+            headerName: "Variante",
+            width: 100,
+            ...defaultOptions,
+          } as ColDef,
+        ]
+      : []),
+    ...contest.problemIds.map(
+      (id, i): ColDef => ({
+        field: `answers[${id}]`,
+        headerName: id,
+        width: 50 + (i % 4 === 3 ? 15 : 0),
+        valueGetter: ({ data }) => data.answers?.[id],
+        tooltipValueGetter: ({ data }) => data.answers?.[id],
+        ...defaultOptions,
+        sortable: false,
+        filter: false,
+      }),
+    ),
+    {
+      headerName: "Punti",
+      pinned: "right",
+      width: 100,
+      valueGetter: ({ data }) => (!isStudentEmpty(data) ? score(data, variants, solutions) : ""),
+      ...defaultOptions,
+      editable: false,
+    },
+    {
+      field: "disabled",
+      headerName: "Cancella",
+      cellDataType: "boolean",
+      width: 120,
+      valueGetter: ({ data }) => data.disabled ?? false,
+      ...defaultOptions,
+      sortable: false,
+    },
+  ];
 }
 
 function isStudentIncomplete(student: Student, contest: Contest, variants: SchemaDoc[]) {
