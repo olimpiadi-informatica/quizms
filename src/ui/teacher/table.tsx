@@ -1,4 +1,13 @@
-import React, { Ref, Suspense, forwardRef, lazy, useMemo, useRef, useState } from "react";
+import React, {
+  Ref,
+  Suspense,
+  forwardRef,
+  lazy,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 import {
   CellEditRequestEvent,
@@ -37,6 +46,14 @@ export function TeacherTable() {
   const [selectedSchool, setSelectedSchool] = useState(0);
   const importRef = useRef<HTMLDialogElement>(null);
   const finalizeRef = useRef<HTMLDialogElement>(null);
+
+  useEffect(() => {
+    if (window.location.hash) {
+      const school = schools.findIndex((s) => s.contestId === window.location.hash.slice(1));
+      if (school !== -1) setSelectedSchool(school);
+      window.location.hash = "";
+    }
+  }, []);
 
   const contest = contests.find((c) => c.id === schools[selectedSchool].contestId)!;
   return (

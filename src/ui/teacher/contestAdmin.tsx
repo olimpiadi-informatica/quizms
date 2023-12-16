@@ -365,9 +365,7 @@ function StudentRestoreList(props: { school: School }) {
   );
 }
 
-function ContestAdmin(props: { school: School; contest: Contest }) {
-  const { school, contest } = props;
-
+function ContestAdmin({ school, contest }: { school: School; contest: Contest }) {
   const getNow = useTime();
   const now = getNow();
 
@@ -412,11 +410,9 @@ function ContestAdmin(props: { school: School; contest: Contest }) {
               <StartContestButton school={school} key={school.id} />
             )}
             {canUndoContest(now, school) && <StopContestButton school={school} />}
-            <button
-              className="btn btn-info"
-              onClick={() => (window.location.href = "students/") /* TODO */}>
+            <a className="btn btn-info" href={`./students/#${school.contestId}`} /* TODO */>
               Gestisci studenti e risposte
-            </button>
+            </a>
           </div>
         </div>
       </div>
