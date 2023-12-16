@@ -4,7 +4,7 @@ import classNames from "classnames";
 import {
   addMinutes,
   addSeconds,
-  differenceInSeconds,
+  differenceInMinutes,
   format,
   roundToNearestMinutes,
 } from "date-fns";
@@ -42,45 +42,25 @@ import { Contest } from "~/models/contest";
 import { School } from "~/models/school";
 import { StudentRestore, studentHash } from "~/models/student";
 import Loading from "~/ui/components/loading";
+import Modal from "~/ui/components/modal";
 import { useTime, useUpdateAt } from "~/ui/components/time";
+import Timer from "~/ui/components/timer";
 import { hash, randomToken } from "~/utils/random";
 
-import Modal from "../components/modal";
-import Timer from "../components/timer";
 import { useTeacher } from "./provider";
 
-function contestFinished(now: Date, school: School, contest: Contest) {
-  return (
-    school.startingTime && differenceInSeconds(now, school.startingTime) > contest.duration! * 60
-  );
-}
-
-function contestRunning(now: Date, school: School, contest: Contest) {
-  return (
-    school.startingTime && !contestFinished(now, school, contest) && now >= school.startingTime!
-  );
-}
-
-function insideContestWindow(now: Date, contest: Contest) {
-  return now >= contest.startingWindowStart! && now <= contest.startingWindowEnd!;
-}
-
 function canStartContest(now: Date, school: School, contest: Contest) {
-  if (school.startingTime) {
-    return (
-      contest.allowRestart &&
-      contestFinished(now, school, contest) &&
-      insideContestWindow(now, contest)
-    );
-  }
-  return insideContestWindow(now, contest);
+  if (now < contest.startingWindowStart! || now > contest.startingWindowEnd!) return false;
+  if (!school.startingTime) return true;
+  if (!contest.allowRestart) return false;
+  return differenceInMinutes(now, school.startingTime) >= contest.duration!;
 }
 
 function canUndoContest(now: Date, school: School) {
   return school.startingTime && now < addMinutes(school.startingTime, -1);
 }
 
-function StartContest({ school }: { school: School }) {
+function StartContestButton({ school }: { school: School }) {
   const db = useDb();
   const { setSchool } = useTeacher();
 
@@ -126,7 +106,7 @@ function StartContest({ school }: { school: School }) {
 
 async function generateToken(now: Date, db: Firestore, prevSchool: School) {
   const token = randomToken();
-  const startingTime = roundToNearestMinutes(addSeconds(addMinutes(now, 3), 30));
+  const startingTime = roundToNearestMinutes(addSeconds(now, 210 /* 3.5 minutes */));
 
   const school: School = {
     ...prevSchool,
@@ -155,7 +135,7 @@ async function generateToken(now: Date, db: Firestore, prevSchool: School) {
   return school;
 }
 
-function StopContest({ school }: { school: School }) {
+function StopContestButton({ school }: { school: School }) {
   const { setSchool } = useTeacher();
   const modalRef = useRef<HTMLDialogElement>(null);
 
@@ -223,10 +203,11 @@ function StopContest({ school }: { school: School }) {
 
 function ContestData({ contest, school }: { school: School; contest: Contest }) {
   const endTime = addMinutes(school.startingTime!, contest.duration!);
+
   const getNow = useTime();
   const now = getNow();
 
-  if (contestFinished(now, school, contest)) {
+  if (now > endTime) {
     return (
       <div className="flex flex-col gap-3">
         <p>
@@ -236,38 +217,37 @@ function ContestData({ contest, school }: { school: School; contest: Contest }) 
       </div>
     );
   }
-  if (contestRunning(now, school, contest)) {
+  if (now < school.startingTime!) {
     return (
       <div className="flex flex-col gap-3">
-        <p>
-          <b>Codice:</b> <span className="text-mono">{school.token}</span>
+        <p className="my-2 text-lg">
+          <b>Codice:</b> <span className="font-mono">{school.token}</span>
         </p>
-        <p>La gara terminerà alle {format(endTime, "HH:mm", { locale: dateLocaleIT })}.</p>
+        <p>La gara inizierà alle ore {format(school.startingTime!, "HH:mm")}.</p>
         <p>
-          Tempo rimanente: <Timer endTime={endTime} />
+          Tempo rimanente all&apos;inizio: <Timer endTime={school.startingTime!} />
         </p>
-        <div className="mx-auto flex flex-col items-center justify-center gap-2 text-2xl">
-          Gara iniziata alle ore {format(school.startingTime!, "HH:mm")}.
-        </div>
+        {canUndoContest(now, school) && (
+          <p>
+            Se ti sei sbagliato, puoi ancora annullare la gara fino a un minuto prima
+            dell&apos;inizio.
+          </p>
+        )}
       </div>
     );
   }
-
   return (
     <div className="flex flex-col gap-3">
-      <p className="my-2 text-lg">
-        <b>Codice:</b> <span className="font-mono">{school.token}</span>
-      </p>
-      <p>La gara inizierà alle ore {format(school.startingTime!, "HH:mm")}.</p>
       <p>
-        Tempo rimanente all&apos;inizio: <Timer endTime={school.startingTime!} />
+        <b>Codice:</b> <span className="text-mono">{school.token}</span>
       </p>
-      {canUndoContest(now, school) && (
-        <p>
-          Se ti sei sbagliato, puoi ancora annullare la gara fino a un minuto prima
-          dell&apos;inizio.
-        </p>
-      )}
+      <p>La gara terminerà alle {format(endTime, "HH:mm", { locale: dateLocaleIT })}.</p>
+      <p>
+        Tempo rimanente: <Timer endTime={endTime} />
+      </p>
+      <div className="mx-auto flex flex-col items-center justify-center gap-2 text-2xl">
+        Gara iniziata alle ore {format(school.startingTime!, "HH:mm")}.
+      </div>
     </div>
   );
 }
@@ -392,8 +372,8 @@ function ContestAdmin(props: { school: School; contest: Contest }) {
   const now = getNow();
 
   useUpdateAt(school.startingTime);
-  useUpdateAt(addMinutes(school.startingTime!, contest.duration!));
-  useUpdateAt(addMinutes(school.startingTime!, -1));
+  useUpdateAt(school.startingTime && addMinutes(school.startingTime, contest.duration!));
+  useUpdateAt(school.startingTime && addMinutes(school.startingTime, -1));
 
   if (!contest.startingWindowEnd || !contest.startingWindowStart) {
     throw new Error("Data inizio e fine del contest non specificate");
@@ -429,9 +409,9 @@ function ContestAdmin(props: { school: School; contest: Contest }) {
           <div className="mt-2 flex flex-wrap justify-center gap-3">
             {/* contest buttons */}
             {canStartContest(now, school, contest) && (
-              <StartContest school={school} key={school.id} />
+              <StartContestButton school={school} key={school.id} />
             )}
-            {canUndoContest(now, school) && <StopContest school={school} />}
+            {canUndoContest(now, school) && <StopContestButton school={school} />}
             <button
               className="btn btn-info"
               onClick={() => (window.location.href = "students/") /* TODO */}>
