@@ -4,6 +4,8 @@ import { Schema, SchemaDoc } from "~/models/variant";
 
 export function score(student: Student, variants: SchemaDoc[], solutions: Solution[]) {
   const answers = student.answers;
+  if (!student.variant && student.contest == "fibonacci-primarie") student.variant = "1";
+  else if (!student.variant && student.contest == "fibonacci-secondarie") student.variant = "2";
   const variant = variants.find((variant) => variant.id === student.variant);
   const solution = solutions.find((solution) => solution.id === student.variant)?.answers;
   const schema = variant?.schema;
