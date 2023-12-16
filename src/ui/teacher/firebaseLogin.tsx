@@ -53,6 +53,7 @@ function TeacherLogin({ children }: { children: ReactNode }) {
           </label>
           <input
             type="email"
+            autoComplete="email"
             placeholder="Inserisci l'email"
             className="input input-bordered w-full max-w-md"
             onChange={(e) => setEmail(e.target.value)}
@@ -65,6 +66,7 @@ function TeacherLogin({ children }: { children: ReactNode }) {
           </label>
           <input
             type="password"
+            autoComplete="current-password"
             placeholder="Insersci la password"
             className="input input-bordered w-full max-w-md"
             onChange={(e) => setPassword(e.target.value)}
