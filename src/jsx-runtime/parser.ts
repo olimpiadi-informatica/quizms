@@ -1,11 +1,10 @@
 import { Expression, Program, Property } from "estree";
 import { builders as b } from "estree-toolkit";
-import { toJs } from "estree-util-to-js";
 
 import { ContestConfig } from "~/models/generation-config";
 import { hash } from "~/utils/random";
 
-import { getAnswers, shuffleAnswers, shuffleProblems } from "./variants";
+import { shuffleAnswers, shuffleProblems } from "./variants";
 
 type ParseOptions = {
   functionArguments: any[];

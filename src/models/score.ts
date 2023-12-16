@@ -1,6 +1,6 @@
 import { Solution } from "~/models/solution";
 import { Student } from "~/models/student";
-import { Schema, SchemaDoc } from "~/models/variant";
+import { SchemaDoc } from "~/models/variant";
 
 export function score(student: Student, variants: SchemaDoc[], solutions: Solution[]) {
   const answers = student.answers;

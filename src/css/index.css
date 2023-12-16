@@ -38,6 +38,7 @@ body {
 .ag-theme-quartz-auto-dark {
   --ag-background-color: theme(colors.base-100);
   --ag-header-background-color: theme(colors.base-100);
+  --ag-control-panel-background-color: theme(colors.base-100);
   --ag-foreground-color: theme(colors.base-content);
 }
 
