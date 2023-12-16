@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 
 import { addMinutes, differenceInSeconds, isAfter } from "date-fns";
 
-import useTime from "./time";
+import { useTime } from "./time";
 
 type TimerProps =
   | {

@@ -3,14 +3,13 @@ import React, {
   ComponentType,
   Suspense,
   forwardRef,
-  useEffect,
   useMemo,
   useRef,
   useState,
 } from "react";
 
 import classNames from "classnames";
-import { addMinutes, differenceInMilliseconds, formatISO } from "date-fns";
+import { addMilliseconds, addMinutes, formatISO } from "date-fns";
 import { FirebaseOptions } from "firebase/app";
 import { getAuth, signOut } from "firebase/auth";
 import {
@@ -42,7 +41,7 @@ import { parsePersonalInformation } from "~/models/contest";
 import { Student, studentHash } from "~/models/student";
 import { RemoteContest } from "~/ui";
 import Loading from "~/ui/components/loading";
-import useTime from "~/ui/components/time";
+import { useTime, useUpdateAt } from "~/ui/components/time";
 import Timer from "~/ui/components/timer";
 import { hash, randomId } from "~/utils/random";
 
@@ -287,25 +286,13 @@ function StudentInner({
     window.location.reload();
   };
 
-  const getNow = useTime();
-
   const [started, setStarted] = useState(false);
-  useEffect(() => {
-    const id = setTimeout(
-      () => setStarted(true),
-      differenceInMilliseconds(school.startingTime!, getNow()) + 1000 + Math.random() * 1000,
-    );
-    return () => clearTimeout(id);
-  }, [school.startingTime, getNow]);
+  useUpdateAt(addMilliseconds(school.startingTime!, 1000 + Math.random() * 1000), () =>
+    setStarted(true),
+  );
 
   const [terminated, setTerminated] = useState(false);
-  useEffect(() => {
-    const id = setTimeout(
-      () => setTerminated(true),
-      differenceInMilliseconds(addMinutes(school.startingTime!, contest.duration!), getNow()),
-    );
-    return () => clearTimeout(id);
-  }, [school.startingTime, contest.duration, getNow]);
+  useUpdateAt(addMinutes(school.startingTime!, contest.duration!), () => setTerminated(true));
 
   const setStudentAndSubmit = async (newStudent: Student) => {
     if (isEqual(student, newStudent)) return;

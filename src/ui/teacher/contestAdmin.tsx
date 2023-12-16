@@ -1,10 +1,9 @@
-import React, { Suspense, useEffect, useRef, useState } from "react";
+import React, { Suspense, useRef, useState } from "react";
 
 import classNames from "classnames";
 import {
   addMinutes,
   addSeconds,
-  differenceInMilliseconds,
   differenceInSeconds,
   format,
   roundToNearestMinutes,
@@ -43,7 +42,7 @@ import { Contest } from "~/models/contest";
 import { School } from "~/models/school";
 import { StudentRestore, studentHash } from "~/models/student";
 import Loading from "~/ui/components/loading";
-import useTime from "~/ui/components/time";
+import { useTime, useUpdateAt } from "~/ui/components/time";
 import { hash, randomToken } from "~/utils/random";
 
 import Modal from "../components/modal";
@@ -392,35 +391,9 @@ function ContestAdmin(props: { school: School; contest: Contest }) {
   const getNow = useTime();
   const now = getNow();
 
-  const [time, setTime] = useState(now);
-
-  // refresh the page when the page should change
-  useEffect(() => {
-    if (school.startingTime) {
-      const refreshDates: Date[] = [
-        school.startingTime,
-        addMinutes(school.startingTime, contest.duration!),
-        addMinutes(school.startingTime, -1),
-      ];
-      const timeouts: NodeJS.Timeout[] = [];
-      for (const d of refreshDates) {
-        if (d > getNow()) {
-          const interval = setTimeout(
-            () => {
-              setTime(getNow);
-            },
-            differenceInMilliseconds(d, getNow()) + 1000,
-          );
-          timeouts.push(interval);
-        }
-      }
-      return () => {
-        for (const interval of timeouts) {
-          clearInterval(interval);
-        }
-      };
-    }
-  }, [school.startingTime, time, getNow, contest.duration]);
+  useUpdateAt(school.startingTime);
+  useUpdateAt(addMinutes(school.startingTime!, contest.duration!));
+  useUpdateAt(addMinutes(school.startingTime!, -1));
 
   if (!contest.startingWindowEnd || !contest.startingWindowStart) {
     throw new Error("Data inizio e fine del contest non specificate");

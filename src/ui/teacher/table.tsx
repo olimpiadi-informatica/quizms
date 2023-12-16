@@ -1,13 +1,4 @@
-import React, {
-  Ref,
-  Suspense,
-  forwardRef,
-  lazy,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { Ref, Suspense, forwardRef, lazy, useMemo, useRef, useState } from "react";
 
 import {
   CellEditRequestEvent,
@@ -16,9 +7,9 @@ import {
   ITooltipParams,
 } from "ag-grid-community";
 import classNames from "classnames";
-import { addMinutes, differenceInMilliseconds, format, isEqual as isEqualDate } from "date-fns";
+import { addMinutes, format, isEqual as isEqualDate } from "date-fns";
 import { it as dateLocaleIT } from "date-fns/locale";
-import { cloneDeep, compact, set, sumBy } from "lodash-es";
+import { cloneDeep, set, sumBy } from "lodash-es";
 import { AlertTriangle, FileCheck, Upload, Users } from "lucide-react";
 
 import { Contest, parsePersonalInformation } from "~/models/contest";
@@ -29,7 +20,7 @@ import { Student, studentHash } from "~/models/student";
 import { SchemaDoc } from "~/models/variant";
 import Loading from "~/ui/components/loading";
 import Modal from "~/ui/components/modal";
-import useTime from "~/ui/components/time";
+import { useTime, useUpdateAt } from "~/ui/components/time";
 import { agGridLocaleIT } from "~/ui/teacher/tableLocale";
 import { randomId } from "~/utils/random";
 
@@ -212,12 +203,12 @@ const FinalizeModal = forwardRef(function FinalizeModal(
 function Table({ school, contest }: { school: School; contest: Contest }) {
   const { solutions, students, setStudent, variants } = useTeacher();
 
-  const getNow = useTime();
+  const now = useTime();
   const endTime =
-    !!school.startingTime &&
-    !!contest.duration &&
-    addMinutes(school.startingTime, contest.duration);
-  const isContestRunning = endTime && getNow() <= endTime;
+    school.startingTime && contest.duration
+      ? addMinutes(school.startingTime, contest.duration)
+      : undefined;
+  const isContestRunning = endTime && now() <= endTime;
 
   const TESTID = "scolastiche-test"; // TODO: revert, only for testing
   const editable = (!isContestRunning || contest.id == TESTID) && !school.finalized;
@@ -249,13 +240,7 @@ function Table({ school, contest }: { school: School; contest: Contest }) {
       : []),
   ];
 
-  const [, setTime] = useState(getNow);
-  useEffect(() => {
-    if (!isContestRunning) return;
-    const now = getNow();
-    const id = setTimeout(() => setTime(getNow), differenceInMilliseconds(endTime, now));
-    return () => clearTimeout(id);
-  }, [getNow, endTime, isContestRunning]);
+  useUpdateAt(endTime);
 
   const colDefs = useMemo(
     () => columnDefinition(contest, variants, solutions, editable),

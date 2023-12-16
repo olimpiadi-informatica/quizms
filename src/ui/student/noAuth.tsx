@@ -3,17 +3,17 @@ import React, {
   ReactNode,
   SetStateAction,
   useCallback,
-  useEffect,
   useMemo,
   useState,
 } from "react";
 
-import { add, differenceInMilliseconds } from "date-fns";
+import { add } from "date-fns";
 import { isFunction, range } from "lodash-es";
 
 import { Contest } from "~/models/contest";
 import { School } from "~/models/school";
 import { Student } from "~/models/student";
+import { useUpdateAt } from "~/ui/components/time";
 
 import { Layout } from "./layout";
 import { StudentProvider } from "./provider";
@@ -56,11 +56,7 @@ export function NoAuth({
     variant: "0",
   });
 
-  useEffect(() => {
-    if (!endTime) return;
-    const id = setTimeout(() => setSubmitted(true), differenceInMilliseconds(endTime, new Date()));
-    return () => clearTimeout(id);
-  }, [endTime, setSubmitted]);
+  useUpdateAt(endTime, () => setSubmitted(true));
 
   const start = useCallback(() => {
     const now = new Date();

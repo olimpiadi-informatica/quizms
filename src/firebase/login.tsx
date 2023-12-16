@@ -7,7 +7,7 @@ import { ErrorBoundary, FallbackProps } from "react-error-boundary";
 
 import Error from "~/ui/components/error";
 import Loading from "~/ui/components/loading";
-import useTime from "~/ui/components/time";
+import { useTime } from "~/ui/components/time";
 
 import { useAuth } from "./hooks";
 
