@@ -291,7 +291,7 @@ function Table({ school, contest }: { school: School; contest: Contest }) {
         rowSelection="single"
         onCellEditRequest={onCellEditRequest}
         enableBrowserTooltips={true}
-        // localeText={agGridLocaleIT}
+        localeText={agGridLocaleIT}
         onGridReady={(ev) => {
           ev.api.setFilterModel({
             disabled: {
@@ -319,9 +319,13 @@ function columnDefinition(
     xl: 250,
   };
 
-  const defaultOptions = {
+  const defaultOptions: ColDef = {
     sortable: true,
     filter: true,
+    filterParams: {
+      buttons: ["reset"],
+      closeOnApply: true,
+    },
     resizable: true,
     editable,
   };
