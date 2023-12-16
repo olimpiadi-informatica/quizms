@@ -227,6 +227,10 @@ function Table({ school, contest }: { school: School; contest: Contest }) {
     await setStudent(student);
   };
 
+  const defaultVariant = contest.hasVariants
+    ? variants.find((v) => v.contest === contest.id && ["1", "2"].includes(v.id))!.id
+    : undefined; // TODO: ugly hack
+
   const allStudents = [
     ...students.filter((s) => s.school === school.id),
     ...(editable
@@ -235,6 +239,7 @@ function Table({ school, contest }: { school: School; contest: Contest }) {
             id: newStudentId.current,
             contest: contest.id,
             school: school.id,
+            variant: defaultVariant,
             createdAt: new Date(),
             answers: {},
           } as Student,

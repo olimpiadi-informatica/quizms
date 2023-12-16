@@ -32,9 +32,8 @@ export function studentHash(student: Student) {
     student.personalInformation?.classYear,
     student.personalInformation?.classSection,
     student.token,
-  ]
-    .join("$")
-    .toLowerCase(); // TODO: update firebase rules
+  ].join("$");
+  // .toLowerCase(); // TODO: update firebase rules
 
   return [...sha256(joined)]
     .map((b) => b.toString(16).padStart(2, "0"))
