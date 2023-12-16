@@ -1,6 +1,5 @@
 import React, { Suspense, useEffect, useRef, useState } from "react";
 
-import { sha256 } from "@noble/hashes/sha256";
 import classNames from "classnames";
 import {
   addMinutes,
@@ -42,7 +41,7 @@ import { useCollection } from "~/firebase/hooks";
 import { useDb } from "~/firebase/login";
 import { Contest } from "~/models/contest";
 import { School } from "~/models/school";
-import { Student, StudentRestore } from "~/models/student";
+import { StudentRestore, studentHash } from "~/models/student";
 import Loading from "~/ui/components/loading";
 import useTime from "~/ui/components/time";
 import { hash, randomToken } from "~/utils/random";
@@ -155,23 +154,6 @@ async function generateToken(now: Date, db: Firestore, prevSchool: School) {
   });
 
   return school;
-}
-
-function studentHash(student: Student) {
-  return [
-    ...sha256(
-      [
-        student.personalInformation!.name,
-        student.personalInformation!.surname,
-        student.personalInformation!.classYear,
-        student.personalInformation!.classSection,
-        student.token,
-      ].join("$"),
-    ),
-  ]
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("")
-    .toUpperCase();
 }
 
 function StopContest({ school }: { school: School }) {
