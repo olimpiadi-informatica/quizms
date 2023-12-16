@@ -227,7 +227,7 @@ function Table({ school, contest }: { school: School; contest: Contest }) {
     await setStudent(student);
   };
 
-  const defaultVariant = contest.hasVariants
+  const defaultVariant = !contest.hasVariants
     ? variants.find((v) => v.contest === contest.id && ["1", "2"].includes(v.id))!.id
     : undefined; // TODO: ugly hack
 
