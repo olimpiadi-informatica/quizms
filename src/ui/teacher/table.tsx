@@ -339,10 +339,6 @@ function columnDefinition(
   const defaultOptions: ColDef = {
     sortable: true,
     filter: true,
-    filterParams: {
-      buttons: ["reset"],
-      closeOnApply: true,
-    },
     resizable: true,
     editable,
   };

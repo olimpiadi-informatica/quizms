@@ -41,7 +41,7 @@ export const agGridLocaleIT = {
 
   // Filter Buttons
   // applyFilter: "Apply",
-  resetFilter: "Ripristina",
+  // resetFilter: "Ripristina",
   // clearFilter: "Clear",
   // cancelFilter: "Cancel",
 
