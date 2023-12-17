@@ -4,12 +4,20 @@ import { format, join } from "node:path";
 import { cert, deleteApp, initializeApp } from "firebase-admin/app";
 import { CollectionReference, getFirestore } from "firebase-admin/firestore";
 
-import { schoolConverter, studentConverter, submissionConverter } from "~/firebase/convertersAdmin";
+import {
+  schemaDocConverter,
+  schoolConverter,
+  solutionConverter,
+  studentConverter,
+  submissionConverter,
+} from "~/firebase/convertersAdmin";
 
 type ExportOptions = {
   schools?: boolean;
+  solutions?: boolean;
   students?: boolean;
   submissions?: boolean;
+  variants?: boolean;
 };
 
 export default async function exportContests(options: ExportOptions) {
@@ -31,9 +39,17 @@ export default async function exportContests(options: ExportOptions) {
     const ref = db.collection("schools").withConverter(schoolConverter);
     await exportCollection(ref, "schools", dir);
   }
+  if (options.solutions) {
+    const ref = db.collection("solutions").withConverter(solutionConverter);
+    await exportCollection(ref, "solutions", dir);
+  }
   if (options.submissions) {
     const ref = db.collection("submissions").withConverter(submissionConverter);
     await exportCollection(ref, "submissions", dir);
+  }
+  if (options.variants) {
+    const ref = db.collection("schema").withConverter(schemaDocConverter);
+    await exportCollection(ref, "variants", dir);
   }
 
   await deleteApp(app);
