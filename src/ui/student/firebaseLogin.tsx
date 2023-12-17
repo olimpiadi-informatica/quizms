@@ -388,7 +388,7 @@ async function createStudent(db: Firestore, student: Student) {
     throw new InvalidTokenError("Codice non valido");
   }
   const schoolMappingData = schoolMapping.data();
-  if (schoolMappingData.contestId != student.contest) {
+  if (schoolMappingData.contestId !== student.contest) {
     throw new InvalidTokenError("Il codice inserito non corrisponde alla gara selezionata");
   }
   student.school = schoolMappingData.school;

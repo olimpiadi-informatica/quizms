@@ -66,9 +66,9 @@ export function TeacherTable() {
                 <a
                   role="tab"
                   key={school.id}
-                  className={classNames("tab", i == selectedSchool && "tab-active")}
+                  className={classNames("tab", i === selectedSchool && "tab-active")}
                   onClick={() => setSelectedSchool(i)}>
-                  {contests.find((c) => c.id == school.contestId)!.name}
+                  {contests.find((c) => c.id === school.contestId)!.name}
                 </a>
               ))}
             </div>

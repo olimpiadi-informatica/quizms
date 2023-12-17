@@ -43,7 +43,7 @@ export function shuffleProblems(program: Program, variant: string) {
       if (isQuizmsComponent("Problem", comp) && is.objectExpression(props)) {
         id++;
         for (const prop of props.properties) {
-          if (getPropertyKey(prop) == "id") {
+          if (getPropertyKey(prop) === "id") {
             setPropertyVal(prop, id);
           }
         }
@@ -71,7 +71,7 @@ export function getAnswers(program: Program, remove: boolean) {
 
         if (is.objectExpression(props)) {
           for (const prop of props.properties) {
-            if (is.property(prop) && is.literal(prop.key) && prop.key.value == "points") {
+            if (is.property(prop) && is.literal(prop.key) && prop.key.value === "points") {
               if (is.arrayExpression(prop.value)) {
                 [pointsCorrect, pointsBlank, pointsWrong] = prop.value.elements.map((x) =>
                   x && "value" in x ? Number(x.value) : 0,
@@ -100,7 +100,7 @@ export function getAnswers(program: Program, remove: boolean) {
           schema[probId.toString()][subId.toString()].options!.push(answerLabel);
         else schema[probId.toString()][subId.toString()].options = [answerLabel];
         for (const prop of props.properties) {
-          if (getPropertyKey(prop) == "correct" && getPropertyVal(prop) === true) {
+          if (getPropertyKey(prop) === "correct" && getPropertyVal(prop) === true) {
             answers[probId.toString()][subId.toString()] = answerLabel;
           }
         }
@@ -110,7 +110,7 @@ export function getAnswers(program: Program, remove: boolean) {
       }
       if (isQuizmsComponent("OpenAnswer", comp) && is.objectExpression(props)) {
         for (const prop of props.properties) {
-          if (getPropertyKey(prop) == "correct") {
+          if (getPropertyKey(prop) === "correct") {
             const correct = getPropertyVal(prop);
             if (typeof correct === "string") {
               answers[probId.toString()][subId.toString()] = correct;
@@ -131,7 +131,7 @@ export function getAnswers(program: Program, remove: boolean) {
   const flatSchema: Schema = {};
   for (const probId in answers) {
     for (const subId in answers[probId]) {
-      const id = size(answers[probId]) == 1 ? `${probId}` : `${probId}.${subId}`;
+      const id = size(answers[probId]) === 1 ? `${probId}` : `${probId}.${subId}`;
       flatAnswers[id] = answers[probId][subId];
       flatSchema[id] = schema[probId][subId];
       flatSchema[id].id = id;

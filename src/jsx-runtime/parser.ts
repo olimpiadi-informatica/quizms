@@ -37,7 +37,7 @@ export function parseValue(value: any, options: ParseOptions): Expression {
   if (value === undefined || value === Number.POSITIVE_INFINITY || Number.isNaN(value)) {
     return b.identifier(String(value));
   }
-  if (value == null || typeof value === "string" || typeof value === "boolean") {
+  if (value === null || typeof value === "string" || typeof value === "boolean") {
     return b.literal(value);
   }
   if (typeof value === "bigint") {
@@ -117,7 +117,7 @@ export function parseValue(value: any, options: ParseOptions): Expression {
       ),
     );
 
-    if (Object.getPrototypeOf(value) == null) {
+    if (Object.getPrototypeOf(value) === null) {
       properties.unshift(b.property("init", b.identifier("__proto__"), b.literal(null)));
     }
     return b.objectExpression(properties);

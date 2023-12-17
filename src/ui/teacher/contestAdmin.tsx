@@ -255,7 +255,7 @@ function StudentRestoreButton({ studentRestore }: { studentRestore: StudentResto
 
   const approve = async () => {
     for (const request of studentRestore) {
-      if (code == String(hash(request.id) % 1000).padStart(3, "0")) {
+      if (code === String(hash(request.id) % 1000).padStart(3, "0")) {
         const q = query(
           collection(db, "studentMappingUid"),
           where("studentId", "==", request.studentId),
@@ -461,7 +461,7 @@ export function ContestsAdminPage() {
               <a
                 role="tab"
                 key={school.id}
-                className={classNames("tab", i == selectedContest && "tab-active")}
+                className={classNames("tab", i === selectedContest && "tab-active")}
                 onClick={() => setSelectedContest(i)}>
                 {contests.find((contest) => contest.id === schools[i].contestId)!.name}
               </a>
@@ -469,13 +469,13 @@ export function ContestsAdminPage() {
           </div>
         </div>
       </div>
-      {selectedContest != -1 && (
+      {selectedContest !== -1 && (
         <ContestAdmin
           school={schools[selectedContest]}
           contest={contests.find((contest) => contest.id === schools[selectedContest].contestId)!}
         />
       )}
-      {selectedContest == -1 && (
+      {selectedContest === -1 && (
         <div className="flex h-full flex-col items-center justify-center">
           Nessuna gara selezionata.
         </div>

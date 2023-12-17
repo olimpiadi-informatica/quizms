@@ -14,10 +14,10 @@ export default async function loadGenConfig(configPath: string) {
   for (const contestId of Object.keys(configJson)) {
     const contest = configJson[contestId];
     contest.id = contestId;
-    if (typeof contest.variantIds == "string") {
+    if (typeof contest.variantIds === "string") {
       contest.variantIds = await readJson(contest.variantIds);
     }
-    if (typeof contest.pdfVariantIds == "string") {
+    if (typeof contest.pdfVariantIds === "string") {
       contest.pdfVariantIds = await readJson(contest.pdfVariantIds);
     }
   }
