@@ -53,7 +53,7 @@ export function TeacherTable() {
       if (school !== -1) setSelectedSchool(school);
       window.location.hash = "";
     }
-  }, []);
+  }, [schools]);
 
   const contest = contests.find((c) => c.id === schools[selectedSchool].contestId)!;
   return (
