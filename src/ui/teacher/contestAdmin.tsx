@@ -25,7 +25,6 @@ import {
   writeBatch,
 } from "firebase/firestore";
 import { groupBy, range } from "lodash-es";
-import { PDFDocument } from "pdf-lib";
 
 import {
   pdfConverter,
@@ -102,7 +101,7 @@ function StartContestButton({ school }: { school: School }) {
 }
 
 async function generateToken(now: Date, db: Firestore, prevSchool: School) {
-  const token = randomToken();
+  const token = await randomToken();
   const startingTime = roundToNearestMinutes(addSeconds(now, 210 /* 3.5 minutes */));
 
   const school: School = {
@@ -419,6 +418,7 @@ function DownloadPdfButton({ school, contest }: { school: School; contest: Conte
     ).withConverter(pdfConverter);
 
     const statements = await getDocs(q);
+    const { PDFDocument } = await import("pdf-lib");
     const pdf = await PDFDocument.create();
     for (const statement of statements.docs) {
       const otherPdf = await PDFDocument.load(statement.data().statement);

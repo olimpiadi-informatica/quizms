@@ -1,8 +1,6 @@
 import { sha256 } from "@noble/hashes/sha256";
 import { RandomGenerator, unsafeUniformIntDistribution, xoroshiro128plus } from "pure-rand";
 
-import { wordlist } from "./wordlist";
-
 export class Rng {
   private readonly rng: RandomGenerator;
 
@@ -32,7 +30,8 @@ function getRandomInt(max: number) {
   return Math.floor(Math.random() * max);
 }
 
-export function randomToken(): string {
+export async function randomToken(): Promise<string> {
+  const { wordlist } = await import("./wordlist");
   const tokens = [];
   for (let i = 0; i < 3; i++) {
     tokens.push(wordlist[getRandomInt(wordlist.length)]);
