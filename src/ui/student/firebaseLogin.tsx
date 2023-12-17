@@ -8,7 +8,6 @@ import React, {
   useState,
 } from "react";
 
-import classNames from "classnames";
 import { addMilliseconds, addMinutes, formatISO } from "date-fns";
 import { FirebaseOptions } from "firebase/app";
 import { getAuth, signOut } from "firebase/auth";
@@ -40,6 +39,7 @@ import { FirebaseLogin, useDb } from "~/firebase/login";
 import { parsePersonalInformation } from "~/models/contest";
 import { Student, studentHash } from "~/models/student";
 import { RemoteContest } from "~/ui";
+import { Button } from "~/ui/components/button";
 import Loading from "~/ui/components/loading";
 import { useTime, useUpdateAt } from "~/ui/components/time";
 import Timer from "~/ui/components/timer";
@@ -217,15 +217,9 @@ function StudentLogin({
               </div>
               <span className="pt-1 text-error">{error?.message ?? <>&nbsp;</>}</span>
               <div className="flex justify-center pt-3">
-                <button
-                  className="btn btn-success"
-                  onClick={start}
-                  type="button"
-                  disabled={loading || !completed}>
-                  <span
-                    className={classNames("loading loading-spinner", !loading && "hidden")}></span>
+                <Button className="btn-success" onClick={start} disabled={completed}>
                   Inizia
-                </button>
+                </Button>
               </div>
             </>
           )}

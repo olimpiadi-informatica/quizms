@@ -41,6 +41,7 @@ import { useDb } from "~/firebase/login";
 import { Contest } from "~/models/contest";
 import { School } from "~/models/school";
 import { StudentRestore, studentHash } from "~/models/student";
+import { Button, LoadingButtons } from "~/ui/components/button";
 import Loading from "~/ui/components/loading";
 import Modal from "~/ui/components/modal";
 import { useTime, useUpdateAt } from "~/ui/components/time";
@@ -65,19 +66,16 @@ function StartContestButton({ school }: { school: School }) {
   const { setSchool } = useTeacher();
 
   const modalRef = useRef<HTMLDialogElement>(null);
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error>();
   const getNow = useTime();
 
   const start = async () => {
     try {
-      setLoading(true);
       const newSchool = await generateToken(getNow(), db, school);
       await setSchool(newSchool);
     } catch (e) {
       setError(e as Error);
     }
-    setLoading(false);
   };
 
   return (
@@ -86,18 +84,17 @@ function StartContestButton({ school }: { school: School }) {
         Inizia prova online
       </button>
       <Modal ref={modalRef} title="Conferma">
-        <p>Sei sicuro di voler iniziare il contest?</p>
+        <p>Sei sicuro di voler iniziare la gara?</p>
         <span className="pt-1 text-error">
           {error?.message ? `Errore: ${error?.message}` : <>&nbsp;</>}
         </span>
         <div className="mt-3 flex flex-row justify-center gap-3">
-          <button className="btn btn-warning" onClick={start} disabled={loading}>
-            <span className={classNames("loading loading-spinner", !loading && "hidden")}></span>
-            Conferma
-          </button>
-          <button className="btn" disabled={loading}>
-            Annulla
-          </button>
+          <LoadingButtons>
+            <Button className="btn-warning" onClick={start}>
+              Conferma
+            </Button>
+            <Button>Annulla</Button>
+          </LoadingButtons>
         </div>
       </Modal>
     </>
@@ -139,12 +136,9 @@ function StopContestButton({ school }: { school: School }) {
   const { setSchool } = useTeacher();
   const modalRef = useRef<HTMLDialogElement>(null);
 
-  const [loading, setLoading] = useState(false);
   const db = useDb();
 
   const undoContestStart = async () => {
-    setLoading(true);
-
     // delete all student connected to token
     const q = query(
       collection(db, "students"),
@@ -176,8 +170,6 @@ function StopContestButton({ school }: { school: School }) {
     );
 
     await setSchool({ ...school, token: undefined, startingTime: undefined });
-
-    setLoading(false);
   };
 
   return (
@@ -188,13 +180,12 @@ function StopContestButton({ school }: { school: School }) {
       <Modal ref={modalRef} title="Conferma">
         <p>Sei sicuro di voler annullare l&apos;inizio della gara?</p>
         <div className="mt-3 flex flex-row justify-center gap-3">
-          <button className="btn btn-warning" onClick={undoContestStart} disabled={loading}>
-            <span className={classNames("loading loading-spinner", !loading && "hidden")}></span>
-            Conferma
-          </button>
-          <button className="btn" disabled={loading}>
-            Annulla
-          </button>
+          <LoadingButtons>
+            <Button className="btn-warning" onClick={undoContestStart}>
+              Conferma
+            </Button>
+            <Button>Annulla</Button>
+          </LoadingButtons>
         </div>
       </Modal>
     </>
@@ -257,14 +248,12 @@ function StudentRestoreButton({ studentRestore }: { studentRestore: StudentResto
 
   const modalRef = useRef<HTMLDialogElement>(null);
   const [code, setCode] = useState("");
-  const [loading, setLoading] = useState(false);
 
   const targetCodes = studentRestore.map((request) =>
     String(hash(request.id) % 1000).padStart(3, "0"),
   );
 
   const approve = async () => {
-    setLoading(true);
     for (const request of studentRestore) {
       if (code == String(hash(request.id) % 1000).padStart(3, "0")) {
         const q = query(
@@ -289,17 +278,14 @@ function StudentRestoreButton({ studentRestore }: { studentRestore: StudentResto
         await batch.commit();
       }
     }
-    setLoading(false);
 
-    await reject();
+    reject();
   };
 
-  const reject = async () => {
-    await Promise.all(
-      studentRestore.map((request) => {
-        deleteDoc(doc(db, "studentRestore", request.id));
-      }),
-    );
+  const reject = () => {
+    studentRestore.map((request) => {
+      void deleteDoc(doc(db, "studentRestore", request.id));
+    });
     modalRef.current?.close();
   };
 
@@ -326,17 +312,12 @@ function StudentRestoreButton({ studentRestore }: { studentRestore: StudentResto
           />
         </label>
         <div className="mt-3 flex flex-row justify-center gap-3">
-          <button
-            className="btn btn-error"
-            onClick={approve}
-            disabled={!targetCodes.includes(code)}
-            type="button">
-            <span className={classNames("loading loading-spinner", !loading && "hidden")} />
-            Approva
-          </button>
-          <button className="btn" onClick={reject}>
-            Rigetta
-          </button>
+          <LoadingButtons>
+            <Button className="btn-error" onClick={approve} disabled={!targetCodes.includes(code)}>
+              Approva
+            </Button>
+            <Button onClick={reject}>Rigetta</Button>
+          </LoadingButtons>
         </div>
       </Modal>
     </>
@@ -430,11 +411,8 @@ function ContestAdmin({ school, contest }: { school: School; contest: Contest })
 
 function DownloadPdfButton({ school, contest }: { school: School; contest: Contest }) {
   const db = useDb();
-  const [loading, setLoading] = useState(false);
 
   const onClick = async () => {
-    setLoading(true);
-
     const q = query(
       collection(db, "pdfs"),
       where(documentId(), "in", school.pdfVariants),
@@ -461,15 +439,12 @@ function DownloadPdfButton({ school, contest }: { school: School; contest: Conte
 
     const blob = new Blob([await pdf.save()]);
     saveAs(blob, `${contest.id}-${school.schoolId}.pdf`);
-
-    setLoading(false);
   };
 
   return (
-    <button className="btn btn-warning" onClick={onClick} disabled={loading}>
-      <span className={classNames("loading loading-spinner", !loading && "hidden")}></span>
+    <Button className="btn-warning" onClick={onClick}>
       Scarica testo per prova cartacea
-    </button>
+    </Button>
   );
 }
 

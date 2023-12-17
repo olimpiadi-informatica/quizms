@@ -1,6 +1,5 @@
 import React, { ReactNode, useCallback, useState } from "react";
 
-import classNames from "classnames";
 import { FirebaseOptions } from "firebase/app";
 import { User, getAuth, signOut } from "firebase/auth";
 
@@ -13,6 +12,7 @@ import {
 } from "~/firebase/converters";
 import { useCollection, useSignInWithPassword } from "~/firebase/hooks";
 import { FirebaseLogin, useDb } from "~/firebase/login";
+import { Button } from "~/ui/components/button";
 
 import { Layout } from "./layout";
 import { TeacherProvider } from "./provider";
@@ -35,7 +35,7 @@ function TeacherLogin({ children }: { children: ReactNode }) {
   const db = useDb();
   const auth = getAuth(db.app);
 
-  const { signInWithPassword, loading, error } = useSignInWithPassword();
+  const { signInWithPassword, error } = useSignInWithPassword();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const signIn = () => signInWithPassword(email, password);
@@ -75,10 +75,9 @@ function TeacherLogin({ children }: { children: ReactNode }) {
         </div>
         <span className="pt-1 text-error">{error?.message ?? <>&nbsp;</>}</span>
         <div className="flex justify-center pt-3">
-          <button className="btn btn-success" onClick={signIn} type="button">
-            <span className={classNames("loading loading-spinner", !loading && "hidden")}></span>
+          <Button className="btn-success" onClick={signIn}>
             Accedi
-          </button>
+          </Button>
         </div>
       </form>
     </div>

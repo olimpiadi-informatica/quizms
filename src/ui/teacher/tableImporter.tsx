@@ -9,6 +9,7 @@ import { Contest } from "~/models/contest";
 import { School } from "~/models/school";
 import { Student, studentSchema } from "~/models/student";
 import { SchemaDoc } from "~/models/variant";
+import { Button } from "~/ui/components/button";
 import Modal from "~/ui/components/modal";
 import { useTeacher } from "~/ui/teacher/provider";
 import { randomId } from "~/utils/random";
@@ -34,7 +35,6 @@ const ImportModal = forwardRef(function ImportModal(
 
   const [file, setFile] = useState<string>();
   const [error, setError] = useState<Error>();
-  const [loading, setLoading] = useState(false);
 
   const { variants, setStudent } = useTeacher();
 
@@ -50,7 +50,6 @@ const ImportModal = forwardRef(function ImportModal(
 
   const onClick = async () => {
     setError(undefined);
-    setLoading(true);
     try {
       await importStudents(file ?? "", contest, variants, school, setStudent);
       if (ref && "current" in ref) {
@@ -63,7 +62,6 @@ const ImportModal = forwardRef(function ImportModal(
         inputRef.current.value = "";
       }
     }
-    setLoading(false);
   };
 
   return (
@@ -106,11 +104,9 @@ const ImportModal = forwardRef(function ImportModal(
             accept="text/csv"
             onChange={(e) => onChange(e.target.files?.[0])}
           />
-          <button className="btn btn-primary" type="button" onClick={onClick} disabled={!file}>
-            {loading && <span className="loading loading-spinner" />}
-            {!loading && <ArrowUpFromLine />}
+          <Button className="btn-primary" icon={ArrowUpFromLine} onClick={onClick} disabled={!file}>
             Importa
-          </button>
+          </Button>
         </div>
         <div className="text-error">{error?.message}</div>
       </div>
