@@ -4,20 +4,17 @@ import { ReactNode } from "react";
 import classNames from "classnames";
 
 type ContextProps = {
-  loading?: string;
-  setLoading: (value?: string) => void;
+  contextLoading?: string;
+  setContextLoading?: (value?: string) => void;
 };
 
-const LoadingButtonsContext = createContext({
-  loading: undefined,
-  setLoading: () => {},
-} as ContextProps);
+const LoadingButtonsContext = createContext<ContextProps>({});
 
 export function LoadingButtons({ children }: { children: ReactNode }) {
-  const [loading, setLoading] = useState<string>();
+  const [contextLoading, setContextLoading] = useState<string>();
 
   return (
-    <LoadingButtonsContext.Provider value={{ loading, setLoading }}>
+    <LoadingButtonsContext.Provider value={{ contextLoading, setContextLoading }}>
       {children}
     </LoadingButtonsContext.Provider>
   );
@@ -32,7 +29,14 @@ type ButtonProps = {
 };
 
 export function Button({ className, icon: Icon, onClick, disabled, children }: ButtonProps) {
-  const { loading, setLoading } = useContext(LoadingButtonsContext);
+  const { contextLoading, setContextLoading } = useContext(LoadingButtonsContext);
+  const [localLoading, setLocalLoading] = useState<string>();
+
+  const loading = contextLoading ?? localLoading;
+
+  const setLoading = (value?: string) => {
+    (setContextLoading ?? setLocalLoading)(value);
+  };
 
   const id = useId();
   const spinning = loading === id;
@@ -52,6 +56,7 @@ export function Button({ className, icon: Icon, onClick, disabled, children }: B
     <button
       className={classNames("btn", className)}
       onClick={handleClick}
+      type={onClick ? "button" : "submit"}
       disabled={!!loading || disabled}>
       {spinning && <span className="loading loading-spinner" />}
       {!spinning && Icon && <Icon />}

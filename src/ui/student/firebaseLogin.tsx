@@ -217,7 +217,7 @@ function StudentLogin({
               </div>
               <span className="pt-1 text-error">{error?.message ?? <>&nbsp;</>}</span>
               <div className="flex justify-center pt-3">
-                <Button className="btn-success" onClick={start} disabled={completed}>
+                <Button className="btn-success" onClick={start} disabled={!completed}>
                   Inizia
                 </Button>
               </div>
