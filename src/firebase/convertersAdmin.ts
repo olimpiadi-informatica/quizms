@@ -19,7 +19,7 @@ import z, {
 
 import { Contest, contestSchema } from "~/models/contest";
 import { Pdf, pdfSchema } from "~/models/pdf";
-import { School, schoolSchema } from "~/models/school";
+import { School, SchoolMapping, schoolMappingSchema, schoolSchema } from "~/models/school";
 import { Solution, solutionSchema } from "~/models/solution";
 import { Student, studentSchema } from "~/models/student";
 import { Submission, submissionSchema } from "~/models/submission";
@@ -94,6 +94,11 @@ export const contestConverter: FirestoreDataConverter<Contest> = {
 export const schoolConverter: FirestoreDataConverter<School> = {
   toFirestore: (data) => convertToFirestore(data),
   fromFirestore: (snapshot) => parse(schoolSchema, snapshot),
+};
+
+export const schoolMappingConverter: FirestoreDataConverter<SchoolMapping> = {
+  toFirestore: (data) => convertToFirestore(data),
+  fromFirestore: (snapshot) => parse(schoolMappingSchema, snapshot),
 };
 
 export const solutionConverter: FirestoreDataConverter<Solution> = {
