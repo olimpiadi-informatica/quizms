@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 
-import { BlockMath, InlineMath } from "react-katex";
+import katex from "katex";
 
 type MathProps = {
   display?: boolean;
@@ -8,9 +8,13 @@ type MathProps = {
 };
 
 export default function Math({ display, children }: MathProps) {
-  if (display) {
-    return <BlockMath math={children} />;
-  } else {
-    return <InlineMath math={children} />;
-  }
+  const ref = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    if (ref.current) {
+      katex.render(children, ref.current, { displayMode: display });
+    }
+  }, [ref, children, display]);
+
+  return <span ref={ref} />;
 }
