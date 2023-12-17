@@ -71,7 +71,7 @@ export function Layout({ children }: { children: ReactNode }) {
             ) : (
               <button
                 className="btn btn-success btn-sm h-full"
-                disabled={terminated}
+                disabled={terminated || !school.startingTime}
                 onClick={() => submitRef.current?.showModal()}>
                 Termina
               </button>

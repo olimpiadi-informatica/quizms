@@ -7,7 +7,7 @@ import React, {
   useState,
 } from "react";
 
-import { add } from "date-fns";
+import { addMinutes } from "date-fns";
 import { isFunction, range } from "lodash-es";
 
 import { Contest } from "~/models/contest";
@@ -43,7 +43,7 @@ export function NoAuth({
     (value) => (value !== "undefined" ? new Date(JSON.parse(value)) : undefined),
   );
   const endTime = useMemo(
-    () => startTime && add(startTime, { minutes: duration }),
+    () => startTime && addMinutes(startTime, duration),
     [startTime, duration],
   );
   const [student, setStudent] = useLocalStorage<Student>("student", {
