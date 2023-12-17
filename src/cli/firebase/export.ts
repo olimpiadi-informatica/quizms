@@ -7,6 +7,7 @@ import { CollectionReference, getFirestore } from "firebase-admin/firestore";
 import {
   schemaDocConverter,
   schoolConverter,
+  schoolMappingConverter,
   solutionConverter,
   studentConverter,
   submissionConverter,
@@ -17,6 +18,7 @@ type ExportOptions = {
   solutions?: boolean;
   students?: boolean;
   submissions?: boolean;
+  tokens?: boolean;
   variants?: boolean;
 };
 
@@ -46,6 +48,10 @@ export default async function exportContests(options: ExportOptions) {
   if (options.submissions) {
     const ref = db.collection("submissions").withConverter(submissionConverter);
     await exportCollection(ref, "submissions", dir);
+  }
+  if (options.tokens) {
+    const ref = db.collection("schoolMapping").withConverter(schoolMappingConverter);
+    await exportCollection(ref, "tokens", dir);
   }
   if (options.variants) {
     const ref = db.collection("schema").withConverter(schemaDocConverter);
