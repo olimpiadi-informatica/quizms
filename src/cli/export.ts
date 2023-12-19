@@ -9,7 +9,6 @@ export type ExportOptions = {
   dir: string;
   outDir: string;
   training?: boolean;
-  variant?: string;
 };
 
 export default async function staticExport(options: ExportOptions): Promise<void> {
@@ -17,10 +16,6 @@ export default async function staticExport(options: ExportOptions): Promise<void
     process.env.QUIZMS_MODE = "training";
   } else {
     process.env.QUIZMS_MODE = "contest";
-  }
-
-  if (options.variant) {
-    process.env.QUIZMS_VARIANT = options.variant;
   }
 
   const pages = await glob("src/**/index.html", {

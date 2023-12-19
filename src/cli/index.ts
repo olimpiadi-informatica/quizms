@@ -32,7 +32,6 @@ function main() {
     .argument("[directory]", "The directory of the contest.", cwd())
     .option("-d, --outDir <directory>", "The directory to output the bundle.", "dist")
     .option("-t, --training", "Embed the questions and the answers in the export.")
-    .option("-v, --variant <variant>", "The seed used to generate the variant of the contest.")
     .action((dir, options) => void staticExport({ dir, ...options }));
 
   program
