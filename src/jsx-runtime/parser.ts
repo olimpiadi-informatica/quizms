@@ -139,7 +139,7 @@ export function shuffleContest(
     ],
   };
 
-  const tree = entry() as ExpressionWrapper;
+  const tree = entry();
   const program = b.program([
     b.exportDefaultDeclaration(
       b.functionDeclaration(

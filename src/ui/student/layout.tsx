@@ -60,7 +60,7 @@ export function Layout({ children }: { children: ReactNode }) {
             {terminated || !school.startingTime || !contest.duration ? (
               <span className="font-mono">00:00</span>
             ) : (
-              <Timer startTime={school.startingTime!} duration={contest.duration!} />
+              <Timer startTime={school.startingTime} duration={contest.duration} />
             )}
           </div>
           <div className="h-full flex-none py-0.5">
