@@ -36,9 +36,6 @@ import { randomId } from "~/utils/random";
 import { useTeacher } from "./provider";
 import ImportModal from "./tableImporter";
 
-import "ag-grid-community/styles/ag-grid.css";
-import "ag-grid-community/styles/ag-theme-quartz.css";
-
 const AgGridReact = lazy(() => import("ag-grid-react").then((m) => ({ default: m.AgGridReact })));
 
 export function TeacherTable() {

@@ -9,15 +9,20 @@ export function useTime() {
   return () => addMilliseconds(new Date(), data);
 
   async function fetcher(url: string) {
-    const resp = await fetch(url);
-    const localTime = Date.now();
+    try {
+      const resp = await fetch(url);
+      if (!resp.ok) return 0;
 
-    if (!resp.ok) throw new Error("Failed to fetch time");
+      const localTime = Date.now();
 
-    const text = await resp.text();
-    const serverTime = Number(text);
+      const text = await resp.text();
+      const serverTime = Number(text);
+      if (isNaN(serverTime)) return 0;
 
-    return serverTime - localTime;
+      return serverTime - localTime;
+    } catch (e) {
+      return 0;
+    }
   }
 }
 
