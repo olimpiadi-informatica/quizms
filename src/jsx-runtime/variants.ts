@@ -1,5 +1,5 @@
 import { Program } from "estree";
-import { is, traverse } from "estree-toolkit";
+import { builders as b, is, traverse } from "estree-toolkit";
 import { Node } from "estree-toolkit/dist/estree";
 import { size } from "lodash-es";
 
@@ -34,6 +34,17 @@ export function shuffleProblems(program: Program, variant: string) {
   traverse(program, {
     CallExpression(path) {
       const node = path.node!;
+      const [comp, props] = node.arguments;
+      if (isQuizmsComponent("Problem", comp) && is.objectExpression(props)) {
+        id++;
+        props.properties.push(b.property("init", b.literal("oldId"), b.literal(id), false));
+      }
+    },
+  });
+  id = 0;
+  traverse(program, {
+    CallExpression(path) {
+      const node = path.node!;
       const [comp, props, ...children] = node.arguments;
       if (isQuizmsComponent("Section", comp)) {
         const rng = new Rng(`b#section#${variant}#${id}`);
@@ -55,7 +66,8 @@ export function shuffleProblems(program: Program, variant: string) {
 export function getAnswers(program: Program, remove: boolean) {
   let probId = 0,
     subId = 0,
-    ansId = 0;
+    ansId = 0,
+    oldProbId: string;
   let [pointsCorrect, pointsBlank, pointsWrong] = [0, 0, 0];
   const answers: Record<string, Record<string, string>> = {};
   const schema: Record<string, Schema> = {};
@@ -77,6 +89,10 @@ export function getAnswers(program: Program, remove: boolean) {
                   x && "value" in x ? Number(x.value) : 0,
                 );
               }
+            } else if (getPropertyKey(prop) == "oldId") {
+              oldProbId = getPropertyVal(
+                prop,
+              ) as string; /* TODO remove from statement and from schema */
             }
           }
         }
@@ -90,6 +106,7 @@ export function getAnswers(program: Program, remove: boolean) {
           pointsCorrect,
           pointsBlank,
           pointsWrong,
+          oldId: oldProbId || probId.toString(),
           blankOption: "-", // TODO
         };
       }
@@ -131,10 +148,13 @@ export function getAnswers(program: Program, remove: boolean) {
   const flatSchema: Schema = {};
   for (const probId in answers) {
     for (const subId in answers[probId]) {
+      const oldProbId = schema[probId][subId].oldId;
       const id = size(answers[probId]) === 1 ? `${probId}` : `${probId}.${subId}`;
+      const oldId = size(answers[probId]) === 1 ? `${oldProbId}` : `${oldProbId}.${subId}`;
       flatAnswers[id] = answers[probId][subId];
       flatSchema[id] = schema[probId][subId];
       flatSchema[id].id = id;
+      flatSchema[id].oldId = oldId;
     }
   }
   return { answers: flatAnswers, schema: flatSchema };

@@ -3,6 +3,7 @@ import z from "zod";
 export const schemaSchema = z.record(
   z.object({
     id: z.string(),
+    oldId: z.string(),
     type: z.enum(["text", "number"]),
     regex: z.instanceof(RegExp).optional(),
     options: z.string().array().nonempty().optional(),
