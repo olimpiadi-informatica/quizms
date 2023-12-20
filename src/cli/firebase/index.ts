@@ -1,6 +1,5 @@
 import { Command } from "commander";
 
-import danger from "./danger";
 import exportContests from "./export";
 import importContests from "./import";
 
@@ -8,11 +7,6 @@ export default function firebaseCommand() {
   const command = new Command("firebase");
 
   command.description("commands to interact with the Firebase database.");
-
-  command
-    .command("danger")
-    .description("dangerous commands to interact with the Firebase database.")
-    .action(() => void danger());
 
   command
     .command("export")
@@ -23,6 +17,7 @@ export default function firebaseCommand() {
     .option("--submissions", "Export the submissions.")
     .option("--tokens", "Export the tokens.")
     .option("--variants", "Export the variants.")
+    .option("--contests", "Export the contests.")
     .action((options) => void exportContests(options));
 
   command

@@ -5,6 +5,7 @@ import { cert, deleteApp, initializeApp } from "firebase-admin/app";
 import { CollectionReference, getFirestore } from "firebase-admin/firestore";
 
 import {
+  contestConverter,
   schemaDocConverter,
   schoolConverter,
   schoolMappingConverter,
@@ -20,6 +21,7 @@ type ExportOptions = {
   submissions?: boolean;
   tokens?: boolean;
   variants?: boolean;
+  contests?: boolean;
 };
 
 export default async function exportContests(options: ExportOptions) {
@@ -56,6 +58,10 @@ export default async function exportContests(options: ExportOptions) {
   if (options.variants) {
     const ref = db.collection("schema").withConverter(schemaDocConverter);
     await exportCollection(ref, "variants", dir);
+  }
+  if (options.contests) {
+    const ref = db.collection("contests").withConverter(contestConverter);
+    await exportCollection(ref, "contests", dir);
   }
 
   await deleteApp(app);
