@@ -1,5 +1,3 @@
-import { Dispatch, SetStateAction } from "react";
-
 import { range } from "lodash-es";
 
 export class Input {
@@ -12,9 +10,13 @@ export class Input {
 
   public readInt = (): number => {
     if (this.index >= this.tokens.length) {
-      throw "Non ci sono abbastanza numeri in input";
+      throw new Error("Non ci sono abbastanza numeri in input");
     }
-    return parseInt(this.tokens[this.index++]);
+    const value = Number(this.tokens[this.index++]);
+    if (isNaN(value)) {
+      throw new Error("Il valore in input non è un numero");
+    }
+    return value;
   };
 
   public readArrayInt = (length: number): number[] => {
@@ -23,17 +25,31 @@ export class Input {
 }
 
 export class Output {
-  private readonly setOutput: Dispatch<SetStateAction<string>>;
+  private readonly MAX_OUTPUT_LENGTH = 3000;
+  private readonly MAX_OUTPUT_LINES = 100;
 
-  constructor(setOutput: Dispatch<SetStateAction<string>>) {
-    this.setOutput = setOutput;
-  }
+  private lineCount = 0;
+  private length = 0;
+
+  constructor(private onOutput: (value: string) => void) {}
 
   public writeAny = (value: any) => {
     if (Array.isArray(value)) {
-      this.setOutput((prev) => `${prev}${value.map(this.writeAny).join(" ")}\n`);
+      value = value.join(" ") + "\n";
     } else {
-      this.setOutput((prev) => `${prev}${value}\n`);
+      value = `${value}\n`;
     }
+
+    this.length += value.length;
+    this.lineCount += 1;
+
+    if (this.lineCount > this.MAX_OUTPUT_LINES) {
+      throw new Error("Output troppo lungo");
+    }
+    if (this.length > this.MAX_OUTPUT_LENGTH) {
+      throw new Error("Output troppo lungo");
+    }
+
+    this.onOutput(value);
   };
 }

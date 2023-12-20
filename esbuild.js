@@ -50,6 +50,7 @@ const uiConfig = {
   platform: "browser",
   splitting: true,
   outdir: "dist",
+  loader: { ".css": "copy" },
 };
 
 /** @type {import("esbuild").BuildOptions} */

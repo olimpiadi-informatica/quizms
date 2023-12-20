@@ -15,10 +15,6 @@ body {
   @apply min-w-[360px];
 }
 
-[display="none"] {
-  @apply hidden;
-}
-
 .katex-mathml {
   @apply select-none;
 }
@@ -47,19 +43,4 @@ body {
 .ag-header-cell,
 .ag-cell {
   --ag-cell-horizontal-padding: 0.5rem;
-}
-
-.blocklyHtmlInput {
-  @apply bg-white;
-}
-
-@media not screen(sm) {
-  .blocklyToolboxDiv {
-    @apply w-10;
-  }
-
-  .blocklyToolboxCategory .blocklyTreeRow {
-    @apply !border-l-[20px];
-    @apply indent-96;
-  }
 }

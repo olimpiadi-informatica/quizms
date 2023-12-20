@@ -1,26 +1,21 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
-import { DisableTopBlocks } from "@blockly/disable-top-blocks";
-import { default as BlocklyCore, BlocklyOptions, WorkspaceSvg } from "blockly";
-import { javascriptGenerator } from "blockly/javascript";
-import locale from "blockly/msg/it";
+import { ToolboxDefinition } from "blockly/core/utils/toolbox";
 import classNames from "classnames";
 import { ArrowDown, FastForward, Pause, Play, RotateCcw, Send, SkipForward } from "lucide-react";
-import { BlocklyWorkspace } from "react-blockly";
 
+import useExecutor from "~/ui/blockly/executor";
+import Loading from "~/ui/components/loading";
 import { Rng } from "~/utils/random";
 
-import "./blocks";
-import useExecutor from "./executor";
 import { Input, Output } from "./io";
-import toolboxConfiguration from "./toolbox.json";
-
-BlocklyCore.setLocale(locale);
+import useIcp from "./workspaceIpc";
 
 type BlocklyProps = {
+  toolbox: ToolboxDefinition;
   initialBlocks?: object;
   example?: string;
-  generateInput: (rng: Rng) => Generator<any>;
+  generator: (rng: Rng) => Generator<any>;
   solution: (input: Input, output: Output) => void;
   debug?: {
     logBlocks?: boolean;
@@ -28,77 +23,36 @@ type BlocklyProps = {
   };
 };
 
-export default function Workspace({ initialBlocks, example, debug }: BlocklyProps) {
-  const workspaceConfiguration: BlocklyOptions = {
-    renderer: "zelos",
-    sounds: false,
-    zoom: {
-      controls: true,
-      startScale: 0.8,
-    },
-    maxInstances: {
-      start: 1,
-    },
-  };
+export default function Workspace({ toolbox, initialBlocks, example, debug }: BlocklyProps) {
+  const [iframe, setIframe] = useState<HTMLIFrameElement | null>(null);
+  const [ready, setReady] = useState(false);
 
+  const [blocks, setBlocks] = useState({});
+  const [code, setCode] = useState("");
   const [input, setInput] = useState(example ?? "");
-  const [workspace, setWorkspace] = useState<WorkspaceSvg>();
-  const [executor, output, terminated] = useExecutor(workspace, input);
-  const [pause, setPause] = useState(false);
 
-  const onReset = useCallback(() => {
-    executor?.reset();
-    setPause(false);
-  }, [executor]);
+  const [step, output, running, highlightedBlock] = useExecutor(code, input);
 
-  const onPlayPause = useCallback(() => {
-    setPause((old) => {
-      if (old) {
-        executor?.pause();
-      } else {
-        executor?.run();
-      }
-      return !old;
-    });
-  }, [executor]);
-
-  const onInputChange = useCallback(
-    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      setInput(e.target.value);
-      executor?.setInput(e.target.value);
-    },
-    [executor],
-  );
-
-  const onWorkspaceChange = useCallback(
-    (workspace: WorkspaceSvg | undefined) => {
-      setWorkspace(workspace);
-      if (workspace) {
-        const js = javascriptGenerator.workspaceToCode(workspace);
-        executor?.setCode(js);
-
-        if (debug?.logJs) {
-          console.info(js);
-        }
-      }
-    },
-    [executor, debug?.logJs],
-  );
-
-  const onJsonChange = useCallback(
-    (json: object) => {
-      if (debug?.logBlocks) {
-        console.info(JSON.stringify(json, null, 2));
-      }
-    },
-    [debug?.logBlocks],
-  );
+  const send = useIcp(iframe?.contentWindow, (data: any) => {
+    if (data.cmd === "init") {
+      send({ cmd: "init", toolbox, debug, initialBlocks });
+      send({ cmd: "input", input: example });
+    } else if (data.cmd === "ready") {
+      setReady(true);
+    } else if (data.cmd === "blocks") {
+      setBlocks(data.blocks);
+      if (debug?.logBlocks) console.log(JSON.stringify(data.blocks, null, 2));
+    } else if (data.cmd === "code") {
+      setCode(data.code);
+      if (debug?.logJs) console.log(data.code);
+    }
+  });
 
   useEffect(() => {
-    if (terminated && pause) {
-      onPlayPause();
-    }
-  }, [terminated, pause, onPlayPause]);
+    send({ cmd: "highlight", highlightedBlock });
+  }, [highlightedBlock]);
+
+  const reset = () => {};
 
   return (
     <div className="relative inset-y-0 left-1/2 mb-5 w-screen -translate-x-1/2 overflow-x-hidden px-4 sm:px-8">
@@ -109,38 +63,30 @@ export default function Workspace({ initialBlocks, example, debug }: BlocklyProp
               <div
                 className={classNames(
                   "btn btn-info h-full w-full rounded-[inherit]",
-                  terminated && "btn-disabled",
+                  !running && "btn-disabled",
                 )}>
                 <label className="swap swap-rotate h-full w-full">
-                  <input
-                    type="checkbox"
-                    disabled={terminated}
-                    checked={pause}
-                    onChange={onPlayPause}
-                  />
+                  <input type="checkbox" disabled={!running} checked={false} onChange={() => {}} />
                   <Pause className="swap-on h-6 w-6" />
                   <Play className="swap-off h-6 w-6" />
                 </label>
               </div>
             </div>
             <div className="join-item tooltip" data-tip="Esegui un blocco">
-              <button
-                className="btn btn-info rounded-[inherit]"
-                disabled={terminated}
-                onClick={() => executor?.step()}>
+              <button className="btn btn-info rounded-[inherit]" disabled={!running} onClick={step}>
                 <SkipForward className="h-6 w-6" />
               </button>
             </div>
             <div className="join-item tooltip" data-tip="Esegui fino alla fine">
               <button
                 className="btn btn-info rounded-[inherit]"
-                disabled={terminated}
-                onClick={() => executor?.runAll()}>
+                disabled={!running}
+                onClick={() => {}}>
                 <FastForward className="h-6 w-6" />
               </button>
             </div>
             <div className="join-item tooltip" data-tip="Esegui da capo">
-              <button className="btn btn-info rounded-[inherit]" onClick={onReset}>
+              <button className="btn btn-info rounded-[inherit]" onClick={() => {}}>
                 <RotateCcw className="h-6 w-6" />
               </button>
             </div>
@@ -151,19 +97,17 @@ export default function Workspace({ initialBlocks, example, debug }: BlocklyProp
             </button>
           </div>
         </div>
-        <div className="overflow-hidden rounded-xl border-2 border-[#c6c6c6] md:order-first lg:row-span-2">
-          <BlocklyWorkspace
-            onInject={(workspace) => {
-              workspace.addChangeListener(BlocklyCore.Events.disableOrphans);
-              new DisableTopBlocks().init();
-            }}
-            toolboxConfiguration={toolboxConfiguration}
-            workspaceConfiguration={workspaceConfiguration}
-            onWorkspaceChange={onWorkspaceChange}
-            initialJson={initialBlocks}
-            onJsonChange={onJsonChange}
-            className="h-[32rem] max-h-[calc(100vh-6rem)] border-0 text-[#1f2937]"
+        <div className="relative h-[calc(100vh-8rem)] max-h-[640px] w-full overflow-hidden rounded-xl border-2 border-[#c6c6c6] md:order-first lg:row-span-2">
+          <iframe
+            ref={setIframe}
+            src={import("./workspaceEditor") as any}
+            className="h-full w-full"
           />
+          {!ready && (
+            <div className="absolute inset-0 z-50 bg-white text-slate-700">
+              <Loading />
+            </div>
+          )}
         </div>
         <div className="flex flex-col md:col-span-2 lg:col-span-1">
           <textarea
@@ -172,7 +116,7 @@ export default function Workspace({ initialBlocks, example, debug }: BlocklyProp
             placeholder="Input"
             maxLength={2000}
             value={input}
-            onChange={onInputChange}
+            onChange={(e) => setInput(e.target.value)}
           />
           <div className="divider-horizontall divider">
             <ArrowDown size={72} />

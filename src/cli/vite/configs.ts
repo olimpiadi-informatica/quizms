@@ -7,6 +7,7 @@ import { InlineConfig, splitVendorChunkPlugin } from "vite";
 
 import { mdxOptions } from "~/mdx";
 
+import iframe from "./iframe";
 import images from "./images";
 import python from "./python";
 
@@ -35,6 +36,7 @@ export default function (mode: "development" | "production", options?: Options):
       python(),
       react({ plugins: swcPlugins }),
       splitVendorChunkPlugin(),
+      visualizer({ filename: "dist/stats.html" }),
     ],
     clearScreen: false,
     server: {
