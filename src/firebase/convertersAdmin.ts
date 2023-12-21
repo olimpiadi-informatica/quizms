@@ -17,14 +17,20 @@ import z, {
   ZodUnion,
 } from "zod";
 
-import { Contest, contestSchema } from "~/models/contest";
-import { School, SchoolMapping, schoolMappingSchema, schoolSchema } from "~/models/school";
-import { Solution, solutionSchema } from "~/models/solution";
-import { Pdf, pdfSchema } from "~/models/statement";
-import { Student, studentSchema } from "~/models/student";
-import { Submission, submissionSchema } from "~/models/submission";
-import { Teacher, teacherSchema } from "~/models/teacher";
-import { Variant, VariantMapping, variantMappingSchema, variantSchema } from "~/models/variant";
+import {
+  Student,
+  Submission,
+  contestSchema,
+  pdfSchema,
+  schoolMappingSchema,
+  schoolSchema,
+  solutionSchema,
+  statementSchema,
+  studentSchema,
+  submissionSchema,
+  variantMappingSchema,
+  variantSchema,
+} from "~/models";
 import validate from "~/utils/validate";
 
 function convertToFirestore(data: Record<string, any>) {
@@ -79,25 +85,21 @@ function parse<T>(schema: ZodType<T, any, any>, snapshot: DocumentSnapshot): T {
   return validate(toFirebaseSchema(schema), data);
 }
 
-export const contestConverter: FirestoreDataConverter<Contest> = {
-  toFirestore: (data) => convertToFirestore(data),
-  fromFirestore: (snapshot) => parse(contestSchema, snapshot),
-};
+function converter<T extends object>(schema: ZodType<T, any, any>): FirestoreDataConverter<T> {
+  return {
+    toFirestore: (data) => convertToFirestore(data),
+    fromFirestore: (snapshot) => parse(schema, snapshot),
+  };
+}
 
-export const schoolConverter: FirestoreDataConverter<School> = {
-  toFirestore: (data) => convertToFirestore(data),
-  fromFirestore: (snapshot) => parse(schoolSchema, snapshot),
-};
-
-export const schoolMappingConverter: FirestoreDataConverter<SchoolMapping> = {
-  toFirestore: (data) => convertToFirestore(data),
-  fromFirestore: (snapshot) => parse(schoolMappingSchema, snapshot),
-};
-
-export const solutionConverter: FirestoreDataConverter<Solution> = {
-  toFirestore: (data) => convertToFirestore(data),
-  fromFirestore: (snapshot) => parse(solutionSchema, snapshot),
-};
+export const contestConverter = converter(contestSchema);
+export const schoolConverter = converter(schoolSchema);
+export const schoolMappingConverter = converter(schoolMappingSchema);
+export const pdfConverter = converter(pdfSchema);
+export const statementConverter = converter(statementSchema);
+export const solutionConverter = converter(solutionSchema);
+export const variantConverter = converter(variantSchema);
+export const variantMappingConverter = converter(variantMappingSchema);
 
 export const studentConverter: FirestoreDataConverter<Student> = {
   toFirestore(data) {
@@ -117,24 +119,4 @@ export const submissionConverter: FirestoreDataConverter<Submission> = {
     };
   },
   fromFirestore: (snapshot) => parse(submissionSchema, snapshot),
-};
-
-export const variantConverter: FirestoreDataConverter<Variant> = {
-  toFirestore: (data) => convertToFirestore(data),
-  fromFirestore: (snapshot) => parse(variantSchema, snapshot),
-};
-
-export const variantMappingConverter: FirestoreDataConverter<VariantMapping> = {
-  toFirestore: (data) => convertToFirestore(data),
-  fromFirestore: (snapshot) => parse(variantMappingSchema, snapshot),
-};
-
-export const teacherConverter: FirestoreDataConverter<Teacher> = {
-  toFirestore: (data) => convertToFirestore(data),
-  fromFirestore: (snapshot) => parse(teacherSchema, snapshot),
-};
-
-export const pdfConverter: FirestoreDataConverter<Pdf> = {
-  toFirestore: (data) => convertToFirestore(data),
-  fromFirestore: (snapshot) => parse(pdfSchema, snapshot),
 };

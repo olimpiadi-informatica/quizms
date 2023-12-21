@@ -3,9 +3,7 @@ import React, { ReactNode, SetStateAction, useCallback, useMemo, useState } from
 import { addMinutes } from "date-fns";
 import { isFunction, range } from "lodash-es";
 
-import { Contest } from "~/models/contest";
-import { School } from "~/models/school";
-import { Student } from "~/models/student";
+import { Contest, School, Student } from "~/models";
 
 import { useUpdateAt } from "../components/time";
 import { StudentProvider } from "./provider";
@@ -60,7 +58,6 @@ export function NoAuth({ contestName, duration, questionCount, children }: AuthP
       { name: "surname", label: "Cognome", type: "text" },
     ],
     hasVariants: true,
-    allowStudentRegistration: false,
     allowRestart: true,
   };
 

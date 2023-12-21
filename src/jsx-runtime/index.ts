@@ -37,7 +37,7 @@ export function useMDXComponents() {
   return Object.fromEntries(
     components.map((name) => [
       name,
-      new ExpressionWrapper(() => b.memberExpression(b.identifier("quizms"), b.identifier(name))),
+      new ExpressionWrapper(() => b.memberExpression(b.identifier("Quizms"), b.identifier(name))),
     ]),
   );
 }

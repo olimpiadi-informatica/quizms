@@ -34,9 +34,7 @@ import {
 } from "~/firebase/converters";
 import { studentConverter } from "~/firebase/converters";
 import { useCollection } from "~/firebase/hooks";
-import { Contest } from "~/models/contest";
-import { School } from "~/models/school";
-import { StudentRestore, studentHash } from "~/models/student";
+import { Contest, School, StudentRestore, studentHash } from "~/models";
 import { hash, randomToken } from "~/utils/random";
 
 import { Button, LoadingButtons } from "../components/button";
@@ -121,7 +119,7 @@ async function generateToken(now: Date, db: Firestore, prevSchool: School) {
   await runTransaction(db, async (trans) => {
     const mapping = await trans.get(schoolMappingsRef);
     if (mapping.exists()) {
-      throw new Error("Token già esistente");
+      throw new Error("Token già esistente, riprova.");
     }
 
     trans.set(schoolRef, school);

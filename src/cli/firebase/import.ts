@@ -1,317 +1,244 @@
-import { readFileSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
-import { cwd } from "node:process";
 
-import { cert, deleteApp, initializeApp } from "firebase-admin/app";
-import { Auth, getAuth } from "firebase-admin/auth";
-import { Firestore, Query, getFirestore } from "firebase-admin/firestore";
-import { range } from "lodash-es";
-import z, { ZodType } from "zod";
+import { deleteApp } from "firebase-admin/app";
+import { getAuth } from "firebase-admin/auth";
+import { Firestore, FirestoreDataConverter, GrpcStatus } from "firebase-admin/firestore";
+import { capitalize, map, range } from "lodash-es";
+import z from "zod";
 
-import { exportVariants } from "~/cli/export-variants";
-import loadGenerationConfig from "~/cli/load-generation-config";
 import {
   contestConverter,
   pdfConverter,
   schoolConverter,
   solutionConverter,
-  teacherConverter,
+  statementConverter,
   variantConverter,
+  variantMappingConverter,
 } from "~/firebase/convertersAdmin";
-import { contestSchema } from "~/models/contest";
-import { schoolSchema } from "~/models/school";
-import validate from "~/utils/validate";
+import { contestSchema, schoolSchema } from "~/models";
+import { generationConfigSchema } from "~/models/generationConfig";
+import { Rng } from "~/utils/random";
+
+import { confirm, fatal, info, success } from "../utils/logs";
+import { readCollection } from "../utils/parser";
+import { buildVariants } from "../variants";
+import { initializeDb } from "./common";
 
 type ImportOptions = {
   config: string;
-  teachers?: boolean;
-  schools?: boolean;
-  contests?: boolean;
-  variants?: boolean;
-  solutions?: boolean;
   delete?: boolean;
+  force?: boolean;
+
+  contests?: boolean;
+  schools?: boolean;
+  teachers?: boolean;
+
+  variants?: boolean;
+  "variant-mappings"?: boolean;
+  statements?: boolean;
   pdfs?: boolean;
-  all?: boolean;
+  solutions?: boolean;
 };
 
-/*async function getAllUsers(auth: Auth) {
-  let listResults = await auth.listUsers(1000);
-  const uids = listResults.users.map((user) => user.uid);
-  while (listResults.pageToken) {
-    listResults = await auth.listUsers(1000, listResults.pageToken);
-    listResults.users.forEach((user) => uids.push(user.uid));
+export default async function importData(options: ImportOptions) {
+  const [app, db] = await initializeDb();
+
+  if (options.contests) {
+    await importContests(db, options);
   }
-  return uids;
-}
-
-async function deleteCollection(db: Firestore, collectionPath: string) {
-  return;
-  const collectionRef = db.collection(collectionPath);
-  const query = collectionRef.orderBy("__name__").limit(400);
-
-  return new Promise<void>((resolve, reject) => {
-    deleteQueryBatch(db, query, resolve).catch(reject);
-  });
-}
-
-async function deleteQueryBatch(db: Firestore, query: Query, resolve: () => void) {
-  const snapshot = await query.get();
-
-  const batchSize = snapshot.size;
-  if (batchSize === 0) {
-    // When there are no documents left, we are done
-    resolve();
-    return;
+  if (options.teachers) {
+    await importTeachers(db, options);
+  }
+  if (options.schools) {
+    await importSchools(db, options);
+  }
+  if (options.pdfs) {
+    await importPdf(db, options);
+  }
+  if (options.variants || options.statements || options.solutions || options["variant-mappings"]) {
+    await importVariants(db, options);
   }
 
-  // Delete documents in a batch
-  const batch = db.batch();
-  snapshot.docs.forEach((doc) => {
-    batch.delete(doc.ref);
-  });
-  await batch.commit();
-
-  // Recurse on the next process tick, to avoid
-  // exploding the stack.
-  process.nextTick(() => {
-    deleteQueryBatch(db, query, resolve);
-  });
-}*/
-
-export default async function importContests(options: ImportOptions) {
-  const config = await loadGenerationConfig(options.config);
-  if (options.delete) return;
-  if (options.all) return;
-
-  const serviceAccount = JSON.parse(await readFile("serviceAccountKey.json", "utf-8"));
-  const app = initializeApp({
-    credential: cert(serviceAccount),
-  });
-  const auth = getAuth();
-  const db = getFirestore(app);
-  db.settings({ ignoreUndefinedProperties: true });
-
-  if (options.all || options.contests) {
-    /*if (options.delete) {
-      console.info("Deleting contests...");
-      await deleteCollection(db, "contests");
-      console.info("Deleted contests!");
-    }*/
-    console.info("Importing contests...");
-    const contests = JSON.parse(await readFile("data/contests.json", "utf-8"));
-
-    const res = await Promise.all(
-      Object.entries(contests).map(async ([id, record]) => {
-        const contest = validateOrExit(contestSchema, record, { id });
-        await db.doc(`contests/${contest.id}`).withConverter(contestConverter).set(contest);
-      }),
-    );
-    console.info(`${res.length} contests imported!`);
-  }
-
-  if (options.all || options.teachers) {
-    /*if (options.delete) {
-      console.info("Deleting users and teachers...");
-      const uids = await getAllUsers(auth);
-      await auth.deleteUsers(uids);
-      await deleteCollection(db, "teachers");
-      await deleteCollection(db, "students");
-      await deleteCollection(db, "studentMappingUid");
-      await deleteCollection(db, "studentMappingHash");
-      await deleteCollection(db, "studentRestore");
-      console.info("Deleted users and teachers!");
-    }*/
-    console.info("Importing users...");
-    const teachers = JSON.parse(await readFile("data/teachers.json", "utf-8"));
-
-    const res = await Promise.all(
-      Object.entries(teachers).map(async ([email, record]) => {
-        const user = validateOrExit(userSchema, record, { email });
-
-        const prevUser = await auth.getUserByEmail(user.email).catch(() => undefined);
-        if (!prevUser) {
-          const newUser = await auth.createUser({
-            email: user.email,
-            emailVerified: true,
-            password: user.password,
-            displayName: user.name,
-            disabled: false,
-          });
-          await db
-            .doc(`teachers/${newUser.uid}`)
-            .withConverter(teacherConverter)
-            .set({ id: newUser.uid });
-        } else {
-          await db
-            .doc(`teachers/${prevUser.uid}`)
-            .withConverter(teacherConverter)
-            .set({ id: prevUser.uid });
-        }
-      }),
-    );
-
-    console.info(`${res.length} users imported!`);
-  }
-
-  if (options.all || options.pdfs) {
-    /*if (options.delete) {
-      console.info("Deleting pdfs...");
-      await deleteCollection(db, "pdfs");
-      console.info("Deleted pdfs!");
-    }*/
-    console.info("Importing pdfs...");
-    for (const contest of Object.values(config)) {
-      const variantIds = contest.pdfVariantIds;
-      const res = await Promise.all(
-        variantIds.map(async (variantId) => {
-          const path = join("pdf/final", `${variantId}.pdf`);
-          const pdfFile = readFileSync(path);
-          await db.doc(`pdfs/${variantId}`).withConverter(pdfConverter).set({
-            id: variantId,
-            statement: pdfFile,
-          });
-        }),
-      );
-      console.info(`${res.length} pdfs imported!`);
-    }
-  }
-
-  if (options.all || options.schools) {
-    /*if (options.delete) {
-      console.info("Deleting schools...");
-      await deleteCollection(db, "schools");
-      await deleteCollection(db, "schoolMapping");
-      console.info("Deleted schools!");
-    }*/
-    console.info("Importing schools...");
-    const schools = JSON.parse(await readFile("data/schools.json", "utf-8"));
-
-    const res = await Promise.all(
-      schools.map(async (record: any) => {
-        const school = validateOrExit(schoolSchema.omit({ id: true }), record);
-        const user = await auth.getUserByEmail(school.teacher);
-        await db
-          .collection("schools")
-          .withConverter(schoolConverter)
-          .add({
-            id: "",
-            ...school,
-            teacher: user.uid,
-          });
-      }),
-    );
-    console.info(`${res.length} schools imported!`);
-  }
-
-  if (options.all || options.variants || options.solutions) {
-    /*if (options.delete) {
-      if (options.all || options.variants) {
-        console.info("Deleting variants...");
-        await deleteCollection(db, "variants");
-        await deleteCollection(db, "variantMapping");
-        await deleteCollection(db, "variantSchema");
-        console.info("Deleted variants!");
-      }
-      if (options.all || options.solutions) {
-        console.info("Deleting solutions...");
-        await deleteCollection(db, "solutions");
-        console.info("Deleted solutions!");
-      }
-    }*/
-    for (const contest of Object.values(config)) {
-      const { solutions, variants } = await exportVariants(cwd(), contest);
-
-      if (options.all || options.variants) {
-        console.info("Importing variants...");
-
-        const res1 = await Promise.all(
-          Object.entries(variants["offline"]).map(async ([id, variant]) => {
-            await db.doc(`variants/${id}`).withConverter(variantConverter).set(variant);
-            await db.doc(`schema/${id}`).withConverter(schemaDocConverter).set({
-              id: variant.id,
-              schema: variant.schema,
-              contest: variant.contest,
-            });
-          }),
-        );
-        const res2 = await Promise.all(
-          Object.entries(variants["online"]).map(async ([id, variant]) => {
-            if (Object.keys(variants["offline"]).includes(id)) id = "1" + id;
-            await db.doc(`variants/${id}`).withConverter(variantConverter).set(variant);
-            await db.doc(`schema/${id}`).withConverter(schemaDocConverter).set({
-              id: variant.id,
-              schema: variant.schema,
-              contest: variant.contest,
-            });
-          }),
-        );
-        console.info(`${res1.length + res2.length} variants imported!`);
-
-        /*console.info("Importing variant mappings...");
-        const prefix = contest.id;
-        const rng = new Rng(`#variantMappings#${contest.secret}#`);
-        const res2 = await Promise.all(
-          range(4096).map(async (i) => {
-            const suffix = Buffer.from([i / 256, i % 256])
-              .toString("hex")
-              .slice(1)
-              .toUpperCase();
-            const id = `${prefix}-${suffix}`;
-            await db
-              .doc(`variantMapping/${id}`)
-              .withConverter(variantMappingConverter)
-              .set({
-                id,
-                variant: contest.variantIds[rng.randInt(0, contest.variantIds.length - 1)],
-              });
-          }),
-        );
-        console.info(`${res2.length} variant mappings imported!`);*/
-      }
-
-      if (options.all || options.solutions) {
-        console.info("Importing solutions...");
-        const res1 = await Promise.all(
-          Object.entries(solutions["offline"]).map(async ([id, solution]) => {
-            await db.doc(`solutions/${id}`).withConverter(solutionConverter).set(solution);
-          }),
-        );
-        const res2 = await Promise.all(
-          Object.entries(solutions["online"]).map(async ([id, solution]) => {
-            if (Object.keys(solutions["offline"]).includes(id)) id = "1" + id;
-            await db.doc(`solutions/${id}`).withConverter(solutionConverter).set(solution);
-          }),
-        );
-        console.info(`${res2.length + res1.length} solutions imported!`);
-      }
-    }
-  }
-
-  console.info("All done!");
+  success("All done!");
   await deleteApp(app);
 }
 
-const userSchema = z.object({
-  name: z.string(),
-  email: z.string().email(),
-  password: z.string(),
-});
+async function importContests(db: Firestore, options: ImportOptions) {
+  const contests = await readCollection("contests", contestSchema);
+  await importCollection(db, "contests", contests, contestConverter, options);
+}
 
-function validateOrExit<In, Out, Extra extends In>(
-  schema: ZodType<Out, any, In>,
-  value: In,
-  extra?: Extra,
-): Out {
-  try {
-    return validate<any, Out>(
-      z
-        .record(z.any())
-        .transform((record) => ({ ...extra, ...record }))
-        .pipe(schema),
-      value,
-    );
-  } catch (e) {
-    process.exit(1);
+async function importSchools(db: Firestore, options: ImportOptions) {
+  const auth = getAuth();
+
+  const schools = await readCollection("schools", schoolSchema);
+  const schoolsWithTeacher = await Promise.all(
+    schools.map(async (school) => {
+      try {
+        const user = await auth.getUserByEmail(school.teacher);
+        return { ...school, teacher: user.uid };
+      } catch (e) {
+        fatal(`Teacher ${school.teacher} does not exist. Make sure to import teachers first.`);
+      }
+    }),
+  );
+
+  await importCollection(db, "schools", schoolsWithTeacher, schoolConverter, options);
+}
+
+async function importTeachers(db: Firestore, options: ImportOptions) {
+  const teacherSchema = z.object({
+    name: z.string(),
+    email: z.string().email(),
+    password: z.string(),
+  });
+
+  const teachers = await readCollection("teachers", teacherSchema);
+
+  const auth = getAuth();
+  const ids = await Promise.all(
+    teachers.map(async (teacher) => {
+      const prevUser = await auth.getUserByEmail(teacher.email).catch(() => undefined);
+      if (!prevUser) {
+        const newUser = await auth.createUser({
+          email: teacher.email,
+          emailVerified: true,
+          password: teacher.password,
+          displayName: teacher.name,
+          disabled: false,
+        });
+        return { id: newUser.uid };
+      } else if (options.force) {
+        await auth.updateUser(prevUser.uid, {
+          email: teacher.email,
+          emailVerified: true,
+          password: teacher.password,
+          displayName: teacher.name,
+          disabled: false,
+        });
+        return { id: prevUser.uid };
+      } else {
+        fatal(`Teacher ${teacher.email} already exists. Use \`--force\` to overwrite.`);
+      }
+    }),
+  );
+
+  const converter: FirestoreDataConverter<{ id: string }> = {
+    toFirestore: () => ({}),
+    fromFirestore: (snap) => ({ id: snap.id }),
+  };
+  await importCollection(db, "teachers", ids, converter, options);
+}
+
+async function importPdf(db: Firestore, options: ImportOptions) {
+  const generationConfigs = await readCollection("contests", generationConfigSchema);
+  const pdfs = await Promise.all(
+    generationConfigs
+      .flatMap((c) => [...c.variantIds, ...c.pdfVariantIds])
+      .map(async (id) => {
+        try {
+          const statement = await readFile(join("variants", id, "statement.pdf"));
+          return { id, statement };
+        } catch (e) {
+          fatal(`Cannot find pdf of variant ${id}. Use \`quizms pdf\` to generate it first.`);
+        }
+      }),
+  );
+
+  await importCollection(db, "pdfs", pdfs, pdfConverter, options);
+}
+
+async function importVariants(db: Firestore, options: ImportOptions) {
+  const generationConfigs = await readCollection("contests", generationConfigSchema);
+
+  // TODO: option dir
+  const variants = await buildVariants("src", generationConfigs);
+  if (options.variants) {
+    await importCollection(db, "variants", map(variants, 0), variantConverter, options);
   }
+  if (options.statements) {
+    await importCollection(db, "statements", map(variants, 1), statementConverter, options);
+  }
+  if (options.solutions) {
+    await importCollection(db, "solutions", map(variants, 2), solutionConverter, options);
+  }
+  if (options["variant-mappings"]) {
+    const mappings = await Promise.all(
+      generationConfigs.flatMap((config) => {
+        const rng = new Rng(`${config.secret}-${config.id}-variantMappings`);
+        return range(4096).map(async (i) => {
+          const suffix = i.toString(16).padStart(3, "0").toUpperCase();
+          return {
+            id: `${config.id}-${suffix}`,
+            variant: rng.choice(config.variantIds),
+          };
+        });
+      }),
+    );
+    await importCollection(db, "variantMappings", mappings, variantMappingConverter, options);
+  }
+}
+
+async function importCollection<T extends { id: string }>(
+  db: Firestore,
+  collection: string,
+  data: T[],
+  converter: FirestoreDataConverter<T>,
+  options: ImportOptions,
+) {
+  if (options.delete) {
+    await deleteCollection(db, collection);
+  }
+
+  await confirm(
+    `You are about to import the ${collection}. ${
+      options.force ? "This will overwrite any existing data. " : ""
+    }Are you sure?`,
+  );
+
+  for (let i = 0; i < data.length; i += 400) {
+    const batch = db.batch();
+    for (const record of data.slice(i, i + 400)) {
+      const ref = db.doc(`${collection}/${record.id}`).withConverter(converter);
+      if (options?.force) {
+        batch.set(ref, record);
+      } else {
+        batch.create(ref, record);
+      }
+    }
+    try {
+      await batch.commit();
+    } catch (e: any) {
+      if (e.code === GrpcStatus.ALREADY_EXISTS) {
+        fatal(
+          `Document ${e.documentRef.id} already exists in \`${collection}\`. Use \`--force\` to overwrite existing documents.`,
+        );
+      } else {
+        fatal(`Cannot import ${collection}: ${e}`);
+      }
+    }
+  }
+
+  success(`${capitalize(collection)} imported!`);
+}
+
+async function deleteCollection(db: Firestore, collection: string) {
+  await confirm(`You are about to delete all ${collection}. Are you sure?`);
+
+  const collectionRef = db.collection(collection);
+  const query = collectionRef.limit(400);
+
+  for (;;) {
+    const snapshot = await query.get();
+    if (snapshot.empty) break;
+
+    const batch = db.batch();
+    for (const doc of snapshot.docs) {
+      batch.delete(doc.ref);
+    }
+    await batch.commit();
+  }
+
+  info(`${capitalize(collection)} deleted!`);
 }

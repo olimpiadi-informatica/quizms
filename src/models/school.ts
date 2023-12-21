@@ -3,7 +3,6 @@ import z from "zod";
 export const schoolSchema = z.object({
   id: z.string(),
   schoolId: z.string(),
-  externalId: z.string().optional(),
   name: z.string(),
   teacher: z.string(),
   token: z.string().optional(),

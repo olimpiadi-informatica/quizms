@@ -1,10 +1,10 @@
 import { Expression, Program, Property } from "estree";
 import { builders as b } from "estree-toolkit";
 
-import { ContestConfig } from "~/models/generation-config";
+import { GenerationConfig } from "~/models/generationConfig";
 import { hash } from "~/utils/random";
 
-import { shuffleAnswers, shuffleProblems } from "./variants";
+import { shuffleAnswers, shuffleProblems } from "./shuffle";
 
 type ParseOptions = {
   functionArguments: any[];
@@ -126,10 +126,10 @@ export function parseValue(value: any, options: ParseOptions): Expression {
   throw new TypeError(`Unsupported value: ${String(value)}`);
 }
 
-export function shuffleContest(
+export function shuffleStatement(
   entry: () => ExpressionWrapper,
   variant: string,
-  config?: ContestConfig,
+  config: GenerationConfig,
 ): Program {
   const options = {
     functionArguments: [
@@ -144,16 +144,16 @@ export function shuffleContest(
     b.exportDefaultDeclaration(
       b.functionDeclaration(
         b.identifier("Contest"),
-        [b.identifier("React"), b.identifier("quizms")],
+        [b.identifier("React"), b.identifier("Quizms")],
         b.blockStatement([b.returnStatement(tree.expr(options))]),
       ),
     ),
   ]);
 
-  if (!config || config.shuffleProblems) {
+  if (config.shuffleProblems) {
     shuffleProblems(program, variant);
   }
-  if (!config || config.shuffleAnswers) {
+  if (config.shuffleAnswers) {
     shuffleAnswers(program, variant);
   }
   return program;

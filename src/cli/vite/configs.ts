@@ -1,3 +1,4 @@
+import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
 import { CompileOptions as MdxOptions } from "@mdx-js/mdx";
@@ -7,6 +8,7 @@ import { visualizer } from "rollup-plugin-visualizer";
 import { InlineConfig, splitVendorChunkPlugin } from "vite";
 import inspect from "vite-plugin-inspect";
 
+import { fatal } from "~/cli/utils/logs";
 import { mdxOptions } from "~/mdx/plugins";
 
 import iframe from "./iframe";
@@ -18,9 +20,20 @@ type Options = {
   mdx?: MdxOptions;
 };
 
-export default function (mode: "development" | "production", options?: Options): InlineConfig {
+export default function (
+  root: string,
+  mode: "development" | "production",
+  options?: Options,
+): InlineConfig {
+  if (!existsSync(root)) {
+    fatal(
+      `Invalid directory. Make sure you're in the root of a QuizMS project or specify a different directory, use \`--help\` for usage.`,
+    );
+  }
+
   return {
     configFile: false,
+    root,
     mode,
     envPrefix: "QUIZMS_",
     resolve: {

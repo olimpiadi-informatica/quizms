@@ -12,9 +12,9 @@ export type DevOptions = {
 export default async function devServer(options: DevOptions) {
   process.env.QUIZMS_MODE = "development";
 
+  const root = join(options.dir, "src");
   const server = await createServer({
-    ...configs("development"),
-    root: join(options.dir, "src"),
+    ...configs(root, "development"),
     publicDir: join(options.dir, "public"),
   });
   await server.listen(options.port);

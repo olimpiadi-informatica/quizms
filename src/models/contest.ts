@@ -30,8 +30,8 @@ export const contestSchema = z.object({
   name: z.string(),
   problemIds: z.coerce.string().array(),
 
-  startingWindowStart: z.coerce.date().optional(),
-  startingWindowEnd: z.coerce.date().optional(),
+  startingWindowStart: z.date().optional(),
+  startingWindowEnd: z.date().optional(),
   duration: z.coerce.number().positive().optional(),
 
   personalInformation: z.array(
@@ -41,11 +41,11 @@ export const contestSchema = z.object({
       personalInformationDate,
     ]),
   ),
-  hasVariants: z.boolean().default(true),
-  allowStudentRegistration: z.boolean().default(false),
-  allowRestart: z.boolean().default(false),
+  hasVariants: z.boolean(),
+  allowRestart: z.boolean(),
+  pdfPerSchool: z.number().optional(),
 
-  instructions: z.string().optional(),
+  // instructions: z.string().optional(),
 });
 
 export type Contest = z.infer<typeof contestSchema>;

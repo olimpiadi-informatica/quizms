@@ -3,16 +3,19 @@ import { format, join } from "node:path";
 
 import { cert, deleteApp, initializeApp } from "firebase-admin/app";
 import { CollectionReference, getFirestore } from "firebase-admin/firestore";
+import { capitalize } from "lodash-es";
 
 import {
   contestConverter,
-  schemaDocConverter,
   schoolConverter,
   schoolMappingConverter,
   solutionConverter,
   studentConverter,
   submissionConverter,
+  variantConverter,
 } from "~/firebase/convertersAdmin";
+
+import { info, success } from "../utils/logs";
 
 type ExportOptions = {
   schools?: boolean;
@@ -56,7 +59,7 @@ export default async function exportContests(options: ExportOptions) {
     await exportCollection(ref, "tokens", dir);
   }
   if (options.variants) {
-    const ref = db.collection("schema").withConverter(schemaDocConverter);
+    const ref = db.collection("variants").withConverter(variantConverter);
     await exportCollection(ref, "variants", dir);
   }
   if (options.contests) {
@@ -68,6 +71,8 @@ export default async function exportContests(options: ExportOptions) {
 }
 
 async function exportCollection(ref: CollectionReference, collection: string, dir: string) {
+  info(`Exporting ${collection}.`);
+
   const chunkSize = 25_000;
   let snapshot = await ref.limit(chunkSize).get();
 
@@ -80,9 +85,12 @@ async function exportCollection(ref: CollectionReference, collection: string, di
     }
 
     sum += snapshot.size;
-    console.log(`Found ${sum} ${collection}.`);
+    info(`Found ${sum} ${collection}.`);
 
     const last = snapshot.docs.at(-1);
     snapshot = await ref.startAfter(last).limit(chunkSize).get();
   }
+
+  success(`${capitalize(collection)} export completed.`);
+  await file.close();
 }

@@ -24,8 +24,7 @@ export default async function staticExport(options: ExportOptions): Promise<void
   const inputs = Object.fromEntries(pages.map((p) => [dirname(p).replace(/\W/g, "-"), p]));
 
   await build({
-    ...configs("production"),
-    root: join(options.dir, "src"),
+    ...configs(join(options.dir, "src"), "production"),
     publicDir: join(options.dir, "public"),
     build: {
       outDir: join(options.dir, options.outDir),

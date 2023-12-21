@@ -1,8 +1,6 @@
 import React, { ReactNode, createContext, useContext } from "react";
 
-import { Contest } from "~/models/contest";
-import { School } from "~/models/school";
-import { Student } from "~/models/student";
+import { Contest, School, Student } from "~/models";
 
 import { Layout } from "./layout";
 

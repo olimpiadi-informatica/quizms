@@ -31,8 +31,7 @@ import {
   variantMappingConverter,
 } from "~/firebase/converters";
 import { useAnonymousAuth, useCollection, useDocument } from "~/firebase/hooks";
-import { parsePersonalInformation } from "~/models/contest";
-import { Student, studentHash } from "~/models/student";
+import { Student, parsePersonalInformation, studentHash } from "~/models";
 import { hash, randomId } from "~/utils/random";
 
 class DuplicateStudentError extends Error {

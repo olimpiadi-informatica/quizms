@@ -2275,6 +2275,7 @@ export const wordlist = [
   "pontefice",
   "popolare",
   "popolo",
+  "pordenone",
   "porta",
   "portali",
   "portando",

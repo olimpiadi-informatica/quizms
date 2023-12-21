@@ -43,7 +43,9 @@ export function Problem({ id, points, statement: Statement }: ProblemProps) {
 
   const variantId = useMemo(
     () =>
-      import.meta.env.PROD && student.variant ? hash(`r#problem#${student.variant}#${id}`) : 0,
+      import.meta.env.QUIZMS_MODE === "training" && student.variant
+        ? hash(`r#problem#${student.variant}#${id}`)
+        : 0,
     [student.variant, id],
   );
 

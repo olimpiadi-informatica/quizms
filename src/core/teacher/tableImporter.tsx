@@ -5,10 +5,14 @@ import { ArrowUpFromLine } from "lucide-react";
 import { parse as parseCSV } from "papaparse";
 import z from "zod";
 
-import { Contest, parsePersonalInformation } from "~/models/contest";
-import { School } from "~/models/school";
-import { Student, studentSchema } from "~/models/student";
-import { Variant } from "~/models/variant";
+import {
+  Contest,
+  School,
+  Student,
+  Variant,
+  parsePersonalInformation,
+  studentSchema,
+} from "~/models";
 import { randomId } from "~/utils/random";
 import validate from "~/utils/validate";
 
@@ -151,7 +155,7 @@ async function importStudents(
       const off = contest.personalInformation.length + Number(contest.hasVariants || 0);
       const variantId = contest.hasVariants
         ? value[off - 1]
-        : variants.find((v) => v.contest === contest.id && ["1", "2"].includes(v.id))!.id; // TODO: ugly hack
+        : variants.find((v) => v.contest === contest.id)!.id;
 
       if (variantId) {
         const variant = variants.find((v) => v.id === variantId && v.contest === contest.id);

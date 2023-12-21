@@ -20,12 +20,16 @@ import { addMinutes, isEqual as isEqualDate } from "date-fns";
 import { cloneDeep, set, sumBy } from "lodash-es";
 import { AlertTriangle, FileCheck, Upload, Users } from "lucide-react";
 
-import { Contest, parsePersonalInformation } from "~/models/contest";
-import { School } from "~/models/school";
-import { score } from "~/models/score";
-import { Solution } from "~/models/solution";
-import { Student, studentHash } from "~/models/student";
-import { Variant } from "~/models/variant";
+import {
+  Contest,
+  School,
+  Solution,
+  Student,
+  Variant,
+  parsePersonalInformation,
+  studentHash,
+} from "~/models";
+import { score } from "~/models";
 import { randomId } from "~/utils/random";
 
 import Loading from "../components/loading";
@@ -226,8 +230,7 @@ function Table({ school, contest }: { school: School; contest: Contest }) {
       : undefined;
   const isContestRunning = endTime && now() <= endTime;
 
-  const TESTID = "scolastiche-test"; // TODO: revert, only for testing
-  const editable = (!isContestRunning || contest.id == TESTID) && !school.finalized;
+  const editable = !isContestRunning && !school.finalized;
 
   const newStudentId = useRef(randomId());
 
@@ -237,8 +240,8 @@ function Table({ school, contest }: { school: School; contest: Contest }) {
   };
 
   const defaultVariant = !contest.hasVariants
-    ? variants.find((v) => v.contest === contest.id && ["1", "2"].includes(v.id))!.id
-    : undefined; // TODO: ugly hack
+    ? variants.find((v) => v.contest === contest.id)!.id
+    : undefined;
 
   const allStudents = [
     ...students.filter((s) => s.school === school.id),
@@ -270,12 +273,8 @@ function Table({ school, contest }: { school: School; contest: Contest }) {
       const schema = contest.personalInformation.find((f) => f.name === subfield);
       value = parsePersonalInformation(value, schema);
     }
-    if (field === "variant") {
-      if (
-        !variants.some((v) => v.id === value && (v.contest === contest.id || contest.id == TESTID))
-      ) {
-        value = undefined;
-      }
+    if (field === "variant" && !variants.some((v) => v.id === value && v.contest === contest.id)) {
+      value = undefined;
     }
     if (field === "answers") {
       value = value?.toUpperCase();
@@ -432,7 +431,7 @@ function isStudentIncomplete(student: Student, contest: Contest, variants: Varia
 
   if (contest.hasVariants && !variant) return "Variante mancante";
   if (!variant) {
-    variant = variants.find((v) => v.contest === contest.id && ["1", "2"].includes(v.id))!; // TODO: ugly hack
+    variant = variants.find((v) => v.contest === contest.id)!;
   }
 
   for (const [id, schema] of Object.entries(variant.schema)) {

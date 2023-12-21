@@ -1,11 +1,8 @@
 import React, { ReactNode, createContext, useContext } from "react";
 
-import { TeacherLayout } from "~/core/teacher/layout";
-import { Contest } from "~/models/contest";
-import { School } from "~/models/school";
-import { Solution } from "~/models/solution";
-import { Student } from "~/models/student";
-import { Variant } from "~/models/variant";
+import { Contest, School, Solution, Student, Variant } from "~/models";
+
+import { TeacherLayout } from "./layout";
 
 type TeacherProviderProps = {
   /** Scuola dell'insegnante */

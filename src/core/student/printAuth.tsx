@@ -1,17 +1,14 @@
 import React, { ReactNode } from "react";
 
-import { Contest } from "~/models/contest";
-import { School } from "~/models/school";
-import { Student } from "~/models/student";
+import { Contest, School, Student } from "~/models";
 
 import { StudentProvider } from "./provider";
 
 type AuthProps = {
-  contest: Contest;
-  children: ReactNode;
+  headers: Record<string, Contest>;
 };
 
-export function PrintAuth({ contest, children }: AuthProps) {
+export function PrintAuth({ headers }: AuthProps) {
   const urlParams = new URLSearchParams(window.location.search);
   const variant = urlParams.get("variant") ?? "";
   const submitted = false;
@@ -68,7 +65,7 @@ function PrintForm({ contest, variant }: { contest: Contest; variant: string }) 
           <input
             type="text"
             className="input input-bordered w-full max-w-md"
-            value={variant.split("-")[1]} // TODO: better fix
+            value={variant}
             readOnly
           />
         </div>

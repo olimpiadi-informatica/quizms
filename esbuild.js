@@ -1,5 +1,5 @@
 import fs from "node:fs/promises";
-import { argv } from "node:process";
+import { argv, exit } from "node:process";
 
 import { Command } from "commander";
 import { build, context } from "esbuild";
@@ -36,6 +36,9 @@ const commonConfig = {
   alias: {
     "~": "./src",
   },
+  minifyIdentifiers: true,
+  minifySyntax: true,
+  minifyWhitespace: true,
 };
 
 /** @type {import("esbuild").BuildOptions} */
@@ -47,6 +50,7 @@ const uiConfig = {
   splitting: true,
   outdir: "dist",
   loader: { ".css": "copy" },
+  minifyWhitespace: false,
 };
 
 /** @type {import("esbuild").BuildOptions} */
@@ -71,7 +75,7 @@ const jsxRuntimeConfig = {
   ...commonConfig,
   entryPoints: ["src/jsx-runtime/index.ts"],
   packages: "external",
-  platform: "browser",
+  platform: "node",
   outfile: "dist/jsx-runtime.js",
 };
 
@@ -82,12 +86,7 @@ command
   .description("Create a production build")
   .action(async () => {
     for (const config of [uiConfig, cliConfig, cssConfig, jsxRuntimeConfig]) {
-      await build({
-        ...config,
-        minifyIdentifiers: true,
-        minifySyntax: true,
-        minifyWhitespace: false,
-      });
+      await build(config);
     }
   });
 
@@ -107,7 +106,11 @@ command
     };
 
     for (const config of [uiConfig, cliConfig, jsxRuntimeConfig]) {
-      const ctx = await context({ ...config, plugins: [watchPlugin] });
+      const ctx = await context({
+        ...config,
+        minifyIdentifiers: false,
+        plugins: [watchPlugin],
+      });
       await ctx.watch();
     }
   });
@@ -115,5 +118,5 @@ command
 try {
   await command.parseAsync(argv);
 } catch (error) {
-  process.exit(1);
+  exit(1);
 }

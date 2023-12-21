@@ -12,6 +12,10 @@ export class Rng {
     return unsafeUniformIntDistribution(min, max, this.rng);
   };
 
+  public choice = <T>(array: T[]): T => {
+    return array[this.randInt(0, array.length - 1)];
+  };
+
   public shuffle = (array: any[]): void => {
     for (let i = array.length - 1; i > 0; i--) {
       const j = this.randInt(0, i);
@@ -40,8 +44,5 @@ export async function randomToken(): Promise<string> {
 }
 
 export function randomId() {
-  return (
-    window?.crypto?.randomUUID?.() ??
-    `${getRandomInt(Number.MAX_SAFE_INTEGER)}-${getRandomInt(Number.MAX_SAFE_INTEGER)}`
-  );
+  return crypto.randomUUID();
 }
