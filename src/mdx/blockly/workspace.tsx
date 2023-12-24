@@ -62,13 +62,13 @@ export default function Workspace({ toolbox, initialBlocks, example, debug }: Bl
             <div className="join-item tooltip" data-tip="Esegui/pausa">
               <div
                 className={classNames(
-                  "btn btn-info h-full w-full rounded-[inherit]",
+                  "btn btn-info size-full rounded-[inherit]",
                   !running && "btn-disabled",
                 )}>
-                <label className="swap swap-rotate h-full w-full">
+                <label className="swap swap-rotate size-full">
                   <input type="checkbox" disabled={!running} checked={false} onChange={() => {}} />
-                  <Pause className="swap-on h-6 w-6" />
-                  <Play className="swap-off h-6 w-6" />
+                  <Pause className="swap-on size-6" />
+                  <Play className="swap-off size-6" />
                 </label>
               </div>
             </div>
@@ -78,7 +78,7 @@ export default function Workspace({ toolbox, initialBlocks, example, debug }: Bl
                 disabled={!running}
                 onClick={step}
                 aria-label="Esugui un blocco">
-                <SkipForward className="h-6 w-6" />
+                <SkipForward className="size-6" />
               </button>
             </div>
             <div className="join-item tooltip" data-tip="Esegui fino alla fine">
@@ -87,7 +87,7 @@ export default function Workspace({ toolbox, initialBlocks, example, debug }: Bl
                 disabled={!running}
                 onClick={() => {}}
                 aria-label="Esegui fino alla fine">
-                <FastForward className="h-6 w-6" />
+                <FastForward className="size-6" />
               </button>
             </div>
             <div className="join-item tooltip" data-tip="Esegui da capo">
@@ -95,13 +95,13 @@ export default function Workspace({ toolbox, initialBlocks, example, debug }: Bl
                 className="btn btn-info rounded-[inherit]"
                 onClick={reset}
                 aria-label="Esegui da capo">
-                <RotateCcw className="h-6 w-6" />
+                <RotateCcw className="size-6" />
               </button>
             </div>
           </div>
           <div className="tooltip" data-tip="Invia la soluzione">
             <button className="btn btn-success" aria-label="Invia la soluzione">
-              <Send className="h-6 w-6" />
+              <Send className="size-6" />
             </button>
           </div>
         </div>
@@ -109,7 +109,7 @@ export default function Workspace({ toolbox, initialBlocks, example, debug }: Bl
           <iframe
             ref={setIframe}
             src={import("./workspaceEditor") as any}
-            className="h-full w-full"
+            className="size-full"
             title="Area di lavoro di Blockly"
           />
           {!ready && (

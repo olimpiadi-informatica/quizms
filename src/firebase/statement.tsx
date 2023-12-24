@@ -20,7 +20,7 @@ export function FirebaseStatement() {
 
   if (!started)
     return (
-      <div className="flex h-screen justify-center">
+      <div className="flex h-dvh justify-center">
         <div className="flex items-center justify-center text-2xl">
           La gara inizierà tra
           <span className="px-2">

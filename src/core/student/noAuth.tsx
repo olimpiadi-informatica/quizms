@@ -93,7 +93,7 @@ export function NoAuth({ contestName, duration, questionCount, children }: AuthP
       reset={reset}
       terminated={submitted}>
       {import.meta.env.PROD && !startTime ? (
-        <div className="flex h-screen justify-center">
+        <div className="flex h-dvh justify-center">
           <div className="flex flex-col justify-center">
             <button className="btn btn-success btn-lg" onClick={start}>
               Inizia

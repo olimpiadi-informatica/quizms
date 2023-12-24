@@ -28,7 +28,7 @@ export function FirebaseLogin({ config, children }: Props) {
 
   return (
     <FirebaseContext.Provider value={db}>
-      <div className="h-screen">
+      <div className="h-dvh">
         <ErrorBoundary FallbackComponent={ErrorLogout}>
           <Suspense fallback={<Loading />}>
             <AuthWrapper>{children}</AuthWrapper>

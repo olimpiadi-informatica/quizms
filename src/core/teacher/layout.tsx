@@ -16,7 +16,7 @@ export function TeacherLayout({ children }: { children: ReactNode }) {
   }, [modalRef]); */
 
   return (
-    <div className="flex h-screen flex-col">
+    <div className="flex h-dvh flex-col">
       <div className="navbar flex-none justify-between bg-primary text-primary-content">
         <div className="dropdown max-w-full flex-none">
           <div tabIndex={0} role="button" className="btn btn-ghost no-animation w-full flex-nowrap">

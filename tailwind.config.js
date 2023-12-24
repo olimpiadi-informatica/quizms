@@ -7,11 +7,6 @@ module.exports = {
   content: ["./src/**/*.{ts,tsx}"],
   theme: {
     extend: {
-      height: {
-        "1/2-screen": ["50vh", "50dvh"],
-        "3/4-screen": ["75vh", "75dvh"],
-        screen: ["100vh", "100dvh"],
-      },
       screens: {
         xs: "450px",
       },
