@@ -1,7 +1,7 @@
 @import "srs-theme.less";
 
 code {
-  @apply !px-0.5 !font-normal;
+  @apply !bg-transparent !px-0.5 !font-normal;
 }
 
 code::before,

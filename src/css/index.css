@@ -25,7 +25,7 @@ body {
 
 .tooltip:hover:before,
 .tooltip:hover:after {
-  @apply delay-1000;
+  @apply delay-500;
 }
 
 .tooltip:before,
