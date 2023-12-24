@@ -190,15 +190,19 @@ service cloud.firestore {
             allow read: if request.auth != null && request.auth.token.email_verified;
         }
 
-        match /variants/{variant} {
-            function canStudentReadVariant(variant) {
-                let student = getStudent(request.auth.uid);
-                return student != null
-                    && isAuthenticated(student.data.uid)
-                    && student.data.variant == variant
-                    && student.data.startedAt <= request.time;
-            }
+        function canStudentReadVariant(variant) {
+            let student = getStudent(request.auth.uid);
+            return student != null
+                && isAuthenticated(student.data.uid)
+                && student.data.variant == variant
+                && student.data.startedAt <= request.time;
+        }
 
+        match /statements/{variant} {
+            allow read: if canStudentReadVariant(variant) || isTeacher();
+        }
+
+        match /variants/{variant} {
             allow read: if canStudentReadVariant(variant) || isTeacher();
         }
 
@@ -209,10 +213,5 @@ service cloud.firestore {
         match /pdfs/{variant} {
             allow read: if request.auth != null && isTeacher();
         }
-        
-        match /schema/{variant} {
-            allow read: if request.auth != null && isTeacher();
-        }
-          
     }
 }

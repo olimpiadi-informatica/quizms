@@ -25,7 +25,7 @@ import { School } from "~/models/school";
 import { score } from "~/models/score";
 import { Solution } from "~/models/solution";
 import { Student, studentHash } from "~/models/student";
-import { SchemaDoc } from "~/models/variant";
+import { Variant } from "~/models/variant";
 import { randomId } from "~/utils/random";
 
 import Loading from "../components/loading";
@@ -323,7 +323,7 @@ function Table({ school, contest }: { school: School; contest: Contest }) {
 
 function columnDefinition(
   contest: Contest,
-  variants: SchemaDoc[],
+  variants: Variant[],
   solutions: Solution[],
   editable: boolean,
 ): ColDef[] {
@@ -418,7 +418,7 @@ function columnDefinition(
   ];
 }
 
-function isStudentIncomplete(student: Student, contest: Contest, variants: SchemaDoc[]) {
+function isStudentIncomplete(student: Student, contest: Contest, variants: Variant[]) {
   if (isStudentEmpty(student)) return;
   if (student.disabled) return;
 

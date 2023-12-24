@@ -7,7 +7,7 @@ import { useUpdateAt } from "~/core/components/time";
 import Timer from "~/core/components/timer";
 import { RemoteStatement } from "~/core/student";
 import { useStudent } from "~/core/student/provider";
-import { variantConverter } from "~/firebase/converters";
+import { statementConverter } from "~/firebase/converters";
 import { useDocument } from "~/firebase/hooks";
 
 export function FirebaseStatement() {
@@ -40,14 +40,14 @@ export function FirebaseStatement() {
 function ContestInner() {
   const { student } = useStudent();
 
-  const [variant] = useDocument("variants", student.variant!, variantConverter, {
+  const [statement] = useDocument("statements", student.variant!, statementConverter, {
     subscribe: true,
   });
 
   const url = useMemo(() => {
-    const blob = new Blob([variant.statement], { type: "text/javascript" });
+    const blob = new Blob([statement.statement], { type: "text/javascript" });
     return URL.createObjectURL(blob);
-  }, [variant.statement]);
+  }, [statement.statement]);
 
   return <RemoteStatement url={url} />;
 }

@@ -14,16 +14,13 @@ import loadGenerationConfig from "~/cli/load-generation-config";
 import {
   contestConverter,
   pdfConverter,
-  schemaDocConverter,
   schoolConverter,
   solutionConverter,
   teacherConverter,
   variantConverter,
-  variantMappingConverter,
 } from "~/firebase/convertersAdmin";
 import { contestSchema } from "~/models/contest";
 import { schoolSchema } from "~/models/school";
-import { Rng } from "~/utils/random";
 import validate from "~/utils/validate";
 
 type ImportOptions = {

@@ -1,8 +1,8 @@
 import { Solution } from "~/models/solution";
 import { Student } from "~/models/student";
-import { SchemaDoc } from "~/models/variant";
+import { Variant } from "~/models/variant";
 
-export function score(student: Student, variants: SchemaDoc[], solutions: Solution[]) {
+export function score(student: Student, variants: Variant[], solutions: Solution[]) {
   const answers = student.answers;
   const variant = variants.find((variant) => variant.id === student.variant);
   const solution = solutions.find((solution) => solution.id === student.variant)?.answers;

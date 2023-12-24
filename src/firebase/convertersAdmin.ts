@@ -18,20 +18,13 @@ import z, {
 } from "zod";
 
 import { Contest, contestSchema } from "~/models/contest";
-import { Pdf, pdfSchema } from "~/models/pdf";
 import { School, SchoolMapping, schoolMappingSchema, schoolSchema } from "~/models/school";
 import { Solution, solutionSchema } from "~/models/solution";
+import { Pdf, pdfSchema } from "~/models/statement";
 import { Student, studentSchema } from "~/models/student";
 import { Submission, submissionSchema } from "~/models/submission";
 import { Teacher, teacherSchema } from "~/models/teacher";
-import {
-  SchemaDoc,
-  Variant,
-  VariantMapping,
-  schemaDocSchema,
-  variantMappingSchema,
-  variantSchema,
-} from "~/models/variant";
+import { Variant, VariantMapping, variantMappingSchema, variantSchema } from "~/models/variant";
 import validate from "~/utils/validate";
 
 function convertToFirestore(data: Record<string, any>) {
@@ -144,9 +137,4 @@ export const teacherConverter: FirestoreDataConverter<Teacher> = {
 export const pdfConverter: FirestoreDataConverter<Pdf> = {
   toFirestore: (data) => convertToFirestore(data),
   fromFirestore: (snapshot) => parse(pdfSchema, snapshot),
-};
-
-export const schemaDocConverter: FirestoreDataConverter<SchemaDoc> = {
-  toFirestore: (data) => convertToFirestore(data),
-  fromFirestore: (snapshot) => parse(schemaDocSchema, snapshot),
 };

@@ -5,7 +5,7 @@ import { Contest } from "~/models/contest";
 import { School } from "~/models/school";
 import { Solution } from "~/models/solution";
 import { Student } from "~/models/student";
-import { SchemaDoc } from "~/models/variant";
+import { Variant } from "~/models/variant";
 
 type TeacherProviderProps = {
   /** Scuola dell'insegnante */
@@ -19,7 +19,7 @@ type TeacherProviderProps = {
   /** Contest attivi */
   contests: Contest[];
   /** Varianti dei contest */
-  variants: SchemaDoc[];
+  variants: Variant[];
   /** Soluzioni delle varianti */
   solutions: Solution[];
   /** Funzione per effettuare il logout */

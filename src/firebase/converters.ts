@@ -19,9 +19,9 @@ import z, {
 } from "zod";
 
 import { Contest, contestSchema } from "~/models/contest";
-import { Pdf, pdfSchema } from "~/models/pdf";
 import { School, SchoolMapping, schoolMappingSchema, schoolSchema } from "~/models/school";
 import { Solution, solutionSchema } from "~/models/solution";
+import { Pdf, Statement, pdfSchema, statementSchema } from "~/models/statement";
 import {
   Student,
   StudentMappingHash,
@@ -34,14 +34,7 @@ import {
 } from "~/models/student";
 import { Submission, submissionSchema } from "~/models/submission";
 import { ZodBytes } from "~/models/types";
-import {
-  SchemaDoc,
-  Variant,
-  VariantMapping,
-  schemaDocSchema,
-  variantMappingSchema,
-  variantSchema,
-} from "~/models/variant";
+import { Variant, VariantMapping, variantMappingSchema, variantSchema } from "~/models/variant";
 import validate from "~/utils/validate";
 
 function convertToFirestore(data: Record<string, any>) {
@@ -132,6 +125,11 @@ export const solutionConverter: FirestoreDataConverter<Solution> = {
   fromFirestore: (snapshot) => parse(solutionSchema, snapshot),
 };
 
+export const statementConverter: FirestoreDataConverter<Statement> = {
+  toFirestore: (data) => convertToFirestore(data),
+  fromFirestore: (snapshot) => parse(statementSchema, snapshot),
+};
+
 export const studentConverter: FirestoreDataConverter<Student> = {
   toFirestore(data) {
     return {
@@ -170,9 +168,4 @@ export const variantConverter: FirestoreDataConverter<Variant> = {
 export const variantMappingConverter: FirestoreDataConverter<VariantMapping> = {
   toFirestore: (data) => convertToFirestore(data),
   fromFirestore: (snapshot) => parse(variantMappingSchema, snapshot),
-};
-
-export const schemaDocConverter: FirestoreDataConverter<SchemaDoc> = {
-  toFirestore: (data) => convertToFirestore(data),
-  fromFirestore: (snapshot) => parse(schemaDocSchema, snapshot),
 };

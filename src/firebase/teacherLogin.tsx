@@ -8,10 +8,10 @@ import { TeacherProvider } from "~/core/teacher/provider";
 import { FirebaseLogin, useDb } from "~/firebase/baseLogin";
 import {
   contestConverter,
-  schemaDocConverter,
   schoolConverter,
   solutionConverter,
   studentConverter,
+  variantConverter,
 } from "~/firebase/converters";
 import { useCollection, useSignInWithPassword } from "~/firebase/hooks";
 
@@ -90,7 +90,7 @@ function TeacherInner({ user, children }: { user: User; children: ReactNode }) {
     subscribe: true,
   });
   const [contests] = useCollection("contests", contestConverter);
-  const [variants] = useCollection("schema", schemaDocConverter);
+  const [variants] = useCollection("schema", variantConverter);
   const [solutions] = useCollection("solutions", solutionConverter);
 
   const [students, setStudent] = useCollection("students", studentConverter, {

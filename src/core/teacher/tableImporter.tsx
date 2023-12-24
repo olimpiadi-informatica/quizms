@@ -8,7 +8,7 @@ import z from "zod";
 import { Contest, parsePersonalInformation } from "~/models/contest";
 import { School } from "~/models/school";
 import { Student, studentSchema } from "~/models/student";
-import { SchemaDoc } from "~/models/variant";
+import { Variant } from "~/models/variant";
 import { randomId } from "~/utils/random";
 import validate from "~/utils/validate";
 
@@ -139,7 +139,7 @@ export default ImportModal;
 async function importStudents(
   file: string,
   contest: Contest,
-  variants: SchemaDoc[],
+  variants: Variant[],
   school: School,
   addStudent: (student: Student) => Promise<void>,
   dateFormat: string,
