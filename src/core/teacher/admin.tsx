@@ -1,14 +1,7 @@
 import React, { Suspense, useRef, useState } from "react";
 
 import classNames from "classnames";
-import {
-  addMinutes,
-  addSeconds,
-  differenceInMinutes,
-  format,
-  roundToNearestMinutes,
-} from "date-fns";
-import { it as dateLocaleIT } from "date-fns/locale";
+import { addMinutes, addSeconds, differenceInMinutes, roundToNearestMinutes } from "date-fns";
 import { saveAs } from "file-saver";
 import {
   Firestore,
@@ -58,6 +51,14 @@ function canStartContest(now: Date, school: School, contest: Contest) {
 
 function canUndoContest(now: Date, school: School) {
   return school.startingTime && now < addMinutes(school.startingTime, -1);
+}
+
+function formatTime(time: Date) {
+  return new Intl.DateTimeFormat("it-IT", { timeStyle: "short" }).format(time);
+}
+
+function formatDate(date: Date) {
+  return new Intl.DateTimeFormat("it-IT", { dateStyle: "long" }).format(date);
 }
 
 function StartContestButton({ school }: { school: School }) {
@@ -200,9 +201,7 @@ function ContestData({ contest, school }: { school: School; contest: Contest }) 
   if (now > endTime) {
     return (
       <div className="flex flex-col gap-3">
-        <p>
-          Gara iniziata alle ore {format(school.startingTime!, "HH:mm", { locale: dateLocaleIT })}.
-        </p>
+        <p>Gara iniziata alle ore {formatTime(school.startingTime!)}.</p>
         <p>La gara è terminata.</p>
       </div>
     );
@@ -213,7 +212,7 @@ function ContestData({ contest, school }: { school: School; contest: Contest }) 
         <p className="my-2 text-lg">
           <b>Codice:</b> <span className="font-mono">{school.token}</span>
         </p>
-        <p>La gara inizierà alle ore {format(school.startingTime!, "HH:mm")}.</p>
+        <p>La gara inizierà alle ore {formatTime(school.startingTime!)}.</p>
         <p>
           Tempo rimanente all&apos;inizio: <Timer endTime={school.startingTime!} />
         </p>
@@ -231,12 +230,12 @@ function ContestData({ contest, school }: { school: School; contest: Contest }) 
       <p>
         <b>Codice:</b> <span className="text-mono">{school.token}</span>
       </p>
-      <p>La gara terminerà alle {format(endTime, "HH:mm", { locale: dateLocaleIT })}.</p>
+      <p>La gara terminerà alle {formatTime(endTime)}.</p>
       <p>
         Tempo rimanente: <Timer endTime={endTime} />
       </p>
       <div className="mx-auto flex flex-col items-center justify-center gap-2 text-2xl">
-        Gara iniziata alle ore {format(school.startingTime!, "HH:mm")}.
+        Gara iniziata alle ore {formatTime(school.startingTime!)}.
       </div>
     </div>
   );
@@ -366,10 +365,8 @@ function ContestAdmin({ school, contest }: { school: School; contest: Contest })
         <div className="card-body">
           <h2 className="card-title">Informazioni Gara</h2>
           {/* contest info */}
-          La gara si potrà svolgere dalle{" "}
-          {format(contest.startingWindowStart, "HH:mm", { locale: dateLocaleIT })} alle{" "}
-          {format(contest.startingWindowEnd, "HH:mm", { locale: dateLocaleIT })} del{" "}
-          {format(contest.startingWindowStart, "d LLLL", { locale: dateLocaleIT })}.
+          La gara si potrà svolgere dalle {formatTime(contest.startingWindowStart)} alle{" "}
+          {formatTime(contest.startingWindowEnd)} del {formatDate(contest.startingWindowStart)}.
           <div className="mt-2 flex justify-center">
             <DownloadPdfButton school={school} contest={contest} />
           </div>

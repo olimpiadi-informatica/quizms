@@ -16,8 +16,7 @@ import {
   ITooltipParams,
 } from "ag-grid-community";
 import classNames from "classnames";
-import { addMinutes, format, isEqual as isEqualDate } from "date-fns";
-import { it as dateLocaleIT } from "date-fns/locale";
+import { addMinutes, isEqual as isEqualDate } from "date-fns";
 import { cloneDeep, set, sumBy } from "lodash-es";
 import { AlertTriangle, FileCheck, Upload, Users } from "lucide-react";
 
@@ -358,7 +357,7 @@ function columnDefinition(
         },
         cellRenderer: ({ api, data, value }: ICellRendererParams<Student>) => {
           if (field.type === "date" && value) {
-            return format(value, "P", { locale: dateLocaleIT });
+            return new Intl.DateTimeFormat("it-IT").format(value);
           }
           if (
             i === 0 &&

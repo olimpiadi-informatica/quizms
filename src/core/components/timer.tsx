@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-import { addMinutes, differenceInSeconds, isAfter } from "date-fns";
+import { addMinutes, differenceInSeconds } from "date-fns";
 
 import { useTime } from "./time";
 
@@ -24,7 +24,7 @@ export default function Timer(props: TimerProps) {
     const id = setInterval(() => {
       const now = getNow();
       setCurrentTime(now);
-      if (isAfter(now, endTime)) {
+      if (now >= endTime) {
         clearInterval(id);
       }
     }, 100);
