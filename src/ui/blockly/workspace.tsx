@@ -73,7 +73,11 @@ export default function Workspace({ toolbox, initialBlocks, example, debug }: Bl
               </div>
             </div>
             <div className="join-item tooltip" data-tip="Esegui un blocco">
-              <button className="btn btn-info rounded-[inherit]" disabled={!running} onClick={step}>
+              <button
+                className="btn btn-info rounded-[inherit]"
+                disabled={!running}
+                onClick={step}
+                aria-label="Esugui un blocco">
                 <SkipForward className="h-6 w-6" />
               </button>
             </div>
@@ -81,18 +85,22 @@ export default function Workspace({ toolbox, initialBlocks, example, debug }: Bl
               <button
                 className="btn btn-info rounded-[inherit]"
                 disabled={!running}
-                onClick={() => {}}>
+                onClick={() => {}}
+                aria-label="Esegui fino alla fine">
                 <FastForward className="h-6 w-6" />
               </button>
             </div>
             <div className="join-item tooltip" data-tip="Esegui da capo">
-              <button className="btn btn-info rounded-[inherit]" onClick={() => {}}>
+              <button
+                className="btn btn-info rounded-[inherit]"
+                onClick={() => {}}
+                aria-label="Esegui da capo">
                 <RotateCcw className="h-6 w-6" />
               </button>
             </div>
           </div>
           <div className="tooltip" data-tip="Invia la soluzione">
-            <button className="btn btn-success">
+            <button className="btn btn-success" aria-label="Invia la soluzione">
               <Send className="h-6 w-6" />
             </button>
           </div>
@@ -102,6 +110,7 @@ export default function Workspace({ toolbox, initialBlocks, example, debug }: Bl
             ref={setIframe}
             src={import("./workspaceEditor") as any}
             className="h-full w-full"
+            title="Area di lavoro di Blockly"
           />
           {!ready && (
             <div className="absolute inset-0 z-50 bg-white text-slate-700">
