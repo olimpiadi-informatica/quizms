@@ -37,19 +37,18 @@ export default async function staticExport(options: ExportOptions): Promise<void
           manualChunks: (id) => {
             if (id.includes("node_modules/katex/")) return "katex";
             if (id.includes("node_modules/lodash-es/")) return "lodash";
-            if (id.includes("node_modules/react-dom/")) return "react-dom";
+            if (id.includes("node_modules/@firebase/auth/")) return "firebase-auth";
+            if (id.includes("node_modules/@firebase/firestore/")) return "firestore";
             if (id.includes("node_modules/@firebase/")) return "firebase";
-            if (
-              id.includes("node_modules/highlight.js/") ||
-              id.includes("node_modules/lowlight/") ||
-              id.includes("node_modules/react-syntax-highlighter/")
-            )
-              return "highlight";
+            if (id.includes("node_modules/zod/")) return "zod";
+
+            // FIXME: the order in which chunks are loaded is apparently important, as a workaround
+            //  we need to rename react-dom to something else so that it is loaded in the correct order
+            if (id.includes("node_modules/react-dom/")) return "~react-dom";
           },
         },
       },
       sourcemap: options.training,
-      chunkSizeWarningLimit: 1000,
     },
     logLevel: "info",
   });

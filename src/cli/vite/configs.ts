@@ -3,7 +3,9 @@ import { fileURLToPath } from "node:url";
 import { CompileOptions as MdxOptions } from "@mdx-js/mdx";
 import mdxPlugin from "@mdx-js/rollup";
 import react from "@vitejs/plugin-react-swc";
+import { visualizer } from "rollup-plugin-visualizer";
 import { InlineConfig, splitVendorChunkPlugin } from "vite";
+import inspect from "vite-plugin-inspect";
 
 import { mdxOptions } from "~/mdx";
 
@@ -31,7 +33,9 @@ export default function (mode: "development" | "production", options?: Options):
       "process.env.NODE_ENV": JSON.stringify(mode),
     },
     plugins: [
+      iframe(),
       images(),
+      inspect(),
       { enforce: "pre", ...mdxPlugin({ ...mdxOptions, ...options?.mdx }) },
       python(),
       react({ plugins: swcPlugins }),
@@ -43,6 +47,7 @@ export default function (mode: "development" | "production", options?: Options):
       fs: {
         allow: [".", fileURLToPath(new URL("../..", import.meta.url))],
       },
+      host: false,
     },
   };
 }
