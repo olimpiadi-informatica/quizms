@@ -1,7 +1,13 @@
 import React, { Suspense, useRef, useState } from "react";
 
 import classNames from "classnames";
-import { addMinutes, addSeconds, differenceInMinutes, roundToNearestMinutes } from "date-fns";
+import {
+  addMinutes,
+  addSeconds,
+  differenceInMinutes,
+  roundToNearestMinutes,
+  subMinutes,
+} from "date-fns";
 import { saveAs } from "file-saver";
 import {
   Firestore,
@@ -24,8 +30,6 @@ import {
   pdfConverter,
   schoolConverter,
   schoolMappingConverter,
-  studentMappingHashConverter,
-  studentMappingUidConverter,
   studentRestoreConverter,
 } from "~/firebase/converters";
 import { studentConverter } from "~/firebase/converters";
@@ -50,7 +54,7 @@ function canStartContest(now: Date, school: School, contest: Contest) {
 }
 
 function canUndoContest(now: Date, school: School) {
-  return school.startingTime && now < addMinutes(school.startingTime, -1);
+  return school.startingTime && now < subMinutes(school.startingTime, 1);
 }
 
 function formatTime(time: Date) {
@@ -103,7 +107,7 @@ function StartContestButton({ school }: { school: School }) {
 
 async function generateToken(now: Date, db: Firestore, prevSchool: School) {
   const token = await randomToken();
-  const startingTime = roundToNearestMinutes(addSeconds(now, 210 /* 3.5 minutes */));
+  const startingTime = roundToNearestMinutes(addSeconds(now, 3.5 * 60));
 
   const school: School = {
     ...prevSchool,
@@ -141,32 +145,19 @@ function StopContestButton({ school }: { school: School }) {
   const undoContestStart = async () => {
     // delete all student connected to token
     const q = query(
-      collection(db, "students"),
+      collection(db, "students").withConverter(studentConverter),
       where("school", "==", school.id),
       where("token", "==", school.token),
     );
 
-    const students = await getDocs(q);
+    const snapshot = await getDocs(q);
+    const students = snapshot.docs.map((doc) => doc.data());
     await Promise.all(
-      students.docs.map(async (student) => {
-        await deleteDoc(
-          doc(db, "studentMappingUid", student.data().uid).withConverter(
-            studentMappingUidConverter,
-          ),
-        );
-        await deleteDoc(
-          doc(
-            db,
-            "studentMappingHash",
-            studentHash({ id: student.id, ...student.data() }),
-          ).withConverter(studentMappingHashConverter),
-        );
-      }),
-    );
-    await Promise.all(
-      students.docs.map(async (student) => {
-        await deleteDoc(doc(db, "students", student.id).withConverter(studentConverter));
-      }),
+      students.flatMap((student) => [
+        deleteDoc(doc(db, "studentMappingUid", student.uid!)),
+        deleteDoc(doc(db, "studentMappingHash", studentHash(student))),
+        deleteDoc(doc(db, "students", student.id)),
+      ]),
     );
 
     await setSchool({ ...school, token: undefined, startingTime: undefined });
