@@ -4,13 +4,15 @@ import { addMilliseconds, differenceInMilliseconds } from "date-fns";
 import useSWR from "swr/immutable";
 
 export function useTime() {
-  const { data } = useSWR("https://time1.olinfo.it/", fetcher, { suspense: true });
+  const { data } = useSWR("time-server", fetcher, { suspense: true });
 
   return () => addMilliseconds(new Date(), data);
 
-  async function fetcher(url: string) {
+  async function fetcher() {
+    if (!import.meta.env.QUIZMS_TIME_SERVER) return 0;
+
     try {
-      const resp = await fetch(url);
+      const resp = await fetch(import.meta.env.QUIZMS_TIME_SERVER);
       if (!resp.ok) return 0;
 
       const localTime = Date.now();

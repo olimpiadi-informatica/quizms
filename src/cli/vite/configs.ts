@@ -11,6 +11,7 @@ import { mdxOptions } from "~/mdx";
 
 import iframe from "./iframe";
 import images from "./images";
+import preconnect from "./preconnect";
 import python from "./python";
 
 type Options = {
@@ -37,6 +38,7 @@ export default function (mode: "development" | "production", options?: Options):
       images(),
       inspect(),
       { enforce: "pre", ...mdxPlugin({ ...mdxOptions, ...options?.mdx }) },
+      preconnect(),
       python(),
       react({ plugins: swcPlugins }),
       splitVendorChunkPlugin(),
