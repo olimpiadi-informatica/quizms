@@ -3,6 +3,9 @@ import React, { ReactNode, useCallback, useState } from "react";
 import { FirebaseOptions } from "firebase/app";
 import { User, getAuth, signOut } from "firebase/auth";
 
+import { Button } from "~/core/components/button";
+import { TeacherProvider } from "~/core/teacher/provider";
+import { FirebaseLogin, useDb } from "~/firebase/baseLogin";
 import {
   contestConverter,
   schemaDocConverter,
@@ -11,13 +14,8 @@ import {
   studentConverter,
 } from "~/firebase/converters";
 import { useCollection, useSignInWithPassword } from "~/firebase/hooks";
-import { FirebaseLogin, useDb } from "~/firebase/login";
 
-import { Button } from "../components/button";
-import { Layout } from "./layout";
-import { TeacherProvider } from "./provider";
-
-export function FirebaseTeacherLogin({
+export function TeacherLogin({
   config,
   children,
 }: {
@@ -26,12 +24,12 @@ export function FirebaseTeacherLogin({
 }) {
   return (
     <FirebaseLogin config={config}>
-      <TeacherLogin>{children}</TeacherLogin>
+      <TeacherLoginInner>{children}</TeacherLoginInner>
     </FirebaseLogin>
   );
 }
 
-function TeacherLogin({ children }: { children: ReactNode }) {
+function TeacherLoginInner({ children }: { children: ReactNode }) {
   const db = useDb();
   const auth = getAuth(db.app);
 
@@ -118,7 +116,7 @@ function TeacherInner({ user, children }: { user: User; children: ReactNode }) {
       variants={variants}
       solutions={solutions}
       logout={logout}>
-      <Layout>{children}</Layout>
+      {children}
     </TeacherProvider>
   );
 }

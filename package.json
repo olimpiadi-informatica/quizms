@@ -11,10 +11,11 @@
     "lint": "eslint --fix . ; tsc --noEmit",
     "fmt": "prettier --write src/"
   },
-  "main": "dist/index.js",
   "bin": "bin/bin.js",
   "exports": {
-    ".": "./dist/index.js",
+    "./student": "./dist/core/student/index.js",
+    "./teacher": "./dist/core/teacher/index.js",
+    "./firebase": "./dist/firebase/index.js",
     "./css": "./dist/index.css",
     "./jsx-runtime": "./dist/jsx-runtime.js"
   },
@@ -102,7 +103,6 @@
     "highlight.js": "^11.8",
     "less": "^4.1",
     "postcss": "^8.4",
-    "postcss-font-display": "^0.3",
     "prettier": "^3.0",
     "prettier-plugin-tailwindcss": "^0.5",
     "tailwindcss": "^3.2",

@@ -29,7 +29,7 @@ import { compact } from "lodash-es";
 import { useErrorBoundary } from "react-error-boundary";
 import useSWR, { MutatorOptions, SWRConfiguration } from "swr";
 
-import { useDb } from "./login";
+import { useDb } from "./baseLogin";
 
 const swrConfig: SWRConfiguration = {
   revalidateOnMount: true,

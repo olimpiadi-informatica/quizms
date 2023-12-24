@@ -4,8 +4,8 @@ import { components } from "~/mdx/components";
 
 import { useStudent } from "./provider";
 
-export function RemoteContest({ url }: { url: string }) {
-  const [Contest, setContest] = useState<ComponentType>();
+export function RemoteStatement({ url }: { url: string }) {
+  const [Statement, setStatement] = useState<ComponentType>();
   const { student } = useStudent();
 
   const variantUrl = new URL(url, import.meta.url);
@@ -15,14 +15,14 @@ export function RemoteContest({ url }: { url: string }) {
 
   useEffect(() => {
     import(/* @vite-ignore */ variantUrl.href).then(({ default: contest }) => {
-      setContest(() =>
-        memo(function Contest() {
+      setStatement(() =>
+        memo(function Statement() {
           return contest(React, components);
         }),
       );
     });
   }, [variantUrl.href]);
 
-  if (Contest) return <Contest />;
+  if (Statement) return <Statement />;
   return undefined;
 }

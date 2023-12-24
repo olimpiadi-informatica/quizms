@@ -4,6 +4,8 @@ import { Contest } from "~/models/contest";
 import { School } from "~/models/school";
 import { Student } from "~/models/student";
 
+import { Layout } from "./layout";
+
 type StudentProviderProps = {
   /** Dati dello studente */
   student: Student;
@@ -32,7 +34,11 @@ export function StudentProvider({
 }: StudentProviderProps & {
   children: ReactNode;
 }) {
-  return <StudentContext.Provider value={{ ...rest }}>{children}</StudentContext.Provider>;
+  return (
+    <StudentContext.Provider value={{ ...rest }}>
+      <Layout>{children}</Layout>
+    </StudentContext.Provider>
+  );
 }
 
 export function useStudent() {

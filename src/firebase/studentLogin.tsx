@@ -1,14 +1,6 @@
-import React, {
-  ChangeEvent,
-  ComponentType,
-  Suspense,
-  forwardRef,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { ChangeEvent, ReactNode, forwardRef, useRef, useState } from "react";
 
-import { addMilliseconds, addMinutes, formatISO } from "date-fns";
+import { addMinutes, formatISO } from "date-fns";
 import { FirebaseOptions } from "firebase/app";
 import { getAuth, signOut } from "firebase/auth";
 import {
@@ -22,6 +14,11 @@ import {
 } from "firebase/firestore";
 import { isEqual } from "lodash-es";
 
+import { Button } from "~/core/components/button";
+import Modal from "~/core/components/modal";
+import { useTime, useUpdateAt } from "~/core/components/time";
+import { StudentProvider } from "~/core/student/provider";
+import { FirebaseLogin, useDb } from "~/firebase/baseLogin";
 import {
   contestConverter,
   schoolConverter,
@@ -31,23 +28,12 @@ import {
   studentMappingUidConverter,
   studentRestoreConverter,
   submissionConverter,
-  variantConverter,
   variantMappingConverter,
 } from "~/firebase/converters";
 import { useAnonymousAuth, useCollection, useDocument } from "~/firebase/hooks";
-import { FirebaseLogin, useDb } from "~/firebase/login";
 import { parsePersonalInformation } from "~/models/contest";
 import { Student, studentHash } from "~/models/student";
 import { hash, randomId } from "~/utils/random";
-
-import { Button } from "../components/button";
-import Loading from "../components/loading";
-import Modal from "../components/modal";
-import { useTime, useUpdateAt } from "../components/time";
-import Timer from "../components/timer";
-import { Layout } from "./layout";
-import { StudentProvider, useStudent } from "./provider";
-import { RemoteContest } from "./remoteContest";
 
 class DuplicateStudentError extends Error {
   studentId: string = "";
@@ -56,28 +42,28 @@ class DuplicateStudentError extends Error {
 
 class InvalidTokenError extends Error {}
 
-export function FirebaseStudentLogin({
+export function StudentLogin({
   config,
   contestFilter,
-  header,
+  children,
 }: {
   config: FirebaseOptions;
   contestFilter?: string[];
-  header: ComponentType<any>; // TODO: rimuovimi
+  children: ReactNode;
 }) {
   return (
     <FirebaseLogin config={config}>
-      <StudentLogin header={header} contestFilter={contestFilter} />
+      <StudentLoginInner contestFilter={contestFilter}>{children}</StudentLoginInner>
     </FirebaseLogin>
   );
 }
 
-function StudentLogin({
+function StudentLoginInner({
   contestFilter,
-  header,
+  children,
 }: {
   contestFilter?: string[];
-  header: ComponentType<any>;
+  children: ReactNode;
 }) {
   const db = useDb();
   const getNow = useTime();
@@ -110,7 +96,11 @@ function StudentLogin({
   const modalRef = useRef<HTMLDialogElement>(null);
 
   if (students[0]?.startedAt) {
-    return <StudentInner header={header} student={students[0]} setStudent={setStudent} />;
+    return (
+      <StudentInner student={students[0]} setStudent={setStudent}>
+        {children}
+      </StudentInner>
+    );
   }
 
   const completed =
@@ -264,11 +254,11 @@ const StudentRestoreModal = forwardRef(function StudentRestoreModal(
 function StudentInner({
   student,
   setStudent,
-  header: Header,
+  children,
 }: {
   student: Student;
   setStudent: (student: Student) => Promise<void>;
-  header: ComponentType<any>;
+  children: ReactNode;
 }) {
   const db = useDb();
 
@@ -279,11 +269,6 @@ function StudentInner({
     await signOut(getAuth(db.app));
     window.location.reload();
   };
-
-  const [started, setStarted] = useState(false);
-  useUpdateAt(addMilliseconds(school.startingTime!, 1000 + Math.random() * 1000), () =>
-    setStarted(true),
-  );
 
   const [terminated, setTerminated] = useState(false);
   useUpdateAt(addMinutes(school.startingTime!, contest.duration!), () => setTerminated(true));
@@ -312,24 +297,7 @@ function StudentInner({
       submit={logout}
       logout={logout}
       terminated={terminated}>
-      <Layout>
-        <Header />
-        {!started && (
-          <div className="flex h-screen justify-center">
-            <div className="flex items-center justify-center text-2xl">
-              La gara inizierà tra
-              <span className="px-2">
-                <Timer endTime={school.startingTime!} />
-              </span>
-            </div>
-          </div>
-        )}
-        {started && (
-          <Suspense fallback={<Loading />}>
-            <ContestInner />
-          </Suspense>
-        )}
-      </Layout>
+      {children}
     </StudentProvider>
   );
 }
@@ -428,17 +396,4 @@ async function createStudent(db: Firestore, student: Student) {
   }
 
   return student;
-}
-
-function ContestInner() {
-  const { student } = useStudent();
-
-  const [variant] = useDocument("variants", student.variant!, variantConverter);
-
-  const url = useMemo(() => {
-    const blob = new Blob([variant.statement], { type: "text/javascript" });
-    return URL.createObjectURL(blob);
-  }, [variant.statement]);
-
-  return <RemoteContest url={url} />;
 }

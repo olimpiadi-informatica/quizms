@@ -1,11 +1,4 @@
-import React, {
-  ComponentType,
-  ReactNode,
-  SetStateAction,
-  useCallback,
-  useMemo,
-  useState,
-} from "react";
+import React, { ReactNode, SetStateAction, useCallback, useMemo, useState } from "react";
 
 import { addMinutes } from "date-fns";
 import { isFunction, range } from "lodash-es";
@@ -15,7 +8,6 @@ import { School } from "~/models/school";
 import { Student } from "~/models/student";
 
 import { useUpdateAt } from "../components/time";
-import { Layout } from "./layout";
 import { StudentProvider } from "./provider";
 
 type AuthProps = {
@@ -23,18 +15,9 @@ type AuthProps = {
   duration: number;
   questionCount?: number;
   children: ReactNode;
-
-  // Da rimuovere
-  header: ComponentType<any>;
 };
 
-export function NoAuth({
-  header: Header,
-  contestName,
-  duration,
-  questionCount,
-  children,
-}: AuthProps) {
+export function NoAuth({ contestName, duration, questionCount, children }: AuthProps) {
   const [submitted, setSubmitted] = useLocalStorage("submit", false);
 
   const [startTime, setStartTime] = useLocalStorage<Date | undefined>(
@@ -109,20 +92,17 @@ export function NoAuth({
       submit={() => setSubmitted(true)}
       reset={reset}
       terminated={submitted}>
-      <Layout>
-        <Header />
-        {import.meta.env.PROD && !startTime ? (
-          <div className="flex h-screen justify-center">
-            <div className="flex flex-col justify-center">
-              <button className="btn btn-success btn-lg" onClick={start}>
-                Inizia
-              </button>
-            </div>
+      {import.meta.env.PROD && !startTime ? (
+        <div className="flex h-screen justify-center">
+          <div className="flex flex-col justify-center">
+            <button className="btn btn-success btn-lg" onClick={start}>
+              Inizia
+            </button>
           </div>
-        ) : (
-          children
-        )}
-      </Layout>
+        </div>
+      ) : (
+        children
+      )}
     </StudentProvider>
   );
 }

@@ -4,34 +4,19 @@ import { Contest } from "~/models/contest";
 import { School } from "~/models/school";
 import { Student } from "~/models/student";
 
-import { Layout } from "./layout";
 import { StudentProvider } from "./provider";
 
 type AuthProps = {
-  contestName: string;
-  duration: number;
+  contest: Contest;
   children: ReactNode;
 };
 
-export function PrintAuth({ contestName, children }: AuthProps) {
+export function PrintAuth({ contest, children }: AuthProps) {
   const urlParams = new URLSearchParams(window.location.search);
   const variant = urlParams.get("variant") ?? "";
   const submitted = false;
 
   const startTime = undefined;
-
-  const mockContest: Contest = {
-    id: "id-finto",
-    name: contestName,
-    problemIds: [],
-    personalInformation: [
-      { name: "name", label: "Nome", type: "text" },
-      { name: "surname", label: "Cognome", type: "text" },
-    ],
-    hasVariants: true,
-    allowStudentRegistration: false,
-    allowRestart: true,
-  };
 
   const mockSchool: School = {
     id: "",
@@ -40,7 +25,7 @@ export function PrintAuth({ contestName, children }: AuthProps) {
     teacher: "",
     startingTime: startTime,
     finalized: false,
-    contestId: "id-finto",
+    contestId: contest.id,
   };
 
   const student: Student = {
@@ -52,13 +37,42 @@ export function PrintAuth({ contestName, children }: AuthProps) {
 
   return (
     <StudentProvider
-      contest={mockContest}
+      contest={contest}
       school={mockSchool}
       student={student}
       setStudent={async () => {}}
       submit={() => {}}
       terminated={submitted}>
-      <Layout>{children}</Layout>
+      <PrintForm contest={contest} variant={variant} />
+      {children}
     </StudentProvider>
+  );
+}
+
+function PrintForm({ contest, variant }: { contest: Contest; variant: string }) {
+  return (
+    <div className="grid grid-cols-2 gap-2 pb-10">
+      {contest.personalInformation.map((field) => (
+        <div key={field.name} className="form-control w-full">
+          <label className="label">
+            <span className="label-text text-lg">{field.label}</span>
+          </label>
+          <input type="text" className="input input-bordered w-full max-w-md" />
+        </div>
+      ))}
+      {contest.hasVariants && (
+        <div className="form-control w-full">
+          <label className="label">
+            <span className="label-text text-lg">Variante</span>
+          </label>
+          <input
+            type="text"
+            className="input input-bordered w-full max-w-md"
+            value={variant.split("-")[1]} // TODO: better fix
+            readOnly
+          />
+        </div>
+      )}
+    </div>
   );
 }

@@ -1,6 +1,4 @@
 export { NoAuth } from "./noAuth";
 export { StudentProvider } from "./provider";
-export { RemoteContest } from "./remoteContest";
+export { RemoteStatement } from "./remoteStatement";
 export { PrintAuth } from "./printAuth";
-export { FirebaseStudentLogin } from "./firebaseLogin";
-export { PrintForm } from "./printForm";

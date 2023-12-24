@@ -7,7 +7,7 @@ import Error from "../components/error";
 import Modal from "../components/modal";
 import { useTeacher } from "./provider";
 
-export function Layout({ children }: { children: ReactNode }) {
+export function TeacherLayout({ children }: { children: ReactNode }) {
   const { contests, schools, logout } = useTeacher();
   const instructions = contests[0].instructions;
   const modalRef = useRef<HTMLDialogElement>(null);

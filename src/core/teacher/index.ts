@@ -1,3 +1,2 @@
 export { TeacherTable } from "./table";
-export { FirebaseTeacherLogin } from "./firebaseLogin";
-export { ContestsAdminPage } from "./contestAdmin";
+export { TeacherAdmin } from "./admin";

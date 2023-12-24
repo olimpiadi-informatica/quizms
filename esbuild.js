@@ -5,7 +5,6 @@ import { Command } from "commander";
 import { build, context } from "esbuild";
 import less from "less";
 import postcss from "postcss";
-import fontDisplay from "postcss-font-display";
 import tailwindcss from "tailwindcss";
 
 /** @type {import("esbuild").Plugin} */
@@ -15,10 +14,7 @@ const cssPlugin = {
     build.onLoad({ filter: /\.css$/ }, async (args) => {
       const content = await fs.readFile(args.path, "utf8");
 
-      const processor = postcss([
-        tailwindcss,
-        fontDisplay({ test: /^KaTeX/, display: "swap", replace: false }),
-      ]);
+      const processor = postcss([tailwindcss]);
       const { css } = await processor.process(content, { from: args.path });
       return { contents: css, loader: "css" };
     });
@@ -45,7 +41,7 @@ const commonConfig = {
 /** @type {import("esbuild").BuildOptions} */
 const uiConfig = {
   ...commonConfig,
-  entryPoints: ["src/core/index.ts"],
+  entryPoints: ["src/core/student/index.ts", "src/core/teacher/index.ts", "src/firebase/index.ts"],
   packages: "external",
   platform: "browser",
   splitting: true,
@@ -67,13 +63,7 @@ const cssConfig = {
   ...commonConfig,
   entryPoints: ["src/css/index.css"],
   outfile: "dist/index.css",
-  assetNames: "fonts/[name]-[hash]",
   plugins: [cssPlugin],
-  loader: {
-    ".ttf": "file",
-    ".woff": "file",
-    ".woff2": "file",
-  },
 };
 
 /** @type {import("esbuild").BuildOptions} */

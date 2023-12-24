@@ -4,6 +4,8 @@ import { sumBy } from "lodash-es";
 import { User } from "lucide-react";
 import { ErrorBoundary } from "react-error-boundary";
 
+import Prose from "~/mdx/components/prose";
+
 import Error from "../components/error";
 import Modal from "../components/modal";
 import Progress from "../components/progress";
@@ -80,7 +82,12 @@ export function Layout({ children }: { children: ReactNode }) {
         </div>
       </div>
       <ErrorBoundary FallbackComponent={Error}>
-        <div className="screen:overflow-y-scroll">{children}</div>
+        <div className="screen:overflow-y-scroll">
+          <Prose /* TODO */>
+            <h1 className="text-balance">{contest.name}</h1>
+            {children}
+          </Prose>
+        </div>
       </ErrorBoundary>
     </div>
   );

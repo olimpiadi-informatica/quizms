@@ -1,5 +1,6 @@
 import React, { ReactNode, createContext, useContext } from "react";
 
+import { TeacherLayout } from "~/core/teacher/layout";
 import { Contest } from "~/models/contest";
 import { School } from "~/models/school";
 import { Solution } from "~/models/solution";
@@ -34,7 +35,11 @@ export function TeacherProvider({
 }: TeacherProviderProps & {
   children: ReactNode;
 }) {
-  return <TeacherContext.Provider value={props}>{children}</TeacherContext.Provider>;
+  return (
+    <TeacherContext.Provider value={props}>
+      <TeacherLayout>{children}</TeacherLayout>
+    </TeacherContext.Provider>
+  );
 }
 
 export function useTeacher() {

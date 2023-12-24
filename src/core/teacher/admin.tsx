@@ -26,6 +26,7 @@ import {
 } from "firebase/firestore";
 import { groupBy, range } from "lodash-es";
 
+import { useDb } from "~/firebase/baseLogin";
 import {
   pdfConverter,
   schoolConverter,
@@ -36,7 +37,6 @@ import {
 } from "~/firebase/converters";
 import { studentConverter } from "~/firebase/converters";
 import { useCollection } from "~/firebase/hooks";
-import { useDb } from "~/firebase/login";
 import { Contest } from "~/models/contest";
 import { School } from "~/models/school";
 import { StudentRestore, studentHash } from "~/models/student";
@@ -448,7 +448,7 @@ function DownloadPdfButton({ school, contest }: { school: School; contest: Conte
   );
 }
 
-export function ContestsAdminPage() {
+export function TeacherAdmin() {
   const { contests, schools } = useTeacher();
   const [selectedContest, setSelectedContest] = useState(schools.length === 1 ? 0 : -1);
 

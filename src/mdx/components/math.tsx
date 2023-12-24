@@ -2,6 +2,8 @@ import React, { useEffect, useRef } from "react";
 
 import katex from "katex";
 
+import "katex/dist/katex.css";
+
 type MathProps = {
   display?: boolean;
   children: string;
