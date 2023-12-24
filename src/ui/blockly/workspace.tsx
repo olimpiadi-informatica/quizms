@@ -50,7 +50,7 @@ export default function Workspace({ toolbox, initialBlocks, example, debug }: Bl
 
   useEffect(() => {
     send({ cmd: "highlight", highlightedBlock });
-  }, [highlightedBlock]);
+  }, [send, highlightedBlock]);
 
   const reset = () => {};
 
@@ -93,7 +93,7 @@ export default function Workspace({ toolbox, initialBlocks, example, debug }: Bl
             <div className="join-item tooltip" data-tip="Esegui da capo">
               <button
                 className="btn btn-info rounded-[inherit]"
-                onClick={() => {}}
+                onClick={reset}
                 aria-label="Esegui da capo">
                 <RotateCcw className="h-6 w-6" />
               </button>

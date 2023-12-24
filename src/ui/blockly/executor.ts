@@ -10,7 +10,7 @@ export default function useExecutor(code: string, input: string) {
       const interpreter = new BlocklyInterpreter(code, input);
       setInterpreter(interpreter);
     });
-  }, []);
+  }, [code, input]);
 
   const [state, setState] = useState({
     output: "",
