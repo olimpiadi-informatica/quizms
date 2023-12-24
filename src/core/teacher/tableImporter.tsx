@@ -9,11 +9,12 @@ import { Contest } from "~/models/contest";
 import { School } from "~/models/school";
 import { Student, studentSchema } from "~/models/student";
 import { SchemaDoc } from "~/models/variant";
-import { Button } from "~/ui/components/button";
-import Modal from "~/ui/components/modal";
-import { useTeacher } from "~/ui/teacher/provider";
 import { randomId } from "~/utils/random";
 import validate from "~/utils/validate";
+
+import { Button } from "../components/button";
+import Modal from "../components/modal";
+import { useTeacher } from "../teacher/provider";
 
 const ImportModal = forwardRef(function ImportModal(
   {

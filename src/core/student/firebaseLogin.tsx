@@ -38,16 +38,16 @@ import { useAnonymousAuth, useCollection, useDocument } from "~/firebase/hooks";
 import { FirebaseLogin, useDb } from "~/firebase/login";
 import { parsePersonalInformation } from "~/models/contest";
 import { Student, studentHash } from "~/models/student";
-import { RemoteContest } from "~/ui";
-import { Button } from "~/ui/components/button";
-import Loading from "~/ui/components/loading";
-import { useTime, useUpdateAt } from "~/ui/components/time";
-import Timer from "~/ui/components/timer";
 import { hash, randomId } from "~/utils/random";
 
+import { Button } from "../components/button";
+import Loading from "../components/loading";
 import Modal from "../components/modal";
+import { useTime, useUpdateAt } from "../components/time";
+import Timer from "../components/timer";
 import { Layout } from "./layout";
 import { StudentProvider, useStudent } from "./provider";
+import { RemoteContest } from "./remoteContest";
 
 class DuplicateStudentError extends Error {
   studentId: string = "";

@@ -13,8 +13,8 @@ import { isFunction, range } from "lodash-es";
 import { Contest } from "~/models/contest";
 import { School } from "~/models/school";
 import { Student } from "~/models/student";
-import { useUpdateAt } from "~/ui/components/time";
 
+import { useUpdateAt } from "../components/time";
 import { Layout } from "./layout";
 import { StudentProvider } from "./provider";
 

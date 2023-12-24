@@ -4,12 +4,10 @@ import { sumBy } from "lodash-es";
 import { User } from "lucide-react";
 import { ErrorBoundary } from "react-error-boundary";
 
-import Error from "~/ui/components/error";
-import Modal from "~/ui/components/modal";
-import Progress from "~/ui/components/progress";
-import Prose from "~/ui/components/prose";
-import Timer from "~/ui/components/timer";
-
+import Error from "../components/error";
+import Modal from "../components/modal";
+import Progress from "../components/progress";
+import Timer from "../components/timer";
 import { useStudent } from "./provider";
 
 export function Layout({ children }: { children: ReactNode }) {
@@ -82,9 +80,7 @@ export function Layout({ children }: { children: ReactNode }) {
         </div>
       </div>
       <ErrorBoundary FallbackComponent={Error}>
-        <div className="screen:overflow-y-scroll">
-          <Prose>{children}</Prose>
-        </div>
+        <div className="screen:overflow-y-scroll">{children}</div>
       </ErrorBoundary>
     </div>
   );

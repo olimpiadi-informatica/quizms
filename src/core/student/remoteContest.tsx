@@ -1,6 +1,6 @@
 import React, { ComponentType, memo, useEffect, useState } from "react";
 
-import { components } from "~/ui/mdxComponents";
+import { components } from "~/mdx/components";
 
 import { useStudent } from "./provider";
 

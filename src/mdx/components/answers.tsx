@@ -11,10 +11,10 @@ import React, {
 import classNames from "classnames";
 import { Trash2 } from "lucide-react";
 
+import { useStudent } from "~/core/student/provider";
 import { Rng } from "~/utils/random";
 
 import { useProblem } from "./problem";
-import { useStudent } from "./student/provider";
 
 type AnswerContextProps = {
   id: string;

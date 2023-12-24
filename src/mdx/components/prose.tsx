@@ -3,7 +3,7 @@ import React, { ReactNode } from "react";
 import { MDXProvider } from "@mdx-js/react";
 import classNames from "classnames";
 
-import { components } from "../mdxComponents";
+import { components } from "./index";
 
 export default function Prose({ children }: { children: ReactNode }) {
   return (

@@ -40,13 +40,13 @@ import { useDb } from "~/firebase/login";
 import { Contest } from "~/models/contest";
 import { School } from "~/models/school";
 import { StudentRestore, studentHash } from "~/models/student";
-import { Button, LoadingButtons } from "~/ui/components/button";
-import Loading from "~/ui/components/loading";
-import Modal from "~/ui/components/modal";
-import { useTime, useUpdateAt } from "~/ui/components/time";
-import Timer from "~/ui/components/timer";
 import { hash, randomToken } from "~/utils/random";
 
+import { Button, LoadingButtons } from "../components/button";
+import Loading from "../components/loading";
+import Modal from "../components/modal";
+import { useTime, useUpdateAt } from "../components/time";
+import Timer from "../components/timer";
 import { useTeacher } from "./provider";
 
 function canStartContest(now: Date, school: School, contest: Contest) {

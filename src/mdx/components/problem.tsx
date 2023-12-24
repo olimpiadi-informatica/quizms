@@ -10,10 +10,10 @@ import React, {
 
 import { noop } from "lodash-es";
 
+import { useStudent } from "~/core/student/provider";
 import { hash } from "~/utils/random";
 
 import { useContest } from "./contest";
-import { useStudent } from "./student/provider";
 
 type StatementProps = {
   variant?: (id: number) => number;

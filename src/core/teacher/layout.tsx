@@ -3,9 +3,8 @@ import React, { ReactNode, useRef } from "react";
 import { BadgeInfo, GraduationCap } from "lucide-react";
 import { ErrorBoundary } from "react-error-boundary";
 
-import Error from "~/ui/components/error";
-import Modal from "~/ui/components/modal";
-
+import Error from "../components/error";
+import Modal from "../components/modal";
 import { useTeacher } from "./provider";
 
 export function Layout({ children }: { children: ReactNode }) {

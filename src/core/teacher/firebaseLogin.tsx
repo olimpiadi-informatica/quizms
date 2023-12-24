@@ -12,8 +12,8 @@ import {
 } from "~/firebase/converters";
 import { useCollection, useSignInWithPassword } from "~/firebase/hooks";
 import { FirebaseLogin, useDb } from "~/firebase/login";
-import { Button } from "~/ui/components/button";
 
+import { Button } from "../components/button";
 import { Layout } from "./layout";
 import { TeacherProvider } from "./provider";
 

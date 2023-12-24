@@ -7,7 +7,7 @@ import { visualizer } from "rollup-plugin-visualizer";
 import { InlineConfig, splitVendorChunkPlugin } from "vite";
 import inspect from "vite-plugin-inspect";
 
-import { mdxOptions } from "~/mdx";
+import { mdxOptions } from "~/mdx/plugins";
 
 import iframe from "./iframe";
 import images from "./images";

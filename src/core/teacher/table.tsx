@@ -27,14 +27,14 @@ import { score } from "~/models/score";
 import { Solution } from "~/models/solution";
 import { Student, studentHash } from "~/models/student";
 import { SchemaDoc } from "~/models/variant";
-import Loading from "~/ui/components/loading";
-import Modal from "~/ui/components/modal";
-import { useTime, useUpdateAt } from "~/ui/components/time";
-import { agGridLocaleIT } from "~/ui/teacher/tableLocale";
 import { randomId } from "~/utils/random";
 
+import Loading from "../components/loading";
+import Modal from "../components/modal";
+import { useTime, useUpdateAt } from "../components/time";
 import { useTeacher } from "./provider";
 import ImportModal from "./tableImporter";
+import { agGridLocaleIT } from "./tableLocale";
 
 const AgGridReact = lazy(() => import("ag-grid-react").then((m) => ({ default: m.AgGridReact })));
 

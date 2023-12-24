@@ -45,7 +45,7 @@ const commonConfig = {
 /** @type {import("esbuild").BuildOptions} */
 const uiConfig = {
   ...commonConfig,
-  entryPoints: ["src/ui/index.ts"],
+  entryPoints: ["src/core/index.ts"],
   packages: "external",
   platform: "browser",
   splitting: true,

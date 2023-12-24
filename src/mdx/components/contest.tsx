@@ -13,8 +13,8 @@ import React, {
 
 import { isNil, sumBy } from "lodash-es";
 
-import Modal from "./components/modal";
-import { useStudent } from "./student/provider";
+import Modal from "~/core/components/modal";
+import { useStudent } from "~/core/student/provider";
 
 type Problem = {
   id: string;

@@ -5,9 +5,9 @@ import { browserLocalPersistence, debugErrorMap, getAuth, initializeAuth } from 
 import { Firestore, initializeFirestore, persistentLocalCache } from "firebase/firestore";
 import { ErrorBoundary, FallbackProps } from "react-error-boundary";
 
-import Error from "~/ui/components/error";
-import Loading from "~/ui/components/loading";
-import { useTime } from "~/ui/components/time";
+import Error from "~/core/components/error";
+import Loading from "~/core/components/loading";
+import { useTime } from "~/core/components/time";
 
 import { useAuth } from "./hooks";
 
