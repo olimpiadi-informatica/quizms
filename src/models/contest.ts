@@ -58,7 +58,7 @@ export function parsePersonalInformation(
   if (!schema) return value;
   switch (schema.type) {
     case "text":
-      return value;
+      return value.trim();
     case "number": {
       const unbounded = Number(value);
       if ((schema?.min ?? -Infinity) <= unbounded && unbounded <= (schema?.max ?? Infinity)) {

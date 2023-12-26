@@ -70,7 +70,7 @@ service cloud.firestore {
 
         function studentHash(student) {
             let data = student.personalInformation;
-            let joined = [data.name, data.surname, data.classYear, data.classSection, student.token].join('$');
+            let joined = [data.name, data.surname, data.classYear, data.classSection, student.token].join('$').lower();
             return hashing.sha256(joined).toHexString();
         }
 
