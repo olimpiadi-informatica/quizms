@@ -46,6 +46,7 @@
     "file-saver": "^2.0.5",
     "firebase": "^10.6",
     "firebase-admin": "^11.11",
+    "firebase-tools": "^13.0",
     "js-interpreter": "^5.0",
     "katex": "^0.16",
     "lodash-es": "^4.17",

@@ -1,5 +1,6 @@
 import { Command } from "commander";
 
+import deploy from "./deploy";
 import exportContests from "./export";
 import importContests from "./import";
 
@@ -7,6 +8,11 @@ export default function firebaseCommand() {
   const command = new Command("firebase");
 
   command.description("commands to interact with the Firebase database.");
+
+  command
+    .command("deploy")
+    .description("Deploy the website.")
+    .action(() => deploy());
 
   command
     .command("export")
