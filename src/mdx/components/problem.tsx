@@ -2,13 +2,14 @@ import React, {
   ComponentType,
   ReactNode,
   createContext,
+  memo,
+  useCallback,
   useContext,
   useEffect,
-  useMemo,
   useState,
 } from "react";
 
-import { noop } from "lodash-es";
+import { noop, range } from "lodash-es";
 
 import { useStudent } from "~/core/student/provider";
 import { hash } from "~/utils/random";
@@ -16,7 +17,8 @@ import { hash } from "~/utils/random";
 import { useContest } from "./contest";
 
 type StatementProps = {
-  variant?: (id: number) => number;
+  variant: (id: number) => number;
+  setVariantCount: (count: number) => void;
 };
 
 type ProblemProps = {
@@ -38,20 +40,47 @@ const ProblemContext = createContext<ProblemContextProps>({
 });
 ProblemContext.displayName = "ProblemContext";
 
-export function Problem({ id, points, statement: Statement }: ProblemProps) {
+export function Problem({ id, points, statement }: ProblemProps) {
   const { student } = useStudent();
 
-  const variantId = useMemo(
-    () =>
-      import.meta.env.QUIZMS_MODE === "training" && student.variant
-        ? hash(`r#problem#${student.variant}#${id}`)
-        : 0,
-    [student.variant, id],
+  const [variantCount, setVariantCount] = useState(1);
+  const [variant, setVariant] = useState(() =>
+    import.meta.env.QUIZMS_MODE === "training" && student.variant
+      ? hash(`r#problem#${student.variant}#${id}`)
+      : 0,
   );
+
+  const getVariant = useCallback(() => variant, [variant]);
+  const setVariantCountOnce = useCallback(
+    (count: number) => {
+      if (count && count !== variantCount) {
+        setTimeout(() => setVariantCount(count), 0);
+      }
+    },
+    [variantCount],
+  );
+
+  const Statement = memo(statement);
 
   return (
     <ProblemContext.Provider value={{ id, points, setCorrect: noop }}>
-      <Statement variant={() => variantId} />
+      <div className="relative">
+        {import.meta.env.DEV && (
+          <div className="absolute right-0 top-0">
+            <select
+              className="select select-ghost"
+              value={variant}
+              onChange={(e) => setVariant(+e.target.value)}>
+              {range(variantCount).map((v) => (
+                <option key={v} value={v}>
+                  Variante {v + 1}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+        <Statement variant={getVariant} setVariantCount={setVariantCountOnce} />
+      </div>
       <hr className="last:hidden" />
     </ProblemContext.Provider>
   );

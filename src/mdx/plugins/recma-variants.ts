@@ -49,72 +49,88 @@ function injectLocalVariables(ast: Program, problemId: number) {
     $: { scope: true },
 
     FunctionDeclaration(path) {
-      const variables = Object.keys(path.scope!.globalBindings).filter(
+      const variableNames = Object.keys(path.scope!.globalBindings).filter(
         (name) => (name.length === 1 || name !== upperFirst(name)) && !wellKnownGlobals.has(name),
       );
 
       const node = path.node!;
       if (node.id?.name === "_createMdxContent") {
-        node.body.body.unshift(
-          b.variableDeclaration("const", [
-            b.variableDeclarator(
-              b.identifier("__variant__"),
-              b.binaryExpression(
-                "%",
-                b.logicalExpression(
-                  "??",
-                  b.callExpression(
-                    b.memberExpression(b.identifier("props"), b.identifier("variant"), false, true),
-                    [b.literal(problemId)],
-                    true,
-                  ),
-                  b.literal(0),
-                ),
+        // const __variantCount__ = (frontmatter?.variants ?? variants).length;
+        const variantCount = b.variableDeclaration("const", [
+          b.variableDeclarator(
+            b.identifier("__variantCount__"),
+            b.memberExpression(
+              b.logicalExpression(
+                "??",
                 b.memberExpression(
-                  b.logicalExpression(
-                    "??",
-                    b.memberExpression(
-                      b.identifier("frontmatter"),
-                      b.identifier("variants"),
-                      false,
-                      true,
-                    ),
-                    b.identifier("variants"),
-                  ),
-                  b.identifier("length"),
-                ),
-              ),
-            ),
-          ]),
-          b.variableDeclaration("const", [
-            b.variableDeclarator(
-              b.objectPattern(
-                variables.map(
-                  (name) =>
-                    b.property(
-                      "init",
-                      b.identifier(name),
-                      b.identifier(name),
-                    ) as AssignmentProperty,
-                ),
-              ),
-              b.memberExpression(
-                b.logicalExpression(
-                  "??",
-                  b.memberExpression(
-                    b.identifier("frontmatter"),
-                    b.identifier("variants"),
-                    false,
-                    true,
-                  ),
+                  b.identifier("frontmatter"),
                   b.identifier("variants"),
+                  false,
+                  true,
                 ),
-                b.identifier("__variant__"),
-                true,
+                b.identifier("variants"),
+              ),
+              b.identifier("length"),
+            ),
+          ),
+        ]);
+
+        // props?.setVariantCount?.(__variantCount__);
+        const setVariantCount = b.expressionStatement(
+          b.callExpression(
+            b.memberExpression(b.identifier("props"), b.identifier("setVariantCount"), false, true),
+            [b.identifier("__variantCount__")],
+            true,
+          ),
+        );
+
+        // const __variant__ = (props?.variant ?? 0) % __variantCount__;
+        const variant = b.variableDeclaration("const", [
+          b.variableDeclarator(
+            b.identifier("__variant__"),
+            b.binaryExpression(
+              "%",
+              b.logicalExpression(
+                "??",
+                b.callExpression(
+                  b.memberExpression(b.identifier("props"), b.identifier("variant"), false, true),
+                  [b.literal(problemId)],
+                  true,
+                ),
+                b.literal(0),
+              ),
+              b.identifier("__variantCount__"),
+            ),
+          ),
+        ]);
+
+        // const { ... } = (frontmatter?.variants ?? variants)[__variant__];
+        const variables = b.variableDeclaration("const", [
+          b.variableDeclarator(
+            b.objectPattern(
+              variableNames.map(
+                (name) =>
+                  b.property("init", b.identifier(name), b.identifier(name)) as AssignmentProperty,
               ),
             ),
-          ]),
-        );
+            b.memberExpression(
+              b.logicalExpression(
+                "??",
+                b.memberExpression(
+                  b.identifier("frontmatter"),
+                  b.identifier("variants"),
+                  false,
+                  true,
+                ),
+                b.identifier("variants"),
+              ),
+              b.identifier("__variant__"),
+              true,
+            ),
+          ),
+        ]);
+
+        node.body.body.unshift(variantCount, setVariantCount, variant, variables);
       }
     },
   });
