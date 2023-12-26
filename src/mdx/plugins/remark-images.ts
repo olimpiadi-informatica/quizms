@@ -123,7 +123,7 @@ const remarkImages: Plugin<[], Root> = () => {
             "src",
             b.conditionalExpression(
               b.binaryExpression("===", b.unaryExpression("typeof", imgSrc), b.literal("function")),
-              b.callExpression(imgSrc, [b.identifier("__variant__")]),
+              b.callExpression(imgSrc, [b.identifier("_variant")]),
               imgSrc,
             ),
           ),

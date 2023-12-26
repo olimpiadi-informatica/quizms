@@ -42,52 +42,38 @@ function findVariants(ast: Program) {
   return variantsFound;
 }
 
-const wellKnownGlobals = new Set(["console", "import", "parseInt", "undefined"]);
-
 function injectLocalVariables(ast: Program, problemId: number) {
   traverse(ast, {
     $: { scope: true },
 
     FunctionDeclaration(path) {
       const variableNames = Object.keys(path.scope!.globalBindings).filter(
-        (name) => (name.length === 1 || name !== upperFirst(name)) && !wellKnownGlobals.has(name),
+        (name) => /^([a-z]|[A-Z]$)/.test(name) && name !== "import" && name !== "undefined",
       );
 
       const node = path.node!;
       if (node.id?.name === "_createMdxContent") {
-        // const __variantCount__ = (frontmatter?.variants ?? variants).length;
-        const variantCount = b.variableDeclaration("const", [
+        // const _allVariants = frontmatter?.variants ?? variants;
+        const allVariants = b.variableDeclaration("const", [
           b.variableDeclarator(
-            b.identifier("__variantCount__"),
-            b.memberExpression(
-              b.logicalExpression(
-                "??",
-                b.memberExpression(
-                  b.identifier("frontmatter"),
-                  b.identifier("variants"),
-                  false,
-                  true,
-                ),
+            b.identifier("_allVariants"),
+            b.logicalExpression(
+              "??",
+              b.memberExpression(
+                b.identifier("frontmatter"),
                 b.identifier("variants"),
+                false,
+                true,
               ),
-              b.identifier("length"),
+              b.identifier("variants"),
             ),
           ),
         ]);
 
-        // props?.setVariantCount?.(__variantCount__);
-        const setVariantCount = b.expressionStatement(
-          b.callExpression(
-            b.memberExpression(b.identifier("props"), b.identifier("setVariantCount"), false, true),
-            [b.identifier("__variantCount__")],
-            true,
-          ),
-        );
-
-        // const __variant__ = (props?.variant ?? 0) % __variantCount__;
+        // const _variant = (props?.variant ?? 0) % _allVariants.length;
         const variant = b.variableDeclaration("const", [
           b.variableDeclarator(
-            b.identifier("__variant__"),
+            b.identifier("_variant"),
             b.binaryExpression(
               "%",
               b.logicalExpression(
@@ -99,12 +85,51 @@ function injectLocalVariables(ast: Program, problemId: number) {
                 ),
                 b.literal(0),
               ),
-              b.identifier("__variantCount__"),
+              b.memberExpression(b.identifier("_allVariants"), b.identifier("length")),
             ),
           ),
         ]);
 
-        // const { ... } = (frontmatter?.variants ?? variants)[__variant__];
+        // for (const _variable of Object.keys(_allVariants[_variant]))
+        //   if (/^[^a-z]./.test(name))
+        //     throw new Error(`Invalid variable name: ${_variable}`);
+        const checkVariables = b.forOfStatement(
+          b.variableDeclaration("const", [b.variableDeclarator(b.identifier("_variable"))]),
+          b.callExpression(b.memberExpression(b.identifier("Object"), b.identifier("keys")), [
+            b.memberExpression(b.identifier("_allVariants"), b.identifier("_variant"), true),
+          ]),
+          b.ifStatement(
+            b.callExpression(
+              b.memberExpression(
+                {
+                  type: "Literal",
+                  regex: {
+                    pattern: "^[^a-z].",
+                    flags: "",
+                  },
+                },
+                b.identifier("test"),
+              ),
+              [b.identifier("_variable")],
+            ),
+            b.throwStatement(
+              b.newExpression(b.identifier("Error"), [
+                b.binaryExpression(
+                  "+",
+                  b.binaryExpression(
+                    "+",
+                    b.literal("Invalid variable name: `"),
+                    b.identifier("_variable"),
+                  ),
+                  b.literal("`. Variables names must start with a lowercase letter."),
+                ),
+              ]),
+            ),
+          ),
+          false,
+        );
+
+        // const { ... } = _allVariants[_variant];
         const variables = b.variableDeclaration("const", [
           b.variableDeclarator(
             b.objectPattern(
@@ -113,24 +138,20 @@ function injectLocalVariables(ast: Program, problemId: number) {
                   b.property("init", b.identifier(name), b.identifier(name)) as AssignmentProperty,
               ),
             ),
-            b.memberExpression(
-              b.logicalExpression(
-                "??",
-                b.memberExpression(
-                  b.identifier("frontmatter"),
-                  b.identifier("variants"),
-                  false,
-                  true,
-                ),
-                b.identifier("variants"),
-              ),
-              b.identifier("__variant__"),
-              true,
-            ),
+            b.memberExpression(b.identifier("_allVariants"), b.identifier("_variant"), true),
           ),
         ]);
 
-        node.body.body.unshift(variantCount, setVariantCount, variant, variables);
+        // props?.setVariantCount?.(_allVariants.length);
+        const setVariantCount = b.expressionStatement(
+          b.callExpression(
+            b.memberExpression(b.identifier("props"), b.identifier("setVariantCount"), false, true),
+            [b.memberExpression(b.identifier("_allVariants"), b.identifier("length"))],
+            true,
+          ),
+        );
+
+        node.body.body.unshift(allVariants, variant, checkVariables, variables, setVariantCount);
       }
     },
   });
