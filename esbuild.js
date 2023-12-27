@@ -56,10 +56,10 @@ const uiConfig = {
 /** @type {import("esbuild").BuildOptions} */
 const cliConfig = {
   ...commonConfig,
-  entryPoints: ["src/cli/index.ts"],
+  entryPoints: ["src/cli/index.ts", "src/jsx-runtime/index.ts"],
   packages: "external",
   platform: "node",
-  outfile: "dist/cli.js",
+  outdir: "dist",
 };
 
 /** @type {import("esbuild").BuildOptions} */
@@ -70,22 +70,13 @@ const cssConfig = {
   plugins: [cssPlugin],
 };
 
-/** @type {import("esbuild").BuildOptions} */
-const jsxRuntimeConfig = {
-  ...commonConfig,
-  entryPoints: ["src/jsx-runtime/index.ts"],
-  packages: "external",
-  platform: "node",
-  outfile: "dist/jsx-runtime.js",
-};
-
 const command = new Command();
 
 command
   .command("build")
   .description("Create a production build")
   .action(async () => {
-    for (const config of [uiConfig, cliConfig, cssConfig, jsxRuntimeConfig]) {
+    for (const config of [uiConfig, cliConfig, cssConfig]) {
       await build(config);
     }
   });
@@ -105,7 +96,7 @@ command
       },
     };
 
-    for (const config of [uiConfig, cliConfig, jsxRuntimeConfig]) {
+    for (const config of [uiConfig, cliConfig]) {
       const ctx = await context({
         ...config,
         minifyIdentifiers: false,
