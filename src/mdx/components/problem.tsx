@@ -17,7 +17,7 @@ import { hash } from "~/utils/random";
 import { useContest } from "./contest";
 
 type StatementProps = {
-  variant: (id: number) => number;
+  variant: () => number;
   setVariantCount: (count: number) => void;
 };
 

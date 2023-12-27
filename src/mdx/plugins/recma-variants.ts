@@ -2,13 +2,11 @@ import { AssignmentProperty, Program } from "estree";
 import { builders as b, is, traverse } from "estree-toolkit";
 import { Plugin } from "unified";
 
-import { hash } from "~/utils/random";
-
 const recmaVariants: Plugin<[], Program> = () => {
-  return (ast, file) => {
+  return (ast) => {
     const found = findVariants(ast);
     if (found) {
-      injectLocalVariables(ast, hash(file.value));
+      injectLocalVariables(ast);
     }
   };
 };
@@ -41,7 +39,7 @@ function findVariants(ast: Program) {
   return variantsFound;
 }
 
-function injectLocalVariables(ast: Program, problemId: number) {
+function injectLocalVariables(ast: Program) {
   traverse(ast, {
     $: { scope: true },
 
@@ -79,7 +77,7 @@ function injectLocalVariables(ast: Program, problemId: number) {
                 "??",
                 b.callExpression(
                   b.memberExpression(b.identifier("props"), b.identifier("variant"), false, true),
-                  [b.literal(problemId)],
+                  [],
                   true,
                 ),
                 b.literal(0),
