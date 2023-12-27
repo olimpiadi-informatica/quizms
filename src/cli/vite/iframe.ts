@@ -4,11 +4,14 @@ import { Node as AcornNode } from "acorn";
 import { is, traverse } from "estree-toolkit";
 import { isString } from "lodash-es";
 import MagicString from "magic-string";
+import { OutputChunk } from "rollup";
 import { PluginOption } from "vite";
+
+import { warning } from "~/cli/utils/logs";
 
 export default function iframe(): PluginOption {
   let isBuild = false;
-  const iframeIds: [string, string, string][] = [];
+  const iframeIds: [string, string][] = [];
 
   return {
     name: "iframe",
@@ -48,16 +51,16 @@ export default function iframe(): PluginOption {
           ) {
             for (const prop of props.properties) {
               if (!is.property(prop) || !is.identifier(prop.key)) {
-                console.warn("cannot analyze iframe property:", prop);
+                warning(`cannot analyze iframe property: ${prop.type}`);
                 continue;
               }
               if (prop.key.name !== "src") continue;
               if (!is.importExpression(prop.value)) {
-                console.warn("iframe src is not an import expression:", prop);
+                warning(`iframe src is not an import expression: ${prop.type}`);
                 continue;
               }
               if (!is.literal(prop.value.source) || !isString(prop.value.source.value)) {
-                console.warn("iframe src is not a literal:", prop);
+                warning(`iframe src is not a literal: ${prop.type}`);
                 continue;
               }
 
@@ -75,7 +78,7 @@ export default function iframe(): PluginOption {
                   type: "asset",
                   fileName: `assets/iframe-${srcId}.html`,
                 });
-                iframeIds.push([srcPath, srcId, iframeId]);
+                iframeIds.push([srcId, iframeId]);
 
                 srcValue = `import.meta.ROLLUP_FILE_URL_${iframeId}`;
               } else {
@@ -95,11 +98,32 @@ export default function iframe(): PluginOption {
       return { code: s.toString(), map: /* TODO */ null };
     },
     generateBundle(this, options, bundle) {
-      for (const [srcPath, srcId, iframeId] of iframeIds) {
-        const name = basename(srcPath, ".js") + ".css";
-        const css = Object.values(bundle).find((chunk) => chunk.name === name);
+      for (const [srcId, iframeId] of iframeIds) {
+        const entry = bundle[this.getFileName(srcId)] as OutputChunk;
 
-        this.setAssetSource(iframeId, iframeHtml(this.getFileName(srcId), css?.fileName));
+        const modules = new Set<string>();
+        const queue = [entry];
+
+        while (queue.length) {
+          const chunk = queue.pop()!;
+          for (const dep of [...chunk.imports, ...chunk.dynamicImports]) {
+            if (modules.has(dep)) continue;
+            modules.add(dep);
+            queue.push(bundle[dep] as OutputChunk);
+          }
+          for (const css of chunk.viteMetadata?.importedCss ?? []) {
+            modules.add(css);
+          }
+        }
+
+        const head = [...modules]
+          .map((fileName) => {
+            const rel = fileName.endsWith(".css") ? "stylesheet" : "modulepreload";
+            return `<link rel="${rel}" href="/${fileName}">`;
+          })
+          .join("\n    ");
+
+        this.setAssetSource(iframeId, iframeHtml(entry.fileName, head));
       }
     },
     configureServer(server) {
@@ -116,15 +140,15 @@ export default function iframe(): PluginOption {
   };
 }
 
-function iframeHtml(src: string, css?: string) {
+function iframeHtml(src: string, head?: string) {
   return `\
 <!DOCTYPE html>
 <html lang="it">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    ${css ? `<link rel="stylesheet" href="/${css}">` : ""}
     <title>iframe</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    ${head ?? ""}
   </head>
   <body>
     <div id="app"></div>
