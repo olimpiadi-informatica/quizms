@@ -15,6 +15,7 @@ import iframe from "./iframe";
 import images from "./images";
 import preconnect from "./preconnect";
 import python from "./python";
+import reactEntry from "./reactEntry";
 
 type Options = {
   mdx?: MdxOptions;
@@ -54,6 +55,7 @@ export default function (
       preconnect(),
       python(),
       react({ plugins: swcPlugins }),
+      reactEntry(),
       splitVendorChunkPlugin(),
       visualizer({ filename: "dist/stats.html" }),
     ],

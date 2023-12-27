@@ -7,7 +7,8 @@ import MagicString from "magic-string";
 import { OutputChunk } from "rollup";
 import { PluginOption } from "vite";
 
-import { warning } from "~/cli/utils/logs";
+import { warning } from "../utils/logs";
+import htmlTemplate from "./htmlTemplate";
 
 export default function iframe(): PluginOption {
   let isBuild = false;
@@ -122,37 +123,26 @@ export default function iframe(): PluginOption {
             return `<link rel="${rel}" href="/${fileName}">`;
           })
           .join("\n    ");
+        const body = `<script type="module" src="/${entry.fileName}"></script>`;
+        const html = htmlTemplate(body, head);
 
-        this.setAssetSource(iframeId, iframeHtml(entry.fileName, head));
+        this.setAssetSource(iframeId, html);
       }
     },
     configureServer(server) {
-      server.middlewares.use((req, res, next) => {
+      server.middlewares.use(async (req, res, next) => {
         const url = new URL(req.url!, `http://${req.headers.host}`);
         if (url.pathname === "/__iframe.html") {
+          const body = `<script type="module" src="/@fs${url.searchParams.get("src")}"></script>`;
+          const html = htmlTemplate(body);
+          const finalHtml = await server.transformIndexHtml(req.url!, html);
+
           res.setHeader("Content-Type", "text/html");
-          res.end(iframeHtml("@fs" + url.searchParams.get("src")!));
+          res.end(finalHtml);
         } else {
           next();
         }
       });
     },
   };
-}
-
-function iframeHtml(src: string, head?: string) {
-  return `\
-<!DOCTYPE html>
-<html lang="it">
-  <head>
-    <meta charset="utf-8" />
-    <title>iframe</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    ${head ?? ""}
-  </head>
-  <body>
-    <div id="app"></div>
-    <script type="module" src="/${src}"></script>
-  </body>
-</html>`;
 }

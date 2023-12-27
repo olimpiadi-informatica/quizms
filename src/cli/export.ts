@@ -1,4 +1,4 @@
-import { dirname, join } from "node:path";
+import { dirname, extname, join } from "node:path";
 
 import glob from "fast-glob";
 import { build } from "vite";
@@ -18,10 +18,18 @@ export default async function staticExport(options: ExportOptions): Promise<void
     process.env.QUIZMS_MODE = "contest";
   }
 
-  const pages = await glob("src/**/index.html", {
-    cwd: options.dir,
+  const root = join(options.dir, "src");
+  const pages = await glob("**/index.{html,jsx}", {
+    cwd: root,
   });
-  const inputs = Object.fromEntries(pages.map((p) => [dirname(p).replace(/\W/g, "-"), p]));
+  const input = Object.fromEntries(
+    pages.map((p) => {
+      const name = "page-" + dirname(p).replace(/\W/g, "-");
+      const entry =
+        extname(p) === ".jsx" ? `virtual:react-entry?src=${encodeURIComponent(p)}` : join(root, p);
+      return [name, entry];
+    }),
+  );
 
   await build({
     ...configs(join(options.dir, "src"), "production"),
@@ -31,7 +39,7 @@ export default async function staticExport(options: ExportOptions): Promise<void
       emptyOutDir: true,
       assetsInlineLimit: 1024,
       rollupOptions: {
-        input: inputs,
+        input,
         output: {
           manualChunks: (id) => {
             if (id.includes("node_modules/katex/")) return "katex";
