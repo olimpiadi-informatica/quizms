@@ -1,4 +1,4 @@
-import { basename, dirname, join } from "node:path";
+import { dirname, join } from "node:path";
 
 import { Node as AcornNode } from "acorn";
 import { is, traverse } from "estree-toolkit";

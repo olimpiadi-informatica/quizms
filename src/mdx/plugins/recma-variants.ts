@@ -1,6 +1,5 @@
 import { AssignmentProperty, Program } from "estree";
 import { builders as b, is, traverse } from "estree-toolkit";
-import { upperFirst } from "lodash-es";
 import { Plugin } from "unified";
 
 import { hash } from "~/utils/random";

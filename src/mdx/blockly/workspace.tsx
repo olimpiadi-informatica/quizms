@@ -41,10 +41,10 @@ export default function Workspace({ toolbox, initialBlocks, example, debug }: Bl
       setReady(true);
     } else if (data.cmd === "blocks") {
       setBlocks(data.blocks);
-      if (debug?.logBlocks) console.log(JSON.stringify(data.blocks, null, 2));
+      if (debug?.logBlocks) console.info(JSON.stringify(data.blocks, null, 2));
     } else if (data.cmd === "code") {
       setCode(data.code);
-      if (debug?.logJs) console.log(data.code);
+      if (debug?.logJs) console.info(data.code);
     }
   });
 

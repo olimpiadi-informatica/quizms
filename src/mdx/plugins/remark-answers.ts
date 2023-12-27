@@ -88,7 +88,7 @@ function parseOpenAnswerGroup(tree: Root) {
 
 function parseExplanation(tree: Root) {
   visit(tree, "blockquote", (blockquote: Blockquote, index, parent) => {
-    if (process.env.NODE_ENV === "development" || process.env.QUIZMS_MODE === "training") {
+    if (process.env.QUIZMS_MODE === "development" || process.env.QUIZMS_MODE === "training") {
       parent!.children[index!] = {
         type: "mdxJsxFlowElement",
         name: "Explanation",

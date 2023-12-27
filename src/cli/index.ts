@@ -1,4 +1,4 @@
-import { cwd, exit } from "node:process";
+import { cwd } from "node:process";
 
 import { InvalidArgumentError, program } from "commander";
 import "dotenv/config";
