@@ -69,6 +69,7 @@
     "remark-mdx-frontmatter": "^4.0",
     "remark-mdx-math-enhanced": "=0.0.1-beta.3",
     "remark-smartypants": "^2.0",
+    "rollup-plugin-license": "^3.2",
     "rollup-plugin-visualizer": "^5.11",
     "sharp": "^0.32",
     "smol-toml": "^1.1",

@@ -5,6 +5,7 @@ import { CompileOptions as MdxOptions } from "@mdx-js/mdx";
 import mdxPlugin from "@mdx-js/rollup";
 import react from "@vitejs/plugin-react-swc";
 import { visualizer } from "rollup-plugin-visualizer";
+import license from "rollup-plugin-license";
 import { InlineConfig, splitVendorChunkPlugin } from "vite";
 import inspect from "vite-plugin-inspect";
 
@@ -47,7 +48,18 @@ export default function (
     define: {
       "process.env.NODE_ENV": JSON.stringify(mode),
     },
+    esbuild: {
+      legalComments: "external",
+      banner: "/*! For licenses information, see LICENSES.txt */",
+    },
     plugins: [
+      license({
+        thirdParty: {
+          output: {
+            file: "dist/LICENSES.txt", // TODO: outdir option
+          },
+        },
+      }),
       iframe(),
       images(),
       inspect(),
