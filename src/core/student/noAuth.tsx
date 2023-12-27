@@ -18,15 +18,6 @@ type AuthProps = {
 export function NoAuth({ contestName, duration, questionCount, children }: AuthProps) {
   const [submitted, setSubmitted] = useLocalStorage("submit", false);
 
-  const [startTime, setStartTime] = useLocalStorage<Date | undefined>(
-    "startTime",
-    undefined,
-    (value) => (value !== "undefined" ? new Date(JSON.parse(value)) : undefined),
-  );
-  const endTime = useMemo(
-    () => startTime && addMinutes(startTime, duration),
-    [startTime, duration],
-  );
   const [student, setStudent] = useLocalStorage<Student>("student", {
     id: "",
     personalInformation: {
@@ -37,26 +28,19 @@ export function NoAuth({ contestName, duration, questionCount, children }: AuthP
     variant: "0",
   });
 
+  const endTime = useMemo(
+    () => student.startedAt && addMinutes(student.startedAt, duration),
+    [student.startedAt, duration],
+  );
+
   useUpdateAt(endTime, () => setSubmitted(true));
 
-  const start = useCallback(() => {
-    const now = new Date();
-    setStartTime(now);
-    setStudent((student) => ({
-      ...student,
-      variant: (import.meta.env.PROD ? Math.random() * Number.MAX_SAFE_INTEGER : 0).toString(),
-    }));
-  }, [setStartTime, setStudent]);
-
   const mockContest: Contest = {
-    id: "id-finto",
+    id: "",
     name: contestName,
     problemIds: range(questionCount ?? 0).map((i) => i.toString()),
     duration,
-    personalInformation: [
-      { name: "name", label: "Nome", type: "text" },
-      { name: "surname", label: "Cognome", type: "text" },
-    ],
+    personalInformation: [],
     hasVariants: true,
     allowRestart: true,
   };
@@ -65,9 +49,9 @@ export function NoAuth({ contestName, duration, questionCount, children }: AuthP
     id: "",
     schoolId: "",
     contestId: "",
-    name: "Nessuna scuola",
+    name: "",
     teacher: "",
-    startingTime: startTime,
+    startingTime: student.startedAt,
     finalized: false,
   };
 
@@ -76,9 +60,9 @@ export function NoAuth({ contestName, duration, questionCount, children }: AuthP
     setStudent((student) => ({
       ...student,
       answers: {},
+      startedAt: undefined,
     }));
-    setStartTime(undefined);
-  }, [setStudent, setStartTime, setSubmitted]);
+  }, [setStudent, setSubmitted]);
 
   return (
     <StudentProvider
@@ -89,17 +73,7 @@ export function NoAuth({ contestName, duration, questionCount, children }: AuthP
       submit={() => setSubmitted(true)}
       reset={reset}
       terminated={submitted}>
-      {import.meta.env.PROD && !startTime ? (
-        <div className="flex h-dvh justify-center">
-          <div className="flex flex-col justify-center">
-            <button className="btn btn-success btn-lg" onClick={start}>
-              Inizia
-            </button>
-          </div>
-        </div>
-      ) : (
-        children
-      )}
+      {children}
     </StudentProvider>
   );
 }

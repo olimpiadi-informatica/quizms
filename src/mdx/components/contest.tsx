@@ -15,6 +15,7 @@ import { isNil, sumBy } from "lodash-es";
 
 import Modal from "~/core/components/modal";
 import { useStudent } from "~/core/student/provider";
+import { randomId } from "~/utils/random";
 
 type Problem = {
   id: string;
@@ -32,7 +33,7 @@ const ContestContext = createContext<ContestContextProps>({
 ContestContext.displayName = "ContestContext";
 
 export function Contest({ children }: { children: ReactNode }) {
-  const { terminated } = useStudent();
+  const { student, setStudent, terminated } = useStudent();
   const [problems, setProblems] = useState<Record<string, Problem>>({});
 
   const registerProblem = useCallback((problem: Problem) => {
@@ -51,6 +52,26 @@ export function Contest({ children }: { children: ReactNode }) {
       ref.current?.showModal();
     }
   }, [terminated, resultShown]);
+
+  if (import.meta.env.QUIZMS_MODE === "training" && !student.startedAt) {
+    const start = () => {
+      void setStudent({
+        ...student,
+        startedAt: new Date(),
+        variant: import.meta.env.PROD ? randomId() : "",
+      });
+    };
+
+    return (
+      <div className="flex h-dvh justify-center">
+        <div className="flex flex-col justify-center">
+          <button className="btn btn-success btn-lg" onClick={start}>
+            Inizia
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <ContestContext.Provider value={{ registerProblem }}>
