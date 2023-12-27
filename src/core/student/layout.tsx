@@ -35,8 +35,8 @@ export function Layout({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <div className="flex h-dvh flex-col">
-      <div className="navbar flex-none justify-between bg-base-300 text-base-content print:hidden">
+    <div className="h-dvh screen:overflow-y-scroll">
+      <div className="navbar sticky top-0 z-50 h-16 justify-between bg-base-300 bg-opacity-85 px-3 text-base-content backdrop-blur print:hidden">
         <div className="dropdown max-w-full flex-none">
           <div tabIndex={0} role="button" className="btn btn-ghost no-animation w-full flex-nowrap">
             <User className="flex-none" />
@@ -77,17 +77,14 @@ export function Layout({ children }: { children: ReactNode }) {
               </button>
             )}
           </div>
-
           <SubmitModal ref={submitRef} />
         </div>
       </div>
       <ErrorBoundary FallbackComponent={Error}>
-        <div className="screen:overflow-y-scroll">
-          <Prose /* TODO */>
-            <h1 className="text-pretty">{contest.name}</h1>
-            {children}
-          </Prose>
-        </div>
+        <Prose /* TODO */>
+          <h1 className="text-pretty">{contest.name}</h1>
+          {children}
+        </Prose>
       </ErrorBoundary>
     </div>
   );
