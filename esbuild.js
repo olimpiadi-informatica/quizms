@@ -1,6 +1,7 @@
 import fs from "node:fs/promises";
 import { argv, exit } from "node:process";
 
+import autoprefixer from "autoprefixer";
 import { Command } from "commander";
 import { build, context } from "esbuild";
 import less from "less";
@@ -14,7 +15,7 @@ const cssPlugin = {
     build.onLoad({ filter: /\.css$/ }, async (args) => {
       const content = await fs.readFile(args.path, "utf8");
 
-      const processor = postcss([tailwindcss]);
+      const processor = postcss([autoprefixer, tailwindcss]);
       const { css } = await processor.process(content, { from: args.path });
       return { contents: css, loader: "css" };
     });

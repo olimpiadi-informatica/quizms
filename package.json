@@ -101,6 +101,7 @@
     "@types/react-syntax-highlighter": "^15.5",
     "@typescript-eslint/eslint-plugin": "^6.2",
     "@typescript-eslint/parser": "^6.2",
+    "autoprefixer": "^10.4",
     "daisyui": "^4.4",
     "eslint": "^8.34",
     "eslint-plugin-react": "^7.32",
