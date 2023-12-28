@@ -1,7 +1,7 @@
 import { access } from "node:fs/promises";
 import { extname, join } from "node:path";
 
-import { omit, stubFalse, stubTrue } from "lodash-es";
+import { stubFalse, stubTrue } from "lodash-es";
 import { OutputChunk } from "rollup";
 import { PluginOption } from "vite";
 

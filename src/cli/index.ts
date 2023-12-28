@@ -12,7 +12,7 @@ import pdf from "./pdf";
 import variants from "./variants";
 
 function safeParseInt(value: string): number {
-  const parsedValue = parseInt(value);
+  const parsedValue = Number(value);
   if (isNaN(parsedValue)) {
     throw new InvalidArgumentError("Argument must be a number.");
   }

@@ -164,6 +164,17 @@
   resolved "https://registry.yarnpkg.com/@braintree/sanitize-url/-/sanitize-url-6.0.4.tgz#923ca57e173c6b232bbbb07347b1be982f03e783"
   integrity sha512-s3jaWicZd0pkP0jf5ysyHUI/RE7MHos6qlToFcGWXVp+ykHOy77OUMrfbgJ9it2C5bow7OIQwYYaHjk9XlBQ2A==
 
+"@cantoo/pdf-lib@^1.20.0":
+  version "1.20.0"
+  resolved "https://registry.yarnpkg.com/@cantoo/pdf-lib/-/pdf-lib-1.20.0.tgz#2efe9f7f5cca4e8c0114664fde90c1a2cac3e781"
+  integrity sha512-1tmL13CfYiOPGB+rm8WJeLe821Y3H1NmSyNvhvvbZOAQ38s0ugQ/tpDEbfomucz+owYK+gtuDKoWdGmKBTjfHg==
+  dependencies:
+    "@pdf-lib/standard-fonts" "^1.0.0"
+    "@pdf-lib/upng" "^1.0.1"
+    color "^4.2.3"
+    node-html-better-parser "^1.4.0"
+    pako "^1.0.11"
+
 "@colors/colors@1.5.0":
   version "1.5.0"
   resolved "https://registry.yarnpkg.com/@colors/colors/-/colors-1.5.0.tgz#bb504579c1cae923e6576a4f5da43d25f97bdbd9"
@@ -5055,6 +5066,11 @@ html-encoding-sniffer@^3.0.0:
   dependencies:
     whatwg-encoding "^2.0.0"
 
+html-entities@^2.3.2:
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/html-entities/-/html-entities-2.4.0.tgz#edd0cee70402584c8c76cc2c0556db09d1f45061"
+  integrity sha512-igBTJcNNNhvZFRtm8uA6xMY6xYleeDwn3PeBCkDz7tHttv4F2hsDI2aPgNERWzvRcNYHNT3ymRaQzllmXj4YsQ==
+
 http-cache-semantics@^4.1.1:
   version "4.1.1"
   resolved "https://registry.yarnpkg.com/http-cache-semantics/-/http-cache-semantics-4.1.1.tgz#abe02fcb2985460bf0323be664436ec3476a6d5a"
@@ -7577,6 +7593,13 @@ node-gyp@^10.0.1:
     tar "^6.1.2"
     which "^4.0.0"
 
+node-html-better-parser@^1.4.0:
+  version "1.4.3"
+  resolved "https://registry.yarnpkg.com/node-html-better-parser/-/node-html-better-parser-1.4.3.tgz#b0aff7771094541e1ccc97fa3f612709fc303779"
+  integrity sha512-Ks/yImEI7A5Yav3p0ecyH2/q3YOllFQ4BQUgk8I/BZgISdXNMhNHQhX7D5kjHQhd6oMok0f9FUaHNFJBVqylHw==
+  dependencies:
+    html-entities "^2.3.2"
+
 node-releases@^2.0.14:
   version "2.0.14"
   resolved "https://registry.yarnpkg.com/node-releases/-/node-releases-2.0.14.tgz#2ffb053bceb8b2be8495ece1ab6ce600c4461b0b"
@@ -7996,16 +8019,6 @@ path-type@^4.0.0:
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/path-type/-/path-type-4.0.0.tgz#84ed01c0a7ba380afe09d90a8c180dcd9d03043b"
   integrity sha512-gDKb8aZMDeD/tZWs9P6+q0J9Mwkdl6xMV8TjnGP3qJVJ06bdMgkbBlLU8IdfOsIsFz2BW1rNVT3XuNEl8zPAvw==
-
-pdf-lib@^1.17:
-  version "1.17.1"
-  resolved "https://registry.yarnpkg.com/pdf-lib/-/pdf-lib-1.17.1.tgz#9e7dd21261a0c1fb17992580885b39e7d08f451f"
-  integrity sha512-V/mpyJAoTsN4cnP31vc0wfNA1+p20evqqnap0KLoRUN0Yk/p3wN52DOEsL4oBFcLdb76hlpKPtzJIgo67j/XLw==
-  dependencies:
-    "@pdf-lib/standard-fonts" "^1.0.0"
-    "@pdf-lib/upng" "^1.0.1"
-    pako "^1.0.11"
-    tslib "^1.11.1"
 
 periscopic@^3.0.0:
   version "3.1.0"
@@ -9769,11 +9782,6 @@ ts-interface-checker@^0.1.9:
   version "0.1.13"
   resolved "https://registry.yarnpkg.com/ts-interface-checker/-/ts-interface-checker-0.1.13.tgz#784fd3d679722bc103b1b4b8030bcddb5db2a699"
   integrity sha512-Y/arvbn+rrz3JCKl9C4kVNfTfSm2/mEp5FSz5EsZSANGPSlQrpRI5M4PKF+mJnE52jOO90PnPSc3Ur3bTQw0gA==
-
-tslib@^1.11.1:
-  version "1.14.1"
-  resolved "https://registry.yarnpkg.com/tslib/-/tslib-1.14.1.tgz#cf2d38bdc34a134bcaf1091c41f6619e2f672d00"
-  integrity sha512-Xni35NKzjgMrwevysHTCArtLDpPvye8zV/0E4EyYn43P7/7qvQwPh9BGkHewbMulVntbigmcT7rdX3BNo9wRJg==
 
 tslib@^2.0.1, tslib@^2.1.0, tslib@^2.3.0:
   version "2.6.2"

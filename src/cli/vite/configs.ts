@@ -4,8 +4,8 @@ import { fileURLToPath } from "node:url";
 import { CompileOptions as MdxOptions } from "@mdx-js/mdx";
 import mdxPlugin from "@mdx-js/rollup";
 import react from "@vitejs/plugin-react-swc";
-import { visualizer } from "rollup-plugin-visualizer";
 import license from "rollup-plugin-license";
+// import { visualizer } from "rollup-plugin-visualizer";
 import { InlineConfig, splitVendorChunkPlugin } from "vite";
 import inspect from "vite-plugin-inspect";
 
@@ -69,7 +69,7 @@ export default function (
       react({ plugins: swcPlugins }),
       reactEntry(),
       splitVendorChunkPlugin(),
-      visualizer({ filename: "dist/stats.html" }),
+      // visualizer({ filename: "dist/stats.html" }),
     ],
     clearScreen: false,
     server: {

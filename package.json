@@ -6,7 +6,7 @@
   "author": "Alessandro Bortolin <bortolin.alessandro@outlook.it>",
   "license": "MIT",
   "scripts": {
-    "build": "rm -rf dist/ && node esbuild.js build",
+    "build": "rm -rf dist/ && NODE_ENV=production node esbuild.js build",
     "watch": "node esbuild.js watch",
     "lint": "eslint --fix . ; tsc --noEmit",
     "fmt": "prettier --write src/"
@@ -25,6 +25,7 @@
   ],
   "dependencies": {
     "@blockly/disable-top-blocks": "^0.4",
+    "@cantoo/pdf-lib": "^1.20.0",
     "@date-fns/utc": "^1.1",
     "@mdx-js/mdx": "^3.0",
     "@mdx-js/rollup": "^3.0",
@@ -56,7 +57,6 @@
     "mermaid-isomorphic": "^2.1",
     "mini-svg-data-uri": "^1.4",
     "papaparse": "^5.4",
-    "pdf-lib": "^1.17",
     "picocolors": "^1.0",
     "playwright": "^1.36",
     "prop-types": "^15.8",

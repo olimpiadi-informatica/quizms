@@ -24,10 +24,11 @@ export default async function staticExport(options: ExportOptions): Promise<void
   });
   const input = Object.fromEntries(
     pages.map((p) => {
-      const name = "page-" + dirname(p).replace(/\W/g, "-");
+      const dir = dirname(p);
+      const name = dir === "." ? "index" : dir.replace(/\W/g, "-");
       const entry =
         extname(p) === ".jsx" ? `virtual:react-entry?src=${encodeURIComponent(p)}` : join(root, p);
-      return [name, entry];
+      return ["page-" + name, entry];
     }),
   );
 

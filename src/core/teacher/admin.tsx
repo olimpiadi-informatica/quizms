@@ -404,7 +404,7 @@ function DownloadPdfButton({ school, contest }: { school: School; contest: Conte
     ).withConverter(pdfConverter);
 
     const statements = await getDocs(q);
-    const { PDFDocument } = await import("pdf-lib");
+    const { PDFDocument } = await import("@cantoo/pdf-lib");
     const pdf = await PDFDocument.create();
     for (const statement of statements.docs) {
       const otherPdf = await PDFDocument.load(statement.data().statement);
