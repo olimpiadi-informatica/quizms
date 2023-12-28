@@ -2,7 +2,7 @@
   "compilerOptions": {
     "module": "es2022",
     "moduleResolution": "node",
-    "target": "es2015",
+    "target": "es2021",
     "declaration": true,
     "declarationDir": "dist",
     "jsx": "react",

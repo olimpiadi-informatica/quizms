@@ -8,20 +8,15 @@ export function RemoteStatement({ url }: { url: string }) {
   const [Statement, setStatement] = useState<ComponentType>();
   const { student } = useStudent();
 
-  const variantUrl = new URL(url, import.meta.url);
-  if (variantUrl.protocol !== "blob:") {
-    variantUrl.searchParams.set("variant", student.variant ?? "0");
-  }
-
   useEffect(() => {
-    import(/* @vite-ignore */ variantUrl.href).then(({ default: contest }) => {
+    import(/* @vite-ignore */ url).then(({ default: contest }) => {
       setStatement(() =>
         memo(function Statement() {
           return contest(React, components);
         }),
       );
     });
-  }, [variantUrl.href]);
+  }, [url]);
 
   if (Statement) return <Statement />;
   return undefined;

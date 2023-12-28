@@ -1,44 +1,119 @@
-import { BrowserContext, chromium } from "playwright";
+import { rm } from "node:fs/promises";
+import { join } from "node:path";
+import { promisify } from "node:util";
 
-import { GenerationConfig } from "~/models/generationConfig";
+import { mapValues } from "lodash-es";
+import pc from "picocolors";
+import { InlineConfig, PluginOption, build, mergeConfig, preview } from "vite";
 
-import { info } from "./utils/logs";
+import { Statement } from "~/models";
+import { GenerationConfig, generationConfigSchema } from "~/models/generationConfig";
 
-async function printStatement(
-  context: BrowserContext,
-  baseUrl: string,
-  variant: number,
-  outFile: string,
-) {
-  const page = await context.newPage();
-  const url = `${baseUrl}?v=${variant}`;
-  info(`Printing statement ${variant}.`);
-  await page.goto(url, { waitUntil: "load" });
-  for (const img of await page.getByRole("img").all()) {
-    await img.isVisible();
+import generatePdfs from "./pdf";
+import { info, success } from "./utils/logs";
+import { readCollection } from "./utils/parser";
+import { buildVariants } from "./variants";
+import configs from "./vite/configs";
+
+export type PrintOptions = {
+  dir: string;
+  config: string;
+  outDir: string;
+  server: boolean;
+};
+
+export default async function print(options: PrintOptions) {
+  process.env.QUIZMS_MODE = "pdf";
+
+  // TODO: config file option
+  const generationConfigs = await readCollection("contests", generationConfigSchema);
+
+  info("Building statements...");
+  const root = join(options.dir, "src");
+  const variants = await buildVariants(root, generationConfigs);
+  const statements = mapValues(variants, 1);
+
+  info("Building website...");
+  const buildDir = join(options.dir, options.outDir, ".pdf-build");
+  await build(
+    mergeConfig(configs(join(options.dir, "src"), "production"), {
+      publicDir: join(options.dir, "public"),
+      build: {
+        outDir: buildDir,
+        emptyOutDir: true,
+        chunkSizeWarningLimit: Number.MAX_SAFE_INTEGER,
+        rollupOptions: {
+          input: { print: "virtual:react-entry?src=virtual:print" },
+        },
+      },
+      plugins: [printPlugin(statements, generationConfigs)],
+      logLevel: "info",
+    } as InlineConfig),
+  );
+
+  const serverConfig = mergeConfig(configs(options.dir, "production"), {
+    build: {
+      outDir: buildDir,
+    },
+    plugins: [printPlugin(statements, generationConfigs)],
+  } as InlineConfig);
+  const server = await preview(serverConfig);
+  const url = server.resolvedUrls!.local[0] + "print";
+
+  if (options.server) {
+    success(`Server started: ${pc.bold(pc.cyan(url))}`);
+    return;
   }
-  await page.waitForTimeout(1000);
-  await page.pdf({
-    path: outFile,
-    format: "a4",
-  });
-  await page.close();
+
+  await generatePdfs(generationConfigs, url, options.outDir);
+
+  await promisify(server.httpServer.close.bind(server.httpServer))();
+  await rm(buildDir, { recursive: true });
 }
 
-export async function printStatements(configs: GenerationConfig[], outDir: string) {
-  const browser = await chromium.launch({ headless: true });
-  const context = await browser.newContext();
-  const chunkSize = 10;
-  for (const config of configs) {
-    for (let i = 0; i < config.pdfVariantIds.length; i += chunkSize) {
-      await Promise.all(
-        config.pdfVariantIds.slice(i, i + chunkSize).map(async (variantId) => {
-          const path = join(outDir, "raw", `${variantId}.pdf`);
-          await printStatement(context, config.baseUrl, variantId, path);
-        }),
-      );
-    }
-  }
-  await context.close();
-  await browser.close();
+function printPlugin(
+  statements: Record<string, Statement>,
+  generationConfigs: GenerationConfig[],
+): PluginOption {
+  return {
+    name: "print-plugin",
+    resolveId(id) {
+      if (id === "virtual:print") {
+        return "\0" + id;
+      }
+    },
+    load(id) {
+      if (id === "\0virtual:print") {
+        return `\
+import { createElement } from "react";
+
+import { PrintAuth } from "quizms/student";
+import "quizms/css";
+
+export const title = "PDF";
+const contests = ${JSON.stringify(generationConfigs)};
+export function App() {
+  return createElement(PrintAuth, { contests });
+}`;
+      }
+    },
+    configurePreviewServer(server) {
+      server.middlewares.use(async (req, res, next) => {
+        const url = new URL(req.url!, `http://${req.headers.host}`);
+        if (url.pathname === "/pdf/statement.js") {
+          const variant = url.searchParams.get("v");
+          if (!variant || !(variant in statements)) {
+            res.writeHead(400);
+            res.end("Invalid variant parameter");
+            return;
+          }
+
+          res.setHeader("content-type", "text/javascript");
+          res.end(statements[variant].statement);
+          return;
+        }
+        next();
+      });
+    },
+  };
 }

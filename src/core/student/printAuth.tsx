@@ -1,26 +1,59 @@
 import React, { ReactNode } from "react";
 
+import { RemoteStatement } from "~/core/student/remoteStatement";
 import { Contest, School, Student } from "~/models";
+import { GenerationConfig } from "~/models/generationConfig";
 
-import { StudentProvider } from "./provider";
+import { StudentProvider, useStudent } from "./provider";
 
 type AuthProps = {
-  headers: Record<string, Contest>;
+  contests: GenerationConfig[];
 };
 
-export function PrintAuth({ headers }: AuthProps) {
+export function PrintAuth({ contests }: AuthProps) {
   const urlParams = new URLSearchParams(window.location.search);
-  const variant = urlParams.get("variant") ?? "";
-  const submitted = false;
+  const variant = urlParams.get("v");
 
-  const startTime = undefined;
+  const contest = contests.find(
+    (c) => c.variantIds.includes(variant!) || c.pdfVariantIds.includes(variant!),
+  );
+
+  if (!variant || !contest) {
+    return (
+      <div className="h-dvh overflow-auto">
+        <div className="prose mx-auto p-4 lg:max-w-4xl">
+          {variant && <h3 className="text-error">Variante non trovata.</h3>}
+          {contests.map((c) => (
+            <>
+              <h3>{c.name}</h3>
+              <h4>Varianti su carta</h4>
+              <ul className="columns-3 lg:columns-4">
+                {c.variantIds.map((v) => (
+                  <li>
+                    <a href={`?v=${v}`}>{v}</a>
+                  </li>
+                ))}
+              </ul>
+              <h4>Varianti online</h4>
+              <ul className="columns-3 lg:columns-4">
+                {c.pdfVariantIds.map((v) => (
+                  <li>
+                    <a href={`?v=${v}`}>{v}</a>
+                  </li>
+                ))}
+              </ul>
+            </>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   const mockSchool: School = {
     id: "",
-    schoolId: "finto id",
-    name: "Nessuna scuola",
+    schoolId: "",
+    name: "",
     teacher: "",
-    startingTime: startTime,
     finalized: false,
     contestId: contest.id,
   };
@@ -39,14 +72,16 @@ export function PrintAuth({ headers }: AuthProps) {
       student={student}
       setStudent={async () => {}}
       submit={() => {}}
-      terminated={submitted}>
-      <PrintForm contest={contest} variant={variant} />
-      {children}
+      terminated={false}>
+      <PrintForm />
+      <RemoteStatement url={`/pdf/statement.js?v=${variant}`} />
     </StudentProvider>
   );
 }
 
-function PrintForm({ contest, variant }: { contest: Contest; variant: string }) {
+function PrintForm() {
+  const { contest, student } = useStudent();
+
   return (
     <div className="grid grid-cols-2 gap-2 pb-10">
       {contest.personalInformation.map((field) => (
@@ -65,7 +100,7 @@ function PrintForm({ contest, variant }: { contest: Contest; variant: string }) 
           <input
             type="text"
             className="input input-bordered w-full max-w-md"
-            value={variant}
+            value={student.variant}
             readOnly
           />
         </div>

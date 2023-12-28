@@ -8,7 +8,7 @@ import firebaseCommand from "~/cli/firebase";
 
 import devServer from "./dev";
 import staticExport from "./export";
-import pdf from "./pdf";
+import print from "./print";
 import variants from "./variants";
 
 function safeParseInt(value: string): number {
@@ -39,13 +39,13 @@ async function main() {
     .action((dir, options) => staticExport({ dir, ...options }));
 
   program
-    .command("pdf")
-    .description("Create a PDF of the contest.")
+    .command("print")
+    .description("Create PDFs for the contest.")
     .argument("[directory]", "The directory of the contest.", cwd())
     .option("-c, --config <config>", "The contests config file.")
-    .option("-d, --outDir <directory>", "The directory to output the PDF.", "pdf")
+    .option("-d, --outDir <directory>", "The directory to output the PDF.", "variants")
     .option("-s, --server", "Only serve the pages, don't generate the PDF.")
-    .action((dir, options) => pdf({ dir, ...options }));
+    .action((dir, options) => print({ dir, ...options }));
 
   program
     .command("variants")

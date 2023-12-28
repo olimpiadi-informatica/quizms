@@ -1,81 +1,99 @@
+import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { promisify } from "node:util";
 
-import { mapValues } from "lodash-es";
-import { InlineConfig, PluginOption, mergeConfig, preview } from "vite";
+import { PDFDocument, PDFPageDrawTextOptions, StandardFonts } from "@cantoo/pdf-lib";
+import { map, range, size, uniq } from "lodash-es";
+import { BrowserContext, chromium } from "playwright";
 
-import { Statement } from "~/models";
-import { GenerationConfig, generationConfigSchema } from "~/models/generationConfig";
+import { GenerationConfig } from "~/models/generationConfig";
 
-import { readCollection } from "./utils/parser";
-import { buildVariants } from "./variants";
-import configs from "./vite/configs";
+import { info } from "./utils/logs";
 
-export type PdfOptions = {
-  dir: string;
-  config: string;
-  outDir: string;
-  server: boolean;
-};
+async function generatePdf(
+  context: BrowserContext,
+  baseUrl: string,
+  variant: string,
+  hasVariants: boolean,
+  outDir: string,
+) {
+  info(`Printing statement ${variant}.`);
+  const page = await context.newPage();
+  await page.goto(`${baseUrl}?v=${variant}`, { waitUntil: "load" });
+  for (const img of await page.getByRole("img").all()) {
+    await img.isVisible();
+  }
+  await page.waitForTimeout(1000);
 
-export default async function pdf(options: PdfOptions) {
-  process.env.QUIZMS_MODE = "pdf";
+  const basePdf = await page.pdf({
+    format: "a4",
+    margin: {
+      top: "0.75cm",
+      bottom: "1.125cm",
+      left: "0.25cm",
+      right: "0.25cm",
+    },
+  });
+  await page.close();
 
-  // TODO: config file option
-  const generationConfigs = await readCollection("contests", generationConfigSchema);
+  const doc = await PDFDocument.load(basePdf);
 
-  const root = join(options.dir, "src");
-  const variants = await buildVariants(root, generationConfigs);
+  const font = await doc.embedFont(StandardFonts.Helvetica);
+  const fontOptions: PDFPageDrawTextOptions = {
+    size: 14,
+    font,
+  };
 
-  const serverConfig = mergeConfig(configs(root, "production"), {
-    plugins: [variantPlugin(mapValues(variants, 1), generationConfigs)],
-  } as InlineConfig);
-  const server = await preview(serverConfig);
+  const pages = doc.getPages();
+  for (const pageNum of range(pages.length)) {
+    const page = pages[pageNum];
+    const { width } = page.getSize();
 
-  if (options.server) return;
+    if (hasVariants) {
+      page.drawText(`Variante ${variant}`, {
+        ...fontOptions,
+        x: 15,
+        y: 13,
+      });
+    }
 
-  const url = server.resolvedUrls.local[0];
-  // TODO: generate PDF
+    const pageNumText = `${pageNum + 1}`;
+    page.drawText(pageNumText, {
+      ...fontOptions,
+      x: width - font.widthOfTextAtSize(pageNumText, fontOptions.size!) - 15,
+      y: 13,
+    });
+  }
 
-  await promisify(server.httpServer.close)();
+  const pdf = await doc.save();
+
+  await mkdir(join(outDir, variant), { recursive: true });
+  await writeFile(join(outDir, variant, "statement.pdf"), pdf);
 }
 
-function variantPlugin(
-  statements: Record<string, Statement>,
-  generationConfigs: GenerationConfig[],
-): PluginOption {
-  return {
-    name: "variant-plugin",
-    configurePreviewServer(server) {
-      server.middlewares.use((req, res, next) => {
-        const url = new URL(req.url!, `http://${req.headers.host}`);
-        if (url.pathname === "/pdf/statement.js") {
-          const variant = url.searchParams.get("v");
-          if (!variant || !(variant in statements)) {
-            res.writeHead(400);
-            res.end("Invalid variant parameter");
-            return;
-          }
+export default async function generatePdfs(
+  configs: GenerationConfig[],
+  baseUrl: string,
+  outDir: string,
+) {
+  const browser = await chromium.launch({ headless: true });
+  const context = await browser.newContext();
 
-          res.setHeader("content-type", "text/javascript");
-          res.end(statements[variant]);
-          return;
-        }
-        if (url.pathname === "/pdf/contest.json") {
-          const contest = url.searchParams.get("c");
-          const config = generationConfigs.find((c) => c.id === contest);
-          if (!config) {
-            res.writeHead(400);
-            res.end("Invalid contest parameter");
-            return;
-          }
+  const poolSize = 16;
+  const promises: Record<string, Promise<void>> = {};
 
-          res.setHeader("content-type", "application/json");
-          res.end(JSON.stringify(config));
-          return;
-        }
-        next();
-      });
-    },
-  };
+  for (const config of configs) {
+    const ids = uniq([...config.variantIds, ...config.pdfVariantIds]).slice(0, 10); // TODO: remove
+    for (const id of ids) {
+      if (size(promises) >= poolSize) {
+        const oldId = await Promise.any(map(promises, (promise, id) => promise.then(() => id)));
+        delete promises[oldId];
+      }
+      promises[id] = generatePdf(context, baseUrl, id, config.hasVariants, outDir);
+    }
+  }
+
+  await Promise.all(Object.values(promises));
+
+  await context.close();
+  await browser.close();
 }

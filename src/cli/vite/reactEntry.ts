@@ -29,15 +29,19 @@ export default function reactEntry(): PluginOption {
       if (path === "\0virtual:react-entry") {
         const params = new URLSearchParams(query);
         const page = params.get("src")!;
+
+        const isVirtual = page.startsWith("virtual:");
         if (isBuild) {
           const pageId = this.emitFile({
             type: "asset",
-            fileName: page.replace(/\.jsx$/, ".html"),
+            fileName: isVirtual
+              ? page.replace(/^virtual:/, "") + ".html"
+              : page.replace(/\.jsx$/, ".html"),
           });
           pages[pageId] = id;
         }
 
-        const entry = join(root, page);
+        const entry = isVirtual ? page : join(root, page);
         return `\
 import { createElement, StrictMode } from "react";
 import { createRoot } from "react-dom/client";
