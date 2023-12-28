@@ -37,9 +37,6 @@ const commonConfig = {
   alias: {
     "~": "./src",
   },
-  minifyIdentifiers: true,
-  minifySyntax: true,
-  minifyWhitespace: true,
 };
 
 /** @type {import("esbuild").BuildOptions} */
@@ -78,7 +75,12 @@ command
   .description("Create a production build")
   .action(async () => {
     for (const config of [uiConfig, cliConfig, cssConfig]) {
-      await build(config);
+      await build({
+        minifyIdentifiers: true,
+        minifySyntax: true,
+        minifyWhitespace: true,
+        ...config,
+      });
     }
   });
 
@@ -100,7 +102,6 @@ command
     for (const config of [uiConfig, cliConfig]) {
       const ctx = await context({
         ...config,
-        minifyIdentifiers: false,
         plugins: [watchPlugin],
       });
       await ctx.watch();

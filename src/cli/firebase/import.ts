@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { deleteApp } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 import { Firestore, FirestoreDataConverter, GrpcStatus } from "firebase-admin/firestore";
-import { capitalize, map, range } from "lodash-es";
+import { capitalize, map, range, uniq } from "lodash-es";
 import z from "zod";
 
 import {
@@ -135,7 +135,7 @@ async function importPdf(db: Firestore, options: ImportOptions) {
   const generationConfigs = await readCollection("contests", generationConfigSchema);
   const pdfs = await Promise.all(
     generationConfigs
-      .flatMap((c) => [...c.variantIds, ...c.pdfVariantIds])
+      .flatMap((c) => uniq([...c.variantIds, ...c.pdfVariantIds]))
       .map(async (id) => {
         try {
           const statement = await readFile(join("variants", id, "statement.pdf"));

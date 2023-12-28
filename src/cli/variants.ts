@@ -5,6 +5,7 @@ import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 
 import { toJs } from "estree-util-to-js";
+import { uniq } from "lodash-es";
 import { temporaryDirectoryTask } from "tempy";
 import { InlineConfig, build } from "vite";
 
@@ -69,7 +70,8 @@ export async function buildVariants(
 
   const variants: Record<string, [Variant, Statement, Solution]> = {};
   for (const config of configs) {
-    for (const id of [...config.variantIds, ...config.pdfVariantIds]) {
+    const ids = uniq([...config.variantIds, ...config.pdfVariantIds]);
+    for (const id of ids) {
       const seed = `${config.secret}-${id}`;
       const variantAst = shuffleStatement(baseStatements[config.id], seed, config);
       const answers = getSolutions(variantAst);

@@ -1,7 +1,7 @@
-import React, { ReactNode } from "react";
+import React from "react";
 
 import { RemoteStatement } from "~/core/student/remoteStatement";
-import { Contest, School, Student } from "~/models";
+import { School, Student } from "~/models";
 import { GenerationConfig } from "~/models/generationConfig";
 
 import { StudentProvider, useStudent } from "./provider";
@@ -29,7 +29,7 @@ export function PrintAuth({ contests }: AuthProps) {
               <h4>Varianti su carta</h4>
               <ul className="columns-3 lg:columns-4">
                 {c.variantIds.map((v) => (
-                  <li>
+                  <li key={v}>
                     <a href={`?v=${v}`}>{v}</a>
                   </li>
                 ))}
@@ -37,7 +37,7 @@ export function PrintAuth({ contests }: AuthProps) {
               <h4>Varianti online</h4>
               <ul className="columns-3 lg:columns-4">
                 {c.pdfVariantIds.map((v) => (
-                  <li>
+                  <li key={v}>
                     <a href={`?v=${v}`}>{v}</a>
                   </li>
                 ))}
