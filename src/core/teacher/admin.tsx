@@ -40,7 +40,7 @@ import { hash, randomToken } from "~/utils/random";
 import { Button, LoadingButtons } from "../components/button";
 import Loading from "../components/loading";
 import Modal from "../components/modal";
-import { useTime, useUpdateAt } from "../components/time";
+import { useIsAfter, useTime } from "../components/time";
 import Timer from "../components/timer";
 import { useTeacher } from "./provider";
 
@@ -337,9 +337,9 @@ function ContestAdmin({ school, contest }: { school: School; contest: Contest })
   const getNow = useTime();
   const now = getNow();
 
-  useUpdateAt(school.startingTime);
-  useUpdateAt(school.startingTime && addMinutes(school.startingTime, contest.duration!));
-  useUpdateAt(school.startingTime && addMinutes(school.startingTime, -1));
+  useIsAfter(school.startingTime);
+  useIsAfter(school.startingTime && addMinutes(school.startingTime, contest.duration!));
+  useIsAfter(school.startingTime && addMinutes(school.startingTime, -1));
 
   if (!contest.startingWindowEnd || !contest.startingWindowStart) {
     throw new Error("Data inizio e fine del contest non specificate");

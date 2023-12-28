@@ -5,7 +5,7 @@ import { isFunction, range } from "lodash-es";
 
 import { Contest, School, Student } from "~/models";
 
-import { useUpdateAt } from "../components/time";
+import { useIsAfter } from "../components/time";
 import { StudentProvider } from "./provider";
 
 type AuthProps = {
@@ -33,7 +33,7 @@ export function NoAuth({ contestName, duration, questionCount, children }: AuthP
     [student.startedAt, duration],
   );
 
-  useUpdateAt(endTime, () => setSubmitted(true));
+  const terminated = useIsAfter(endTime);
 
   const mockContest: Contest = {
     id: "",
@@ -72,7 +72,7 @@ export function NoAuth({ contestName, duration, questionCount, children }: AuthP
       setStudent={async (s) => setStudent(s)}
       submit={() => setSubmitted(true)}
       reset={reset}
-      terminated={submitted}>
+      terminated={terminated || submitted}>
       {children}
     </StudentProvider>
   );

@@ -34,7 +34,7 @@ import { randomId } from "~/utils/random";
 
 import Loading from "../components/loading";
 import Modal from "../components/modal";
-import { useTime, useUpdateAt } from "../components/time";
+import { useIsAfter } from "../components/time";
 import { useTeacher } from "./provider";
 import ImportModal from "./tableImporter";
 import { agGridLocaleIT } from "./tableLocale";
@@ -223,12 +223,11 @@ const FinalizeModal = forwardRef(function FinalizeModal(
 function Table({ school, contest }: { school: School; contest: Contest }) {
   const { solutions, students, setStudent, variants } = useTeacher();
 
-  const now = useTime();
   const endTime =
     school.startingTime && contest.duration
       ? addMinutes(school.startingTime, contest.duration)
       : undefined;
-  const isContestRunning = endTime && now() <= endTime;
+  const isContestRunning = useIsAfter(endTime);
 
   const editable = !isContestRunning && !school.finalized;
 
@@ -258,8 +257,6 @@ function Table({ school, contest }: { school: School; contest: Contest }) {
         ]
       : []),
   ];
-
-  useUpdateAt(endTime);
 
   const colDefs = useMemo(
     () => columnDefinition(contest, variants, solutions, editable),

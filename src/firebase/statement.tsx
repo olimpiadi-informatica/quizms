@@ -1,9 +1,9 @@
-import React, { Suspense, useMemo, useState } from "react";
+import React, { Suspense, useMemo } from "react";
 
 import { addMilliseconds } from "date-fns";
 
 import Loading from "~/core/components/loading";
-import { useUpdateAt } from "~/core/components/time";
+import { useIsAfter } from "~/core/components/time";
 import Timer from "~/core/components/timer";
 import { RemoteStatement } from "~/core/student";
 import { useStudent } from "~/core/student/provider";
@@ -12,11 +12,12 @@ import { useDocument } from "~/firebase/hooks";
 
 export function FirebaseStatement() {
   const { school } = useStudent();
-
-  const [started, setStarted] = useState(false);
-  useUpdateAt(addMilliseconds(school.startingTime!, 1000 + Math.random() * 1000), () =>
-    setStarted(true),
+  const startingTime = useMemo(
+    () => addMilliseconds(school.startingTime!, 1000 + Math.random() * 1000),
+    [school.startingTime],
   );
+
+  const started = useIsAfter(startingTime);
 
   if (!started)
     return (

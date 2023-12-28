@@ -1,4 +1,4 @@
-import React, { ChangeEvent, ReactNode, forwardRef, useRef, useState } from "react";
+import React, { ChangeEvent, ReactNode, forwardRef, useMemo, useRef, useState } from "react";
 
 import { addMinutes, formatISO } from "date-fns";
 import { FirebaseOptions } from "firebase/app";
@@ -16,7 +16,7 @@ import { isEqual } from "lodash-es";
 
 import { Button } from "~/core/components/button";
 import Modal from "~/core/components/modal";
-import { useTime, useUpdateAt } from "~/core/components/time";
+import { useIsAfter, useTime } from "~/core/components/time";
 import { StudentProvider } from "~/core/student/provider";
 import { FirebaseLogin, useDb } from "~/firebase/baseLogin";
 import {
@@ -264,13 +264,16 @@ function StudentInner({
   const [contest] = useDocument("contests", student.contest!, contestConverter);
   const [school] = useDocument("schools", student.school!, schoolConverter, { subscribe: true });
 
+  const endingTime = useMemo(
+    () => addMinutes(school.startingTime!, contest.duration!),
+    [school.startingTime, contest.duration],
+  );
+  const terminated = useIsAfter(endingTime);
+
   const logout = async () => {
     await signOut(getAuth(db.app));
     window.location.reload();
   };
-
-  const [terminated, setTerminated] = useState(false);
-  useUpdateAt(addMinutes(school.startingTime!, contest.duration!), () => setTerminated(true));
 
   const setStudentAndSubmit = async (newStudent: Student) => {
     if (isEqual(student, newStudent)) return;

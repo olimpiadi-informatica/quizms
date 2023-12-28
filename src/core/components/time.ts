@@ -28,7 +28,7 @@ export function useTime() {
   }
 }
 
-export function useUpdateAt(time?: Date, callback?: () => void) {
+export function useIsAfter(time?: Date) {
   const now = useTime();
 
   const [, refresh] = useReducer((x) => x + 1, 0);
@@ -39,10 +39,14 @@ export function useUpdateAt(time?: Date, callback?: () => void) {
     const diff = differenceInMilliseconds(time, now());
     if (diff < 0) return;
 
-    const timeout = setTimeout(() => {
-      refresh();
-      callback?.();
-    }, diff + 5);
+    const timeout = setTimeout(refresh, diff + 5);
     return () => clearTimeout(timeout);
-  }, [time, refresh, callback, now]);
+  }, [time, refresh, now]);
+
+  useEffect(() => {
+    window.addEventListener("visibilitychange", refresh);
+    return () => window.removeEventListener("visibilitychange", refresh);
+  }, []);
+
+  return !!time && now() >= time;
 }
