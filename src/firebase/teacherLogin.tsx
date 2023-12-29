@@ -96,14 +96,6 @@ function TeacherInner({ user, children }: { user: User; children: ReactNode }) {
   const [variants] = useCollection("schema", variantConverter);
   const [solutions] = useCollection("solutions", solutionConverter);
 
-  const [students, setStudent] = useCollection("students", studentConverter, {
-    constraints: {
-      school: schools.map((s) => s.id),
-    },
-    orderBy: "createdAt",
-    subscribe: true,
-  });
-
   const logout = useCallback(async () => {
     await signOut(getAuth(db.app));
     window.location.reload();
@@ -113,12 +105,11 @@ function TeacherInner({ user, children }: { user: User; children: ReactNode }) {
     <TeacherProvider
       schools={schools}
       setSchool={async (school) => updateSchool(db, schools, school)}
-      students={students}
-      setStudent={setStudent}
       contests={contests}
       variants={variants}
       solutions={solutions}
-      logout={logout}>
+      logout={logout}
+      useStudents={useStudents}>
       {children}
     </TeacherProvider>
   );
@@ -151,4 +142,12 @@ async function updateSchool(db: Firestore, allSchools: School[], school: School)
   } else {
     await updateDoc(schoolRef, school);
   }
+}
+
+function useStudents(school: string) {
+  return useCollection("students", studentConverter, {
+    constraints: { school },
+    orderBy: "createdAt",
+    subscribe: true,
+  });
 }

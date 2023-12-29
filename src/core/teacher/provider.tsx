@@ -9,10 +9,6 @@ type TeacherProviderProps = {
   schools: School[];
   /** Funzione per modificare i dati della scuola */
   setSchool: (school: School) => Promise<void>;
-  /** Studenti della scuola */
-  students: Student[];
-  /** Funzione per modificare gli studenti della scuola */
-  setStudent: (student: Student) => Promise<void>;
   /** Contest attivi */
   contests: Contest[];
   /** Varianti dei contest */
@@ -21,6 +17,8 @@ type TeacherProviderProps = {
   solutions: Solution[];
   /** Funzione per effettuare il logout */
   logout: () => Promise<void>;
+  /** Hook per ottenere gli studenti di una scuola */
+  useStudents: (schoolId: string) => readonly [Student[], (student: Student) => Promise<void>];
 };
 
 const TeacherContext = createContext<TeacherProviderProps>({} as TeacherProviderProps);
@@ -39,6 +37,11 @@ export function TeacherProvider({
   );
 }
 
-export function useTeacher() {
+export function useTeacher(): Omit<TeacherProviderProps, "useStudents"> {
   return useContext(TeacherContext);
+}
+
+export function useTeacherStudents(schoolId: string) {
+  const { useStudents } = useContext(TeacherContext);
+  return useStudents(schoolId);
 }

@@ -18,7 +18,7 @@ import validate from "~/utils/validate";
 
 import { Button } from "../components/button";
 import Modal from "../components/modal";
-import { useTeacher } from "../teacher/provider";
+import { useTeacher, useTeacherStudents } from "./provider";
 
 const ImportModal = forwardRef(function ImportModal(
   {
@@ -60,7 +60,8 @@ const ImportModal = forwardRef(function ImportModal(
   const [file, setFile] = useState<string>();
   const [error, setError] = useState<Error>();
 
-  const { variants, setStudent } = useTeacher();
+  const { variants } = useTeacher();
+  const [, setStudent] = useTeacherStudents(school.id);
 
   const onChange = async (file?: File) => {
     setError(undefined);

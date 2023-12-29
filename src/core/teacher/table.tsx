@@ -35,7 +35,7 @@ import { randomId } from "~/utils/random";
 import Loading from "../components/loading";
 import Modal from "../components/modal";
 import { useIsAfter } from "../components/time";
-import { useTeacher } from "./provider";
+import { useTeacher, useTeacherStudents } from "./provider";
 import ImportModal from "./tableImporter";
 import { agGridLocaleIT } from "./tableLocale";
 
@@ -122,7 +122,8 @@ export function TeacherTable() {
 }
 
 function Counter({ school, contest }: { school: School; contest: Contest }) {
-  const { students, variants } = useTeacher();
+  const { variants } = useTeacher();
+  const [students] = useTeacherStudents(school.id);
 
   return sumBy(students, (s) => {
     return Number(
@@ -138,7 +139,8 @@ const FinalizeModal = forwardRef(function FinalizeModal(
   { contest, school }: { contest: Contest; school: School },
   ref: Ref<HTMLDialogElement> | null,
 ) {
-  const { students, variants, setSchool } = useTeacher();
+  const { variants, setSchool } = useTeacher();
+  const [students] = useTeacherStudents(school.id);
   const [confirm, setConfirm] = useState("");
 
   const error = useMemo(() => {
@@ -220,7 +222,8 @@ const FinalizeModal = forwardRef(function FinalizeModal(
 });
 
 function Table({ school, contest }: { school: School; contest: Contest }) {
-  const { solutions, students, setStudent, variants } = useTeacher();
+  const { solutions, variants } = useTeacher();
+  const [students, setStudent] = useTeacherStudents(school.id);
 
   const endTime =
     school.startingTime && contest.duration
