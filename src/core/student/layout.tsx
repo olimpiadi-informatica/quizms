@@ -52,7 +52,7 @@ export function Layout({ children }: { children: ReactNode }) {
             </ul>
           )}
         </div>
-        <div className="h-full gap-3" /*  TODO: disable on contest start */>
+        <div className="h-full gap-3">
           <Progress className="hidden min-w-[5rem] sm:block" percentage={progress}>
             {progress}%
           </Progress>
@@ -81,7 +81,7 @@ export function Layout({ children }: { children: ReactNode }) {
         </div>
       </div>
       <ErrorBoundary FallbackComponent={Error}>
-        <Prose /* TODO */>
+        <Prose>
           <h1 className="text-pretty">{contest.name}</h1>
           {children}
         </Prose>

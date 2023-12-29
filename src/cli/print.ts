@@ -84,8 +84,7 @@ function resolveContestsPlugin(generationConfigs: GenerationConfig[]): PluginOpt
       if (id === "\0virtual:quizms-contests") {
         return `\
 const contests = ${JSON.stringify(generationConfigs)};
-export default contests;
-`;
+export default contests;`;
       }
     },
   };

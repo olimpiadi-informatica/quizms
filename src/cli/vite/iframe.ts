@@ -96,7 +96,10 @@ export default function iframe(): PluginOption {
         },
       });
 
-      return { code: s.toString(), map: /* TODO */ null };
+      return {
+        code: s.toString(),
+        map: s.generateMap({ hires: true }),
+      };
     },
     generateBundle(this, options, bundle) {
       for (const [srcId, iframeId] of iframeIds) {
