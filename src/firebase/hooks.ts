@@ -25,7 +25,7 @@ import {
   setDoc,
   where,
 } from "firebase/firestore";
-import { compact } from "lodash-es";
+import { compact, sortBy } from "lodash-es";
 import { useErrorBoundary } from "react-error-boundary";
 import useSWR, { MutatorOptions, SWRConfiguration } from "swr";
 
@@ -93,23 +93,27 @@ export function useDocument<T>(
   }
 }
 
+type CollectionSortingOptions = { orderBy?: string } | { orderByDesc?: string };
+
+type CollectionOptions = {
+  constraints?: Record<string, string | string[]>;
+  limit?: number;
+  subscribe?: boolean;
+} & CollectionSortingOptions;
+
 export function useCollection<
   T extends {
     id: string;
   },
->(
-  path: string,
-  converter: FirestoreDataConverter<T>,
-  options?: {
-    constraints?: Record<string, string | string[]>;
-    orderBy?: string;
-    orderByDesc?: string;
-    limit?: number;
-    subscribe?: boolean;
-  },
-) {
+>(path: string, converter: FirestoreDataConverter<T>, options?: CollectionOptions) {
   const db = useDb();
   const { showBoundary } = useErrorBoundary();
+
+  let orderByField: string | undefined = undefined;
+  if (options && "orderBy" in options) orderByField = options.orderBy;
+  if (options && "orderByDesc" in options) orderByField = options.orderByDesc;
+
+  const orderByDir = options && "orderByDesc" in options ? "desc" : "asc";
 
   const ref = collection(db, path).withConverter(converter);
   const q = query(
@@ -118,16 +122,15 @@ export function useCollection<
       where(k, Array.isArray(v) ? "in" : "==", v),
     ),
     ...compact([
-      options?.orderBy && orderBy(options.orderBy),
-      options?.orderByDesc && orderBy(options.orderByDesc, "desc"),
+      orderByField && orderBy(orderByField, orderByDir),
       options?.limit && limit(options.limit),
     ]),
   );
 
   const params = {
     ...options?.constraints,
-    orderBy: options?.orderBy,
-    orderByDesc: options?.orderByDesc,
+    orderByField,
+    orderByDir,
     limit: options?.limit?.toString(),
   } as Record<string, string>;
 
@@ -137,12 +140,14 @@ export function useCollection<
 
   const setDocument = useCallback(
     async (newDoc: T) => {
-      // TODO: orderBy, limit
       function merge(prev: T[] | undefined) {
         if (!prev) return [newDoc];
-        const index = prev.findIndex((doc) => doc.id === newDoc.id);
-        if (index === -1) return [...prev, newDoc];
-        return prev.map((doc, i) => (i === index ? newDoc : doc));
+        let coll = prev.filter((doc) => doc.id !== newDoc.id);
+        coll.push(newDoc);
+        coll = sortBy(coll, [orderByField ?? "id"]);
+        if (orderByDir === "desc") coll.reverse();
+        if (options?.limit) coll = coll.slice(0, options.limit);
+        return coll;
       }
 
       await mutate(
@@ -154,7 +159,7 @@ export function useCollection<
         { ...mutationConfig, optimisticData: merge },
       );
     },
-    [mutate, ref],
+    [mutate, ref, options?.limit, orderByDir, orderByField],
   );
 
   useEffect(() => {
