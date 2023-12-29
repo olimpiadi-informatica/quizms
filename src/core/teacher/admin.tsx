@@ -10,7 +10,6 @@ import {
 } from "date-fns";
 import { saveAs } from "file-saver";
 import {
-  Firestore,
   collection,
   deleteDoc,
   doc,
@@ -18,7 +17,6 @@ import {
   getDocs,
   limit,
   query,
-  runTransaction,
   serverTimestamp,
   where,
   writeBatch,
@@ -26,12 +24,7 @@ import {
 import { groupBy, range } from "lodash-es";
 
 import { useDb } from "~/firebase/baseLogin";
-import {
-  pdfConverter,
-  schoolConverter,
-  schoolMappingConverter,
-  studentRestoreConverter,
-} from "~/firebase/converters";
+import { pdfConverter, studentRestoreConverter } from "~/firebase/converters";
 import { studentConverter } from "~/firebase/converters";
 import { useCollection } from "~/firebase/hooks";
 import { Contest, School, StudentRestore, studentHash } from "~/models";
@@ -64,7 +57,6 @@ function formatDate(date: Date) {
 }
 
 function StartContestButton({ school }: { school: School }) {
-  const db = useDb();
   const { setSchool } = useTeacher();
 
   const modalRef = useRef<HTMLDialogElement>(null);
@@ -73,8 +65,9 @@ function StartContestButton({ school }: { school: School }) {
 
   const start = async () => {
     try {
-      const newSchool = await generateToken(getNow(), db, school);
-      await setSchool(newSchool);
+      const token = await randomToken();
+      const startingTime = roundToNearestMinutes(addSeconds(getNow(), 3.5 * 60));
+      await setSchool({ ...school, token, startingTime });
     } catch (e) {
       setError(e as Error);
     }
@@ -103,37 +96,6 @@ function StartContestButton({ school }: { school: School }) {
   );
 }
 
-async function generateToken(now: Date, db: Firestore, prevSchool: School) {
-  const token = await randomToken();
-  const startingTime = roundToNearestMinutes(addSeconds(now, 3.5 * 60));
-
-  const school: School = {
-    ...prevSchool,
-    token,
-    startingTime,
-  };
-
-  const schoolMappingsRef = doc(db, "schoolMapping", token).withConverter(schoolMappingConverter);
-  const schoolRef = doc(db, "schools", school.id).withConverter(schoolConverter);
-
-  await runTransaction(db, async (trans) => {
-    const mapping = await trans.get(schoolMappingsRef);
-    if (mapping.exists()) {
-      throw new Error("Token già esistente, riprova.");
-    }
-
-    trans.set(schoolRef, school);
-    trans.set(schoolMappingsRef, {
-      id: token,
-      school: school.id,
-      startingTime,
-      contestId: school.contestId,
-    });
-  });
-
-  return school;
-}
-
 function StopContestButton({ school }: { school: School }) {
   const { setSchool } = useTeacher();
   const modalRef = useRef<HTMLDialogElement>(null);
@@ -141,7 +103,10 @@ function StopContestButton({ school }: { school: School }) {
   const db = useDb();
 
   const undoContestStart = async () => {
+    await setSchool({ ...school, token: undefined, startingTime: undefined });
+
     // delete all student connected to token
+    // TODO: require index?
     const q = query(
       collection(db, "students").withConverter(studentConverter),
       where("school", "==", school.id),
@@ -157,8 +122,6 @@ function StopContestButton({ school }: { school: School }) {
         deleteDoc(doc(db, "students", student.id)),
       ]),
     );
-
-    await setSchool({ ...school, token: undefined, startingTime: undefined });
   };
 
   return (

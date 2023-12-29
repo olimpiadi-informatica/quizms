@@ -2,6 +2,7 @@ import React, { ReactNode, useCallback, useState } from "react";
 
 import { FirebaseOptions } from "firebase/app";
 import { User, getAuth, signOut } from "firebase/auth";
+import { Firestore, doc, runTransaction, updateDoc } from "firebase/firestore";
 
 import { Button } from "~/core/components/button";
 import { TeacherProvider } from "~/core/teacher/provider";
@@ -9,11 +10,13 @@ import { FirebaseLogin, useDb } from "~/firebase/baseLogin";
 import {
   contestConverter,
   schoolConverter,
+  schoolMappingConverter,
   solutionConverter,
   studentConverter,
   variantConverter,
 } from "~/firebase/converters";
 import { useCollection, useSignInWithPassword } from "~/firebase/hooks";
+import { School } from "~/models";
 
 export function TeacherLogin({
   config,
@@ -85,7 +88,7 @@ function TeacherLoginInner({ children }: { children: ReactNode }) {
 function TeacherInner({ user, children }: { user: User; children: ReactNode }) {
   const db = useDb();
 
-  const [schools, setSchool] = useCollection("schools", schoolConverter, {
+  const [schools] = useCollection("schools", schoolConverter, {
     constraints: { teacher: user.uid },
     subscribe: true,
   });
@@ -109,7 +112,7 @@ function TeacherInner({ user, children }: { user: User; children: ReactNode }) {
   return (
     <TeacherProvider
       schools={schools}
-      setSchool={setSchool}
+      setSchool={async (school) => updateSchool(db, schools, school)}
       students={students}
       setStudent={setStudent}
       contests={contests}
@@ -119,4 +122,33 @@ function TeacherInner({ user, children }: { user: User; children: ReactNode }) {
       {children}
     </TeacherProvider>
   );
+}
+
+async function updateSchool(db: Firestore, allSchools: School[], school: School) {
+  const prevSchool = allSchools.find((s) => s.id === school.id)!;
+
+  const schoolRef = doc(db, "schools", school.id).withConverter(schoolConverter);
+
+  if (school.token && prevSchool.token !== school.token) {
+    const schoolMappingsRef = doc(db, "schoolMapping", school.token).withConverter(
+      schoolMappingConverter,
+    );
+
+    await runTransaction(db, async (trans) => {
+      const mapping = await trans.get(schoolMappingsRef);
+      if (mapping.exists()) {
+        throw new Error("Token già esistente, riprova.");
+      }
+
+      trans.update(schoolRef, school);
+      trans.set(schoolMappingsRef, {
+        id: school.token,
+        school: school.id,
+        startingTime: school.startingTime,
+        contestId: school.contestId,
+      });
+    });
+  } else {
+    await updateDoc(schoolRef, school);
+  }
 }
