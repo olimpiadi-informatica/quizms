@@ -2,7 +2,7 @@ import z from "zod";
 
 import { contestSchema } from "./contest";
 
-export const generationConfigSchema = contestSchema.required().extend({
+export const generationConfigSchema = contestSchema.extend({
   longName: z.string().optional(),
   secret: z.string(),
   entry: z.string(),

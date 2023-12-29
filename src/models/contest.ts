@@ -45,7 +45,7 @@ export const contestSchema = z.object({
   allowRestart: z.boolean(),
   pdfPerSchool: z.number().optional(),
 
-  // instructions: z.string().optional(),
+  instructions: z.string().optional(),
 });
 
 export type Contest = z.infer<typeof contestSchema>;

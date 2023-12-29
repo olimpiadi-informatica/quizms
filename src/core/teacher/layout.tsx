@@ -1,4 +1,4 @@
-import React, { ReactNode, useRef } from "react";
+import React, { ReactNode, useEffect, useRef } from "react";
 
 import { BadgeInfo, GraduationCap } from "lucide-react";
 import { ErrorBoundary } from "react-error-boundary";
@@ -11,9 +11,12 @@ export function TeacherLayout({ children }: { children: ReactNode }) {
   const { contests, schools, logout } = useTeacher();
   const instructions = contests[0].instructions;
   const modalRef = useRef<HTMLDialogElement>(null);
-  /* useEffect(() => {
-    modalRef.current?.showModal();
-  }, [modalRef]); */
+
+  useEffect(() => {
+    if (instructions) {
+      modalRef.current?.showModal();
+    }
+  }, [modalRef, instructions]);
 
   return (
     <div className="flex h-dvh flex-col">
