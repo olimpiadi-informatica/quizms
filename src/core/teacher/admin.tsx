@@ -13,7 +13,6 @@ import {
   collection,
   deleteDoc,
   doc,
-  documentId,
   getDocs,
   limit,
   query,
@@ -24,10 +23,10 @@ import {
 import { groupBy, range } from "lodash-es";
 
 import { useDb } from "~/firebase/baseLogin";
-import { pdfConverter, studentRestoreConverter } from "~/firebase/converters";
+import { studentRestoreConverter } from "~/firebase/converters";
 import { studentConverter } from "~/firebase/converters";
 import { useCollection } from "~/firebase/hooks";
-import { Contest, School, StudentRestore, studentHash } from "~/models";
+import { Contest, School, StudentRestore } from "~/models";
 import { hash, randomToken } from "~/utils/random";
 
 import { Button, LoadingButtons } from "../components/button";
@@ -99,29 +98,14 @@ function StartContestButton({ school }: { school: School }) {
 function StopContestButton({ school }: { school: School }) {
   const { setSchool } = useTeacher();
   const modalRef = useRef<HTMLDialogElement>(null);
-
-  const db = useDb();
+  const [error, setError] = useState<Error>();
 
   const undoContestStart = async () => {
-    await setSchool({ ...school, token: undefined, startingTime: undefined });
-
-    // delete all student connected to token
-    // TODO: require index?
-    const q = query(
-      collection(db, "students").withConverter(studentConverter),
-      where("school", "==", school.id),
-      where("token", "==", school.token),
-    );
-
-    const snapshot = await getDocs(q);
-    const students = snapshot.docs.map((doc) => doc.data());
-    await Promise.all(
-      students.flatMap((student) => [
-        deleteDoc(doc(db, "studentMappingUid", student.uid!)),
-        deleteDoc(doc(db, "studentMappingHash", studentHash(student))),
-        deleteDoc(doc(db, "students", student.id)),
-      ]),
-    );
+    try {
+      await setSchool({ ...school, token: undefined, startingTime: undefined });
+    } catch (e) {
+      setError(e as Error);
+    }
   };
 
   return (
@@ -131,6 +115,9 @@ function StopContestButton({ school }: { school: School }) {
       </button>
       <Modal ref={modalRef} title="Conferma">
         <p>Sei sicuro di voler annullare l&apos;inizio della gara?</p>
+        <span className="pt-1 text-error">
+          {error?.message ? `Errore: ${error?.message}` : <>&nbsp;</>}
+        </span>
         <div className="mt-3 flex flex-row justify-center gap-3">
           <LoadingButtons>
             <Button className="btn-warning" onClick={undoContestStart}>
@@ -358,19 +345,15 @@ function ContestAdmin({ school, contest }: { school: School; contest: Contest })
 }
 
 function DownloadPdfButton({ school, contest }: { school: School; contest: Contest }) {
-  const db = useDb();
+  const { getPdfStatements } = useTeacher();
 
   const onClick = async () => {
-    const q = query(
-      collection(db, "pdfs"),
-      where(documentId(), "in", school.pdfVariants),
-    ).withConverter(pdfConverter);
+    const statements = await getPdfStatements(school.pdfVariants ?? []);
 
-    const statements = await getDocs(q);
     const { PDFDocument } = await import("@cantoo/pdf-lib");
     const pdf = await PDFDocument.create();
-    for (const statement of statements.docs) {
-      const otherPdf = await PDFDocument.load(statement.data().statement);
+    for (const statement of statements) {
+      const otherPdf = await PDFDocument.load(statement.statement);
       const toCopy = range(otherPdf.getPages().length);
       const pages = await pdf.copyPages(otherPdf, toCopy);
       for (const page of pages) {

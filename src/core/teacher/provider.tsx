@@ -1,6 +1,6 @@
 import React, { ReactNode, createContext, useContext } from "react";
 
-import { Contest, School, Solution, Student, Variant } from "~/models";
+import { Contest, Pdf, School, Solution, Student, Variant } from "~/models";
 
 import { TeacherLayout } from "./layout";
 
@@ -17,6 +17,8 @@ type TeacherProviderProps = {
   solutions: Solution[];
   /** Funzione per effettuare il logout */
   logout: () => Promise<void>;
+  /** Funzione per ottenere i pdf dei testi */
+  getPdfStatements: (pdfVariants: string[]) => Promise<Pdf[]>;
   /** Hook per ottenere gli studenti di una scuola */
   useStudents: (schoolId: string) => readonly [Student[], (student: Student) => Promise<void>];
 };
