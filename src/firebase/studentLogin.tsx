@@ -5,6 +5,7 @@ import { FirebaseOptions } from "firebase/app";
 import { getAuth, signOut } from "firebase/auth";
 import {
   Firestore,
+  FirestoreError,
   addDoc,
   collection,
   doc,
@@ -35,11 +36,13 @@ import { Student, parsePersonalInformation, studentHash } from "~/models";
 import { hash, randomId } from "~/utils/random";
 
 class DuplicateStudentError extends Error {
-  studentId: string = "";
-  schoolId: string = "";
+  constructor(
+    public studentId: string,
+    public schoolId: string,
+  ) {
+    super("Studente già registrato");
+  }
 }
-
-class InvalidTokenError extends Error {}
 
 export function StudentLogin({
   config,
@@ -321,7 +324,7 @@ async function createStudentRestore(
       surname: curStudent.personalInformation!.surname,
     });
   } catch (e) {
-    throw new InvalidTokenError("Codice scaduto");
+    throw new Error("Codice scaduto");
   }
 }
 
@@ -351,11 +354,11 @@ async function createStudent(db: Firestore, student: Student) {
   );
   const schoolMapping = await getDoc(schoolMappingRef);
   if (!schoolMapping.exists()) {
-    throw new InvalidTokenError("Codice non valido");
+    throw new Error("Codice non valido");
   }
   const schoolMappingData = schoolMapping.data();
   if (schoolMappingData.contestId !== student.contest) {
-    throw new InvalidTokenError("Il codice inserito non corrisponde alla gara selezionata");
+    throw new Error("Il codice inserito non corrisponde alla gara selezionata");
   }
   student.school = schoolMappingData.school;
   student.startedAt = schoolMappingData.startingTime;
@@ -376,10 +379,7 @@ async function createStudent(db: Firestore, student: Student) {
     await runTransaction(db, async (trans) => {
       const mapping = await trans.get(hashMappingRef);
       if (mapping.exists()) {
-        const duplicateError = new DuplicateStudentError("Studente già registrato");
-        duplicateError.studentId = mapping.data().studentId;
-        duplicateError.schoolId = student.school!;
-        throw duplicateError;
+        throw new DuplicateStudentError(mapping.data().studentId, student.school!);
       }
 
       trans.set(studentRef, student);
@@ -387,10 +387,10 @@ async function createStudent(db: Firestore, student: Student) {
       trans.set(uidMappingRef, { id: student.uid, studentId: student.id });
     });
   } catch (e) {
-    if (e instanceof DuplicateStudentError) {
-      throw e;
+    if ((e as FirestoreError).code === "permission-denied") {
+      throw new Error("Codice scaduto");
     }
-    throw new InvalidTokenError("Codice scaduto");
+    throw e;
   }
 
   return student;
