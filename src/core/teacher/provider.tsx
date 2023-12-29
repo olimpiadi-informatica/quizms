@@ -1,6 +1,6 @@
 import React, { ReactNode, createContext, useContext } from "react";
 
-import { Contest, Pdf, School, Solution, Student, Variant } from "~/models";
+import { Contest, Pdf, School, Solution, Student, StudentRestore, Variant } from "~/models";
 
 import { TeacherLayout } from "./layout";
 
@@ -21,6 +21,14 @@ type TeacherProviderProps = {
   getPdfStatements: (pdfVariants: string[]) => Promise<Pdf[]>;
   /** Hook per ottenere gli studenti di una scuola */
   useStudents: (schoolId: string) => readonly [Student[], (student: Student) => Promise<void>];
+  /** Hook per ottenere le richieste di accesso degli studenti */
+  useStudentRestores: (
+    school: School,
+  ) => readonly [
+    StudentRestore[],
+    (request: StudentRestore) => Promise<void>,
+    (studentId: string) => Promise<void>,
+  ];
 };
 
 const TeacherContext = createContext<TeacherProviderProps>({} as TeacherProviderProps);
@@ -39,11 +47,16 @@ export function TeacherProvider({
   );
 }
 
-export function useTeacher(): Omit<TeacherProviderProps, "useStudents"> {
+export function useTeacher(): Omit<TeacherProviderProps, "useStudents" | "useStudentRestores"> {
   return useContext(TeacherContext);
 }
 
 export function useTeacherStudents(schoolId: string) {
   const { useStudents } = useContext(TeacherContext);
   return useStudents(schoolId);
+}
+
+export function useTeacherStudentRestores(school: School) {
+  const { useStudentRestores } = useContext(TeacherContext);
+  return useStudentRestores(school);
 }

@@ -9,23 +9,8 @@ import {
   subMinutes,
 } from "date-fns";
 import { saveAs } from "file-saver";
-import {
-  collection,
-  deleteDoc,
-  doc,
-  getDocs,
-  limit,
-  query,
-  serverTimestamp,
-  where,
-  writeBatch,
-} from "firebase/firestore";
 import { groupBy, range } from "lodash-es";
 
-import { useDb } from "~/firebase/baseLogin";
-import { studentRestoreConverter } from "~/firebase/converters";
-import { studentConverter } from "~/firebase/converters";
-import { useCollection } from "~/firebase/hooks";
 import { Contest, School, StudentRestore } from "~/models";
 import { hash, randomToken } from "~/utils/random";
 
@@ -34,7 +19,7 @@ import Loading from "../components/loading";
 import Modal from "../components/modal";
 import { useIsAfter, useTime } from "../components/time";
 import Timer from "../components/timer";
-import { useTeacher } from "./provider";
+import { useTeacher, useTeacherStudentRestores } from "./provider";
 
 function canStartContest(now: Date, school: School, contest: Contest) {
   if (now < contest.startingWindowStart! || now > contest.startingWindowEnd!) return false;
@@ -180,50 +165,33 @@ function ContestData({ contest, school }: { school: School; contest: Contest }) 
   );
 }
 
-function StudentRestoreButton({ studentRestore }: { studentRestore: StudentRestore[] }) {
-  const db = useDb();
-
+function StudentRestoreButton({
+  studentRestore,
+  approve,
+  reject,
+}: {
+  studentRestore: StudentRestore[];
+  approve: (studentRestore: StudentRestore) => Promise<void>;
+  reject: (studentId: string) => Promise<void>;
+}) {
   const modalRef = useRef<HTMLDialogElement>(null);
   const [code, setCode] = useState("");
 
   const targetCodes = studentRestore.map((request) =>
-    String(hash(request.id) % 1000).padStart(3, "0"),
+    `${hash(request.id) % 1000}`.padStart(3, "0"),
   );
 
-  const approve = async () => {
-    for (const request of studentRestore) {
-      if (code === String(hash(request.id) % 1000).padStart(3, "0")) {
-        const q = query(
-          collection(db, "studentMappingUid"),
-          where("studentId", "==", request.studentId),
-          limit(400),
-        );
-        const prevMappings = await getDocs(q);
-
-        const batch = writeBatch(db);
-        batch.update(doc(db, "students", request.studentId).withConverter(studentConverter), {
-          uid: request.id,
-          updatedAt: serverTimestamp(),
-        });
-        batch.set(doc(db, "studentMappingUid", request.id), {
-          studentId: request.studentId,
-        });
-        prevMappings.forEach((mapping) => {
-          batch.delete(doc(db, "studentMappingUid", mapping.id));
-        });
-
-        await batch.commit();
-      }
+  const approveRequest = async () => {
+    const request = studentRestore.find(
+      (request) => `${hash(request.id) % 1000}`.padStart(3, "0") === code,
+    );
+    if (request) {
+      await approve(request);
     }
-
-    reject();
   };
 
-  const reject = () => {
-    studentRestore.map((request) => {
-      void deleteDoc(doc(db, "studentRestore", request.id));
-    });
-    modalRef.current?.close();
+  const rejectRequest = async () => {
+    await reject(studentRestore[0].studentId);
   };
 
   return (
@@ -250,10 +218,13 @@ function StudentRestoreButton({ studentRestore }: { studentRestore: StudentResto
         </label>
         <div className="mt-3 flex flex-row justify-center gap-3">
           <LoadingButtons>
-            <Button className="btn-error" onClick={approve} disabled={!targetCodes.includes(code)}>
+            <Button onClick={rejectRequest}>Rigetta</Button>
+            <Button
+              className="btn-error"
+              onClick={approveRequest}
+              disabled={!targetCodes.includes(code)}>
               Approva
             </Button>
-            <Button onClick={reject}>Rigetta</Button>
           </LoadingButtons>
         </div>
       </Modal>
@@ -261,24 +232,23 @@ function StudentRestoreButton({ studentRestore }: { studentRestore: StudentResto
   );
 }
 
-function StudentRestoreList(props: { school: School }) {
-  const { school } = props;
-  const [studentRestore] = useCollection("studentRestore", studentRestoreConverter, {
-    constraints: { schoolId: school.id, token: school.token ?? "" },
-    subscribe: true,
-  });
+function StudentRestoreList({ school }: { school: School }) {
+  const [studentRestores, approve, reject] = useTeacherStudentRestores(school);
 
-  if (!studentRestore || studentRestore.length === 0) {
+  if (!studentRestores || studentRestores.length === 0) {
     return <>Nessuna richiesta.</>;
   }
 
   return (
     <div className="flex flex-col items-start gap-3">
-      {Object.entries(groupBy(studentRestore, (request) => request.studentId)).map(
-        ([id, requests]) => (
-          <StudentRestoreButton studentRestore={requests} key={id} />
-        ),
-      )}
+      {Object.entries(groupBy(studentRestores, "studentId")).map(([id, requests]) => (
+        <StudentRestoreButton
+          studentRestore={requests}
+          key={id}
+          approve={approve}
+          reject={reject}
+        />
+      ))}
     </div>
   );
 }

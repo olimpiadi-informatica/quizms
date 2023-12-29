@@ -8,8 +8,10 @@ import {
   doc,
   documentId,
   getDocs,
+  limit,
   query,
   runTransaction,
+  serverTimestamp,
   updateDoc,
   where,
   writeBatch,
@@ -26,10 +28,12 @@ import {
   schoolMappingConverter,
   solutionConverter,
   studentConverter,
+  studentMappingUidConverter,
+  studentRestoreConverter,
   variantConverter,
 } from "~/firebase/converters";
 import { useCollection, useSignInWithPassword } from "~/firebase/hooks";
-import { School, studentHash } from "~/models";
+import { School, StudentRestore, studentHash } from "~/models";
 
 export function TeacherLogin({
   config,
@@ -122,8 +126,9 @@ function TeacherInner({ user, children }: { user: User; children: ReactNode }) {
       variants={variants}
       solutions={solutions}
       logout={logout}
+      getPdfStatements={async (pdfVariants) => getPdfStatements(db, pdfVariants)}
       useStudents={useStudents}
-      getPdfStatements={async (pdfVariants) => getPdfStatements(db, pdfVariants)}>
+      useStudentRestores={useStudentRestores}>
       {children}
     </TeacherProvider>
   );
@@ -135,7 +140,7 @@ async function setSchool(db: Firestore, allSchools: School[], school: School) {
   const schoolRef = doc(db, "schools", school.id).withConverter(schoolConverter);
 
   if (prevSchool.token === school.token) {
-    // The teacher has changed the token, we simply update the school.
+    // The teacher hasn't changed the token, we simply update the school.
 
     await updateDoc(schoolRef, school);
   } else if (school.token) {
@@ -154,7 +159,7 @@ async function setSchool(db: Firestore, allSchools: School[], school: School) {
         throw new Error("Token già esistente, riprova.");
       }
 
-      trans.update(schoolRef, school);
+      trans.set(schoolRef, school);
       trans.set(schoolMappingsRef, {
         id: school.token,
         school: school.id,
@@ -208,4 +213,64 @@ function useStudents(school: string) {
     orderBy: "createdAt",
     subscribe: true,
   });
+}
+
+function useStudentRestores(school: School) {
+  const db = useDb();
+  const [studentRestores] = useCollection("studentRestore", studentRestoreConverter, {
+    constraints: { schoolId: school.id, token: school.token ?? "" },
+    subscribe: true,
+    limit: 50,
+  });
+
+  const reject = async (studentId: string) => {
+    // Delete all the requests for this student.
+    const q = query(
+      collection(db, "studentRestore").withConverter(studentRestoreConverter),
+      where("studentId", "==", studentId),
+      limit(400),
+    );
+
+    for (;;) {
+      const requests = await getDocs(q);
+      if (requests.empty) break;
+
+      const batch = writeBatch(db);
+      for (const request of requests.docs) {
+        batch.delete(doc(db, "studentRestore", request.id));
+      }
+      await batch.commit();
+    }
+  };
+
+  const approve = async (request: StudentRestore) => {
+    // We need to delete the previous mapping for this student. There should be only one, but
+    // we delete all of them just to be sure. Firestore limits the number of writes in a batch,
+    // so we delete only the first 400 mappings, hopefully it shouldn't be a problem if there
+    // are still some old mappings in the database.
+    const q = query(
+      collection(db, "studentMappingUid").withConverter(studentMappingUidConverter),
+      where("studentId", "==", request.studentId),
+      limit(400),
+    );
+    const prevMappings = await getDocs(q);
+
+    const batch = writeBatch(db);
+    batch.update(doc(db, "students", request.studentId).withConverter(studentConverter), {
+      uid: request.id,
+      updatedAt: serverTimestamp(),
+    });
+    batch.set(doc(db, "studentMappingUid", request.id).withConverter(studentMappingUidConverter), {
+      id: request.id,
+      studentId: request.studentId,
+    });
+    for (const mapping of prevMappings.docs) {
+      batch.delete(doc(db, "studentMappingUid", mapping.id));
+    }
+    await batch.commit();
+
+    await reject(request.studentId);
+  };
+
+  return [studentRestores, approve, reject] as const;
 }
