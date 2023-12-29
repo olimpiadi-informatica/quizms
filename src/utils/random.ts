@@ -30,15 +30,14 @@ export function hash(input: Parameters<typeof sha256>[0]): number {
   return Number(view.getBigUint64(0, true) & BigInt(Number.MAX_SAFE_INTEGER));
 }
 
-function getRandomInt(max: number) {
-  return Math.floor(Math.random() * max);
-}
-
 export async function randomToken(): Promise<string> {
-  const { wordlist } = await import("./wordlist");
+  const { default: wordlist } = await import("./wordlist.txt");
+  const words = wordlist.split("\n");
+
+  const rng = new Rng(randomId());
   const tokens = [];
   for (let i = 0; i < 3; i++) {
-    tokens.push(wordlist[getRandomInt(wordlist.length)]);
+    tokens.push(rng.choice(words));
   }
   return tokens.join("-");
 }
