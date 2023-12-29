@@ -70,9 +70,7 @@ function StudentLoginInner({
   const user = useAnonymousAuth();
   const [contests] = useCollection("contests", contestConverter);
   const [students, setStudent] = useCollection("students", studentConverter, {
-    constraints: {
-      uid: user?.uid,
-    },
+    constraints: { uid: user?.uid },
     limit: 1,
   });
 
@@ -228,9 +226,7 @@ const StudentRestoreModal = forwardRef(function StudentRestoreModal(
   const user = auth.currentUser!;
 
   useCollection("students", studentConverter, {
-    constraints: {
-      uid: user?.uid,
-    },
+    constraints: { uid: user?.uid },
     limit: 1,
     subscribe: true,
   });

@@ -135,21 +135,21 @@ function Counter({ school, contest }: { school: School; contest: Contest }) {
 }
 
 const FinalizeModal = forwardRef(function FinalizeModal(
-  props: { contest: Contest; school: School },
+  { contest, school }: { contest: Contest; school: School },
   ref: Ref<HTMLDialogElement> | null,
 ) {
   const { students, variants, setSchool } = useTeacher();
   const [confirm, setConfirm] = useState("");
 
   const error = useMemo(() => {
-    const filteredStudents = students.filter((s) => s.school === props.school.id);
+    const filteredStudents = students.filter((s) => s.school === school.id);
 
     const prevStudents = new Set();
 
     for (const student of filteredStudents) {
       const { name, surname } = student.personalInformation ?? {};
 
-      const reason = isStudentIncomplete(student, props.contest, variants);
+      const reason = isStudentIncomplete(student, contest, variants);
       if (reason) {
         if (!name || !surname) return "Almeno uno studente non ha nome o cognome";
         return `Lo studente ${name} ${surname} non può essere finalizzato: ${reason}`;
@@ -162,13 +162,12 @@ const FinalizeModal = forwardRef(function FinalizeModal(
         prevStudents.add(studentHash({ ...student, token: "" }));
       }
     }
-  }, [students, props, variants]);
+  }, [students, contest, school, variants]);
 
   const correctConfirm = "tutti gli studenti sono stati correttamente inseriti";
 
   const finalize = async () => {
-    await setSchool({ ...props.school, finalized: true });
-    window.location.reload();
+    await setSchool({ ...school, finalized: true });
   };
 
   return (
@@ -191,7 +190,7 @@ const FinalizeModal = forwardRef(function FinalizeModal(
           <p>
             Finalizzando <b>non</b> sarà più possibile <b>aggiungere</b> nuovi studenti o{" "}
             <b>modificare</b> i dati degli studenti in questa scuola per la gara{" "}
-            <i>{props.contest?.name}</i>.
+            <i>{contest?.name}</i>.
           </p>
           <p>
             Se hai capito e sei d&apos;accordo, scrivi &ldquo;<i>{correctConfirm}</i>&rdquo;.

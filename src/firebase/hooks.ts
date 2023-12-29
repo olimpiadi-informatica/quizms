@@ -95,8 +95,8 @@ export function useDocument<T>(
 
 type CollectionSortingOptions = { orderBy?: string } | { orderByDesc?: string };
 
-type CollectionOptions = {
-  constraints?: Record<string, string | string[]>;
+type CollectionOptions<T> = {
+  constraints?: { [P in keyof T]?: T[P] | T[P][] };
   limit?: number;
   subscribe?: boolean;
 } & CollectionSortingOptions;
@@ -105,7 +105,7 @@ export function useCollection<
   T extends {
     id: string;
   },
->(path: string, converter: FirestoreDataConverter<T>, options?: CollectionOptions) {
+>(path: string, converter: FirestoreDataConverter<T>, options?: CollectionOptions<T>) {
   const db = useDb();
   const { showBoundary } = useErrorBoundary();
 
