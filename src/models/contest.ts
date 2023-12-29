@@ -43,7 +43,6 @@ export const contestSchema = z.object({
   ),
   hasVariants: z.boolean(),
   allowRestart: z.boolean(),
-  pdfPerSchool: z.number().optional(),
 
   instructions: z.string().optional(),
 });

@@ -2,7 +2,7 @@
 
 ```mermaid
 flowchart LR
-    subgraph plugin remark 
+    subgraph plugin remark
         md1[MDAST]
         md2[MDAST]
         mdc[MDAST]

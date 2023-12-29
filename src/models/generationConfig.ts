@@ -10,6 +10,7 @@ export const generationConfigSchema = contestSchema.extend({
   shuffleAnswers: z.boolean(),
   variantIds: z.coerce.string().array(),
   pdfVariantIds: z.coerce.string().array(),
+  pdfPerSchool: z.number().optional(),
 });
 
 export type GenerationConfig = z.infer<typeof generationConfigSchema>;
