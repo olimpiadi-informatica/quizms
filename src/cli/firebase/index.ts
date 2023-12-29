@@ -1,3 +1,5 @@
+import { cwd } from "node:process";
+
 import { Command } from "commander";
 
 import deploy from "./deploy";
@@ -12,11 +14,13 @@ export default function firebaseCommand() {
   command
     .command("deploy")
     .description("Deploy the website.")
-    .action(() => deploy());
+    .argument("[directory]", "The directory of the contest.", cwd())
+    .action((dir) => deploy({ dir }));
 
   command
     .command("export")
     .description("Export the contests data.")
+    .argument("[directory]", "The directory of the contest.", cwd())
     .option("--schools", "Export the schools.")
     .option("--solutions", "Export the solutions.")
     .option("--students", "Export the students.")
@@ -24,11 +28,12 @@ export default function firebaseCommand() {
     .option("--tokens", "Export the tokens.")
     .option("--variants", "Export the variants.")
     .option("--contests", "Export the contests.")
-    .action((options) => exportData(options));
+    .action((dir, options) => exportData({ dir, ...options }));
 
   command
     .command("import")
     .description("Import the contests data.")
+    .argument("[directory]", "The directory of the contest.", cwd())
     .option("-c, --config <config>", "The contests config file.")
     .option("--teachers", "Import the teachers.")
     .option("--schools", "Import the schools.")
@@ -40,7 +45,7 @@ export default function firebaseCommand() {
     .option("--pdfs", "Import the pdf files.")
     .option("-d, --delete", "Delete existing collections.")
     .option("-f, --force", "Overwrite existing documents.")
-    .action((options) => importData(options));
+    .action((dir, options) => importData({ dir, ...options }));
 
   return command;
 }

@@ -103,13 +103,12 @@ export default async function variants(options: ExportVariantsOptions) {
     );
   }
 
-  // TODO: config file option
-  const generationConfigs = await readCollection("contests", generationConfigSchema);
+  const generationConfigs = await readCollection(options.dir, "contests", generationConfigSchema);
   const variants = await buildVariants(root, generationConfigs);
 
   const res = await Promise.all(
     Object.values(variants).map(async ([variant, statement, solution]) => {
-      const dir = join(options.outDir, variant.id);
+      const dir = join(options.dir, options.outDir, variant.id);
       await mkdir(dir, { recursive: true });
       await writeFile(join(dir, "schema.json"), JSON.stringify(variant));
       await writeFile(join(dir, "statement.js"), statement.statement);

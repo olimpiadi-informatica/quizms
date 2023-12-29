@@ -1,8 +1,18 @@
 import { existsSync } from "node:fs";
+import { chdir } from "node:process";
 
 import firebase from "firebase-tools";
 
-export default async function deploy() {
+import { loadServiceAccountKey } from "./common";
+
+type DeployOptions = {
+  dir: string;
+};
+
+export default async function deploy(options: DeployOptions) {
+  loadServiceAccountKey(options.dir);
+
+  chdir(options.dir);
   if (!existsSync("firebase.json")) {
     await firebase.init("hosting");
   }

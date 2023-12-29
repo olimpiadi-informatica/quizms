@@ -26,8 +26,7 @@ export type PrintOptions = {
 export default async function print(options: PrintOptions) {
   process.env.QUIZMS_MODE = "pdf";
 
-  // TODO: config file option
-  const generationConfigs = await readCollection("contests", generationConfigSchema);
+  const generationConfigs = await readCollection(options.dir, "contests", generationConfigSchema);
 
   info("Building statements...");
   const root = join(options.dir, "src");

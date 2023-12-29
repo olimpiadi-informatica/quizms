@@ -1,8 +1,8 @@
-import { mkdir, open, readFile } from "node:fs/promises";
+import { mkdir, open } from "node:fs/promises";
 import { format, join } from "node:path";
 
-import { cert, deleteApp, initializeApp } from "firebase-admin/app";
-import { CollectionReference, getFirestore } from "firebase-admin/firestore";
+import { deleteApp } from "firebase-admin/app";
+import { CollectionReference } from "firebase-admin/firestore";
 import { capitalize } from "lodash-es";
 
 import {
@@ -16,8 +16,10 @@ import {
 } from "~/firebase/convertersAdmin";
 
 import { info, success } from "../utils/logs";
+import { initializeDb } from "./common";
 
 type ExportOptions = {
+  dir: string;
   schools?: boolean;
   solutions?: boolean;
   students?: boolean;
@@ -28,43 +30,39 @@ type ExportOptions = {
 };
 
 export default async function exportContests(options: ExportOptions) {
-  const serviceAccount = JSON.parse(await readFile("serviceAccountKey.json", "utf-8"));
-  const app = initializeApp({
-    credential: cert(serviceAccount),
-  });
-  const db = getFirestore(app);
+  const [app, db] = await initializeDb(options.dir);
 
   const timestamp = new Date().toISOString();
-  const dir = join("export", timestamp);
-  await mkdir(dir, { recursive: true });
+  const outDir = join(options.dir, "export", timestamp);
+  await mkdir(outDir, { recursive: true });
 
   if (options.students) {
     const ref = db.collection("students").withConverter(studentConverter);
-    await exportCollection(ref, "students", dir);
+    await exportCollection(ref, "students", outDir);
   }
   if (options.schools) {
     const ref = db.collection("schools").withConverter(schoolConverter);
-    await exportCollection(ref, "schools", dir);
+    await exportCollection(ref, "schools", outDir);
   }
   if (options.solutions) {
     const ref = db.collection("solutions").withConverter(solutionConverter);
-    await exportCollection(ref, "solutions", dir);
+    await exportCollection(ref, "solutions", outDir);
   }
   if (options.submissions) {
     const ref = db.collection("submissions").withConverter(submissionConverter);
-    await exportCollection(ref, "submissions", dir);
+    await exportCollection(ref, "submissions", outDir);
   }
   if (options.tokens) {
     const ref = db.collection("schoolMapping").withConverter(schoolMappingConverter);
-    await exportCollection(ref, "tokens", dir);
+    await exportCollection(ref, "tokens", outDir);
   }
   if (options.variants) {
     const ref = db.collection("variants").withConverter(variantConverter);
-    await exportCollection(ref, "variants", dir);
+    await exportCollection(ref, "variants", outDir);
   }
   if (options.contests) {
     const ref = db.collection("contests").withConverter(contestConverter);
-    await exportCollection(ref, "contests", dir);
+    await exportCollection(ref, "contests", outDir);
   }
 
   await deleteApp(app);

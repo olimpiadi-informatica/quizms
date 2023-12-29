@@ -1,12 +1,15 @@
 import { existsSync } from "node:fs";
+import { join } from "node:path";
 
 import { initializeApp } from "firebase-admin/app";
 import { getFirestore } from "firebase-admin/firestore";
 
 import { fatal } from "../utils/logs";
 
-export function loadServiceAccountKey() {
-  if (!existsSync("serviceAccountKey.json")) {
+export function loadServiceAccountKey(dir: string) {
+  const path = join(dir, "serviceAccountKey.json");
+
+  if (!existsSync(path)) {
     fatal(`\
 Il file con le credenziali di Firebase non è stato trovato.
 
@@ -20,11 +23,11 @@ Per generare il file:
 `);
   }
 
-  process.env.GOOGLE_APPLICATION_CREDENTIALS = "serviceAccountKey.json";
+  process.env.GOOGLE_APPLICATION_CREDENTIALS = path;
 }
 
-export async function initializeDb() {
-  loadServiceAccountKey();
+export async function initializeDb(dir: string) {
+  loadServiceAccountKey(dir);
   const app = initializeApp();
   const db = getFirestore(app);
   db.settings({ ignoreUndefinedProperties: true });

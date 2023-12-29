@@ -26,6 +26,7 @@ import { buildVariants } from "../variants";
 import { initializeDb } from "./common";
 
 type ImportOptions = {
+  dir: string;
   config: string;
   delete?: boolean;
   force?: boolean;
@@ -42,7 +43,7 @@ type ImportOptions = {
 };
 
 export default async function importData(options: ImportOptions) {
-  const [app, db] = await initializeDb();
+  const [app, db] = await initializeDb(options.dir);
 
   if (options.contests) {
     await importContests(db, options);
@@ -65,14 +66,14 @@ export default async function importData(options: ImportOptions) {
 }
 
 async function importContests(db: Firestore, options: ImportOptions) {
-  const contests = await readCollection("contests", contestSchema);
+  const contests = await readCollection(options.dir, "contests", contestSchema);
   await importCollection(db, "contests", contests, contestConverter, options);
 }
 
 async function importSchools(db: Firestore, options: ImportOptions) {
   const auth = getAuth();
 
-  const schools = await readCollection("schools", schoolSchema);
+  const schools = await readCollection(options.dir, "schools", schoolSchema);
   const schoolsWithTeacher = await Promise.all(
     schools.map(async (school) => {
       try {
@@ -94,7 +95,7 @@ async function importTeachers(db: Firestore, options: ImportOptions) {
     password: z.string(),
   });
 
-  const teachers = await readCollection("teachers", teacherSchema);
+  const teachers = await readCollection(options.dir, "teachers", teacherSchema);
 
   const auth = getAuth();
   const ids = await Promise.all(
@@ -132,7 +133,7 @@ async function importTeachers(db: Firestore, options: ImportOptions) {
 }
 
 async function importPdf(db: Firestore, options: ImportOptions) {
-  const generationConfigs = await readCollection("contests", generationConfigSchema);
+  const generationConfigs = await readCollection(options.dir, "contests", generationConfigSchema);
   const pdfs = await Promise.all(
     generationConfigs
       .flatMap((c) => uniq([...c.variantIds, ...c.pdfVariantIds]))
@@ -150,10 +151,9 @@ async function importPdf(db: Firestore, options: ImportOptions) {
 }
 
 async function importVariants(db: Firestore, options: ImportOptions) {
-  const generationConfigs = await readCollection("contests", generationConfigSchema);
+  const generationConfigs = await readCollection(options.dir, "contests", generationConfigSchema);
 
-  // TODO: option dir
-  const variants = await buildVariants("src", generationConfigs);
+  const variants = await buildVariants(join(options.dir, "src"), generationConfigs);
   if (options.variants) {
     await importCollection(db, "variants", map(variants, 0), variantConverter, options);
   }

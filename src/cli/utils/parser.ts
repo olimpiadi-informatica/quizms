@@ -1,5 +1,6 @@
 import { readFile } from "node:fs/promises";
-import { join } from "node:path";
+import { join, relative } from "node:path";
+import { cwd } from "node:process";
 
 import yaml from "js-yaml";
 import { camelCase, cloneDeepWith, isPlainObject } from "lodash-es";
@@ -11,7 +12,11 @@ import validate from "~/utils/validate";
 
 import { fatal, info } from "./logs";
 
-export async function readCollection<T>(collection: string, schema: ZodType<T, any, any>) {
+export async function readCollection<T>(
+  dir: string,
+  collection: string,
+  schema: ZodType<T, any, any>,
+) {
   const parsers = [
     { ext: ".toml", parser: toml.parse },
     { ext: ".yaml", parser: yaml.load },
@@ -20,21 +25,24 @@ export async function readCollection<T>(collection: string, schema: ZodType<T, a
     { ext: ".csv", parser: parseCsv },
   ];
 
-  const path = join("data", collection); // TODO: option dir
+  const path = join(dir, "data", collection);
+
   for (const { ext, parser } of parsers) {
+    const relativePath = relative(cwd(), collection) + ext;
+
     let content: string;
     try {
       content = await readFile(path + ext, "utf-8");
     } catch (e) {
       continue;
     }
-    info(`Reading from ${path}${ext}...`);
+    info(`Reading from ${relativePath}...`);
 
     let rawData: any;
     try {
       rawData = parser(content);
     } catch (e) {
-      fatal(`Cannot parse ${path}${ext}: ${e}`);
+      fatal(`Cannot parse ${relativePath}: ${e}`);
     }
 
     try {
@@ -43,15 +51,15 @@ export async function readCollection<T>(collection: string, schema: ZodType<T, a
       } else if (isPlainObject(rawData)) {
         return Object.entries(rawData).map(([id, record]) => {
           if (!isPlainObject(record)) {
-            fatal(`Cannot parse ${path}${ext}: ${id} is not an object`);
+            fatal(`Cannot parse ${relativePath}: ${id} is not an object`);
           }
           return validate(schema, renameKeys({ id, ...(record as object) }));
         });
       } else {
-        fatal(`Cannot parse ${path}${ext}: not an array or object`);
+        fatal(`Cannot parse ${relativePath}: not an array or object`);
       }
     } catch (e) {
-      fatal(`Cannot parse ${path}${ext}: ${e}`);
+      fatal(`Cannot parse ${relativePath}: ${e}`);
     }
   }
 
