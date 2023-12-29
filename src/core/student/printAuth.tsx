@@ -1,4 +1,7 @@
-import React from "react";
+import React, { ReactNode } from "react";
+
+// @ts-ignore
+import contests from "virtual:quizms-contests";
 
 import { RemoteStatement } from "~/core/student/remoteStatement";
 import { School, Student } from "~/models";
@@ -7,14 +10,14 @@ import { GenerationConfig } from "~/models/generationConfig";
 import { StudentProvider, useStudent } from "./provider";
 
 type AuthProps = {
-  contests: GenerationConfig[];
+  children: ReactNode;
 };
 
-export function PrintAuth({ contests }: AuthProps) {
+export function PrintAuth({ children }: AuthProps) {
   const urlParams = new URLSearchParams(window.location.search);
   const variant = urlParams.get("v");
 
-  const contest = contests.find(
+  const contest = (contests as GenerationConfig[]).find(
     (c) => c.variantIds.includes(variant!) || c.pdfVariantIds.includes(variant!),
   );
 
@@ -23,11 +26,11 @@ export function PrintAuth({ contests }: AuthProps) {
       <div className="h-dvh overflow-auto">
         <div className="prose mx-auto p-4 lg:max-w-4xl">
           {variant && <h3 className="text-error">Variante non trovata.</h3>}
-          {contests.map((c) => (
+          {contests.map((c: GenerationConfig) => (
             <>
               <h3>{c.name}</h3>
               <h4>Varianti su carta</h4>
-              <ul className="columns-3 lg:columns-4">
+              <ul className="columns-3 first:*:mt-0 lg:columns-4">
                 {c.variantIds.map((v) => (
                   <li key={v}>
                     <a href={`?v=${v}`}>{v}</a>
@@ -35,7 +38,7 @@ export function PrintAuth({ contests }: AuthProps) {
                 ))}
               </ul>
               <h4>Varianti online</h4>
-              <ul className="columns-3 lg:columns-4">
+              <ul className="columns-3 first:*:mt-0 lg:columns-4">
                 {c.pdfVariantIds.map((v) => (
                   <li key={v}>
                     <a href={`?v=${v}`}>{v}</a>
@@ -73,13 +76,12 @@ export function PrintAuth({ contests }: AuthProps) {
       setStudent={async () => {}}
       submit={() => {}}
       terminated={false}>
-      <PrintForm />
-      <RemoteStatement url={`/pdf/statement.js?v=${variant}`} />
+      {children}
     </StudentProvider>
   );
 }
 
-function PrintForm() {
+export function PrintForm() {
   const { contest, student } = useStudent();
 
   return (
@@ -89,7 +91,7 @@ function PrintForm() {
           <label className="label">
             <span className="label-text text-lg">{field.label}</span>
           </label>
-          <input type="text" className="input input-bordered w-full max-w-md" />
+          <input type="text" className="input input-bordered w-full max-w-md" readOnly />
         </div>
       ))}
       {contest.hasVariants && (
@@ -107,4 +109,10 @@ function PrintForm() {
       )}
     </div>
   );
+}
+
+export function PrintStatement() {
+  const { student } = useStudent();
+
+  return <RemoteStatement url={`/pdf/statement.js?v=${student.variant}`} />;
 }

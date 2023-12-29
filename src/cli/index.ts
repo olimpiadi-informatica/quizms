@@ -44,6 +44,7 @@ async function main() {
     .argument("[directory]", "The directory of the contest.", cwd())
     .option("-c, --config <config>", "The contests config file.")
     .option("-d, --outDir <directory>", "The directory to output the PDF.", "variants")
+    .option("-e, --entry <entry>", "The entry point of the PDF.", "print.jsx")
     .option("-s, --server", "Only serve the pages, don't generate the PDF.")
     .action((dir, options) => print({ dir, ...options }));
 

@@ -19,6 +19,7 @@ export type PrintOptions = {
   dir: string;
   config: string;
   outDir: string;
+  entry: string;
   server: boolean;
 };
 
@@ -43,10 +44,10 @@ export default async function print(options: PrintOptions) {
         emptyOutDir: true,
         chunkSizeWarningLimit: Number.MAX_SAFE_INTEGER,
         rollupOptions: {
-          input: { print: "virtual:react-entry?src=virtual:print" },
+          input: { print: `virtual:react-entry?src=${encodeURIComponent(options.entry)}` },
         },
       },
-      plugins: [printPlugin(statements, generationConfigs)],
+      plugins: [resolveContestsPlugin(generationConfigs)],
       logLevel: "info",
     } as InlineConfig),
   );
@@ -55,10 +56,10 @@ export default async function print(options: PrintOptions) {
     build: {
       outDir: buildDir,
     },
-    plugins: [printPlugin(statements, generationConfigs)],
+    plugins: [printPlugin(statements)],
   } as InlineConfig);
   const server = await preview(serverConfig);
-  const url = server.resolvedUrls!.local[0] + "print";
+  const url = server.resolvedUrls!.local[0] + options.entry.replace(/\.jsx?$/, "");
 
   if (options.server) {
     success(`Server started: ${pc.bold(pc.cyan(url))}`);
@@ -71,32 +72,32 @@ export default async function print(options: PrintOptions) {
   await rm(buildDir, { recursive: true });
 }
 
-function printPlugin(
-  statements: Record<string, Statement>,
-  generationConfigs: GenerationConfig[],
-): PluginOption {
+function resolveContestsPlugin(generationConfigs: GenerationConfig[]): PluginOption {
   return {
-    name: "print-plugin",
+    name: "resolve-contest-plugin",
+    apply: "build",
     resolveId(id) {
-      if (id === "virtual:print") {
+      if (id === "virtual:quizms-contests") {
+        console.log("\nresolveId", id);
         return "\0" + id;
       }
     },
     load(id) {
-      if (id === "\0virtual:print") {
+      if (id === "\0virtual:quizms-contests") {
+        console.log("\nload", id);
         return `\
-import { createElement } from "react";
-
-import { PrintAuth } from "quizms/student";
-import "quizms/css";
-
-export const title = "PDF";
 const contests = ${JSON.stringify(generationConfigs)};
-export function App() {
-  return createElement(PrintAuth, { contests });
-}`;
+export default contests;
+`;
       }
     },
+  };
+}
+
+function printPlugin(statements: Record<string, Statement>): PluginOption {
+  return {
+    name: "print-plugin",
+    apply: "serve",
     configurePreviewServer(server) {
       server.middlewares.use(async (req, res, next) => {
         const url = new URL(req.url!, `http://${req.headers.host}`);

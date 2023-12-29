@@ -11,9 +11,9 @@ import { info } from "./utils/logs";
 
 async function generatePdf(
   context: BrowserContext,
+  config: GenerationConfig,
   baseUrl: string,
   variant: string,
-  hasVariants: boolean,
   outDir: string,
 ) {
   info(`Printing statement ${variant}.`);
@@ -48,13 +48,11 @@ async function generatePdf(
     const page = pages[pageNum];
     const { width } = page.getSize();
 
-    if (hasVariants) {
-      page.drawText(`Variante ${variant}`, {
-        ...fontOptions,
-        x: 15,
-        y: 13,
-      });
-    }
+    page.drawText(config.hasVariants ? `Variante ${variant}` : config.name, {
+      ...fontOptions,
+      x: 15,
+      y: 13,
+    });
 
     const pageNumText = `${pageNum + 1}`;
     page.drawText(pageNumText, {
@@ -82,13 +80,13 @@ export default async function generatePdfs(
   const promises: Record<string, Promise<void>> = {};
 
   for (const config of configs) {
-    const ids = uniq([...config.variantIds, ...config.pdfVariantIds]).slice(0, 10); // TODO: remove
+    const ids = uniq([...config.variantIds, ...config.pdfVariantIds]);
     for (const id of ids) {
       if (size(promises) >= poolSize) {
         const oldId = await Promise.any(map(promises, (promise, id) => promise.then(() => id)));
         delete promises[oldId];
       }
-      promises[id] = generatePdf(context, baseUrl, id, config.hasVariants, outDir);
+      promises[id] = generatePdf(context, config, baseUrl, id, outDir);
     }
   }
 
