@@ -78,13 +78,11 @@ function resolveContestsPlugin(generationConfigs: GenerationConfig[]): PluginOpt
     apply: "build",
     resolveId(id) {
       if (id === "virtual:quizms-contests") {
-        console.log("\nresolveId", id);
         return "\0" + id;
       }
     },
     load(id) {
       if (id === "\0virtual:quizms-contests") {
-        console.log("\nload", id);
         return `\
 const contests = ${JSON.stringify(generationConfigs)};
 export default contests;

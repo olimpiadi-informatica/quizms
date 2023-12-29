@@ -1,14 +1,16 @@
 import { cwd } from "node:process";
+import { stdin, stdout } from "node:process";
+import readline from "node:readline";
 
 import { InvalidArgumentError, program } from "commander";
 import "dotenv/config";
 import { version } from "package.json";
 
-import firebaseCommand from "~/cli/firebase";
-
 import devServer from "./dev";
 import staticExport from "./export";
+import firebaseCommand from "./firebase";
 import print from "./print";
+import { fatal } from "./utils/logs";
 import variants from "./variants";
 
 function safeParseInt(value: string): number {
@@ -32,7 +34,7 @@ async function main() {
 
   program
     .command("export")
-    .description("Create a static export of the contest.")
+    .description("Create a static export of the website.")
     .argument("[directory]", "The directory of the contest.", cwd())
     .option("-d, --outDir <directory>", "The directory to output the bundle.", "dist")
     .option("-t, --training", "Embed the questions and the answers in the export.")
@@ -62,3 +64,7 @@ async function main() {
 }
 
 void main();
+
+const rl = readline.createInterface({ input: stdin, output: stdout });
+
+rl.on("SIGINT", () => fatal(`Command cancelled.`));
