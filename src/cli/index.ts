@@ -1,6 +1,4 @@
 import { cwd } from "node:process";
-import { stdin, stdout } from "node:process";
-import readline from "node:readline";
 
 import { InvalidArgumentError, program } from "commander";
 import "dotenv/config";
@@ -10,7 +8,7 @@ import devServer from "./dev";
 import staticExport from "./export";
 import firebaseCommand from "./firebase";
 import print from "./print";
-import { fatal } from "./utils/logs";
+import { cleanup } from "./utils/logs";
 import variants from "./variants";
 
 function safeParseInt(value: string): number {
@@ -63,8 +61,4 @@ async function main() {
   await program.parseAsync();
 }
 
-const rl = readline.createInterface({ input: stdin, output: stdout });
-
-rl.on("SIGINT", () => fatal(`Command cancelled.`));
-
-main().then(() => rl.close());
+main().then(() => cleanup());

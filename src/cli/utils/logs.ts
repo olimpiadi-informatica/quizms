@@ -3,13 +3,19 @@ import readline from "node:readline/promises";
 
 import pc from "picocolors";
 
+const rl = readline.createInterface({ input: stdin, output: stdout });
+
+rl.on("SIGINT", () => fatal(`Command cancelled.`));
+
+export function cleanup() {
+  rl.close();
+}
+
 export async function confirm(question: string) {
-  const rl = readline.createInterface({ input: stdin, output: stdout });
-  const ans = await rl.question(`[${pc.blue("INFO")}]  ${question} (y/N) `);
+  const ans = await rl.question(`${pc.blue("𝓲")} ${question} (y/N) `);
   if (ans.toLowerCase() !== "y") {
     exit(0);
   }
-  rl.close();
 }
 
 export function fatal(msg: string): never {
