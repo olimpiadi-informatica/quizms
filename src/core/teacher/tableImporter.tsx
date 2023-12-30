@@ -150,7 +150,7 @@ async function importStudents(
   dateFormat: string,
 ) {
   const schema = z
-    .array(z.string().trim())
+    .array(z.string().trim().max(256))
     .min(contest.personalInformation.length)
     .transform<Student>((value, ctx) => {
       const off = contest.personalInformation.length + Number(contest.hasVariants || 0);
@@ -177,13 +177,25 @@ async function importStudents(
         return z.NEVER;
       }
 
+      const personalInformation: Student["personalInformation"] = {};
+      for (const [i, field] of contest.personalInformation.entries()) {
+        const [validated, error] = parsePersonalInformation(value[i], field, {
+          dateFormat,
+        });
+        if (error) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: [i],
+            message: error,
+          });
+          return z.NEVER;
+        }
+        personalInformation[field.name] = validated;
+      }
+
       return {
         id: randomId(),
-        personalInformation: Object.fromEntries(
-          contest.personalInformation.map((field, i) => {
-            return [field.name, parsePersonalInformation(value[i].trim(), field, { dateFormat })];
-          }),
-        ),
+        personalInformation,
         contest: contest.id,
         school: school.id,
         variant: variantId,

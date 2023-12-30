@@ -270,7 +270,7 @@ function Table({ school, contest }: { school: School; contest: Contest }) {
     const [field, subfield] = ev.colDef.field!.split(/[.[\]]/);
     if (field === "personalInformation") {
       const schema = contest.personalInformation.find((f) => f.name === subfield);
-      value = parsePersonalInformation(value, schema);
+      [value] = parsePersonalInformation(value, schema);
     }
     if (field === "variant" && !variants.some((v) => v.id === value && v.contest === contest.id)) {
       value = undefined;

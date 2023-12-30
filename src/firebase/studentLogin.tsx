@@ -1,6 +1,7 @@
 import React, { ChangeEvent, ReactNode, forwardRef, useMemo, useRef, useState } from "react";
 
-import { addMinutes, formatISO } from "date-fns";
+import classNames from "classnames";
+import { addMinutes } from "date-fns";
 import { FirebaseOptions } from "firebase/app";
 import { getAuth, signOut } from "firebase/auth";
 import {
@@ -14,6 +15,7 @@ import {
   setDoc,
 } from "firebase/firestore";
 import { isEqual } from "lodash-es";
+import { AlertCircle } from "lucide-react";
 
 import { Button } from "~/core/components/button";
 import Modal from "~/core/components/modal";
@@ -32,7 +34,7 @@ import {
   variantMappingConverter,
 } from "~/firebase/converters";
 import { useAnonymousAuth, useCollection, useDocument } from "~/firebase/hooks";
-import { Student, parsePersonalInformation, studentHash } from "~/models";
+import { Contest, Student, parsePersonalInformation, studentHash } from "~/models";
 import { hash, randomId } from "~/utils/random";
 
 class DuplicateStudentError extends Error {
@@ -130,7 +132,7 @@ function StudentLoginInner({
 
   return (
     <div className="h-full">
-      <div className="flex h-full flex-col items-center justify-center overflow-y-auto px-4">
+      <div className="flex h-full flex-col items-center overflow-y-auto px-4">
         <form className="my-8 w-full max-w-md grow">
           <div className="form-control w-full">
             <label className="label">
@@ -153,41 +155,14 @@ function StudentLoginInner({
             </select>
           </div>
 
-          {contest?.personalInformation.map((field) => {
-            const value = student.personalInformation?.[field.name];
-            const formattedValue =
-              value instanceof Date
-                ? formatISO(value, { representation: "date" })
-                : (value as string) ?? "";
-
-            const onChange = (e: ChangeEvent<HTMLInputElement>) => {
-              const value = parsePersonalInformation(e.target.value, field);
-              setLocalStudent((student) => ({
-                ...student,
-                personalInformation: {
-                  ...student.personalInformation,
-                  [field.name]: value,
-                },
-              }));
-            };
-
-            return (
-              <div key={field.name} className="form-control w-full">
-                <label className="label">
-                  <span className="label-text text-lg">{field.label}</span>
-                </label>
-                <input
-                  type={field.type}
-                  placeholder={"Inserisci " + field.label}
-                  className="input input-bordered w-full max-w-md"
-                  onChange={onChange}
-                  disabled={loading}
-                  value={formattedValue}
-                  required
-                />
-              </div>
-            );
-          })}
+          {contest?.personalInformation.map((field) => (
+            <PersonalInformationField
+              key={field.name}
+              setStudent={setLocalStudent}
+              field={field}
+              disabled={loading}
+            />
+          ))}
 
           {contest && (
             <>
@@ -205,8 +180,10 @@ function StudentLoginInner({
                   required
                 />
               </div>
-              <span className="pt-1 text-error">{error?.message ?? <>&nbsp;</>}</span>
-              <div className="flex justify-center pt-3">
+              <p className="pt-3 text-error">
+                {error ? <>Login fallito: {error.message}</> : <>&nbsp;</>}
+              </p>
+              <div className="flex justify-center pt-1">
                 <Button className="btn-success" onClick={start} disabled={!completed}>
                   Inizia
                 </Button>
@@ -216,6 +193,65 @@ function StudentLoginInner({
         </form>
         <StudentRestoreModal ref={modalRef} />
       </div>
+    </div>
+  );
+}
+
+function PersonalInformationField({
+  setStudent,
+  field,
+  disabled,
+}: {
+  setStudent: (set: (student: Student) => Student) => void;
+  field: Contest["personalInformation"][number];
+  disabled?: boolean;
+}) {
+  const [value, setValue] = useState<string>("");
+  const [error, setError] = useState<string>();
+  const [blur, setBlur] = useState(false);
+
+  const onChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setBlur(false);
+    setValue(e.target.value);
+
+    const [newValue, error] = parsePersonalInformation(e.target.value, field);
+
+    setStudent((student) => ({
+      ...student,
+      personalInformation: {
+        ...student.personalInformation,
+        [field.name]: newValue,
+      },
+    }));
+    setError(error);
+  };
+
+  return (
+    <div key={field.name} className="form-control w-full">
+      <label className="label">
+        <span className="label-text text-lg">{field.label}</span>
+      </label>
+      <input
+        type={field.type}
+        placeholder={"Inserisci " + field.label}
+        className={classNames(
+          "input input-bordered w-full max-w-md",
+          blur && error && "input-error",
+        )}
+        onChange={onChange}
+        onBlur={() => setBlur(true)}
+        disabled={disabled}
+        value={value}
+        min={field.type === "number" ? field.min : undefined}
+        max={field.type === "number" ? field.max : undefined}
+        required
+      />
+      {blur && error && (
+        <span className="p-1 text-sm text-error">
+          <AlertCircle className="inline size-5 pb-1 pr-1" />
+          {error}
+        </span>
+      )}
     </div>
   );
 }

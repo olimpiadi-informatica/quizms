@@ -50,31 +50,54 @@ export const contestSchema = z.object({
 export type Contest = z.infer<typeof contestSchema>;
 
 export function parsePersonalInformation(
-  value: any,
+  value: string | undefined,
   schema?: Contest["personalInformation"][number],
   options?: { dateFormat?: string },
-) {
-  if (!schema) return value;
+): [string | number | Date | undefined, string | undefined] {
+  if (value === undefined || !schema) {
+    return [value, undefined];
+  }
   switch (schema.type) {
-    case "text":
-      return value.trim();
-    case "number": {
-      const unbounded = Number(value);
-      if ((schema?.min ?? -Infinity) <= unbounded && unbounded <= (schema?.max ?? Infinity)) {
-        return unbounded;
+    case "text": {
+      value = value.trim();
+      if (value === "") {
+        return [undefined, "Il campo non può essere vuoto."];
       }
-      return;
+      if (value.length > 256) {
+        return [undefined, "Il campo non può essere più lungo di 256 caratteri."];
+      }
+      return [value, undefined];
+    }
+    case "number": {
+      const num = Number(value);
+      if (isNaN(num)) {
+        return [undefined, "Il valore non è un numero."];
+      }
+      if (schema?.min !== undefined && num < schema.min) {
+        return [undefined, `Il valore deve essere maggiore o uguale a ${schema.min}.`];
+      }
+      if (schema?.max !== undefined && num > schema.max) {
+        return [undefined, `Il valore deve essere minore o uguale a ${schema.max}.`];
+      }
+      return [num, undefined];
     }
     case "date": {
-      if (!value) return;
-      let date: Date | string = value;
+      let date: Date;
       if (options?.dateFormat) {
         date = parseDate(value, options.dateFormat, 0);
         date = subMinutes(date, date.getTimezoneOffset());
+      } else {
+        date = new UTCDateMini(value);
       }
-      date = new UTCDateMini(date);
-      if (schema.min <= date && date <= schema.max) return date;
-      return;
+      if (date < schema?.min) {
+        const formatter = new Intl.DateTimeFormat("it-IT", { dateStyle: "long" });
+        return [undefined, `La data deve essere successiva al ${formatter.format(schema.min)}.`];
+      }
+      if (date > schema?.max) {
+        const formatter = new Intl.DateTimeFormat("it-IT", { dateStyle: "long" });
+        return [undefined, `La data deve essere precedente al ${formatter.format(schema.max)}.`];
+      }
+      return [date, undefined];
     }
   }
 }
