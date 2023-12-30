@@ -181,7 +181,7 @@ function StudentLoginInner({
                 />
               </div>
               <p className="pt-3 text-error">
-                {error ? <>Login fallito: {error.message}</> : <>&nbsp;</>}
+                {error ? <>Errore: {error.message}</> : <>&nbsp;</>}
               </p>
               <div className="flex justify-center pt-1">
                 <Button className="btn-success" onClick={start} disabled={!completed}>
@@ -379,7 +379,7 @@ async function createStudent(db: Firestore, student: Student) {
   const variantRef = doc(db, "variantMappings", variant).withConverter(variantMappingConverter);
   const variantMapping = await getDoc(variantRef);
   if (!variantMapping.exists()) {
-    throw new Error("Variante non trovata, contattare gli amministratori della piattaforma");
+    throw new Error("Variante non trovata, contattare gli amministratori della piattaforma.");
   }
   student.variant = variantMapping.data().variant;
 
@@ -390,11 +390,11 @@ async function createStudent(db: Firestore, student: Student) {
   );
   const schoolMapping = await getDoc(schoolMappingRef);
   if (!schoolMapping.exists()) {
-    throw new Error("Codice non valido");
+    throw new Error("Codice non valido.");
   }
   const schoolMappingData = schoolMapping.data();
   if (schoolMappingData.contestId !== student.contest) {
-    throw new Error("Il codice inserito non corrisponde alla gara selezionata");
+    throw new Error("Il codice inserito non corrisponde alla gara selezionata.");
   }
   student.school = schoolMappingData.school;
   student.startedAt = schoolMappingData.startingTime;
@@ -424,7 +424,7 @@ async function createStudent(db: Firestore, student: Student) {
     });
   } catch (e) {
     if ((e as FirestoreError).code === "permission-denied") {
-      throw new Error("Codice scaduto");
+      throw new Error("Codice scaduto.");
     }
     throw e;
   }
