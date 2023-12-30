@@ -376,7 +376,7 @@ async function createStudent(db: Firestore, student: Student) {
   const hash = studentHash(student);
   const variant = `${student.contest}-${hash.slice(0, 3)}`;
 
-  const variantRef = doc(db, "variantMapping", variant).withConverter(variantMappingConverter);
+  const variantRef = doc(db, "variantMappings", variant).withConverter(variantMappingConverter);
   const variantMapping = await getDoc(variantRef);
   if (!variantMapping.exists()) {
     throw new Error("Variante non trovata, contattare gli amministratori della piattaforma");
