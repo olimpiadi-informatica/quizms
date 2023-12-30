@@ -10,7 +10,7 @@ import { Statement } from "~/models";
 import { GenerationConfig, generationConfigSchema } from "~/models/generationConfig";
 
 import generatePdfs from "./pdf";
-import { info, success } from "./utils/logs";
+import { fatal, info, success } from "./utils/logs";
 import { readCollection } from "./utils/parser";
 import { buildVariants } from "./variants";
 import configs from "./vite/configs";
@@ -35,21 +35,24 @@ export default async function print(options: PrintOptions) {
 
   info("Building website...");
   const buildDir = join(options.dir, options.outDir, ".pdf-build");
-  await build(
-    mergeConfig(configs(join(options.dir, "src"), "production"), {
-      publicDir: join(options.dir, "public"),
-      build: {
-        outDir: buildDir,
-        emptyOutDir: true,
-        chunkSizeWarningLimit: Number.MAX_SAFE_INTEGER,
-        rollupOptions: {
-          input: { print: `virtual:react-entry?src=${encodeURIComponent(options.entry)}` },
-        },
+  const buildConfig = mergeConfig(configs(join(options.dir, "src"), "production"), {
+    publicDir: join(options.dir, "public"),
+    build: {
+      outDir: buildDir,
+      emptyOutDir: true,
+      chunkSizeWarningLimit: Number.MAX_SAFE_INTEGER,
+      rollupOptions: {
+        input: { print: `virtual:react-entry?src=${encodeURIComponent(options.entry)}` },
       },
-      plugins: [resolveContestsPlugin(generationConfigs)],
-      logLevel: "info",
-    } as InlineConfig),
-  );
+    },
+    plugins: [resolveContestsPlugin(generationConfigs)],
+    logLevel: "info",
+  } as InlineConfig);
+  try {
+    await build(buildConfig);
+  } catch (e) {
+    fatal("Build failed.");
+  }
 
   const serverConfig = mergeConfig(configs(options.dir, "production"), {
     build: {

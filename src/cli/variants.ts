@@ -46,7 +46,12 @@ function buildBaseStatements(
         },
       },
     };
-    await build(bundleConfig);
+
+    try {
+      await build(bundleConfig);
+    } catch (e) {
+      fatal("Build failed.");
+    }
 
     return Object.fromEntries(
       await Promise.all(

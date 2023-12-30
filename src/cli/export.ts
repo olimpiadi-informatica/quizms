@@ -4,6 +4,7 @@ import glob from "fast-glob";
 import license from "rollup-plugin-license";
 import { InlineConfig, build, mergeConfig } from "vite";
 
+import { fatal } from "./utils/logs";
 import configs from "./vite/configs";
 
 export type ExportOptions = {
@@ -35,46 +36,50 @@ export default async function staticExport(options: ExportOptions): Promise<void
 
   const outDir = join(options.dir, options.outDir);
 
-  await build(
-    mergeConfig(configs(join(options.dir, "src"), "production"), {
-      publicDir: join(options.dir, "public"),
-      build: {
-        outDir,
-        emptyOutDir: true,
-        assetsInlineLimit: 1024,
-        rollupOptions: {
-          input,
-          output: {
-            manualChunks: (id) => {
-              if (id.includes("node_modules/katex/")) return "katex";
-              if (id.includes("node_modules/lodash-es/")) return "lodash";
-              if (id.includes("node_modules/@firebase/auth/")) return "firebase-auth";
-              if (id.includes("node_modules/@firebase/firestore/")) return "firestore";
-              if (id.includes("node_modules/@firebase/")) return "firebase";
-              if (id.includes("node_modules/zod/")) return "zod";
+  const config = mergeConfig(configs(join(options.dir, "src"), "production"), {
+    publicDir: join(options.dir, "public"),
+    build: {
+      outDir,
+      emptyOutDir: true,
+      assetsInlineLimit: 1024,
+      rollupOptions: {
+        input,
+        output: {
+          manualChunks: (id) => {
+            if (id.includes("node_modules/katex/")) return "katex";
+            if (id.includes("node_modules/lodash-es/")) return "lodash";
+            if (id.includes("node_modules/@firebase/auth/")) return "firebase-auth";
+            if (id.includes("node_modules/@firebase/firestore/")) return "firestore";
+            if (id.includes("node_modules/@firebase/")) return "firebase";
+            if (id.includes("node_modules/zod/")) return "zod";
 
-              // FIXME: the order in which chunks are loaded is apparently important, as a workaround
-              //  we need to rename react-dom to something else so that it is loaded in the correct order
-              if (id.includes("node_modules/react-dom/")) return "~react-dom";
-            },
+            // FIXME: the order in which chunks are loaded is apparently important, as a workaround
+            //  we need to rename react-dom to something else so that it is loaded in the correct order
+            if (id.includes("node_modules/react-dom/")) return "~react-dom";
           },
         },
-        sourcemap: options.training,
       },
-      esbuild: {
-        legalComments: "external",
-        banner: "/*! For licenses information, see LICENSES.txt */",
-      },
-      plugins: [
-        license({
-          thirdParty: {
-            output: {
-              file: join(outDir, "LICENSES.txt"),
-            },
+      sourcemap: options.training,
+    },
+    esbuild: {
+      legalComments: "external",
+      banner: "/*! For licenses information, see LICENSES.txt */",
+    },
+    plugins: [
+      license({
+        thirdParty: {
+          output: {
+            file: join(outDir, "LICENSES.txt"),
           },
-        }),
-      ],
-      logLevel: "info",
-    } as InlineConfig),
-  );
+        },
+      }),
+    ],
+    logLevel: "info",
+  } as InlineConfig);
+
+  try {
+    await build(config);
+  } catch (e) {
+    fatal("Build failed.");
+  }
 }
