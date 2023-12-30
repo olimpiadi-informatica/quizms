@@ -76,7 +76,7 @@ export default async function print(options: PrintOptions) {
 
 function resolveContestsHelperPlugin(generationConfigs: GenerationConfig[]): PluginOption {
   return {
-    name: "resolve-contest-helper",
+    name: "quizms:resolve-contest-helper",
     apply: "build",
     configResolved(config) {
       const plugin = config.plugins.find((plugin) => plugin.name === "resolve-contest")!;
@@ -87,7 +87,7 @@ function resolveContestsHelperPlugin(generationConfigs: GenerationConfig[]): Plu
 
 function printPlugin(statements: Record<string, Statement>): PluginOption {
   return {
-    name: "print",
+    name: "quizms:print",
     apply: "serve",
     configurePreviewServer(server) {
       server.middlewares.use(async (req, res, next) => {

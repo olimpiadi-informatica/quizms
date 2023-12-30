@@ -38,7 +38,7 @@ export default function images(): PluginOption {
   let isBuild = true;
 
   return {
-    name: "optimize-image",
+    name: "quizms:optimize-image",
     enforce: "pre",
     configResolved({ command }) {
       isBuild = command === "build";

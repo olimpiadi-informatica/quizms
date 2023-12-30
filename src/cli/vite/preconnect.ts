@@ -2,7 +2,7 @@ import { PluginOption } from "vite";
 
 export default function preconnect(): PluginOption {
   return {
-    name: "preconnect",
+    name: "quizms:preconnect",
     transformIndexHtml() {
       if (!process.env.QUIZMS_TIME_SERVER) return;
       return [

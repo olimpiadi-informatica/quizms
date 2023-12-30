@@ -6,7 +6,7 @@ export default function resolveContests(): PluginOption {
   };
 
   return {
-    name: "resolve-contest",
+    name: "quizms:resolve-contest",
     resolveId(id) {
       if (id === "virtual:quizms-contests") {
         return "\0" + id;

@@ -8,7 +8,7 @@ const execFile = promisify(child_process.execFile);
 
 export default function python(): PluginOption {
   return {
-    name: "python",
+    name: "quizms:python",
     async load(rawPath) {
       const [path] = rawPath.split("?");
       const ext = extname(path);

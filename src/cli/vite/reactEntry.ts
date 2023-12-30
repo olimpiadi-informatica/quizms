@@ -13,7 +13,7 @@ export default function reactEntry(): PluginOption {
   const pages: Record<string, string> = {};
 
   return {
-    name: "entry",
+    name: "quizms:entry",
     configResolved(config) {
       isBuild = config.command === "build";
       root = config.root;

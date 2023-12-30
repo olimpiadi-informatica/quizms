@@ -15,7 +15,7 @@ export default function iframe(): PluginOption {
   const iframeIds: [string, string][] = [];
 
   return {
-    name: "iframe",
+    name: "quizms:iframe",
     configResolved({ command }) {
       isBuild = command === "build";
     },
