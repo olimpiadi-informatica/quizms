@@ -63,8 +63,8 @@ async function main() {
   await program.parseAsync();
 }
 
-void main();
-
 const rl = readline.createInterface({ input: stdin, output: stdout });
 
 rl.on("SIGINT", () => fatal(`Command cancelled.`));
+
+main().then(() => rl.close());
