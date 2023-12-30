@@ -45,7 +45,7 @@ export default async function print(options: PrintOptions) {
         input: { print: `virtual:react-entry?src=${encodeURIComponent(options.entry)}` },
       },
     },
-    plugins: [resolveContestsPlugin(generationConfigs)],
+    plugins: [resolveContestsHelperPlugin(generationConfigs)],
     logLevel: "info",
   } as InlineConfig);
   try {
@@ -74,28 +74,20 @@ export default async function print(options: PrintOptions) {
   await rm(buildDir, { recursive: true });
 }
 
-function resolveContestsPlugin(generationConfigs: GenerationConfig[]): PluginOption {
+function resolveContestsHelperPlugin(generationConfigs: GenerationConfig[]): PluginOption {
   return {
-    name: "resolve-contest-plugin",
+    name: "resolve-contest-helper",
     apply: "build",
-    resolveId(id) {
-      if (id === "virtual:quizms-contests") {
-        return "\0" + id;
-      }
-    },
-    load(id) {
-      if (id === "\0virtual:quizms-contests") {
-        return `\
-const contests = ${JSON.stringify(generationConfigs)};
-export default contests;`;
-      }
+    configResolved(config) {
+      const plugin = config.plugins.find((plugin) => plugin.name === "resolve-contest")!;
+      plugin.api.contests = generationConfigs;
     },
   };
 }
 
 function printPlugin(statements: Record<string, Statement>): PluginOption {
   return {
-    name: "print-plugin",
+    name: "print",
     apply: "serve",
     configurePreviewServer(server) {
       server.middlewares.use(async (req, res, next) => {

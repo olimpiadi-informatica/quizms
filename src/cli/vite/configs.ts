@@ -16,6 +16,7 @@ import images from "./images";
 import preconnect from "./preconnect";
 import python from "./python";
 import reactEntry from "./reactEntry";
+import resolveContests from "./resolveContests";
 
 type Options = {
   mdx?: MdxOptions;
@@ -48,6 +49,7 @@ export default function (
       "process.env.NODE_ENV": JSON.stringify(mode),
     },
     plugins: [
+      resolveContests(),
       iframe(),
       images(),
       inspect(),

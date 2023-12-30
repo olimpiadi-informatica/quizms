@@ -17,7 +17,8 @@ export function PrintAuth({ children }: AuthProps) {
   const urlParams = new URLSearchParams(window.location.search);
   const variant = urlParams.get("v");
 
-  const contest = (contests as GenerationConfig[]).find(
+  const allContests = contests() as GenerationConfig[];
+  const contest = allContests.find(
     (c) => c.variantIds.includes(variant!) || c.pdfVariantIds.includes(variant!),
   );
 
@@ -26,7 +27,7 @@ export function PrintAuth({ children }: AuthProps) {
       <div className="h-dvh overflow-auto">
         <div className="prose mx-auto p-4 lg:max-w-4xl">
           {variant && <h3 className="text-error">Variante non trovata.</h3>}
-          {contests.map((c: GenerationConfig) => (
+          {allContests.map((c) => (
             <>
               <h3>{c.name}</h3>
               <h4>Varianti su carta</h4>
