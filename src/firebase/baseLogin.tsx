@@ -18,6 +18,8 @@ type Props = {
 
 export function FirebaseLogin({ config, children }: Props) {
   const db = useMemo(() => {
+    if (!config) return;
+
     const app = initializeApp(config);
     initializeAuth(app, {
       errorMap: debugErrorMap,
@@ -25,6 +27,14 @@ export function FirebaseLogin({ config, children }: Props) {
     });
     return initializeFirestore(app, { localCache: persistentLocalCache() });
   }, [config]);
+
+  if (!config) {
+    return (
+      <div className="h-dvh">
+        <Error error={{ message: "No Firebase configuration provided." }} />
+      </div>
+    );
+  }
 
   return (
     <FirebaseContext.Provider value={db}>
