@@ -1,3 +1,4 @@
+import { existsSync } from "node:fs";
 import { rm } from "node:fs/promises";
 import { join } from "node:path";
 import { promisify } from "node:util";
@@ -28,8 +29,15 @@ export default async function print(options: PrintOptions) {
 
   const generationConfigs = await readCollection(options.dir, "contests", generationConfigSchema);
 
-  info("Building statements...");
   const root = join(options.dir, "src");
+  const entry = join(root, options.entry);
+  if (!existsSync(entry)) {
+    fatal(`\
+Entry file ${pc.bold(pc.red(options.entry))} does not exists. \
+Make sure it exists or specify a different entry file using \`--entry\`.`);
+  }
+
+  info("Building statements...");
   const variants = await buildVariants(root, generationConfigs);
   const statements = mapValues(variants, 1);
 
@@ -79,7 +87,7 @@ function resolveContestsHelperPlugin(generationConfigs: GenerationConfig[]): Plu
     name: "quizms:resolve-contest-helper",
     apply: "build",
     configResolved(config) {
-      const plugin = config.plugins.find((plugin) => plugin.name === "resolve-contest")!;
+      const plugin = config.plugins.find((plugin) => plugin.name === "quizms:resolve-contest")!;
       plugin.api.contests = generationConfigs;
     },
   };
