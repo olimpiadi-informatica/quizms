@@ -95,19 +95,27 @@ createRoot(document.getElementById("app")).render(
         const ext = extname(url.pathname);
 
         if (ext === "" || ext === ".html") {
-          const entry = `.${url.pathname.replace(/([^/])$/, "$1/")}index.jsx`;
+          const path = url.pathname.replace(/(\.html|\/)$/, "");
+          const entry = join(".", path, "index.jsx");
 
           const exists = await access(join(root, entry)).then(stubTrue, stubFalse);
           if (exists) {
-            const body = `\
+            if (!url.pathname.endsWith(".html")) {
+              res.writeHead(307, {
+                Location: path + ".html",
+              });
+              res.end();
+            } else {
+              const body = `\
     <script type="module">
       import "virtual:react-entry?src=${encodeURIComponent(entry)}";
     </script>`;
-            const html = htmlTemplate(body);
-            const finalHtml = await server.transformIndexHtml(req.url!, html);
+              const html = htmlTemplate(body);
+              const finalHtml = await server.transformIndexHtml(req.url!, html);
 
-            res.setHeader("Content-Type", "text/html");
-            res.end(finalHtml);
+              res.setHeader("Content-Type", "text/html");
+              res.end(finalHtml);
+            }
             return;
           }
         }
