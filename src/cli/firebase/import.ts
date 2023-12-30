@@ -1,10 +1,11 @@
+import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 
 import { deleteApp } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 import { Firestore, FirestoreDataConverter, GrpcStatus } from "firebase-admin/firestore";
-import { capitalize, map, range, uniq } from "lodash-es";
+import { capitalize, lowerCase, map, range, uniq } from "lodash-es";
 import z from "zod";
 
 import {
@@ -20,7 +21,7 @@ import { contestSchema, schoolSchema } from "~/models";
 import { generationConfigSchema } from "~/models/generationConfig";
 import { Rng } from "~/utils/random";
 
-import { confirm, fatal, info, success } from "../utils/logs";
+import { confirm, fatal, info, success, warning } from "../utils/logs";
 import { readCollection } from "../utils/parser";
 import { buildVariants } from "../variants";
 import { initializeDb } from "./common";
@@ -36,13 +37,34 @@ type ImportOptions = {
   teachers?: boolean;
 
   variants?: boolean;
-  "variant-mappings"?: boolean;
+  variantMappings?: boolean;
   statements?: boolean;
   pdfs?: boolean;
   solutions?: boolean;
 };
 
 export default async function importData(options: ImportOptions) {
+  if (!existsSync(join(options.dir, "data"))) {
+    fatal(
+      `Cannot find data directory at ${options.dir}. Make sure you're in the root of a QuizMS project or specify a different directory, use \`--help\` for usage.`,
+    );
+  }
+
+  const collections: (keyof ImportOptions)[] = [
+    "contests",
+    "schools",
+    "teachers",
+    "variants",
+    "variantMappings",
+    "statements",
+    "pdfs",
+    "solutions",
+  ];
+  if (collections.every((key) => !options[key])) {
+    warning(`Nothing to import. Use \`--help\` for usage.`);
+    return;
+  }
+
   const [app, db] = await initializeDb(options.dir);
 
   if (options.contests) {
@@ -57,7 +79,7 @@ export default async function importData(options: ImportOptions) {
   if (options.pdfs) {
     await importPdf(db, options);
   }
-  if (options.variants || options.statements || options.solutions || options["variant-mappings"]) {
+  if (options.variants || options.statements || options.solutions || options.variantMappings) {
     await importVariants(db, options);
   }
 
@@ -163,7 +185,7 @@ async function importVariants(db: Firestore, options: ImportOptions) {
   if (options.solutions) {
     await importCollection(db, "solutions", map(variants, 2), solutionConverter, options);
   }
-  if (options["variant-mappings"]) {
+  if (options.variantMappings) {
     const mappings = await Promise.all(
       generationConfigs.flatMap((config) => {
         const rng = new Rng(`${config.secret}-${config.id}-variantMappings`);
@@ -192,7 +214,7 @@ async function importCollection<T extends { id: string }>(
   }
 
   await confirm(
-    `You are about to import the ${collection}. ${
+    `You are about to import the ${lowerCase(collection)}. ${
       options.force ? "This will overwrite any existing data. " : ""
     }Are you sure?`,
   );
@@ -215,16 +237,16 @@ async function importCollection<T extends { id: string }>(
           `Document ${e.documentRef.id} already exists in \`${collection}\`. Use \`--force\` to overwrite existing documents.`,
         );
       } else {
-        fatal(`Cannot import ${collection}: ${e}`);
+        fatal(`Cannot import ${lowerCase(collection)}: ${e}`);
       }
     }
   }
 
-  success(`${capitalize(collection)} imported!`);
+  success(`${capitalize(lowerCase(collection))} imported!`);
 }
 
 async function deleteCollection(db: Firestore, collection: string) {
-  await confirm(`You are about to delete all ${collection}. Are you sure?`);
+  await confirm(`You are about to delete all ${lowerCase(collection)}. Are you sure?`);
 
   const collectionRef = db.collection(collection);
   const query = collectionRef.limit(400);
