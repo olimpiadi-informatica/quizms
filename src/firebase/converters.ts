@@ -10,6 +10,7 @@ import z, {
   ZodArray,
   ZodDate,
   ZodDefault,
+  ZodDiscriminatedUnion,
   ZodObject,
   ZodOptional,
   ZodRecord,
@@ -87,6 +88,9 @@ function toFirebaseSchema(schema: ZodTypeAny): ZodTypeAny {
   }
   if (schema instanceof ZodUnion) {
     return z.union(schema.options.map((option: ZodTypeAny) => toFirebaseSchema(option)));
+  }
+  if (schema instanceof ZodDiscriminatedUnion) {
+    return z.discriminatedUnion(schema.discriminator, schema.options.map(toFirebaseSchema));
   }
   return schema;
 }
