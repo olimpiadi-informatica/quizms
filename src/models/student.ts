@@ -6,8 +6,8 @@ export const studentSchema = z
     uid: z.string(),
     personalInformation: z.record(z.union([z.string(), z.number(), z.date()]).optional()),
 
-    contest: z.string(),
-    school: z.string(),
+    participationId: z.string(),
+    contestId: z.string(),
     token: z.string(),
     startedAt: z.date(),
 
@@ -59,7 +59,7 @@ export type StudentMappingUid = z.infer<typeof studentMappingUidSchema>;
 export const studentRestoreSchema = z.object({
   id: z.string(), // uid identificativo della sessione
   studentId: z.string(), // identificativo dello studente a cui ci si vuole loggare
-  schoolId: z.string(), // scuola dello studente
+  participationId: z.string(), // scuola dello studente
   token: z.string(),
   name: z.string(), // nome dello studente
   surname: z.string(), // cognome dello studente

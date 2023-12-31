@@ -23,9 +23,9 @@ import {
   Student,
   Submission,
   contestSchema,
+  participationMappingSchema,
+  participationSchema,
   pdfSchema,
-  schoolMappingSchema,
-  schoolSchema,
   solutionSchema,
   statementSchema,
   studentMappingHashSchema,
@@ -108,8 +108,8 @@ function converter<T extends object>(schema: ZodType<T, any, any>): FirestoreDat
 }
 
 export const contestConverter = converter(contestSchema);
-export const schoolConverter = converter(schoolSchema);
-export const schoolMappingConverter = converter(schoolMappingSchema);
+export const participationConverter = converter(participationSchema);
+export const participationMappingConverter = converter(participationMappingSchema);
 export const pdfConverter = converter(pdfSchema);
 export const solutionConverter = converter(solutionSchema);
 export const statementConverter = converter(statementSchema);

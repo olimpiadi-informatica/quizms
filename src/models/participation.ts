@@ -1,24 +1,24 @@
 import z from "zod";
 
-export const schoolSchema = z.object({
+export const participationSchema = z.object({
   id: z.string(),
   schoolId: z.string(),
+  contestId: z.string(),
   name: z.string(),
   teacher: z.string(),
   token: z.string().optional(),
   startingTime: z.date().optional(),
   finalized: z.boolean().optional().default(false),
-  contestId: z.string(),
   pdfVariants: z.array(z.coerce.string()).optional(),
 });
 
-export type School = z.infer<typeof schoolSchema>;
+export type Participation = z.infer<typeof participationSchema>;
 
-export const schoolMappingSchema = z.object({
+export const participationMappingSchema = z.object({
   id: z.string(),
-  school: z.string(),
+  participationId: z.string(),
   contestId: z.string(),
   startingTime: z.date(),
 });
 
-export type SchoolMapping = z.infer<typeof schoolMappingSchema>;
+export type ParticipationMapping = z.infer<typeof participationMappingSchema>;

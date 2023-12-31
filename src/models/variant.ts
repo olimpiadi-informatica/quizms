@@ -2,7 +2,7 @@ import z from "zod";
 
 export const variantSchema = z.object({
   id: z.string(),
-  contest: z.string(),
+  contestId: z.string(),
   schema: z.record(
     z.object({
       id: z.string(),
