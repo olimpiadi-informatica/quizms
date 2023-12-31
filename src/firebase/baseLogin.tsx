@@ -25,7 +25,8 @@ export function FirebaseLogin({ config, children }: Props) {
       errorMap: debugErrorMap,
       persistence: browserLocalPersistence,
     });
-    return initializeFirestore(app, { localCache: persistentLocalCache() });
+    const setting = import.meta.env.PROD ? { localCache: persistentLocalCache() } : {};
+    return initializeFirestore(app, setting);
   }, [config]);
 
   if (!config) {

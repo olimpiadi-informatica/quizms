@@ -23,7 +23,7 @@ service cloud.firestore {
         }
 
         function getParticipation(id) {
-            return get(/databases/$(database)/documents/participation/$(id));
+            return get(/databases/$(database)/documents/participations/$(id));
         }
 
         function isTeacherSchool(participationId) {

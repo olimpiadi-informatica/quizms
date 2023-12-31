@@ -12,7 +12,7 @@ import {
   query,
   runTransaction,
   serverTimestamp,
-  updateDoc,
+  setDoc,
   where,
   writeBatch,
 } from "firebase/firestore";
@@ -148,7 +148,7 @@ async function setParticipation(
   if (prevParticipation.token === participation.token) {
     // The teacher hasn't changed the token, we simply update the participation.
 
-    await updateDoc(participationRef, participation);
+    await setDoc(participationRef, participation);
   } else if (participation.token) {
     // The teacher has created a new token and wants to start the contest, we need to:
     // - update the participation token;
@@ -180,7 +180,7 @@ async function setParticipation(
     // - delete the participation token;
     // - delete the all the students with that token.
 
-    await updateDoc(participationRef, participation);
+    await setDoc(participationRef, participation);
 
     // TODO: require index?
     const q = query(
