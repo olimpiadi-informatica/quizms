@@ -110,7 +110,7 @@ function TeacherInner({ user, children }: { user: User; children: ReactNode }) {
     subscribe: true,
   });
   const [contests] = useCollection("contests", contestConverter);
-  const [variants] = useCollection("schema", variantConverter);
+  const [variants] = useCollection("variants", variantConverter);
   const [solutions] = useCollection("solutions", solutionConverter);
 
   const logout = useCallback(async () => {

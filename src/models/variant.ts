@@ -5,7 +5,6 @@ export const variantSchema = z.object({
   contestId: z.string(),
   schema: z.record(
     z.object({
-      id: z.string(),
       type: z.enum(["text", "number"]),
       options: z.string().array().nonempty().optional(),
       blankOption: z.string().optional(),

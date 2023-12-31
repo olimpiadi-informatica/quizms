@@ -100,9 +100,9 @@ createRoot(document.getElementById("app")).render(
 
           const exists = await access(join(root, entry)).then(stubTrue, stubFalse);
           if (exists) {
-            if (!url.pathname.endsWith(".html")) {
+            if (!url.pathname.endsWith("/")) {
               res.writeHead(307, {
-                Location: path + ".html",
+                Location: path + "/",
               });
               res.end();
             } else {
