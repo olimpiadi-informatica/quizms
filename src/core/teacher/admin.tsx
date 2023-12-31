@@ -69,10 +69,10 @@ function StartContestButton({ participation }: { participation: Participation })
         </span>
         <div className="mt-3 flex flex-row justify-center gap-3">
           <LoadingButtons>
+            <Button className="btn-info">Annulla</Button>
             <Button className="btn-warning" onClick={start}>
               Conferma
             </Button>
-            <Button>Annulla</Button>
           </LoadingButtons>
         </div>
       </Modal>
@@ -105,10 +105,10 @@ function StopContestButton({ participation }: { participation: Participation }) 
         </span>
         <div className="mt-3 flex flex-row justify-center gap-3">
           <LoadingButtons>
+            <Button className="btn-info">Annulla</Button>
             <Button className="btn-warning" onClick={undoContestStart}>
               Conferma
             </Button>
-            <Button>Annulla</Button>
           </LoadingButtons>
         </div>
       </Modal>

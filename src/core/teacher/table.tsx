@@ -32,6 +32,7 @@ import {
 import { score } from "~/models";
 import { randomId } from "~/utils/random";
 
+import { Button, LoadingButtons } from "../components/button";
 import Loading from "../components/loading";
 import Modal from "../components/modal";
 import { useIsAfter } from "../components/time";
@@ -216,14 +217,16 @@ const FinalizeModal = forwardRef(function FinalizeModal(
             />
           </p>
           <div className="flex justify-center gap-5">
-            <button
-              className="btn btn-error"
-              onClick={finalize}
-              disabled={confirm !== correctConfirm}>
-              <AlertTriangle />
-              Conferma
-            </button>
-            <button className="btn btn-neutral">Annulla</button>
+            <LoadingButtons>
+              <Button className="btn-neutral">Annulla</Button>
+              <Button
+                className="btn-error"
+                onClick={finalize}
+                disabled={confirm !== correctConfirm}>
+                <AlertTriangle />
+                Conferma
+              </Button>
+            </LoadingButtons>
           </div>
         </div>
       )}

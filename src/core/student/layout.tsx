@@ -97,7 +97,7 @@ const SubmitModal = forwardRef(function SubmitModal(_, ref: Ref<HTMLDialogElemen
     <Modal ref={ref} title="Confermi di voler terminare?">
       <p>Confermando non potrai più modificare le tue risposte.</p>
       <div className="text-md mt-3 flex flex-row justify-center gap-5">
-        <button className="btn btn-outline btn-neutral" onClick={close}>
+        <button className="btn btn-info" onClick={close}>
           Annulla
         </button>
         <button className="btn btn-error" onClick={() => submit()}>
