@@ -22,7 +22,7 @@ import { AlertTriangle, FileCheck, Upload, Users } from "lucide-react";
 
 import {
   Contest,
-  School,
+  Participation,
   Solution,
   Student,
   Variant,
@@ -45,33 +45,35 @@ import "ag-grid-community/styles/ag-theme-quartz.css";
 const AgGridReact = lazy(() => import("ag-grid-react").then((m) => ({ default: m.AgGridReact })));
 
 export function TeacherTable() {
-  const { contests, schools } = useTeacher();
-  const [selectedSchool, setSelectedSchool] = useState(0);
+  const { contests, participations } = useTeacher();
+  const [selectedParticipation, setSelectedParticipation] = useState(0);
   const importRef = useRef<HTMLDialogElement>(null);
   const finalizeRef = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
     if (window.location.hash) {
-      const school = schools.findIndex((s) => s.contestId === window.location.hash.slice(1));
-      if (school !== -1) setSelectedSchool(school);
+      const participation = participations.findIndex(
+        (p) => p.contestId === window.location.hash.slice(1),
+      );
+      if (participation !== -1) setSelectedParticipation(participation);
       window.location.hash = "";
     }
-  }, [schools]);
+  }, [participations]);
 
-  const contest = contests.find((c) => c.id === schools[selectedSchool].contestId)!;
+  const contest = contests.find((c) => c.id === participations[selectedParticipation].contestId)!;
   return (
     <>
       <div className="m-5 flex items-center justify-between gap-5">
         {contests.length >= 2 && (
           <div className="flex justify-center">
             <div role="tablist" className="tabs-boxed tabs flex flex-wrap justify-center">
-              {schools.map((school, i) => (
+              {participations.map((participation, i) => (
                 <a
                   role="tab"
-                  key={school.id}
-                  className={classNames("tab", i === selectedSchool && "tab-active")}
-                  onClick={() => setSelectedSchool(i)}>
-                  {contests.find((c) => c.id === school.contestId)!.name}
+                  key={participation.id}
+                  className={classNames("tab", i === selectedParticipation && "tab-active")}
+                  onClick={() => setSelectedParticipation(i)}>
+                  {contests.find((c) => c.id === participation.contestId)!.name}
                 </a>
               ))}
             </div>
@@ -82,12 +84,12 @@ export function TeacherTable() {
             <Suspense>
               <div className="flex h-10 items-center gap-2 rounded-btn bg-primary px-3 text-primary-content">
                 <Users />
-                <Counter school={schools[selectedSchool]} contest={contest} />
+                <Counter participation={participations[selectedParticipation]} contest={contest} />
                 <div className="hidden lg:block"> studenti</div>
               </div>
             </Suspense>
           </div>
-          {!schools[selectedSchool].finalized && (
+          {!participations[selectedParticipation].finalized && (
             <>
               <button
                 className="btn btn-primary btn-sm h-10"
@@ -106,28 +108,36 @@ export function TeacherTable() {
           <FinalizeModal
             key={contest.id}
             ref={finalizeRef}
-            school={schools[selectedSchool]}
+            participation={participations[selectedParticipation]}
             contest={contest}
           />
         </div>
       </div>
       <div className="min-h-0 flex-auto">
         <Suspense fallback={<Loading />}>
-          <Table key={selectedSchool} contest={contest} school={schools[selectedSchool]} />
-          <ImportModal ref={importRef} school={schools[selectedSchool]} contest={contest} />
+          <Table
+            key={selectedParticipation}
+            contest={contest}
+            participation={participations[selectedParticipation]}
+          />
+          <ImportModal
+            ref={importRef}
+            participation={participations[selectedParticipation]}
+            contest={contest}
+          />
         </Suspense>
       </div>
     </>
   );
 }
 
-function Counter({ school, contest }: { school: School; contest: Contest }) {
+function Counter({ participation, contest }: { participation: Participation; contest: Contest }) {
   const { variants } = useTeacher();
-  const [students] = useTeacherStudents(school.id);
+  const [students] = useTeacherStudents(participation.id);
 
   return sumBy(students, (s) => {
     return Number(
-      s.school === school.id &&
+      s.participationId === participation.id &&
         !s.disabled &&
         !isStudentEmpty(s) &&
         !isStudentIncomplete(s, contest, variants),
@@ -136,15 +146,15 @@ function Counter({ school, contest }: { school: School; contest: Contest }) {
 }
 
 const FinalizeModal = forwardRef(function FinalizeModal(
-  { contest, school }: { contest: Contest; school: School },
+  { contest, participation }: { contest: Contest; participation: Participation },
   ref: Ref<HTMLDialogElement> | null,
 ) {
-  const { variants, setSchool } = useTeacher();
-  const [students] = useTeacherStudents(school.id);
+  const { variants, setParticipation } = useTeacher();
+  const [students] = useTeacherStudents(participation.id);
   const [confirm, setConfirm] = useState("");
 
   const error = useMemo(() => {
-    const filteredStudents = students.filter((s) => s.school === school.id);
+    const filteredStudents = students.filter((p) => p.participationId === participation.id);
 
     const prevStudents = new Set();
 
@@ -164,12 +174,12 @@ const FinalizeModal = forwardRef(function FinalizeModal(
         prevStudents.add(studentHash({ ...student, token: "" }));
       }
     }
-  }, [students, contest, school, variants]);
+  }, [students, contest, participation, variants]);
 
   const correctConfirm = "tutti gli studenti sono stati correttamente inseriti";
 
   const finalize = async () => {
-    await setSchool({ ...school, finalized: true });
+    await setParticipation({ ...participation, finalized: true });
   };
 
   return (
@@ -221,17 +231,17 @@ const FinalizeModal = forwardRef(function FinalizeModal(
   );
 });
 
-function Table({ school, contest }: { school: School; contest: Contest }) {
+function Table({ participation, contest }: { participation: Participation; contest: Contest }) {
   const { solutions, variants } = useTeacher();
-  const [students, setStudent] = useTeacherStudents(school.id);
+  const [students, setStudent] = useTeacherStudents(participation.id);
 
   const endTime =
-    school.startingTime && contest.duration
-      ? addMinutes(school.startingTime, contest.duration)
+    participation.startingTime && contest.duration
+      ? addMinutes(participation.startingTime, contest.duration)
       : undefined;
   const isContestRunning = useIsAfter(endTime);
 
-  const editable = !isContestRunning && !school.finalized;
+  const editable = !isContestRunning && !participation.finalized;
 
   const newStudentId = useRef(randomId());
 
@@ -241,17 +251,17 @@ function Table({ school, contest }: { school: School; contest: Contest }) {
   };
 
   const defaultVariant = !contest.hasVariants
-    ? variants.find((v) => v.contest === contest.id)!.id
+    ? variants.find((v) => v.contestId === contest.id)!.id
     : undefined;
 
   const allStudents = [
-    ...students.filter((s) => s.school === school.id),
+    ...students.filter((s) => s.participationId === participation.id),
     ...(editable
       ? [
           {
             id: newStudentId.current,
-            contest: contest.id,
-            school: school.id,
+            contestId: contest.id,
+            participationId: participation.id,
             variant: defaultVariant,
             createdAt: new Date(),
             answers: {},
@@ -272,14 +282,17 @@ function Table({ school, contest }: { school: School; contest: Contest }) {
       const schema = contest.personalInformation.find((f) => f.name === subfield);
       [value] = parsePersonalInformation(value, schema);
     }
-    if (field === "variant" && !variants.some((v) => v.id === value && v.contest === contest.id)) {
+    if (
+      field === "variant" &&
+      !variants.some((v) => v.id === value && v.contestId === contest.id)
+    ) {
       value = undefined;
     }
     if (field === "answers") {
       value = value?.toUpperCase();
 
       const variant = variants.find(
-        (v) => v.id === (ev.data as Student).variant && v.contest === contest.id,
+        (v) => v.id === (ev.data as Student).variant && v.contestId === contest.id,
       );
       const schema = variant?.schema[subfield];
 
@@ -430,7 +443,7 @@ function isStudentIncomplete(student: Student, contest: Contest, variants: Varia
 
   if (contest.hasVariants && !variant) return "Variante mancante";
   if (!variant) {
-    variant = variants.find((v) => v.contest === contest.id)!;
+    variant = variants.find((v) => v.contestId === contest.id)!;
   }
 
   for (const [id, schema] of Object.entries(variant.schema)) {

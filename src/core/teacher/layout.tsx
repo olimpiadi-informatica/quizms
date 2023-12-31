@@ -8,7 +8,7 @@ import Modal from "../components/modal";
 import { useTeacher } from "./provider";
 
 export function TeacherLayout({ children }: { children: ReactNode }) {
-  const { contests, schools, logout } = useTeacher();
+  const { contests, participations, logout } = useTeacher();
   const instructions = contests[0].instructions;
   const modalRef = useRef<HTMLDialogElement>(null);
 
@@ -24,7 +24,7 @@ export function TeacherLayout({ children }: { children: ReactNode }) {
         <div className="dropdown max-w-full flex-none">
           <div tabIndex={0} role="button" className="btn btn-ghost no-animation w-full flex-nowrap">
             <GraduationCap className="flex-none" />
-            <div className="truncate uppercase">{schools[0]?.name || "Scuola invalida"}</div>
+            <div className="truncate uppercase">{participations[0]?.name || "Scuola invalida"}</div>
           </div>
           <ul className="menu dropdown-content menu-sm z-30 mt-3 w-52 rounded-box bg-base-300 p-2 text-base-content shadow-lg">
             <li>

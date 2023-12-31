@@ -3,7 +3,7 @@ import React, { ReactNode, SetStateAction, useCallback, useMemo, useState } from
 import { addMinutes } from "date-fns";
 import { isFunction, range } from "lodash-es";
 
-import { Contest, School, Student } from "~/models";
+import { Contest, Participation, Student } from "~/models";
 
 import { useIsAfter } from "../components/time";
 import { StudentProvider } from "./provider";
@@ -45,7 +45,7 @@ export function NoAuth({ contestName, duration, questionCount, children }: AuthP
     allowRestart: true,
   };
 
-  const mockSchool: School = {
+  const mockParticipation: Participation = {
     id: "",
     schoolId: "",
     contestId: "",
@@ -67,7 +67,7 @@ export function NoAuth({ contestName, duration, questionCount, children }: AuthP
   return (
     <StudentProvider
       contest={mockContest}
-      school={mockSchool}
+      participation={mockParticipation}
       student={student}
       setStudent={async (s) => setStudent(s)}
       submit={() => setSubmitted(true)}

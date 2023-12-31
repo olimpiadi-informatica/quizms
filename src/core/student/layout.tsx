@@ -15,7 +15,7 @@ import { useStudent } from "./provider";
 export function Layout({ children }: { children: ReactNode }) {
   const submitRef = useRef<HTMLDialogElement>(null);
 
-  const { contest, student, reset, school, terminated, logout } = useStudent();
+  const { contest, student, reset, participation, terminated, logout } = useStudent();
 
   const name = student.personalInformation?.name as string;
   const surname = student.personalInformation?.surname as string;
@@ -57,10 +57,10 @@ export function Layout({ children }: { children: ReactNode }) {
             {progress}%
           </Progress>
           <div className="flex-none px-3">
-            {terminated || !school.startingTime || !contest.duration ? (
+            {terminated || !participation.startingTime || !contest.duration ? (
               <span className="font-mono">00:00</span>
             ) : (
-              <Timer startTime={school.startingTime} duration={contest.duration} />
+              <Timer startTime={participation.startingTime} duration={contest.duration} />
             )}
           </div>
           <div className="h-full flex-none py-0.5">
@@ -71,7 +71,7 @@ export function Layout({ children }: { children: ReactNode }) {
             ) : (
               <button
                 className="btn btn-success btn-sm h-full"
-                disabled={terminated || !school.startingTime}
+                disabled={terminated || !participation.startingTime}
                 onClick={() => submitRef.current?.showModal()}>
                 Termina
               </button>

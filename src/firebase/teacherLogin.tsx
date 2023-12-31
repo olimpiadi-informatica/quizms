@@ -23,9 +23,9 @@ import { TeacherProvider } from "~/core/teacher/provider";
 import { FirebaseLogin, useDb } from "~/firebase/baseLogin";
 import {
   contestConverter,
+  participationConverter,
+  participationMappingConverter,
   pdfConverter,
-  schoolConverter,
-  schoolMappingConverter,
   solutionConverter,
   studentConverter,
   studentMappingUidConverter,
@@ -33,7 +33,7 @@ import {
   variantConverter,
 } from "~/firebase/converters";
 import { useCollection, useSignInWithPassword } from "~/firebase/hooks";
-import { School, StudentRestore, studentHash } from "~/models";
+import { Participation, StudentRestore, studentHash } from "~/models";
 
 export function TeacherLogin({
   config,
@@ -105,7 +105,7 @@ function TeacherLoginInner({ children }: { children: ReactNode }) {
 function TeacherInner({ user, children }: { user: User; children: ReactNode }) {
   const db = useDb();
 
-  const [schools] = useCollection("schools", schoolConverter, {
+  const [participations] = useCollection("participations", participationConverter, {
     constraints: { teacher: user.uid },
     subscribe: true,
   });
@@ -120,8 +120,8 @@ function TeacherInner({ user, children }: { user: User; children: ReactNode }) {
 
   return (
     <TeacherProvider
-      schools={schools}
-      setSchool={async (school) => setSchool(db, schools, school)}
+      participations={participations}
+      setParticipation={async (p) => setParticipation(db, participations, p)}
       contests={contests}
       variants={variants}
       solutions={solutions}
@@ -134,51 +134,59 @@ function TeacherInner({ user, children }: { user: User; children: ReactNode }) {
   );
 }
 
-async function setSchool(db: Firestore, allSchools: School[], school: School) {
-  const prevSchool = allSchools.find((s) => s.id === school.id)!;
+async function setParticipation(
+  db: Firestore,
+  participations: Participation[],
+  participation: Participation,
+) {
+  const prevParticipation = participations.find((s) => s.id === participation.id)!;
 
-  const schoolRef = doc(db, "schools", school.id).withConverter(schoolConverter);
+  const participationRef = doc(db, "participations", participation.id).withConverter(
+    participationConverter,
+  );
 
-  if (prevSchool.token === school.token) {
-    // The teacher hasn't changed the token, we simply update the school.
+  if (prevParticipation.token === participation.token) {
+    // The teacher hasn't changed the token, we simply update the participation.
 
-    await updateDoc(schoolRef, school);
-  } else if (school.token) {
+    await updateDoc(participationRef, participation);
+  } else if (participation.token) {
     // The teacher has created a new token and wants to start the contest, we need to:
-    // - update the school token;
-    // - create the school token mapping.
+    // - update the participation token;
+    // - create the participation token mapping.
     // We do this in a transaction to ensure that the token is unique.
 
-    const schoolMappingsRef = doc(db, "schoolMapping", school.token).withConverter(
-      schoolMappingConverter,
-    );
+    const participationMappingsRef = doc(
+      db,
+      "participationMapping",
+      participation.token,
+    ).withConverter(participationMappingConverter);
 
     await runTransaction(db, async (trans) => {
-      const mapping = await trans.get(schoolMappingsRef);
+      const mapping = await trans.get(participationMappingsRef);
       if (mapping.exists()) {
         throw new Error("Token già esistente, riprova.");
       }
 
-      trans.set(schoolRef, school);
-      trans.set(schoolMappingsRef, {
-        id: school.token,
-        school: school.id,
-        startingTime: school.startingTime,
-        contestId: school.contestId,
+      trans.set(participationRef, participation);
+      trans.set(participationMappingsRef, {
+        id: participation.token,
+        participationId: participation.id,
+        startingTime: participation.startingTime,
+        contestId: participation.contestId,
       });
     });
   } else {
     // The teacher cancelled the contest start, we need to:
-    // - delete the school token;
+    // - delete the participation token;
     // - delete the all the students with that token.
 
-    await updateDoc(schoolRef, school);
+    await updateDoc(participationRef, participation);
 
     // TODO: require index?
     const q = query(
       collection(db, "students").withConverter(studentConverter),
-      where("school", "==", school.id),
-      where("token", "==", school.token),
+      where("participationId", "==", participation.id),
+      where("token", "==", participation.token),
     );
 
     const snapshot = await getDocs(q);
@@ -207,18 +215,18 @@ async function getPdfStatements(db: Firestore, pdfVariants: string[]) {
   return statements.docs.map((doc) => doc.data());
 }
 
-function useStudents(school: string) {
+function useStudents(participationId: string) {
   return useCollection("students", studentConverter, {
-    constraints: { school },
+    constraints: { participationId },
     orderBy: "createdAt",
     subscribe: true,
   });
 }
 
-function useStudentRestores(school: School) {
+function useStudentRestores(participation: Participation) {
   const db = useDb();
   const [studentRestores] = useCollection("studentRestore", studentRestoreConverter, {
-    constraints: { schoolId: school.id, token: school.token ?? "" },
+    constraints: { participationId: participation.id, token: participation.token ?? "" },
     subscribe: true,
     limit: 50,
   });

@@ -1,6 +1,6 @@
 import React, { ReactNode, createContext, useContext } from "react";
 
-import { Contest, School, Student } from "~/models";
+import { Contest, Participation, Student } from "~/models";
 
 import { Layout } from "./layout";
 
@@ -12,7 +12,7 @@ type StudentProviderProps = {
   /** Contest dello studente */
   contest: Contest;
   /** Scuola dello studente */
-  school: School;
+  participation: Participation;
   /** Funzione per terminare la prova e inviare le risposte */
   submit: () => void;
   /** Funzione per resettare le risposte e ricominciare la prova (opzionale) */

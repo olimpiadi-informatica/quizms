@@ -1,14 +1,14 @@
 import React, { ReactNode, createContext, useContext } from "react";
 
-import { Contest, Pdf, School, Solution, Student, StudentRestore, Variant } from "~/models";
+import { Contest, Participation, Pdf, Solution, Student, StudentRestore, Variant } from "~/models";
 
 import { TeacherLayout } from "./layout";
 
 type TeacherProviderProps = {
   /** Scuola dell'insegnante */
-  schools: School[];
+  participations: Participation[];
   /** Funzione per modificare i dati della scuola */
-  setSchool: (school: School) => Promise<void>;
+  setParticipation: (participation: Participation) => Promise<void>;
   /** Contest attivi */
   contests: Contest[];
   /** Varianti dei contest */
@@ -20,10 +20,12 @@ type TeacherProviderProps = {
   /** Funzione per ottenere i pdf dei testi */
   getPdfStatements: (pdfVariants: string[]) => Promise<Pdf[]>;
   /** Hook per ottenere gli studenti di una scuola */
-  useStudents: (schoolId: string) => readonly [Student[], (student: Student) => Promise<void>];
+  useStudents: (
+    participationId: string,
+  ) => readonly [Student[], (student: Student) => Promise<void>];
   /** Hook per ottenere le richieste di accesso degli studenti */
   useStudentRestores: (
-    school: School,
+    participation: Participation,
   ) => readonly [
     StudentRestore[],
     (request: StudentRestore) => Promise<void>,
@@ -51,12 +53,12 @@ export function useTeacher(): Omit<TeacherProviderProps, "useStudents" | "useStu
   return useContext(TeacherContext);
 }
 
-export function useTeacherStudents(schoolId: string) {
+export function useTeacherStudents(participationId: string) {
   const { useStudents } = useContext(TeacherContext);
-  return useStudents(schoolId);
+  return useStudents(participationId);
 }
 
-export function useTeacherStudentRestores(school: School) {
+export function useTeacherStudentRestores(participation: Participation) {
   const { useStudentRestores } = useContext(TeacherContext);
-  return useStudentRestores(school);
+  return useStudentRestores(participation);
 }

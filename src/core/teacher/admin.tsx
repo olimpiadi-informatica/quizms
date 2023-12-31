@@ -11,7 +11,7 @@ import {
 import { saveAs } from "file-saver";
 import { groupBy, range } from "lodash-es";
 
-import { Contest, School, StudentRestore } from "~/models";
+import { Contest, Participation, StudentRestore } from "~/models";
 import { hash, randomToken } from "~/utils/random";
 
 import { Button, LoadingButtons } from "../components/button";
@@ -21,15 +21,15 @@ import { useIsAfter, useTime } from "../components/time";
 import Timer from "../components/timer";
 import { useTeacher, useTeacherStudentRestores } from "./provider";
 
-function canStartContest(now: Date, school: School, contest: Contest) {
+function canStartContest(now: Date, participation: Participation, contest: Contest) {
   if (now < contest.startingWindowStart! || now > contest.startingWindowEnd!) return false;
-  if (!school.startingTime) return true;
+  if (!participation.startingTime) return true;
   if (!contest.allowRestart) return false;
-  return differenceInMinutes(now, school.startingTime) >= contest.duration!;
+  return differenceInMinutes(now, participation.startingTime) >= contest.duration!;
 }
 
-function canUndoContest(now: Date, school: School) {
-  return school.startingTime && now < subMinutes(school.startingTime, 1);
+function canUndoContest(now: Date, participation: Participation) {
+  return participation.startingTime && now < subMinutes(participation.startingTime, 1);
 }
 
 function formatTime(time: Date) {
@@ -40,8 +40,8 @@ function formatDate(date: Date) {
   return new Intl.DateTimeFormat("it-IT", { dateStyle: "long" }).format(date);
 }
 
-function StartContestButton({ school }: { school: School }) {
-  const { setSchool } = useTeacher();
+function StartContestButton({ participation }: { participation: Participation }) {
+  const { setParticipation } = useTeacher();
 
   const modalRef = useRef<HTMLDialogElement>(null);
   const [error, setError] = useState<Error>();
@@ -51,7 +51,7 @@ function StartContestButton({ school }: { school: School }) {
     try {
       const token = await randomToken();
       const startingTime = roundToNearestMinutes(addSeconds(getNow(), 3.5 * 60));
-      await setSchool({ ...school, token, startingTime });
+      await setParticipation({ ...participation, token, startingTime });
     } catch (e) {
       setError(e as Error);
     }
@@ -80,14 +80,14 @@ function StartContestButton({ school }: { school: School }) {
   );
 }
 
-function StopContestButton({ school }: { school: School }) {
-  const { setSchool } = useTeacher();
+function StopContestButton({ participation }: { participation: Participation }) {
+  const { setParticipation } = useTeacher();
   const modalRef = useRef<HTMLDialogElement>(null);
   const [error, setError] = useState<Error>();
 
   const undoContestStart = async () => {
     try {
-      await setSchool({ ...school, token: undefined, startingTime: undefined });
+      await setParticipation({ ...participation, token: undefined, startingTime: undefined });
     } catch (e) {
       setError(e as Error);
     }
@@ -116,8 +116,14 @@ function StopContestButton({ school }: { school: School }) {
   );
 }
 
-function ContestData({ contest, school }: { school: School; contest: Contest }) {
-  const endTime = addMinutes(school.startingTime!, contest.duration!);
+function ContestData({
+  contest,
+  participation,
+}: {
+  participation: Participation;
+  contest: Contest;
+}) {
+  const endTime = addMinutes(participation.startingTime!, contest.duration!);
 
   const getNow = useTime();
   const now = getNow();
@@ -125,22 +131,22 @@ function ContestData({ contest, school }: { school: School; contest: Contest }) 
   if (now > endTime) {
     return (
       <div className="flex flex-col gap-3">
-        <p>Gara iniziata alle ore {formatTime(school.startingTime!)}.</p>
+        <p>Gara iniziata alle ore {formatTime(participation.startingTime!)}.</p>
         <p>La gara è terminata.</p>
       </div>
     );
   }
-  if (now < school.startingTime!) {
+  if (now < participation.startingTime!) {
     return (
       <div className="flex flex-col gap-3">
         <p className="my-2 text-lg">
-          <b>Codice:</b> <span className="font-mono">{school.token}</span>
+          <b>Codice:</b> <span className="font-mono">{participation.token}</span>
         </p>
-        <p>La gara inizierà alle ore {formatTime(school.startingTime!)}.</p>
+        <p>La gara inizierà alle ore {formatTime(participation.startingTime!)}.</p>
         <p>
-          Tempo rimanente all&apos;inizio: <Timer endTime={school.startingTime!} />
+          Tempo rimanente all&apos;inizio: <Timer endTime={participation.startingTime!} />
         </p>
-        {canUndoContest(now, school) && (
+        {canUndoContest(now, participation) && (
           <p>
             Se ti sei sbagliato, puoi ancora annullare la gara fino a un minuto prima
             dell&apos;inizio.
@@ -152,14 +158,14 @@ function ContestData({ contest, school }: { school: School; contest: Contest }) 
   return (
     <div className="flex flex-col gap-3">
       <p>
-        <b>Codice:</b> <span className="text-mono">{school.token}</span>
+        <b>Codice:</b> <span className="text-mono">{participation.token}</span>
       </p>
       <p>La gara terminerà alle {formatTime(endTime)}.</p>
       <p>
         Tempo rimanente: <Timer endTime={endTime} />
       </p>
       <div className="mx-auto flex flex-col items-center justify-center gap-2 text-2xl">
-        Gara iniziata alle ore {formatTime(school.startingTime!)}.
+        Gara iniziata alle ore {formatTime(participation.startingTime!)}.
       </div>
     </div>
   );
@@ -232,8 +238,8 @@ function StudentRestoreButton({
   );
 }
 
-function StudentRestoreList({ school }: { school: School }) {
-  const [studentRestores, approve, reject] = useTeacherStudentRestores(school);
+function StudentRestoreList({ participation }: { participation: Participation }) {
+  const [studentRestores, approve, reject] = useTeacherStudentRestores(participation);
 
   if (!studentRestores || studentRestores.length === 0) {
     return <>Nessuna richiesta.</>;
@@ -253,13 +259,21 @@ function StudentRestoreList({ school }: { school: School }) {
   );
 }
 
-function ContestAdmin({ school, contest }: { school: School; contest: Contest }) {
+function ContestAdmin({
+  participation,
+  contest,
+}: {
+  participation: Participation;
+  contest: Contest;
+}) {
   const getNow = useTime();
   const now = getNow();
 
-  useIsAfter(school.startingTime);
-  useIsAfter(school.startingTime && addMinutes(school.startingTime, contest.duration!));
-  useIsAfter(school.startingTime && addMinutes(school.startingTime, -1));
+  useIsAfter(participation.startingTime);
+  useIsAfter(
+    participation.startingTime && addMinutes(participation.startingTime, contest.duration!),
+  );
+  useIsAfter(participation.startingTime && addMinutes(participation.startingTime, -1));
 
   if (!contest.startingWindowEnd || !contest.startingWindowStart) {
     throw new Error("Data inizio e fine del contest non specificate");
@@ -277,7 +291,7 @@ function ContestAdmin({ school, contest }: { school: School; contest: Contest })
           La gara si potrà svolgere dalle {formatTime(contest.startingWindowStart)} alle{" "}
           {formatTime(contest.startingWindowEnd)} del {formatDate(contest.startingWindowStart)}.
           <div className="mt-2 flex justify-center">
-            <DownloadPdfButton school={school} contest={contest} />
+            <DownloadPdfButton participation={participation} contest={contest} />
           </div>
         </div>
       </div>
@@ -285,18 +299,20 @@ function ContestAdmin({ school, contest }: { school: School; contest: Contest })
         <div className="card-body">
           <h2 className="card-title">Gestione Gara</h2>
           {/* contest data */}
-          {!school.startingTime ? (
+          {!participation.startingTime ? (
             <p>La gara non è ancora iniziata!</p>
           ) : (
-            <ContestData school={school} contest={contest} />
+            <ContestData participation={participation} contest={contest} />
           )}
           <div className="mt-2 flex flex-wrap justify-center gap-3">
             {/* contest buttons */}
-            {canStartContest(now, school, contest) && (
-              <StartContestButton school={school} key={school.id} />
+            {canStartContest(now, participation, contest) && (
+              <StartContestButton participation={participation} key={participation.id} />
             )}
-            {canUndoContest(now, school) && <StopContestButton school={school} />}
-            <a className="btn btn-info" href={`./students/#${school.contestId}`} /* TODO */>
+            {canUndoContest(now, participation) && (
+              <StopContestButton participation={participation} />
+            )}
+            <a className="btn btn-info" href={`./students/#${participation.contestId}`} /* TODO */>
               Gestisci studenti e risposte
             </a>
           </div>
@@ -306,7 +322,7 @@ function ContestAdmin({ school, contest }: { school: School; contest: Contest })
         <div className="card-body">
           <h2 className="card-title">Richieste di accesso</h2>
           <Suspense fallback={<Loading />}>
-            <StudentRestoreList school={school} />
+            <StudentRestoreList participation={participation} />
           </Suspense>
         </div>
       </div>
@@ -314,11 +330,17 @@ function ContestAdmin({ school, contest }: { school: School; contest: Contest })
   );
 }
 
-function DownloadPdfButton({ school, contest }: { school: School; contest: Contest }) {
+function DownloadPdfButton({
+  participation,
+  contest,
+}: {
+  participation: Participation;
+  contest: Contest;
+}) {
   const { getPdfStatements } = useTeacher();
 
   const onClick = async () => {
-    const statements = await getPdfStatements(school.pdfVariants ?? []);
+    const statements = await getPdfStatements(participation.pdfVariants ?? []);
 
     const { PDFDocument } = await import("@cantoo/pdf-lib");
     const pdf = await PDFDocument.create();
@@ -340,7 +362,7 @@ function DownloadPdfButton({ school, contest }: { school: School; contest: Conte
     }
 
     const blob = new Blob([await pdf.save()]);
-    saveAs(blob, `${contest.id}-${school.schoolId}.pdf`);
+    saveAs(blob, `${contest.id}-${participation.schoolId}.pdf`);
   };
 
   return (
@@ -351,21 +373,21 @@ function DownloadPdfButton({ school, contest }: { school: School; contest: Conte
 }
 
 export function TeacherAdmin() {
-  const { contests, schools } = useTeacher();
-  const [selectedContest, setSelectedContest] = useState(schools.length === 1 ? 0 : -1);
+  const { contests, participations } = useTeacher();
+  const [selectedContest, setSelectedContest] = useState(participations.length === 1 ? 0 : -1);
 
   return (
     <>
       <div className="m-5 flex justify-center">
         <div className="flex justify-center">
           <div role="tablist" className="tabs-boxed tabs flex w-full flex-wrap justify-center">
-            {schools.map((school, i) => (
+            {participations.map((participation, i) => (
               <a
                 role="tab"
-                key={school.id}
+                key={participation.id}
                 className={classNames("tab", i === selectedContest && "tab-active")}
                 onClick={() => setSelectedContest(i)}>
-                {contests.find((contest) => contest.id === schools[i].contestId)!.name}
+                {contests.find((contest) => contest.id === participations[i].contestId)!.name}
               </a>
             ))}
           </div>
@@ -373,8 +395,10 @@ export function TeacherAdmin() {
       </div>
       {selectedContest !== -1 && (
         <ContestAdmin
-          school={schools[selectedContest]}
-          contest={contests.find((contest) => contest.id === schools[selectedContest].contestId)!}
+          participation={participations[selectedContest]}
+          contest={
+            contests.find((contest) => contest.id === participations[selectedContest].contestId)!
+          }
         />
       )}
       {selectedContest === -1 && (

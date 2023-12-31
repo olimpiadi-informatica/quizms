@@ -83,7 +83,7 @@ export async function buildVariants(
       const schema = getSchema(variantAst);
       cleanStatement(variantAst);
       variants[id] = [
-        { id, schema, contest: config.id },
+        { id, schema, contestId: config.id },
         { id, statement: toJs(variantAst).value },
         { id, answers },
       ];

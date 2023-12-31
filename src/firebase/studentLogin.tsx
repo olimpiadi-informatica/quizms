@@ -24,8 +24,8 @@ import { StudentProvider } from "~/core/student/provider";
 import { FirebaseLogin, useDb } from "~/firebase/baseLogin";
 import {
   contestConverter,
-  schoolConverter,
-  schoolMappingConverter,
+  participationConverter,
+  participationMappingConverter,
   studentConverter,
   studentMappingHashConverter,
   studentMappingUidConverter,
@@ -40,7 +40,7 @@ import { hash, randomId } from "~/utils/random";
 class DuplicateStudentError extends Error {
   constructor(
     public studentId: string,
-    public schoolId: string,
+    public participationId: string,
   ) {
     super("Studente già registrato");
   }
@@ -86,12 +86,12 @@ function StudentLoginInner({
   const [student, setLocalStudent] = useState<Student>({
     id: randomId(),
     uid: user?.uid,
-    contest: filteredContests.length === 1 ? filteredContests[0].id : undefined,
+    contestId: filteredContests.length === 1 ? filteredContests[0].id : undefined,
     personalInformation: {},
     answers: {},
     createdAt: getNow(),
   });
-  const contest = contests.find((c) => c.id === student.contest);
+  const contest = contests.find((c) => c.id === student.contestId);
 
   const [error, setError] = useState<Error>();
   const [loading, setLoading] = useState(false);
@@ -118,7 +118,7 @@ function StudentLoginInner({
     } catch (e) {
       if (e instanceof DuplicateStudentError) {
         try {
-          await createStudentRestore(db, e.studentId, e.schoolId, student);
+          await createStudentRestore(db, e.studentId, e.participationId, student);
           modalRef.current?.showModal();
         } catch (e) {
           setError(e as Error);
@@ -140,8 +140,10 @@ function StudentLoginInner({
             </label>
             <select
               className="select select-bordered w-full"
-              value={student.contest ?? -1}
-              onChange={(e) => setLocalStudent({ ...student, contest: e.target.value })}
+              value={student.contestId ?? -1}
+              onChange={(e) =>
+                setLocalStudent((student) => ({ ...student, contestId: e.target.value }))
+              }
               disabled={loading}
               required>
               <option value={-1} disabled>
@@ -296,12 +298,17 @@ function StudentInner({
 }) {
   const db = useDb();
 
-  const [contest] = useDocument("contests", student.contest!, contestConverter);
-  const [school] = useDocument("schools", student.school!, schoolConverter, { subscribe: true });
+  const [contest] = useDocument("contests", student.contestId!, contestConverter);
+  const [participation] = useDocument(
+    "participations",
+    student.participationId!,
+    participationConverter,
+    { subscribe: true },
+  );
 
   const endingTime = useMemo(
-    () => addMinutes(school.startingTime!, contest.duration!),
-    [school.startingTime, contest.duration],
+    () => addMinutes(participation.startingTime!, contest.duration!),
+    [participation.startingTime, contest.duration],
   );
   const terminated = useIsAfter(endingTime);
 
@@ -328,7 +335,7 @@ function StudentInner({
   return (
     <StudentProvider
       contest={contest}
-      school={school}
+      participation={participation}
       student={student}
       setStudent={setStudentAndSubmit}
       submit={logout}
@@ -342,7 +349,7 @@ function StudentInner({
 async function createStudentRestore(
   db: Firestore,
   studentId: string,
-  schoolId: string,
+  participationId: string,
   curStudent: Omit<Student, "id">,
 ) {
   // In this case the users want to log in as an already existing student
@@ -353,8 +360,8 @@ async function createStudentRestore(
   try {
     await setDoc(doc(db, "studentRestore", uid).withConverter(studentRestoreConverter), {
       id: uid,
-      studentId: studentId,
-      schoolId: schoolId,
+      studentId,
+      participationId,
       token: curStudent.token,
       name: curStudent.personalInformation!.name,
       surname: curStudent.personalInformation!.surname,
@@ -374,7 +381,7 @@ async function createStudent(db: Firestore, student: Student) {
   // Get the variant assigned to the student
   // An entry should always exist in variantMapping
   const hash = studentHash(student);
-  const variant = `${student.contest}-${hash.slice(0, 3)}`;
+  const variant = `${student.contestId}-${hash.slice(0, 3)}`;
 
   const variantRef = doc(db, "variantMappings", variant).withConverter(variantMappingConverter);
   const variantMapping = await getDoc(variantRef);
@@ -383,27 +390,27 @@ async function createStudent(db: Firestore, student: Student) {
   }
   student.variant = variantMapping.data().variant;
 
-  // Check that the token exists and get the school id (needed to create the student)
+  // Check that the token exists and get the participation id (needed to create the student)
   // If the mapping exists, the token can still be too old
-  const schoolMappingRef = doc(db, "schoolMapping", student.token!).withConverter(
-    schoolMappingConverter,
+  const participationMappingRef = doc(db, "participationMapping", student.token!).withConverter(
+    participationMappingConverter,
   );
-  const schoolMapping = await getDoc(schoolMappingRef);
-  if (!schoolMapping.exists()) {
+  const participationMapping = await getDoc(participationMappingRef);
+  if (!participationMapping.exists()) {
     throw new Error("Codice non valido.");
   }
-  const schoolMappingData = schoolMapping.data();
-  if (schoolMappingData.contestId !== student.contest) {
+  const participationMappingData = participationMapping.data();
+  if (participationMappingData.contestId !== student.contestId) {
     throw new Error("Il codice inserito non corrisponde alla gara selezionata.");
   }
-  student.school = schoolMappingData.school;
-  student.startedAt = schoolMappingData.startingTime;
+  student.participationId = participationMappingData.participationId;
+  student.startedAt = participationMappingData.startingTime;
 
   // Try to create the new student:
   // - check that there is no identical hash already in "studentMappingHash"
   // - create the student
   // - create the mappings to the student (uid -> studentId and hash -> studentId)
-  // If we fail creating the student, it means that the token is too old (since it actually exists in SchoolMapping)
+  // If we fail creating the student, it means that the token is too old (since it actually exists in participationMapping)
   const studentRef = doc(db, "students", student.id).withConverter(studentConverter);
   const hashMappingRef = doc(db, "studentMappingHash", hash).withConverter(
     studentMappingHashConverter,
@@ -415,7 +422,7 @@ async function createStudent(db: Firestore, student: Student) {
     await runTransaction(db, async (trans) => {
       const mapping = await trans.get(hashMappingRef);
       if (mapping.exists()) {
-        throw new DuplicateStudentError(mapping.data().studentId, student.school!);
+        throw new DuplicateStudentError(mapping.data().studentId, student.participationId!);
       }
 
       trans.set(studentRef, student);

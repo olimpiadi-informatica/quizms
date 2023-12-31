@@ -7,7 +7,7 @@ import z from "zod";
 
 import {
   Contest,
-  School,
+  Participation,
   Student,
   Variant,
   parsePersonalInformation,
@@ -23,10 +23,10 @@ import { useTeacher, useTeacherStudents } from "./provider";
 const ImportModal = forwardRef(function ImportModal(
   {
     contest,
-    school,
+    participation,
   }: {
     contest: Contest;
-    school: School;
+    participation: Participation;
   },
   ref: Ref<HTMLDialogElement> | null,
 ) {
@@ -61,7 +61,7 @@ const ImportModal = forwardRef(function ImportModal(
   const [error, setError] = useState<Error>();
 
   const { variants } = useTeacher();
-  const [, setStudent] = useTeacherStudents(school.id);
+  const [, setStudent] = useTeacherStudents(participation.id);
 
   const onChange = async (file?: File) => {
     setError(undefined);
@@ -76,7 +76,7 @@ const ImportModal = forwardRef(function ImportModal(
   const onClick = async () => {
     setError(undefined);
     try {
-      await importStudents(file ?? "", contest, variants, school, setStudent, dateFormat);
+      await importStudents(file ?? "", contest, variants, participation, setStudent, dateFormat);
       if (ref && "current" in ref) {
         ref.current?.close();
       }
@@ -145,7 +145,7 @@ async function importStudents(
   file: string,
   contest: Contest,
   variants: Variant[],
-  school: School,
+  participation: Participation,
   addStudent: (student: Student) => Promise<void>,
   dateFormat: string,
 ) {
@@ -156,10 +156,10 @@ async function importStudents(
       const off = contest.personalInformation.length + Number(contest.hasVariants || 0);
       const variantId = contest.hasVariants
         ? value[off - 1]
-        : variants.find((v) => v.contest === contest.id)!.id;
+        : variants.find((v) => v.contestId === contest.id)!.id;
 
       if (variantId) {
-        const variant = variants.find((v) => v.id === variantId && v.contest === contest.id);
+        const variant = variants.find((v) => v.id === variantId && v.contestId === contest.id);
         if (!variant) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
@@ -196,12 +196,12 @@ async function importStudents(
       return {
         id: randomId(),
         personalInformation,
-        contest: contest.id,
-        school: school.id,
+        contestId: contest.id,
+        participationId: participation.id,
         variant: variantId,
         answers: Object.fromEntries(contest.problemIds.map((id, i) => [id, value[off + i]])),
         createdAt: new Date(),
-      };
+      } as Student;
     })
     .pipe(studentSchema)
     .array();

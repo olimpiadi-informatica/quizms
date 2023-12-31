@@ -4,7 +4,7 @@ import React, { ReactNode } from "react";
 import contests from "virtual:quizms-contests";
 
 import { RemoteStatement } from "~/core/student/remoteStatement";
-import { School, Student } from "~/models";
+import { Participation, Student } from "~/models";
 import { GenerationConfig } from "~/models/generationConfig";
 
 import { StudentProvider, useStudent } from "./provider";
@@ -53,7 +53,7 @@ export function PrintAuth({ children }: AuthProps) {
     );
   }
 
-  const mockSchool: School = {
+  const mockParticipation: Participation = {
     id: "",
     schoolId: "",
     name: "",
@@ -72,7 +72,7 @@ export function PrintAuth({ children }: AuthProps) {
   return (
     <StudentProvider
       contest={contest}
-      school={mockSchool}
+      participation={mockParticipation}
       student={student}
       setStudent={async () => {}}
       submit={() => {}}
