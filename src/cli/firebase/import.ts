@@ -5,7 +5,8 @@ import { join } from "node:path";
 import { deleteApp } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 import { Firestore, FirestoreDataConverter, GrpcStatus } from "firebase-admin/firestore";
-import { capitalize, lowerCase, map, range, uniq } from "lodash-es";
+import { capitalize, lowerCase, map, pick, range, uniq } from "lodash-es";
+import { isMatch } from "picomatch";
 import z from "zod";
 
 import {
@@ -17,7 +18,7 @@ import {
   variantConverter,
   variantMappingConverter,
 } from "~/firebase/convertersAdmin";
-import { contestSchema, participationSchema } from "~/models";
+import { Participation, contestSchema, participationSchema } from "~/models";
 import { generationConfigSchema } from "~/models/generation-config";
 import { Rng } from "~/utils/random";
 
@@ -31,14 +32,15 @@ type ImportOptions = {
   config: string;
   delete?: true;
   force?: true;
+
   contests?: true;
-  participations?: true;
-  teachers?: true;
-  variants?: true;
-  variantMappings?: true;
-  statements?: true;
   pdfs?: true;
+  schools?: true;
   solutions?: true;
+  statements?: true;
+  teachers?: true;
+  variantMappings?: true;
+  variants?: true;
 };
 
 export default async function importData(options: ImportOptions) {
@@ -50,13 +52,13 @@ export default async function importData(options: ImportOptions) {
 
   const collections: (keyof ImportOptions)[] = [
     "contests",
-    "participations",
-    "teachers",
-    "variants",
-    "variantMappings",
-    "statements",
     "pdfs",
+    "schools",
     "solutions",
+    "statements",
+    "teachers",
+    "variantMappings",
+    "variants",
   ];
   if (collections.every((key) => !options[key])) {
     warning(`Nothing to import. Use \`--help\` for usage.`);
@@ -68,10 +70,7 @@ export default async function importData(options: ImportOptions) {
   if (options.contests) {
     await importContests(db, options);
   }
-  if (options.teachers) {
-    await importTeachers(db, options);
-  }
-  if (options.participations) {
+  if (options.schools || options.teachers) {
     await importParticipations(db, options);
   }
   if (options.pdfs) {
@@ -91,40 +90,69 @@ async function importContests(db: Firestore, options: ImportOptions) {
 }
 
 async function importParticipations(db: Firestore, options: ImportOptions) {
-  const auth = getAuth();
+  const schoolSchema = participationSchema
+    .omit({
+      schoolId: true,
+      teacher: true,
+      contestId: true,
+    })
+    .extend({
+      contestIds: z.union([z.string(), z.array(z.string())]),
+      email: z.string().email(),
+      password: z.string(),
+    });
+  const schools = await readCollection(options.dir, "schools", schoolSchema);
+  const configs = await readCollection(options.dir, "contests", generationConfigSchema);
 
-  const participations = await readCollection(options.dir, "participations", participationSchema);
-  const participationsWithTeacher = await Promise.all(
-    participations.map(async (participation) => {
-      try {
-        const user = await auth.getUserByEmail(participation.teacher);
-        return { ...participation, teacher: user.uid };
-      } catch (e) {
-        fatal(
-          `Teacher ${participation.teacher} does not exist. Make sure to import teachers first.`,
-        );
+  if (options.teachers) {
+    const teachers = schools.map((school) => pick(school, ["name", "email", "password"]));
+    await importTeachers(db, teachers, options);
+  }
+
+  if (options.schools) {
+    const auth = getAuth();
+    const participations: Participation[] = [];
+
+    for (const config of configs) {
+      const rng = new Rng(`${config.secret}-${config.id}-participations`);
+
+      for (const school of schools) {
+        if (!isMatch(config.id, school.contestIds)) continue;
+
+        const pdfVariants = rng.sample(config.pdfVariantIds, config.pdfPerSchool);
+
+        const participation: Participation = {
+          id: `${school.id}-${config.id}`,
+          schoolId: school.id,
+          contestId: config.id,
+          name: school.name,
+          teacher: "",
+          finalized: false,
+          pdfVariants,
+        };
+        try {
+          const user = await auth.getUserByEmail(school.email);
+          participation.teacher = user.uid;
+        } catch (e) {
+          fatal(
+            `Teacher ${participation.teacher} does not exist. Make sure to import teachers first.`,
+          );
+        }
+        participations.push(participation);
       }
-    }),
-  );
+    }
 
-  await importCollection(
-    db,
-    "participations",
-    participationsWithTeacher,
-    participationConverter,
-    options,
-  );
+    await importCollection(db, "participations", participations, participationConverter, options);
+  }
 }
 
-async function importTeachers(db: Firestore, options: ImportOptions) {
-  const teacherSchema = z.object({
-    name: z.string(),
-    email: z.string().email(),
-    password: z.string(),
-  });
+type Teacher = {
+  name: string;
+  email: string;
+  password: string;
+};
 
-  const teachers = await readCollection(options.dir, "teachers", teacherSchema);
-
+async function importTeachers(db: Firestore, teachers: Teacher[], options: ImportOptions) {
   const auth = getAuth();
   const ids = await Promise.all(
     teachers.map(async (teacher) => {
@@ -240,7 +268,7 @@ async function importCollection<T extends { id: string }>(
     } catch (e: any) {
       if (e.code === GrpcStatus.ALREADY_EXISTS) {
         fatal(
-          `Document ${e.documentRef.id} already exists in \`${collection}\`. Use \`--force\` to overwrite existing documents.`,
+          `Document already exists in \`${collection}\`. Use \`--force\` to overwrite existing documents.`,
         );
       } else {
         fatal(`Cannot import ${lowerCase(collection)}: ${e}`);

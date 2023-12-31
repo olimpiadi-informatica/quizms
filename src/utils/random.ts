@@ -16,6 +16,14 @@ export class Rng {
     return array[this.randInt(0, array.length - 1)];
   };
 
+  public sample = <T>(array: T[], k: number): T[] => {
+    const values = new Set<T>();
+    while (values.size < k) {
+      values.add(this.choice(array));
+    }
+    return Array.from(values);
+  };
+
   public shuffle = (array: any[]): void => {
     for (let i = array.length - 1; i > 0; i--) {
       const j = this.randInt(0, i);

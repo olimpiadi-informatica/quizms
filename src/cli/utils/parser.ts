@@ -72,7 +72,7 @@ function parseJsonl(content: string) {
 }
 
 function parseCsv(content: string) {
-  const result = Papa.parse(content, { header: true });
+  const result = Papa.parse(content, { header: true, skipEmptyLines: true });
   if (result.errors.length > 0) {
     throw new Error(result.errors[0].message);
   }
