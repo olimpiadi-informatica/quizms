@@ -12,7 +12,7 @@ export function cleanup() {
 }
 
 export async function confirm(question: string) {
-  const ans = await rl.question(`${pc.blue("𝓲")} ${question} (y/N) `);
+  const ans = await rl.question(`${pc.bold(pc.yellow("?"))} ${question} (y/N) `);
   if (ans.toLowerCase() !== "y") {
     exit(0);
   }

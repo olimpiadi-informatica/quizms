@@ -6,6 +6,7 @@ import { deleteApp } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 import { Firestore, FirestoreDataConverter, GrpcStatus } from "firebase-admin/firestore";
 import { capitalize, lowerCase, map, pick, range, uniq } from "lodash-es";
+import pc from "picocolors";
 import { isMatch } from "picomatch";
 import z from "zod";
 
@@ -248,7 +249,7 @@ async function importCollection<T extends { id: string }>(
   }
 
   await confirm(
-    `You are about to import the ${lowerCase(collection)}. ${
+    `You are about to import the ${pc.bold(lowerCase(collection))}. ${
       options.force ? "This will overwrite any existing data. " : ""
     }Are you sure?`,
   );
@@ -280,7 +281,7 @@ async function importCollection<T extends { id: string }>(
 }
 
 async function deleteCollection(db: Firestore, collection: string) {
-  await confirm(`You are about to delete all ${lowerCase(collection)}. Are you sure?`);
+  await confirm(`You are about to delete all ${pc.bold(lowerCase(collection))}. Are you sure?`);
 
   const collectionRef = db.collection(collection);
   const query = collectionRef.limit(400);
