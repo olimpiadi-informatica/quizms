@@ -8,7 +8,7 @@ import pc from "picocolors";
 import { InlineConfig, PluginOption, build, mergeConfig, preview } from "vite";
 
 import { Statement } from "~/models";
-import { GenerationConfig, generationConfigSchema } from "~/models/generationConfig";
+import { GenerationConfig, generationConfigSchema } from "~/models/generation-config";
 
 import generatePdfs from "./pdf";
 import { fatal, info, success } from "./utils/logs";

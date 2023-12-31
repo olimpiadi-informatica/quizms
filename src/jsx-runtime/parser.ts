@@ -1,7 +1,7 @@
 import { Expression, Program, Property } from "estree";
 import { builders as b } from "estree-toolkit";
 
-import { GenerationConfig } from "~/models/generationConfig";
+import { GenerationConfig } from "~/models/generation-config";
 import { hash } from "~/utils/random";
 
 import { shuffleAnswers, shuffleProblems } from "./shuffle";

@@ -5,7 +5,7 @@ import contests from "virtual:quizms-contests";
 
 import { RemoteStatement } from "~/core/student/remoteStatement";
 import { Participation, Student } from "~/models";
-import { GenerationConfig } from "~/models/generationConfig";
+import { GenerationConfig } from "~/models/generation-config";
 
 import { StudentProvider, useStudent } from "./provider";
 

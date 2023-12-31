@@ -18,7 +18,7 @@ import {
   variantMappingConverter,
 } from "~/firebase/convertersAdmin";
 import { contestSchema, participationSchema } from "~/models";
-import { generationConfigSchema } from "~/models/generationConfig";
+import { generationConfigSchema } from "~/models/generation-config";
 import { Rng } from "~/utils/random";
 
 import { confirm, fatal, info, success, warning } from "../utils/logs";

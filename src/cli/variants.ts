@@ -12,7 +12,7 @@ import { InlineConfig, build } from "vite";
 import { ExpressionWrapper, shuffleStatement } from "~/jsx-runtime/parser";
 import { cleanStatement, getSchema, getSolutions } from "~/jsx-runtime/shuffle";
 import { Solution, Statement, Variant } from "~/models";
-import { GenerationConfig, generationConfigSchema } from "~/models/generationConfig";
+import { GenerationConfig, generationConfigSchema } from "~/models/generation-config";
 
 import { fatal, info, success } from "./utils/logs";
 import { readCollection } from "./utils/parser";
