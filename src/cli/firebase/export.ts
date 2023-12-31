@@ -7,8 +7,8 @@ import { capitalize } from "lodash-es";
 
 import {
   contestConverter,
-  schoolConverter,
-  schoolMappingConverter,
+  participationConverter,
+  participationMappingConverter,
   solutionConverter,
   studentConverter,
   submissionConverter,
@@ -20,13 +20,13 @@ import { initializeDb } from "./common";
 
 type ExportOptions = {
   dir: string;
-  schools?: boolean;
-  solutions?: boolean;
-  students?: boolean;
-  submissions?: boolean;
-  tokens?: boolean;
-  variants?: boolean;
-  contests?: boolean;
+  contests?: true;
+  participations?: true;
+  solutions?: true;
+  students?: true;
+  submissions?: true;
+  tokens?: true;
+  variants?: true;
 };
 
 export default async function exportContests(options: ExportOptions) {
@@ -40,9 +40,9 @@ export default async function exportContests(options: ExportOptions) {
     const ref = db.collection("students").withConverter(studentConverter);
     await exportCollection(ref, "students", outDir);
   }
-  if (options.schools) {
-    const ref = db.collection("schools").withConverter(schoolConverter);
-    await exportCollection(ref, "schools", outDir);
+  if (options.participations) {
+    const ref = db.collection("participations").withConverter(participationConverter);
+    await exportCollection(ref, "participations", outDir);
   }
   if (options.solutions) {
     const ref = db.collection("solutions").withConverter(solutionConverter);
@@ -53,7 +53,7 @@ export default async function exportContests(options: ExportOptions) {
     await exportCollection(ref, "submissions", outDir);
   }
   if (options.tokens) {
-    const ref = db.collection("schoolMapping").withConverter(schoolMappingConverter);
+    const ref = db.collection("participationMapping").withConverter(participationMappingConverter);
     await exportCollection(ref, "tokens", outDir);
   }
   if (options.variants) {

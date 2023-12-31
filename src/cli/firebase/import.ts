@@ -10,14 +10,14 @@ import z from "zod";
 
 import {
   contestConverter,
+  participationConverter,
   pdfConverter,
-  schoolConverter,
   solutionConverter,
   statementConverter,
   variantConverter,
   variantMappingConverter,
 } from "~/firebase/convertersAdmin";
-import { contestSchema, schoolSchema } from "~/models";
+import { contestSchema, participationSchema } from "~/models";
 import { generationConfigSchema } from "~/models/generationConfig";
 import { Rng } from "~/utils/random";
 
@@ -29,18 +29,16 @@ import { initializeDb } from "./common";
 type ImportOptions = {
   dir: string;
   config: string;
-  delete?: boolean;
-  force?: boolean;
-
-  contests?: boolean;
-  schools?: boolean;
-  teachers?: boolean;
-
-  variants?: boolean;
-  variantMappings?: boolean;
-  statements?: boolean;
-  pdfs?: boolean;
-  solutions?: boolean;
+  delete?: true;
+  force?: true;
+  contests?: true;
+  participations?: true;
+  teachers?: true;
+  variants?: true;
+  variantMappings?: true;
+  statements?: true;
+  pdfs?: true;
+  solutions?: true;
 };
 
 export default async function importData(options: ImportOptions) {
@@ -52,7 +50,7 @@ export default async function importData(options: ImportOptions) {
 
   const collections: (keyof ImportOptions)[] = [
     "contests",
-    "schools",
+    "participations",
     "teachers",
     "variants",
     "variantMappings",
@@ -73,8 +71,8 @@ export default async function importData(options: ImportOptions) {
   if (options.teachers) {
     await importTeachers(db, options);
   }
-  if (options.schools) {
-    await importSchools(db, options);
+  if (options.participations) {
+    await importParticipations(db, options);
   }
   if (options.pdfs) {
     await importPdf(db, options);
@@ -92,22 +90,30 @@ async function importContests(db: Firestore, options: ImportOptions) {
   await importCollection(db, "contests", contests, contestConverter, options);
 }
 
-async function importSchools(db: Firestore, options: ImportOptions) {
+async function importParticipations(db: Firestore, options: ImportOptions) {
   const auth = getAuth();
 
-  const schools = await readCollection(options.dir, "schools", schoolSchema);
-  const schoolsWithTeacher = await Promise.all(
-    schools.map(async (school) => {
+  const participations = await readCollection(options.dir, "participations", participationSchema);
+  const participationsWithTeacher = await Promise.all(
+    participations.map(async (participation) => {
       try {
-        const user = await auth.getUserByEmail(school.teacher);
-        return { ...school, teacher: user.uid };
+        const user = await auth.getUserByEmail(participation.teacher);
+        return { ...participation, teacher: user.uid };
       } catch (e) {
-        fatal(`Teacher ${school.teacher} does not exist. Make sure to import teachers first.`);
+        fatal(
+          `Teacher ${participation.teacher} does not exist. Make sure to import teachers first.`,
+        );
       }
     }),
   );
 
-  await importCollection(db, "schools", schoolsWithTeacher, schoolConverter, options);
+  await importCollection(
+    db,
+    "participations",
+    participationsWithTeacher,
+    participationConverter,
+    options,
+  );
 }
 
 async function importTeachers(db: Firestore, options: ImportOptions) {
