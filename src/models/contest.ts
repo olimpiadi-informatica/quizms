@@ -30,8 +30,8 @@ export const contestSchema = z.object({
   name: z.string(),
   problemIds: z.coerce.string().array(),
 
-  startingWindowStart: z.date().optional(),
-  startingWindowEnd: z.date().optional(),
+  contestWindowStart: z.date().optional(),
+  contestWindowEnd: z.date().optional(),
   duration: z.coerce.number().positive().optional(),
 
   personalInformation: z.array(

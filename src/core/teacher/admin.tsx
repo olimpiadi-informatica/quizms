@@ -22,7 +22,7 @@ import Timer from "../components/timer";
 import { useTeacher, useTeacherStudentRestores } from "./provider";
 
 function canStartContest(now: Date, participation: Participation, contest: Contest) {
-  if (now < contest.startingWindowStart! || now > contest.startingWindowEnd!) return false;
+  if (now < contest.contestWindowStart! || now > contest.contestWindowEnd!) return false;
   if (!participation.startingTime) return true;
   if (!contest.allowRestart) return false;
   return differenceInMinutes(now, participation.startingTime) >= contest.duration!;
@@ -275,7 +275,7 @@ function ContestAdmin({
   );
   useIsAfter(participation.startingTime && addMinutes(participation.startingTime, -1));
 
-  if (!contest.startingWindowEnd || !contest.startingWindowStart) {
+  if (!contest.contestWindowEnd || !contest.contestWindowStart) {
     throw new Error("Data inizio e fine del contest non specificate");
   }
   if (!contest.duration) {
@@ -288,8 +288,8 @@ function ContestAdmin({
         <div className="card-body">
           <h2 className="card-title">Informazioni Gara</h2>
           {/* contest info */}
-          La gara si potrà svolgere dalle {formatTime(contest.startingWindowStart)} alle{" "}
-          {formatTime(contest.startingWindowEnd)} del {formatDate(contest.startingWindowStart)}.
+          La gara si potrà svolgere dalle {formatTime(contest.contestWindowStart)} alle{" "}
+          {formatTime(contest.contestWindowEnd)} del {formatDate(contest.contestWindowStart)}.
           <div className="mt-2 flex justify-center">
             <DownloadPdfButton participation={participation} contest={contest} />
           </div>
