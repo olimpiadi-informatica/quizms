@@ -224,7 +224,9 @@ function StudentRestoreButton({
         </label>
         <div className="mt-3 flex flex-row justify-center gap-3">
           <LoadingButtons>
-            <Button onClick={rejectRequest}>Rigetta</Button>
+            <Button className="btn-info" onClick={rejectRequest}>
+              Rigetta
+            </Button>
             <Button
               className="btn-error"
               onClick={approveRequest}
