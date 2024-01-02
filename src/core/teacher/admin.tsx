@@ -314,7 +314,10 @@ function ContestAdmin({
             {canUndoContest(now, participation) && (
               <StopContestButton participation={participation} />
             )}
-            <a className="btn btn-info" href={`./students/#${participation.contestId}`} /* TODO */>
+            <a /* TODO */
+              className="btn btn-info"
+              href={`./students/#${participation.contestId}`}
+              target="_blank" rel="noreferrer">
               Gestisci studenti e risposte
             </a>
           </div>

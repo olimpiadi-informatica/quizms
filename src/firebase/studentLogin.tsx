@@ -1,7 +1,7 @@
 import React, { ChangeEvent, ReactNode, forwardRef, useMemo, useRef, useState } from "react";
 
 import classNames from "classnames";
-import { addMinutes } from "date-fns";
+import { addMinutes, formatISO } from "date-fns";
 import { FirebaseOptions } from "firebase/app";
 import { getAuth, signOut } from "firebase/auth";
 import {
@@ -14,7 +14,7 @@ import {
   runTransaction,
   setDoc,
 } from "firebase/firestore";
-import { isEqual } from "lodash-es";
+import { isDate, isEqual } from "lodash-es";
 import { AlertCircle } from "lucide-react";
 
 import { Button } from "~/core/components/button";
@@ -76,6 +76,7 @@ function StudentLoginInner({
   const [contests] = useCollection("contests", contestConverter);
   const [studentMapping] = useDocument("studentMappingUid", user.uid, studentMappingUidConverter, {
     subscribe: true,
+    throwIfMissing: false,
   });
 
   const filteredContests = contests.filter(
@@ -98,6 +99,9 @@ function StudentLoginInner({
   const modalRef = useRef<HTMLDialogElement>(null);
 
   if (studentMapping) {
+    if (loading) {
+      setTimeout(() => setLoading(false), 0);
+    }
     return (
       <StudentInner
         participationId={studentMapping.participationId}
@@ -159,6 +163,7 @@ function StudentLoginInner({
           {contest?.personalInformation.map((field) => (
             <PersonalInformationField
               key={field.name}
+              student={student}
               setStudent={setStudent}
               field={field}
               disabled={loading}
@@ -199,15 +204,24 @@ function StudentLoginInner({
 }
 
 function PersonalInformationField({
+  student,
   setStudent,
   field,
   disabled,
 }: {
+  student: Student;
   setStudent: (set: (student: Student) => Student) => void;
   field: Contest["personalInformation"][number];
   disabled?: boolean;
 }) {
-  const [value, setValue] = useState<string>("");
+  const [value, setValue] = useState<string>(() => {
+    const v = student.personalInformation?.[field.name] ?? "";
+    if (isDate(v)) {
+      return formatISO(v, { representation: "date" });
+    } else {
+      return String(v);
+    }
+  });
   const [error, setError] = useState<string>();
   const [blur, setBlur] = useState(false);
 

@@ -180,11 +180,10 @@ async function setParticipation(
     // - delete the participation token;
     // - delete the all the students with that token.
 
-    await setDoc(participationRef, participation);
-
     const q = query(
       collection(participationRef, "students").withConverter(studentConverter),
-      where("token", "==", participation.token),
+      where("participationId", "==", participation.id),
+      where("token", "==", prevParticipation.token),
     );
 
     const snapshot = await getDocs(q);
@@ -201,6 +200,14 @@ async function setParticipation(
         await batch.commit();
       }),
     );
+
+    // TODO: there is a race condition here, a student can register after we have deleted the
+    //  students but before we have deleted the token from the participation. In this case the
+    //  student won't be deleted from firestore and he will receives a "Missing or insufficient
+    //  permissions" error. We can't however delete the token before the students because the
+    //  student will lose his permission to read the participation and will receive a "Missing
+    //  or insufficient permissions" error either.
+    await setDoc(participationRef, participation);
   }
 }
 

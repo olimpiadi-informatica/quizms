@@ -45,10 +45,8 @@ export function Button({ className, icon: Icon, onClick, disabled, children }: B
     setLoading(id);
     try {
       await onClick?.();
+    } finally {
       setLoading(undefined);
-    } catch (e) {
-      setLoading(undefined);
-      throw e;
     }
   };
 
