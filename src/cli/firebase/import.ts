@@ -45,6 +45,8 @@ type ImportOptions = {
 };
 
 export default async function importData(options: ImportOptions) {
+  process.env.QUIZMS_MODE = "contest";
+
   if (!existsSync(join(options.dir, "data"))) {
     fatal(
       `Cannot find data directory at ${options.dir}. Make sure you're in the root of a QuizMS project or specify a different directory, use \`--help\` for usage.`,

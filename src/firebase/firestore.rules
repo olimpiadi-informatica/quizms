@@ -45,7 +45,8 @@ service cloud.firestore {
         match /participations/{participation} {
             function isStudentSchool() {
                 let student = getStudent(request.auth.uid);
-                return student != null && isAuthenticated(student.data.uid)
+                return student != null
+                    && isAuthenticated(student.data.uid)
                     && student.data.participationId == participation
                     && student.data.token == resource.data.token;
             }
@@ -98,7 +99,7 @@ service cloud.firestore {
 
             function checkVariant(data) {
                 let hash = data.contestId + '-' + studentHash(data)[0: 3];
-                let mapping = get(/databases/$(database)/documents/variantMapping/$(hash));
+                let mapping = get(/databases/$(database)/documents/variantMappings/$(hash));
                 return mapping != null
                     && mapping.data.variant == data.variant;
             }
@@ -208,7 +209,7 @@ service cloud.firestore {
             allow read: if canStudentReadVariant(variant) || isTeacher();
         }
 
-        match /variantMapping/{hash} {
+        match /variantMappings/{hash} {
             allow read: if request.auth != null;
         }
 

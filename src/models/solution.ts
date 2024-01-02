@@ -8,7 +8,7 @@ export const solutionSchema = z.object({
   answers: z.record(
     z.object({
       value: z.string(),
-      originalId: z.string(),
+      originalId: z.coerce.string(),
     }),
   ),
 });
