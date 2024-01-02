@@ -11,11 +11,13 @@ export function cleanup() {
   rl.close();
 }
 
-export async function confirm(question: string) {
+export async function confirm(question: string, terminate = true) {
   const ans = await rl.question(`${pc.bold(pc.yellow("?"))} ${question} (y/N) `);
-  if (ans.toLowerCase() !== "y") {
+  const yes = ans.toLowerCase() === "y";
+  if (!yes && terminate) {
     exit(0);
   }
+  return yes;
 }
 
 export function fatal(msg: string): never {

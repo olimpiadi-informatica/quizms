@@ -58,6 +58,7 @@ const cliConfig = {
   packages: "external",
   platform: "node",
   outdir: "dist",
+  loader: { ".rules": "file" },
 };
 
 /** @type {import("esbuild").BuildOptions} */

@@ -2,9 +2,9 @@ import { cwd } from "node:process";
 
 import { Command } from "commander";
 
-import deploy from "./deploy";
 import exportData from "./export";
 import importData from "./import";
+import init from "./init";
 
 export default function firebaseCommand() {
   const command = new Command("firebase");
@@ -12,10 +12,10 @@ export default function firebaseCommand() {
   command.description("Commands to interact with the Firebase database.");
 
   command
-    .command("deploy")
-    .description("Deploy the website.")
+    .command("init")
+    .description("Initialize the Firebase project.")
     .argument("[directory]", "The directory of the contest.", cwd())
-    .action((dir) => deploy({ dir }));
+    .action((dir) => init({ dir }));
 
   command
     .command("export")
