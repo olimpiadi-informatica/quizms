@@ -268,6 +268,7 @@ function Table({ participation, contest }: { participation: Participation; conte
             variant: defaultVariant,
             createdAt: new Date(),
             answers: {},
+            disabled: false,
           } as Student,
         ]
       : []),

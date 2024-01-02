@@ -90,6 +90,7 @@ function StudentLoginInner({
     personalInformation: {},
     answers: {},
     createdAt: getNow(),
+    disabled: false,
   });
   const contest = contests.find((c) => c.id === student.contestId);
 

@@ -201,6 +201,7 @@ async function importStudents(
         variant: variantId,
         answers: Object.fromEntries(contest.problemIds.map((id, i) => [id, value[off + i]])),
         createdAt: new Date(),
+        disabled: false,
       } as Student;
     })
     .pipe(studentSchema)
