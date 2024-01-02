@@ -6,8 +6,8 @@
   "author": "Alessandro Bortolin <bortolin.alessandro@outlook.it>",
   "license": "MIT",
   "scripts": {
-    "build": "rm -rf dist/ && NODE_ENV=production node esbuild.js build",
-    "watch": "node esbuild.js watch",
+    "build": "rm -rf dist/ && NODE_ENV=production node scripts/build.js build",
+    "watch": "node scripts/build.js watch",
     "lint": "eslint --fix . ; tsc --noEmit",
     "fmt": "prettier --write src/"
   },

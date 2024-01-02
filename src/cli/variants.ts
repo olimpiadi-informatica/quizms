@@ -4,6 +4,7 @@ import { mkdir } from "node:fs/promises";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 
+import { transform } from "esbuild";
 import { toJs } from "estree-util-to-js";
 import { uniq } from "lodash-es";
 import { temporaryDirectoryTask } from "tempy";
@@ -82,9 +83,15 @@ export async function buildVariants(
       const answers = getSolutions(variantAst);
       const schema = getSchema(variantAst);
       cleanStatement(variantAst);
+
+      const statement = await transform(toJs(variantAst).value, {
+        minify: true,
+        charset: "utf8",
+      });
+
       variants[id] = [
         { id, schema, contestId: config.id },
-        { id, statement: toJs(variantAst).value },
+        { id, statement: statement.code },
         { id, answers },
       ];
     }
