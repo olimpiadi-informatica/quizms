@@ -182,10 +182,8 @@ async function setParticipation(
 
     await setDoc(participationRef, participation);
 
-    // TODO: require index?
     const q = query(
-      collection(db, "students").withConverter(studentConverter),
-      where("participationId", "==", participation.id),
+      collection(participationRef, "students").withConverter(studentConverter),
       where("token", "==", participation.token),
     );
 
@@ -197,8 +195,8 @@ async function setParticipation(
         const batch = writeBatch(db);
         for (const student of students) {
           batch.delete(doc(db, "studentMappingUid", student.uid!));
-          batch.delete(doc(db, "studentMappingHash", studentHash(student)));
-          batch.delete(doc(db, "students", student.id));
+          batch.delete(doc(participationRef, "studentMappingHash", studentHash(student)));
+          batch.delete(doc(participationRef, "students", student.id));
         }
         await batch.commit();
       }),
@@ -216,7 +214,7 @@ async function getPdfStatements(db: Firestore, pdfVariants: string[]) {
 }
 
 function useStudents(participationId: string) {
-  return useCollection("students", studentConverter, {
+  return useCollection(`participations/${participationId}/students`, studentConverter, {
     constraints: { participationId },
     orderBy: "createdAt",
     subscribe: true,
@@ -225,16 +223,22 @@ function useStudents(participationId: string) {
 
 function useStudentRestores(participation: Participation) {
   const db = useDb();
-  const [studentRestores] = useCollection("studentRestore", studentRestoreConverter, {
-    constraints: { participationId: participation.id, token: participation.token ?? "" },
-    subscribe: true,
-    limit: 50,
-  });
+
+  const base = doc(db, "participations", participation.id);
+  const [studentRestores] = useCollection(
+    `participations/${participation.id}/studentRestore`,
+    studentRestoreConverter,
+    {
+      constraints: { token: participation.token ?? "" },
+      subscribe: true,
+      limit: 50,
+    },
+  );
 
   const reject = async (studentId: string) => {
     // Delete all the requests for this student.
     const q = query(
-      collection(db, "studentRestore").withConverter(studentRestoreConverter),
+      collection(base, "studentRestore").withConverter(studentRestoreConverter),
       where("studentId", "==", studentId),
       limit(400),
     );
@@ -245,7 +249,7 @@ function useStudentRestores(participation: Participation) {
 
       const batch = writeBatch(db);
       for (const request of requests.docs) {
-        batch.delete(doc(db, "studentRestore", request.id));
+        batch.delete(doc(base, "studentRestore", request.id));
       }
       await batch.commit();
     }
@@ -259,18 +263,20 @@ function useStudentRestores(participation: Participation) {
     const q = query(
       collection(db, "studentMappingUid").withConverter(studentMappingUidConverter),
       where("studentId", "==", request.studentId),
+      where("participationId", "==", request.participationId),
       limit(400),
     );
     const prevMappings = await getDocs(q);
 
     const batch = writeBatch(db);
-    batch.update(doc(db, "students", request.studentId).withConverter(studentConverter), {
+    batch.update(doc(base, "students", request.studentId).withConverter(studentConverter), {
       uid: request.id,
       updatedAt: serverTimestamp(),
     });
     batch.set(doc(db, "studentMappingUid", request.id).withConverter(studentMappingUidConverter), {
       id: request.id,
       studentId: request.studentId,
+      participationId: request.participationId,
     });
     for (const mapping of prevMappings.docs) {
       batch.delete(doc(db, "studentMappingUid", mapping.id));

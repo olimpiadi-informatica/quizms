@@ -74,16 +74,15 @@ function StudentLoginInner({
 
   const user = useAnonymousAuth();
   const [contests] = useCollection("contests", contestConverter);
-  const [students, setStudent] = useCollection("students", studentConverter, {
-    constraints: { uid: user?.uid },
-    limit: 1,
+  const [studentMapping] = useDocument("studentMappingUid", user.uid, studentMappingUidConverter, {
+    subscribe: true,
   });
 
   const filteredContests = contests.filter(
     (contest) => contestFilter?.includes(contest.id) ?? true,
   );
 
-  const [student, setLocalStudent] = useState<Student>({
+  const [student, setStudent] = useState<Student>({
     id: randomId(),
     uid: user?.uid,
     contestId: filteredContests.length === 1 ? filteredContests[0].id : undefined,
@@ -98,9 +97,11 @@ function StudentLoginInner({
   const [loading, setLoading] = useState(false);
   const modalRef = useRef<HTMLDialogElement>(null);
 
-  if (students[0]?.startedAt) {
+  if (studentMapping) {
     return (
-      <StudentInner student={students[0]} setStudent={setStudent}>
+      <StudentInner
+        participationId={studentMapping.participationId}
+        studentId={studentMapping.studentId}>
         {children}
       </StudentInner>
     );
@@ -114,8 +115,7 @@ function StudentLoginInner({
     setLoading(true);
     setError(undefined);
     try {
-      const newStudent = await createStudent(db, { ...student });
-      await setStudent(newStudent);
+      await createStudent(db, { ...student });
     } catch (e) {
       if (e instanceof DuplicateStudentError) {
         try {
@@ -127,8 +127,8 @@ function StudentLoginInner({
       } else {
         setError(e as Error);
       }
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
@@ -142,9 +142,7 @@ function StudentLoginInner({
             <select
               className="select select-bordered w-full"
               value={student.contestId ?? -1}
-              onChange={(e) =>
-                setLocalStudent((student) => ({ ...student, contestId: e.target.value }))
-              }
+              onChange={(e) => setStudent((student) => ({ ...student, contestId: e.target.value }))}
               disabled={loading}
               required>
               <option value={-1} disabled>
@@ -161,7 +159,7 @@ function StudentLoginInner({
           {contest?.personalInformation.map((field) => (
             <PersonalInformationField
               key={field.name}
-              setStudent={setLocalStudent}
+              setStudent={setStudent}
               field={field}
               disabled={loading}
             />
@@ -177,7 +175,7 @@ function StudentLoginInner({
                   type="text"
                   placeholder="Inserisci codice"
                   className="input input-bordered w-full max-w-md"
-                  onChange={(e) => setLocalStudent({ ...student, token: e.target.value })}
+                  onChange={(e) => setStudent({ ...student, token: e.target.value })}
                   value={student.token ?? ""}
                   disabled={loading}
                   required
@@ -187,7 +185,7 @@ function StudentLoginInner({
                 {error ? <>Errore: {error.message}</> : <>&nbsp;</>}
               </p>
               <div className="flex justify-center pt-1">
-                <Button className="btn-success" onClick={start} disabled={!completed}>
+                <Button className="btn-success" onClick={start} disabled={loading || !completed}>
                   Inizia
                 </Button>
               </div>
@@ -267,12 +265,6 @@ const StudentRestoreModal = forwardRef(function StudentRestoreModal(
   const auth = getAuth(db.app);
   const user = auth.currentUser!;
 
-  useCollection("students", studentConverter, {
-    constraints: { uid: user?.uid },
-    limit: 1,
-    subscribe: true,
-  });
-
   return (
     <Modal ref={ref} title="Attenzione">
       <p>
@@ -289,16 +281,21 @@ const StudentRestoreModal = forwardRef(function StudentRestoreModal(
 });
 
 function StudentInner({
-  student,
-  setStudent,
+  participationId,
+  studentId,
   children,
 }: {
-  student: Student;
-  setStudent: (student: Student) => Promise<void>;
+  participationId: string;
+  studentId: string;
   children: ReactNode;
 }) {
   const db = useDb();
 
+  const [student, setStudent] = useDocument(
+    `participations/${participationId}/students`,
+    studentId,
+    studentConverter,
+  );
   const [contest] = useDocument("contests", student.contestId!, contestConverter);
   const [participation] = useDocument(
     "participations",
@@ -325,8 +322,8 @@ function StudentInner({
 
     if (isEqual(student.answers, newStudent.answers)) return;
 
-    const ref = collection(db, "submissions").withConverter(submissionConverter);
-    await addDoc(ref, {
+    const submissionRef = collection(db, "submissions").withConverter(submissionConverter);
+    await addDoc(submissionRef, {
       id: "",
       uid: newStudent.uid!,
       answers: newStudent.answers!,
@@ -359,14 +356,19 @@ async function createStudentRestore(
   const uid = auth.currentUser!.uid;
 
   try {
-    await setDoc(doc(db, "studentRestore", uid).withConverter(studentRestoreConverter), {
-      id: uid,
-      studentId,
-      participationId,
-      token: curStudent.token,
-      name: curStudent.personalInformation!.name,
-      surname: curStudent.personalInformation!.surname,
-    });
+    await setDoc(
+      doc(db, `participations/${participationId}/studentRestore/${uid}`).withConverter(
+        studentRestoreConverter,
+      ),
+      {
+        id: uid,
+        studentId,
+        participationId,
+        token: curStudent.token,
+        name: curStudent.personalInformation!.name,
+        surname: curStudent.personalInformation!.surname,
+      },
+    );
   } catch (e) {
     throw new Error("Codice scaduto");
   }
@@ -412,8 +414,11 @@ async function createStudent(db: Firestore, student: Student) {
   // - create the student
   // - create the mappings to the student (uid -> studentId and hash -> studentId)
   // If we fail creating the student, it means that the token is too old (since it actually exists in participationMapping)
-  const studentRef = doc(db, "students", student.id).withConverter(studentConverter);
-  const hashMappingRef = doc(db, "studentMappingHash", hash).withConverter(
+
+  const base = doc(db, "participations", student.participationId!);
+
+  const studentRef = doc(base, "students", student.id).withConverter(studentConverter);
+  const hashMappingRef = doc(base, "studentMappingHash", hash).withConverter(
     studentMappingHashConverter,
   );
   const uidMappingRef = doc(db, "studentMappingUid", student.uid!).withConverter(
@@ -428,7 +433,11 @@ async function createStudent(db: Firestore, student: Student) {
 
       trans.set(studentRef, student);
       trans.set(hashMappingRef, { id: hash, studentId: student.id });
-      trans.set(uidMappingRef, { id: student.uid, studentId: student.id });
+      trans.set(uidMappingRef, {
+        id: student.uid,
+        studentId: student.id,
+        participationId: student.participationId,
+      });
     });
   } catch (e) {
     if ((e as FirestoreError).code === "permission-denied") {

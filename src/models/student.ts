@@ -52,6 +52,7 @@ export type StudentMappingHash = z.infer<typeof studentMappingHashSchema>;
 export const studentMappingUidSchema = z.object({
   id: z.string(),
   studentId: z.string(),
+  participationId: z.string(),
 });
 
 export type StudentMappingUid = z.infer<typeof studentMappingUidSchema>;
