@@ -159,28 +159,28 @@ async function importTeachers(db: Firestore, teachers: Teacher[], options: Impor
   const auth = getAuth();
   const ids = await Promise.all(
     teachers.map(async (teacher) => {
-      const prevUser = await auth.getUserByEmail(teacher.email).catch(() => undefined);
-      if (!prevUser) {
-        const newUser = await auth.createUser({
+      let user = await auth.getUserByEmail(teacher.email).catch(() => undefined);
+      if (!user) {
+        user = await auth.createUser({
           email: teacher.email,
           emailVerified: true,
           password: teacher.password,
           displayName: teacher.name,
           disabled: false,
         });
-        return { id: newUser.uid };
       } else if (options.force) {
-        await auth.updateUser(prevUser.uid, {
+        await auth.updateUser(user.uid, {
           email: teacher.email,
           emailVerified: true,
           password: teacher.password,
           displayName: teacher.name,
           disabled: false,
         });
-        return { id: prevUser.uid };
       } else {
         fatal(`Teacher ${teacher.email} already exists. Use \`--force\` to overwrite.`);
       }
+      await auth.setCustomUserClaims(user.uid, { isTeacher: true });
+      return { id: user.uid };
     }),
   );
 

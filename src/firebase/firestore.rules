@@ -14,7 +14,7 @@ service cloud.firestore {
         }
 
         function isTeacher() {
-            return exists(/databases/$(database)/documents/teachers/$(request.auth.uid));
+            return request.auth.token.isTeacher == true;
         }
 
         function getStudentById(participationId, studentId) {
@@ -79,10 +79,8 @@ service cloud.firestore {
             function checkEndingTime() {
                 let participation = getParticipation(participationId);
                 let contest = get(/databases/$(database)/documents/contests/$(participation.data.contestId));
-                let startingTime = participation.data.startingTime.toMillis();
-                let totalTime = contest.data.duration * 60000 + 30000;
-                let endingTime = startingTime + totalTime;
-                return request.time.toMillis() <= endingTime;
+                let endingTime = participation.data.startingTime + duration.value(contest.data.duration, "m") + duration.value(30, "s");
+                return request.time <= endingTime;
             }
 
             function checkToken() {
@@ -173,13 +171,8 @@ service cloud.firestore {
         }
 
         match /submissions/{submission} {
-            allow list: if isTeacher();
             allow get: if isAuthenticated(resource.data.uid);
             allow create: if isAuthenticated(request.resource.data.uid) && hasTimestamp('submittedAt');
-        }
-
-        match /teachers/{teacher} {
-            allow get: if request.auth != null && request.auth.token.email_verified;
         }
 
         function canStudentReadVariant(variant) {
