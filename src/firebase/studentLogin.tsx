@@ -104,6 +104,7 @@ function StudentLoginInner({
     }
     return (
       <StudentInner
+        contests={contests}
         participationId={studentMapping.participationId}
         studentId={studentMapping.studentId}>
         {children}
@@ -295,10 +296,12 @@ const StudentRestoreModal = forwardRef(function StudentRestoreModal(
 });
 
 function StudentInner({
+  contests,
   participationId,
   studentId,
   children,
 }: {
+  contests: Contest[];
   participationId: string;
   studentId: string;
   children: ReactNode;
@@ -310,7 +313,6 @@ function StudentInner({
     studentId,
     studentConverter,
   );
-  const [contest] = useDocument("contests", student.contestId!, contestConverter);
   const [participation] = useDocument(
     "participations",
     student.participationId!,
@@ -318,6 +320,7 @@ function StudentInner({
     { subscribe: true },
   );
 
+  const contest = contests.find((c) => c.id === student.contestId)!;
   const endingTime = useMemo(
     () => addMinutes(participation.startingTime!, contest.duration!),
     [participation.startingTime, contest.duration],
