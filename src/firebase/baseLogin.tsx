@@ -9,8 +9,6 @@ import Error from "~/core/components/error";
 import Loading from "~/core/components/loading";
 import { useTime } from "~/core/components/time";
 
-import { useAuth } from "./hooks";
-
 type Props = {
   config: FirebaseOptions;
   children: ReactNode;
@@ -42,7 +40,7 @@ export function FirebaseLogin({ config, children }: Props) {
       <div className="h-dvh">
         <ErrorBoundary FallbackComponent={ErrorLogout}>
           <Suspense fallback={<Loading />}>
-            <AuthWrapper>{children}</AuthWrapper>
+            <TimeWrapper>{children}</TimeWrapper>
           </Suspense>
         </ErrorBoundary>
       </div>
@@ -50,8 +48,7 @@ export function FirebaseLogin({ config, children }: Props) {
   );
 }
 
-function AuthWrapper({ children }: { children: ReactNode }) {
-  useAuth();
+function TimeWrapper({ children }: { children: ReactNode }) {
   useTime();
   return children;
 }

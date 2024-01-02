@@ -32,7 +32,7 @@ import {
   studentRestoreConverter,
   variantConverter,
 } from "~/firebase/converters";
-import { useCollection, useSignInWithPassword } from "~/firebase/hooks";
+import { useCollection, usePrecompiledPasswordAuth, useSignInWithPassword } from "~/firebase/hooks";
 import { Participation, StudentRestore, studentHash } from "~/models";
 
 export function TeacherLogin({
@@ -50,16 +50,15 @@ export function TeacherLogin({
 }
 
 function TeacherLoginInner({ children }: { children: ReactNode }) {
-  const db = useDb();
-  const auth = getAuth(db.app);
-
   const { signInWithPassword, error } = useSignInWithPassword();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const signIn = () => signInWithPassword(email, password);
 
-  if (auth.currentUser) {
-    return <TeacherInner user={auth.currentUser}>{children}</TeacherInner>;
+  const user = usePrecompiledPasswordAuth();
+
+  if (user?.emailVerified) {
+    return <TeacherInner user={user}>{children}</TeacherInner>;
   }
 
   return (
