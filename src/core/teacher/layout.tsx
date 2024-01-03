@@ -1,9 +1,10 @@
-import React, { ReactNode, useEffect, useRef } from "react";
+import React, { ReactNode, Suspense, useEffect, useRef } from "react";
 
 import { BadgeInfo, GraduationCap } from "lucide-react";
 import { ErrorBoundary } from "react-error-boundary";
 
 import Error from "../components/error";
+import Loading from "../components/loading";
 import Modal from "../components/modal";
 import { useTeacher } from "./provider";
 
@@ -43,7 +44,9 @@ export function TeacherLayout({ children }: { children: ReactNode }) {
         )}
       </div>
       <div className="flex flex-auto flex-col overflow-y-auto">
-        <ErrorBoundary FallbackComponent={Error}>{children}</ErrorBoundary>
+        <ErrorBoundary FallbackComponent={Error}>
+          <Suspense fallback={<Loading />}>{children}</Suspense>
+        </ErrorBoundary>
         <Modal ref={modalRef} title="Istruzioni per la gara">
           <div className="prose whitespace-pre-wrap">{instructions}</div>
         </Modal>

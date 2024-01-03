@@ -19,7 +19,7 @@ YAML, CSV, JSON o JSONL.
 I contests sono descritti dal file `data/contests.{toml,yaml,csv,json,jsonl}`. Il formato è il seguente:
 
 | Campo                  | Descrizione                                                                                            | Tipo       | Note                               |
-|------------------------|--------------------------------------------------------------------------------------------------------|------------|------------------------------------|
+| ---------------------- | ------------------------------------------------------------------------------------------------------ | ---------- | ---------------------------------- |
 | `id`                   | ID della gara.                                                                                         | `string`   |                                    |
 | `name`                 | Nome della gara.                                                                                       | `string`   |                                    |
 | `long_name`            | Nome esteso della gara.                                                                                | `string`   | Opzionale.                         |
@@ -42,7 +42,7 @@ I contests sono descritti dal file `data/contests.{toml,yaml,csv,json,jsonl}`. I
 Le informazioni personali devono avere il seguente formato:
 
 | Campo    | Descrizione                                                      | Tipo                            | Note                                                        |
-|----------|------------------------------------------------------------------|---------------------------------|-------------------------------------------------------------|
+| -------- | ---------------------------------------------------------------- | ------------------------------- | ----------------------------------------------------------- |
 | `name`   | Nome del campo.                                                  | `string`                        |                                                             |
 | `label`  | Nome leggibile del campo.                                        | `string`                        |                                                             |
 | `type`   | Tipo del campo.                                                  | `"text"`, `"number"` o `"date"` |                                                             |
@@ -63,8 +63,8 @@ shuffle_problems = true
 shuffle_answers = true
 allow_restart = false
 has_variants = true
-starting_window_start = 2023-12-14T08:00:00
-starting_window_end = 2023-12-14T16:00:00
+contest_window_start = 2023-12-14T08:00:00
+contest_window_end = 2023-12-14T16:00:00
 duration = 90
 problem_ids = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13.1, 13.2, 14.1, 14.2, 15.1, 15.2, 16.1, 16.2]
 variant_ids = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
@@ -91,7 +91,7 @@ npx quizms firebase import --contests
 Le scuole e gli insegnanti sono descritti dal file `data/schools.{toml,yaml,csv,json,jsonl}`. Il formato è il seguente:
 
 | Campo        | Descrizione                              | Tipo                       | Note                                                                                                                                                                |
-|--------------|------------------------------------------|----------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ------------ | ---------------------------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `id`         | Codice meccanografico della scuola.      | `string`                   |                                                                                                                                                                     |
 | `name`       | Nome della scuola.                       | `string`                   |                                                                                                                                                                     |
 | `contestIds` | ID delle gare a cui la scuola partecipa. | `string` oppure `string[]` | È possibile specificare un [picomatch](https://github.com/micromatch/picomatch#globbing-features), ad esempio `"*"` indica che la scuola partecipa a tutte le gare. |

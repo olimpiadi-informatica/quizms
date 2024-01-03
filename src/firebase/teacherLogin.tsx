@@ -274,8 +274,8 @@ function useStudentRestores(participation: Participation) {
   const approve = async (request: StudentRestore) => {
     // We need to delete the previous mapping for this student. There should be only one, but
     // we delete all of them just to be sure. Firestore limits the number of writes in a batch,
-    // so we delete only the first 400 mappings, hopefully it shouldn't be a problem if there
-    // are still some old mappings in the database.
+    // so we delete only the first 400 mappings, it's very unlikely that there are more, but it
+    // shouldn't be a problem if there are still some old mappings in the database.
     const q = query(
       collection(db, "studentMappingUid").withConverter(studentMappingUidConverter),
       where("studentId", "==", request.studentId),

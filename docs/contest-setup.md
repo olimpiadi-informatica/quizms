@@ -3,25 +3,17 @@
 ### Prerequisiti
 
 1. Installa [Firebase CLI](https://firebase.google.com/docs/cli).
-    - Arch Linux: [firebase-tools](https://aur.archlinux.org/packages/firebase-tools/)
-      o [firebase-tools-bin](https://aur.archlinux.org/packages/firebase-tools-bin/);
-    - macOS:
-      ```shell
-      brew install firebase-cli
-      ```
-    - npm:
-      ```shell
-      npm install -g firebase-tools
-      ```
-    - [installazione manuale](https://firebase.google.com/docs/cli#install_the_firebase_cli).
-2. Autenticati con Firebase:
-   ```shell
-   firebase login
-   ```
-3. Imposta il progetto di default:
-   ```shell
-   firebase use --add
-   ```
+   - Arch Linux: [firebase-tools](https://aur.archlinux.org/packages/firebase-tools/)
+     o [firebase-tools-bin](https://aur.archlinux.org/packages/firebase-tools-bin/);
+   - macOS:
+     ```shell
+     brew install firebase-cli
+     ```
+   - npm:
+     ```shell
+     npm install -g firebase-tools
+     ```
+   - [installazione manuale](https://firebase.google.com/docs/cli#install_the_firebase_cli).
 
 ### Creare un nuovo progetto su Firebase
 
@@ -65,11 +57,19 @@ TODO
 
 ### Completa la configurazione
 
-1. Inizializza il progetto locale:
+1. Autenticati con Firebase:
+   ```shell
+   firebase login
+   ```
+2. Imposta il progetto di default:
+   ```shell
+   firebase use --add
+   ```
+3. Inizializza il progetto locale:
    ```shell
    npx quizms firebase init
    ```
-2. Carica le regole di sicurezza e gli indici:
+4. Carica le regole di sicurezza e gli indici:
    ```shell
    firebase deploy --only firestore
    firebase deploy --only storage
