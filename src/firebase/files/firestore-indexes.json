@@ -18,17 +18,33 @@
   "fieldOverrides": [
     {
       "collectionGroup": "students",
-      "fieldPath": "uid",
-      "indexes": [
-        {
-          "order": "ASCENDING",
-          "queryScope": "COLLECTION"
-        },
-        {
-          "order": "ASCENDING",
-          "queryScope": "COLLECTION_GROUP"
-        }
-      ]
+      "fieldPath": "personalInformation",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "students",
+      "fieldPath": "answers",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "students",
+      "fieldPath": "startedAt",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "students",
+      "fieldPath": "updatedAt",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "submissions",
+      "fieldPath": "answers",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "submissions",
+      "fieldPath": "submittedAt",
+      "indexes": []
     }
   ]
 }
