@@ -8,6 +8,8 @@ import { getStorage } from "firebase-admin/storage";
 
 import { fatal } from "~/cli/utils/logs";
 
+import restApi from "./rest-api";
+
 export function loadServiceAccountKey(dir: string) {
   const path = join(dir, "serviceAccountKey.json");
 
@@ -28,16 +30,18 @@ Per generare il file:
   process.env.GOOGLE_APPLICATION_CREDENTIALS = path;
 }
 
-export async function initializeDb(dir: string) {
+export async function initializeFirebase(dir: string) {
   loadServiceAccountKey(dir);
   const app = initializeApp();
   const db = getFirestore(app);
   db.settings({ ignoreUndefinedProperties: true });
 
-  return [app, db] as const;
+  const bucket = await getFirebaseBucket(app);
+
+  return { app, db, bucket };
 }
 
-export async function getFirebaseBucket(app: App) {
+async function getFirebaseBucket(app: App) {
   const credential = app.options.credential as ServiceAccountCredential;
   const token = await credential?.getAccessToken();
   if (!token) {
@@ -46,16 +50,7 @@ export async function getFirebaseBucket(app: App) {
 
   let bucketName: string;
   try {
-    const resp = await fetch(
-      `https://firebase.googleapis.com/v1beta1/projects/${credential.projectId}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token.access_token}`,
-        },
-      },
-    );
-
-    const data = await resp.json();
+    const data = await restApi(app, "firebase", "v1beta1", "");
     bucketName = data.resources.storageBucket;
   } catch (e) {
     fatal(`Failed to get project information: ${e}`);

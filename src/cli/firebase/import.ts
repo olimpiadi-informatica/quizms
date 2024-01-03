@@ -24,7 +24,7 @@ import validate from "~/utils/validate";
 import { fatal, success, warning } from "../utils/logs";
 import { readCollection } from "../utils/parser";
 import { importCollection } from "./utils/collection";
-import { getFirebaseBucket, initializeDb } from "./utils/initialize";
+import { initializeFirebase } from "./utils/initialize";
 import { importStorage } from "./utils/storage";
 
 type ImportOptions = {
@@ -65,8 +65,7 @@ export default async function importData(options: ImportOptions) {
     return;
   }
 
-  const [app, db] = await initializeDb(options.dir);
-  const bucket = await getFirebaseBucket(app);
+  const { app, bucket, db } = await initializeFirebase(options.dir);
 
   if (options.contests) {
     await importContests(db, options);

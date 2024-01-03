@@ -15,7 +15,7 @@ import {
 } from "~/firebase/convertersAdmin";
 
 import { info, success } from "../utils/logs";
-import { initializeDb } from "./utils/initialize";
+import { initializeFirebase } from "./utils/initialize";
 
 type ExportOptions = {
   dir: string;
@@ -28,7 +28,7 @@ type ExportOptions = {
 };
 
 export default async function exportContests(options: ExportOptions) {
-  const [app, db] = await initializeDb(options.dir);
+  const { app, db } = await initializeFirebase(options.dir);
 
   const timestamp = new Date().toISOString();
   const outDir = join(options.dir, "export", timestamp);

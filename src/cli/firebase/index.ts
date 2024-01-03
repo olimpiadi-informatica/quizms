@@ -15,7 +15,8 @@ export default function firebaseCommand() {
     .command("init")
     .description("Initialize the Firebase project.")
     .argument("[directory]", "The directory of the contest.", cwd())
-    .action((dir) => init({ dir }));
+    .option("--force", "Overwrite existing files.")
+    .action((dir, options) => init({ dir, ...options }));
 
   command
     .command("export")
