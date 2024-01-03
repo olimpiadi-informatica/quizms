@@ -2,7 +2,7 @@ import { mkdir, open } from "node:fs/promises";
 import { format, join } from "node:path";
 
 import { deleteApp } from "firebase-admin/app";
-import { CollectionReference } from "firebase-admin/firestore";
+import { Query } from "firebase-admin/firestore";
 import { capitalize } from "lodash-es";
 
 import {
@@ -35,7 +35,7 @@ export default async function exportContests(options: ExportOptions) {
   await mkdir(outDir, { recursive: true });
 
   if (options.students) {
-    const ref = db.collection("students").withConverter(studentConverter);
+    const ref = db.collectionGroup("students").withConverter(studentConverter);
     await exportCollection(ref, "students", outDir);
   }
   if (options.participations) {
@@ -62,7 +62,7 @@ export default async function exportContests(options: ExportOptions) {
   await deleteApp(app);
 }
 
-async function exportCollection(ref: CollectionReference, collection: string, dir: string) {
+async function exportCollection(ref: Query, collection: string, dir: string) {
   info(`Exporting ${collection}.`);
 
   const chunkSize = 25_000;
