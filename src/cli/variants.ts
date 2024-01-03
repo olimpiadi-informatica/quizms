@@ -8,7 +8,7 @@ import { transform } from "esbuild";
 import { toJs } from "estree-util-to-js";
 import { uniq } from "lodash-es";
 import { temporaryDirectoryTask } from "tempy";
-import { InlineConfig, build } from "vite";
+import { InlineConfig, build, mergeConfig } from "vite";
 
 import { ExpressionWrapper, shuffleStatement } from "~/jsx-runtime/parser";
 import { cleanStatement, getSchema } from "~/jsx-runtime/shuffle";
@@ -26,27 +26,29 @@ function buildBaseStatements(
   return temporaryDirectoryTask(async (outDir) => {
     const entry = Object.fromEntries(generationConfigs.map((c) => [c.id, c.entry]));
 
-    const bundleConfig: InlineConfig = {
-      ...configs(root, "production", {
+    const bundleConfig = mergeConfig(
+      configs(root, "production", {
         mdx: {
           providerImportSource: "quizms/jsx-runtime",
           jsxImportSource: "quizms",
         },
       }),
-      build: {
-        copyPublicDir: false,
-        outDir,
-        emptyOutDir: true,
-        lib: {
-          entry,
-          fileName: "base-statement-[name]",
-          formats: ["es"],
+      {
+        build: {
+          copyPublicDir: false,
+          outDir,
+          emptyOutDir: true,
+          lib: {
+            entry,
+            fileName: "base-statement-[name]",
+            formats: ["es"],
+          },
+          rollupOptions: {
+            external: /^node:/,
+          },
         },
-        rollupOptions: {
-          external: /^node:/,
-        },
-      },
-    };
+      } as InlineConfig,
+    );
 
     try {
       await build(bundleConfig);

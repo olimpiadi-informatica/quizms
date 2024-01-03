@@ -4,11 +4,12 @@ import { fileURLToPath } from "node:url";
 import { CompileOptions as MdxOptions } from "@mdx-js/mdx";
 import mdxPlugin from "@mdx-js/rollup";
 import react from "@vitejs/plugin-react-swc";
+import pc from "picocolors";
 // import { visualizer } from "rollup-plugin-visualizer";
 import { InlineConfig, splitVendorChunkPlugin } from "vite";
 import inspect from "vite-plugin-inspect";
 
-import { fatal } from "~/cli/utils/logs";
+import { fatal, info, warning } from "~/cli/utils/logs";
 import { mdxOptions } from "~/mdx/plugins";
 
 import iframe from "./iframe";
@@ -61,6 +62,31 @@ export default function (
       splitVendorChunkPlugin(),
       // visualizer({ filename: "dist/stats.html" }),
     ],
+    build: {
+      rollupOptions: {
+        onwarn: (log) => {
+          if (log.code === "CIRCULAR_DEPENDENCY") return;
+          if (log.code === "EVAL" && log.loc?.file?.includes("vm-browserify")) return;
+          warning(log.message);
+          if (log.loc) {
+            console.log(
+              `  ${pc.blue("➜")} ${pc.bold(`${log.loc.file}:${log.loc.line}:${log.loc.column}`)}`,
+            );
+            if (log.frame) {
+              console.log(
+                log.frame
+                  .split("\n")
+                  .map((l) => " " + l)
+                  .join("\n"),
+              );
+            }
+          }
+          if (log.url) {
+            info(`See ${pc.bold(log.url)} for more information.`);
+          }
+        },
+      },
+    },
     clearScreen: false,
     server: {
       fs: {
