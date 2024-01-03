@@ -1,8 +1,9 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 type Subscription<T> = {
   promise: Promise<T>;
   unsubscribe: () => void;
+  listeners: ((value: T) => void)[];
   data?: { value: T };
 };
 
@@ -21,17 +22,30 @@ export default function useSubscription<T>(
     const unsubscribe = subscribe((value) => {
       resolve();
       const sub = subscriptions.get(key);
-      if (sub) sub.data = { value };
+      if (sub) {
+        sub.data = { value };
+        for (const listener of sub.listeners) {
+          listener(value);
+        }
+      }
     });
-    subscription = { promise, unsubscribe };
+    subscription = { promise, unsubscribe, listeners: [] };
     subscriptions.set(key, subscription);
   }
 
+  if (!subscription.data) throw subscription.promise;
+
+  const [data, setData] = useState(subscription.data.value);
   useEffect(() => {
-    const id = pendingUnsubscribes.get(key);
-    clearTimeout(id);
+    subscription!.listeners.push(setData);
+
+    clearTimeout(pendingUnsubscribes.get(key));
     pendingUnsubscribes.delete(key);
+
     return () => {
+      subscription!.listeners = subscription!.listeners.filter((listener) => listener !== setData);
+      if (subscription!.listeners.length) return;
+
       const id = setTimeout(() => {
         subscription?.unsubscribe();
         subscriptions.delete(key);
@@ -40,6 +54,5 @@ export default function useSubscription<T>(
     };
   }, [key, subscription]);
 
-  if (!subscription.data) throw subscription.promise;
-  return subscription.data.value;
+  return data;
 }
