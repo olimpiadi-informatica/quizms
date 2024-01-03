@@ -17,14 +17,23 @@ export async function importCollection<T extends { id: string }>(
   options: ImportOptions,
 ) {
   if (options.delete) {
-    await deleteCollection(db, collection);
+    await confirm(
+      `You are about to delete all ${pc.bold(
+        collection,
+      )}. Any previous data will be lost, this operation cannot be undone. Are you really sure?`,
+    );
+    const ref = db.collection(collection);
+    await db.recursiveDelete(ref);
+    info(`${upperFirst(collection)} deleted!`);
   }
 
-  await confirm(
-    `You are about to import the ${pc.bold(collection)}. ${
-      options.force ? "This will overwrite any existing data. " : ""
-    }Are you sure?`,
-  );
+  if (options?.force) {
+    await confirm(
+      `You are about to import the ${pc.bold(
+        collection,
+      )}. This will overwrite any existing data, the previous data will be lost. Are you really sure?`,
+    );
+  }
 
   for (let i = 0; i < data.length; i += 400) {
     const batch = db.batch();
@@ -50,24 +59,4 @@ export async function importCollection<T extends { id: string }>(
   }
 
   success(`${upperFirst(collection)} imported!`);
-}
-
-async function deleteCollection(db: Firestore, collection: string) {
-  await confirm(`You are about to delete all ${pc.bold(collection)}. Are you sure?`);
-
-  const collectionRef = db.collection(collection);
-  const query = collectionRef.limit(400);
-
-  for (;;) {
-    const snapshot = await query.get();
-    if (snapshot.empty) break;
-
-    const batch = db.batch();
-    for (const doc of snapshot.docs) {
-      batch.delete(doc.ref);
-    }
-    await batch.commit();
-  }
-
-  info(`${upperFirst(collection)} deleted!`);
 }

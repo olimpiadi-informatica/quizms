@@ -16,11 +16,13 @@ export async function importStorage(
   files: [string, string][],
   options: ImportOptions,
 ) {
-  await confirm(
-    `You are about to import the ${pc.bold(collection)}. ${
-      options.force ? "This will overwrite any existing data. " : ""
-    }Are you sure?`,
-  );
+  if (options?.force) {
+    await confirm(
+      `You are about to import the ${pc.bold(
+        collection,
+      )}. This will overwrite any existing data, the previous data will be lost. Are you really sure?`,
+    );
+  }
 
   await Promise.all(
     files.map(async ([local, remote]) => {
