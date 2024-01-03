@@ -33,12 +33,6 @@ import validate from "~/utils/validate";
 
 function convertToFirestore(data: Record<string, any>) {
   return cloneDeepWith(omit(data, "id"), (value) => {
-    if (value instanceof RegExp) {
-      return value.source;
-    }
-    if (value instanceof Uint8Array) {
-      return Buffer.from(value);
-    }
     if (value instanceof Date) {
       return Timestamp.fromDate(value);
     }
@@ -55,8 +49,6 @@ function toFirebaseSchema(schema: ZodTypeAny): ZodTypeAny {
       .transform((ts) => ts.toDate())
       .pipe(schema);
   }
-  // TODO: regex
-
   if (schema instanceof ZodObject) {
     return z.object(mapValues(schema.shape, (field) => toFirebaseSchema(field)));
   }
@@ -70,7 +62,7 @@ function toFirebaseSchema(schema: ZodTypeAny): ZodTypeAny {
     return z.preprocess((val) => val ?? undefined, toFirebaseSchema(schema.unwrap()).optional());
   }
   if (schema instanceof ZodDefault) {
-    return toFirebaseSchema(schema.removeDefault().optional()).pipe(schema);
+    return toFirebaseSchema(schema.removeDefault()).pipe(schema);
   }
   if (schema instanceof ZodUnion) {
     return z.union(schema.options.map((option: ZodTypeAny) => toFirebaseSchema(option)));

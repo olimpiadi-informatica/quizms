@@ -1,5 +1,4 @@
 import {
-  Bytes,
   DocumentSnapshot,
   FirestoreDataConverter,
   Timestamp,
@@ -33,17 +32,10 @@ import {
   variantMappingSchema,
   variantSchema,
 } from "~/models";
-import { ZodBytes } from "~/models/types";
 import validate from "~/utils/validate";
 
 function convertToFirestore(data: Record<string, any>) {
   return cloneDeepWith(omit(data, "id"), (value) => {
-    if (value instanceof RegExp) {
-      return value.source;
-    }
-    if (value instanceof Uint8Array) {
-      return Bytes.fromUint8Array(value);
-    }
     if (value instanceof Date) {
       return Timestamp.fromDate(value);
     }
@@ -60,14 +52,6 @@ function toFirebaseSchema(schema: ZodTypeAny): ZodTypeAny {
       .transform((ts) => ts.toDate())
       .pipe(schema);
   }
-  if (schema instanceof ZodBytes) {
-    return z
-      .custom<Bytes>((bytes) => bytes instanceof Bytes)
-      .transform((bytes) => bytes.toUint8Array())
-      .pipe(schema);
-  }
-  // TODO: regex
-
   if (schema instanceof ZodObject) {
     return z.object(mapValues(schema.shape, (field) => toFirebaseSchema(field)));
   }
