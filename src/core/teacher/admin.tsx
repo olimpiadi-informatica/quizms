@@ -317,7 +317,8 @@ function ContestAdmin({
             <a /* TODO */
               className="btn btn-info"
               href={`./students/#${participation.contestId}`}
-              target="_blank" rel="noreferrer">
+              target="_blank"
+              rel="noreferrer">
               Gestisci studenti e risposte
             </a>
           </div>

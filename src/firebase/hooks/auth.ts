@@ -17,7 +17,6 @@ import { useDb } from "~/firebase/baseLogin";
 import useSubscription from "./subscription";
 
 const swrConfig: SWRConfiguration = {
-  shouldRetryOnError: false,
   suspense: true,
 };
 

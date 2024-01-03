@@ -23,7 +23,6 @@ import { useDb } from "~/firebase/baseLogin";
 
 const swrConfig: SWRConfiguration = {
   revalidateOnMount: true,
-  shouldRetryOnError: false,
   suspense: true,
 };
 

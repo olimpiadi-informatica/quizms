@@ -6,18 +6,21 @@ import { useTime } from "./time";
 
 type TimerProps =
   | {
+      startTime?: undefined;
+      duration?: undefined;
       endTime: Date;
     }
   | {
       startTime: Date;
       duration: number;
+      endTime?: undefined;
     };
 
 export default function Timer(props: TimerProps) {
   const getNow = useTime();
   const [currentTime, setCurrentTime] = useState(getNow());
 
-  const endTime = "endTime" in props ? props.endTime : addMinutes(props.startTime, props.duration);
+  const endTime = props.endTime ?? addMinutes(props.startTime, props.duration);
 
   useEffect(() => {
     if (!endTime) return;
@@ -37,7 +40,7 @@ export default function Timer(props: TimerProps) {
 
   let timeLeft = Math.max(differenceInSeconds(endTime!, currentTime), 0);
 
-  if ("startTime" in props) {
+  if (props.duration) {
     timeLeft = Math.min(timeLeft, props.duration * 60);
   }
 

@@ -8,7 +8,7 @@ export const participationSchema = z.object({
   teacher: z.string(),
   token: z.string().optional(),
   startingTime: z.date().optional(),
-  finalized: z.boolean().optional().default(false),
+  finalized: z.boolean().default(false),
   pdfVariants: z.array(z.coerce.string()).optional(),
 });
 

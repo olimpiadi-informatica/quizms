@@ -14,7 +14,7 @@ service cloud.firestore {
         }
 
         function isTeacher() {
-            return request.auth.token.isTeacher == true;
+            return request.auth != null && request.auth.token.isTeacher == true;
         }
 
         function getStudentById(participationId, studentId) {

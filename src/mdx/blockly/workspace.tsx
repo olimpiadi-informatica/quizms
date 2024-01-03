@@ -27,7 +27,7 @@ export default function Workspace({ toolbox, initialBlocks, example, debug }: Bl
   const [iframe, setIframe] = useState<HTMLIFrameElement | null>(null);
   const [ready, setReady] = useState(false);
 
-  const [blocks, setBlocks] = useState({});
+  const [, setBlocks] = useState({});
   const [code, setCode] = useState("");
   const [input, setInput] = useState(example ?? "");
 
