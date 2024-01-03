@@ -1,10 +1,16 @@
 # Come preparare problemi per quizms
 
-Un problema è rappresentato da un file Markdown oppure [MDX](https://mdxjs.com/), ovvero Markdown con l'aggiunta di JavaScript. Durante lo sviluppo è possibile usare l'hot-reload che aggiorna i problemi in tempo reale nel browser dopo ogni modifica a uno qualsiasi dei file che compongono il problema.
+Per testare i problemi durante lo sviluppo puoi usare il comando:
+
+```shell
+npx quizms dev
+```
+
+Durante lo sviluppo è abilitato l'hot-reload che aggiorna i problemi in tempo reale nel browser dopo ogni modifica a uno qualsiasi dei file che compongono il problema.
 
 ## Formato del file
 
-Il file è composto da tre parti:
+Un problema è rappresentato da un file Markdown oppure [MDX](https://mdxjs.com/), ovvero Markdown con l'aggiunta di JavaScript. Il file è composto da tre parti:
 
 - il testo del problema;
 - le risposte;
@@ -82,7 +88,7 @@ Per definire le varianti bisogna dichiarare un array di oggetti, dove ogni ogget
 
 - [Front Matter](#front-matter);
 - [JavaScript](#javascript);
-- [Python](#python);
+- [Python](#python).
 
 Il nome delle variabili **deve** iniziare con una lettera minuscola.
 
