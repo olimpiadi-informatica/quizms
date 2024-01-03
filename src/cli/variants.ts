@@ -11,8 +11,8 @@ import { temporaryDirectoryTask } from "tempy";
 import { InlineConfig, build } from "vite";
 
 import { ExpressionWrapper, shuffleStatement } from "~/jsx-runtime/parser";
-import { cleanStatement, getSchema, getSolutions } from "~/jsx-runtime/shuffle";
-import { Solution, Statement, Variant } from "~/models";
+import { cleanStatement, getSchema } from "~/jsx-runtime/shuffle";
+import { Variant } from "~/models";
 import { GenerationConfig, generationConfigSchema } from "~/models/generation-config";
 
 import { fatal, info, success } from "./utils/logs";
@@ -71,16 +71,15 @@ function buildBaseStatements(
 export async function buildVariants(
   root: string,
   configs: GenerationConfig[],
-): Promise<Record<string, [Variant, Statement, Solution]>> {
+): Promise<Record<string, [Variant, string]>> {
   const baseStatements = await buildBaseStatements(root, configs);
 
-  const variants: Record<string, [Variant, Statement, Solution]> = {};
+  const variants: Record<string, [Variant, string]> = {};
   for (const config of configs) {
     const ids = uniq([...config.variantIds, ...config.pdfVariantIds]);
     for (const id of ids) {
       const seed = `${config.secret}-${id}`;
       const variantAst = shuffleStatement(baseStatements[config.id], seed, config);
-      const answers = getSolutions(variantAst);
       const schema = getSchema(variantAst);
       cleanStatement(variantAst);
 
@@ -89,11 +88,7 @@ export async function buildVariants(
         charset: "utf8",
       });
 
-      variants[id] = [
-        { id, schema, contestId: config.id },
-        { id, statement: statement.code },
-        { id, answers },
-      ];
+      variants[id] = [{ id, schema, contestId: config.id }, statement.code];
     }
   }
   return variants;
@@ -119,12 +114,11 @@ export default async function variants(options: ExportVariantsOptions) {
   const variants = await buildVariants(root, generationConfigs);
 
   const res = await Promise.all(
-    Object.values(variants).map(async ([variant, statement, solution]) => {
+    Object.values(variants).map(async ([variant, statement]) => {
       const dir = join(options.dir, options.outDir, variant.id);
       await mkdir(dir, { recursive: true });
       await writeFile(join(dir, "schema.json"), JSON.stringify(variant));
-      await writeFile(join(dir, "statement.js"), statement.statement);
-      await writeFile(join(dir, "solution.json"), JSON.stringify(solution.answers));
+      await writeFile(join(dir, "statement.js"), statement);
     }),
   );
 

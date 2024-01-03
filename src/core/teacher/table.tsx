@@ -23,7 +23,6 @@ import { AlertTriangle, FileCheck, Upload, Users } from "lucide-react";
 import {
   Contest,
   Participation,
-  Solution,
   Student,
   Variant,
   parsePersonalInformation,
@@ -235,7 +234,7 @@ const FinalizeModal = forwardRef(function FinalizeModal(
 });
 
 function Table({ participation, contest }: { participation: Participation; contest: Contest }) {
-  const { solutions, variants } = useTeacher();
+  const { variants } = useTeacher();
   const [students, setStudent] = useTeacherStudents(participation.id);
 
   const endTime =
@@ -275,8 +274,8 @@ function Table({ participation, contest }: { participation: Participation; conte
   ];
 
   const colDefs = useMemo(
-    () => columnDefinition(contest, variants, solutions, editable),
-    [contest, variants, solutions, editable],
+    () => columnDefinition(contest, variants, editable),
+    [contest, variants, editable],
   );
 
   const onCellEditRequest = async (ev: CellEditRequestEvent) => {
@@ -336,12 +335,7 @@ function Table({ participation, contest }: { participation: Participation; conte
   );
 }
 
-function columnDefinition(
-  contest: Contest,
-  variants: Variant[],
-  solutions: Solution[],
-  editable: boolean,
-): ColDef[] {
+function columnDefinition(contest: Contest, variants: Variant[], editable: boolean): ColDef[] {
   const widths = {
     xs: 100,
     sm: 125,
@@ -417,7 +411,7 @@ function columnDefinition(
       headerName: "Punti",
       pinned: "right",
       width: 100,
-      valueGetter: ({ data }) => (!isStudentEmpty(data) ? score(data, variants, solutions) : ""),
+      valueGetter: ({ data }) => (!isStudentEmpty(data) ? score(data, variants) : ""),
       ...defaultOptions,
       editable: false,
     },

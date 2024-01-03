@@ -175,32 +175,12 @@ service cloud.firestore {
             allow create: if isAuthenticated(request.resource.data.uid) && hasTimestamp('submittedAt');
         }
 
-        function canStudentReadVariant(variant) {
-            let student = getStudent(request.auth.uid);
-            return student != null
-                && isAuthenticated(student.data.uid)
-                && student.data.variant == variant
-                && student.data.startedAt <= request.time;
-        }
-
-        match /statements/{variant} {
-            allow read: if canStudentReadVariant(variant) || isTeacher();
-        }
-
         match /variants/{variant} {
-            allow read: if canStudentReadVariant(variant) || isTeacher();
+            allow read: if isTeacher();
         }
 
         match /variantMappings/{hash} {
             allow read: if request.auth != null;
-        }
-
-        match /pdfs/{variant} {
-            allow read: if isTeacher();
-        }
-
-        match /solutions/{solution} {
-            allow read: if isTeacher();
         }
     }
 }

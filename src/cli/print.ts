@@ -7,7 +7,6 @@ import { mapValues } from "lodash-es";
 import pc from "picocolors";
 import { InlineConfig, PluginOption, build, mergeConfig, preview } from "vite";
 
-import { Statement } from "~/models";
 import { GenerationConfig, generationConfigSchema } from "~/models/generation-config";
 
 import generatePdfs from "./pdf";
@@ -93,7 +92,7 @@ function resolveContestsHelperPlugin(generationConfigs: GenerationConfig[]): Plu
   };
 }
 
-function printPlugin(statements: Record<string, Statement>): PluginOption {
+function printPlugin(statements: Record<string, string>): PluginOption {
   return {
     name: "quizms:print",
     apply: "serve",
@@ -109,7 +108,7 @@ function printPlugin(statements: Record<string, Statement>): PluginOption {
           }
 
           res.setHeader("content-type", "text/javascript");
-          res.end(statements[variant].statement);
+          res.end(statements[variant]);
           return;
         }
         next();

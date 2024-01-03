@@ -1,14 +1,17 @@
 import React, { Suspense, useMemo } from "react";
 
 import { addMilliseconds } from "date-fns";
+import { getDownloadURL, getStorage, ref } from "firebase/storage";
+import { useErrorBoundary } from "react-error-boundary";
+import useSWR, { SWRConfiguration } from "swr";
 
 import Loading from "~/core/components/loading";
 import { useIsAfter } from "~/core/components/time";
 import Timer from "~/core/components/timer";
 import { RemoteStatement } from "~/core/student";
 import { useStudent } from "~/core/student/provider";
-import { statementConverter } from "~/firebase/converters";
-import { useDocument } from "~/firebase/hooks";
+
+import { useDb } from "./baseLogin";
 
 export function FirebaseStatement() {
   const { participation } = useStudent();
@@ -39,16 +42,26 @@ export function FirebaseStatement() {
 }
 
 function ContestInner() {
+  const db = useDb();
   const { student } = useStudent();
+  const { showBoundary } = useErrorBoundary();
 
-  const [statement] = useDocument("statements", student.variant!, statementConverter, {
-    subscribe: true,
-  });
+  const storage = getStorage(db.app);
 
-  const url = useMemo(() => {
-    const blob = new Blob([statement.statement], { type: "text/javascript" });
-    return URL.createObjectURL(blob);
-  }, [statement.statement]);
+  const statementRef = ref(storage, `statements/${student.variant!}/statement.js`);
 
-  return <RemoteStatement url={url} />;
+  const { data, error } = useSWR(
+    statementRef.fullPath,
+    () => getDownloadURL(statementRef),
+    swrConfig,
+  );
+  if (error) showBoundary(error);
+
+  return <RemoteStatement url={data!} />;
 }
+
+const swrConfig: SWRConfiguration = {
+  revalidateOnMount: true,
+  shouldRetryOnError: false,
+  suspense: true,
+};

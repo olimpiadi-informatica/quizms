@@ -6,27 +6,42 @@ import { fileURLToPath } from "node:url";
 import pc from "picocolors";
 
 import { confirm, success } from "~/cli/utils/logs";
-import indexes from "~/firebase/firestore-indexes.json";
+
+import firestoreIndexs from "./files/firestore-indexes.json";
 // @ts-expect-error: resolved using esbuild file loader
-import rules from "~/firebase/firestore.rules";
+import firestoreRules from "./files/firestore.rules";
+import storageCors from "./files/storage-cors.json";
+// @ts-expect-error: resolved using esbuild file loader
+import storageRules from "./files/storage.rules";
 
 type InitOptions = {
   dir: string;
 };
 
 export default async function init(options: InitOptions) {
-  const data = join(options.dir, "data");
+  const data = join(options.dir, "firebase");
   await mkdir(data, { recursive: true });
 
-  const rulesPath = join(data, "firestore.rules");
-  if (await overwrite(rulesPath)) {
-    const from = fileURLToPath(new URL(rules, import.meta.url));
-    await cp(from, rulesPath);
+  const firestoreRulesPath = join(data, "firestore.rules");
+  if (await overwrite(firestoreRulesPath)) {
+    const from = fileURLToPath(new URL(firestoreRules, import.meta.url));
+    await cp(from, firestoreRulesPath);
   }
 
-  const indexesPath = join(data, "firestore-indexes.json");
-  if (await overwrite(indexesPath)) {
-    await writeFile(indexesPath, JSON.stringify(indexes, null, 2));
+  const firestoreIndexesPath = join(data, "firestore-indexes.json");
+  if (await overwrite(firestoreIndexesPath)) {
+    await writeFile(firestoreIndexesPath, JSON.stringify(firestoreIndexs, null, 2));
+  }
+
+  const storageRulesPath = join(data, "storage.rules");
+  if (await overwrite(storageRulesPath)) {
+    const from = fileURLToPath(new URL(storageRules, import.meta.url));
+    await cp(from, storageRulesPath);
+  }
+
+  const storageCorsPath = join(data, "storage-cors.json");
+  if (await overwrite(storageCorsPath)) {
+    await writeFile(storageCorsPath, JSON.stringify(storageCors, null, 2));
   }
 
   const configPath = join(options.dir, "firebase.json");
@@ -36,8 +51,11 @@ export default async function init(options: InitOptions) {
       ignore: ["firebase.json", "**/.*", "**/node_modules/**"],
     },
     firestore: {
-      rules: relative(options.dir, rulesPath),
-      indexes: relative(options.dir, indexesPath),
+      rules: relative(options.dir, firestoreRulesPath),
+      indexes: relative(options.dir, firestoreIndexesPath),
+    },
+    storage: {
+      rules: relative(options.dir, storageRulesPath),
     },
   };
 

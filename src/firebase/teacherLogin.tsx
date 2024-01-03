@@ -6,7 +6,6 @@ import {
   Firestore,
   collection,
   doc,
-  documentId,
   getDocs,
   limit,
   query,
@@ -16,6 +15,7 @@ import {
   where,
   writeBatch,
 } from "firebase/firestore";
+import { getBytes, getStorage, ref } from "firebase/storage";
 import { chunk } from "lodash-es";
 
 import { Button } from "~/core/components/button";
@@ -25,8 +25,6 @@ import {
   contestConverter,
   participationConverter,
   participationMappingConverter,
-  pdfConverter,
-  solutionConverter,
   studentConverter,
   studentMappingUidConverter,
   studentRestoreConverter,
@@ -112,7 +110,6 @@ function TeacherInner({ user, children }: { user: User; children: ReactNode }) {
     subscribe: true,
   });
   const [variants] = useCollection("variants", variantConverter);
-  const [solutions] = useCollection("solutions", solutionConverter);
 
   const logout = useCallback(async () => {
     await signOut(getAuth(db.app));
@@ -125,7 +122,6 @@ function TeacherInner({ user, children }: { user: User; children: ReactNode }) {
       setParticipation={async (p) => setParticipation(db, participations, p)}
       contests={contests}
       variants={variants}
-      solutions={solutions}
       logout={logout}
       getPdfStatements={async (pdfVariants) => getPdfStatements(db, pdfVariants)}
       useStudents={useStudents}
@@ -213,12 +209,13 @@ async function setParticipation(
 }
 
 async function getPdfStatements(db: Firestore, pdfVariants: string[]) {
-  const q = query(collection(db, "pdfs"), where(documentId(), "in", pdfVariants)).withConverter(
-    pdfConverter,
-  );
+  const storage = getStorage(db.app);
 
-  const statements = await getDocs(q);
-  return statements.docs.map((doc) => doc.data());
+  return await Promise.all(
+    pdfVariants.map((pdfVariant) =>
+      getBytes(ref(storage, `statements/${pdfVariant}/statement.pdf`)),
+    ),
+  );
 }
 
 function useStudents(participationId: string) {

@@ -5,7 +5,7 @@ import { countBy, mapKeys } from "lodash-es";
 import { isString } from "lodash-es";
 
 import { error, warning } from "~/cli/utils/logs";
-import { Schema, Solution } from "~/models";
+import { Schema } from "~/models";
 import { Rng } from "~/utils/random";
 
 export function shuffleAnswers(program: Program, variant: string) {
@@ -77,58 +77,9 @@ export function cleanStatement(program: Program) {
   });
 }
 
-export function getSolutions(program: Program) {
-  const id = [0, 0];
-  let originalId = "";
-  let answerId = 0;
-
-  const solution: Solution["answers"] = {};
-
-  function setAnswer(id: number[], value: any) {
-    if (!value && !isString(value)) {
-      error(`Problem ${id} solution must be a non-empty string.`);
-      return;
-    }
-    if (solution[`${id}`]) {
-      warning(`Problem ${id} has multiple solutions.`);
-    }
-    solution[`${id}`] = {
-      value,
-      originalId,
-    };
-  }
-
-  traverse(program, {
-    CallExpression(path) {
-      const node = path.node!;
-      const [comp, props] = node.arguments;
-      if (isQuizmsComponent(comp, "Problem")) {
-        id[0]++;
-        id[1] = 0;
-        originalId = (getPropValue(props, "originalId") as string) ?? "";
-      }
-      if (isQuizmsComponent(comp, "SubProblem")) {
-        id[1]++;
-        answerId = 0;
-      }
-      if (isQuizmsComponent(comp, "Answer")) {
-        const label = String.fromCharCode(65 + answerId++);
-        const correct = getPropValue(props, "correct");
-        if (correct) {
-          setAnswer(id, label);
-        }
-      }
-      if (isQuizmsComponent(comp, "OpenAnswer")) {
-        setAnswer(id, getPropValue(props, "correct"));
-      }
-    },
-  });
-
-  return renameKeys(solution);
-}
-
 export function getSchema(program: Program) {
   const id = [0, 0];
+  let originalId = 0;
   let answerId = 0;
   let points: number[] = [];
 
@@ -137,16 +88,20 @@ export function getSchema(program: Program) {
     CallExpression(path) {
       const node = path.node!;
       const [comp, props] = node.arguments;
+
       if (isQuizmsComponent(comp, "Problem")) {
         id[0]++;
         id[1] = 0;
+
         const pointsProp = getProp(props, "points");
         if (is.arrayExpression(pointsProp?.value)) {
           points = pointsProp.value.elements.map((x) => (is.literal(x) ? Number(x.value) : 0));
         } else {
           error(`Problem ${id} must have a valid points array.`);
         }
+        originalId = getPropValue(props, "originalId") as number;
       }
+
       if (isQuizmsComponent(comp, "SubProblem")) {
         id[1]++;
         answerId = 0;
@@ -157,22 +112,43 @@ export function getSchema(program: Program) {
           pointsBlank,
           pointsWrong,
           blankOption: "-", // TODO
-        } as Schema[string];
+          originalId: String(originalId),
+        };
       }
+
+      const problemSchema = schema[`${id}`];
       if (isQuizmsComponent(comp, "Answer")) {
         const label = String.fromCharCode(65 + answerId++);
-        if (schema[`${id}`].options) {
-          schema[`${id}`].options!.push(label);
+        if (problemSchema.options) {
+          problemSchema.options!.push(label);
         } else {
-          schema[`${id}`].options = [label];
+          problemSchema.options = [label];
+        }
+        const correct = getPropValue(props, "correct");
+        if (correct) {
+          if ("solution" in problemSchema) {
+            warning(`Problem ${id} has multiple solutions.`);
+          }
+          problemSchema.solution = label;
         }
       }
+
       if (isQuizmsComponent(comp, "OpenAnswer")) {
         const correct = getPropValue(props, "correct");
-        if (isString(correct) && /^\d+$/.test(correct)) {
-          schema[`${id}`].type = "number";
+        if (!correct || !isString(correct)) {
+          error(`Problem ${id} solution must be a non-empty string.`);
+        } else {
+          if ("solution" in problemSchema) {
+            warning(`Problem ${id} has multiple solutions.`);
+          }
+          problemSchema.solution = correct;
+          if (/^\d+$/.test(correct)) {
+            problemSchema.type = "number";
+          }
         }
       }
+
+      schema[`${id}`] = problemSchema;
     },
   });
 

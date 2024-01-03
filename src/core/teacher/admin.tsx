@@ -350,7 +350,7 @@ function DownloadPdfButton({
     const { PDFDocument } = await import("@cantoo/pdf-lib");
     const pdf = await PDFDocument.create();
     for (const statement of statements) {
-      const otherPdf = await PDFDocument.load(statement.statement);
+      const otherPdf = await PDFDocument.load(statement);
       const toCopy = range(otherPdf.getPages().length);
       const pages = await pdf.copyPages(otherPdf, toCopy);
       for (const page of pages) {

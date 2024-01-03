@@ -1,0 +1,29 @@
+rules_version = '2';
+service firebase.storage {
+    match /b/{bucket}/o {
+        function isAuthenticated(id) {
+            return request.auth != null && request.auth.uid == id;
+        }
+
+        function isTeacher() {
+            return request.auth != null && request.auth.token.isTeacher == true;
+        }
+
+        function getStudent(uid) {
+            let data = firestore.get(/databases/(default)/documents/studentMappingUid/$(uid)).data;
+            return firestore.get(/databases/(default)/documents/participations/$(data.participationId)/students/$(data.studentId));
+        }
+
+        match /statements/{variantId}/{filename} {
+            function canStudentReadVariant() {
+                let student = getStudent(request.auth.uid);
+                return student != null
+                    && isAuthenticated(student.data.uid)
+                    && student.data.variant == variantId
+                    && student.data.startedAt <= request.time;
+            }
+
+            allow read: if canStudentReadVariant() || isTeacher();
+        }
+    }
+}

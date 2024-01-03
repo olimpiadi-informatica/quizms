@@ -2,31 +2,30 @@ import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 
+import { Bucket } from "@google-cloud/storage";
 import { deleteApp } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
-import { Firestore, FirestoreDataConverter, GrpcStatus } from "firebase-admin/firestore";
-import { capitalize, lowerCase, map, pick, range, uniq } from "lodash-es";
-import pc from "picocolors";
+import { Firestore, FirestoreDataConverter } from "firebase-admin/firestore";
+import { pick, range, uniq } from "lodash-es";
 import { isMatch } from "picomatch";
 import z from "zod";
 
 import {
   contestConverter,
   participationConverter,
-  pdfConverter,
-  solutionConverter,
-  statementConverter,
   variantConverter,
   variantMappingConverter,
 } from "~/firebase/convertersAdmin";
-import { Participation, contestSchema, participationSchema } from "~/models";
+import { Participation, contestSchema, participationSchema, variantSchema } from "~/models";
 import { generationConfigSchema } from "~/models/generation-config";
 import { Rng } from "~/utils/random";
+import validate from "~/utils/validate";
 
-import { confirm, fatal, info, success, warning } from "../utils/logs";
+import { fatal, success, warning } from "../utils/logs";
 import { readCollection } from "../utils/parser";
-import { buildVariants } from "../variants";
-import { initializeDb } from "./common";
+import { importCollection } from "./utils/collection";
+import { getFirebaseBucket, initializeDb } from "./utils/initialize";
+import { importStorage } from "./utils/storage";
 
 type ImportOptions = {
   dir: string;
@@ -37,7 +36,6 @@ type ImportOptions = {
   contests?: true;
   pdfs?: true;
   schools?: true;
-  solutions?: true;
   statements?: true;
   teachers?: true;
   variantMappings?: true;
@@ -57,7 +55,6 @@ export default async function importData(options: ImportOptions) {
     "contests",
     "pdfs",
     "schools",
-    "solutions",
     "statements",
     "teachers",
     "variantMappings",
@@ -69,6 +66,7 @@ export default async function importData(options: ImportOptions) {
   }
 
   const [app, db] = await initializeDb(options.dir);
+  const bucket = await getFirebaseBucket(app);
 
   if (options.contests) {
     await importContests(db, options);
@@ -77,10 +75,16 @@ export default async function importData(options: ImportOptions) {
     await importParticipations(db, options);
   }
   if (options.pdfs) {
-    await importPdf(db, options);
+    await importPdf(bucket, options);
   }
-  if (options.variants || options.statements || options.solutions || options.variantMappings) {
+  if (options.variants) {
     await importVariants(db, options);
+  }
+  if (options.statements) {
+    await importStatements(bucket, options);
+  }
+  if (options.variantMappings) {
+    await importVariantMappings(db, options);
   }
 
   success("All done!");
@@ -191,113 +195,67 @@ async function importTeachers(db: Firestore, teachers: Teacher[], options: Impor
   await importCollection(db, "teachers", ids, converter, options);
 }
 
-async function importPdf(db: Firestore, options: ImportOptions) {
+async function importPdf(bucket: Bucket, options: ImportOptions) {
   const generationConfigs = await readCollection(options.dir, "contests", generationConfigSchema);
-  const pdfs = await Promise.all(
-    generationConfigs
-      .flatMap((c) => uniq([...c.variantIds, ...c.pdfVariantIds]))
-      .map(async (id) => {
-        try {
-          const statement = await readFile(join("variants", id, "statement.pdf"));
-          return { id, statement };
-        } catch (e) {
-          fatal(`Cannot find pdf of variant ${id}. Use \`quizms pdf\` to generate it first.`);
-        }
-      }),
-  );
+  const pdfs = generationConfigs
+    .flatMap((c) => uniq([...c.variantIds, ...c.pdfVariantIds]))
+    .map((id): [string, string] => [
+      join(options.dir, "variants", id, "statement.pdf"),
+      join("statements", id, "statement.pdf"),
+    ]);
 
-  await importCollection(db, "pdfs", pdfs, pdfConverter, options);
+  await importStorage(bucket, "PDFs", pdfs, options);
 }
 
 async function importVariants(db: Firestore, options: ImportOptions) {
   const generationConfigs = await readCollection(options.dir, "contests", generationConfigSchema);
-
-  const variants = await buildVariants(join(options.dir, "src"), generationConfigs);
-  if (options.variants) {
-    await importCollection(db, "variants", map(variants, 0), variantConverter, options);
-  }
-  if (options.statements) {
-    await importCollection(db, "statements", map(variants, 1), statementConverter, options);
-  }
-  if (options.solutions) {
-    await importCollection(db, "solutions", map(variants, 2), solutionConverter, options);
-  }
-  if (options.variantMappings) {
-    const mappings = await Promise.all(
-      generationConfigs.flatMap((config) => {
-        const rng = new Rng(`${config.secret}-${config.id}-variantMappings`);
-        return range(4096).map(async (i) => {
-          const suffix = i.toString(16).padStart(3, "0").toUpperCase();
-          return {
-            id: `${config.id}-${suffix}`,
-            variant: rng.choice(config.variantIds),
-          };
-        });
+  const variants = await Promise.all(
+    generationConfigs
+      .flatMap((c) => uniq([...c.variantIds, ...c.pdfVariantIds]))
+      .map(async (id) => {
+        const path = join(options.dir, "variants", id, "schema.json");
+        let schema: string;
+        try {
+          schema = await readFile(path, "utf-8");
+        } catch (e) {
+          fatal(`Cannot find schema for variant ${id}. Use \`quizms variants\` to generate it.`);
+        }
+        try {
+          return validate(variantSchema, JSON.parse(schema));
+        } catch (e) {
+          fatal(`Invalid schema for variant ${id}: ${e}`);
+        }
       }),
-    );
-    await importCollection(db, "variantMappings", mappings, variantMappingConverter, options);
-  }
-}
-
-async function importCollection<T extends { id: string }>(
-  db: Firestore,
-  collection: string,
-  data: T[],
-  converter: FirestoreDataConverter<T>,
-  options: ImportOptions,
-) {
-  if (options.delete) {
-    await deleteCollection(db, collection);
-  }
-
-  await confirm(
-    `You are about to import the ${pc.bold(lowerCase(collection))}. ${
-      options.force ? "This will overwrite any existing data. " : ""
-    }Are you sure?`,
   );
-
-  for (let i = 0; i < data.length; i += 400) {
-    const batch = db.batch();
-    for (const record of data.slice(i, i + 400)) {
-      const ref = db.doc(`${collection}/${record.id}`).withConverter(converter);
-      if (options?.force) {
-        batch.set(ref, record);
-      } else {
-        batch.create(ref, record);
-      }
-    }
-    try {
-      await batch.commit();
-    } catch (e: any) {
-      if (e.code === GrpcStatus.ALREADY_EXISTS) {
-        fatal(
-          `Document already exists in \`${collection}\`. Use \`--force\` to overwrite existing documents.`,
-        );
-      } else {
-        fatal(`Cannot import ${lowerCase(collection)}: ${e}`);
-      }
-    }
-  }
-
-  success(`${capitalize(lowerCase(collection))} imported!`);
+  await importCollection(db, "variants", variants, variantConverter, options);
 }
 
-async function deleteCollection(db: Firestore, collection: string) {
-  await confirm(`You are about to delete all ${pc.bold(lowerCase(collection))}. Are you sure?`);
+async function importStatements(bucket: Bucket, options: ImportOptions) {
+  const generationConfigs = await readCollection(options.dir, "contests", generationConfigSchema);
 
-  const collectionRef = db.collection(collection);
-  const query = collectionRef.limit(400);
+  const statements = generationConfigs
+    .flatMap((c) => uniq([...c.variantIds, ...c.pdfVariantIds]))
+    .map((id): [string, string] => [
+      join(options.dir, "variants", id, "statement.js"),
+      join("statements", id, "statement.js"),
+    ]);
 
-  for (;;) {
-    const snapshot = await query.get();
-    if (snapshot.empty) break;
+  await importStorage(bucket, "statements", statements, options);
+}
 
-    const batch = db.batch();
-    for (const doc of snapshot.docs) {
-      batch.delete(doc.ref);
-    }
-    await batch.commit();
-  }
-
-  info(`${capitalize(collection)} deleted!`);
+async function importVariantMappings(db: Firestore, options: ImportOptions) {
+  const generationConfigs = await readCollection(options.dir, "contests", generationConfigSchema);
+  const mappings = await Promise.all(
+    generationConfigs.flatMap((config) => {
+      const rng = new Rng(`${config.secret}-${config.id}-variantMappings`);
+      return range(4096).map(async (i) => {
+        const suffix = i.toString(16).padStart(3, "0").toUpperCase();
+        return {
+          id: `${config.id}-${suffix}`,
+          variant: rng.choice(config.variantIds),
+        };
+      });
+    }),
+  );
+  await importCollection(db, "variantMappings", mappings, variantMappingConverter, options);
 }

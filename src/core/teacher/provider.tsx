@@ -1,6 +1,6 @@
 import React, { ReactNode, createContext, useContext } from "react";
 
-import { Contest, Participation, Pdf, Solution, Student, StudentRestore, Variant } from "~/models";
+import { Contest, Participation, Student, StudentRestore, Variant } from "~/models";
 
 import { TeacherLayout } from "./layout";
 
@@ -11,14 +11,12 @@ type TeacherProviderProps = {
   setParticipation: (participation: Participation) => Promise<void>;
   /** Contest attivi */
   contests: Contest[];
-  /** Varianti dei contest */
+  /** Varianti dei testi */
   variants: Variant[];
-  /** Soluzioni delle varianti */
-  solutions: Solution[];
   /** Funzione per effettuare il logout */
   logout: () => Promise<void>;
   /** Funzione per ottenere i pdf dei testi */
-  getPdfStatements: (pdfVariants: string[]) => Promise<Pdf[]>;
+  getPdfStatements: (pdfVariants: string[]) => Promise<(Uint8Array | ArrayBuffer)[]>;
   /** Hook per ottenere gli studenti di una scuola */
   useStudents: (
     participationId: string,

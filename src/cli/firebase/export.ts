@@ -9,20 +9,18 @@ import {
   contestConverter,
   participationConverter,
   participationMappingConverter,
-  solutionConverter,
   studentConverter,
   submissionConverter,
   variantConverter,
 } from "~/firebase/convertersAdmin";
 
 import { info, success } from "../utils/logs";
-import { initializeDb } from "./common";
+import { initializeDb } from "./utils/initialize";
 
 type ExportOptions = {
   dir: string;
   contests?: true;
   participations?: true;
-  solutions?: true;
   students?: true;
   submissions?: true;
   tokens?: true;
@@ -43,10 +41,6 @@ export default async function exportContests(options: ExportOptions) {
   if (options.participations) {
     const ref = db.collection("participations").withConverter(participationConverter);
     await exportCollection(ref, "participations", outDir);
-  }
-  if (options.solutions) {
-    const ref = db.collection("solutions").withConverter(solutionConverter);
-    await exportCollection(ref, "solutions", outDir);
   }
   if (options.submissions) {
     const ref = db.collection("submissions").withConverter(submissionConverter);
