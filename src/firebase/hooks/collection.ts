@@ -5,7 +5,6 @@ import {
   FirestoreDataConverter,
   Query,
   collection,
-  collectionGroup,
   doc,
   getDocs,
   limit,
@@ -32,22 +31,12 @@ const mutationConfig: MutatorOptions = {
   populateCache: true,
 };
 
-type CollectionSortingOptions =
-  | {
-      orderBy?: string;
-      orderByDesc?: undefined;
-    }
-  | {
-      orderBy?: undefined;
-      orderByDesc?: string;
-    };
-
 type CollectionOptions<T> = {
   constraints?: { [P in keyof T]?: T[P] | T[P][] };
+  orderBy?: string;
   limit?: number;
   subscribe?: boolean;
-  group?: boolean;
-} & CollectionSortingOptions;
+};
 
 export function useCollection<
   T extends {
@@ -57,13 +46,12 @@ export function useCollection<
   const db = useDb();
   const { showBoundary } = useErrorBoundary();
 
-  let q = (options?.group ? collectionGroup : collection)(db, path).withConverter(converter);
+  let q: Query<T> = collection(db, path).withConverter(converter);
   for (const [k, v] of Object.entries(options?.constraints ?? {})) {
     q = query(q, where(k, Array.isArray(v) ? "in" : "==", v));
   }
 
   if (options?.orderBy) q = query(q, orderBy(options.orderBy));
-  if (options?.orderByDesc) q = query(q, orderBy(options.orderByDesc, "desc"));
   if (options?.limit) q = query(q, limit(options.limit));
 
   const key = `${path}?${JSON.stringify(options)}`;
@@ -71,10 +59,7 @@ export function useCollection<
   if (error) showBoundary(error);
 
   const setData = useCallback(
-    async (newDoc: T) => {
-      if (options?.group) throw new Error("Cannot mutate document on collection group.");
-      await setDocument(db, path, newDoc, mutate, options);
-    },
+    (newDoc: T) => setDocument(db, path, newDoc, mutate, options),
     [mutate, db, path, options],
   );
 
@@ -118,8 +103,7 @@ function merge<T extends { id: string }>(
   if (!coll) return [newDoc];
   coll = coll.filter((doc) => doc.id !== newDoc.id);
   coll.push(newDoc);
-  coll = sortBy(coll, [options?.orderBy ?? options?.orderByDesc ?? "id"]);
-  if (options?.orderByDesc) coll.reverse();
+  coll = sortBy(coll, [options?.orderBy ?? "id"]);
   if (options?.limit) coll = coll.slice(0, options.limit);
   return coll;
 }
