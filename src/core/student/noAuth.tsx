@@ -43,6 +43,7 @@ export function NoAuth({ contestName, duration, questionCount, children }: AuthP
     personalInformation: [],
     hasVariants: true,
     allowRestart: true,
+    statementVersion: 1,
   };
 
   const mockParticipation: Participation = {

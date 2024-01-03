@@ -31,7 +31,7 @@ import {
   variantConverter,
 } from "~/firebase/converters";
 import { useCollection, usePrecompiledPasswordAuth, useSignInWithPassword } from "~/firebase/hooks";
-import { Participation, StudentRestore, studentHash } from "~/models";
+import { Contest, Participation, StudentRestore, Variant, studentHash } from "~/models";
 
 export function TeacherLogin({
   config,
@@ -123,7 +123,9 @@ function TeacherInner({ user, children }: { user: User; children: ReactNode }) {
       contests={contests}
       variants={variants}
       logout={logout}
-      getPdfStatements={async (pdfVariants) => getPdfStatements(db, pdfVariants)}
+      getPdfStatements={async (pdfVariants) =>
+        getPdfStatements(db, contests, variants, pdfVariants)
+      }
       useStudents={useStudents}
       useStudentRestores={useStudentRestores}>
       {children}
@@ -208,13 +210,22 @@ async function setParticipation(
   }
 }
 
-async function getPdfStatements(db: Firestore, pdfVariants: string[]) {
+async function getPdfStatements(
+  db: Firestore,
+  contests: Contest[],
+  variants: Variant[],
+  pdfVariants: string[],
+) {
   const storage = getStorage(db.app);
 
   return await Promise.all(
-    pdfVariants.map((pdfVariant) =>
-      getBytes(ref(storage, `statements/${pdfVariant}/statement.pdf`)),
-    ),
+    pdfVariants.map((pdfVariant) => {
+      const variant = variants.find((v) => v.id === pdfVariant)!;
+      const contest = contests.find((c) => c.id === variant.contestId)!;
+      return getBytes(
+        ref(storage, `statements/${pdfVariant}/statement-${contest.statementVersion}.pdf`),
+      );
+    }),
   );
 }
 

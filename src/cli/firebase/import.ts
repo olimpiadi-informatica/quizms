@@ -197,12 +197,12 @@ async function importTeachers(db: Firestore, teachers: Teacher[], options: Impor
 
 async function importPdf(bucket: Bucket, options: ImportOptions) {
   const generationConfigs = await readCollection(options.dir, "contests", generationConfigSchema);
-  const pdfs = generationConfigs
-    .flatMap((c) => uniq([...c.variantIds, ...c.pdfVariantIds]))
-    .map((id): [string, string] => [
+  const pdfs = generationConfigs.flatMap((c) =>
+    uniq([...c.variantIds, ...c.pdfVariantIds]).map((id): [string, string] => [
       join(options.dir, "variants", id, "statement.pdf"),
-      join("statements", id, "statement.pdf"),
-    ]);
+      join("statements", id, `statement-${c.statementVersion}.pdf`),
+    ]),
+  );
 
   await importStorage(bucket, "PDFs", pdfs, options);
 }
@@ -233,13 +233,12 @@ async function importVariants(db: Firestore, options: ImportOptions) {
 async function importStatements(bucket: Bucket, options: ImportOptions) {
   const generationConfigs = await readCollection(options.dir, "contests", generationConfigSchema);
 
-  const statements = generationConfigs
-    .flatMap((c) => uniq([...c.variantIds, ...c.pdfVariantIds]))
-    .map((id): [string, string] => [
+  const statements = generationConfigs.flatMap((c) =>
+    uniq([...c.variantIds, ...c.pdfVariantIds]).map((id): [string, string] => [
       join(options.dir, "variants", id, "statement.js"),
-      join("statements", id, "statement.js"),
-    ]);
-
+      join("statements", id, `statement-${c.statementVersion}.js`),
+    ]),
+  );
   await importStorage(bucket, "statements", statements, options);
 }
 

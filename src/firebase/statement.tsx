@@ -3,7 +3,7 @@ import React, { Suspense, useMemo } from "react";
 import { addMilliseconds } from "date-fns";
 import { getDownloadURL, getStorage, ref } from "firebase/storage";
 import { useErrorBoundary } from "react-error-boundary";
-import useSWR, { SWRConfiguration } from "swr";
+import useSWR from "swr/immutable";
 
 import Loading from "~/core/components/loading";
 import { useIsAfter } from "~/core/components/time";
@@ -43,25 +43,20 @@ export function FirebaseStatement() {
 
 function ContestInner() {
   const db = useDb();
-  const { student } = useStudent();
+  const { contest, student } = useStudent();
   const { showBoundary } = useErrorBoundary();
 
   const storage = getStorage(db.app);
 
-  const statementRef = ref(storage, `statements/${student.variant!}/statement.js`);
-
-  const { data, error } = useSWR(
-    statementRef.fullPath,
-    () => getDownloadURL(statementRef),
-    swrConfig,
+  const statementRef = ref(
+    storage,
+    `statements/${student.variant!}/statement-${contest.statementVersion}.js`,
   );
+
+  const { data, error } = useSWR(statementRef.fullPath, () => getDownloadURL(statementRef), {
+    suspense: true,
+  });
   if (error) showBoundary(error);
 
   return <RemoteStatement url={data!} />;
 }
-
-const swrConfig: SWRConfiguration = {
-  revalidateOnMount: true,
-  shouldRetryOnError: false,
-  suspense: true,
-};

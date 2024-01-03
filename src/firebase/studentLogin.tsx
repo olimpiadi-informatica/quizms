@@ -73,7 +73,9 @@ function StudentLoginInner({
   const getNow = useTime();
 
   const user = useAnonymousAuth();
-  const [contests] = useCollection("contests", contestConverter);
+  const [contests] = useCollection("contests", contestConverter, {
+    subscribe: true,
+  });
   const [studentMapping] = useDocument("studentMappingUid", user.uid, studentMappingUidConverter, {
     subscribe: true,
     throwIfMissing: false,

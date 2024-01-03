@@ -34,6 +34,8 @@ export const contestSchema = z.object({
   contestWindowEnd: z.date().optional(),
   duration: z.coerce.number().positive().optional(),
 
+  statementVersion: z.number(),
+
   personalInformation: z.array(
     z.discriminatedUnion("type", [
       personalInformationText,
