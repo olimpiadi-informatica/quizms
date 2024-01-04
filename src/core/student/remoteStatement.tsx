@@ -1,7 +1,6 @@
 import React, { memo } from "react";
 
 import { isFunction } from "lodash-es";
-import { useErrorBoundary } from "react-error-boundary";
 import useSWR from "swr/immutable";
 
 import { components } from "~/mdx/components";
@@ -17,12 +16,9 @@ type Props =
     };
 
 export function RemoteStatement({ id, url }: Props) {
-  const { showBoundary } = useErrorBoundary();
-
-  const { data: Statement, error } = useSWR(id, () => fetcher(url), {
+  const { data: Statement } = useSWR(id, () => fetcher(url), {
     suspense: true,
   });
-  if (error) showBoundary(error);
 
   return <Statement />;
 }

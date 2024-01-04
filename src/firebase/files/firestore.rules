@@ -75,7 +75,7 @@ service cloud.firestore {
             function checkEndingTime() {
                 let participation = getParticipation(participationId);
                 let contest = get(/databases/$(database)/documents/contests/$(participation.data.contestId));
-                let endingTime = participation.data.startingTime + duration.value(contest.data.duration, "m") + duration.value(30, "s");
+                let endingTime = participation.data.startingTime + duration.value(contest.data.duration * 60 + 30, 's');
                 return request.time <= endingTime;
             }
 

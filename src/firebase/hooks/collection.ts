@@ -58,8 +58,7 @@ export function useCollection<
   if (options?.limit) q = query(q, limit(options.limit));
 
   const key = `${path}?${JSON.stringify(options)}`;
-  const { data, mutate, error } = useSWR<T[]>(key, () => fetcher(q), swrConfig);
-  if (error) showBoundary(error);
+  const { data, mutate } = useSWR<T[]>(key, () => fetcher(q), swrConfig);
 
   const setData = useCallback(
     (newDoc: T) => setDocument(ref, newDoc, mutate, options),
@@ -79,7 +78,7 @@ export function useCollection<
       );
       return () => unsubscribe();
     },
-    (data) => mutate((prev) => merge(prev, data, options), mutationConfig),
+    (data) => mutate(data, mutationConfig),
   );
 
   return [data as T[], setData] as const;
