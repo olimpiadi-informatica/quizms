@@ -2,6 +2,8 @@ import { UTCDateMini } from "@date-fns/utc";
 import { parse as parseDate, subMinutes } from "date-fns";
 import z from "zod";
 
+import { formatDate } from "~/utils/date";
+
 const basePersonalInformation = z.object({
   name: z.string(),
   label: z.string(),
@@ -92,12 +94,10 @@ export function parsePersonalInformation(
         date = new UTCDateMini(value);
       }
       if (date < schema?.min) {
-        const formatter = new Intl.DateTimeFormat("it-IT", { dateStyle: "long" });
-        return [undefined, `La data deve essere successiva al ${formatter.format(schema.min)}.`];
+        return [undefined, `La data deve essere successiva al ${formatDate(schema.min)}.`];
       }
       if (date > schema?.max) {
-        const formatter = new Intl.DateTimeFormat("it-IT", { dateStyle: "long" });
-        return [undefined, `La data deve essere precedente al ${formatter.format(schema.max)}.`];
+        return [undefined, `La data deve essere precedente al ${formatDate(schema.max)}.`];
       }
       return [date, undefined];
     }

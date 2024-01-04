@@ -11,6 +11,7 @@ import { saveAs } from "file-saver";
 import { groupBy, range } from "lodash-es";
 
 import { Contest, Participation, StudentRestore } from "~/models";
+import { formatDate, formatTime } from "~/utils/date";
 import { hash, randomToken } from "~/utils/random";
 
 import { Button, LoadingButtons } from "../components/button";
@@ -29,14 +30,6 @@ function canStartContest(now: Date, participation: Participation, contest: Conte
 
 function canUndoContest(now: Date, participation: Participation) {
   return participation.startingTime && now < subMinutes(participation.startingTime, 1);
-}
-
-function formatTime(time: Date) {
-  return new Intl.DateTimeFormat("it-IT", { timeStyle: "short" }).format(time);
-}
-
-function formatDate(date: Date) {
-  return new Intl.DateTimeFormat("it-IT", { dateStyle: "long" }).format(date);
 }
 
 function StartContestButton({ participation }: { participation: Participation }) {

@@ -1,6 +1,5 @@
 import React, { Ref, forwardRef, useMemo, useRef, useState } from "react";
 
-import { format as formatDate } from "date-fns";
 import { ArrowUpFromLine } from "lucide-react";
 import { parse as parseCSV } from "papaparse";
 import z from "zod";
@@ -13,6 +12,7 @@ import {
   parsePersonalInformation,
   studentSchema,
 } from "~/models";
+import { formatDate } from "~/utils/date";
 import { randomId } from "~/utils/random";
 import validate from "~/utils/validate";
 
@@ -47,7 +47,7 @@ const ImportModal = forwardRef(function ImportModal(_props, ref: Ref<HTMLDialogE
     const date = new Date();
     date.setMonth(2);
     date.setDate(14);
-    return formatDate(date, dateFormat);
+    return formatDate(date, { format: dateFormat });
   }, [dateFormat]);
 
   const [file, setFile] = useState<string>();

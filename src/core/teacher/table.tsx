@@ -12,6 +12,7 @@ import { AlertTriangle, FileCheck, Upload, Users } from "lucide-react";
 
 import { Contest, Student, Variant, parsePersonalInformation, studentHash } from "~/models";
 import { score } from "~/models";
+import { formatDate } from "~/utils/date";
 import { randomId } from "~/utils/random";
 
 import { Button, LoadingButtons } from "../components/button";
@@ -370,7 +371,7 @@ function columnDefinition(
         },
         cellRenderer: ({ api, data, value }: ICellRendererParams<Student>) => {
           if (field.type === "date" && value) {
-            return new Intl.DateTimeFormat("it-IT").format(value);
+            return formatDate(value, { style: "short" });
           }
           if (
             i === 0 &&
