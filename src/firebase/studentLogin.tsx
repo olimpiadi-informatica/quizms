@@ -33,7 +33,12 @@ import {
   submissionConverter,
   variantMappingConverter,
 } from "~/firebase/converters";
-import { useAnonymousAuth, useCollection, useDocument } from "~/firebase/hooks";
+import {
+  useAnonymousAuth,
+  useCollection,
+  useDocument,
+  useDocumentOptional,
+} from "~/firebase/hooks";
 import { Contest, Student, parsePersonalInformation, studentHash } from "~/models";
 import { hash, randomId } from "~/utils/random";
 
@@ -76,10 +81,12 @@ function StudentLoginInner({
   const [contests] = useCollection("contests", contestConverter, {
     subscribe: true,
   });
-  const [studentMapping] = useDocument("studentMappingUid", user.uid, studentMappingUidConverter, {
-    subscribe: true,
-    throwIfMissing: false,
-  });
+  const [studentMapping] = useDocumentOptional(
+    "studentMappingUid",
+    user.uid,
+    studentMappingUidConverter,
+    { subscribe: true },
+  );
 
   const filteredContests = contests.filter(
     (contest) => contestFilter?.includes(contest.id) ?? true,
