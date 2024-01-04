@@ -39,6 +39,7 @@ export function studentHash(student: Student) {
   return [...sha256(joined)]
     .map((b) => b.toString(16).padStart(2, "0"))
     .join("")
+    .slice(0, 24)
     .toUpperCase();
 }
 

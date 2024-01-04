@@ -68,11 +68,7 @@ service cloud.firestore {
         function studentHash(student) {
             let data = student.personalInformation;
             let joined = [data.name, data.surname, data.classYear, data.classSection, student.token].join('$').lower();
-            return hashing.sha256(joined).toHexString();
-        }
-
-        match /{path=**}/students/{student} {
-            allow read: if isAuthenticated(resource.data.uid) || isTeacherParticipation(resource.data.participationId);
+            return hashing.sha256(joined).toHexString()[0: 24];
         }
 
         match /participations/{participationId}/students/{student} {
@@ -123,6 +119,7 @@ service cloud.firestore {
                     && hasTimestamp('updatedAt');
             }
 
+            allow read: if isAuthenticated(resource.data.uid) || isTeacherParticipation(participationId);
             allow create: if (canStudentCreate() || isTeacherParticipation(participationId)) && request.resource.data.participationId == participationId /* TODO && hasTimestamp('createdAt') */;
             allow update: if canStudentUpdate() || canTeacherUpdate();
             allow delete: if isTeacherParticipation(participationId);

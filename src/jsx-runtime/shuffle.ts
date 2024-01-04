@@ -116,8 +116,8 @@ export function getSchema(program: Program) {
         };
       }
 
-      const problemSchema = schema[`${id}`];
       if (isQuizmsComponent(comp, "Answer")) {
+        const problemSchema = schema[`${id}`];
         const label = String.fromCharCode(65 + answerId++);
         if (problemSchema.options) {
           problemSchema.options!.push(label);
@@ -134,6 +134,7 @@ export function getSchema(program: Program) {
       }
 
       if (isQuizmsComponent(comp, "OpenAnswer")) {
+        const problemSchema = schema[`${id}`];
         const correct = getPropValue(props, "correct");
         if (!correct || !isString(correct)) {
           error(`Problem ${id} solution must be a non-empty string.`);
@@ -147,8 +148,6 @@ export function getSchema(program: Program) {
           }
         }
       }
-
-      schema[`${id}`] = problemSchema;
     },
   });
 

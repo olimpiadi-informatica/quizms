@@ -64,17 +64,14 @@ function useBaseSubscription<T>(
 
   useEffect(() => {
     clearTimeout(pendingUnsubscribes.get(key));
-    pendingUnsubscribes.delete(key);
-
     return () => {
       clearTimeout(pendingUnsubscribes.get(key));
-      pendingUnsubscribes.delete(key);
-
       const id = setTimeout(() => {
         if (subscription?.listeners.size) return;
         subscription?.unsubscribe?.();
         subscriptions.delete(key);
-      }, 100);
+        pendingUnsubscribes.delete(key);
+      }, 1000);
       pendingUnsubscribes.set(key, id as any);
     };
   }, [key, subscription]);
