@@ -172,20 +172,75 @@ const FinalizeModal = forwardRef(function FinalizeModal(
   );
 });
 
+const DeleteModal = forwardRef(function DeleteModal(
+  { studentName }: { studentName: string },
+  ref: Ref<HTMLDialogElement> | null,
+) {
+  const [checked, setChecked] = useState(sessionStorage.getItem("delete-confirmation") === "1");
+
+  const confirm = () => {
+    if (ref && "current" in ref && ref.current) {
+      ref.current.returnValue = "1";
+      ref.current.close();
+    }
+  };
+
+  return (
+    <Modal ref={ref} title="Cancella studente">
+      <div className="prose break-words">
+        <p>
+          Stai per cancellare{" "}
+          {studentName ? (
+            <>
+              lo studente <b>{studentName}</b>
+            </>
+          ) : (
+            <>uno studente</>
+          )}
+          . Puoi vedere gli studenti cancellati e annullarne la cancellazione cliccando sulla
+          testata della colonna &ldquo;<i>Cancella</i>&rdquo; e scegliendo &ldquo;
+          <i>Seleziona tutti</i>&rdquo; come filtro.
+        </p>
+        <div className="form-control mb-2">
+          <label className="label cursor-pointer justify-start gap-3">
+            <input
+              type="checkbox"
+              className="checkbox"
+              checked={checked}
+              onChange={(e) => {
+                setChecked(e.target.checked);
+                sessionStorage.setItem("delete-confirmation", String(+e.target.checked));
+              }}
+            />
+            <span className="label-text">Non mostrarmi più questo pop-up</span>
+          </label>
+        </div>
+        <div className="flex justify-center gap-5">
+          <Button className="btn-info">Annulla</Button>
+          <Button className="btn-warning" onClick={() => confirm()}>
+            Continua
+          </Button>
+        </div>
+      </div>
+    </Modal>
+  );
+});
+
 function Table() {
   const { contest, participation, variants } = useTeacher();
   const [students, setStudent] = useTeacherStudents(participation.id);
+
+  const modalRef = useRef<HTMLDialogElement>(null);
+  const [currentStudent, setCurrentStudent] = useState("");
 
   const endTime =
     participation.startingTime && contest.duration
       ? addMinutes(participation.startingTime, contest.duration)
       : undefined;
   const isContestRunning = useIsAfter(endTime);
-
   const editable = !isContestRunning && !participation.finalized;
 
   const newStudentId = useRef(randomId());
-
   const setStudentAndUpdateId = async (student: Student) => {
     newStudentId.current = randomId();
     await setStudent(student);
@@ -213,6 +268,12 @@ function Table() {
   );
 
   const onCellEditRequest = async (ev: CellEditRequestEvent) => {
+    let student = ev.data as Student;
+    const name = [student.personalInformation?.surname, student.personalInformation?.name]
+      .filter(Boolean)
+      .join(" ");
+    setCurrentStudent(name);
+
     let value = ev.newValue;
     const [field, subfield] = ev.colDef.field!.split(/[.[\]]/);
     if (field === "personalInformation") {
@@ -225,12 +286,23 @@ function Table() {
     if (field === "answers") {
       value = value?.toUpperCase();
 
-      const schema = variants[ev.data.variant]?.schema[subfield];
+      const schema = variants[student.variant!]?.schema[subfield];
       const isValid = value === schema?.blankOption || (schema?.options?.includes(value) ?? true);
       if (!isValid) value = undefined;
     }
+    if (field === "disabled" && value) {
+      const modal = modalRef.current!;
+      if (sessionStorage.getItem("delete-confirmation") !== "1") {
+        ev.api.refreshCells();
 
-    const student = cloneDeep(ev.data as Student);
+        modal.returnValue = "0";
+        modal.showModal();
+        await new Promise<void>((resolve) => (modal.onclose = () => resolve()));
+        value = modal.returnValue === "1";
+      }
+    }
+
+    student = cloneDeep(student);
     set(student, ev.colDef.field!, value);
     await setStudentAndUpdateId(student);
 
@@ -258,6 +330,7 @@ function Table() {
           });
         }}
       />
+      <DeleteModal studentName={currentStudent} ref={modalRef} />
     </div>
   );
 }
