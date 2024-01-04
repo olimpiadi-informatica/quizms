@@ -20,16 +20,9 @@ import { Button } from "../components/button";
 import Modal from "../components/modal";
 import { useTeacher, useTeacherStudents } from "./provider";
 
-const ImportModal = forwardRef(function ImportModal(
-  {
-    contest,
-    participation,
-  }: {
-    contest: Contest;
-    participation: Participation;
-  },
-  ref: Ref<HTMLDialogElement> | null,
-) {
+const ImportModal = forwardRef(function ImportModal(_props, ref: Ref<HTMLDialogElement> | null) {
+  const { contest, participation } = useTeacher();
+
   const inputRef = useRef<HTMLInputElement>(null);
 
   const labels = contest.personalInformation.map((field) => field.label);
@@ -144,7 +137,7 @@ export default ImportModal;
 async function importStudents(
   file: string,
   contest: Contest,
-  variants: Variant[],
+  variants: Record<string, Variant>,
   participation: Participation,
   addStudent: (student: Student) => Promise<void>,
   dateFormat: string,
@@ -154,12 +147,10 @@ async function importStudents(
     .min(contest.personalInformation.length)
     .transform<Student>((value, ctx) => {
       const off = contest.personalInformation.length + Number(contest.hasVariants || 0);
-      const variantId = contest.hasVariants
-        ? value[off - 1]
-        : variants.find((v) => v.contestId === contest.id)!.id;
+      const variantId = contest.hasVariants ? value[off - 1] : variants[0].id;
 
       if (variantId) {
-        const variant = variants.find((v) => v.id === variantId && v.contestId === contest.id);
+        const variant = variants[variantId];
         if (!variant) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,

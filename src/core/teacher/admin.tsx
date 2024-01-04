@@ -1,6 +1,5 @@
 import React, { Suspense, useRef, useState } from "react";
 
-import classNames from "classnames";
 import {
   addMinutes,
   addSeconds,
@@ -261,13 +260,9 @@ function StudentRestoreList({ participation }: { participation: Participation })
   );
 }
 
-function ContestAdmin({
-  participation,
-  contest,
-}: {
-  participation: Participation;
-  contest: Contest;
-}) {
+export function TeacherAdmin() {
+  const { contest, participation } = useTeacher();
+
   const getNow = useTime();
   const now = getNow();
 
@@ -286,7 +281,7 @@ function ContestAdmin({
 
   return (
     <div className="flex flex-col gap-5 p-5 pb-32">
-      <div className="card bg-base-200 shadow-lg">
+      <div className="highlight-border card bg-base-200">
         <div className="card-body">
           <h2 className="card-title">Informazioni Gara</h2>
           {/* contest info */}
@@ -297,7 +292,7 @@ function ContestAdmin({
           </div>
         </div>
       </div>
-      <div className="card bg-base-200 shadow-lg">
+      <div className="highlight-border card bg-base-200">
         <div className="card-body">
           <h2 className="card-title">Gestione Gara</h2>
           {/* contest data */}
@@ -324,7 +319,7 @@ function ContestAdmin({
           </div>
         </div>
       </div>
-      <div className="card bg-base-200 shadow-lg">
+      <div className="highlight-border card bg-base-200">
         <div className="card-body">
           <h2 className="card-title">Richieste di accesso</h2>
           <Suspense fallback={<Loading />}>
@@ -375,43 +370,5 @@ function DownloadPdfButton({
     <Button className="btn-warning" onClick={onClick}>
       Scarica testo per prova cartacea
     </Button>
-  );
-}
-
-export function TeacherAdmin() {
-  const { contests, participations } = useTeacher();
-  const [selectedContest, setSelectedContest] = useState(participations.length === 1 ? 0 : -1);
-
-  return (
-    <>
-      <div className="m-5 flex justify-center">
-        <div className="flex justify-center">
-          <div role="tablist" className="tabs-boxed tabs flex w-full flex-wrap justify-center">
-            {participations.map((participation, i) => (
-              <a
-                role="tab"
-                key={participation.id}
-                className={classNames("tab", i === selectedContest && "tab-active")}
-                onClick={() => setSelectedContest(i)}>
-                {contests.find((contest) => contest.id === participations[i].contestId)!.name}
-              </a>
-            ))}
-          </div>
-        </div>
-      </div>
-      {selectedContest !== -1 && (
-        <ContestAdmin
-          participation={participations[selectedContest]}
-          contest={
-            contests.find((contest) => contest.id === participations[selectedContest].contestId)!
-          }
-        />
-      )}
-      {selectedContest === -1 && (
-        <div className="flex h-full flex-col items-center justify-center">
-          Nessuna gara selezionata.
-        </div>
-      )}
-    </>
   );
 }

@@ -13,7 +13,20 @@ module.exports = {
     },
   },
   daisyui: {
-    themes: ["cupcake", "dark"],
+    themes: [
+      {
+        light: {
+          ...daisyThemes["cupcake"],
+          "--rounded-btn": "0.625rem",
+        },
+      },
+      {
+        dark: {
+          ...daisyThemes["dark"],
+          "--rounded-btn": "0.625rem",
+        },
+      },
+    ],
     logs: false,
   },
   plugins: [

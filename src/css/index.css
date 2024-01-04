@@ -20,6 +20,10 @@ body {
   @apply overflow-auto pb-3;
 }
 
+.highlight-border {
+  @apply border border-white/5 shadow-xl outline outline-1 outline-black/5;
+}
+
 .tooltip:hover:before,
 .tooltip:hover:after {
   @apply delay-500;

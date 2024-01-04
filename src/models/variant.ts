@@ -26,9 +26,9 @@ export const variantMappingSchema = z.object({ id: z.string(), variant: z.string
 
 export type VariantMapping = z.infer<typeof variantMappingSchema>;
 
-export function score(student: Student, variants: Variant[]) {
+export function score(student: Student, variants: Record<string, Variant>) {
   const answers = student.answers;
-  const schema = variants.find((variant) => variant.id === student.variant)?.schema;
+  const schema = variants[student.variant!]?.schema;
 
   if (!schema || !answers) return undefined;
 

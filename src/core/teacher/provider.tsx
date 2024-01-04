@@ -1,18 +1,19 @@
-import React, { ReactNode, createContext, useContext } from "react";
+import React, { ReactNode, createContext, useContext, useEffect, useState } from "react";
 
+import Loading from "~/core/components/loading";
 import { Contest, Participation, Student, StudentRestore, Variant } from "~/models";
 
 import { TeacherLayout } from "./layout";
 
 type TeacherProviderProps = {
-  /** Scuola dell'insegnante */
-  participations: Participation[];
+  /** Gara attiva */
+  participation: Participation;
   /** Funzione per modificare i dati della scuola */
   setParticipation: (participation: Participation) => Promise<void>;
   /** Contest attivi */
-  contests: Contest[];
+  contest: Contest;
   /** Varianti dei testi */
-  variants: Variant[];
+  variants: Record<string, Variant>;
   /** Funzione per effettuare il logout */
   logout: () => Promise<void>;
   /** Funzione per ottenere i pdf dei testi */
@@ -35,15 +36,77 @@ const TeacherContext = createContext<TeacherProviderProps>({} as TeacherProvider
 TeacherContext.displayName = "TeacherContext";
 
 export function TeacherProvider({
+  contests,
+  participations,
   children,
   ...props
-}: TeacherProviderProps & {
+}: Omit<TeacherProviderProps, "contest" | "participation" | "variants"> & {
+  contests: Contest[];
+  participations: Participation[];
+  variants: Variant[];
   children: ReactNode;
 }) {
+  const [loading, setLoading] = useState(true);
+  const [contestId, setContestId] = useState<string | undefined>(
+    participations.length === 1 ? participations[0]?.contestId : undefined,
+  );
+  const contest = contests.find((c) => c.id === contestId);
+  const participation = participations.find((p) => p.contestId === contestId);
+  const variants = Object.fromEntries(
+    props.variants.filter((v) => v.contestId === contest?.id).map((v) => [v.id, v]),
+  );
+
+  useEffect(() => {
+    setLoading(false);
+    onHashChange();
+
+    window.addEventListener("hashchange", onHashChange);
+    return () => window.removeEventListener("hashchange", onHashChange);
+
+    function onHashChange() {
+      setContestId(window.location.hash.slice(1));
+    }
+  }, []);
+
+  useEffect(() => {
+    if (contestId) {
+      window.location.hash = contestId ?? "";
+    }
+  }, [contestId]);
+
+  if (loading) {
+    return <Loading />;
+  }
+
   return (
-    <TeacherContext.Provider value={props}>
-      <TeacherLayout>{children}</TeacherLayout>
-    </TeacherContext.Provider>
+    <TeacherLayout
+      contests={contests}
+      participations={participations}
+      activeContest={contest}
+      activeParticipation={participation}
+      setActiveContest={setContestId}
+      logout={props.logout}>
+      {participation && contest ? (
+        <TeacherContext.Provider
+          value={{
+            ...props,
+            contest,
+            participation,
+            variants,
+          }}>
+          {children}
+        </TeacherContext.Provider>
+      ) : (
+        <div className="flex size-full flex-col items-center justify-center gap-3">
+          <p className="text-2xl">Seleziona una gara</p>
+          {participations.map((p) => (
+            <button key={p.id} className="btn btn-info" onClick={() => setContestId(p.contestId)}>
+              {contests.find((c) => c.id === p.contestId)?.name}
+            </button>
+          ))}
+        </div>
+      )}
+    </TeacherLayout>
   );
 }
 
