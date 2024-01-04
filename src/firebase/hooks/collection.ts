@@ -1,7 +1,7 @@
-import { useCallback, useEffect } from "react";
+import { useCallback } from "react";
 
 import {
-  Firestore,
+  CollectionReference,
   FirestoreDataConverter,
   Query,
   collection,
@@ -19,6 +19,8 @@ import { useErrorBoundary } from "react-error-boundary";
 import useSWR, { KeyedMutator, MutatorOptions, SWRConfiguration } from "swr";
 
 import { useDb } from "~/firebase/baseLogin";
+
+import { useSubscriptionListener } from "./subscription";
 
 const swrConfig: SWRConfiguration = {
   revalidateOnMount: true,
@@ -46,7 +48,8 @@ export function useCollection<
   const db = useDb();
   const { showBoundary } = useErrorBoundary();
 
-  let q: Query<T> = collection(db, path).withConverter(converter);
+  const ref = collection(db, path).withConverter(converter);
+  let q: Query<T> = ref;
   for (const [k, v] of Object.entries(options?.constraints ?? {})) {
     q = query(q, where(k, Array.isArray(v) ? "in" : "==", v));
   }
@@ -59,50 +62,56 @@ export function useCollection<
   if (error) showBoundary(error);
 
   const setData = useCallback(
-    (newDoc: T) => setDocument(db, path, newDoc, mutate, options),
-    [mutate, db, path, options],
+    (newDoc: T) => setDocument(ref, newDoc, mutate, options),
+    [ref, mutate, options],
   );
 
-  useEffect(() => {
-    if (!options?.subscribe) return;
-    const unsubscribe = onSnapshot(
-      q,
-      async (snap) => {
-        await mutate(snap.docs.map((doc) => doc.data()));
-      },
-      (error) => showBoundary(error),
-    );
-    return () => unsubscribe();
-  });
+  useSubscriptionListener<T[]>(
+    key,
+    (setData) => {
+      if (!options?.subscribe) return;
+      const unsubscribe = onSnapshot(
+        q,
+        async (snap) => {
+          setData(snap.docs.map((doc) => doc.data()));
+        },
+        (error) => showBoundary(error),
+      );
+      return () => unsubscribe();
+    },
+    (data) => mutate((prev) => merge(prev, data, options), mutationConfig),
+  );
 
   return [data as T[], setData] as const;
 }
 
 async function setDocument<T extends { id: string }>(
-  db: Firestore,
-  path: string,
+  ref: CollectionReference<T>,
   newDoc: T,
   mutator: KeyedMutator<T[]>,
   options?: CollectionOptions<T>,
 ): Promise<void> {
   await mutator(
     async (prev) => {
-      const docRef = doc(db, path, newDoc.id);
+      const docRef = doc(ref, newDoc.id);
       await setDoc(docRef, newDoc);
-      return merge(prev, newDoc, options);
+      return merge(prev, [newDoc], options);
     },
-    { ...mutationConfig, optimisticData: (prev) => merge(prev, newDoc, options) },
+    {
+      ...mutationConfig,
+      optimisticData: (prev) => merge(prev, [newDoc], options),
+    },
   );
 }
 
 function merge<T extends { id: string }>(
-  coll: T[] | undefined,
-  newDoc: T,
+  prev: T[] | undefined,
+  newDocs: T[],
   options?: CollectionOptions<T>,
 ) {
-  if (!coll) return [newDoc];
-  coll = coll.filter((doc) => doc.id !== newDoc.id);
-  coll.push(newDoc);
+  if (!prev) return newDocs;
+  let coll = prev.filter((doc) => !newDocs.find((newDoc) => newDoc.id === doc.id));
+  coll.push(...newDocs);
   coll = sortBy(coll, [options?.orderBy ?? "id"]);
   if (options?.limit) coll = coll.slice(0, options.limit);
   return coll;

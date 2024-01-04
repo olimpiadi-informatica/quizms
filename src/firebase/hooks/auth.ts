@@ -14,7 +14,7 @@ import useSWR from "swr/immutable";
 
 import { useDb } from "~/firebase/baseLogin";
 
-import useSubscription from "./subscription";
+import { useSubscription } from "./subscription";
 
 const swrConfig: SWRConfiguration = {
   suspense: true,

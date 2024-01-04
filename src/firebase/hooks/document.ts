@@ -13,6 +13,8 @@ import useSWR, { KeyedMutator, MutatorOptions, SWRConfiguration } from "swr";
 
 import { useDb } from "~/firebase/baseLogin";
 
+import { useSubscriptionListener } from "./subscription";
+
 const swrConfig: SWRConfiguration = {
   revalidateOnMount: true,
   suspense: true,
@@ -47,15 +49,19 @@ export function useDocument<T>(
   );
   if (error) showBoundary(error);
 
-  useEffect(() => {
-    if (!options?.subscribe) return;
-    const unsubscribe = onSnapshot(
-      ref,
-      (snap) => mutate(snap.data()),
-      (error) => showBoundary(error),
-    );
-    return () => unsubscribe();
-  });
+  useSubscriptionListener<T>(
+    ref.path,
+    (setData) => {
+      if (!options?.subscribe) return;
+      const unsubscribe = onSnapshot(
+        ref,
+        (snap) => setData(snap.data()!), // TODO: check if exists
+        (error) => showBoundary(error),
+      );
+      return () => unsubscribe();
+    },
+    (data) => mutate(data, mutationConfig),
+  );
 
   const setData = useCallback((newData: T) => setDocument<T>(ref, newData, mutate), [mutate, ref]);
   return [data as T, setData] as const;
