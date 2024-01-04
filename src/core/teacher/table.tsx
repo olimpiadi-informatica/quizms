@@ -7,7 +7,7 @@ import {
   ITooltipParams,
 } from "ag-grid-community";
 import { addMinutes, isEqual as isEqualDate } from "date-fns";
-import { cloneDeep, set, sumBy } from "lodash-es";
+import { cloneDeep, lowerFirst, set, sumBy } from "lodash-es";
 import { AlertTriangle, FileCheck, Upload, Users } from "lucide-react";
 
 import { Contest, Student, Variant, parsePersonalInformation, studentHash } from "~/models";
@@ -104,7 +104,7 @@ const FinalizeModal = forwardRef(function FinalizeModal(
       const reason = isStudentIncomplete(student, contest, variants);
       if (reason) {
         if (!name || !surname) return "Almeno uno studente non ha nome o cognome";
-        return `Lo studente ${name} ${surname} non può essere finalizzato: ${reason}`;
+        return `Lo studente ${name} ${surname} non può essere finalizzato: ${lowerFirst(reason)}.`;
       }
 
       if (!student.disabled) {
@@ -446,9 +446,11 @@ function isStudentIncomplete(
     }
   }
 
-  let variant = variants[student.variant!];
-  if (contest.hasVariants && !variant) return "Variante mancante";
-  if (!variant) variant = Object.values(variants)[0];
+  if (contest.hasVariants) {
+    if (!student.variant) return "Variante mancante";
+    if (!(student.variant in variants)) return `La variante ${student.variant} non è valida`;
+  }
+  const variant = variants[student.variant!] ?? Object.values(variants)[0];
 
   for (const [id, schema] of Object.entries(variant.schema)) {
     const ans = student.answers?.[id];
