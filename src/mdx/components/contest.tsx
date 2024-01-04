@@ -63,7 +63,7 @@ export function Contest({ children }: { children: ReactNode }) {
     };
 
     return (
-      <div className="flex h-dvh justify-center">
+      <div className="flex h-[50vh] justify-center">
         <div className="flex flex-col justify-center">
           <button className="btn btn-success btn-lg" onClick={start}>
             Inizia

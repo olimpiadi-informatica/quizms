@@ -1,20 +1,37 @@
-import React, { ComponentType, memo, useEffect, useState } from "react";
+import React, { memo } from "react";
+
+import { isFunction } from "lodash-es";
+import { useErrorBoundary } from "react-error-boundary";
+import useSWR from "swr/immutable";
 
 import { components } from "~/mdx/components";
 
-export function RemoteStatement({ url }: { url: string }) {
-  const [Statement, setStatement] = useState<ComponentType>();
+type Props =
+  | {
+      id?: undefined;
+      url: string;
+    }
+  | {
+      id: string;
+      url: () => string | Promise<string>;
+    };
 
-  useEffect(() => {
-    import(/* @vite-ignore */ url).then(({ default: contest }) => {
-      setStatement(() =>
-        memo(function Statement() {
-          return contest(React, components);
-        }),
-      );
-    });
-  }, [url]);
+export function RemoteStatement({ id, url }: Props) {
+  const { showBoundary } = useErrorBoundary();
 
-  if (Statement) return <Statement />;
-  return undefined;
+  const { data: Statement, error } = useSWR(id, () => fetcher(url), {
+    suspense: true,
+  });
+  if (error) showBoundary(error);
+
+  return <Statement />;
+}
+
+async function fetcher(url: Props["url"]) {
+  if (isFunction(url)) url = await url();
+  const { default: statement } = await import(/* @vite-ignore */ url);
+
+  return memo(function Statement() {
+    return statement(React, components);
+  });
 }
