@@ -1,4 +1,4 @@
-import React, { ChangeEvent, ReactNode, forwardRef, useMemo, useRef, useState } from "react";
+import React, { ChangeEvent, ReactNode, forwardRef, useId, useMemo, useRef, useState } from "react";
 
 import classNames from "classnames";
 import { addMinutes, formatISO } from "date-fns";
@@ -143,11 +143,13 @@ function StudentLoginInner({
       <div className="flex h-full flex-col items-center overflow-y-auto px-4">
         <form className="my-8 w-full max-w-md grow">
           <div className="form-control w-full">
-            <label className="label">
+            <label className="label" htmlFor="contest">
               <span className="label-text text-lg">Gara</span>
             </label>
             <select
               className="select select-bordered w-full"
+              id="contest"
+              name="contest"
               value={student.contestId ?? -1}
               onChange={(e) => setStudent((student) => ({ ...student, contestId: e.target.value }))}
               disabled={loading}
@@ -176,11 +178,13 @@ function StudentLoginInner({
           {contest && (
             <>
               <div className="form-control w-full">
-                <label className="label">
-                  <span className="label-text text-lg">Codice</span>
+                <label className="label" htmlFor="token">
+                  <span className="label-text text-lg">Codice prova</span>
                 </label>
                 <input
                   type="text"
+                  id="token"
+                  name="token"
                   placeholder="Inserisci codice"
                   className="input input-bordered w-full max-w-md"
                   onChange={(e) => setStudent({ ...student, token: e.target.value })}
@@ -227,6 +231,7 @@ function PersonalInformationField({
   });
   const [error, setError] = useState<string>();
   const [blur, setBlur] = useState(false);
+  const id = useId();
 
   const onChange = (e: ChangeEvent<HTMLInputElement>) => {
     setBlur(false);
@@ -246,10 +251,12 @@ function PersonalInformationField({
 
   return (
     <div key={field.name} className="form-control w-full">
-      <label className="label">
+      <label className="label" htmlFor={id}>
         <span className="label-text text-lg">{field.label}</span>
       </label>
       <input
+        id={id}
+        name={field.label}
         type={field.type}
         placeholder={"Inserisci " + field.label}
         className={classNames(
