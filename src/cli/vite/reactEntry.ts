@@ -14,6 +14,7 @@ export default function reactEntry(): PluginOption {
 
   return {
     name: "quizms:entry",
+    enforce: "pre",
     configResolved(config) {
       isBuild = config.command === "build";
       root = config.root;
@@ -21,6 +22,9 @@ export default function reactEntry(): PluginOption {
     resolveId(id) {
       const [path] = id.split("?");
       if (path === "virtual:react-entry") {
+        return "\0" + id;
+      }
+      if (path === "react-dom/server") {
         return "\0" + id;
       }
     },
@@ -53,6 +57,10 @@ document.title = title;
 createRoot(document.getElementById("app")).render(
   createElement(StrictMode, null, createElement(App))
 );`;
+      }
+      if (path === "\0react-dom/server") {
+        return `\
+export function renderToStaticMarkup() { throw new Error("react-dom/server is not available in the browser"); }`;
       }
     },
     generateBundle(this, _, bundle) {

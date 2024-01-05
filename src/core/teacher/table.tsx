@@ -1,11 +1,11 @@
 import React, { Ref, Suspense, forwardRef, lazy, useMemo, useRef, useState } from "react";
 
-import {
+import type {
   CellEditRequestEvent,
   ColDef,
   ICellRendererParams,
   ITooltipParams,
-} from "ag-grid-community";
+} from "@ag-grid-community/core";
 import { addMinutes, isEqual as isEqualDate } from "date-fns";
 import { cloneDeep, lowerFirst, set, sumBy } from "lodash-es";
 import { AlertTriangle, FileCheck, Upload, Users } from "lucide-react";
@@ -23,10 +23,10 @@ import { useTeacher, useTeacherStudents } from "./provider";
 import ImportModal from "./tableImporter";
 import { agGridLocaleIT } from "./tableLocale";
 
-import "ag-grid-community/styles/ag-grid.css";
-import "ag-grid-community/styles/ag-theme-quartz.css";
+import "@ag-grid-community/styles/ag-grid.css";
+import "@ag-grid-community/styles/ag-theme-quartz.css";
 
-const AgGridReact = lazy(() => import("ag-grid-react").then((m) => ({ default: m.AgGridReact })));
+const AgGridReact = lazy(() => import("../components/agGrid"));
 
 export function TeacherTable() {
   const { contest, participation } = useTeacher();

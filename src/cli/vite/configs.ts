@@ -6,7 +6,7 @@ import mdxPlugin from "@mdx-js/rollup";
 import react from "@vitejs/plugin-react-swc";
 import pc from "picocolors";
 // import { visualizer } from "rollup-plugin-visualizer";
-import { InlineConfig, splitVendorChunkPlugin } from "vite";
+import { InlineConfig } from "vite";
 import inspect from "vite-plugin-inspect";
 
 import { fatal, info, warning } from "~/cli/utils/logs";
@@ -59,13 +59,17 @@ export default function (
       python(),
       react({ plugins: swcPlugins }),
       reactEntry(),
-      splitVendorChunkPlugin(),
       // visualizer({ filename: "dist/stats.html" }),
     ],
     build: {
       rollupOptions: {
         onwarn: (log) => {
-          if (log.code === "CIRCULAR_DEPENDENCY") return;
+          if (
+            (log.code === "CIRCULAR_DEPENDENCY" || log.code === "THIS_IS_UNDEFINED") &&
+            (log.ids ?? [log.id]).some((id) => id?.includes("/node_modules/"))
+          ) {
+            return;
+          }
           if (log.code === "EVAL" && log.loc?.file?.includes("vm-browserify")) return;
           warning(log.message);
           if (log.loc) {

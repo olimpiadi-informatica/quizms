@@ -45,17 +45,20 @@ export default async function staticExport(options: ExportOptions): Promise<void
       rollupOptions: {
         input,
         output: {
+          hoistTransitiveImports: false,
           manualChunks: (id) => {
             if (id.includes("node_modules/katex/")) return "katex";
-            if (id.includes("node_modules/lodash-es/")) return "lodash";
             if (id.includes("node_modules/@firebase/auth/")) return "firebase-auth";
             if (id.includes("node_modules/@firebase/firestore/")) return "firestore";
             if (id.includes("node_modules/@firebase/")) return "firebase";
             if (id.includes("node_modules/zod/")) return "zod";
+            if (id.includes("node_modules/react-dom/")) return "react-dom";
 
-            // FIXME: the order in which chunks are loaded is apparently important, as a workaround
-            //  we need to rename react-dom to something else so that it is loaded in the correct order
-            if (id.includes("node_modules/react-dom/")) return "~react-dom";
+            for (const module of ["rendering", "columns", "widgets"]) {
+              if (id.includes(`node_modules/@ag-grid-community/core/dist/esm/es6/${module}`)) {
+                return `ag-grid`;
+              }
+            }
           },
         },
       },
