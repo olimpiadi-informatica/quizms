@@ -15,11 +15,6 @@ import { useDb } from "~/firebase/baseLogin";
 
 import { useSubscriptionListener } from "./subscription";
 
-const swrConfig: SWRConfiguration = {
-  revalidateOnMount: true,
-  suspense: true,
-};
-
 const mutationConfig: MutatorOptions = {
   revalidate: false,
   rollbackOnError: true,
@@ -51,6 +46,14 @@ export function useDocumentOptional<T>(
   const { showBoundary } = useErrorBoundary();
 
   const ref = doc(db, path, id).withConverter(converter);
+
+  const swrConfig: SWRConfiguration = {
+    revalidateIfStale: !options?.subscribe,
+    revalidateOnFocus: !options?.subscribe,
+    revalidateOnMount: !options?.subscribe,
+    revalidateOnReconnect: !options?.subscribe,
+    suspense: true,
+  };
 
   const key = `${ref.path}?${JSON.stringify(options)}`;
   const { data, mutate } = useSWR<[T | null]>(key, () => fetcher(ref), swrConfig);

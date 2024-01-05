@@ -22,11 +22,6 @@ import { useDb } from "~/firebase/baseLogin";
 
 import { useSubscriptionListener } from "./subscription";
 
-const swrConfig: SWRConfiguration = {
-  revalidateOnMount: true,
-  suspense: true,
-};
-
 const mutationConfig: MutatorOptions = {
   revalidate: false,
   rollbackOnError: true,
@@ -56,6 +51,14 @@ export function useCollection<
 
   if (options?.orderBy) q = query(q, orderBy(options.orderBy));
   if (options?.limit) q = query(q, limit(options.limit));
+
+  const swrConfig: SWRConfiguration = {
+    revalidateIfStale: !options?.subscribe,
+    revalidateOnFocus: !options?.subscribe,
+    revalidateOnMount: !options?.subscribe,
+    revalidateOnReconnect: !options?.subscribe,
+    suspense: true,
+  };
 
   const key = `${path}?${JSON.stringify(options)}`;
   const { data, mutate } = useSWR<T[]>(key, () => fetcher(q), swrConfig);

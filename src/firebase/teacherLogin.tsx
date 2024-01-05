@@ -181,7 +181,6 @@ async function setParticipation(
 
     const q = query(
       collection(participationRef, "students").withConverter(studentConverter),
-      where("participationId", "==", participation.id),
       where("token", "==", prevParticipation.token),
     );
 
@@ -231,7 +230,6 @@ async function getPdfStatements(
 
 function useStudents(participationId: string) {
   return useCollection(`participations/${participationId}/students`, studentConverter, {
-    constraints: { participationId },
     orderBy: "createdAt",
     subscribe: true,
   });
