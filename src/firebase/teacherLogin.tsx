@@ -31,7 +31,7 @@ import {
   variantConverter,
 } from "~/firebase/converters";
 import { useCollection, usePrecompiledPasswordAuth, useSignInWithPassword } from "~/firebase/hooks";
-import { Contest, Participation, StudentRestore, Variant, studentHash } from "~/models";
+import { Participation, StudentRestore, studentHash } from "~/models";
 
 export function TeacherLogin({
   config,
@@ -123,8 +123,8 @@ function TeacherInner({ user, children }: { user: User; children: ReactNode }) {
       contests={contests}
       variants={variants}
       logout={logout}
-      getPdfStatements={async (pdfVariants) =>
-        getPdfStatements(db, contests, variants, pdfVariants)
+      getPdfStatements={async (statementVersion, variantIds) =>
+        getPdfStatements(db, statementVersion, variantIds)
       }
       useStudents={useStudents}
       useStudentRestores={useStudentRestores}>
@@ -209,22 +209,13 @@ async function setParticipation(
   }
 }
 
-async function getPdfStatements(
-  db: Firestore,
-  contests: Contest[],
-  variants: Variant[],
-  pdfVariants: string[],
-) {
+async function getPdfStatements(db: Firestore, statementVersion: number, variantIds: string[]) {
   const storage = getStorage(db.app);
 
   return await Promise.all(
-    pdfVariants.map((pdfVariant) => {
-      const variant = variants.find((v) => v.id === pdfVariant)!;
-      const contest = contests.find((c) => c.id === variant.contestId)!;
-      return getBytes(
-        ref(storage, `statements/${pdfVariant}/statement-${contest.statementVersion}.pdf`),
-      );
-    }),
+    variantIds.map((id) =>
+      getBytes(ref(storage, `statements/${id}/statement-${statementVersion}.pdf`)),
+    ),
   );
 }
 
@@ -235,15 +226,15 @@ function useStudents(participationId: string) {
   });
 }
 
-function useStudentRestores(participation: Participation) {
+function useStudentRestores(participationId: string, token: string) {
   const db = useDb();
 
-  const base = doc(db, "participations", participation.id);
+  const base = doc(db, "participations", participationId);
   const [studentRestores] = useCollection(
-    `participations/${participation.id}/studentRestore`,
+    `participations/${participationId}/studentRestore`,
     studentRestoreConverter,
     {
-      constraints: { token: participation.token ?? "" },
+      constraints: { token },
       subscribe: true,
       limit: 50,
     },

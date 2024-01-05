@@ -54,7 +54,7 @@ const ImportModal = forwardRef(function ImportModal(_props, ref: Ref<HTMLDialogE
   const [error, setError] = useState<Error>();
 
   const { variants } = useTeacher();
-  const [, setStudent] = useTeacherStudents(participation.id);
+  const [, setStudent] = useTeacherStudents();
 
   const onChange = async (file?: File) => {
     setError(undefined);

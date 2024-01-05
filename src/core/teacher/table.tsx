@@ -73,7 +73,7 @@ export function TeacherTable() {
 
 function Counter() {
   const { contest, participation, variants } = useTeacher();
-  const [students] = useTeacherStudents(participation.id);
+  const [students] = useTeacherStudents();
 
   return sumBy(students, (s) => {
     return Number(
@@ -90,7 +90,7 @@ const FinalizeModal = forwardRef(function FinalizeModal(
   ref: Ref<HTMLDialogElement> | null,
 ) {
   const { contest, participation, variants, setParticipation } = useTeacher();
-  const [students] = useTeacherStudents(participation.id);
+  const [students] = useTeacherStudents();
   const [confirm, setConfirm] = useState("");
 
   const error = useMemo(() => {
@@ -229,7 +229,7 @@ const DeleteModal = forwardRef(function DeleteModal(
 
 function Table() {
   const { contest, participation, variants } = useTeacher();
-  const [students, setStudent] = useTeacherStudents(participation.id);
+  const [students, setStudent] = useTeacherStudents();
 
   const modalRef = useRef<HTMLDialogElement>(null);
   const [currentStudent, setCurrentStudent] = useState("");

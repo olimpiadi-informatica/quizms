@@ -1,11 +1,11 @@
-import React, { ReactNode, createContext, useContext, useEffect, useState } from "react";
+import React, { ReactNode, createContext, useContext, useEffect, useMemo, useState } from "react";
 
 import Loading from "~/core/components/loading";
 import { Contest, Participation, Student, StudentRestore, Variant } from "~/models";
 
 import { TeacherLayout } from "./layout";
 
-type TeacherProviderProps = {
+type TeacherContextProps = {
   /** Gara attiva */
   participation: Participation;
   /** Funzione per modificare i dati della scuola */
@@ -17,14 +17,15 @@ type TeacherProviderProps = {
   /** Funzione per effettuare il logout */
   logout: () => Promise<void>;
   /** Funzione per ottenere i pdf dei testi */
-  getPdfStatements: (pdfVariants: string[]) => Promise<(Uint8Array | ArrayBuffer)[]>;
+  getPdfStatements: () => Promise<(Uint8Array | ArrayBuffer)[]>;
   /** Hook per ottenere gli studenti di una scuola */
   useStudents: (
     participationId: string,
   ) => readonly [Student[], (student: Student) => Promise<void>];
   /** Hook per ottenere le richieste di accesso degli studenti */
   useStudentRestores: (
-    participation: Participation,
+    participationId: string,
+    token: string,
   ) => readonly [
     StudentRestore[],
     (request: StudentRestore) => Promise<void>,
@@ -32,29 +33,76 @@ type TeacherProviderProps = {
   ];
 };
 
-const TeacherContext = createContext<TeacherProviderProps>({} as TeacherProviderProps);
+const TeacherContext = createContext<TeacherContextProps>({} as TeacherContextProps);
 TeacherContext.displayName = "TeacherContext";
 
-export function TeacherProvider({
-  contests,
-  participations,
-  children,
-  ...props
-}: Omit<TeacherProviderProps, "contest" | "participation" | "variants"> & {
-  contests: Contest[];
+type TeacherProviderProps = {
   participations: Participation[];
+  setParticipation: (participation: Participation) => Promise<void>;
+  contests: Contest[];
   variants: Variant[];
+  logout: () => Promise<void>;
+  getPdfStatements: (
+    statementVersion: number,
+    variantIds: string[],
+  ) => Promise<(Uint8Array | ArrayBuffer)[]>;
+  useStudents: (
+    participationId: string,
+  ) => readonly [Student[], (student: Student) => Promise<void>];
+  useStudentRestores: (
+    participationId: string,
+    token: string,
+  ) => readonly [
+    StudentRestore[],
+    (request: StudentRestore) => Promise<void>,
+    (studentId: string) => Promise<void>,
+  ];
   children: ReactNode;
-}) {
+};
+
+export function TeacherProvider({
+  participations,
+  setParticipation,
+  contests,
+  variants,
+  logout,
+  getPdfStatements,
+  useStudents,
+  useStudentRestores,
+  children,
+}: TeacherProviderProps) {
   const [loading, setLoading] = useState(true);
   const [contestId, setContestId] = useState<string | undefined>(
     participations.length === 1 ? participations[0]?.contestId : undefined,
   );
   const contest = contests.find((c) => c.id === contestId);
   const participation = participations.find((p) => p.contestId === contestId);
-  const variants = Object.fromEntries(
-    props.variants.filter((v) => v.contestId === contest?.id).map((v) => [v.id, v]),
-  );
+
+  const contextProps: TeacherContextProps = useMemo(() => {
+    const filteredVariants = Object.fromEntries(
+      variants.filter((v) => v.contestId === contest?.id).map((v) => [v.id, v]),
+    );
+    return {
+      contest: contest!,
+      participation: participation!,
+      setParticipation,
+      variants: filteredVariants,
+      logout,
+      getPdfStatements: () =>
+        getPdfStatements(contest?.statementVersion ?? 0, participation?.pdfVariants ?? []),
+      useStudentRestores,
+      useStudents,
+    };
+  }, [
+    contest,
+    getPdfStatements,
+    logout,
+    participation,
+    setParticipation,
+    useStudentRestores,
+    useStudents,
+    variants,
+  ]);
 
   useEffect(() => {
     setLoading(false);
@@ -85,17 +133,9 @@ export function TeacherProvider({
       activeContest={contest}
       activeParticipation={participation}
       setActiveContest={setContestId}
-      logout={props.logout}>
+      logout={logout}>
       {participation && contest ? (
-        <TeacherContext.Provider
-          value={{
-            ...props,
-            contest,
-            participation,
-            variants,
-          }}>
-          {children}
-        </TeacherContext.Provider>
+        <TeacherContext.Provider value={contextProps}>{children}</TeacherContext.Provider>
       ) : (
         <div className="flex size-full flex-col items-center justify-center gap-3">
           <p className="text-2xl">Seleziona una gara</p>
@@ -110,16 +150,16 @@ export function TeacherProvider({
   );
 }
 
-export function useTeacher(): Omit<TeacherProviderProps, "useStudents" | "useStudentRestores"> {
+export function useTeacher(): Omit<TeacherContextProps, "useStudents" | "useStudentRestores"> {
   return useContext(TeacherContext);
 }
 
-export function useTeacherStudents(participationId: string) {
-  const { useStudents } = useContext(TeacherContext);
-  return useStudents(participationId);
+export function useTeacherStudents() {
+  const { participation, useStudents } = useContext(TeacherContext);
+  return useStudents(participation.id);
 }
 
-export function useTeacherStudentRestores(participation: Participation) {
-  const { useStudentRestores } = useContext(TeacherContext);
-  return useStudentRestores(participation);
+export function useTeacherStudentRestores() {
+  const { participation, useStudentRestores } = useContext(TeacherContext);
+  return useStudentRestores(participation.id, participation.token ?? "");
 }

@@ -32,8 +32,8 @@ function canUndoContest(now: Date, participation: Participation) {
   return participation.startingTime && now < subMinutes(participation.startingTime, 1);
 }
 
-function StartContestButton({ participation }: { participation: Participation }) {
-  const { setParticipation } = useTeacher();
+function StartContestButton() {
+  const { participation, setParticipation } = useTeacher();
 
   const modalRef = useRef<HTMLDialogElement>(null);
   const [error, setError] = useState<Error>();
@@ -72,8 +72,8 @@ function StartContestButton({ participation }: { participation: Participation })
   );
 }
 
-function StopContestButton({ participation }: { participation: Participation }) {
-  const { setParticipation } = useTeacher();
+function StopContestButton() {
+  const { participation, setParticipation } = useTeacher();
   const modalRef = useRef<HTMLDialogElement>(null);
   const [error, setError] = useState<Error>();
 
@@ -108,13 +108,9 @@ function StopContestButton({ participation }: { participation: Participation }) 
   );
 }
 
-function ContestData({
-  contest,
-  participation,
-}: {
-  participation: Participation;
-  contest: Contest;
-}) {
+function ContestData() {
+  const { contest, participation } = useTeacher();
+
   const endTime = addMinutes(participation.startingTime!, contest.duration!);
 
   const getNow = useTime();
@@ -232,8 +228,8 @@ function StudentRestoreButton({
   );
 }
 
-function StudentRestoreList({ participation }: { participation: Participation }) {
-  const [studentRestores, approve, reject] = useTeacherStudentRestores(participation);
+function StudentRestoreList() {
+  const [studentRestores, approve, reject] = useTeacherStudentRestores();
 
   if (!studentRestores || studentRestores.length === 0) {
     return <>Nessuna richiesta.</>;
@@ -281,7 +277,7 @@ export function TeacherAdmin() {
           La gara si potrà svolgere dalle {formatTime(contest.contestWindowStart)} alle{" "}
           {formatTime(contest.contestWindowEnd)} del {formatDate(contest.contestWindowStart)}.
           <div className="mt-2 flex justify-center">
-            <DownloadPdfButton participation={participation} contest={contest} />
+            <DownloadPdfButton />
           </div>
         </div>
       </div>
@@ -289,19 +285,11 @@ export function TeacherAdmin() {
         <div className="card-body">
           <h2 className="card-title">Gestione Gara</h2>
           {/* contest data */}
-          {!participation.startingTime ? (
-            <p>La gara non è ancora iniziata!</p>
-          ) : (
-            <ContestData participation={participation} contest={contest} />
-          )}
+          {!participation.startingTime ? <p>La gara non è ancora iniziata!</p> : <ContestData />}
           <div className="mt-2 flex flex-wrap justify-center gap-3">
             {/* contest buttons */}
-            {canStartContest(now, participation, contest) && (
-              <StartContestButton participation={participation} key={participation.id} />
-            )}
-            {canUndoContest(now, participation) && (
-              <StopContestButton participation={participation} />
-            )}
+            {canStartContest(now, participation, contest) && <StartContestButton />}
+            {canUndoContest(now, participation) && <StopContestButton />}
             <a /* TODO */
               className="btn btn-info"
               href={`./students/#${participation.contestId}`}
@@ -316,7 +304,7 @@ export function TeacherAdmin() {
         <div className="card-body">
           <h2 className="card-title">Richieste di accesso</h2>
           <Suspense fallback={<Loading />}>
-            <StudentRestoreList participation={participation} />
+            <StudentRestoreList />
           </Suspense>
         </div>
       </div>
@@ -324,17 +312,11 @@ export function TeacherAdmin() {
   );
 }
 
-function DownloadPdfButton({
-  participation,
-  contest,
-}: {
-  participation: Participation;
-  contest: Contest;
-}) {
-  const { getPdfStatements } = useTeacher();
+function DownloadPdfButton() {
+  const { participation, contest, getPdfStatements } = useTeacher();
 
   const onClick = async () => {
-    const statements = await getPdfStatements(participation.pdfVariants ?? []);
+    const statements = await getPdfStatements();
 
     const { PDFDocument } = await import("@cantoo/pdf-lib");
     const pdf = await PDFDocument.create();
