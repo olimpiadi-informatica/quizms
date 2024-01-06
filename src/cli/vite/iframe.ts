@@ -5,10 +5,10 @@ import { is, traverse } from "estree-toolkit";
 import { isString } from "lodash-es";
 import MagicString from "magic-string";
 import { OutputChunk } from "rollup";
-import { PluginOption } from "vite";
+import { HtmlTagDescriptor, PluginOption } from "vite";
 
 import { warning } from "../utils/logs";
-import htmlTemplate from "./htmlTemplate";
+import { generateHtml, generateHtmlFromBundle } from "./html";
 
 export default function iframe(): PluginOption {
   let isBuild = false;
@@ -101,34 +101,11 @@ export default function iframe(): PluginOption {
         map: s.generateMap({ hires: true }),
       };
     },
-    generateBundle(this, options, bundle) {
+    async generateBundle(this, options, bundle) {
       for (const [srcId, iframeId] of iframeIds) {
         const entry = bundle[this.getFileName(srcId)] as OutputChunk;
 
-        const modules = new Set<string>();
-        const queue = [entry];
-
-        while (queue.length) {
-          const chunk = queue.pop()!;
-          for (const dep of [...chunk.imports, ...chunk.dynamicImports]) {
-            if (modules.has(dep)) continue;
-            modules.add(dep);
-            queue.push(bundle[dep] as OutputChunk);
-          }
-          for (const css of chunk.viteMetadata?.importedCss ?? []) {
-            modules.add(css);
-          }
-        }
-
-        const head = [...modules]
-          .map((fileName) => {
-            const rel = fileName.endsWith(".css") ? "stylesheet" : "modulepreload";
-            return `<link rel="${rel}" href="/${fileName}">`;
-          })
-          .join("\n    ");
-        const body = `<script type="module" src="/${entry.fileName}"></script>`;
-        const html = htmlTemplate(body, head);
-
+        const html = await generateHtmlFromBundle(entry, bundle, { includeDynamicImports: true });
         this.setAssetSource(iframeId, html);
       }
     },
@@ -136,8 +113,12 @@ export default function iframe(): PluginOption {
       server.middlewares.use(async (req, res, next) => {
         const url = new URL(req.url!, `http://${req.headers.host}`);
         if (url.pathname === "/__iframe.html") {
-          const body = `<script type="module" src="/@fs${url.searchParams.get("src")}"></script>`;
-          const html = htmlTemplate(body);
+          const tag: HtmlTagDescriptor = {
+            tag: "script",
+            attrs: { type: "module", src: `/@fs${url.searchParams.get("src")}` },
+            injectTo: "body",
+          };
+          const html = await generateHtml(tag);
           const finalHtml = await server.transformIndexHtml(req.url!, html);
 
           res.setHeader("Content-Type", "text/html");

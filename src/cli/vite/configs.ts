@@ -14,7 +14,6 @@ import { mdxOptions } from "~/mdx/plugins";
 
 import iframe from "./iframe";
 import images from "./images";
-import preconnect from "./preconnect";
 import python from "./python";
 import reactEntry from "./reactEntry";
 import resolveContests from "./resolveContests";
@@ -55,7 +54,6 @@ export default function (
       images(),
       inspect(),
       { enforce: "pre", ...mdxPlugin({ ...mdxOptions, ...options?.mdx }) },
-      preconnect(),
       python(),
       react({ plugins: swcPlugins }),
       reactEntry(),

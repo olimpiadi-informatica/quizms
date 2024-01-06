@@ -3,9 +3,9 @@ import { extname, join } from "node:path";
 
 import { stubFalse, stubTrue } from "lodash-es";
 import { OutputChunk } from "rollup";
-import { PluginOption } from "vite";
+import { HtmlTagDescriptor, PluginOption } from "vite";
 
-import htmlTemplate from "./htmlTemplate";
+import { generateHtml, generateHtmlFromBundle } from "./html";
 
 export default function reactEntry(): PluginOption {
   let isBuild = false;
@@ -63,37 +63,13 @@ createRoot(document.getElementById("app")).render(
 export function renderToStaticMarkup() { throw new Error("react-dom/server is not available in the browser"); }`;
       }
     },
-    generateBundle(this, _, bundle) {
+    async generateBundle(this, _, bundle) {
       for (const [pageId, entryId] of Object.entries(pages)) {
         const entry = Object.values(bundle).find(
           (chunk) => "facadeModuleId" in chunk && chunk.facadeModuleId === entryId,
         ) as OutputChunk;
 
-        const modules = new Set<string>();
-        const queue = [entry];
-
-        while (queue.length) {
-          const chunk = queue.pop()!;
-          for (const dep of chunk.imports) {
-            if (modules.has(dep)) continue;
-            modules.add(dep);
-            queue.push(bundle[dep] as OutputChunk);
-          }
-          for (const css of chunk.viteMetadata?.importedCss ?? []) {
-            modules.add(css);
-          }
-        }
-
-        const head = [...modules]
-          .map((fileName) => {
-            const rel = fileName.endsWith(".css") ? "stylesheet" : "modulepreload";
-            return `<link rel="${rel}" href="/${fileName}">`;
-          })
-          .join("\n    ");
-        const body = `<script type="module" src="/${entry.fileName}"></script>`;
-
-        const html = htmlTemplate(body, head);
-
+        const html = await generateHtmlFromBundle(entry, bundle);
         this.setAssetSource(pageId, html);
       }
     },
@@ -114,11 +90,13 @@ export function renderToStaticMarkup() { throw new Error("react-dom/server is no
               });
               res.end();
             } else {
-              const body = `\
-    <script type="module">
-      import "virtual:react-entry?src=${encodeURIComponent(entry)}";
-    </script>`;
-              const html = htmlTemplate(body);
+              const tag: HtmlTagDescriptor = {
+                tag: "script",
+                attrs: { type: "module" },
+                children: `import "virtual:react-entry?src=${encodeURIComponent(entry)}";`,
+                injectTo: "body",
+              };
+              const html = await generateHtml(tag);
               const finalHtml = await server.transformIndexHtml(req.url!, html);
 
               res.setHeader("Content-Type", "text/html");
