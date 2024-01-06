@@ -1,5 +1,6 @@
 import child_process from "node:child_process";
-import { extname } from "node:path";
+import { existsSync } from "node:fs";
+import { basename, dirname, extname, join } from "node:path";
 import { promisify } from "node:util";
 
 import { PluginOption } from "vite";
@@ -22,6 +23,16 @@ export default module;`;
 }
 
 export async function executePython(file: string): Promise<any> {
+  const fileRelative = join(basename(dirname(file)), basename(file));
+  if (!existsSync(file)) {
+    throw new Error(`Cannot import \`${fileRelative}\`: file does not exist.`);
+  }
   const { stdout } = await execFile("python3", [file]);
-  return JSON.parse(stdout);
+  try {
+    return JSON.parse(stdout);
+  } catch (e: any) {
+    throw new Error(
+      `Cannot import \`${fileRelative}\`: output must be a valid JSON: ${e.message}.`,
+    );
+  }
 }

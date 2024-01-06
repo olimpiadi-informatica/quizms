@@ -1,12 +1,16 @@
+import { basename, join } from "node:path";
+
 import { AssignmentProperty, Program } from "estree";
 import { builders as b, is, traverse } from "estree-toolkit";
 import { Plugin } from "unified";
 
 const recmaVariants: Plugin<[], Program> = () => {
-  return (ast) => {
+  return (ast, file) => {
     const found = findVariants(ast);
     if (found) {
-      injectLocalVariables(ast);
+      injectLocalVariables(ast, join(basename(file.dirname ?? ""), file.basename ?? ""));
+    } else {
+      checkUndefinedVariables(ast, join(basename(file.dirname ?? ""), file.basename ?? ""));
     }
   };
 };
@@ -39,7 +43,7 @@ function findVariants(ast: Program) {
   return variantsFound;
 }
 
-function injectLocalVariables(ast: Program) {
+function injectLocalVariables(ast: Program, file: string) {
   traverse(ast, {
     $: { scope: true },
 
@@ -89,8 +93,8 @@ function injectLocalVariables(ast: Program) {
 
         // for (const _variable of Object.keys(_allVariants[_variant]))
         //   if (/^[^a-z]./.test(name))
-        //     throw new Error(`Invalid variable name: ${_variable}`);
-        const checkVariables = b.forOfStatement(
+        //     throw new Error(`Invalid variable name ${_variable}`);
+        const checkVariableNames = b.forOfStatement(
           b.variableDeclaration("const", [b.variableDeclarator(b.identifier("_variable"))]),
           b.callExpression(b.memberExpression(b.identifier("Object"), b.identifier("keys")), [
             b.memberExpression(b.identifier("_allVariants"), b.identifier("_variant"), true),
@@ -115,15 +119,37 @@ function injectLocalVariables(ast: Program) {
                   "+",
                   b.binaryExpression(
                     "+",
-                    b.literal("Invalid variable name: `"),
+                    b.literal(`Invalid variable name \``),
                     b.identifier("_variable"),
                   ),
-                  b.literal("`. Variables names must start with a lowercase letter."),
+                  b.literal(
+                    `\` in file \`${file}\`: variable names must start with a lowercase letter.`,
+                  ),
                 ),
               ]),
             ),
           ),
           false,
+        );
+
+        // if (!("name" in _allVariants[_variant]))
+        //   throw new Error(`Variable \`${_name}\` is not defined`);
+        const checkVariables = variableNames.map((name) =>
+          b.ifStatement(
+            b.unaryExpression(
+              "!",
+              b.binaryExpression(
+                "in",
+                b.literal(name),
+                b.memberExpression(b.identifier("_allVariants"), b.identifier("_variant"), true),
+              ),
+            ),
+            b.throwStatement(
+              b.newExpression(b.identifier("Error"), [
+                b.literal(`Variable \`${name}\` is not defined in file \`${file}\`.`),
+              ]),
+            ),
+          ),
         );
 
         // const { ... } = _allVariants[_variant];
@@ -148,7 +174,39 @@ function injectLocalVariables(ast: Program) {
           ),
         );
 
-        node.body.body.unshift(allVariants, variant, checkVariables, variables, setVariantCount);
+        node.body.body.unshift(
+          allVariants,
+          variant,
+          checkVariableNames,
+          ...checkVariables,
+          variables,
+          setVariantCount,
+        );
+      }
+    },
+  });
+}
+
+function checkUndefinedVariables(ast: Program, file: string) {
+  traverse(ast, {
+    $: { scope: true },
+
+    FunctionDeclaration(path) {
+      const variableNames = Object.keys(path.scope!.globalBindings).filter(
+        (name) => /^([a-z]|[A-Z]$)/.test(name) && name !== "import" && name !== "undefined",
+      );
+
+      const node = path.node!;
+      if (node.id?.name === "_createMdxContent" && variableNames.length > 0) {
+        node.body.body.unshift(
+          b.throwStatement(
+            b.newExpression(b.identifier("Error"), [
+              b.literal(
+                `Undefined variable \`${variableNames[0]}\` in file \`${file}\`. If you are using variants, make sure to imports them first.`,
+              ),
+            ]),
+          ),
+        );
       }
     },
   });
