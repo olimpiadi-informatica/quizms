@@ -40,6 +40,7 @@ export default function (
     envPrefix: "QUIZMS_",
     resolve: {
       alias: {
+        "@olinfo/quizms": "quizms",
         vm: "vm-browserify",
       },
       dedupe: ["react", "react-dom", "@mdx-js/react"],

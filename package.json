@@ -1,17 +1,21 @@
 {
-  "name": "quizms",
-  "version": "1.0.0-pre-alpha.1",
+  "name": "@olinfo/quizms",
+  "version": "1.0.0-beta.1",
   "type": "module",
-  "private": true,
   "author": "Alessandro Bortolin <bortolin.alessandro@outlook.it>",
   "license": "MIT",
   "scripts": {
+    "prebuild": "yarn lint",
     "build": "rm -rf dist/ && NODE_ENV=production node scripts/build.js build",
     "watch": "node scripts/build.js watch",
-    "lint": "eslint --fix . ; tsc --noEmit",
-    "fmt": "prettier --write src/"
+    "lint": "eslint --fix . && tsc --noEmit",
+    "fmt": "prettier --write src/",
+    "prepack": "yarn build",
+    "release": "npm publish"
   },
-  "bin": "bin/bin.js",
+  "bin": {
+    "quizms": "bin/bin.js"
+  },
   "exports": {
     "./student": "./dist/core/student/index.js",
     "./teacher": "./dist/core/teacher/index.js",
@@ -24,6 +28,10 @@
     "dist"
   ],
   "dependencies": {
+    "@ag-grid-community/client-side-row-model": "^31.0",
+    "@ag-grid-community/core": "^31.0",
+    "@ag-grid-community/react": "^31.0",
+    "@ag-grid-community/styles": "^31.0",
     "@blockly/disable-top-blocks": "^0.4",
     "@cantoo/pdf-lib": "^1.20.0",
     "@date-fns/utc": "^1.1",
@@ -33,10 +41,6 @@
     "@swc/plugin-transform-imports": "^1.5",
     "@vitejs/plugin-react-swc": "^3.3",
     "acorn": "^8.10",
-    "@ag-grid-community/core": "^31.0",
-    "@ag-grid-community/styles": "^31.0",
-    "@ag-grid-community/client-side-row-model": "^31.0",
-    "@ag-grid-community/react": "^31.0",
     "blockly": "^10.0",
     "classnames": "^2.3",
     "commander": "^11.0",
