@@ -26,17 +26,19 @@ export function fatal(msg: string): never {
 }
 
 export function error(msg: string) {
-  console.error(`${pc.red("✗")} ${msg}`);
+  console.error(`${clearLine}${pc.red("✗")} ${msg}`);
 }
 
 export function warning(msg: string) {
-  console.warn(`${pc.yellow("⚠")} ${msg}`);
+  console.warn(`${clearLine}${pc.yellow("⚠")} ${msg}`);
 }
 
 export function info(msg: string) {
-  console.info(`${pc.blue("𝓲")} ${msg}`);
+  console.info(`${clearLine}${pc.blue("𝓲")} ${msg}`);
 }
 
 export function success(msg: string) {
-  console.info(`${pc.green("✓")} ${msg}`);
+  console.info(`${clearLine}${pc.green("✓")} ${msg}`);
 }
+
+const clearLine = "\x1b[2K\x1b[0G";

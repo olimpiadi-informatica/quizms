@@ -69,20 +69,20 @@ export default function (
             return;
           }
           if (log.code === "EVAL" && log.loc?.file?.includes("vm-browserify")) return;
-          warning(log.message);
+          let message = log.message;
           if (log.loc) {
-            console.log(
-              `  ${pc.blue("➜")} ${pc.bold(`${log.loc.file}:${log.loc.line}:${log.loc.column}`)}`,
-            );
+            message += `  ${pc.blue("➜")} ${pc.bold(
+              `${log.loc.file}:${log.loc.line}:${log.loc.column}`,
+            )}`;
+
             if (log.frame) {
-              console.log(
-                log.frame
-                  .split("\n")
-                  .map((l) => " " + l)
-                  .join("\n"),
-              );
+              message += log.frame
+                .split("\n")
+                .map((l) => " " + l)
+                .join("\n");
             }
           }
+          warning(message);
           if (log.url) {
             info(`See ${pc.bold(log.url)} for more information.`);
           }

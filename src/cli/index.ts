@@ -1,4 +1,4 @@
-import { cwd } from "node:process";
+import { cwd, exit } from "node:process";
 
 import { InvalidArgumentError, program } from "commander";
 import "dotenv/config";
@@ -8,7 +8,6 @@ import devServer from "./dev";
 import staticExport from "./export";
 import firebaseCommand from "./firebase";
 import print from "./print";
-import { cleanup } from "./utils/logs";
 import variants from "./variants";
 
 function safeParseInt(value: string): number {
@@ -61,4 +60,4 @@ async function main() {
   await program.parseAsync();
 }
 
-main().then(() => cleanup());
+main().then(() => exit(0));

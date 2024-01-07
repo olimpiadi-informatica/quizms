@@ -72,7 +72,7 @@ Make sure it exists or specify a different entry file using \`--entry\`.`);
 
   if (options.server) {
     success(`Server started: ${pc.bold(pc.cyan(url))}`);
-    return;
+    await new Promise(() => {});
   }
 
   await generatePdfs(generationConfigs, url, options.outDir);

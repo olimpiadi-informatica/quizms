@@ -19,4 +19,6 @@ export default async function devServer(options: DevOptions) {
   await server.listen(options.port);
 
   server.printUrls();
+
+  await new Promise(() => {});
 }
