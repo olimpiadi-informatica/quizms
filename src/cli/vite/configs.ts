@@ -5,7 +5,7 @@ import { CompileOptions as MdxOptions } from "@mdx-js/mdx";
 import mdxPlugin from "@mdx-js/rollup";
 import react from "@vitejs/plugin-react-swc";
 import pc from "picocolors";
-// import { visualizer } from "rollup-plugin-visualizer";
+import { visualizer } from "rollup-plugin-visualizer";
 import { InlineConfig } from "vite";
 import inspect from "vite-plugin-inspect";
 
@@ -40,7 +40,10 @@ export default function (
     envPrefix: "QUIZMS_",
     resolve: {
       alias: [
-        { find: /^quizms\/(.*)/, replacement: "@olinfo/quizms/$1" },
+        {
+          find: /^quizms\/(.*)/,
+          replacement: process.env.NODE_ENV === "production" ? "@olinfo/quizms/$1" : "quizms/$1",
+        },
         { find: "vm", replacement: "vm-browserify" },
       ],
       dedupe: ["react", "react-dom", "@mdx-js/react"],
@@ -58,7 +61,7 @@ export default function (
       python(),
       react({ plugins: swcPlugins }),
       reactEntry(),
-      // visualizer({ filename: "dist/stats.html" }),
+      process.env.NODE_ENV !== "production" && visualizer({ filename: "dist/stats.html" }),
     ],
     build: {
       rollupOptions: {

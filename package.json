@@ -80,7 +80,6 @@
     "remark-smartypants": "^2.0",
     "rollup": "^4.9",
     "rollup-plugin-license": "^3.2",
-    "rollup-plugin-visualizer": "^5.11",
     "sharp": "^0.32",
     "smol-toml": "^1.1",
     "svgo": "^3.0",
@@ -123,6 +122,7 @@
     "postcss": "^8.4",
     "prettier": "^3.0",
     "prettier-plugin-tailwindcss": "^0.5",
+    "rollup-plugin-visualizer": "^5.11",
     "tailwindcss": "^3.2",
     "typescript": "^5.1"
   },
