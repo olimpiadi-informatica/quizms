@@ -39,10 +39,10 @@ export default function (
     mode,
     envPrefix: "QUIZMS_",
     resolve: {
-      alias: {
-        "@olinfo/quizms": "quizms",
-        vm: "vm-browserify",
-      },
+      alias: [
+        { find: /^quizms\/(.*)/, replacement: "@olinfo/quizms/$1" },
+        { find: "vm", replacement: "vm-browserify" },
+      ],
       dedupe: ["react", "react-dom", "@mdx-js/react"],
       extensions: [".js", ".jsx", ".ts", ".tsx", ".md", ".mdx"],
     },
