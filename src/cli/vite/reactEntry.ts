@@ -1,16 +1,19 @@
 import { access } from "node:fs/promises";
 import { extname, join } from "node:path";
 
-import { stubFalse, stubTrue } from "lodash-es";
-import { OutputChunk } from "rollup";
+import { is, traverse } from "estree-toolkit";
+import { isString, stubFalse, stubTrue } from "lodash-es";
+import { OutputChunk, PluginContext } from "rollup";
 import { HtmlTagDescriptor, PluginOption } from "vite";
 
+import { error, warning } from "../utils/logs";
 import { generateHtml, generateHtmlFromBundle } from "./html";
 
 export default function reactEntry(): PluginOption {
   let isBuild = false;
   let root = "";
   const pages: Record<string, string> = {};
+  const options: Record<string, Record<string, string | undefined>> = {};
 
   return {
     name: "quizms:entry",
@@ -28,13 +31,15 @@ export default function reactEntry(): PluginOption {
         return "\0" + id;
       }
     },
-    load(this, id) {
+    async load(this, id) {
       const [path, query] = id.split("?");
       if (path === "\0virtual:react-entry") {
         const params = new URLSearchParams(query);
         const page = params.get("src")!;
 
         const isVirtual = page.startsWith("virtual:");
+        const entry = isVirtual ? page : join(root, page);
+
         if (isBuild) {
           const pageId = this.emitFile({
             type: "asset",
@@ -43,9 +48,12 @@ export default function reactEntry(): PluginOption {
               : page.replace(/\.jsx$/, ".html"),
           });
           pages[pageId] = id;
+
+          if (!isVirtual) {
+            options[pageId] = await extractMeta(this, entry, page);
+          }
         }
 
-        const entry = isVirtual ? page : join(root, page);
         return `\
 import { createElement, StrictMode } from "react";
 import { createRoot } from "react-dom/client";
@@ -69,7 +77,7 @@ export function renderToStaticMarkup() { throw new Error("react-dom/server is no
           (chunk) => "facadeModuleId" in chunk && chunk.facadeModuleId === entryId,
         ) as OutputChunk;
 
-        const html = await generateHtmlFromBundle(entry, bundle);
+        const html = await generateHtmlFromBundle(entry, bundle, options[pageId]);
         this.setAssetSource(pageId, html);
       }
     },
@@ -110,4 +118,38 @@ export function renderToStaticMarkup() { throw new Error("react-dom/server is no
       });
     },
   };
+}
+
+async function extractMeta(ctx: PluginContext, id: string, file: string) {
+  const module = await ctx.load({ id });
+  const ast = ctx.parse(module.code!);
+
+  const meta: Record<string, string | undefined> = {};
+  traverse(ast, {
+    ExportNamedDeclaration(path) {
+      const node = path.node!;
+      if (!is.variableDeclaration(node.declaration)) return;
+      for (const declarator of node.declaration.declarations) {
+        if (!is.identifier(declarator.id)) continue;
+
+        for (const name of ["title", "description"]) {
+          if (name !== declarator.id.name) continue;
+          if (!is.literal(declarator.init) || !isString(declarator.init.value)) {
+            error(`\`${name}\` export of ${file} must be a string literal.`);
+            meta[name] = undefined;
+          } else {
+            meta[name] = declarator.init.value;
+          }
+        }
+      }
+    },
+  });
+
+  if (!("title" in meta)) {
+    error(`\`${file}\` must export a title.`);
+  } else if (!("description" in meta)) {
+    warning(`\`${file}\` should export a description.`);
+  }
+
+  return meta;
 }

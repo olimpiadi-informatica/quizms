@@ -12,9 +12,7 @@ const template = `\
 <html lang="it">
   <head>
     <meta charset="utf-8" />
-    <title>QuizMS</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="" />
   </head>
   <body>
     <div id="app"></div>
@@ -60,7 +58,11 @@ function tagToHast(tag: HtmlTagDescriptor): Element {
 export function generateHtmlFromBundle(
   entry: OutputChunk,
   bundle: OutputBundle,
-  options?: { includeDynamicImports: boolean },
+  options?: {
+    title?: string;
+    description?: string;
+    includeDynamicImports?: boolean;
+  },
 ) {
   const modules = new Set<string>();
   const queue = [entry];
@@ -79,7 +81,24 @@ export function generateHtmlFromBundle(
     }
   }
 
-  const tags: HtmlTagDescriptor[] = [];
+  const tags: HtmlTagDescriptor[] = [
+    {
+      tag: "title",
+      children: options?.title ?? "QuizMS",
+      injectTo: "head",
+    },
+    {
+      tag: "meta",
+      attrs: { name: "description", content: options?.description ?? "" },
+      injectTo: "head",
+    },
+    {
+      tag: "script",
+      attrs: { type: "module", src: "/" + entry.fileName },
+      injectTo: "body",
+    },
+  ];
+
   for (const fileName of modules) {
     tags.push({
       tag: "link",
@@ -90,12 +109,6 @@ export function generateHtmlFromBundle(
       injectTo: "head",
     });
   }
-
-  tags.push({
-    tag: "script",
-    attrs: { type: "module", src: `/${entry.fileName}` },
-    injectTo: "body",
-  });
 
   if (process.env.QUIZMS_TIME_SERVER) {
     tags.push({
