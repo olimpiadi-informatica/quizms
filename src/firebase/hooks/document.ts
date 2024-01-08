@@ -64,7 +64,13 @@ export function useDocumentOptional<T>(
       if (!options?.subscribe) return;
       const unsubscribe = onSnapshot(
         ref,
-        (snap) => setData([snap.data() ?? null]),
+        (snap) => {
+          try {
+            setData([snap.data() ?? null]);
+          } catch (error) {
+            showBoundary(error);
+          }
+        },
         (error) => showBoundary(error),
       );
       return () => unsubscribe();

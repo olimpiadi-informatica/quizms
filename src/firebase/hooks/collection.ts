@@ -75,7 +75,11 @@ export function useCollection<
       const unsubscribe = onSnapshot(
         q,
         async (snap) => {
-          setData(snap.docs.map((doc) => doc.data()));
+          try {
+            setData(snap.docs.map((doc) => doc.data()));
+          } catch (error) {
+            showBoundary(error);
+          }
         },
         (error) => showBoundary(error),
       );
