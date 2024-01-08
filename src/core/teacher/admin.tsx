@@ -1,4 +1,4 @@
-import React, { Suspense, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 
 import {
   addMinutes,
@@ -8,18 +8,18 @@ import {
   subMinutes,
 } from "date-fns";
 import { saveAs } from "file-saver";
-import { groupBy, range } from "lodash-es";
+import { range } from "lodash-es";
 
-import { Contest, Participation, StudentRestore } from "~/models";
+import { Contest, Participation } from "~/models";
 import { formatDate, formatTime } from "~/utils/date";
-import { hash, randomToken } from "~/utils/random";
+import { randomToken } from "~/utils/random";
 
 import { Button, LoadingButtons } from "../components/button";
-import Loading from "../components/loading";
 import Modal from "../components/modal";
 import { useIsAfter, useTime } from "../components/time";
 import Timer from "../components/timer";
-import { useTeacher, useTeacherStudentRestores } from "./provider";
+import StudentRestoreList from "./adminStudentRestore";
+import { useTeacher } from "./provider";
 
 function canStartContest(now: Date, participation: Participation, contest: Contest) {
   if (now < contest.contestWindowStart! || now > contest.contestWindowEnd!) return false;
@@ -159,96 +159,6 @@ function ContestData() {
   );
 }
 
-function StudentRestoreButton({
-  studentRestore,
-  approve,
-  reject,
-}: {
-  studentRestore: StudentRestore[];
-  approve: (studentRestore: StudentRestore) => Promise<void>;
-  reject: (studentId: string) => Promise<void>;
-}) {
-  const modalRef = useRef<HTMLDialogElement>(null);
-  const [code, setCode] = useState("");
-
-  const targetCodes = studentRestore.map((request) =>
-    `${hash(request.id) % 1000}`.padStart(3, "0"),
-  );
-
-  const approveRequest = async () => {
-    const request = studentRestore.find(
-      (request) => `${hash(request.id) % 1000}`.padStart(3, "0") === code,
-    );
-    if (request) {
-      await approve(request);
-    }
-  };
-
-  const rejectRequest = async () => {
-    await reject(studentRestore[0].studentId);
-  };
-
-  return (
-    <>
-      <button className="btn btn-success" onClick={() => modalRef.current?.showModal()}>
-        Richiesta di accesso {studentRestore[0].name} {studentRestore[0].surname}
-      </button>
-      <Modal ref={modalRef} title="Conferma">
-        <p>
-          {studentRestore[0].name} {studentRestore[0].surname} sta cercando di accedere alla gara.
-          Per approvarlo, inserisci il codice di conferma che gli è stato mostrato.
-        </p>
-        <label className="form-control w-full">
-          <div className="label">
-            <span className="label-text">Codice di conferma</span>
-          </div>
-          <input
-            type="number"
-            placeholder="Inserisci codice"
-            value={code}
-            onChange={(e) => setCode(e.target.value)}
-            className="input input-bordered w-full"
-          />
-        </label>
-        <div className="mt-3 flex flex-row justify-center gap-3">
-          <LoadingButtons>
-            <Button className="btn-info" onClick={rejectRequest}>
-              Rigetta
-            </Button>
-            <Button
-              className="btn-error"
-              onClick={approveRequest}
-              disabled={!targetCodes.includes(code)}>
-              Approva
-            </Button>
-          </LoadingButtons>
-        </div>
-      </Modal>
-    </>
-  );
-}
-
-function StudentRestoreList() {
-  const [studentRestores, approve, reject] = useTeacherStudentRestores();
-
-  if (!studentRestores || studentRestores.length === 0) {
-    return <>Nessuna richiesta.</>;
-  }
-
-  return (
-    <div className="flex flex-col items-start gap-3">
-      {Object.entries(groupBy(studentRestores, "studentId")).map(([id, requests]) => (
-        <StudentRestoreButton
-          studentRestore={requests}
-          key={id}
-          approve={approve}
-          reject={reject}
-        />
-      ))}
-    </div>
-  );
-}
-
 export function TeacherAdmin() {
   const { contest, participation } = useTeacher();
 
@@ -269,7 +179,7 @@ export function TeacherAdmin() {
   }
 
   return (
-    <div className="flex flex-col gap-5 p-5 pb-32">
+    <div className="flex flex-col gap-5 p-5">
       <div className="highlight-border card bg-base-200">
         <div className="card-body">
           <h2 className="card-title">Informazioni Gara</h2>
@@ -301,11 +211,9 @@ export function TeacherAdmin() {
         </div>
       </div>
       <div className="highlight-border card bg-base-200">
-        <div className="card-body">
+        <div className="max-h card-body h-[28rem] max-h-screen">
           <h2 className="card-title">Richieste di accesso</h2>
-          <Suspense fallback={<Loading />}>
-            <StudentRestoreList />
-          </Suspense>
+          <StudentRestoreList />
         </div>
       </div>
     </div>
