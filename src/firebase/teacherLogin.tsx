@@ -4,15 +4,11 @@ import { FirebaseOptions } from "firebase/app";
 import { User, getAuth, signOut } from "firebase/auth";
 import {
   Firestore,
-  collection,
   doc,
   getDocs,
-  limit,
-  query,
   runTransaction,
   serverTimestamp,
   setDoc,
-  where,
   writeBatch,
 } from "firebase/firestore";
 import { getBytes, getStorage, ref } from "firebase/storage";
@@ -31,6 +27,7 @@ import {
   variantConverter,
 } from "~/firebase/converters";
 import { useCollection, usePrecompiledPasswordAuth, useSignInWithPassword } from "~/firebase/hooks";
+import query from "~/firebase/query";
 import { Participation, StudentRestore, studentHash } from "~/models";
 
 export function TeacherLogin({
@@ -179,10 +176,9 @@ async function setParticipation(
     // - delete the participation token;
     // - delete the all the students with that token.
 
-    const q = query(
-      collection(participationRef, "students").withConverter(studentConverter),
-      where("token", "==", prevParticipation.token),
-    );
+    const q = query(db, `participations/${participation.id}/students`, studentConverter, {
+      constraints: { token: prevParticipation.token },
+    });
 
     const snapshot = await getDocs(q);
     const students = snapshot.docs.map((doc) => doc.data());
@@ -243,9 +239,13 @@ function useStudentRestores(participationId: string, token: string) {
   const reject = async (studentId: string) => {
     // Delete all the requests for this student.
     const q = query(
-      collection(base, "studentRestore").withConverter(studentRestoreConverter),
-      where("studentId", "==", studentId),
-      limit(400),
+      db,
+      `participations/${participationId}/studentRestore`,
+      studentRestoreConverter,
+      {
+        constraints: { studentId },
+        limit: 400,
+      },
     );
 
     for (;;) {
@@ -265,12 +265,10 @@ function useStudentRestores(participationId: string, token: string) {
     // we delete all of them just to be sure. Firestore limits the number of writes in a batch,
     // so we delete only the first 400 mappings, it's very unlikely that there are more, but it
     // shouldn't be a problem if there are still some old mappings in the database.
-    const q = query(
-      collection(db, "studentMappingUid").withConverter(studentMappingUidConverter),
-      where("studentId", "==", request.studentId),
-      where("participationId", "==", request.participationId),
-      limit(400),
-    );
+    const q = query(db, "studentMappingUid", studentMappingUidConverter, {
+      constraints: { studentId: request.studentId, participationId },
+      limit: 400,
+    });
     const prevMappings = await getDocs(q);
 
     const batch = writeBatch(db);
@@ -281,7 +279,7 @@ function useStudentRestores(participationId: string, token: string) {
     batch.set(doc(db, "studentMappingUid", request.id).withConverter(studentMappingUidConverter), {
       id: request.id,
       studentId: request.studentId,
-      participationId: request.participationId,
+      participationId,
     });
     for (const mapping of prevMappings.docs) {
       batch.delete(doc(db, "studentMappingUid", mapping.id));

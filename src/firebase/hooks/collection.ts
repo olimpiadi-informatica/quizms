@@ -7,18 +7,15 @@ import {
   collection,
   doc,
   getDocs,
-  limit,
   onSnapshot,
-  orderBy,
-  query,
   setDoc,
-  where,
 } from "firebase/firestore";
 import { sortBy } from "lodash-es";
 import { useErrorBoundary } from "react-error-boundary";
 import useSWR, { KeyedMutator, MutatorOptions, SWRConfiguration } from "swr";
 
 import { useDb } from "~/firebase/baseLogin";
+import query from "~/firebase/query";
 
 import { useSubscriptionListener } from "./subscription";
 
@@ -30,27 +27,21 @@ const mutationConfig: MutatorOptions = {
 
 type CollectionOptions<T> = {
   constraints?: { [P in keyof T]?: T[P] | T[P][] };
-  orderBy?: string;
+  orderBy?: keyof T & string;
   limit?: number;
   subscribe?: boolean;
 };
 
-export function useCollection<
-  T extends {
-    id: string;
-  },
->(path: string, converter: FirestoreDataConverter<T>, options?: CollectionOptions<T>) {
+export function useCollection<T extends { id: string }>(
+  path: string,
+  converter: FirestoreDataConverter<T>,
+  options?: CollectionOptions<T>,
+) {
   const db = useDb();
   const { showBoundary } = useErrorBoundary();
 
   const ref = collection(db, path).withConverter(converter);
-  let q: Query<T> = ref;
-  for (const [k, v] of Object.entries(options?.constraints ?? {})) {
-    q = query(q, where(k, Array.isArray(v) ? "in" : "==", v));
-  }
-
-  if (options?.orderBy) q = query(q, orderBy(options.orderBy));
-  if (options?.limit) q = query(q, limit(options.limit));
+  const q = query(db, path, converter, options);
 
   const swrConfig: SWRConfiguration = {
     revalidateIfStale: !options?.subscribe,
