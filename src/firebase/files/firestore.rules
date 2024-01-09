@@ -143,7 +143,6 @@ service cloud.firestore {
             function canStudentCreate() {
                 let participation = getParticipation(participationId);
                 return isAuthenticated(uid)
-                    && participationId == request.resource.data.participationId
                     && participation != null
                     && participation.data.token == request.resource.data.token;
             }

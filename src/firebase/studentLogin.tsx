@@ -133,7 +133,11 @@ function StudentLoginInner({
     } catch (e) {
       if (e instanceof DuplicateStudentError) {
         try {
-          await createStudentRestore(db, e.studentId, e.participationId, student);
+          await createStudentRestore(db, {
+            ...student,
+            id: e.studentId,
+            participationId: e.participationId,
+          });
           modalRef.current?.showModal();
         } catch (e) {
           setError(e as Error);
@@ -289,7 +293,7 @@ function PersonalInformationField({
 }
 
 const StudentRestoreModal = forwardRef(function StudentRestoreModal(
-  props,
+  _props,
   ref: React.Ref<HTMLDialogElement>,
 ) {
   const db = useDb();
@@ -377,29 +381,22 @@ function StudentInner({
   );
 }
 
-async function createStudentRestore(
-  db: Firestore,
-  studentId: string,
-  participationId: string,
-  curStudent: Omit<Student, "id">,
-) {
+async function createStudentRestore(db: Firestore, student: Student) {
   // In this case the users want to log in as an already existing student
   // If it fails, it means that the token is too old
-  const auth = getAuth(db.app);
-  const uid = auth.currentUser!.uid;
 
   try {
     await setDoc(
-      doc(db, `participations/${participationId}/studentRestore/${uid}`).withConverter(
-        studentRestoreConverter,
-      ),
+      doc(
+        db,
+        `participations/${student.participationId}/studentRestore/${student.uid}`,
+      ).withConverter(studentRestoreConverter),
       {
-        id: uid,
-        studentId,
-        participationId,
-        token: curStudent.token,
-        name: curStudent.personalInformation!.name,
-        surname: curStudent.personalInformation!.surname,
+        id: student.uid,
+        studentId: student.id,
+        token: student.token!,
+        name: student.personalInformation!.name as string,
+        surname: student.personalInformation!.surname as string,
       },
     );
   } catch (e) {

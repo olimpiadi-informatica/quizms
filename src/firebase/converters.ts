@@ -4,7 +4,7 @@ import {
   Timestamp,
   serverTimestamp,
 } from "firebase/firestore";
-import { cloneDeepWith, mapValues, omit } from "lodash-es";
+import { cloneDeepWith, isDate, isString, mapValues, omit } from "lodash-es";
 import z, {
   ZodArray,
   ZodDate,
@@ -36,8 +36,11 @@ import validate from "~/utils/validate";
 
 function convertToFirestore(data: Record<string, any>) {
   return cloneDeepWith(omit(data, "id"), (value) => {
-    if (value instanceof Date) {
+    if (isDate(value)) {
       return Timestamp.fromDate(value);
+    }
+    if (isString(value)) {
+      return value.trim();
     }
     if (value === undefined) {
       return null;
