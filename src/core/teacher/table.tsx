@@ -7,10 +7,10 @@ import type {
   ITooltipParams,
 } from "@ag-grid-community/core";
 import { addMinutes, isEqual as isEqualDate } from "date-fns";
-import { cloneDeep, lowerFirst, set, sumBy } from "lodash-es";
+import { cloneDeep, deburr, lowerFirst, set, sumBy } from "lodash-es";
 import { AlertTriangle, FileCheck, Upload, Users } from "lucide-react";
 
-import { Contest, Student, Variant, parsePersonalInformation, studentHash } from "~/models";
+import { Contest, Student, Variant, parsePersonalInformation } from "~/models";
 import { score } from "~/models";
 import { formatDate } from "~/utils/date";
 import { randomId } from "~/utils/random";
@@ -94,11 +94,28 @@ const FinalizeModal = forwardRef(function FinalizeModal(
   const [confirm, setConfirm] = useState("");
 
   const error = useMemo(() => {
-    const filteredStudents = students.filter((p) => p.participationId === participation.id);
+    const prevStudents = new Set<string>();
 
-    const prevStudents = new Set();
+    // Generate a list of string that can uniquely identify a student. Multiple
+    // strings are generated to prevent possible errors during data entry.
+    function normalize(student: Student) {
+      const info = student.personalInformation!;
+      const orderings = [
+        ["name", "surname", "classYear", "classSection"],
+        ["name", "surname", "classYear", "birthDate"],
+        ["surname", "name", "classYear", "classSection"],
+        ["surname", "name", "classYear", "birthDate"],
+      ];
+      return orderings.map((fields) => {
+        return deburr(fields.map((field) => info[field]).join("\n"))
+          .toLowerCase()
+          .replace(/[^a-z\n]/g, "");
+      });
+    }
 
     for (const student of filteredStudents) {
+      if (student.disabled) continue;
+
       const { name, surname } = student.personalInformation ?? {};
 
       const reason = isStudentIncomplete(student, contest, variants);
@@ -107,11 +124,11 @@ const FinalizeModal = forwardRef(function FinalizeModal(
         return `Lo studente ${name} ${surname} non può essere finalizzato: ${lowerFirst(reason)}.`;
       }
 
-      if (!student.disabled) {
-        if (prevStudents.has(studentHash({ ...student, token: "" }))) {
+      for (const normalized of normalize(student)) {
+        if (prevStudents.has(normalized)) {
           return `Lo studente ${name} ${surname} è stato inserito più volte`;
         }
-        prevStudents.add(studentHash({ ...student, token: "" }));
+        prevStudents.add(normalized);
       }
     }
   }, [students, contest, participation, variants]);

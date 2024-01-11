@@ -1,5 +1,6 @@
 import { UTCDateMini } from "@date-fns/utc";
 import { parse as parseDate, subMinutes } from "date-fns";
+import { isDate } from "lodash-es";
 import z from "zod";
 
 import { formatDate } from "~/utils/date";
@@ -61,43 +62,59 @@ export function parsePersonalInformation(
   if (value === undefined || !schema) {
     return [value, undefined];
   }
+  const label = `"${schema.label}"`.toLowerCase();
   switch (schema.type) {
     case "text": {
-      value = value.trim();
-      if (value === "") {
-        return [undefined, "Il campo non può essere vuoto."];
+      value = value
+        .replace(/\s+/g, " ")
+        .replace(/[´`‘’]/g, "'")
+        .trim();
+      if (/[^-'\s\p{Alpha}]/u.test(value)) {
+        const helpUtf8 = /[^\p{ASCII}]/u.test(value) ? " e che la codifica sia UTF-8" : "";
+        return [
+          undefined,
+          `Il campo ${label} contiene caratteri non validi. Assicurati che non ci siano simboli${helpUtf8}.`,
+        ];
       }
       if (value.length > 256) {
-        return [undefined, "Il campo non può essere più lungo di 256 caratteri."];
+        return [undefined, `Il campo ${label} non può essere più lungo di 256 caratteri.`];
       }
       return [value, undefined];
     }
     case "number": {
       const num = Number(value);
       if (isNaN(num)) {
-        return [undefined, "Il valore non è un numero."];
+        return [undefined, `Il campo ${label} deve essere un numero.`];
       }
       if (schema?.min !== undefined && num < schema.min) {
-        return [undefined, `Il valore deve essere maggiore o uguale a ${schema.min}.`];
+        return [undefined, `Il campo ${label} deve essere maggiore o uguale a ${schema.min}.`];
       }
       if (schema?.max !== undefined && num > schema.max) {
-        return [undefined, `Il valore deve essere minore o uguale a ${schema.max}.`];
+        return [undefined, `Il campo ${label} deve essere minore o uguale a ${schema.max}.`];
       }
       return [num, undefined];
     }
     case "date": {
       let date: Date;
-      if (options?.dateFormat) {
-        date = parseDate(value, options.dateFormat, 0);
-        date = subMinutes(date, date.getTimezoneOffset());
+      if (isDate(value)) {
+        date = value;
+      } else if (options?.dateFormat) {
+        date = parseDate(value, options.dateFormat, new Date());
       } else {
         date = new UTCDateMini(value);
       }
+      date = subMinutes(date, date.getTimezoneOffset());
       if (date < schema?.min) {
-        return [undefined, `La data deve essere successiva al ${formatDate(schema.min)}.`];
+        return [
+          undefined,
+          `Il campo ${label} deve contenere una data successiva al ${formatDate(schema.min)}.`,
+        ];
       }
       if (date > schema?.max) {
-        return [undefined, `La data deve essere precedente al ${formatDate(schema.max)}.`];
+        return [
+          undefined,
+          `Il campo ${label} deve contenere una data precedente al ${formatDate(schema.max)}.`,
+        ];
       }
       return [date, undefined];
     }
