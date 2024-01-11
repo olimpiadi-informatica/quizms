@@ -7,10 +7,6 @@ const rl = readline.createInterface({ input: stdin, output: stdout });
 
 rl.on("SIGINT", () => fatal(`Command cancelled.`));
 
-export function cleanup() {
-  rl.close();
-}
-
 export async function confirm(question: string, terminate = true) {
   const ans = await rl.question(`${pc.bold(pc.yellow("?"))} ${question} (y/N) `);
   const yes = ans.toLowerCase() === "y";
