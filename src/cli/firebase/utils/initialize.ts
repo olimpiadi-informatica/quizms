@@ -5,7 +5,7 @@ import { App, initializeApp } from "firebase-admin/app";
 import { getFirestore } from "firebase-admin/firestore";
 import { getStorage } from "firebase-admin/storage";
 
-import { fatal } from "~/cli/utils/logs";
+import { fatal } from "~/utils/logs";
 
 import restApi from "./rest-api";
 

@@ -8,11 +8,10 @@ import Papa from "papaparse";
 import * as toml from "smol-toml";
 import { ZodType } from "zod";
 
+import { fatal, info } from "~/utils/logs";
 import validate from "~/utils/validate";
 
-import { fatal, info } from "./logs";
-
-export async function readCollection<T>(
+export default async function load<T>(
   dir: string,
   collection: string,
   schema: ZodType<T, any, any>,

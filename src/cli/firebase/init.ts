@@ -7,7 +7,7 @@ import { Bucket } from "@google-cloud/storage";
 import { App } from "firebase-admin/app";
 import pc from "picocolors";
 
-import { confirm, error, info, success } from "~/cli/utils/logs";
+import { confirm, error, info, success } from "~/utils/logs";
 
 import firestoreIndexes from "./files/firestore-indexes.json";
 import firestoreRules from "./files/firestore.rules";

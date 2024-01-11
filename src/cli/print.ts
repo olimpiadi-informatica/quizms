@@ -8,10 +8,10 @@ import pc from "picocolors";
 import { InlineConfig, PluginOption, build, mergeConfig, preview } from "vite";
 
 import { GenerationConfig, generationConfigSchema } from "~/models/generation-config";
+import load from "~/models/load";
+import { fatal, info, success } from "~/utils/logs";
 
 import generatePdfs from "./pdf";
-import { fatal, info, success } from "./utils/logs";
-import { readCollection } from "./utils/parser";
 import { buildVariants } from "./variants";
 import configs from "./vite/configs";
 
@@ -26,7 +26,7 @@ export type PrintOptions = {
 export default async function print(options: PrintOptions) {
   process.env.QUIZMS_MODE = "pdf";
 
-  const generationConfigs = await readCollection(options.dir, "contests", generationConfigSchema);
+  const generationConfigs = await load(options.dir, "contests", generationConfigSchema);
 
   const root = join(options.dir, "src");
   const entry = join(root, options.entry);

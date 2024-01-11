@@ -1,7 +1,7 @@
 import { App } from "firebase-admin/app";
 import type { ServiceAccountCredential } from "firebase-admin/lib/app/credential-internal";
 
-import { fatal } from "~/cli/utils/logs";
+import { fatal } from "~/utils/logs";
 
 export default async function restApi(
   app: App,

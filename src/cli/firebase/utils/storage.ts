@@ -4,7 +4,7 @@ import { Bucket } from "@google-cloud/storage";
 import { upperFirst } from "lodash-es";
 import pc from "picocolors";
 
-import { confirm, fatal, success } from "~/cli/utils/logs";
+import { confirm, fatal, success } from "~/utils/logs";
 
 type ImportOptions = {
   force?: true;

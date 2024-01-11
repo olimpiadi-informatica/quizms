@@ -6,7 +6,7 @@ import { isString, stubFalse, stubTrue } from "lodash-es";
 import { OutputChunk, PluginContext } from "rollup";
 import { HtmlTagDescriptor, PluginOption } from "vite";
 
-import { error, warning } from "~/cli/utils/logs";
+import { error, warning } from "~/utils/logs";
 
 import { generateHtml, generateHtmlFromBundle } from "./html";
 

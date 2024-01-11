@@ -13,9 +13,9 @@ import { ExpressionWrapper, shuffleStatement } from "~/jsx-runtime/parser";
 import { cleanStatement, getSchema } from "~/jsx-runtime/shuffle";
 import { Variant } from "~/models";
 import { GenerationConfig, generationConfigSchema } from "~/models/generation-config";
+import load from "~/models/load";
+import { fatal, info, success } from "~/utils/logs";
 
-import { fatal, info, success } from "./utils/logs";
-import { readCollection } from "./utils/parser";
 import configs from "./vite/configs";
 
 function buildBaseStatements(
@@ -111,7 +111,7 @@ export default async function variants(options: ExportVariantsOptions) {
     );
   }
 
-  const generationConfigs = await readCollection(options.dir, "contests", generationConfigSchema);
+  const generationConfigs = await load(options.dir, "contests", generationConfigSchema);
   const variants = await buildVariants(root, generationConfigs);
 
   const res = await Promise.all(

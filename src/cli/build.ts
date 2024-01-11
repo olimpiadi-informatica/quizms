@@ -4,7 +4,8 @@ import glob from "fast-glob";
 import license from "rollup-plugin-license";
 import { InlineConfig, build, mergeConfig } from "vite";
 
-import { fatal } from "./utils/logs";
+import { fatal } from "~/utils/logs";
+
 import configs from "./vite/configs";
 
 export type ExportOptions = {

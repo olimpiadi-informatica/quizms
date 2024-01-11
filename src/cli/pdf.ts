@@ -6,8 +6,7 @@ import { map, range, size, uniq } from "lodash-es";
 import { BrowserContext, chromium } from "playwright";
 
 import { GenerationConfig } from "~/models/generation-config";
-
-import { info } from "./utils/logs";
+import { info } from "~/utils/logs";
 
 async function generatePdf(
   context: BrowserContext,

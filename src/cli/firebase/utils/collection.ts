@@ -2,7 +2,7 @@ import { Firestore, FirestoreDataConverter, GrpcStatus } from "firebase-admin/fi
 import { upperFirst } from "lodash-es";
 import pc from "picocolors";
 
-import { confirm, fatal, info, success } from "~/cli/utils/logs";
+import { confirm, fatal, info, success } from "~/utils/logs";
 
 type ImportOptions = {
   delete?: true;

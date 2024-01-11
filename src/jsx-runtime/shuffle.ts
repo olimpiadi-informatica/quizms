@@ -3,8 +3,8 @@ import { builders as b, is, traverse } from "estree-toolkit";
 import { Node } from "estree-toolkit/dist/estree";
 import { countBy, isString, mapKeys } from "lodash-es";
 
-import { error, warning } from "~/cli/utils/logs";
 import { Schema } from "~/models";
+import { error, warning } from "~/utils/logs";
 import { Rng } from "~/utils/random";
 
 export function shuffleAnswers(program: Program, variant: string) {

@@ -10,10 +10,10 @@ import { pick, range, uniq } from "lodash-es";
 import { isMatch } from "picomatch";
 import z from "zod";
 
-import { fatal, success, warning } from "~/cli/utils/logs";
-import { readCollection } from "~/cli/utils/parser";
 import { Participation, contestSchema, participationSchema, variantSchema } from "~/models";
 import { generationConfigSchema } from "~/models/generation-config";
+import load from "~/models/load";
+import { fatal, success, warning } from "~/utils/logs";
 import { Rng } from "~/utils/random";
 import validate from "~/utils/validate";
 
@@ -91,7 +91,7 @@ export default async function importData(options: ImportOptions) {
 }
 
 async function importContests(db: Firestore, options: ImportOptions) {
-  const contests = await readCollection(options.dir, "contests", contestSchema);
+  const contests = await load(options.dir, "contests", contestSchema);
   await importCollection(db, "contests", contests, contestConverter, options);
 }
 
@@ -107,8 +107,8 @@ async function importParticipations(db: Firestore, options: ImportOptions) {
       email: z.string().email(),
       password: z.string(),
     });
-  const schools = await readCollection(options.dir, "schools", schoolSchema);
-  const configs = await readCollection(options.dir, "contests", generationConfigSchema);
+  const schools = await load(options.dir, "schools", schoolSchema);
+  const configs = await load(options.dir, "contests", generationConfigSchema);
 
   if (options.teachers) {
     const teachers = schools.map((school) => pick(school, ["name", "email", "password"]));
@@ -195,7 +195,7 @@ async function importTeachers(db: Firestore, teachers: Teacher[], options: Impor
 }
 
 async function importPdf(bucket: Bucket, options: ImportOptions) {
-  const generationConfigs = await readCollection(options.dir, "contests", generationConfigSchema);
+  const generationConfigs = await load(options.dir, "contests", generationConfigSchema);
   const pdfs = generationConfigs.flatMap((c) =>
     uniq([...c.variantIds, ...c.pdfVariantIds]).map((id): [string, string] => [
       join(options.dir, "variants", id, "statement.pdf"),
@@ -207,7 +207,7 @@ async function importPdf(bucket: Bucket, options: ImportOptions) {
 }
 
 async function importVariants(db: Firestore, options: ImportOptions) {
-  const generationConfigs = await readCollection(options.dir, "contests", generationConfigSchema);
+  const generationConfigs = await load(options.dir, "contests", generationConfigSchema);
   const variants = await Promise.all(
     generationConfigs
       .flatMap((c) => uniq([...c.variantIds, ...c.pdfVariantIds]))
@@ -230,7 +230,7 @@ async function importVariants(db: Firestore, options: ImportOptions) {
 }
 
 async function importStatements(bucket: Bucket, options: ImportOptions) {
-  const generationConfigs = await readCollection(options.dir, "contests", generationConfigSchema);
+  const generationConfigs = await load(options.dir, "contests", generationConfigSchema);
 
   const statements = generationConfigs.flatMap((c) =>
     uniq([...c.variantIds, ...c.pdfVariantIds]).map((id): [string, string] => [
@@ -242,7 +242,7 @@ async function importStatements(bucket: Bucket, options: ImportOptions) {
 }
 
 async function importVariantMappings(db: Firestore, options: ImportOptions) {
-  const generationConfigs = await readCollection(options.dir, "contests", generationConfigSchema);
+  const generationConfigs = await load(options.dir, "contests", generationConfigSchema);
   const mappings = await Promise.all(
     generationConfigs.flatMap((config) => {
       const rng = new Rng(`${config.secret}-${config.id}-variantMappings`);

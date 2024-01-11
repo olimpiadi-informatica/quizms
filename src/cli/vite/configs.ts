@@ -9,8 +9,8 @@ import { visualizer } from "rollup-plugin-visualizer";
 import { InlineConfig } from "vite";
 import inspect from "vite-plugin-inspect";
 
-import { fatal, info, warning } from "~/cli/utils/logs";
 import { mdxOptions } from "~/mdx/plugins";
+import { fatal, info, warning } from "~/utils/logs";
 
 import iframe from "./iframe";
 import images from "./images";
