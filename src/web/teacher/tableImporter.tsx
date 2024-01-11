@@ -15,9 +15,9 @@ import {
 import { formatDate } from "~/utils/date";
 import { randomId } from "~/utils/random";
 import validate from "~/utils/validate";
+import { Button } from "~/web/components/button";
+import Modal from "~/web/components/modal";
 
-import { Button } from "../components/button";
-import Modal from "../components/modal";
 import { useTeacher, useTeacherStudents } from "./provider";
 
 const ImportModal = forwardRef(function ImportModal(_props, ref: Ref<HTMLDialogElement> | null) {

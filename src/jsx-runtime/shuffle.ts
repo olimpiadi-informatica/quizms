@@ -1,8 +1,7 @@
 import { Program, Property } from "estree";
 import { builders as b, is, traverse } from "estree-toolkit";
 import { Node } from "estree-toolkit/dist/estree";
-import { countBy, mapKeys } from "lodash-es";
-import { isString } from "lodash-es";
+import { countBy, isString, mapKeys } from "lodash-es";
 
 import { error, warning } from "~/cli/utils/logs";
 import { Schema } from "~/models";

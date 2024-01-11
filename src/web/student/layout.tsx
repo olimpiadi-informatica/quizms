@@ -5,11 +5,11 @@ import { User } from "lucide-react";
 import { ErrorBoundary } from "react-error-boundary";
 
 import Prose from "~/mdx/components/prose";
+import Error from "~/web/components/error";
+import Modal from "~/web/components/modal";
+import Progress from "~/web/components/progress";
+import Timer from "~/web/components/timer";
 
-import Error from "../components/error";
-import Modal from "../components/modal";
-import Progress from "../components/progress";
-import Timer from "../components/timer";
 import { useStudent } from "./provider";
 
 export function Layout({ children }: { children: ReactNode }) {

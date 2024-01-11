@@ -22,7 +22,9 @@ import { hash, randomId } from "~/utils/random";
 import { Button } from "~/web/components/button";
 import Modal from "~/web/components/modal";
 import { useIsAfter, useTime } from "~/web/components/time";
-import { FirebaseLogin, useDb } from "~/web/firebase/baseLogin";
+import { StudentProvider } from "~/web/student/provider";
+
+import { FirebaseLogin, useDb } from "./baseLogin";
 import {
   contestConverter,
   participationConverter,
@@ -33,14 +35,8 @@ import {
   studentRestoreConverter,
   submissionConverter,
   variantMappingConverter,
-} from "~/web/firebase/converters";
-import {
-  useAnonymousAuth,
-  useCollection,
-  useDocument,
-  useDocumentOptional,
-} from "~/web/firebase/hooks";
-import { StudentProvider } from "~/web/student/provider";
+} from "./converters";
+import { useAnonymousAuth, useCollection, useDocument, useDocumentOptional } from "./hooks";
 
 class DuplicateStudentError extends Error {
   constructor(

@@ -7,7 +7,8 @@ import MagicString from "magic-string";
 import { OutputChunk } from "rollup";
 import { HtmlTagDescriptor, PluginOption } from "vite";
 
-import { warning } from "../utils/logs";
+import { warning } from "~/cli/utils/logs";
+
 import { generateHtml, generateHtmlFromBundle } from "./html";
 
 export default function iframe(): PluginOption {

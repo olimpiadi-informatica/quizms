@@ -6,8 +6,7 @@ import { getDownloadURL, getStorage, ref } from "firebase/storage";
 import Loading from "~/web/components/loading";
 import { useIsAfter } from "~/web/components/time";
 import Timer from "~/web/components/timer";
-import { RemoteStatement } from "~/web/student";
-import { useStudent } from "~/web/student/provider";
+import { RemoteStatement, useStudent } from "~/web/student";
 
 import { useDb } from "./baseLogin";
 

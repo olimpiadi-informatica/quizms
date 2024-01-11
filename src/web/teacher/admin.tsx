@@ -13,11 +13,11 @@ import { range } from "lodash-es";
 import { Contest, Participation } from "~/models";
 import { formatDate, formatTime } from "~/utils/date";
 import { randomToken } from "~/utils/random";
+import { Button, LoadingButtons } from "~/web/components/button";
+import Modal from "~/web/components/modal";
+import { useIsAfter, useTime } from "~/web/components/time";
+import Timer from "~/web/components/timer";
 
-import { Button, LoadingButtons } from "../components/button";
-import Modal from "../components/modal";
-import { useIsAfter, useTime } from "../components/time";
-import Timer from "../components/timer";
 import StudentRestoreList from "./adminStudentRestore";
 import { useTeacher } from "./provider";
 

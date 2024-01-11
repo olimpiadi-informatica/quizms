@@ -5,9 +5,9 @@ import contests from "virtual:quizms-contests";
 
 import { Participation, Student } from "~/models";
 import { GenerationConfig } from "~/models/generation-config";
-import { RemoteStatement } from "~/web/student/remoteStatement";
 
 import { StudentProvider, useStudent } from "./provider";
+import { RemoteStatement } from "./remoteStatement";
 
 type AuthProps = {
   children: ReactNode;

@@ -5,9 +5,8 @@ import { ChevronDown, GraduationCap } from "lucide-react";
 import { ErrorBoundary } from "react-error-boundary";
 
 import { Contest, Participation } from "~/models";
-
-import Error from "../components/error";
-import Loading from "../components/loading";
+import Error from "~/web/components/error";
+import Loading from "~/web/components/loading";
 
 type Props = {
   contests: Contest[];

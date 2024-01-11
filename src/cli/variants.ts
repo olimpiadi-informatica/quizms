@@ -1,6 +1,5 @@
 import { existsSync } from "node:fs";
-import { writeFile } from "node:fs/promises";
-import { mkdir } from "node:fs/promises";
+import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 

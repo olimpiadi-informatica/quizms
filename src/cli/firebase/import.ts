@@ -10,13 +10,13 @@ import { pick, range, uniq } from "lodash-es";
 import { isMatch } from "picomatch";
 import z from "zod";
 
+import { fatal, success, warning } from "~/cli/utils/logs";
+import { readCollection } from "~/cli/utils/parser";
 import { Participation, contestSchema, participationSchema, variantSchema } from "~/models";
 import { generationConfigSchema } from "~/models/generation-config";
 import { Rng } from "~/utils/random";
 import validate from "~/utils/validate";
 
-import { fatal, success, warning } from "../utils/logs";
-import { readCollection } from "../utils/parser";
 import { importCollection } from "./utils/collection";
 import {
   contestConverter,

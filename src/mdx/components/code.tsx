@@ -1,5 +1,4 @@
-import React, { Suspense } from "react";
-import { lazy } from "react";
+import React, { Suspense, lazy } from "react";
 
 import classNames from "classnames";
 

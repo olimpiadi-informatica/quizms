@@ -7,7 +7,8 @@ import { StudentRestore } from "~/models";
 import { hash } from "~/utils/random";
 import { Button } from "~/web/components/button";
 import Modal from "~/web/components/modal";
-import { useTeacherStudentRestores } from "~/web/teacher/provider";
+
+import { useTeacherStudentRestores } from "./provider";
 
 function StudentRestoreEntry({
   studentRestore,

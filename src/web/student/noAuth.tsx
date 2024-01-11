@@ -4,8 +4,8 @@ import { addMinutes } from "date-fns";
 import { isFunction, range } from "lodash-es";
 
 import { Contest, Participation, Student } from "~/models";
+import { useIsAfter } from "~/web/components/time";
 
-import { useIsAfter } from "../components/time";
 import { StudentProvider } from "./provider";
 
 type AuthProps = {

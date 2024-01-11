@@ -16,7 +16,9 @@ import { chunk } from "lodash-es";
 
 import { Participation, StudentRestore, studentHash } from "~/models";
 import { Button } from "~/web/components/button";
-import { FirebaseLogin, useDb } from "~/web/firebase/baseLogin";
+import { TeacherProvider } from "~/web/teacher/provider";
+
+import { FirebaseLogin, useDb } from "./baseLogin";
 import {
   contestConverter,
   participationConverter,
@@ -25,14 +27,9 @@ import {
   studentMappingUidConverter,
   studentRestoreConverter,
   variantConverter,
-} from "~/web/firebase/converters";
-import {
-  useCollection,
-  usePrecompiledPasswordAuth,
-  useSignInWithPassword,
-} from "~/web/firebase/hooks";
-import query from "~/web/firebase/query";
-import { TeacherProvider } from "~/web/teacher/provider";
+} from "./converters";
+import { useCollection, usePrecompiledPasswordAuth, useSignInWithPassword } from "./hooks";
+import query from "./query";
 
 export function TeacherLogin({
   config,

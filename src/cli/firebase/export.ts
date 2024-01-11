@@ -5,7 +5,8 @@ import { deleteApp } from "firebase-admin/app";
 import { Query } from "firebase-admin/firestore";
 import { capitalize } from "lodash-es";
 
-import { info, success } from "../utils/logs";
+import { info, success } from "~/cli/utils/logs";
+
 import {
   contestConverter,
   participationConverter,

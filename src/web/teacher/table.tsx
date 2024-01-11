@@ -14,11 +14,11 @@ import { Contest, Student, Variant, parsePersonalInformation } from "~/models";
 import { score } from "~/models";
 import { formatDate } from "~/utils/date";
 import { randomId } from "~/utils/random";
+import { Button, LoadingButtons } from "~/web/components/button";
+import Loading from "~/web/components/loading";
+import Modal from "~/web/components/modal";
+import { useIsAfter } from "~/web/components/time";
 
-import { Button, LoadingButtons } from "../components/button";
-import Loading from "../components/loading";
-import Modal from "../components/modal";
-import { useIsAfter } from "../components/time";
 import { useTeacher, useTeacherStudents } from "./provider";
 import ImportModal from "./tableImporter";
 import { agGridLocaleIT } from "./tableLocale";
@@ -26,7 +26,7 @@ import { agGridLocaleIT } from "./tableLocale";
 import "@ag-grid-community/styles/ag-grid.css";
 import "@ag-grid-community/styles/ag-theme-quartz.css";
 
-const AgGridReact = lazy(() => import("../components/agGrid"));
+const AgGridReact = lazy(() => import("~/web/components/agGrid"));
 
 export function TeacherTable() {
   const { contest, participation } = useTeacher();
