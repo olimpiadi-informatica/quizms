@@ -3,10 +3,9 @@ import React, { Suspense, useRef, useState } from "react";
 import { groupBy, sortBy } from "lodash-es";
 import { Check, X } from "lucide-react";
 
+import { Button, Modal } from "~/components";
 import { StudentRestore } from "~/models";
 import { hash } from "~/utils/random";
-import { Button } from "~/web/components/button";
-import Modal from "~/web/components/modal";
 
 import { useTeacherStudentRestores } from "./provider";
 

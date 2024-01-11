@@ -14,8 +14,8 @@ import {
 import { getBytes, getStorage, ref } from "firebase/storage";
 import { chunk } from "lodash-es";
 
+import { Button } from "~/components";
 import { Participation, StudentRestore, studentHash } from "~/models";
-import { Button } from "~/web/components/button";
 import { TeacherProvider } from "~/web/teacher/provider";
 
 import { FirebaseLogin, useDb } from "./baseLogin";

@@ -3,9 +3,7 @@ import React, { Suspense, useMemo } from "react";
 import { addMilliseconds } from "date-fns";
 import { getDownloadURL, getStorage, ref } from "firebase/storage";
 
-import Loading from "~/web/components/loading";
-import { useIsAfter } from "~/web/components/time";
-import Timer from "~/web/components/timer";
+import { Loading, Timer, useIsAfter } from "~/components";
 import { RemoteStatement, useStudent } from "~/web/student";
 
 import { useDb } from "./baseLogin";

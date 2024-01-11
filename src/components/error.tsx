@@ -3,7 +3,7 @@ import React, { useEffect } from "react";
 import { RotateCw } from "lucide-react";
 import { FallbackProps } from "react-error-boundary";
 
-export default function Error({ error, resetErrorBoundary }: Partial<FallbackProps>) {
+export function Error({ error, resetErrorBoundary }: Partial<FallbackProps>) {
   useEffect(() => {
     if (import.meta.hot) {
       import.meta.hot.on("vite:afterUpdate", onHmr);

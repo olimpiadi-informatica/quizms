@@ -1,7 +1,7 @@
 import React, { ReactNode, createContext, useContext, useEffect, useMemo, useState } from "react";
 
+import { Loading } from "~/components";
 import { Contest, Participation, Student, StudentRestore, Variant } from "~/models";
-import Loading from "~/web/components/loading";
 
 import { TeacherLayout } from "./layout";
 

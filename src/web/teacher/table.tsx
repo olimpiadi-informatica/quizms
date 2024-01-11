@@ -10,14 +10,10 @@ import { addMinutes, isEqual as isEqualDate } from "date-fns";
 import { cloneDeep, deburr, lowerFirst, set, sumBy } from "lodash-es";
 import { AlertTriangle, FileCheck, Upload, Users } from "lucide-react";
 
-import { Contest, Student, Variant, parsePersonalInformation } from "~/models";
-import { score } from "~/models";
+import { Button, Loading, LoadingButtons, Modal, useIsAfter } from "~/components";
+import { Contest, Student, Variant, parsePersonalInformation, score } from "~/models";
 import { formatDate } from "~/utils/date";
 import { randomId } from "~/utils/random";
-import { Button, LoadingButtons } from "~/web/components/button";
-import Loading from "~/web/components/loading";
-import Modal from "~/web/components/modal";
-import { useIsAfter } from "~/web/components/time";
 
 import { useTeacher, useTeacherStudents } from "./provider";
 import ImportModal from "./tableImporter";
@@ -26,7 +22,7 @@ import { agGridLocaleIT } from "./tableLocale";
 import "@ag-grid-community/styles/ag-grid.css";
 import "@ag-grid-community/styles/ag-theme-quartz.css";
 
-const AgGridReact = lazy(() => import("~/web/components/agGrid"));
+const AgGridReact = lazy(() => import("~/components/agGrid"));
 
 export function TeacherTable() {
   const { contest, participation } = useTeacher();

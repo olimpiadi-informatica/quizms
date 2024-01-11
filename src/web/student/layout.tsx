@@ -4,11 +4,8 @@ import { sumBy } from "lodash-es";
 import { User } from "lucide-react";
 import { ErrorBoundary } from "react-error-boundary";
 
+import { Error, Modal, Progress, Timer } from "~/components";
 import Prose from "~/mdx/components/prose";
-import Error from "~/web/components/error";
-import Modal from "~/web/components/modal";
-import Progress from "~/web/components/progress";
-import Timer from "~/web/components/timer";
 
 import { useStudent } from "./provider";
 

@@ -5,7 +5,7 @@ type ModalProps = {
   children: ReactNode;
 };
 
-export default forwardRef(function Modal(
+export const Modal = forwardRef(function Modal(
   { title, children }: ModalProps,
   ref: Ref<HTMLDialogElement>,
 ) {

@@ -3,8 +3,8 @@ import React, { ReactNode, SetStateAction, useCallback, useMemo, useState } from
 import { addMinutes } from "date-fns";
 import { isFunction, range } from "lodash-es";
 
+import { useIsAfter } from "~/components";
 import { Contest, Participation, Student } from "~/models";
-import { useIsAfter } from "~/web/components/time";
 
 import { StudentProvider } from "./provider";
 

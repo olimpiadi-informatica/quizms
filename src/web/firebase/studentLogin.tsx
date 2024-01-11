@@ -17,11 +17,9 @@ import {
 import { isDate, isEqual } from "lodash-es";
 import { AlertCircle } from "lucide-react";
 
+import { Button, Modal, useIsAfter, useTime } from "~/components";
 import { Contest, Student, parsePersonalInformation, studentHash } from "~/models";
 import { hash, randomId } from "~/utils/random";
-import { Button } from "~/web/components/button";
-import Modal from "~/web/components/modal";
-import { useIsAfter, useTime } from "~/web/components/time";
 import { StudentProvider } from "~/web/student/provider";
 
 import { FirebaseLogin, useDb } from "./baseLogin";

@@ -1,8 +1,8 @@
 import React from "react";
 
-import Progress from "./progress";
+import { Progress } from "./progress";
 
-export default function Loading() {
+export function Loading() {
   return (
     <div className="not-prose flex h-full items-center justify-center">
       <Progress>

@@ -4,6 +4,7 @@ import { ArrowUpFromLine } from "lucide-react";
 import { parse as parseCSV } from "papaparse";
 import z from "zod";
 
+import { Button, Modal } from "~/components";
 import {
   Contest,
   Participation,
@@ -15,8 +16,6 @@ import {
 import { formatDate } from "~/utils/date";
 import { randomId } from "~/utils/random";
 import validate from "~/utils/validate";
-import { Button } from "~/web/components/button";
-import Modal from "~/web/components/modal";
 
 import { useTeacher, useTeacherStudents } from "./provider";
 

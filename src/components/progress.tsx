@@ -9,7 +9,7 @@ type ProgressBlockProps = {
   className?: string;
 };
 
-export default function Progress({ percentage, className, children }: ProgressBlockProps) {
+export function Progress({ percentage, className, children }: ProgressBlockProps) {
   let value = percentage !== undefined ? Math.round(percentage) : undefined;
   if (value !== undefined) {
     if (isNaN(value)) {
