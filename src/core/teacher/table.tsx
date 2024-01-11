@@ -72,16 +72,11 @@ export function TeacherTable() {
 }
 
 function Counter() {
-  const { contest, participation, variants } = useTeacher();
+  const { contest, variants } = useTeacher();
   const [students] = useTeacherStudents();
 
   return sumBy(students, (s) => {
-    return Number(
-      s.participationId === participation.id &&
-        !s.disabled &&
-        !isStudentEmpty(s) &&
-        !isStudentIncomplete(s, contest, variants),
-    );
+    return Number(!s.disabled && !isStudentEmpty(s) && !isStudentIncomplete(s, contest, variants));
   });
 }
 
@@ -113,7 +108,7 @@ const FinalizeModal = forwardRef(function FinalizeModal(
       });
     }
 
-    for (const student of filteredStudents) {
+    for (const student of students) {
       if (student.disabled) continue;
 
       const { name, surname } = student.personalInformation ?? {};
@@ -131,7 +126,7 @@ const FinalizeModal = forwardRef(function FinalizeModal(
         prevStudents.add(normalized);
       }
     }
-  }, [students, contest, participation, variants]);
+  }, [students, contest, variants]);
 
   const correctConfirm = "tutti gli studenti sono stati correttamente inseriti";
 
@@ -263,22 +258,19 @@ function Table() {
     newStudentId.current = randomId();
     await setStudent(student);
   };
-  const allStudents = [
-    ...students.filter((s) => s.participationId === participation.id),
-    ...(editable
-      ? [
-          {
-            id: newStudentId.current,
-            contestId: contest.id,
-            participationId: participation.id,
-            variant: !contest.hasVariants ? Object.keys(variants)[0] : undefined,
-            createdAt: new Date(),
-            answers: {},
-            disabled: false,
-          } as Student,
-        ]
-      : []),
-  ];
+
+  const allStudents = [...students];
+  if (editable) {
+    allStudents.push({
+      id: newStudentId.current,
+      contestId: contest.id,
+      participationId: participation.id,
+      variant: !contest.hasVariants ? Object.keys(variants)[0] : undefined,
+      createdAt: new Date(),
+      answers: {},
+      disabled: false,
+    } as Student);
+  }
 
   const colDefs = useMemo(
     () => columnDefinition(contest, variants, editable),

@@ -3,7 +3,6 @@ import { join } from "node:path";
 
 import { App, initializeApp } from "firebase-admin/app";
 import { getFirestore } from "firebase-admin/firestore";
-import type { ServiceAccountCredential } from "firebase-admin/lib/app/credential-internal";
 import { getStorage } from "firebase-admin/storage";
 
 import { fatal } from "~/cli/utils/logs";
@@ -42,12 +41,6 @@ export async function initializeFirebase(dir: string) {
 }
 
 async function getFirebaseBucket(app: App) {
-  const credential = app.options.credential as ServiceAccountCredential;
-  const token = await credential?.getAccessToken();
-  if (!token) {
-    fatal("Failed to get access token from credential.");
-  }
-
   let bucketName: string;
   try {
     const data = await restApi(app, "firebase", "v1beta1", "");

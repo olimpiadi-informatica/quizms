@@ -17,11 +17,14 @@ export class Rng {
   };
 
   public sample = <T>(array: T[], k: number): T[] => {
-    const values = new Set<T>();
-    while (values.size < k) {
-      values.add(this.choice(array));
+    const values = array.slice(0, k);
+    for (let i = k; i < array.length; i++) {
+      const j = this.randInt(0, i);
+      if (j < k) {
+        values[j] = array[i];
+      }
     }
-    return Array.from(values);
+    return values;
   };
 
   public shuffle = (array: any[]): void => {
