@@ -17,11 +17,12 @@ import {
 import { isDate, isEqual } from "lodash-es";
 import { AlertCircle } from "lucide-react";
 
-import { Button } from "~/core/components/button";
-import Modal from "~/core/components/modal";
-import { useIsAfter, useTime } from "~/core/components/time";
-import { StudentProvider } from "~/core/student/provider";
-import { FirebaseLogin, useDb } from "~/firebase/baseLogin";
+import { Contest, Student, parsePersonalInformation, studentHash } from "~/models";
+import { hash, randomId } from "~/utils/random";
+import { Button } from "~/web/components/button";
+import Modal from "~/web/components/modal";
+import { useIsAfter, useTime } from "~/web/components/time";
+import { FirebaseLogin, useDb } from "~/web/firebase/baseLogin";
 import {
   contestConverter,
   participationConverter,
@@ -32,15 +33,14 @@ import {
   studentRestoreConverter,
   submissionConverter,
   variantMappingConverter,
-} from "~/firebase/converters";
+} from "~/web/firebase/converters";
 import {
   useAnonymousAuth,
   useCollection,
   useDocument,
   useDocumentOptional,
-} from "~/firebase/hooks";
-import { Contest, Student, parsePersonalInformation, studentHash } from "~/models";
-import { hash, randomId } from "~/utils/random";
+} from "~/web/firebase/hooks";
+import { StudentProvider } from "~/web/student/provider";
 
 class DuplicateStudentError extends Error {
   constructor(

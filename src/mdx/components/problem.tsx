@@ -11,8 +11,8 @@ import React, {
 
 import { noop, range } from "lodash-es";
 
-import { useStudent } from "~/core/student/provider";
 import { hash } from "~/utils/random";
+import { useStudent } from "~/web/student/provider";
 
 import { useContest } from "./contest";
 

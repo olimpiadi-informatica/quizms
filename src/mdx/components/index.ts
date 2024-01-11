@@ -1,7 +1,7 @@
 import { ComponentType, memo } from "react";
 
-import Blockly from "../blockly/workspace";
 import { Answer, AnswerGroup, Explanation, OpenAnswer } from "./answers";
+import Blockly from "./blockly/workspace";
 import Code from "./code";
 import { Contest } from "./contest";
 import Image from "./image";

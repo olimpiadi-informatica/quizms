@@ -3,11 +3,11 @@ import React, { Suspense, useRef, useState } from "react";
 import { groupBy, sortBy } from "lodash-es";
 import { Check, X } from "lucide-react";
 
-import { Button } from "~/core/components/button";
-import Modal from "~/core/components/modal";
-import { useTeacherStudentRestores } from "~/core/teacher/provider";
 import { StudentRestore } from "~/models";
 import { hash } from "~/utils/random";
+import { Button } from "~/web/components/button";
+import Modal from "~/web/components/modal";
+import { useTeacherStudentRestores } from "~/web/teacher/provider";
 
 function StudentRestoreEntry({
   studentRestore,

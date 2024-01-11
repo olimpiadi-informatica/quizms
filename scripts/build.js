@@ -4,6 +4,7 @@ import { argv, exit } from "node:process";
 import autoprefixer from "autoprefixer";
 import { Command } from "commander";
 import { build, context } from "esbuild";
+import glob from "fast-glob";
 import less from "less";
 import postcss from "postcss";
 import tailwindcss from "tailwindcss";
@@ -40,9 +41,9 @@ const commonConfig = {
 };
 
 /** @type {import("esbuild").BuildOptions} */
-const uiConfig = {
+const webConfig = {
   ...commonConfig,
-  entryPoints: ["src/core/student/index.ts", "src/core/teacher/index.ts", "src/firebase/index.ts"],
+  entryPoints: glob.sync("src/web/*/index.ts"),
   packages: "external",
   platform: "browser",
   splitting: true,
@@ -64,7 +65,7 @@ const cliConfig = {
 /** @type {import("esbuild").BuildOptions} */
 const cssConfig = {
   ...commonConfig,
-  entryPoints: ["src/css/index.css"],
+  entryPoints: ["src/web/css/index.css"],
   outfile: "dist/index.css",
   plugins: [cssPlugin],
 };
@@ -75,7 +76,7 @@ command
   .command("build")
   .description("Create a production build")
   .action(async () => {
-    for (const config of [uiConfig, cliConfig, cssConfig]) {
+    for (const config of [webConfig, cliConfig, cssConfig]) {
       await build({
         minifyIdentifiers: true,
         minifySyntax: true,
@@ -100,7 +101,7 @@ command
       },
     };
 
-    for (const config of [uiConfig, cliConfig]) {
+    for (const config of [webConfig, cliConfig]) {
       const ctx = await context({
         ...config,
         plugins: [watchPlugin],

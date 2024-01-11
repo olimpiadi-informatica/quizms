@@ -10,12 +10,6 @@ import { pick, range, uniq } from "lodash-es";
 import { isMatch } from "picomatch";
 import z from "zod";
 
-import {
-  contestConverter,
-  participationConverter,
-  variantConverter,
-  variantMappingConverter,
-} from "~/firebase/convertersAdmin";
 import { Participation, contestSchema, participationSchema, variantSchema } from "~/models";
 import { generationConfigSchema } from "~/models/generation-config";
 import { Rng } from "~/utils/random";
@@ -24,6 +18,12 @@ import validate from "~/utils/validate";
 import { fatal, success, warning } from "../utils/logs";
 import { readCollection } from "../utils/parser";
 import { importCollection } from "./utils/collection";
+import {
+  contestConverter,
+  participationConverter,
+  variantConverter,
+  variantMappingConverter,
+} from "./utils/convertersAdmin";
 import { initializeFirebase } from "./utils/initialize";
 import { importStorage } from "./utils/storage";
 

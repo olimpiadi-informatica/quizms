@@ -4,8 +4,8 @@ import { ToolboxDefinition } from "blockly/core/utils/toolbox";
 import classNames from "classnames";
 import { ArrowDown, FastForward, Pause, Play, RotateCcw, Send, SkipForward } from "lucide-react";
 
-import Loading from "~/core/components/loading";
 import { Rng } from "~/utils/random";
+import Loading from "~/web/components/loading";
 
 import useExecutor from "./executor";
 import { Input, Output } from "./io";

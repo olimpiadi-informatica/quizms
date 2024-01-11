@@ -5,6 +5,7 @@ import { deleteApp } from "firebase-admin/app";
 import { Query } from "firebase-admin/firestore";
 import { capitalize } from "lodash-es";
 
+import { info, success } from "../utils/logs";
 import {
   contestConverter,
   participationConverter,
@@ -12,9 +13,7 @@ import {
   studentConverter,
   submissionConverter,
   variantConverter,
-} from "~/firebase/convertersAdmin";
-
-import { info, success } from "../utils/logs";
+} from "./utils/convertersAdmin";
 import { initializeFirebase } from "./utils/initialize";
 
 type ExportOptions = {

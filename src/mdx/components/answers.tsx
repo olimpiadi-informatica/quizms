@@ -11,8 +11,8 @@ import React, {
 import classNames from "classnames";
 import { Trash2 } from "lucide-react";
 
-import { useStudent } from "~/core/student/provider";
 import { Rng } from "~/utils/random";
+import { useStudent } from "~/web/student/provider";
 
 import { useProblem } from "./problem";
 

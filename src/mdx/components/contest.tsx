@@ -13,9 +13,9 @@ import React, {
 
 import { isNil, sumBy } from "lodash-es";
 
-import Modal from "~/core/components/modal";
-import { useStudent } from "~/core/student/provider";
 import { randomId } from "~/utils/random";
+import Modal from "~/web/components/modal";
+import { useStudent } from "~/web/student/provider";
 
 type Problem = {
   id: string;

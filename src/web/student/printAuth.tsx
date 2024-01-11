@@ -3,9 +3,9 @@ import React, { ReactNode } from "react";
 // @ts-expect-error: virtual module doesn't have a type declaration
 import contests from "virtual:quizms-contests";
 
-import { RemoteStatement } from "~/core/student/remoteStatement";
 import { Participation, Student } from "~/models";
 import { GenerationConfig } from "~/models/generation-config";
+import { RemoteStatement } from "~/web/student/remoteStatement";
 
 import { StudentProvider, useStudent } from "./provider";
 

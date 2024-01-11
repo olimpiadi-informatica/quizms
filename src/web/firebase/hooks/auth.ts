@@ -12,7 +12,7 @@ import { useErrorBoundary } from "react-error-boundary";
 import { SWRConfiguration } from "swr";
 import useSWR from "swr/immutable";
 
-import { useDb } from "~/firebase/baseLogin";
+import { useDb } from "~/web/firebase/baseLogin";
 
 import { useSubscription } from "./subscription";
 

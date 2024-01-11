@@ -17,9 +17,9 @@
     "quizms": "bin/bin.js"
   },
   "exports": {
-    "./student": "./dist/core/student/index.js",
-    "./teacher": "./dist/core/teacher/index.js",
-    "./firebase": "./dist/firebase/index.js",
+    "./student": "./dist/web/student/index.js",
+    "./teacher": "./dist/web/teacher/index.js",
+    "./firebase": "./dist/web/firebase/index.js",
     "./css": "./dist/index.css",
     "./jsx-runtime": "./dist/jsx-runtime/index.js"
   },

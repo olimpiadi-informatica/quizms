@@ -8,10 +8,10 @@ import { App } from "firebase-admin/app";
 import pc from "picocolors";
 
 import { confirm, error, info, success } from "~/cli/utils/logs";
-import firestoreIndexes from "~/firebase/files/firestore-indexes.json";
-import firestoreRules from "~/firebase/files/firestore.rules";
-import storageRules from "~/firebase/files/storage.rules";
 
+import firestoreIndexes from "./files/firestore-indexes.json";
+import firestoreRules from "./files/firestore.rules";
+import storageRules from "./files/storage.rules";
 import { initializeFirebase } from "./utils/initialize";
 import restApi from "./utils/rest-api";
 
