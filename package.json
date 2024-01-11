@@ -8,8 +8,8 @@
     "prebuild": "yarn lint",
     "build": "rm -rf dist/ && NODE_ENV=production node scripts/build.js build",
     "watch": "node scripts/build.js watch",
-    "lint": "eslint --fix . && tsc --noEmit",
-    "fmt": "prettier --write src/",
+    "lint": "eslint --fix . && tsc --noEmit && prettier --check --cache src/",
+    "fmt": "prettier --write --cache src/",
     "prepack": "yarn build",
     "release": "npm publish"
   },
@@ -17,9 +17,9 @@
     "quizms": "bin/bin.js"
   },
   "exports": {
-    "./student": "./dist/web/student/index.js",
-    "./teacher": "./dist/web/teacher/index.js",
-    "./firebase": "./dist/web/firebase/index.js",
+    "./student": "./dist/student/index.js",
+    "./teacher": "./dist/teacher/index.js",
+    "./firebase": "./dist/firebase/index.js",
     "./css": "./dist/index.css",
     "./jsx-runtime": "./dist/jsx-runtime/index.js"
   },
