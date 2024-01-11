@@ -136,6 +136,6 @@ Per eseguire il deploy del sito usa i comandi:
 
 ```shell
 export QUIZMS_TIME_SERVER="https://time1.olinfo.it"
-npx quizms export
+npx quizms build
 firebase deploy --only hosting
 ```

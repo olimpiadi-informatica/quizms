@@ -4,8 +4,8 @@ import { InvalidArgumentError, program } from "commander";
 import "dotenv/config";
 import { version } from "package.json";
 
+import staticExport from "./build";
 import devServer from "./dev";
-import staticExport from "./export";
 import firebaseCommand from "./firebase";
 import print from "./print";
 import variants from "./variants";
@@ -30,7 +30,7 @@ async function main() {
     .action((dir, options) => devServer({ dir, ...options }));
 
   program
-    .command("export")
+    .command("build")
     .description("Create a static export of the website.")
     .argument("[directory]", "The directory of the contest.", cwd())
     .option("-d, --outDir <directory>", "The directory to output the bundle.", "dist")
