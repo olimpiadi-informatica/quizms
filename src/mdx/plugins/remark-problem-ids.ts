@@ -1,6 +1,5 @@
 import { Root, TopLevelContent } from "mdast";
 import { MdxJsxFlowElement } from "mdast-util-mdx-jsx";
-import "mdast-util-mdxjs-esm";
 import { Plugin } from "unified";
 import { visit } from "unist-util-visit";
 

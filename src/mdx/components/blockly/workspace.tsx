@@ -73,7 +73,7 @@ export default function Workspace({ toolbox, initialBlocks, example, debug }: Bl
                   !running && "btn-disabled",
                 )}>
                 <label className="swap swap-rotate size-full">
-                  <input type="checkbox" disabled={!running} checked={false} onChange={() => {}} />
+                  <input type="checkbox" disabled={!running} checked={false} />
                   <Pause className="swap-on size-6" />
                   <Play className="swap-off size-6" />
                 </label>
@@ -92,7 +92,6 @@ export default function Workspace({ toolbox, initialBlocks, example, debug }: Bl
               <button
                 className="btn btn-info rounded-[inherit]"
                 disabled={!running}
-                onClick={() => {}}
                 aria-label="Esegui fino alla fine">
                 <FastForward className="size-6" />
               </button>

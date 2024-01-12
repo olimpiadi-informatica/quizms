@@ -14,7 +14,7 @@ import {
   runTransaction,
   setDoc,
 } from "firebase/firestore";
-import { isDate, isEqual } from "lodash-es";
+import { defer, isDate, isEqual } from "lodash-es";
 import { AlertCircle } from "lucide-react";
 
 import { Button, Modal, useIsAfter, useTime } from "~/components";
@@ -103,7 +103,7 @@ function StudentLoginInner({
 
   if (studentMapping) {
     if (loading) {
-      setTimeout(() => setLoading(false), 0);
+      defer(() => setLoading(false));
     }
     return (
       <StudentInner

@@ -6,7 +6,7 @@ import { Bucket } from "@google-cloud/storage";
 import { deleteApp } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 import { Firestore, FirestoreDataConverter } from "firebase-admin/firestore";
-import { pick, range, uniq } from "lodash-es";
+import { noop, pick, range, uniq } from "lodash-es";
 import { isMatch } from "picomatch";
 import z from "zod";
 
@@ -162,7 +162,7 @@ async function importTeachers(db: Firestore, teachers: Teacher[], options: Impor
   const auth = getAuth();
   const ids = await Promise.all(
     teachers.map(async (teacher) => {
-      let user = await auth.getUserByEmail(teacher.email).catch(() => {});
+      let user = await auth.getUserByEmail(teacher.email).catch(noop);
       if (!user) {
         user = await auth.createUser({
           email: teacher.email,

@@ -9,7 +9,7 @@ import React, {
   useState,
 } from "react";
 
-import { noop, range } from "lodash-es";
+import { defer, noop, range } from "lodash-es";
 
 import { hash } from "~/utils/random";
 import { useStudent } from "~/web/student/provider";
@@ -36,7 +36,7 @@ type ProblemContextProps = {
 const ProblemContext = createContext<ProblemContextProps>({
   id: undefined,
   points: [0, 0, 0],
-  setCorrect: () => {},
+  setCorrect: noop,
 });
 ProblemContext.displayName = "ProblemContext";
 
@@ -54,7 +54,7 @@ export function Problem({ id, points, statement }: ProblemProps) {
   const setVariantCountOnce = useCallback(
     (count: number) => {
       if (count && count !== variantCount) {
-        setTimeout(() => setVariantCount(count), 0);
+        defer(() => setVariantCount(count));
       }
     },
     [variantCount],

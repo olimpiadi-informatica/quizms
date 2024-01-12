@@ -1,5 +1,6 @@
 import { join } from "node:path";
 
+import { noop } from "lodash-es";
 import { createServer } from "vite";
 
 import configs from "./vite/configs";
@@ -20,5 +21,5 @@ export default async function devServer(options: DevOptions) {
 
   server.printUrls();
 
-  await new Promise(() => {});
+  await new Promise(noop);
 }

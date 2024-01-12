@@ -1,5 +1,6 @@
 import React, { ReactNode } from "react";
 
+import { noop } from "lodash-es";
 // @ts-expect-error: virtual module doesn't have a type declaration
 import contests from "virtual:quizms-contests";
 
@@ -75,7 +76,7 @@ export function PrintAuth({ children }: AuthProps) {
       participation={mockParticipation}
       student={student}
       setStudent={async () => {}}
-      submit={() => {}}
+      submit={noop}
       terminated={false}>
       {children}
     </StudentProvider>

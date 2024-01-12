@@ -8,6 +8,7 @@ import {
   signInAnonymously,
   signInWithEmailAndPassword,
 } from "firebase/auth";
+import { noop } from "lodash-es";
 import { useErrorBoundary } from "react-error-boundary";
 import { SWRConfiguration } from "swr";
 import useSWR from "swr/immutable";
@@ -29,7 +30,7 @@ export function useAuth() {
     const unsubscribe = onAuthStateChanged(auth, {
       next: (user) => set(user),
       error: (err) => showBoundary(err),
-      complete: () => {},
+      complete: noop,
     });
     return () => unsubscribe();
   });

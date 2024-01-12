@@ -11,7 +11,7 @@ import React, {
   useState,
 } from "react";
 
-import { isNil, sumBy } from "lodash-es";
+import { isNil, noop, sumBy } from "lodash-es";
 
 import { Modal } from "~/components";
 import { randomId } from "~/utils/random";
@@ -28,7 +28,7 @@ type ContestContextProps = {
 };
 
 const ContestContext = createContext<ContestContextProps>({
-  registerProblem: () => {},
+  registerProblem: noop,
 });
 ContestContext.displayName = "ContestContext";
 

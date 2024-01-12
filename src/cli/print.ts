@@ -3,7 +3,7 @@ import { rm } from "node:fs/promises";
 import { join } from "node:path";
 import { promisify } from "node:util";
 
-import { mapValues } from "lodash-es";
+import { mapValues, noop } from "lodash-es";
 import pc from "picocolors";
 import { InlineConfig, PluginOption, build, mergeConfig, preview } from "vite";
 
@@ -72,7 +72,7 @@ Make sure it exists or specify a different entry file using \`--entry\`.`);
 
   if (options.server) {
     success(`Server started: ${pc.bold(pc.cyan(url))}`);
-    await new Promise(() => {});
+    await new Promise(noop);
   }
 
   await generatePdfs(generationConfigs, url, options.outDir);
