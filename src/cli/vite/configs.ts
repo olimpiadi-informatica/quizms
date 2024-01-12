@@ -1,4 +1,5 @@
 import { existsSync } from "node:fs";
+import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { CompileOptions as MdxOptions } from "@mdx-js/mdx";
@@ -38,13 +39,9 @@ export default function (
     mode,
     envPrefix: "QUIZMS_",
     resolve: {
-      alias: [
-        {
-          find: /^quizms\/(.*)/,
-          replacement: process.env.NODE_ENV === "production" ? "@olinfo/quizms/$1" : "quizms/$1",
-        },
-        { find: "vm", replacement: "vm-browserify" },
-      ],
+      alias: {
+        vm: "vm-browserify",
+      },
       dedupe: ["react", "react-dom", "@mdx-js/react"],
       extensions: [".js", ".jsx", ".ts", ".tsx", ".md", ".mdx"],
     },
@@ -52,7 +49,6 @@ export default function (
       "process.env.NODE_ENV": JSON.stringify(mode),
     },
     plugins: [
-      resolveContests(),
       iframe(),
       images(),
       inspect(),
@@ -60,6 +56,7 @@ export default function (
       python(),
       react({ plugins: swcPlugins }),
       reactEntry(),
+      resolveContests(),
     ],
     build: {
       rollupOptions: {
@@ -94,7 +91,7 @@ export default function (
     clearScreen: false,
     server: {
       fs: {
-        allow: [".", fileURLToPath(new URL("../..", import.meta.url))],
+        allow: [join(root, ".."), fileURLToPath(new URL("../..", import.meta.url))],
       },
       host: false,
     },

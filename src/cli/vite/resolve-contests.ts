@@ -1,4 +1,4 @@
-import { PluginOption } from "vite";
+import { InlineConfig, PluginOption, mergeConfig } from "vite";
 
 export default function resolveContests(): PluginOption {
   const api = {
@@ -7,6 +7,13 @@ export default function resolveContests(): PluginOption {
 
   return {
     name: "quizms:resolve-contest",
+    config: (config) => {
+      return mergeConfig(config, {
+        optimizeDeps: {
+          exclude: ["virtual:quizms-contests"],
+        },
+      } as InlineConfig);
+    },
     resolveId(id) {
       if (id === "virtual:quizms-contests") {
         return "\0" + id;
