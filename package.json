@@ -117,6 +117,7 @@
     "eslint": "^8.34",
     "eslint-plugin-react": "^7.32",
     "eslint-plugin-react-hooks": "^4.6",
+    "eslint-plugin-tailwindcss": "^3.13.1",
     "eslint-plugin-unicorn": "^50.0.1",
     "highlight.js": "^11.8",
     "less": "^4.1",
@@ -177,14 +178,16 @@
       "react",
       "react-hooks",
       "@typescript-eslint",
-      "unicorn"
+      "unicorn",
+      "tailwindcss"
     ],
     "extends": [
       "eslint:recommended",
       "plugin:react/recommended",
       "plugin:react-hooks/recommended",
       "plugin:@typescript-eslint/recommended",
-      "plugin:unicorn/recommended"
+      "plugin:unicorn/recommended",
+      "plugin:tailwindcss/recommended"
     ],
     "rules": {
       "linebreak-style": "off",

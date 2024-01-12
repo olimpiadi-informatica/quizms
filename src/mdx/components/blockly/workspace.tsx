@@ -131,7 +131,7 @@ export default function Workspace({ toolbox, initialBlocks, example, debug }: Bl
             value={input}
             onChange={(e) => setInput(e.target.value)}
           />
-          <div className="divider-horizontall divider">
+          <div className="divider divider-horizontal">
             <ArrowDown size={72} />
           </div>
           <textarea

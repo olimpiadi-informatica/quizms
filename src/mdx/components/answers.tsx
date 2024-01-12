@@ -143,7 +143,7 @@ export function OpenAnswer({ correct, type }: OpenAnswerProps) {
   }, [correct, setCorrect]);
 
   return (
-    <div className="open-answer px-2">
+    <div className="px-2">
       <input
         className={classNames(
           "input input-bordered w-72 max-w-full border-2 print:placeholder:text-transparent",
@@ -169,7 +169,7 @@ export function Explanation({ children }: { children: ReactNode }) {
   const { terminated } = useStudent();
   if (!terminated) return;
   return (
-    <div className="explanation my-5 rounded-xl bg-base-200 print:hidden">
+    <div className="my-5 rounded-xl bg-base-200 print:hidden">
       <div className="collapse">
         <input type="checkbox" />
         <div className="collapse-title text-xl font-medium">Mostra soluzione</div>

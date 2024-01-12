@@ -33,7 +33,7 @@ export function Layout({ children }: { children: ReactNode }) {
 
   return (
     <div className="h-dvh screen:overflow-y-scroll">
-      <div className="navbar sticky top-0 z-50 h-16 justify-between bg-base-300 bg-opacity-85 px-3 text-base-content backdrop-blur print:hidden">
+      <div className="navbar sticky top-0 z-50 h-16 justify-between bg-base-300/85 px-3 text-base-content backdrop-blur print:hidden">
         <div className="dropdown max-w-full flex-none">
           <div tabIndex={0} role="button" className="btn btn-ghost no-animation w-full flex-nowrap">
             <User className="flex-none" />
@@ -93,7 +93,7 @@ const SubmitModal = forwardRef(function SubmitModal(_, ref: Ref<HTMLDialogElemen
   return (
     <Modal ref={ref} title="Confermi di voler terminare?">
       <p>Confermando non potrai più modificare le tue risposte.</p>
-      <div className="text-md mt-3 flex flex-row justify-center gap-5">
+      <div className="mt-3 flex flex-row justify-center gap-5">
         <button className="btn btn-info" onClick={close}>
           Annulla
         </button>

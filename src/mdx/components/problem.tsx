@@ -104,7 +104,7 @@ export function SubProblem({ subId, children }: SubProblemProps) {
 
   return (
     <ProblemContext.Provider value={{ id: newId, points, setCorrect }}>
-      <div className="subproblem break-inside-avoid">
+      <div className="break-inside-avoid">
         <h3>Domanda {newId}</h3>
         {children}
       </div>

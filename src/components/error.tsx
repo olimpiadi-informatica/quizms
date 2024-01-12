@@ -19,7 +19,7 @@ export function Error({ error, resetErrorBoundary }: Partial<FallbackProps>) {
     <div className="flex size-full flex-col items-center justify-center">
       <p className="mx-8 break-words text-center text-error">Errore: {error.message}</p>
       {resetErrorBoundary && (
-        <div className="text-md mt-5 flex flex-row justify-center">
+        <div className="mt-5 flex flex-row justify-center">
           <button className="btn btn-error" onClick={resetErrorBoundary}>
             <RotateCw />
             Ricarica

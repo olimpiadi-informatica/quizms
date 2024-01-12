@@ -143,7 +143,7 @@ function ContestData() {
   return (
     <div className="flex flex-col gap-3">
       <p>
-        <b>Codice:</b> <span className="text-mono">{participation.token}</span>
+        <b>Codice:</b> <span className="font-mono">{participation.token}</span>
       </p>
       <p>La gara terminerà alle {formatTime(endTime)}.</p>
       <p>
@@ -208,7 +208,7 @@ export function TeacherAdmin() {
         </div>
       </div>
       <div className="highlight-border card bg-base-200">
-        <div className="max-h card-body h-[28rem] max-h-screen">
+        <div className="card-body h-[28rem] max-h-screen">
           <h2 className="card-title">Richieste di accesso</h2>
           <StudentRestoreList />
         </div>
