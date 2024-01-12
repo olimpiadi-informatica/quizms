@@ -6,9 +6,9 @@
   "license": "MIT",
   "scripts": {
     "prebuild": "yarn lint",
-    "build": "rm -rf dist/ && NODE_ENV=production node scripts/build.js build",
+    "build": "NODE_ENV=production node scripts/build.js build",
     "watch": "node scripts/build.js watch",
-    "lint": "eslint --fix . && tsc --noEmit && prettier --check --cache src/",
+    "lint": "eslint --fix . && tsc --noEmit && prettier --check --cache --log-level=warn src/",
     "fmt": "prettier --write --cache src/",
     "prepack": "yarn build",
     "release": "npm publish"
@@ -22,6 +22,13 @@
     "./firebase": "./dist/firebase/index.js",
     "./css": "./dist/index.css",
     "./jsx-runtime": "./dist/jsx-runtime/index.js"
+  },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "dist/*"
+      ]
+    }
   },
   "files": [
     "bin",
@@ -124,9 +131,15 @@
     "postcss": "^8.4",
     "prettier": "^3.0",
     "prettier-plugin-tailwindcss": "^0.5",
-    "rollup-plugin-visualizer": "^5.11",
     "tailwindcss": "^3.2",
+    "tsup": "^8.0",
     "typescript": "^5.1"
+  },
+  "postcss": {
+    "plugins": {
+      "tailwindcss": {},
+      "autoprefixer": {}
+    }
   },
   "prettier": {
     "trailingComma": "all",

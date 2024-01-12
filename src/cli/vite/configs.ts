@@ -5,7 +5,6 @@ import { CompileOptions as MdxOptions } from "@mdx-js/mdx";
 import mdxPlugin from "@mdx-js/rollup";
 import react from "@vitejs/plugin-react-swc";
 import pc from "picocolors";
-import { visualizer } from "rollup-plugin-visualizer";
 import { InlineConfig } from "vite";
 import inspect from "vite-plugin-inspect";
 
@@ -61,7 +60,6 @@ export default function (
       python(),
       react({ plugins: swcPlugins }),
       reactEntry(),
-      process.env.NODE_ENV !== "production" && visualizer({ filename: "dist/stats.html" }),
     ],
     build: {
       rollupOptions: {
