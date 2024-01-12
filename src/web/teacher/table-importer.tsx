@@ -158,7 +158,7 @@ async function importStudents(
           });
           return z.NEVER;
         }
-      } else if (value.slice(contest.personalInformation.length).some((v) => v)) {
+      } else if (value.slice(contest.personalInformation.length).some(Boolean)) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           path: [contest.personalInformation.length],

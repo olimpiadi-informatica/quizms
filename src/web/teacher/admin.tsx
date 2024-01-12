@@ -15,7 +15,7 @@ import { Contest, Participation } from "~/models";
 import { formatDate, formatTime } from "~/utils/date";
 import { randomToken } from "~/utils/random";
 
-import StudentRestoreList from "./adminStudentRestore";
+import StudentRestoreList from "./admin-student-restore";
 import { useTeacher } from "./provider";
 
 function canStartContest(now: Date, participation: Participation, contest: Contest) {
@@ -192,7 +192,7 @@ export function TeacherAdmin() {
         <div className="card-body">
           <h2 className="card-title">Gestione Gara</h2>
           {/* contest data */}
-          {!participation.startingTime ? <p>La gara non è ancora iniziata!</p> : <ContestData />}
+          {participation.startingTime ? <ContestData /> : <p>La gara non è ancora iniziata!</p>}
           <div className="mt-2 flex flex-wrap justify-center gap-3">
             {/* contest buttons */}
             {canStartContest(now, participation, contest) && <StartContestButton />}

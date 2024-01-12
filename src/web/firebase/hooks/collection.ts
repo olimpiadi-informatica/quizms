@@ -14,7 +14,7 @@ import { sortBy } from "lodash-es";
 import { useErrorBoundary } from "react-error-boundary";
 import useSWR, { KeyedMutator, MutatorOptions, SWRConfiguration } from "swr";
 
-import { useDb } from "~/web/firebase/baseLogin";
+import { useDb } from "~/web/firebase/base-login";
 import query from "~/web/firebase/query";
 
 import { useSubscriptionListener } from "./subscription";
@@ -107,7 +107,7 @@ function merge<T extends { id: string }>(
   options?: CollectionOptions<T>,
 ) {
   if (!prev) return newDocs;
-  let coll = prev.filter((doc) => !newDocs.find((newDoc) => newDoc.id === doc.id));
+  let coll = prev.filter((doc) => !newDocs.some((newDoc) => newDoc.id === doc.id));
   coll.push(...newDocs);
   coll = sortBy(coll, [options?.orderBy ?? "id"]);
   if (options?.limit) coll = coll.slice(0, options.limit);

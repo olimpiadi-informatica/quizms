@@ -15,11 +15,7 @@ export type ExportOptions = {
 };
 
 export default async function staticExport(options: ExportOptions): Promise<void> {
-  if (options.training) {
-    process.env.QUIZMS_MODE = "training";
-  } else {
-    process.env.QUIZMS_MODE = "contest";
-  }
+  process.env.QUIZMS_MODE = options.training ? "training" : "contest";
 
   const root = join(options.dir, "src");
   const pages = await glob("**/index.{html,jsx}", {
@@ -28,7 +24,7 @@ export default async function staticExport(options: ExportOptions): Promise<void
   const input = Object.fromEntries(
     pages.map((p) => {
       const dir = dirname(p);
-      const name = dir === "." ? "index" : dir.replace(/\W/g, "-");
+      const name = dir === "." ? "index" : dir.replaceAll(/\W/g, "-");
       const entry =
         extname(p) === ".jsx" ? `virtual:react-entry?src=${encodeURIComponent(p)}` : join(root, p);
       return ["page-" + name, entry];
@@ -83,7 +79,7 @@ export default async function staticExport(options: ExportOptions): Promise<void
 
   try {
     await build(config);
-  } catch (e) {
+  } catch {
     fatal("Build failed.");
   }
 }

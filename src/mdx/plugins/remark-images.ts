@@ -50,7 +50,7 @@ const remarkImages: Plugin<[], Root> = () => {
                     b.identifier("glob"),
                   ),
                   [
-                    b.literal(path.replace(/\{.*?}/g, "*")),
+                    b.literal(path.replaceAll(/{.*?}/g, "*")),
                     b.objectExpression([
                       b.property("init", b.identifier("eager"), b.literal(true)),
                       b.property("init", b.identifier("import"), b.literal("default")),
@@ -71,7 +71,7 @@ const remarkImages: Plugin<[], Root> = () => {
           ),
         );
 
-        const templateLiteral = `String.raw\`${path.replace(/{/g, "${")}\``;
+        const templateLiteral = `String.raw\`${path.replaceAll("{", "${")}\``;
         const template = Parser.parse(templateLiteral, {
           ecmaVersion: "latest",
           sourceType: "module",

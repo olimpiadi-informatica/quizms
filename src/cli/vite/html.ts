@@ -41,7 +41,7 @@ const applyTransform: Plugin<[HtmlTagDescriptor[]], Root> = (tags) => {
 function tagToHast(tag: HtmlTagDescriptor): Element {
   let children: Element["children"] = [];
   if (Array.isArray(tag.children)) {
-    children = tag.children.map(tagToHast);
+    children = tag.children.map((child) => tagToHast(child));
   }
   if (isString(tag.children)) {
     children = [{ type: "text", value: tag.children }];
@@ -67,11 +67,11 @@ export function generateHtmlFromBundle(
   const modules = new Set<string>();
   const queue = [entry];
 
-  while (queue.length) {
+  while (queue.length > 0) {
     const chunk = queue.pop()!;
     const imports = [...chunk.imports];
     if (options?.includeDynamicImports) imports.push(...chunk.dynamicImports);
-    for (const dep of chunk.imports) {
+    for (const dep of imports) {
       if (modules.has(dep)) continue;
       modules.add(dep);
       queue.push(bundle[dep] as OutputChunk);

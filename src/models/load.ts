@@ -31,8 +31,8 @@ export default async function load<T>(
 
     let content: string;
     try {
-      content = await readFile(path + ext, "utf-8");
-    } catch (e) {
+      content = await readFile(path + ext, "utf8");
+    } catch {
       continue;
     }
     info(`Reading from ${relativePath}...`);

@@ -66,8 +66,8 @@ export function parsePersonalInformation(
   switch (schema.type) {
     case "text": {
       value = value
-        .replace(/\s+/g, " ")
-        .replace(/[´`‘’]/g, "'")
+        .replaceAll(/\s+/g, " ")
+        .replaceAll(/[`´‘’]/g, "'")
         .trim();
       if (/[^-'\s\p{Alpha}]/u.test(value)) {
         const helpUtf8 = /[^\p{ASCII}]/u.test(value) ? " e che la codifica sia UTF-8" : "";
@@ -83,7 +83,7 @@ export function parsePersonalInformation(
     }
     case "number": {
       const num = Number(value);
-      if (isNaN(num)) {
+      if (Number.isNaN(num)) {
         return [undefined, `Il campo ${label} deve essere un numero.`];
       }
       if (schema?.min !== undefined && num < schema.min) {

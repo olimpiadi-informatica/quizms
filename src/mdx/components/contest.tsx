@@ -107,9 +107,9 @@ const CompletedModal = forwardRef(function CompletedModal(
     if (
       Object.values(problems)
         .map((p) => p.correct)
-        .some(isNil)
+        .some((c) => isNil(c))
     ) {
-      return undefined;
+      return;
     }
     return sumBy(Object.values(problems), calcPoints);
   }, [problems, calcPoints]);

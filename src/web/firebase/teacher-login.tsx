@@ -18,7 +18,7 @@ import { Button } from "~/components";
 import { Participation, StudentRestore, studentHash } from "~/models";
 import { TeacherProvider } from "~/web/teacher/provider";
 
-import { FirebaseLogin, useDb } from "./baseLogin";
+import { FirebaseLogin, useDb } from "./base-login";
 import {
   contestConverter,
   participationConverter,

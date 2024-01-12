@@ -93,12 +93,7 @@ export function renderToStaticMarkup() { throw new Error("react-dom/server is no
 
           const exists = await access(join(root, entry)).then(stubTrue, stubFalse);
           if (exists) {
-            if (!url.pathname.endsWith("/")) {
-              res.writeHead(307, {
-                Location: path + "/",
-              });
-              res.end();
-            } else {
+            if (url.pathname.endsWith("/")) {
               const tag: HtmlTagDescriptor = {
                 tag: "script",
                 attrs: { type: "module" },
@@ -110,6 +105,11 @@ export function renderToStaticMarkup() { throw new Error("react-dom/server is no
 
               res.setHeader("Content-Type", "text/html");
               res.end(finalHtml);
+            } else {
+              res.writeHead(307, {
+                Location: path + "/",
+              });
+              res.end();
             }
             return;
           }

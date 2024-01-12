@@ -2,7 +2,7 @@ import React, { Suspense, lazy } from "react";
 
 import classNames from "classnames";
 
-const CodeHighlight = lazy(() => import("./codeHighlight"));
+const CodeHighlight = lazy(() => import("./code-highlight"));
 
 type Props = {
   code: string;

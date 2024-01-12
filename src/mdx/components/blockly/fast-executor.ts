@@ -4,14 +4,15 @@ import { Input, Output } from "./io";
 
 class ExitError extends Error {}
 
+function exit() {
+  throw new ExitError();
+}
+
 export default function fastExecutor(code: string, textInput: string) {
   let textOutput = "";
 
   const input = new Input(textInput);
   const output = new Output((value) => (textOutput += value));
-  const exit = () => {
-    throw new ExitError();
-  };
 
   try {
     const fn = new Function("input", "output", "highlightBlock", "loopTrap", "exit", code);

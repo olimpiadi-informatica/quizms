@@ -14,7 +14,7 @@ import {
   studentConverter,
   submissionConverter,
   variantConverter,
-} from "./utils/convertersAdmin";
+} from "./utils/converters-admin";
 import { initializeFirebase } from "./utils/initialize";
 
 type ExportOptions = {

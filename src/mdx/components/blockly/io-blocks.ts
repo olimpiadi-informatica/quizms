@@ -1,4 +1,4 @@
-import { CustomBlock } from "./customBlock";
+import { CustomBlock } from "./custom-block";
 
 export const ioBlocks: CustomBlock[] = [
   {

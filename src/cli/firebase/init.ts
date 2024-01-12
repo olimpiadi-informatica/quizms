@@ -50,7 +50,7 @@ async function copyFiles(options: InitOptions) {
 
   const firestoreIndexesPath = join(data, "firestore-indexes.json");
   if (await overwrite(firestoreIndexesPath, options)) {
-    await writeFile(firestoreIndexesPath, JSON.stringify(firestoreIndexes, null, 2));
+    await writeFile(firestoreIndexesPath, JSON.stringify(firestoreIndexes, undefined, 2));
   }
 
   const storageRulesPath = join(data, "storage.rules");
@@ -75,7 +75,7 @@ async function copyFiles(options: InitOptions) {
   };
 
   if (await overwrite(configPath, options)) {
-    await writeFile(configPath, JSON.stringify(configs, null, 2));
+    await writeFile(configPath, JSON.stringify(configs, undefined, 2));
   }
 
   success(`Files copied!`);

@@ -15,8 +15,8 @@ import { fatal, info, warning } from "~/utils/logs";
 import iframe from "./iframe";
 import images from "./images";
 import python from "./python";
-import reactEntry from "./reactEntry";
-import resolveContests from "./resolveContests";
+import reactEntry from "./react-entry";
+import resolveContests from "./resolve-contests";
 
 type Options = {
   mdx?: MdxOptions;

@@ -30,7 +30,7 @@ export function score(student: Student, variants: Record<string, Variant>) {
   const answers = student.answers;
   const schema = variants[student.variant!]?.schema;
 
-  if (!schema || !answers) return undefined;
+  if (!schema || !answers) return;
 
   let points = 0;
   for (const id in schema) {
@@ -43,7 +43,7 @@ export function score(student: Student, variants: Record<string, Variant>) {
       problem.pointsWrong === undefined ||
       problem.solution === undefined
     ) {
-      return undefined;
+      return;
     }
 
     if (answer === undefined || answer === "" || answer === problem.blankOption) {

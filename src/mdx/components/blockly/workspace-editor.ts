@@ -4,12 +4,12 @@ import { ToolboxDefinition } from "blockly/core/utils/toolbox";
 import locale from "blockly/msg/it";
 
 import toJS from "./generator";
-import { ioBlocks } from "./ioBlocks";
-import "./workspaceEditor.css";
+import { ioBlocks } from "./io-blocks";
+import "./workspace-editor.css";
 
-let blocks: object | undefined = undefined;
-let code: string | undefined = undefined;
-let workspace: WorkspaceSvg | undefined = undefined;
+let blocks: object | undefined;
+let code: string | undefined;
+let workspace: WorkspaceSvg | undefined;
 
 type Props = {
   toolbox: ToolboxDefinition;
@@ -66,12 +66,12 @@ function send(cmd: string, props?: any) {
   window.parent.postMessage({ cmd, ...props }, "*");
 }
 
-window.onmessage = (event) => {
+window.addEventListener("message", (event) => {
   const { cmd, ...props } = event.data;
   if (cmd === "init") {
     init(props);
   } else if (cmd === "highlight") {
     workspace?.highlightBlock(props.highlightedBlock);
   }
-};
+});
 send("init");

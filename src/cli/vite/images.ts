@@ -18,7 +18,7 @@ import { executePython } from "./python";
 
 const execFile = promisify(child_process.execFile);
 
-const imageExtensions = [".png", ".jpg", ".jpeg", ".tiff", ".gif", ".webp", ".avif"];
+const imageExtensions = new Set([".png", ".jpg", ".jpeg", ".tiff", ".gif", ".webp", ".avif"]);
 
 type ImageOptions = ResizeOptions | { scale: number };
 
@@ -74,7 +74,7 @@ export default function images(): PluginOption {
         return emitFile(this, path, image, isBuild);
       }
 
-      if (imageExtensions.includes(ext)) {
+      if (imageExtensions.has(ext)) {
         const image = await transformImage(path, options);
         return emitFile(this, path, image, isBuild);
       }
@@ -151,7 +151,7 @@ async function transformAsymptote(
 }
 
 async function transformSvg(path: string, options: ImageOptions): Promise<Image> {
-  const content = await fs.readFile(path, { encoding: "utf-8" });
+  const content = await fs.readFile(path, { encoding: "utf8" });
 
   const originalSize: { width?: number; height?: number } = {};
 
@@ -276,7 +276,7 @@ async function findAsymptoteDependencies(asyPath: string) {
   }
 
   imports.delete(asyPath);
-  return Array.from(imports);
+  return [...imports];
 }
 
 function sizePlugin(out: { width?: number; height?: number }): SvgoPlugin {

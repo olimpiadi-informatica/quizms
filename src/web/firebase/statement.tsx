@@ -6,7 +6,7 @@ import { getDownloadURL, getStorage, ref } from "firebase/storage";
 import { Loading, Timer, useIsAfter } from "~/components";
 import { RemoteStatement, useStudent } from "~/web/student";
 
-import { useDb } from "./baseLogin";
+import { useDb } from "./base-login";
 
 export function FirebaseStatement() {
   const { participation } = useStudent();

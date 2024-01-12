@@ -51,7 +51,7 @@ function buildBaseStatements(
 
     try {
       await build(bundleConfig);
-    } catch (e) {
+    } catch {
       fatal("Build failed.");
     }
 

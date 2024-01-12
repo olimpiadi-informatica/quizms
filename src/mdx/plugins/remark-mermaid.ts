@@ -43,7 +43,7 @@ const remarkMermaid: Plugin<[], Root> = () => {
         const params = Object.fromEntries(
           (node.meta ?? "")
             .split(/\s+/)
-            .map(decodeURIComponent)
+            .map((m) => decodeURIComponent(m))
             .map((m) => m.split("=", 2)),
         );
 

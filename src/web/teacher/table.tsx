@@ -16,13 +16,13 @@ import { formatDate } from "~/utils/date";
 import { randomId } from "~/utils/random";
 
 import { useTeacher, useTeacherStudents } from "./provider";
-import ImportModal from "./tableImporter";
-import { agGridLocaleIT } from "./tableLocale";
+import ImportModal from "./table-importer";
+import { agGridLocaleIT } from "./table-locale";
 
 import "@ag-grid-community/styles/ag-grid.css";
 import "@ag-grid-community/styles/ag-theme-quartz.css";
 
-const AgGridReact = lazy(() => import("~/components/agGrid"));
+const AgGridReact = lazy(() => import("~/components/ag-grid"));
 
 export function TeacherTable() {
   const { contest, participation } = useTeacher();
@@ -100,7 +100,7 @@ const FinalizeModal = forwardRef(function FinalizeModal(
       return orderings.map((fields) => {
         return deburr(fields.map((field) => info[field]).join("\n"))
           .toLowerCase()
-          .replace(/[^a-z\n]/g, "");
+          .replaceAll(/[^\na-z]/g, "");
       });
     }
 
@@ -181,11 +181,13 @@ const FinalizeModal = forwardRef(function FinalizeModal(
   );
 });
 
+const deleteConfirmStorageKey = "delete-confirm";
+
 const DeleteModal = forwardRef(function DeleteModal(
   { studentName }: { studentName: string },
   ref: Ref<HTMLDialogElement> | null,
 ) {
-  const [checked, setChecked] = useState(sessionStorage.getItem("delete-confirmation") === "1");
+  const [checked, setChecked] = useState(sessionStorage.getItem(deleteConfirmStorageKey) === "1");
 
   const confirm = () => {
     if (ref && "current" in ref && ref.current) {
@@ -218,7 +220,7 @@ const DeleteModal = forwardRef(function DeleteModal(
               checked={checked}
               onChange={(e) => {
                 setChecked(e.target.checked);
-                sessionStorage.setItem("delete-confirmation", String(+e.target.checked));
+                sessionStorage.setItem(deleteConfirmStorageKey, String(+e.target.checked));
               }}
             />
             <span className="label-text">Non mostrarmi più questo pop-up</span>
@@ -261,7 +263,7 @@ function Table() {
       id: newStudentId.current,
       contestId: contest.id,
       participationId: participation.id,
-      variant: !contest.hasVariants ? Object.keys(variants)[0] : undefined,
+      variant: contest.hasVariants ? undefined : Object.keys(variants)[0],
       createdAt: new Date(),
       answers: {},
       disabled: false,
@@ -298,11 +300,12 @@ function Table() {
     }
     if (field === "disabled" && value) {
       const modal = modalRef.current!;
-      if (sessionStorage.getItem("delete-confirmation") !== "1") {
+      if (sessionStorage.getItem(deleteConfirmStorageKey) !== "1") {
         ev.api.refreshCells();
 
         modal.returnValue = "0";
         modal.showModal();
+        // eslint-disable-next-line unicorn/prefer-add-event-listener
         await new Promise<void>((resolve) => (modal.onclose = () => resolve()));
         value = modal.returnValue === "1";
       }
@@ -421,7 +424,7 @@ function columnDefinition(
       headerName: "Punti",
       pinned: "right",
       width: 100,
-      valueGetter: ({ data }) => (!isStudentEmpty(data) ? score(data, variants) : ""),
+      valueGetter: ({ data }) => (isStudentEmpty(data) ? "" : score(data, variants)),
       ...defaultOptions,
       editable: false,
     },

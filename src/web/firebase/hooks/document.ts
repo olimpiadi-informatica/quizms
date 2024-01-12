@@ -11,7 +11,7 @@ import {
 import { useErrorBoundary } from "react-error-boundary";
 import useSWR, { KeyedMutator, MutatorOptions, SWRConfiguration } from "swr";
 
-import { useDb } from "~/web/firebase/baseLogin";
+import { useDb } from "~/web/firebase/base-login";
 
 import { useSubscriptionListener } from "./subscription";
 
@@ -56,9 +56,9 @@ export function useDocumentOptional<T>(
   };
 
   const key = `${ref.path}?${JSON.stringify(options)}`;
-  const { data, mutate } = useSWR<[T | null]>(key, () => fetcher(ref), swrConfig);
+  const { data, mutate } = useSWR<[T?]>(key, () => fetcher(ref), swrConfig);
 
-  useSubscriptionListener<[T | null]>(
+  useSubscriptionListener<[T?]>(
     key,
     (setData) => {
       if (!options?.subscribe) return;
@@ -66,7 +66,7 @@ export function useDocumentOptional<T>(
         ref,
         (snap) => {
           try {
-            setData([snap.data() ?? null]);
+            setData([snap.data()]);
           } catch (error) {
             showBoundary(error);
           }
@@ -82,11 +82,7 @@ export function useDocumentOptional<T>(
   return [data![0], setData] as const;
 }
 
-async function setDocument<T>(
-  ref: DocumentReference<T>,
-  newDoc: T,
-  mutator: KeyedMutator<[T | null]>,
-) {
+async function setDocument<T>(ref: DocumentReference<T>, newDoc: T, mutator: KeyedMutator<[T?]>) {
   await mutator(
     async () => {
       await setDoc(ref, newDoc);
@@ -96,10 +92,10 @@ async function setDocument<T>(
   );
 }
 
-async function fetcher<T>(ref: DocumentReference<T>): Promise<[T | null]> {
+async function fetcher<T>(ref: DocumentReference<T>): Promise<[T?]> {
   const snapshot = await getDoc(ref);
   if (!snapshot.exists()) {
-    return [null];
+    return [undefined];
   }
   return [snapshot.data({ serverTimestamps: "estimate" })];
 }

@@ -13,14 +13,14 @@ export class Input {
       throw new Error("Non ci sono abbastanza numeri in input");
     }
     const value = Number(this.tokens[this.index++]);
-    if (isNaN(value)) {
-      throw new Error("Il valore in input non è un numero");
+    if (Number.isNaN(value)) {
+      throw new TypeError("Il valore in input non è un numero");
     }
     return value;
   };
 
   public readArrayInt = (length: number): number[] => {
-    return range(length).map(this.readInt);
+    return range(length).map(() => this.readInt());
   };
 }
 
@@ -34,11 +34,7 @@ export class Output {
   constructor(private onOutput: (value: string) => void) {}
 
   public writeAny = (value: any) => {
-    if (Array.isArray(value)) {
-      value = value.join(" ") + "\n";
-    } else {
-      value = `${value}\n`;
-    }
+    value = (Array.isArray(value) ? value.join(" ") : String(value)) + "\n";
 
     this.length += value.length;
     this.lineCount += 1;

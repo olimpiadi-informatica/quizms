@@ -1,4 +1,4 @@
-export { NoAuth } from "./noAuth";
+export { NoAuth } from "./no-auth";
 export { StudentProvider, useStudent } from "./provider";
-export { RemoteStatement } from "./remoteStatement";
-export * from "./printAuth";
+export { RemoteStatement } from "./remote-statement";
+export * from "./print-auth";

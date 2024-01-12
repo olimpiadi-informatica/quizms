@@ -1,3 +1,3 @@
-export { StudentLogin } from "./studentLogin";
-export { TeacherLogin } from "./teacherLogin";
+export { StudentLogin } from "./student-login";
+export { TeacherLogin } from "./teacher-login";
 export { FirebaseStatement } from "./statement";

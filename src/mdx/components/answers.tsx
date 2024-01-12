@@ -48,7 +48,7 @@ export function AnswerGroup({ children }: AnswerGroupProps) {
         "prose-p:my-1 print:flex print:border print:border-[var(--tw-prose-hr)] print:p-1",
       )}>
       {answers.map((answer, i) => (
-        <AnswerContext.Provider key={i} value={{ id: String.fromCharCode(65 + i) }}>
+        <AnswerContext.Provider key={i} value={{ id: String.fromCodePoint(65 + i) }}>
           {answer}
         </AnswerContext.Provider>
       ))}
@@ -167,7 +167,7 @@ export function OpenAnswer({ correct, type }: OpenAnswerProps) {
 
 export function Explanation({ children }: { children: ReactNode }) {
   const { terminated } = useStudent();
-  if (!terminated) return null;
+  if (!terminated) return;
   return (
     <div className="explanation my-5 rounded-xl bg-base-200 print:hidden">
       <div className="collapse">

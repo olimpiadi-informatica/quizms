@@ -10,13 +10,9 @@ type ProgressBlockProps = {
 };
 
 export function Progress({ percentage, className, children }: ProgressBlockProps) {
-  let value = percentage !== undefined ? Math.round(percentage) : undefined;
+  let value = percentage === undefined ? undefined : Math.round(percentage);
   if (value !== undefined) {
-    if (isNaN(value)) {
-      value = undefined;
-    } else {
-      value = clamp(value, 0, 100);
-    }
+    value = Number.isNaN(value) ? undefined : clamp(value, 0, 100);
   }
 
   return (

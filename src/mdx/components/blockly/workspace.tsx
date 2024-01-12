@@ -9,7 +9,7 @@ import { Rng } from "~/utils/random";
 
 import useExecutor from "./executor";
 import { Input, Output } from "./io";
-import useIcp from "./workspaceIpc";
+import useIcp from "./workspace-ipc";
 
 type BlocklyProps = {
   toolbox: ToolboxDefinition;
@@ -34,25 +34,32 @@ export default function Workspace({ toolbox, initialBlocks, example, debug }: Bl
   const [step, output, running, highlightedBlock] = useExecutor(code, input);
 
   const send = useIcp(iframe?.contentWindow, (data: any) => {
-    if (data.cmd === "init") {
-      send({ cmd: "init", toolbox, debug, initialBlocks });
-      send({ cmd: "input", input: example });
-    } else if (data.cmd === "ready") {
-      setReady(true);
-    } else if (data.cmd === "blocks") {
-      setBlocks(data.blocks);
-      if (debug?.logBlocks) console.info(JSON.stringify(data.blocks, null, 2));
-    } else if (data.cmd === "code") {
-      setCode(data.code);
-      if (debug?.logJs) console.info(data.code);
+    switch (data.cmd) {
+      case "init": {
+        send({ cmd: "init", toolbox, debug, initialBlocks });
+        send({ cmd: "input", input: example });
+        break;
+      }
+      case "ready": {
+        setReady(true);
+        break;
+      }
+      case "blocks": {
+        setBlocks(data.blocks);
+        if (debug?.logBlocks) console.info(JSON.stringify(data.blocks, undefined, 2));
+        break;
+      }
+      case "code": {
+        setCode(data.code);
+        if (debug?.logJs) console.info(data.code);
+        break;
+      }
     }
   });
 
   useEffect(() => {
     send({ cmd: "highlight", highlightedBlock });
   }, [send, highlightedBlock]);
-
-  const reset = () => {};
 
   return (
     <div className="relative inset-y-0 left-1/2 mb-5 w-screen -translate-x-1/2 overflow-x-hidden px-4 sm:px-8">
@@ -91,10 +98,7 @@ export default function Workspace({ toolbox, initialBlocks, example, debug }: Bl
               </button>
             </div>
             <div className="join-item tooltip" data-tip="Esegui da capo">
-              <button
-                className="btn btn-info rounded-[inherit]"
-                onClick={reset}
-                aria-label="Esegui da capo">
+              <button className="btn btn-info rounded-[inherit]" aria-label="Esegui da capo">
                 <RotateCcw className="size-6" />
               </button>
             </div>
@@ -108,7 +112,7 @@ export default function Workspace({ toolbox, initialBlocks, example, debug }: Bl
         <div className="relative h-[calc(100vh-8rem)] max-h-[640px] w-full overflow-hidden rounded-xl border-2 border-[#c6c6c6] md:order-first lg:row-span-2">
           <iframe
             ref={setIframe}
-            src={import("./workspaceEditor") as any}
+            src={import("./workspace-editor") as any}
             className="size-full"
             title="Area di lavoro di Blockly"
           />

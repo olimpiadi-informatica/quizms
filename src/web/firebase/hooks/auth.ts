@@ -12,7 +12,7 @@ import { useErrorBoundary } from "react-error-boundary";
 import { SWRConfiguration } from "swr";
 import useSWR from "swr/immutable";
 
-import { useDb } from "~/web/firebase/baseLogin";
+import { useDb } from "~/web/firebase/base-login";
 
 import { useSubscription } from "./subscription";
 
@@ -51,11 +51,11 @@ export function usePrecompiledPasswordAuth() {
     if (email && password) {
       try {
         await signInWithEmailAndPassword(auth, email, password);
-      } catch (e) {
+      } catch {
         console.warn("Failed to sign in with precompiled credentials.");
       }
 
-      window.history.replaceState(null, "", window.location.pathname);
+      window.history.replaceState(undefined, "", window.location.pathname);
     }
 
     return 0;

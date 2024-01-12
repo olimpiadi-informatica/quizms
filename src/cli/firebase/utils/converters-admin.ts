@@ -71,7 +71,10 @@ function toFirebaseSchema(schema: ZodTypeAny): ZodTypeAny {
     return z.union(schema.options.map((option: ZodTypeAny) => toFirebaseSchema(option)));
   }
   if (schema instanceof ZodDiscriminatedUnion) {
-    return z.discriminatedUnion(schema.discriminator, schema.options.map(toFirebaseSchema));
+    return z.discriminatedUnion(
+      schema.discriminator,
+      schema.options.map((option: ZodTypeAny) => toFirebaseSchema(option)),
+    );
   }
   return schema;
 }

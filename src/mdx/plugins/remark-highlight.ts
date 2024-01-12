@@ -17,22 +17,22 @@ const remarkHighlight: Plugin<[], Root> = () => {
       const params = Object.fromEntries(
         (meta ?? "")
           .split(/\s+/)
-          .map(decodeURIComponent)
+          .map((m) => decodeURIComponent(m))
           .map((m) => m.split("=", 2)),
       );
 
       const value =
-        lang !== "srs"
+        lang === "srs"
           ? code.value
-          : code.value
-              .replace(/{/g, "${")
-              .replace(/<-/g, "←")
-              .replace(/->/g, "→")
-              .replace(/<=/g, "≤")
-              .replace(/>=/g, "≥")
-              .replace(/!=/g, "≠")
-              .replace(/\*/g, "×")
-              .replace(/\.\.\./g, "…");
+              .replaceAll("{", "${")
+              .replaceAll("<-", "←")
+              .replaceAll("->", "→")
+              .replaceAll("<=", "≤")
+              .replaceAll(">=", "≥")
+              .replaceAll("!=", "≠")
+              .replaceAll("*", "×")
+              .replaceAll("...", "…")
+          : code.value;
 
       const templateLiteral = `String.raw\`${value}\``;
       const template = Parser.parse(templateLiteral, {

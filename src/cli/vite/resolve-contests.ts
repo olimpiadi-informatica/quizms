@@ -2,7 +2,7 @@ import { PluginOption } from "vite";
 
 export default function resolveContests(): PluginOption {
   const api = {
-    contests: null,
+    contests: undefined,
   };
 
   return {
@@ -14,17 +14,15 @@ export default function resolveContests(): PluginOption {
     },
     load(id) {
       if (id === "\0virtual:quizms-contests") {
-        if (api.contests === null) {
-          return `\
+        return api.contests === undefined
+          ? `\
 export default function() {
   throw new Error("\`PrintAuth\` can be used only with print command.");
-}`;
-        } else {
-          return `\
+}`
+          : `\
 export default function() {
   return ${JSON.stringify(api.contests)};
 }`;
-        }
       }
     },
     api,

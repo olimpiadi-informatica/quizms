@@ -117,7 +117,7 @@ export function getSchema(program: Program) {
 
       if (isQuizmsComponent(comp, "Answer")) {
         const problemSchema = schema[`${id}`];
-        const label = String.fromCharCode(65 + answerId++);
+        const label = String.fromCodePoint(65 + answerId++);
         if (problemSchema.options) {
           problemSchema.options!.push(label);
         } else {

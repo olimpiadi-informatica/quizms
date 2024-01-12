@@ -12,7 +12,7 @@ import variants from "./variants";
 
 function safeParseInt(value: string): number {
   const parsedValue = Number(value);
-  if (isNaN(parsedValue)) {
+  if (Number.isNaN(parsedValue)) {
     throw new InvalidArgumentError("Argument must be a number.");
   }
   return parsedValue;
@@ -60,4 +60,5 @@ async function main() {
   await program.parseAsync();
 }
 
-main().then(() => exit(0));
+await main();
+exit(0);

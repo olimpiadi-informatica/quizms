@@ -25,7 +25,7 @@ function srs(hljs: HLJSApi): Language {
       },
       {
         scope: "operator.small",
-        begin: /[←→+\-×/…=≠≤≥]/,
+        begin: /[+/=×…←→≠≤≥-]/,
       },
       {
         scope: "built_in",

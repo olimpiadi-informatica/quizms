@@ -7,7 +7,7 @@ import { Participation, Student } from "~/models";
 import { GenerationConfig } from "~/models/generation-config";
 
 import { StudentProvider, useStudent } from "./provider";
-import { RemoteStatement } from "./remoteStatement";
+import { RemoteStatement } from "./remote-statement";
 
 type AuthProps = {
   children: ReactNode;

@@ -22,7 +22,7 @@ import { Contest, Student, parsePersonalInformation, studentHash } from "~/model
 import { hash, randomId } from "~/utils/random";
 import { StudentProvider } from "~/web/student/provider";
 
-import { FirebaseLogin, useDb } from "./baseLogin";
+import { FirebaseLogin, useDb } from "./base-login";
 import {
   contestConverter,
   participationConverter,
@@ -228,11 +228,7 @@ function PersonalInformationField({
 }) {
   const [value, setValue] = useState<string>(() => {
     const v = student.personalInformation?.[field.name] ?? "";
-    if (isDate(v)) {
-      return formatISO(v, { representation: "date" });
-    } else {
-      return String(v);
-    }
+    return isDate(v) ? formatISO(v, { representation: "date" }) : String(v);
   });
   const [error, setError] = useState<string>();
   const [blur, setBlur] = useState(false);
@@ -393,7 +389,7 @@ async function createStudentRestore(db: Firestore, student: Student) {
         surname: student.personalInformation!.surname as string,
       },
     );
-  } catch (e) {
+  } catch {
     throw new Error("Codice scaduto");
   }
 }

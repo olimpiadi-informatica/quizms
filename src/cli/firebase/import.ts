@@ -23,7 +23,7 @@ import {
   participationConverter,
   variantConverter,
   variantMappingConverter,
-} from "./utils/convertersAdmin";
+} from "./utils/converters-admin";
 import { initializeFirebase } from "./utils/initialize";
 import { importStorage } from "./utils/storage";
 
@@ -139,7 +139,7 @@ async function importParticipations(db: Firestore, options: ImportOptions) {
         try {
           const user = await auth.getUserByEmail(school.email);
           participation.teacher = user.uid;
-        } catch (e) {
+        } catch {
           fatal(
             `Teacher ${participation.teacher} does not exist. Make sure to import teachers first.`,
           );
@@ -162,7 +162,7 @@ async function importTeachers(db: Firestore, teachers: Teacher[], options: Impor
   const auth = getAuth();
   const ids = await Promise.all(
     teachers.map(async (teacher) => {
-      let user = await auth.getUserByEmail(teacher.email).catch(() => undefined);
+      let user = await auth.getUserByEmail(teacher.email).catch(() => {});
       if (!user) {
         user = await auth.createUser({
           email: teacher.email,
@@ -215,8 +215,8 @@ async function importVariants(db: Firestore, options: ImportOptions) {
         const path = join(options.dir, "variants", id, "schema.json");
         let schema: string;
         try {
-          schema = await readFile(path, "utf-8");
-        } catch (e) {
+          schema = await readFile(path, "utf8");
+        } catch {
           fatal(`Cannot find schema for variant ${id}. Use \`quizms variants\` to generate it.`);
         }
         try {

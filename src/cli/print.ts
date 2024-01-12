@@ -57,7 +57,7 @@ Make sure it exists or specify a different entry file using \`--entry\`.`);
   } as InlineConfig);
   try {
     await build(buildConfig);
-  } catch (e) {
+  } catch {
     fatal("Build failed.");
   }
 

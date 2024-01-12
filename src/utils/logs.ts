@@ -37,4 +37,4 @@ export function success(msg: string) {
   console.info(`${clearLine}${pc.green("✓")} ${msg}`);
 }
 
-const clearLine = "\x1b[2K\x1b[0G";
+const clearLine = "\u001B[2K\u001B[0G";
