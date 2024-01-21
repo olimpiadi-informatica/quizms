@@ -16,7 +16,7 @@ type Props =
     };
 
 export function RemoteStatement({ id, url }: Props) {
-  const { data: Statement } = useSWR(id, () => fetcher(url), {
+  const { data: Statement } = useSWR(id ?? url, () => fetcher(url), {
     suspense: true,
   });
 

@@ -93,10 +93,14 @@ const FinalizeModal = forwardRef(function FinalizeModal(
       const info = student.personalInformation!;
       const orderings = [
         ["name", "surname", "classYear", "classSection"],
-        ["name", "surname", "classYear", "birthDate"],
         ["surname", "name", "classYear", "classSection"],
-        ["surname", "name", "classYear", "birthDate"],
       ];
+      if (contest.personalInformation.some((f) => f.name === "birthDate")) {
+        orderings.push(
+          ["name", "surname", "classYear", "birthDate"],
+          ["surname", "name", "classYear", "birthDate"],
+        );
+      }
       return orderings.map((fields) => {
         return deburr(fields.map((field) => info[field]).join("\n"))
           .toLowerCase()

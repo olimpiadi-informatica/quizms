@@ -6,6 +6,7 @@ import { pathToFileURL } from "node:url";
 import { transform } from "esbuild";
 import { toJs } from "estree-util-to-js";
 import { uniq } from "lodash-es";
+import { name as quizmsImportSource } from "package.json";
 import { temporaryDirectoryTask } from "tempy";
 import { InlineConfig, build, mergeConfig } from "vite";
 
@@ -28,8 +29,8 @@ function buildBaseStatements(
     const bundleConfig = mergeConfig(
       configs(root, "production", {
         mdx: {
-          providerImportSource: "quizms/jsx-runtime",
-          jsxImportSource: "quizms",
+          providerImportSource: `${quizmsImportSource}/jsx-runtime`,
+          jsxImportSource: quizmsImportSource,
         },
       }),
       {
