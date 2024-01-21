@@ -1,7 +1,6 @@
 import React, { ReactNode } from "react";
 
 import { noop } from "lodash-es";
-// @ts-expect-error: virtual module doesn't have a type declaration
 import contests from "virtual:quizms-contests";
 
 import { Participation, Student } from "~/models";
