@@ -60,10 +60,25 @@ async function copyFiles(options: InitOptions) {
   }
 
   const configPath = join(options.dir, "firebase.json");
+
+  // See {@link https://github.com/firebase/firebase-tools/blob/master/src/firebaseConfig.ts#L236 here}.
   const configs = {
     hosting: {
       public: "dist",
       ignore: ["firebase.json", "**/.*", "**/node_modules/**"],
+      trailingSlash: false,
+      headers: [
+        {
+          source: "/assets/**",
+          headers: [
+            {
+              key: "Cache-Control",
+              value: "public, max-age=31536000, immutable", // 365 days
+            },
+          ],
+        },
+      ],
+      predeploy: "npx quizms build",
     },
     firestore: {
       rules: relative(options.dir, firestoreRulesPath),
