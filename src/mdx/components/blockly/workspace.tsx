@@ -31,7 +31,7 @@ export default function Workspace({ toolbox, initialBlocks, example, debug }: Bl
   const [code, setCode] = useState("");
   const [input, setInput] = useState(example ?? "");
 
-  const [step, output, running, highlightedBlock] = useExecutor(code, input);
+  const [step, reset, output, running, highlightedBlock] = useExecutor(code, input);
 
   const send = useIcp(iframe?.contentWindow, (data: any) => {
     switch (data.cmd) {
@@ -88,17 +88,17 @@ export default function Workspace({ toolbox, initialBlocks, example, debug }: Bl
                 <SkipForward className="size-6" />
               </button>
             </div>
-            <div className="join-item tooltip" data-tip="Esegui fino alla fine">
+            {/* <div className="join-item tooltip" data-tip="Esegui fino alla fine">
               <button
                 className="btn btn-info rounded-[inherit]"
                 disabled={!running}
                 aria-label="Esegui fino alla fine">
                 <FastForward className="size-6" />
               </button>
-            </div>
+            </div> */}
             <div className="join-item tooltip" data-tip="Esegui da capo">
               <button className="btn btn-info rounded-[inherit]" aria-label="Esegui da capo">
-                <RotateCcw className="size-6" />
+                <RotateCcw className="size-6" onClick={reset}/>
               </button>
             </div>
           </div>

@@ -5,18 +5,27 @@ import type { BlocklyInterpreter } from "./interpreter";
 export default function useExecutor(code: string, input: string) {
   const [interpreter, setInterpreter] = useState<BlocklyInterpreter>();
 
-  useEffect(() => {
-    import("./interpreter").then(({ BlocklyInterpreter }) => {
-      const interpreter = new BlocklyInterpreter(code, input);
-      setInterpreter(interpreter);
-    });
-  }, [code, input]);
-
   const [state, setState] = useState({
     output: "",
     highlightedBlock: "",
     running: true,
   });
+
+  const reset = () => {
+    import("./interpreter").then(({ BlocklyInterpreter }) => {
+        const interpreter = new BlocklyInterpreter(code, input);
+        setInterpreter(interpreter);
+      });
+    setState({
+      output: "",
+      highlightedBlock: "",
+      running: true,
+    });
+  };
+
+  useEffect(() => {
+    reset();
+  }, [code, input]);
 
   const step = () => {
     interpreter?.step();
@@ -27,5 +36,5 @@ export default function useExecutor(code: string, input: string) {
     });
   };
 
-  return [step, state.output, state.running, state.highlightedBlock] as const;
+  return [step, reset, state.output, state.running, state.highlightedBlock] as const;
 }
