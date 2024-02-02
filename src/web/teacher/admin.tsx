@@ -186,7 +186,7 @@ export function TeacherAdmin() {
             La gara si potrà svolgere dalle {formatTime(contest.contestWindowStart)} alle{" "}
             {formatTime(contest.contestWindowEnd)} del {formatDate(contest.contestWindowStart)}.
           </div>
-          <div className="mt-2 flex justify-center">
+          <div className="not-prose mt-2 flex justify-center">
             <DownloadPdfButton />
           </div>
         </div>

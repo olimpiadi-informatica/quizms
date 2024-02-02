@@ -115,7 +115,7 @@ export default function StudentRestoreList() {
           <tr>
             <th>Cognome</th>
             <th>Nome</th>
-            <th className="w-12">Rigetta</th>
+            <th className="w-12">Rifiuta</th>
             <th className="w-12">Approva</th>
           </tr>
         </thead>
