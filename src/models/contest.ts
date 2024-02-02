@@ -82,10 +82,10 @@ export function parsePersonalInformation(
       return [value, undefined];
     }
     case "number": {
-      const num = Number(value);
-      if (Number.isNaN(num)) {
-        return [undefined, `Il campo ${label} deve essere un numero.`];
+      if (!/^-?\d+$/.test(value)) {
+        return [undefined, `Il campo ${label} deve essere un numero intero.`];
       }
+      const num = Number(value);
       if (schema?.min !== undefined && num < schema.min) {
         return [undefined, `Il campo ${label} deve essere maggiore o uguale a ${schema.min}.`];
       }
@@ -96,6 +96,9 @@ export function parsePersonalInformation(
     }
     case "date": {
       let date: Date;
+      if (value === "") {
+        return [undefined, `Il campo ${label} è obbligatorio.`];
+      }
       if (isDate(value)) {
         date = value;
       } else if (options?.dateFormat) {

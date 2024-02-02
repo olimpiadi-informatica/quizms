@@ -258,7 +258,7 @@ function PersonalInformationField({
       <input
         id={id}
         name={field.label}
-        type={field.type}
+        type={field.type === "number" ? "text" : field.type}
         placeholder={"Inserisci " + field.label}
         className={classNames(
           "input input-bordered w-full max-w-md",
