@@ -178,11 +178,14 @@ export function TeacherAdmin() {
   return (
     <div className="flex flex-col gap-5 p-5">
       <div className="highlight-border card bg-base-200">
-        <div className="card-body">
+        <div className="prose card-body max-w-none">
           <h2 className="card-title">Informazioni Gara</h2>
+          <div className="mb-2 whitespace-pre-wrap">{contest.instructions}</div>
           {/* contest info */}
-          La gara si potrà svolgere dalle {formatTime(contest.contestWindowStart)} alle{" "}
-          {formatTime(contest.contestWindowEnd)} del {formatDate(contest.contestWindowStart)}.
+          <div className="font-bold">
+            La gara si potrà svolgere dalle {formatTime(contest.contestWindowStart)} alle{" "}
+            {formatTime(contest.contestWindowEnd)} del {formatDate(contest.contestWindowStart)}.
+          </div>
           <div className="mt-2 flex justify-center">
             <DownloadPdfButton />
           </div>
