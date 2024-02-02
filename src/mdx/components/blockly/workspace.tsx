@@ -28,10 +28,11 @@ export default function Workspace({ toolbox, initialBlocks, example, debug }: Bl
   const [ready, setReady] = useState(false);
 
   const [, setBlocks] = useState({});
+  const [variableMappings, setVariableMappings] = useState([]);
   const [code, setCode] = useState("");
   const [input, setInput] = useState(example ?? "");
 
-  const [step, reset, output, running, highlightedBlock] = useExecutor(code, input);
+  const [step, reset, output, running, highlightedBlock, variables] = useExecutor(code, input);
   const [playing, setPlaying] = useState(false);
 
   const send = useIcp(iframe?.contentWindow, (data: any) => {
@@ -55,6 +56,11 @@ export default function Workspace({ toolbox, initialBlocks, example, debug }: Bl
         if (debug?.logJs) console.info(data.code);
         break;
       }
+      case "variables": {
+        setVariableMappings(data.variablesMapping);
+        if (debug?.logBlocks) console.info(data.variablesMapping);
+        break;
+      }
     }
   });
 
@@ -68,6 +74,16 @@ export default function Workspace({ toolbox, initialBlocks, example, debug }: Bl
       return () => clearInterval(interval);
     }
   }, [step, playing]);
+
+  useEffect(() => {
+    console.log(variables);
+    console.log(variableMappings);
+    const variableValues: Record<string, any> = {};
+    for (const [k, v] of Object.entries(variableMappings)) {
+      variableValues[v] = variables[k];
+    }
+    console.log(variableValues);
+  }, [variables, variableMappings]);
 
   return (
     <div className="relative inset-y-0 left-1/2 mb-5 w-screen -translate-x-1/2 overflow-x-hidden px-4 sm:px-8">

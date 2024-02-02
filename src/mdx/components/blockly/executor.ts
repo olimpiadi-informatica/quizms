@@ -2,13 +2,21 @@ import { useEffect, useState } from "react";
 
 import type { BlocklyInterpreter } from "./interpreter";
 
+type StateType = {
+  output: string;
+  highlightedBlock: string;
+  running: boolean;
+  variables: Record<string, any>;
+};
+
 export default function useExecutor(code: string, input: string) {
   const [interpreter, setInterpreter] = useState<BlocklyInterpreter>();
 
-  const [state, setState] = useState({
+  const [state, setState] = useState<StateType>({
     output: "",
     highlightedBlock: "",
     running: true,
+    variables: {},
   });
 
   const reset = () => {
@@ -20,6 +28,7 @@ export default function useExecutor(code: string, input: string) {
       output: "",
       highlightedBlock: "",
       running: true,
+      variables: interpreter?.globalScope.object.properties ?? {},
     });
   };
 
@@ -33,8 +42,16 @@ export default function useExecutor(code: string, input: string) {
       output: interpreter?.output ?? "",
       highlightedBlock: interpreter?.highlightedBlock ?? "",
       running: interpreter?.running ?? true,
+      variables: { ...interpreter?.globalScope.object.properties } ?? {},
     });
   };
 
-  return [step, reset, state.output, state.running, state.highlightedBlock] as const;
+  return [
+    step,
+    reset,
+    state.output,
+    state.running,
+    state.highlightedBlock,
+    state.variables,
+  ] as const;
 }

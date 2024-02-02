@@ -13,6 +13,8 @@ declare module "js-interpreter" {
     setProperty(object: any, name: string, value: any): void;
 
     step(): boolean;
+
+    globalScope: { object: { properties: Record<string, any> } };
   }
 }
 
