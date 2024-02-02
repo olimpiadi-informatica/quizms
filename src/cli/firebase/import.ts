@@ -5,7 +5,7 @@ import { join } from "node:path";
 import { Bucket } from "@google-cloud/storage";
 import { deleteApp } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
-import { Firestore, FirestoreDataConverter } from "firebase-admin/firestore";
+import { Firestore } from "firebase-admin/firestore";
 import { noop, pick, range, uniq } from "lodash-es";
 import { isMatch } from "picomatch";
 import z from "zod";
@@ -104,15 +104,18 @@ async function importParticipations(db: Firestore, options: ImportOptions) {
     })
     .extend({
       contestIds: z.union([z.string(), z.array(z.string())]),
-      email: z.string().email(),
       password: z.string(),
-    });
+    })
+    .transform((school) => ({
+      ...school,
+      email: `${school.id}@teacher.edu`,
+    }));
   const schools = await load(options.dir, "schools", schoolSchema);
   const configs = await load(options.dir, "contests", generationConfigSchema);
 
   if (options.teachers) {
     const teachers = schools.map((school) => pick(school, ["name", "email", "password"]));
-    await importTeachers(db, teachers, options);
+    await importTeachers(teachers, options);
   }
 
   if (options.schools) {
@@ -158,9 +161,9 @@ type Teacher = {
   password: string;
 };
 
-async function importTeachers(db: Firestore, teachers: Teacher[], options: ImportOptions) {
+async function importTeachers(teachers: Teacher[], options: ImportOptions) {
   const auth = getAuth();
-  const ids = await Promise.all(
+  await Promise.all(
     teachers.map(async (teacher) => {
       let user = await auth.getUserByEmail(teacher.email).catch(noop);
       if (!user) {
@@ -183,15 +186,8 @@ async function importTeachers(db: Firestore, teachers: Teacher[], options: Impor
         fatal(`Teacher ${teacher.email} already exists. Use \`--force\` to overwrite.`);
       }
       await auth.setCustomUserClaims(user.uid, { isTeacher: true });
-      return { id: user.uid };
     }),
   );
-
-  const converter: FirestoreDataConverter<{ id: string }> = {
-    toFirestore: () => ({}),
-    fromFirestore: (snap) => ({ id: snap.id }),
-  };
-  await importCollection(db, "teachers", ids, converter, options);
 }
 
 async function importPdf(bucket: Bucket, options: ImportOptions) {

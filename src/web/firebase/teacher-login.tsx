@@ -47,9 +47,9 @@ export function TeacherLogin({
 
 function TeacherLoginInner({ children }: { children: ReactNode }) {
   const { signInWithPassword, error } = useSignInWithPassword();
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const signIn = () => signInWithPassword(email, password);
+  const signIn = () => signInWithPassword(`${username}@teacher.edu`, password);
 
   const user = usePrecompiledPasswordAuth();
 
@@ -62,15 +62,15 @@ function TeacherLoginInner({ children }: { children: ReactNode }) {
       <form className="max-w-md grow p-4">
         <div className="form-control w-full">
           <label className="label">
-            <span className="label-text text-lg">Email</span>
+            <span className="label-text text-lg">Codice meccanografico</span>
           </label>
           <input
-            type="email"
-            autoComplete="email"
-            placeholder="Inserisci l'email"
+            type="text"
+            autoComplete="username"
+            placeholder="Inserisci il codice meccanografico"
             className="input input-bordered w-full max-w-md"
-            onChange={(e) => setEmail(e.target.value)}
-            value={email}
+            onChange={(e) => setUsername(e.target.value)}
+            value={username}
           />
         </div>
         <div className="form-control w-full">

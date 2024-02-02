@@ -95,15 +95,14 @@ Le scuole e gli insegnanti sono descritti dal file `data/schools.{toml,yaml,csv,
 | `id`         | Codice meccanografico della scuola.      | `string`                   |                                                                                                                                                                     |
 | `name`       | Nome della scuola.                       | `string`                   |                                                                                                                                                                     |
 | `contestIds` | ID delle gare a cui la scuola partecipa. | `string` oppure `string[]` | È possibile specificare un [picomatch](https://github.com/micromatch/picomatch#globbing-features), ad esempio `"*"` indica che la scuola partecipa a tutte le gare. |
-| `email`      | Email della scuola.                      | `string`                   |                                                                                                                                                                     |
 | `password`   | Password della scuola.                   | `string`                   |                                                                                                                                                                     |
 
 Un esempio di file CSV è il seguente:
 
 ```csv
-id,name,contestIds,email,password
-PNTF01000A,ITST J.F.Kennedy,oii-scolastiche,PNTF01000A@istruzione.it,OKYkIZ6xFHPqyFS8HdUk
-BOIS01400R,ISS Francesco Alberghetti,oii-scolastiche,BOIS01400R@istruzione.it,n6r2yEKwAxJxBUCad7eS
+id,name,contestIds,password
+PNTF01000A,ITST J.F.Kennedy,oii-scolastiche,OKYkIZ6xFHPqyFS8HdUk
+BOIS01400R,ISS Francesco Alberghetti,oii-scolastiche,n6r2yEKwAxJxBUCad7eS
 ```
 
 Per importare le scuole usa il comando:
