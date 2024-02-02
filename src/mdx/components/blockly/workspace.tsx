@@ -67,7 +67,7 @@ export default function Workspace({ toolbox, initialBlocks, example, debug }: Bl
       const interval = setInterval(step, 1000);
       return () => clearInterval(interval);
     }
-  }, [playing]);
+  }, [step, playing]);
 
   return (
     <div className="relative inset-y-0 left-1/2 mb-5 w-screen -translate-x-1/2 overflow-x-hidden px-4 sm:px-8">
@@ -81,7 +81,14 @@ export default function Workspace({ toolbox, initialBlocks, example, debug }: Bl
                   !running && "btn-disabled",
                 )}>
                 <label className="swap swap-rotate size-full">
-                  <input type="checkbox" disabled={!running} defaultChecked={false} onChange={(event) => { setPlaying(event.target.checked) }} />
+                  <input
+                    type="checkbox"
+                    disabled={!running}
+                    checked={playing}
+                    onChange={(event) => {
+                      setPlaying(event.target.checked);
+                    }}
+                  />
                   <Pause className="swap-on size-6" />
                   <Play className="swap-off size-6" />
                 </label>
@@ -106,7 +113,13 @@ export default function Workspace({ toolbox, initialBlocks, example, debug }: Bl
             </div> */}
             <div className="join-item tooltip" data-tip="Esegui da capo">
               <button className="btn btn-info rounded-[inherit]" aria-label="Esegui da capo">
-                <RotateCcw className="size-6" onClick={reset} />
+                <RotateCcw
+                  className="size-6"
+                  onClick={() => {
+                    reset();
+                    setPlaying(false);
+                  }}
+                />
               </button>
             </div>
           </div>

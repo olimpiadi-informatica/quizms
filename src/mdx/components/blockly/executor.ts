@@ -13,9 +13,9 @@ export default function useExecutor(code: string, input: string) {
 
   const reset = () => {
     import("./interpreter").then(({ BlocklyInterpreter }) => {
-        const interpreter = new BlocklyInterpreter(code, input);
-        setInterpreter(interpreter);
-      });
+      const interpreter = new BlocklyInterpreter(code, input);
+      setInterpreter(interpreter);
+    });
     setState({
       output: "",
       highlightedBlock: "",
