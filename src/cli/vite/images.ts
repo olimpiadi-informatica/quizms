@@ -131,26 +131,33 @@ async function transformAsymptote(
 
   const injectFile = await temporaryWrite(inject ?? "", { extension: "asy" });
 
-  if (platform() === "darwin") {
-    const pdfFile = temporaryFile({ extension: "pdf" });
-    try {
+  try {
+    if (platform() === "darwin") {
+      const pdfFile = temporaryFile({ extension: "pdf" });
       await execFile("asy", [path, "-f", "pdf", "-autoimport", injectFile, "-o", pdfFile], {
         cwd: dirname(path),
       });
-    } catch (err: any) {
-      fatal(`Failed to compile asymptote:\n${err.stderr}`);
-    }
 
-    await execFile("pdf2svg", [pdfFile, svgFile]);
-    await fs.unlink(pdfFile);
-  } else {
-    try {
+      await execFile("pdf2svg", [pdfFile, svgFile]);
+      await fs.unlink(pdfFile);
+    } else {
       await execFile("asy", [path, "-f", "svg", "-autoimport", injectFile, "-o", svgFile], {
         cwd: dirname(path),
       });
-    } catch (err: any) {
-      fatal(`Failed to compile asymptote:\n${err.stderr}`);
     }
+  } catch (err: any) {
+    console.log(err);
+    fatal(`\
+Failed to compile asymptote:
+code: ${err.code}
+killed: ${err.killed}
+error: ${err.error}
+signal: ${err.signal}
+stdout:
+${err.stdout}
+
+stderr:
+${err.stderr}`);
   }
 
   const image = await transformSvg(svgFile, options);
