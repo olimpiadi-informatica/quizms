@@ -146,18 +146,7 @@ async function transformAsymptote(
       });
     }
   } catch (err: any) {
-    console.log(err);
-    fatal(`\
-Failed to compile asymptote:
-code: ${err.code}
-killed: ${err.killed}
-error: ${err.error}
-signal: ${err.signal}
-stdout:
-${err.stdout}
-
-stderr:
-${err.stderr}`);
+    fatal(`Failed to compile asymptote:\n${err.stderr}`);
   }
 
   const image = await transformSvg(svgFile, options);
