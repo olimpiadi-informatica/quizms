@@ -92,11 +92,11 @@ export default function Workspace({
   }, [step, playing]);
 
   useEffect(() => {
-    const variableValues: Record<string, any> = {};
+    const blocklyVariables: Record<string, any> = {};
     for (const [k, v] of Object.entries(variableMappings)) {
-      variableValues[v] = globalScope[k];
+      blocklyVariables[v] = globalScope[k];
     }
-    setBlocklyVariables(variableValues);
+    setBlocklyVariables(blocklyVariables);
   }, [globalScope, variableMappings]);
 
   return (

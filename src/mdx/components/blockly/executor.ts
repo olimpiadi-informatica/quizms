@@ -28,7 +28,7 @@ export default function useExecutor(code: string, input: string) {
       output: "",
       highlightedBlock: "",
       running: true,
-      globalScope: interpreter?.globalScope.object.properties ?? {},
+      globalScope: interpreter?.pseudoToNative(interpreter.globalScope.object) ?? {},
     });
   };
 
@@ -42,7 +42,7 @@ export default function useExecutor(code: string, input: string) {
       output: interpreter?.output ?? "",
       highlightedBlock: interpreter?.highlightedBlock ?? "",
       running: interpreter?.running ?? true,
-      globalScope: { ...interpreter?.globalScope.object.properties } ?? {},
+      globalScope: interpreter?.pseudoToNative(interpreter.globalScope.object) ?? {},
     });
   };
 

@@ -9,6 +9,7 @@ declare module "js-interpreter" {
     createNativeFunction(fn: (...args: any[]) => any): any;
 
     nativeToPseudo(value: any): any;
+    pseudoToNative(value: any): any;
 
     setProperty(object: any, name: string, value: any): void;
 
