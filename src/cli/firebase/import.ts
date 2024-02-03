@@ -33,6 +33,7 @@ type ImportOptions = {
   delete?: true;
   force?: true;
 
+  admins?: true;
   contests?: true;
   pdfs?: true;
   schools?: true;
@@ -52,6 +53,7 @@ export default async function importData(options: ImportOptions) {
   }
 
   const collections: (keyof ImportOptions)[] = [
+    "admins",
     "contests",
     "pdfs",
     "schools",
@@ -67,6 +69,9 @@ export default async function importData(options: ImportOptions) {
 
   const { app, bucket, db } = await initializeFirebase(options.dir);
 
+  if (options.admins) {
+    await importAdmins(options);
+  }
   if (options.contests) {
     await importContests(db, options);
   }
@@ -88,6 +93,11 @@ export default async function importData(options: ImportOptions) {
 
   success("All done!");
   await deleteApp(app);
+}
+
+async function importAdmins(options: ImportOptions) {
+  const admins = await load(options.dir, "admins", userSchema);
+  await importUsers(admins, { isAdmin: true }, options);
 }
 
 async function importContests(db: Firestore, options: ImportOptions) {
@@ -115,7 +125,7 @@ async function importParticipations(db: Firestore, options: ImportOptions) {
 
   if (options.teachers) {
     const teachers = schools.map((school) => pick(school, ["name", "email", "password"]));
-    await importTeachers(teachers, options);
+    await importUsers(teachers, { isTeacher: true }, options);
   }
 
   if (options.schools) {
@@ -155,16 +165,22 @@ async function importParticipations(db: Firestore, options: ImportOptions) {
   }
 }
 
-type Teacher = {
-  name: string;
-  email: string;
-  password: string;
-};
+async function importPdf(bucket: Bucket, options: ImportOptions) {
+  const generationConfigs = await load(options.dir, "contests", generationConfigSchema);
+  const pdfs = generationConfigs.flatMap((c) =>
+    uniq([...c.variantIds, ...c.pdfVariantIds]).map((id): [string, string] => [
+      join(options.dir, "variants", id, "statement.pdf"),
+      join("statements", id, `statement-${c.statementVersion}.pdf`),
+    ]),
+  );
 
-async function importTeachers(teachers: Teacher[], options: ImportOptions) {
+  await importStorage(bucket, "PDFs", pdfs, options);
+}
+
+async function importUsers(users: User[], customClaims: object, options: ImportOptions) {
   const auth = getAuth();
   await Promise.all(
-    teachers.map(async (teacher) => {
+    users.map(async (teacher) => {
       let user = await auth.getUserByEmail(teacher.email).catch(noop);
       if (!user) {
         user = await auth.createUser({
@@ -185,21 +201,9 @@ async function importTeachers(teachers: Teacher[], options: ImportOptions) {
       } else {
         fatal(`Teacher ${teacher.email} already exists. Use \`--force\` to overwrite.`);
       }
-      await auth.setCustomUserClaims(user.uid, { isTeacher: true });
+      await auth.setCustomUserClaims(user.uid, customClaims);
     }),
   );
-}
-
-async function importPdf(bucket: Bucket, options: ImportOptions) {
-  const generationConfigs = await load(options.dir, "contests", generationConfigSchema);
-  const pdfs = generationConfigs.flatMap((c) =>
-    uniq([...c.variantIds, ...c.pdfVariantIds]).map((id): [string, string] => [
-      join(options.dir, "variants", id, "statement.pdf"),
-      join("statements", id, `statement-${c.statementVersion}.pdf`),
-    ]),
-  );
-
-  await importStorage(bucket, "PDFs", pdfs, options);
 }
 
 async function importVariants(db: Firestore, options: ImportOptions) {
@@ -253,3 +257,11 @@ async function importVariantMappings(db: Firestore, options: ImportOptions) {
   );
   await importCollection(db, "variantMappings", mappings, variantMappingConverter, options);
 }
+
+const userSchema = z.object({
+  name: z.string(),
+  email: z.string().email(),
+  password: z.string(),
+});
+
+type User = z.infer<typeof userSchema>;

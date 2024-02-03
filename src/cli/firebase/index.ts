@@ -35,6 +35,7 @@ export default function firebaseCommand() {
     .description("Import the contests data.")
     .argument("[directory]", "The directory of the contest.", cwd())
     .option("-c, --config <config>", "The contests config file.")
+    .option("--admins", "Import the admins.")
     .option("--contests", "Import the contests.")
     .option("--pdfs", "Import the pdf files.")
     .option("--schools", "Import the schools.")

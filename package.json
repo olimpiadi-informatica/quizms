@@ -17,6 +17,7 @@
     "quizms": "bin/bin.js"
   },
   "exports": {
+    "./admin": "./dist/admin/index.js",
     "./student": "./dist/student/index.js",
     "./teacher": "./dist/teacher/index.js",
     "./firebase": "./dist/firebase/index.js",
@@ -25,6 +26,9 @@
   },
   "typesVersions": {
     "*": {
+      "admin": [
+        "./dist/admin/index.d.ts"
+      ],
       "student": [
         "./dist/student/index.d.ts"
       ],
