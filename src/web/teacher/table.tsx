@@ -412,6 +412,20 @@ function columnDefinition(
           } as ColDef,
         ]
       : []),
+    {
+      headerName: "Vedi Prova",
+      width: 100,
+      cellRenderer: ({ data }: ICellRendererParams<Student>) => (
+        <a
+          className="btn btn-primary btn-sm"
+          href={`/teacher/test/?studentId=${data!.id}#${data!.contestId}`}
+          target="_blank"
+          rel="noreferrer">
+          Apri
+        </a>
+      ),
+      sortable: false,
+    },
     ...contest.problemIds.map(
       (id, i): ColDef => ({
         field: `answers[${id}]`,
