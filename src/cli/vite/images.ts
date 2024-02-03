@@ -13,6 +13,8 @@ import { CustomPlugin as SvgoPlugin, optimize } from "svgo";
 import { temporaryFile, temporaryWrite } from "tempy";
 import { PluginOption } from "vite";
 
+import { fatal } from "~/utils/logs";
+
 import { jsToAsy } from "./asymptote";
 import { executePython } from "./python";
 
@@ -131,16 +133,24 @@ async function transformAsymptote(
 
   if (platform() === "darwin") {
     const pdfFile = temporaryFile({ extension: "pdf" });
-    await execFile("asy", [path, "-f", "pdf", "-autoimport", injectFile, "-o", pdfFile], {
-      cwd: dirname(path),
-    });
+    try {
+      await execFile("asy", [path, "-f", "pdf", "-autoimport", injectFile, "-o", pdfFile], {
+        cwd: dirname(path),
+      });
+    } catch (err: any) {
+      fatal(`Failed to compile asymptote:\n${err.stderr}`);
+    }
 
     await execFile("pdf2svg", [pdfFile, svgFile]);
     await fs.unlink(pdfFile);
   } else {
-    await execFile("asy", [path, "-f", "svg", "-autoimport", injectFile, "-o", svgFile], {
-      cwd: dirname(path),
-    });
+    try {
+      await execFile("asy", [path, "-f", "svg", "-autoimport", injectFile, "-o", svgFile], {
+        cwd: dirname(path),
+      });
+    } catch (err: any) {
+      fatal(`Failed to compile asymptote:\n${err.stderr}`);
+    }
   }
 
   const image = await transformSvg(svgFile, options);
