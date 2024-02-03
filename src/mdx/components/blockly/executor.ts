@@ -6,7 +6,7 @@ type StateType = {
   output: string;
   highlightedBlock: string;
   running: boolean;
-  variables: Record<string, any>;
+  globalScope: Record<string, any>;
 };
 
 export default function useExecutor(code: string, input: string) {
@@ -16,7 +16,7 @@ export default function useExecutor(code: string, input: string) {
     output: "",
     highlightedBlock: "",
     running: true,
-    variables: {},
+    globalScope: {},
   });
 
   const reset = () => {
@@ -28,7 +28,7 @@ export default function useExecutor(code: string, input: string) {
       output: "",
       highlightedBlock: "",
       running: true,
-      variables: interpreter?.globalScope.object.properties ?? {},
+      globalScope: interpreter?.globalScope.object.properties ?? {},
     });
   };
 
@@ -42,7 +42,7 @@ export default function useExecutor(code: string, input: string) {
       output: interpreter?.output ?? "",
       highlightedBlock: interpreter?.highlightedBlock ?? "",
       running: interpreter?.running ?? true,
-      variables: { ...interpreter?.globalScope.object.properties } ?? {},
+      globalScope: { ...interpreter?.globalScope.object.properties } ?? {},
     });
   };
 
@@ -52,6 +52,6 @@ export default function useExecutor(code: string, input: string) {
     state.output,
     state.running,
     state.highlightedBlock,
-    state.variables,
+    state.globalScope,
   ] as const;
 }

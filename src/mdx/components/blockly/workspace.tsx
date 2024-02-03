@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { ReactNode, useEffect, useState } from "react";
 
 import { ToolboxDefinition } from "blockly/core/utils/toolbox";
 import classNames from "classnames";
@@ -11,19 +11,33 @@ import useExecutor from "./executor";
 import { Input, Output } from "./io";
 import useIcp from "./workspace-ipc";
 
+type VariableValues = {
+  blocklyVariables: Record<string, any>;
+  globalScope: Record<string, any>;
+};
+
 type BlocklyProps = {
   toolbox: ToolboxDefinition;
   initialBlocks?: object;
   example?: string;
   generator: (rng: Rng) => Generator<any>;
   solution: (input: Input, output: Output) => void;
+  visualizer: (variables: Record<string, any>) => void;
   debug?: {
     logBlocks?: boolean;
     logJs?: boolean;
+    logVariables?: boolean;
   };
+  children?: (props: { variables: VariableValues }) => ReactNode;
 };
 
-export default function Workspace({ toolbox, initialBlocks, example, debug }: BlocklyProps) {
+export default function Workspace({
+  toolbox,
+  initialBlocks,
+  example,
+  debug,
+  children,
+}: BlocklyProps) {
   const [iframe, setIframe] = useState<HTMLIFrameElement | null>(null);
   const [ready, setReady] = useState(false);
 
@@ -32,8 +46,10 @@ export default function Workspace({ toolbox, initialBlocks, example, debug }: Bl
   const [code, setCode] = useState("");
   const [input, setInput] = useState(example ?? "");
 
-  const [step, reset, output, running, highlightedBlock, variables] = useExecutor(code, input);
+  const [step, reset, output, running, highlightedBlock, globalScope] = useExecutor(code, input);
   const [playing, setPlaying] = useState(false);
+
+  const [blocklyVariables, setBlocklyVariables] = useState<Record<string, any>>({});
 
   const send = useIcp(iframe?.contentWindow, (data: any) => {
     switch (data.cmd) {
@@ -58,7 +74,7 @@ export default function Workspace({ toolbox, initialBlocks, example, debug }: Bl
       }
       case "variables": {
         setVariableMappings(data.variablesMapping);
-        if (debug?.logBlocks) console.info(data.variablesMapping);
+        if (debug?.logVariables) console.info(data.variablesMapping);
         break;
       }
     }
@@ -76,14 +92,12 @@ export default function Workspace({ toolbox, initialBlocks, example, debug }: Bl
   }, [step, playing]);
 
   useEffect(() => {
-    console.log(variables);
-    console.log(variableMappings);
     const variableValues: Record<string, any> = {};
     for (const [k, v] of Object.entries(variableMappings)) {
-      variableValues[v] = variables[k];
+      variableValues[v] = globalScope[k];
     }
-    console.log(variableValues);
-  }, [variables, variableMappings]);
+    setBlocklyVariables(variableValues);
+  }, [globalScope, variableMappings]);
 
   return (
     <div className="relative inset-y-0 left-1/2 mb-5 w-screen -translate-x-1/2 overflow-x-hidden px-4 sm:px-8">
@@ -178,6 +192,7 @@ export default function Workspace({ toolbox, initialBlocks, example, debug }: Bl
             readOnly
           />
         </div>
+        {children && children({ variables: { blocklyVariables, globalScope } })}
       </div>
     </div>
   );
