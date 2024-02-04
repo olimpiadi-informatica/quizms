@@ -13,8 +13,6 @@ import { CustomPlugin as SvgoPlugin, optimize } from "svgo";
 import { temporaryFile, temporaryWrite } from "tempy";
 import { PluginOption } from "vite";
 
-import { fatal } from "~/utils/logs";
-
 import { jsToAsy } from "./asymptote";
 import { executePython } from "./python";
 
@@ -146,7 +144,7 @@ async function transformAsymptote(
       });
     }
   } catch (err: any) {
-    fatal(`Failed to compile asymptote:\n${err.stderr}`);
+    throw new Error(`Failed to compile asymptote:\n${err.stderr}`);
   }
 
   const image = await transformSvg(svgFile, options);
