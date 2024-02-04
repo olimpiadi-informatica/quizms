@@ -42,6 +42,8 @@ export function NoAuth({ contestName, duration, questionCount, children }: AuthP
     duration,
     personalInformation: [],
     hasVariants: true,
+    hasOnline: true,
+    hasPdf: true,
     allowRestart: true,
     statementVersion: 1,
   };
