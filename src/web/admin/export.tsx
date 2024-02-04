@@ -54,7 +54,7 @@ const ExportModal = forwardRef(function StudentExportModal(
         </div>
         <div className="flex items-center gap-2">
           <AlertTriangle size={16} className="text-warning" />
-          <span>Questa funzionalità è supportata solo da Chrome e Edge.</span>
+          <span>Per esportare i dati devi usare un browser Chrome o Edge.</span>
         </div>
         <div className="flex justify-center">
           <Button className="btn btn-error" onClick={onExport}>

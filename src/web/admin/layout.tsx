@@ -2,7 +2,7 @@ import React, { ReactNode } from "react";
 
 import classNames from "classnames";
 import { getAuth } from "firebase/auth";
-import { ChevronDown, GraduationCap } from "lucide-react";
+import { ChevronDown, UserCog } from "lucide-react";
 import { ErrorBoundary } from "react-error-boundary";
 
 import { Error } from "~/components";
@@ -61,7 +61,7 @@ export function AdminLayout({
         )}
         <div className="dropdown dropdown-end max-w-full flex-none">
           <div tabIndex={0} role="button" className="btn btn-ghost no-animation w-full flex-nowrap">
-            <GraduationCap className="flex-none" />
+            <UserCog className="flex-none" />
             <div className="truncate">{user.displayName}</div>
           </div>
           <ul
