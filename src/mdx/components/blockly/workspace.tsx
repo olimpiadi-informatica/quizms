@@ -3,7 +3,7 @@ import React, { ComponentType, useEffect, useState } from "react";
 import { ToolboxDefinition } from "blockly/core/utils/toolbox";
 import classNames from "classnames";
 import { range } from "lodash-es";
-import { Check, FileQuestion, Pause, Play, RotateCcw, Send, SkipForward, X } from "lucide-react";
+import { Check, Pause, Play, RotateCcw, Send, SkipForward, X } from "lucide-react";
 
 import { Loading } from "~/components";
 
@@ -133,16 +133,10 @@ export default function Workspace({
                     onClick={() => setTestcaseIndex(index)}
                     className={classNames(
                       "btn join-item tooltip rounded-[inherit]",
-                      running ? "btn-info" : correct ? "btn-success" : "btn-error",
+                      correct ? "btn-success" : "btn-error",
                     )}
                     data-tip={msg}>
-                    {running ? (
-                      <FileQuestion className="size-6" />
-                    ) : correct ? (
-                      <Check className="size-6" />
-                    ) : (
-                      <X className="size-6" />
-                    )}
+                    {correct ? <Check className="size-6" /> : <X className="size-6" />}
                   </button>
                 );
               })}
