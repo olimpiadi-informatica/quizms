@@ -25,8 +25,8 @@ export default function useExecutor(code: string, initialState: Record<string, a
     const interpreter = new BlocklyInterpreter(code, initialState);
     setInterpreter(interpreter);
     setState({
-      highlightedBlock: "",
-      running: true,
+      highlightedBlock: interpreter?.highlightedBlock ?? "",
+      running: interpreter?.running ?? false,
       correct: interpreter?.correct ?? false,
       msg: interpreter?.msg ?? "",
       globalScope: interpreter?.pseudoToNative(interpreter.globalScope.object) ?? {},
@@ -39,6 +39,13 @@ export default function useExecutor(code: string, initialState: Record<string, a
 
   const step = () => {
     interpreter?.step();
+    setState({
+      highlightedBlock: interpreter?.highlightedBlock ?? "",
+      running: interpreter?.running ?? false,
+      correct: interpreter?.correct ?? false,
+      msg: interpreter?.msg ?? "",
+      globalScope: interpreter?.pseudoToNative(interpreter.globalScope.object) ?? {},
+    });
   };
 
   return [
