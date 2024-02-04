@@ -29,6 +29,8 @@ I contests sono descritti dal file `data/contests.{toml,yaml,csv,json,jsonl}`. I
 | `shuffle_answers`      | Se le risposte vengono mescolate.                                                                      | `boolean`  |                                    |
 | `allow_restart`        | Se gli insegnanti possono far partire la gara più volte.                                               | `boolean`  |                                    |
 | `has_variants`         | Se ci sono più varianti dei testi.                                                                     | `boolean`  |                                    |
+| `has_online`           | Se c'è la gara online.                                                                                 | `boolean`  |                                    |
+| `has_pdf`              | Se c'è la gara cartacea.                                                                               | `boolean`  |                                    |
 | `contest_window_start` | Data di inizio della finestra di svolgimento della gara.                                               | `date`     |                                    |
 | `contest_window_end`   | Data di fine della finestra di svolgimento della gara.                                                 | `date`     |                                    |
 | `duration`             | Durata della gara in minuti.                                                                           | `number`   | Deve essere minore o uguale a 99.  |
