@@ -85,7 +85,7 @@ export function AdminLayout({
               {contests.map((contest) => (
                 <button
                   key={contest.id}
-                  className="btn btn-info"
+                  className="btn btn-error"
                   onClick={() => setActiveContest(contest.id)}>
                   {contest.name}
                 </button>
