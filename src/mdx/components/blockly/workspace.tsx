@@ -2,7 +2,8 @@ import React, { ComponentType, useEffect, useState } from "react";
 
 import { ToolboxDefinition } from "blockly/core/utils/toolbox";
 import classNames from "classnames";
-import { Pause, Play, RotateCcw, Send, SkipForward } from "lucide-react";
+import { range } from "lodash-es";
+import { Check, FileQuestion, Pause, Play, RotateCcw, Send, SkipForward, X } from "lucide-react";
 
 import { Loading } from "~/components";
 
@@ -28,6 +29,13 @@ type BlocklyProps = {
   Visualizer?: ComponentType<{ variables: VariableValues }>;
 };
 
+type TestcaseStatus = {
+  running: boolean;
+  correct: boolean;
+  msg: string;
+  index: number;
+};
+
 export default function Workspace({
   toolbox,
   initialBlocks,
@@ -42,8 +50,17 @@ export default function Workspace({
   const [, setBlocks] = useState({});
   const [variableMappings, setVariableMappings] = useState([]);
   const [code, setCode] = useState("");
+  const [testcaseIndex, setTestcaseIndex] = useState(0);
+  const [testcaseStatuses, setTestcaseStatuses] = useState<TestcaseStatus[]>(
+    range(testcases.length).map((index) => {
+      return { correct: false, running: true, index, msg: "" };
+    }),
+  );
 
-  const [step, reset, running, highlightedBlock, globalScope] = useExecutor(code, testcases[0]);
+  const [step, reset, running, highlightedBlock, globalScope, correct, msg] = useExecutor(
+    code,
+    testcases[testcaseIndex],
+  );
   const [playing, setPlaying] = useState(false);
 
   const [blocklyVariables, setBlocklyVariables] = useState<Record<string, any>>({});
@@ -77,6 +94,20 @@ export default function Workspace({
   });
 
   useEffect(() => {
+    setTestcaseStatuses((testcaseStatuses) => {
+      const newStatuses = [...testcaseStatuses];
+      newStatuses[testcaseIndex] = {
+        correct,
+        running,
+        msg,
+        index: testcaseIndex,
+      };
+      return newStatuses;
+    });
+    console.log(correct, msg);
+  }, [correct, running, msg, testcaseIndex]);
+
+  useEffect(() => {
     send({ cmd: "highlight", highlightedBlock });
   }, [send, highlightedBlock]);
 
@@ -100,13 +131,37 @@ export default function Workspace({
       <div className="grid gap-3 md:grid-cols-[1fr_auto] lg:grid-rows-[auto_1fr] xl:grid-cols-[2fr_1fr]">
         <div className="flex gap-3 md:flex-col lg:flex-row">
           <div className="join md:join-vertical lg:join-horizontal">
+            {testcaseStatuses.map(({ index, correct, running, msg }) => {
+              return (
+                <button
+                  key={index}
+                  onClick={() => setTestcaseIndex(index)}
+                  className={classNames(
+                    "btn join-item tooltip rounded-[inherit]",
+                    running ? "btn-info" : correct ? "btn-success" : "btn-error",
+                  )}
+                  data-tip={msg}>
+                  {running ? (
+                    <FileQuestion className="size-6" />
+                  ) : correct ? (
+                    <Check className="size-6" />
+                  ) : (
+                    <X className="size-6" />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+        <div className="flex gap-3 md:flex-col lg:flex-row">
+          <div className="join md:join-vertical lg:join-horizontal">
             <div className="join-item tooltip" data-tip="Esegui/pausa">
               <div
                 className={classNames(
-                  "btn btn-info size-full rounded-[inherit]",
+                  "btn btn-info rounded-[inherit]",
                   !running && "btn-disabled",
                 )}>
-                <label className="swap swap-rotate size-full">
+                <label className="swap swap-rotate size-6">
                   <input
                     type="checkbox"
                     disabled={!running}
@@ -147,6 +202,9 @@ export default function Workspace({
             </button>
           </div>
         </div>
+        <div className="flex flex-col md:col-span-2 lg:col-span-1">
+          {Visualizer && <Visualizer variables={{ blocklyVariables, globalScope }} />}
+        </div>
         <div className="relative h-[calc(100vh-8rem)] max-h-[640px] w-full overflow-hidden rounded-xl border-2 border-[#c6c6c6] md:order-first lg:row-span-2">
           <iframe
             ref={setIframe}
@@ -159,9 +217,6 @@ export default function Workspace({
               <Loading />
             </div>
           )}
-        </div>
-        <div className="flex flex-col md:col-span-2 lg:col-span-1">
-          {Visualizer && <Visualizer variables={{ blocklyVariables, globalScope }} />}
         </div>
       </div>
     </div>

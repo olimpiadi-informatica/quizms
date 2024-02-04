@@ -7,6 +7,8 @@ export class BlocklyInterpreter extends Interpreter {
 
   public highlightedBlock = "";
   public running = true;
+  public correct = false;
+  public msg = "";
   public output = "";
 
   constructor(code: string, initialState: Record<string, any>) {
@@ -23,7 +25,11 @@ export class BlocklyInterpreter extends Interpreter {
       interpreter.setProperty(
         global,
         "exit",
-        interpreter.createNativeFunction(() => (this.running = false)),
+        interpreter.createNativeFunction((correct: boolean, msg: string) => {
+          this.running = false;
+          this.correct = correct;
+          this.msg = msg;
+        }),
       );
       interpreter.setProperty(
         global,

@@ -5,6 +5,8 @@ import type { BlocklyInterpreter } from "./interpreter";
 type StateType = {
   highlightedBlock: string;
   running: boolean;
+  correct: boolean;
+  msg: string;
   globalScope: Record<string, any>;
 };
 
@@ -14,6 +16,8 @@ export default function useExecutor(code: string, initialState: Record<string, a
   const [state, setState] = useState<StateType>({
     highlightedBlock: "",
     running: true,
+    correct: false,
+    msg: "",
     globalScope: {},
   });
 
@@ -25,6 +29,8 @@ export default function useExecutor(code: string, initialState: Record<string, a
     setState({
       highlightedBlock: "",
       running: true,
+      correct: interpreter?.correct ?? false,
+      msg: interpreter?.msg ?? "",
       globalScope: interpreter?.pseudoToNative(interpreter.globalScope.object) ?? {},
     });
   };
@@ -38,9 +44,19 @@ export default function useExecutor(code: string, initialState: Record<string, a
     setState({
       highlightedBlock: interpreter?.highlightedBlock ?? "",
       running: interpreter?.running ?? true,
+      correct: interpreter?.correct ?? false,
+      msg: interpreter?.msg ?? "",
       globalScope: interpreter?.pseudoToNative(interpreter.globalScope.object) ?? {},
     });
   };
 
-  return [step, reset, state.running, state.highlightedBlock, state.globalScope] as const;
+  return [
+    step,
+    reset,
+    state.running,
+    state.highlightedBlock,
+    state.globalScope,
+    state.correct,
+    state.msg,
+  ] as const;
 }
