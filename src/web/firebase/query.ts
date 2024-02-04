@@ -1,20 +1,27 @@
 import {
   CollectionReference,
   DocumentReference,
+  DocumentSnapshot,
   Firestore,
   FirestoreDataConverter,
   Query,
   query as _query,
   collection,
+  collectionGroup,
   limit,
   orderBy,
+  startAfter,
   where,
 } from "firebase/firestore";
 
-type QueryOption<T> = {
-  constraints?: { [P in keyof T]?: T[P] | T[P][] };
+export type Constraints<T> = { [P in keyof T]?: T[P] | T[P][] };
+
+export type QueryOption<T> = {
+  constraints?: Constraints<T>;
   orderBy?: keyof T & string;
   limit?: number;
+  startAfter?: T | DocumentSnapshot<T>;
+  group?: boolean;
 };
 
 export default function query<T>(
@@ -23,13 +30,17 @@ export default function query<T>(
   converter: FirestoreDataConverter<T>,
   options?: QueryOption<T>,
 ) {
-  let q: Query<T> = collection(db as Firestore, path).withConverter(converter);
+  let q: Query<T> = (options?.group ? collectionGroup : collection)(
+    db as Firestore,
+    path,
+  ).withConverter(converter);
   for (const [k, v] of Object.entries(options?.constraints ?? {})) {
     q = _query(q, where(k, Array.isArray(v) ? "in" : "==", v));
   }
 
   if (options?.orderBy) q = _query(q, orderBy(options.orderBy));
   if (options?.limit) q = _query(q, limit(options.limit));
+  if (options?.startAfter) q = _query(q, startAfter(options.startAfter));
 
   return q;
 }

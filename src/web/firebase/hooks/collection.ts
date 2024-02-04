@@ -15,7 +15,7 @@ import { useErrorBoundary } from "react-error-boundary";
 import useSWR, { KeyedMutator, MutatorOptions, SWRConfiguration } from "swr";
 
 import { useDb } from "~/web/firebase/base-login";
-import query from "~/web/firebase/query";
+import query, { Constraints } from "~/web/firebase/query";
 
 import { useSubscriptionListener } from "./subscription";
 
@@ -26,7 +26,7 @@ const mutationConfig: MutatorOptions = {
 };
 
 type CollectionOptions<T> = {
-  constraints?: { [P in keyof T]?: T[P] | T[P][] };
+  constraints?: Constraints<T>;
   orderBy?: keyof T & string;
   limit?: number;
   subscribe?: boolean;

@@ -6,7 +6,7 @@
     "declaration": true,
     "declarationDir": "dist",
     "jsx": "react",
-    "types": ["vite/client"],
+    "types": ["vite/client", "@types/wicg-file-system-access"],
     "strict": true,
     "noImplicitAny": true,
     "allowJs": true,

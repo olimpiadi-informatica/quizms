@@ -128,6 +128,7 @@
     "@types/picomatch": "^2.3.3",
     "@types/react": "^18.0",
     "@types/react-syntax-highlighter": "^15.5",
+    "@types/wicg-file-system-access": "^2023.10.4",
     "@typescript-eslint/eslint-plugin": "^6.2",
     "@typescript-eslint/parser": "^6.2",
     "autoprefixer": "^10.4",

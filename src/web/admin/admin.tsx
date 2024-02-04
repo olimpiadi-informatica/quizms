@@ -1,85 +1,90 @@
-import React, { Suspense, useMemo, useState } from "react";
+import React, { Suspense } from "react";
 
-import { useAdmin } from "~/web/admin/provider";
-import { participationConverter } from "~/web/firebase/converters";
-import { useCollection } from "~/web/firebase/hooks";
+import { Loading } from "~/components";
+import { Participation, Student } from "~/models";
+import { participationConverter, studentConverter } from "~/web/firebase/converters";
+import { useCount } from "~/web/firebase/hooks/count";
+
+import ContestSettings from "./contest-settings";
+import Export from "./export";
+import { useAdmin } from "./provider";
 
 export function Admin() {
-  const { contest, setContest } = useAdmin();
+  const { contest } = useAdmin();
 
   return (
     <div className="flex flex-col gap-5 p-5">
       <div className="highlight-border card bg-base-200">
         <div className="card-body">
           <h2 className="card-title">Impostazioni gara</h2>
-          <TextareaField
-            label="Istruzioni gara"
-            value={contest.instructions}
-            setValue={(instructions) => setContest({ ...contest, instructions })}
-          />
+          <ContestSettings />
+        </div>
+      </div>
+      <div className="highlight-border card bg-base-200">
+        <div className="card-body h-44">
+          <h2 className="card-title">Statistiche</h2>
+          <Suspense fallback={<Loading />}>
+            <ContestInformation />
+          </Suspense>
         </div>
       </div>
       <div className="highlight-border card bg-base-200">
         <div className="card-body">
-          <h2 className="card-title">Statistiche</h2>
-          <ContestInformation />
+          <h2 className="card-title">Esportazione</h2>
+          <div className="flex justify-center gap-5">
+            <Export
+              label="scuole"
+              description="tutte le scuole"
+              collection="participations"
+              converter={participationConverter}
+              options={{ constraints: { contestId: contest.id } }}
+            />
+            <Export
+              label="studenti"
+              description="tutti gli studenti"
+              collection="students"
+              converter={studentConverter}
+              options={{
+                constraints: { contestId: contest.id, disabled: false },
+                group: true,
+              }}
+            />
+          </div>
         </div>
       </div>
     </div>
   );
 }
 
-type TextareaFieldProps = {
-  label: string;
-  value?: string;
-  setValue: (value: string) => void;
-};
-
-function TextareaField({ label, value, setValue }: TextareaFieldProps) {
-  const [editable, setEditable] = useState(false);
-
-  return (
-    <label className="form-control">
-      <div className="label">
-        <span className="label-text">{label}</span>
-        <span className="label-text-alt inline-flex items-end gap-2">
-          <span>Modifica</span>
-          <input
-            type="checkbox"
-            className="checkbox checkbox-xs"
-            checked={editable}
-            onChange={(e) => setEditable(e.target.checked)}
-          />
-        </span>
-      </div>
-      <textarea
-        className="textarea textarea-bordered"
-        value={value ?? ""}
-        onChange={(e) => setValue(e.target.value)}
-        readOnly={!editable}
-        rows={10}
-      />
-    </label>
-  );
-}
-
 function ContestInformation() {
   const { contest } = useAdmin();
 
-  const [schools] = useCollection("participations", participationConverter, {
+  const totalSchools = useCount<Participation>("participations", {
     constraints: {
       contestId: contest.id,
     },
   });
 
-  const finalizedSchools = useMemo(() => schools.filter((school) => school.finalized), [schools]);
+  const finalizedSchools = useCount<Participation>("participations", {
+    constraints: {
+      contestId: contest.id,
+      finalized: true,
+    },
+  });
+
+  const totalStudents = useCount<Student>("students", {
+    constraints: {
+      contestId: contest.id,
+      disabled: false,
+    },
+    group: true,
+  });
 
   return (
-    <Suspense>
-      <div>
-        <div>Scuole totali: {schools.length}</div>
-        <div>Scuole finalizzate: {finalizedSchools.length}</div>
-      </div>
-    </Suspense>
+    <div>
+      <div>Scuole totali: {totalSchools}</div>
+      <div>Scuole finalizzate: {finalizedSchools}</div>
+      <div>Studenti totali: {totalStudents}</div>
+    </div>
   );
 }
