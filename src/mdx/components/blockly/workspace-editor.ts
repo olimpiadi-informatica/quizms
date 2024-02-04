@@ -39,6 +39,7 @@ function init({ toolbox, initialBlocks }: Props) {
   }
 
   workspace = Blockly.inject("app", config);
+  javascriptGenerator.init(workspace);
   workspace.addChangeListener(Blockly.Events.disableOrphans);
   workspace.addChangeListener((event) => {
     if (event.type === Blockly.Events.FINISHED_LOADING) {
@@ -46,6 +47,7 @@ function init({ toolbox, initialBlocks }: Props) {
     }
 
     const newCode = toJS(workspace);
+    javascriptGenerator.nameDB_.setVariableMap(workspace!.getVariableMap());
     if (newCode !== code) {
       code = newCode;
       send("code", { code });
