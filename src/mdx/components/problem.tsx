@@ -66,7 +66,7 @@ export function Problem({ id, points, statement }: ProblemProps) {
     <ProblemContext.Provider value={{ id, points, setCorrect: noop }}>
       <div className="relative">
         {import.meta.env.DEV && (
-          <div className="absolute right-0 top-0">
+          <div className="absolute right-0 top-0 print:hidden">
             <select
               className="select select-ghost"
               value={variant}

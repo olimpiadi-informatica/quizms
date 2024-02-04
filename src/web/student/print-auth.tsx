@@ -5,6 +5,7 @@ import contests from "virtual:quizms-contests";
 
 import { Participation, Student } from "~/models";
 import { GenerationConfig } from "~/models/generation-config";
+import { formatDate } from "~/utils/date";
 
 import { StudentProvider, useStudent } from "./provider";
 import { RemoteStatement } from "./remote-statement";
@@ -82,6 +83,12 @@ export function PrintAuth({ children }: AuthProps) {
   );
 }
 
+function formatField(value: string | number | Date | undefined) {
+  if (value === undefined) return "";
+  if (value instanceof Date) return formatDate(value);
+  return value.toString();
+}
+
 export function PrintForm() {
   const { contest, student } = useStudent();
 
@@ -92,7 +99,12 @@ export function PrintForm() {
           <label className="label">
             <span className="label-text text-lg">{field.label}</span>
           </label>
-          <input type="text" className="input input-bordered w-full max-w-md" readOnly />
+          <input
+            type="text"
+            className="input input-bordered w-full max-w-md"
+            readOnly
+            value={formatField(student.personalInformation![field.name])}
+          />
         </div>
       ))}
       {contest.hasVariants && (

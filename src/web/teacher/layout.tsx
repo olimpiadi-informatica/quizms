@@ -28,7 +28,7 @@ export function TeacherLayout({
 }: Props) {
   return (
     <div className="flex h-dvh flex-col">
-      <div className="navbar flex-none justify-between bg-primary text-primary-content">
+      <div className="navbar flex-none justify-between bg-primary text-primary-content print:hidden">
         {activeContest && (
           <div className="dropdown max-w-full flex-none">
             <div
@@ -78,7 +78,7 @@ export function TeacherLayout({
           </ul>
         </div>
       </div>
-      <div className="flex flex-auto flex-col overflow-y-auto">
+      <div className="flex flex-auto flex-col screen:overflow-y-auto">
         <ErrorBoundary FallbackComponent={Error}>
           <Suspense fallback={<Loading />}>{children}</Suspense>
         </ErrorBoundary>

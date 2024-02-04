@@ -92,7 +92,7 @@ export function Answer({ correct, children }: AnswerProps) {
         id={answerId}
         checked={answer === id}
         className={classNames(
-          "radio radio-sm my-auto mr-4 bg-base-100 disabled:opacity-90 print:mr-2",
+          "radio radio-sm my-auto mr-4 bg-base-100 [print-color-adjust:exact] disabled:opacity-90 print:mr-2",
           terminated &&
             answer === id && {
               "radio-success": correct === true,
@@ -107,7 +107,7 @@ export function Answer({ correct, children }: AnswerProps) {
       <label htmlFor={answerId} className="grow">
         {children}
       </label>
-      <div className="absolute right-0 top-0 mr-1 flex h-full justify-center">
+      <div className="absolute right-0 top-0 mr-1 flex h-full justify-center print:hidden">
         <button
           className={classNames(
             "btn btn-square btn-ghost btn-sm my-auto",
