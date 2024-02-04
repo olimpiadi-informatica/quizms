@@ -1,6 +1,7 @@
-import React, { ReactNode, createContext, useContext, useEffect, useMemo, useState } from "react";
+import React, { ReactNode, createContext, useContext, useMemo } from "react";
 
 import { Loading } from "~/components";
+import useHash from "~/components/hash";
 import { Contest, Participation, Student, StudentRestore, Variant } from "~/models";
 
 import { TeacherLayout } from "./layout";
@@ -71,8 +72,7 @@ export function TeacherProvider({
   useStudentRestores,
   children,
 }: TeacherProviderProps) {
-  const [loading, setLoading] = useState(true);
-  const [contestId, setContestId] = useState<string | undefined>(
+  const [contestId, setContestId] = useHash(
     participations.length === 1 ? participations[0]?.contestId : undefined,
   );
   const contest = contests.find((c) => c.id === contestId);
@@ -104,25 +104,7 @@ export function TeacherProvider({
     variants,
   ]);
 
-  useEffect(() => {
-    setLoading(false);
-    onHashChange();
-
-    window.addEventListener("hashchange", onHashChange);
-    return () => window.removeEventListener("hashchange", onHashChange);
-
-    function onHashChange() {
-      setContestId(window.location.hash.slice(1));
-    }
-  }, []);
-
-  useEffect(() => {
-    if (contestId) {
-      window.location.hash = contestId ?? "";
-    }
-  }, [contestId]);
-
-  if (loading) {
+  if (contestId === undefined) {
     return <Loading />;
   }
 
