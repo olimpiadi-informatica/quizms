@@ -9,6 +9,7 @@ import { Loading } from "~/components";
 
 import { CustomBlock } from "./custom-block";
 import useExecutor from "./executor";
+import { BlocklyInterpreter } from "./interpreter";
 import useIcp from "./workspace-ipc";
 
 type VariableValues = {
@@ -30,7 +31,6 @@ type BlocklyProps = {
 };
 
 type TestcaseStatus = {
-  running: boolean;
   correct: boolean;
   msg: string;
   index: number;
@@ -46,22 +46,23 @@ export default function Workspace({
 }: BlocklyProps) {
   const [iframe, setIframe] = useState<HTMLIFrameElement | null>(null);
   const [ready, setReady] = useState(false);
-
+  const [editing, setEditing] = useState(true);
+  const [playing, setPlaying] = useState(false);
   const [, setBlocks] = useState({});
   const [variableMappings, setVariableMappings] = useState([]);
+
   const [code, setCode] = useState("");
   const [testcaseIndex, setTestcaseIndex] = useState(0);
   const [testcaseStatuses, setTestcaseStatuses] = useState<TestcaseStatus[]>(
     range(testcases.length).map((index) => {
-      return { correct: false, running: true, index, msg: "" };
+      return { correct: false, index, msg: "" };
     }),
   );
 
-  const [step, reset, running, highlightedBlock, globalScope, correct, msg] = useExecutor(
+  const [step, reset, running, highlightedBlock, globalScope] = useExecutor(
     code,
     testcases[testcaseIndex],
   );
-  const [playing, setPlaying] = useState(false);
 
   const [blocklyVariables, setBlocklyVariables] = useState<Record<string, any>>({});
 
@@ -82,6 +83,7 @@ export default function Workspace({
       }
       case "code": {
         setCode(data.code);
+        setEditing(true);
         if (debug?.logJs) console.info(data.code);
         break;
       }
@@ -92,20 +94,6 @@ export default function Workspace({
       }
     }
   });
-
-  useEffect(() => {
-    setTestcaseStatuses((testcaseStatuses) => {
-      const newStatuses = [...testcaseStatuses];
-      newStatuses[testcaseIndex] = {
-        correct,
-        running,
-        msg,
-        index: testcaseIndex,
-      };
-      return newStatuses;
-    });
-    console.log(correct, msg);
-  }, [correct, running, msg, testcaseIndex]);
 
   useEffect(() => {
     send({ cmd: "highlight", highlightedBlock });
@@ -126,81 +114,111 @@ export default function Workspace({
     setBlocklyVariables(blocklyVariables);
   }, [globalScope, variableMappings]);
 
+  useEffect(() => {
+    if (editing) {
+      setPlaying(false);
+    }
+  }, [editing]);
+
   return (
     <div className="relative inset-y-0 left-1/2 mb-5 w-screen -translate-x-1/2 overflow-x-hidden px-4 sm:px-8">
       <div className="grid gap-3 md:grid-cols-[1fr_auto] lg:grid-rows-[auto_1fr] xl:grid-cols-[2fr_1fr]">
-        <div className="flex gap-3 md:flex-col lg:flex-row">
-          <div className="join md:join-vertical lg:join-horizontal">
-            {testcaseStatuses.map(({ index, correct, running, msg }) => {
-              return (
-                <button
-                  key={index}
-                  onClick={() => setTestcaseIndex(index)}
-                  className={classNames(
-                    "btn join-item tooltip rounded-[inherit]",
-                    running ? "btn-info" : correct ? "btn-success" : "btn-error",
-                  )}
-                  data-tip={msg}>
-                  {running ? (
-                    <FileQuestion className="size-6" />
-                  ) : correct ? (
-                    <Check className="size-6" />
-                  ) : (
-                    <X className="size-6" />
-                  )}
-                </button>
-              );
-            })}
+        {!editing && (
+          <div className="flex gap-3 md:flex-col lg:flex-row">
+            <div className="join md:join-vertical lg:join-horizontal">
+              {testcaseStatuses.map(({ index, correct, msg }) => {
+                return (
+                  <button
+                    key={index}
+                    onClick={() => setTestcaseIndex(index)}
+                    className={classNames(
+                      "btn join-item tooltip rounded-[inherit]",
+                      running ? "btn-info" : correct ? "btn-success" : "btn-error",
+                    )}
+                    data-tip={msg}>
+                    {running ? (
+                      <FileQuestion className="size-6" />
+                    ) : correct ? (
+                      <Check className="size-6" />
+                    ) : (
+                      <X className="size-6" />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
           </div>
-        </div>
+        )}
         <div className="flex gap-3 md:flex-col lg:flex-row">
-          <div className="join md:join-vertical lg:join-horizontal">
-            <div className="join-item tooltip" data-tip="Esegui/pausa">
-              <div
-                className={classNames(
-                  "btn btn-info rounded-[inherit]",
-                  !running && "btn-disabled",
-                )}>
-                <label className="swap swap-rotate size-6">
-                  <input
-                    type="checkbox"
-                    disabled={!running}
-                    checked={playing}
-                    onChange={(event) => {
-                      setPlaying(event.target.checked);
-                    }}
-                  />
-                  <Pause className="swap-on size-6" />
-                  <Play className="swap-off size-6" />
-                </label>
+          {!editing && (
+            <div className="join md:join-vertical lg:join-horizontal">
+              <div className="join-item tooltip" data-tip="Esegui/pausa">
+                <div
+                  className={classNames(
+                    "btn btn-info rounded-[inherit]",
+                    !running && "btn-disabled",
+                  )}>
+                  <label className="swap swap-rotate size-6">
+                    <input
+                      type="checkbox"
+                      disabled={!running}
+                      checked={playing}
+                      onChange={(event) => {
+                        setPlaying(event.target.checked);
+                      }}
+                    />
+                    <Pause className="swap-on size-6" />
+                    <Play className="swap-off size-6" />
+                  </label>
+                </div>
               </div>
-            </div>
-            <div className="join-item tooltip" data-tip="Esegui un blocco">
-              <button
-                className="btn btn-info rounded-[inherit]"
-                disabled={!running}
-                onClick={step}
-                aria-label="Esugui un blocco">
-                <SkipForward className="size-6" />
-              </button>
-            </div>
-            <div className="join-item tooltip" data-tip="Esegui da capo">
-              <button className="btn btn-info rounded-[inherit]" aria-label="Esegui da capo">
-                <RotateCcw
-                  className="size-6"
+              <div className="join-item tooltip" data-tip="Esegui un blocco">
+                <button
+                  className="btn btn-info rounded-[inherit]"
+                  disabled={!running}
+                  onClick={step}
+                  aria-label="Esugui un blocco">
+                  <SkipForward className="size-6" />
+                </button>
+              </div>
+              <div className="join-item tooltip" data-tip="Esegui da capo">
+                <button
+                  className="btn btn-info rounded-[inherit]"
+                  aria-label="Esegui da capo"
                   onClick={() => {
                     reset();
                     setPlaying(false);
-                  }}
-                />
+                  }}>
+                  <RotateCcw className="size-6" />
+                </button>
+              </div>
+            </div>
+          )}
+          {editing && (
+            <div className="tooltip" data-tip="Invia la soluzione">
+              <button
+                className="btn btn-success"
+                aria-label="Invia la soluzione"
+                onClick={() => {
+                  const newStatuses = [...testcaseStatuses];
+                  for (const i of range(testcases.length)) {
+                    const interpreter = new BlocklyInterpreter(code, testcases[i]);
+                    while (interpreter.running) {
+                      interpreter.step();
+                    }
+                    newStatuses[i] = {
+                      correct: interpreter.correct,
+                      index: i,
+                      msg: interpreter.msg,
+                    };
+                  }
+                  setTestcaseStatuses(newStatuses);
+                  setEditing(false);
+                }}>
+                <Send className="size-6" />
               </button>
             </div>
-          </div>
-          <div className="tooltip" data-tip="Invia la soluzione">
-            <button className="btn btn-success" aria-label="Invia la soluzione">
-              <Send className="size-6" />
-            </button>
-          </div>
+          )}
         </div>
         <div className="flex flex-col md:col-span-2 lg:col-span-1">
           {Visualizer && <Visualizer variables={{ blocklyVariables, globalScope }} />}
