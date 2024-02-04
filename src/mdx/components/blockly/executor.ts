@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import type { BlocklyInterpreter } from "./interpreter";
+import { BlocklyInterpreter } from "./interpreter";
 
 type StateType = {
   highlightedBlock: string;
@@ -22,10 +22,8 @@ export default function useExecutor(code: string, initialState: Record<string, a
   });
 
   const reset = () => {
-    import("./interpreter").then(({ BlocklyInterpreter }) => {
-      const interpreter = new BlocklyInterpreter(code, initialState);
-      setInterpreter(interpreter);
-    });
+    const interpreter = new BlocklyInterpreter(code, initialState);
+    setInterpreter(interpreter);
     setState({
       highlightedBlock: "",
       running: true,
