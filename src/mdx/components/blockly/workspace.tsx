@@ -1,14 +1,12 @@
-import React, { ReactNode, useEffect, useState } from "react";
+import React, { ComponentType, useEffect, useState } from "react";
 
 import { ToolboxDefinition } from "blockly/core/utils/toolbox";
 import classNames from "classnames";
-import { ArrowDown, Pause, Play, RotateCcw, Send, SkipForward } from "lucide-react";
+import { Pause, Play, RotateCcw, Send, SkipForward } from "lucide-react";
 
 import { Loading } from "~/components";
-import { Rng } from "~/utils/random";
 
 import useExecutor from "./executor";
-import { Input, Output } from "./io";
 import useIcp from "./workspace-ipc";
 
 type VariableValues = {
@@ -19,24 +17,21 @@ type VariableValues = {
 type BlocklyProps = {
   toolbox: ToolboxDefinition;
   initialBlocks?: object;
-  example?: string;
-  generator: (rng: Rng) => Generator<any>;
-  solution: (input: Input, output: Output) => void;
-  visualizer: (variables: Record<string, any>) => void;
+  testcases: Array<Record<string, any>>;
   debug?: {
     logBlocks?: boolean;
     logJs?: boolean;
     logVariables?: boolean;
   };
-  children?: (props: { variables: VariableValues }) => ReactNode;
+  Visualizer?: ComponentType<{ variables: VariableValues }>;
 };
 
 export default function Workspace({
   toolbox,
   initialBlocks,
-  example,
+  testcases,
   debug,
-  children,
+  Visualizer,
 }: BlocklyProps) {
   const [iframe, setIframe] = useState<HTMLIFrameElement | null>(null);
   const [ready, setReady] = useState(false);
@@ -44,9 +39,8 @@ export default function Workspace({
   const [, setBlocks] = useState({});
   const [variableMappings, setVariableMappings] = useState([]);
   const [code, setCode] = useState("");
-  const [input, setInput] = useState(example ?? "");
 
-  const [step, reset, output, running, highlightedBlock, globalScope] = useExecutor(code, input);
+  const [step, reset, running, highlightedBlock, globalScope] = useExecutor(code, testcases[0]);
   const [playing, setPlaying] = useState(false);
 
   const [blocklyVariables, setBlocklyVariables] = useState<Record<string, any>>({});
@@ -55,7 +49,6 @@ export default function Workspace({
     switch (data.cmd) {
       case "init": {
         send({ cmd: "init", toolbox, debug, initialBlocks });
-        send({ cmd: "input", input: example });
         break;
       }
       case "ready": {
@@ -133,14 +126,6 @@ export default function Workspace({
                 <SkipForward className="size-6" />
               </button>
             </div>
-            {/* <div className="join-item tooltip" data-tip="Esegui fino alla fine">
-              <button
-                className="btn btn-info rounded-[inherit]"
-                disabled={!running}
-                aria-label="Esegui fino alla fine">
-                <FastForward className="size-6" />
-              </button>
-            </div> */}
             <div className="join-item tooltip" data-tip="Esegui da capo">
               <button className="btn btn-info rounded-[inherit]" aria-label="Esegui da capo">
                 <RotateCcw
@@ -173,26 +158,8 @@ export default function Workspace({
           )}
         </div>
         <div className="flex flex-col md:col-span-2 lg:col-span-1">
-          <textarea
-            rows={4}
-            className="textarea textarea-bordered w-full grow resize-none font-mono placeholder:font-sans"
-            placeholder="Input"
-            maxLength={2000}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-          />
-          <div className="divider divider-horizontal">
-            <ArrowDown size={72} />
-          </div>
-          <textarea
-            rows={4}
-            className="textarea textarea-bordered w-full grow resize-none font-mono placeholder:font-sans"
-            placeholder="Output"
-            value={output}
-            readOnly
-          />
+          {Visualizer && <Visualizer variables={{ blocklyVariables, globalScope }} />}
         </div>
-        {children && children({ variables: { blocklyVariables, globalScope } })}
       </div>
     </div>
   );

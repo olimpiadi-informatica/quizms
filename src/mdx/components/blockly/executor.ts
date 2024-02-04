@@ -3,17 +3,15 @@ import { useEffect, useState } from "react";
 import type { BlocklyInterpreter } from "./interpreter";
 
 type StateType = {
-  output: string;
   highlightedBlock: string;
   running: boolean;
   globalScope: Record<string, any>;
 };
 
-export default function useExecutor(code: string, input: string) {
+export default function useExecutor(code: string, initialState: Record<string, any>) {
   const [interpreter, setInterpreter] = useState<BlocklyInterpreter>();
 
   const [state, setState] = useState<StateType>({
-    output: "",
     highlightedBlock: "",
     running: true,
     globalScope: {},
@@ -21,11 +19,10 @@ export default function useExecutor(code: string, input: string) {
 
   const reset = () => {
     import("./interpreter").then(({ BlocklyInterpreter }) => {
-      const interpreter = new BlocklyInterpreter(code, input);
+      const interpreter = new BlocklyInterpreter(code, initialState);
       setInterpreter(interpreter);
     });
     setState({
-      output: "",
       highlightedBlock: "",
       running: true,
       globalScope: interpreter?.pseudoToNative(interpreter.globalScope.object) ?? {},
@@ -34,24 +31,16 @@ export default function useExecutor(code: string, input: string) {
 
   useEffect(() => {
     reset();
-  }, [code, input]);
+  }, [code, initialState]);
 
   const step = () => {
     interpreter?.step();
     setState({
-      output: interpreter?.output ?? "",
       highlightedBlock: interpreter?.highlightedBlock ?? "",
       running: interpreter?.running ?? true,
       globalScope: interpreter?.pseudoToNative(interpreter.globalScope.object) ?? {},
     });
   };
 
-  return [
-    step,
-    reset,
-    state.output,
-    state.running,
-    state.highlightedBlock,
-    state.globalScope,
-  ] as const;
+  return [step, reset, state.running, state.highlightedBlock, state.globalScope] as const;
 }

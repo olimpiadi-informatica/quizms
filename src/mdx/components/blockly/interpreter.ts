@@ -1,7 +1,5 @@
 import Interpreter from "js-interpreter";
 
-import { Input, Output } from "./io";
-
 const MAX_LOOP_ITERATIONS = 1000;
 
 export class BlocklyInterpreter extends Interpreter {
@@ -11,7 +9,7 @@ export class BlocklyInterpreter extends Interpreter {
   public running = true;
   public output = "";
 
-  constructor(code: string, input: string) {
+  constructor(code: string, initialState: Record<string, any>) {
     super(code, (interpreter: Interpreter, global: any) => {
       interpreter.setProperty(
         global,
@@ -27,13 +25,16 @@ export class BlocklyInterpreter extends Interpreter {
         "exit",
         interpreter.createNativeFunction(() => (this.running = false)),
       );
-
-      interpreter.setProperty(global, "input", interpreter.nativeToPseudo(new Input(input)));
       interpreter.setProperty(
         global,
-        "output",
-        interpreter.nativeToPseudo(new Output((value) => (this.output += value))),
+        "setup",
+        interpreter.createNativeFunction(() => {
+          for (const [name, value] of Object.entries(initialState)) {
+            interpreter.setProperty(global, name, interpreter.nativeToPseudo(value));
+          }
+        }),
       );
+
       interpreter.setProperty(global, "loopTrap", MAX_LOOP_ITERATIONS);
     });
   }
@@ -45,15 +46,10 @@ export class BlocklyInterpreter extends Interpreter {
       this.stepFinished = false;
       try {
         this.running = super.step() && this.running;
-      } catch (e) {
-        this.output += `===== Errore ========\n${e}\n`;
+      } catch {
         this.running = false;
       }
     } while (this.running && !this.stepFinished);
-
-    if (!this.running) {
-      this.output += "===== Terminato =====\n";
-    }
 
     return this.running;
   };

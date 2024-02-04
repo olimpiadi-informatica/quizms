@@ -9,7 +9,7 @@ export const ioBlocks: CustomBlock[] = [
     tooltip: "L'esecuzione inizia da qui",
     helpUrl: "",
     maxInstances: 1,
-    js: "",
+    js: "setup();\n",
   },
   {
     type: "exit",
