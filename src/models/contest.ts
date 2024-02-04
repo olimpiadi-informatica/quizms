@@ -47,6 +47,8 @@ export const contestSchema = z.object({
     ]),
   ),
   hasVariants: z.boolean(),
+  hasOnline: z.boolean(),
+  hasPdf: z.boolean(),
   allowRestart: z.boolean(),
 
   instructions: z.string().optional(),

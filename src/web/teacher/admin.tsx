@@ -186,20 +186,28 @@ export function TeacherAdmin() {
             La gara si potrà svolgere dalle {formatTime(contest.contestWindowStart)} alle{" "}
             {formatTime(contest.contestWindowEnd)} del {formatDate(contest.contestWindowStart)}.
           </div>
-          <div className="not-prose mt-2 flex justify-center">
-            <DownloadPdfButton />
-          </div>
+          {contest.hasPdf && (
+            <div className="not-prose mt-2 flex justify-center">
+              <DownloadPdfButton />
+            </div>
+          )}
         </div>
       </div>
+
       <div className="highlight-border card bg-base-200">
         <div className="card-body">
           <h2 className="card-title">Gestione Gara</h2>
           {/* contest data */}
-          {participation.startingTime ? <ContestData /> : <p>La gara non è ancora iniziata!</p>}
+          {contest.hasOnline &&
+            (participation.startingTime ? <ContestData /> : <p>La gara non è ancora iniziata!</p>)}
           <div className="mt-2 flex flex-wrap justify-center gap-3">
-            {/* contest buttons */}
-            {canStartContest(now, participation, contest) && <StartContestButton />}
-            {canUndoContest(now, participation) && <StopContestButton />}
+            {contest.hasOnline && (
+              /* contest buttons */
+              <>
+                {canStartContest(now, participation, contest) && <StartContestButton />}
+                {canUndoContest(now, participation) && <StopContestButton />}
+              </>
+            )}
             <a /* TODO */
               className="btn btn-info"
               href={`./students/#${participation.contestId}`}
@@ -210,12 +218,14 @@ export function TeacherAdmin() {
           </div>
         </div>
       </div>
-      <div className="highlight-border card bg-base-200">
-        <div className="card-body h-[28rem] max-h-screen">
-          <h2 className="card-title">Richieste di accesso</h2>
-          <StudentRestoreList />
+      {contest.hasOnline && (
+        <div className="highlight-border card bg-base-200">
+          <div className="card-body h-[28rem] max-h-screen">
+            <h2 className="card-title">Richieste di accesso</h2>
+            <StudentRestoreList />
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
