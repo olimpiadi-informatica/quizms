@@ -74,9 +74,9 @@ export function Layout({ children }: { children: ReactNode }) {
               </button>
             )}
           </div>
-          <SubmitModal ref={submitRef} />
         </div>
       </div>
+      <SubmitModal ref={submitRef} />
       <ErrorBoundary FallbackComponent={Error}>
         <Prose>
           <h1 className="text-pretty">{contest.name}</h1>
@@ -94,9 +94,7 @@ const SubmitModal = forwardRef(function SubmitModal(_, ref: Ref<HTMLDialogElemen
     <Modal ref={ref} title="Confermi di voler terminare?">
       <p>Confermando non potrai più modificare le tue risposte.</p>
       <div className="mt-3 flex flex-row justify-center gap-5">
-        <button className="btn btn-info" onClick={close}>
-          Annulla
-        </button>
+        <button className="btn btn-info">Annulla</button>
         <button className="btn btn-error" onClick={() => submit()}>
           Conferma
         </button>

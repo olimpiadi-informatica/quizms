@@ -2,7 +2,6 @@ import React, { ReactNode } from "react";
 
 import { useTeacher, useTeacherStudents } from "~/web/teacher/provider";
 
-import { PrintForm } from "./print-auth";
 import { StudentProvider } from "./provider";
 
 export function ImpersonificationAuth({ id, children }: { id: string; children: ReactNode }) {
@@ -19,7 +18,6 @@ export function ImpersonificationAuth({ id, children }: { id: string; children: 
       submit={async () => {}}
       reset={async () => {}}
       terminated={false}>
-      <PrintForm />
       {children}
     </StudentProvider>
   );

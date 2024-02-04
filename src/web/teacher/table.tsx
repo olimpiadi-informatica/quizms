@@ -252,8 +252,8 @@ function Table() {
     participation.startingTime && contest.duration
       ? addMinutes(participation.startingTime, contest.duration)
       : undefined;
-  const isContestRunning = useIsAfter(endTime);
-  const editable = !isContestRunning && !participation.finalized;
+  const isContestFinished = useIsAfter(endTime);
+  const editable = isContestFinished && !participation.finalized;
 
   const newStudentId = useRef(randomId());
   const setStudentAndUpdateId = async (student: Student) => {
@@ -415,15 +415,16 @@ function columnDefinition(
     {
       headerName: "Vedi Prova",
       width: 100,
-      cellRenderer: ({ data }: ICellRendererParams<Student>) => (
-        <a
-          className="btn btn-primary btn-sm"
-          href={`/teacher/test/?studentId=${data!.id}#${data!.contestId}`}
-          target="_blank"
-          rel="noreferrer">
-          Apri
-        </a>
-      ),
+      cellRenderer: ({ data }: ICellRendererParams<Student>) =>
+        data?.variant && (
+          <a
+            className="link link-info"
+            href={`/teacher/test/?studentId=${data!.id}#${data!.contestId}`}
+            target="_blank"
+            rel="noreferrer">
+            apri
+          </a>
+        ),
       sortable: false,
     },
     ...contest.problemIds.map(

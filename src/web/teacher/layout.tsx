@@ -28,7 +28,24 @@ export function TeacherLayout({
 }: Props) {
   return (
     <div className="flex h-dvh flex-col">
-      <div className="navbar flex-none justify-between bg-primary text-primary-content print:hidden">
+      <div className="navbar flex-none flex-row-reverse justify-between bg-primary text-primary-content print:hidden">
+        <div className="dropdown dropdown-end max-w-full flex-none">
+          <div tabIndex={0} role="button" className="btn btn-ghost no-animation w-full flex-nowrap">
+            <GraduationCap className="flex-none" />
+            <div className="truncate">
+              {activeParticipation?.name ?? participations[0]?.name ?? "Scuola invalida"}
+            </div>
+          </div>
+          <ul
+            className={classNames(
+              "menu dropdown-content menu-sm z-30 mt-3 w-52 p-2",
+              "highlight-border rounded-box bg-base-200 text-base-content",
+            )}>
+            <li>
+              <button onClick={logout}>Cambia scuola</button>
+            </li>
+          </ul>
+        </div>
         {activeContest && (
           <div className="dropdown max-w-full flex-none">
             <div
@@ -60,23 +77,6 @@ export function TeacherLayout({
             )}
           </div>
         )}
-        <div className="dropdown dropdown-end max-w-full flex-none">
-          <div tabIndex={0} role="button" className="btn btn-ghost no-animation w-full flex-nowrap">
-            <GraduationCap className="flex-none" />
-            <div className="truncate">
-              {activeParticipation?.name ?? participations[0]?.name ?? "Scuola invalida"}
-            </div>
-          </div>
-          <ul
-            className={classNames(
-              "menu dropdown-content menu-sm z-30 mt-3 w-52 p-2",
-              "highlight-border rounded-box bg-base-200 text-base-content",
-            )}>
-            <li>
-              <button onClick={logout}>Cambia scuola</button>
-            </li>
-          </ul>
-        </div>
       </div>
       <div className="flex flex-auto flex-col screen:overflow-y-auto">
         <ErrorBoundary FallbackComponent={Error}>
