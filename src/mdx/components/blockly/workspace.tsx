@@ -14,7 +14,7 @@ import useIcp from "./workspace-ipc";
 
 type VariableValues = {
   blocklyVariables: Record<string, any>;
-  globalScope: Record<string, any>;
+  hiddenState: Record<string, any>;
 };
 
 type BlocklyProps = {
@@ -215,7 +215,9 @@ export default function Workspace({
           )}
         </div>
         <div className="flex flex-col md:col-span-2 lg:col-span-1">
-          {Visualizer && <Visualizer variables={{ blocklyVariables, globalScope }} />}
+          {Visualizer && (
+            <Visualizer variables={{ blocklyVariables, hiddenState: globalScope?.hiddenState }} />
+          )}
         </div>
         <div className="relative h-[calc(100vh-8rem)] max-h-[640px] w-full overflow-hidden rounded-xl border-2 border-[#c6c6c6] md:order-first lg:row-span-2">
           <iframe
