@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { BlocklyInterpreter } from "./interpreter";
 
@@ -21,7 +21,7 @@ export default function useExecutor(code: string, initialState: Record<string, a
     globalScope: {},
   });
 
-  const reset = () => {
+  const reset = useCallback(() => {
     const interpreter = new BlocklyInterpreter(code, initialState);
     setInterpreter(interpreter);
     setState({
@@ -31,21 +31,14 @@ export default function useExecutor(code: string, initialState: Record<string, a
       msg: interpreter?.msg ?? "",
       globalScope: interpreter?.pseudoToNative(interpreter.globalScope.object) ?? {},
     });
-  };
+  }, [code, initialState]);
 
   useEffect(() => {
     reset();
-  }, [code, initialState]);
+  }, [reset, code, initialState]);
 
   const step = () => {
     interpreter?.step();
-    setState({
-      highlightedBlock: interpreter?.highlightedBlock ?? "",
-      running: interpreter?.running ?? true,
-      correct: interpreter?.correct ?? false,
-      msg: interpreter?.msg ?? "",
-      globalScope: interpreter?.pseudoToNative(interpreter.globalScope.object) ?? {},
-    });
   };
 
   return [

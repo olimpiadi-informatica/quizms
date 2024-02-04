@@ -130,7 +130,9 @@ export default function Workspace({
                 return (
                   <button
                     key={index}
-                    onClick={() => setTestcaseIndex(index)}
+                    onClick={() => {
+                      setTestcaseIndex(index);
+                    }}
                     className={classNames(
                       "btn join-item tooltip rounded-[inherit]",
                       correct ? "btn-success" : "btn-error",
