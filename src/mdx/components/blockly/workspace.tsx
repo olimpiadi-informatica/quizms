@@ -101,7 +101,7 @@ export default function Workspace({
 
   useEffect(() => {
     if (playing) {
-      const interval = setInterval(step, 1000);
+      const interval = setInterval(step, 200);
       return () => clearInterval(interval);
     }
   }, [step, playing]);
@@ -122,109 +122,101 @@ export default function Workspace({
 
   return (
     <div className="relative inset-y-0 left-1/2 mb-5 w-screen -translate-x-1/2 overflow-x-hidden px-4 sm:px-8">
-      <div className="grid gap-3 md:grid-cols-[1fr_auto] lg:grid-rows-[auto_auto_1fr] xl:grid-cols-[2fr_1fr]">
-        <div className="sl:flex-row flex gap-3 md:flex-col">
-          {!editing && (
-            <div className="flex gap-3 md:flex-col lg:flex-row">
-              <div className="join md:join-vertical lg:join-horizontal">
-                {testcaseStatuses.map(({ index, correct, msg }) => {
-                  return (
-                    <button
-                      key={index}
-                      onClick={() => {
-                        setTestcaseIndex(index);
-                      }}
-                      className={classNames(
-                        "btn join-item tooltip rounded-[inherit]",
-                        correct ? "btn-success" : "btn-error",
-                      )}
-                      data-tip={msg}>
-                      {correct ? <Check className="size-6" /> : <X className="size-6" />}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-          <div className="flex gap-3 md:flex-col lg:flex-row">
-            {!editing && (
-              <div className="join md:join-vertical lg:join-horizontal">
-                <div className="join-item tooltip" data-tip="Esegui/pausa">
-                  <div
-                    className={classNames(
-                      "btn btn-info rounded-[inherit]",
-                      !running && "btn-disabled",
-                    )}>
-                    <label className="swap swap-rotate size-6">
-                      <input
-                        type="checkbox"
-                        disabled={!running}
-                        checked={playing}
-                        onChange={(event) => {
-                          setPlaying(event.target.checked);
-                          console.log("CLICK");
-                        }}
-                      />
-                      <Pause className="swap-on size-6" />
-                      <Play className="swap-off size-6" />
-                    </label>
-                  </div>
-                </div>
-                <div className="join-item tooltip" data-tip="Esegui un blocco">
+      <div className="flex gap-6 md:flex-col lg:flex-row">
+        <div className="flex w-full flex-col gap-6">
+          <div className="flex gap-6">
+            <div className="join md:join-vertical lg:join-horizontal">
+              {testcaseStatuses.map(({ index, correct, msg }) => {
+                return (
                   <button
-                    className="btn btn-info rounded-[inherit]"
-                    disabled={!running}
-                    onClick={step}
-                    aria-label="Esugui un blocco">
-                    <SkipForward className="size-6" />
-                  </button>
-                </div>
-                <div className="join-item tooltip" data-tip="Esegui da capo">
-                  <button
-                    className="btn btn-info rounded-[inherit]"
-                    aria-label="Esegui da capo"
+                    key={index}
                     onClick={() => {
-                      reset();
-                      setPlaying(false);
-                    }}>
-                    <RotateCcw className="size-6" />
+                      setTestcaseIndex(index);
+                    }}
+                    className={classNames(
+                      "btn join-item tooltip rounded-[inherit]",
+                      correct ? "btn-success" : "btn-error",
+                    )}
+                    data-tip={msg}>
+                    {correct ? <Check className="size-6" /> : <X className="size-6" />}
                   </button>
+                );
+              })}
+            </div>
+            <div className="join md:join-vertical lg:join-horizontal">
+              <div className="join-item tooltip" data-tip="Esegui/pausa">
+                <div
+                  className={classNames(
+                    "btn btn-info rounded-[inherit]",
+                    !running && "btn-disabled",
+                  )}>
+                  <label className="swap swap-rotate size-6">
+                    <input
+                      type="checkbox"
+                      disabled={!running}
+                      checked={playing}
+                      onChange={(event) => {
+                        setPlaying(event.target.checked);
+                        console.log("CLICK");
+                      }}
+                    />
+                    <Pause className="swap-on size-6" />
+                    <Play className="swap-off size-6" />
+                  </label>
                 </div>
               </div>
-            )}
-            {editing && (
-              <div className="tooltip" data-tip="Invia la soluzione">
+              <div className="join-item tooltip" data-tip="Esegui un blocco">
                 <button
-                  className="btn btn-success"
-                  aria-label="Invia la soluzione"
-                  onClick={() => {
-                    const newStatuses = [...testcaseStatuses];
-                    for (const i of range(testcases.length)) {
-                      const interpreter = new BlocklyInterpreter(code, testcases[i]);
-                      while (interpreter.running) {
-                        interpreter.step();
-                      }
-                      newStatuses[i] = {
-                        correct: interpreter.correct,
-                        index: i,
-                        msg: interpreter.msg,
-                      };
-                    }
-                    setTestcaseStatuses(newStatuses);
-                    setEditing(false);
-                  }}>
-                  <Send className="size-6" />
+                  className="btn btn-info rounded-[inherit]"
+                  disabled={!running}
+                  onClick={step}
+                  aria-label="Esugui un blocco">
+                  <SkipForward className="size-6" />
                 </button>
               </div>
+              <div className="join-item tooltip" data-tip="Esegui da capo">
+                <button
+                  className="btn btn-info rounded-[inherit]"
+                  aria-label="Esegui da capo"
+                  onClick={() => {
+                    reset();
+                    setPlaying(false);
+                  }}>
+                  <RotateCcw className="size-6" />
+                </button>
+              </div>
+            </div>
+            <div className="tooltip" data-tip="Invia la soluzione">
+              <button
+                className="btn btn-success"
+                aria-label="Invia la soluzione"
+                onClick={() => {
+                  const newStatuses = [...testcaseStatuses];
+                  for (const i of range(testcases.length)) {
+                    const interpreter = new BlocklyInterpreter(code, testcases[i]);
+                    while (interpreter.running) {
+                      interpreter.step();
+                    }
+                    newStatuses[i] = {
+                      correct: interpreter.correct,
+                      index: i,
+                      msg: interpreter.msg,
+                    };
+                  }
+                  setTestcaseStatuses(newStatuses);
+                  setEditing(false);
+                }}>
+                <Send className="size-6" />
+              </button>
+            </div>
+          </div>
+          <div className="h-full overflow-auto rounded-lg border-solid">
+            {Visualizer && (
+              <Visualizer variables={{ blocklyVariables, hiddenState: globalScope?.hiddenState }} />
             )}
           </div>
         </div>
-        <div className="flex md:col-span-2 md:flex-row lg:col-span-1 lg:flex-col">
-          {Visualizer && (
-            <Visualizer variables={{ blocklyVariables, hiddenState: globalScope?.hiddenState }} />
-          )}
-        </div>
-        <div className="relative h-[calc(100vh-8rem)] max-h-[640px] w-full overflow-hidden rounded-xl border-2 border-[#c6c6c6] md:order-first lg:row-span-3">
+        <div className="h-[640px] w-full rounded-lg">
           <iframe
             ref={setIframe}
             src={import("./workspace-editor") as any}
