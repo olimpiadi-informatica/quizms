@@ -31,15 +31,7 @@ export class BlocklyInterpreter extends Interpreter {
           this.msg = msg;
         }),
       );
-      interpreter.setProperty(
-        global,
-        "setup",
-        interpreter.createNativeFunction(() => {
-          for (const [name, value] of Object.entries(initialState)) {
-            interpreter.setProperty(global, name, interpreter.nativeToPseudo(value));
-          }
-        }),
-      );
+      interpreter.setProperty(global, "hiddenState", interpreter.nativeToPseudo(initialState));
 
       interpreter.setProperty(global, "loopTrap", MAX_LOOP_ITERATIONS);
     });
