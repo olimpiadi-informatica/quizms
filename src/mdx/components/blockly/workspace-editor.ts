@@ -4,8 +4,8 @@ import { ToolboxDefinition } from "blockly/core/utils/toolbox";
 import { javascriptGenerator } from "blockly/javascript";
 import locale from "blockly/msg/it";
 
-import toJS from "./generator";
-import { ioBlocks } from "./io-blocks";
+import { CustomBlock } from "./custom-block";
+import toJS, { initGenerator } from "./generator";
 import "./workspace-editor.css";
 
 let blocks: object | undefined;
@@ -16,9 +16,10 @@ let workspace: WorkspaceSvg | undefined;
 type Props = {
   toolbox: ToolboxDefinition;
   initialBlocks?: object;
+  customBlocks?: CustomBlock[];
 };
 
-function init({ toolbox, initialBlocks }: Props) {
+function init({ toolbox, initialBlocks, customBlocks }: Props) {
   Blockly.setLocale(locale);
 
   const config: BlocklyOptions = {
@@ -32,14 +33,17 @@ function init({ toolbox, initialBlocks }: Props) {
     maxInstances: {},
     toolbox,
   };
-  for (const block of ioBlocks) {
-    if ("maxInstances" in block && block.maxInstances) {
-      config.maxInstances![block.type] = block.maxInstances;
+
+  if (customBlocks) {
+    for (const block of customBlocks) {
+      if ("maxInstances" in block && block.maxInstances) {
+        config.maxInstances![block.type] = block.maxInstances;
+      }
     }
   }
 
   workspace = Blockly.inject("app", config);
-  javascriptGenerator.init(workspace);
+  initGenerator(workspace, customBlocks);
   workspace.addChangeListener(Blockly.Events.disableOrphans);
   workspace.addChangeListener((event) => {
     if (event.type === Blockly.Events.FINISHED_LOADING) {

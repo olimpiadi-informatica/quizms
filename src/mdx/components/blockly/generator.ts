@@ -1,19 +1,15 @@
-import BlocklyCore, { Block, CodeGenerator, WorkspaceSvg } from "blockly";
+import BlocklyCore, { Block, CodeGenerator, Workspace, WorkspaceSvg } from "blockly";
 import { javascriptGenerator } from "blockly/javascript";
 
-import { CustomBlockArg } from "./custom-block";
-import { ioBlocks } from "./io-blocks";
+import { CustomBlock, CustomBlockArg } from "./custom-block";
 
-console.log("Blockly version:", BlocklyCore.VERSION);
+type Generator = CodeGenerator & Record<`ORDER_${string}`, number>;
 
 javascriptGenerator.STATEMENT_PREFIX = "highlightBlock(%1);\n";
 javascriptGenerator.INFINITE_LOOP_TRAP =
   'if(--loopTrap === 0) throw new Error("Ciclo infinito");\n';
 javascriptGenerator.addReservedWords("exit,highlightBlock,loopTrap,input,output");
-
-BlocklyCore.defineBlocksWithJsonArray(ioBlocks);
-
-type Generator = CodeGenerator & Record<`ORDER_${string}`, number>;
+console.log("Blockly version:", BlocklyCore.VERSION);
 
 function replaceArgs(block: Block, generator: Generator, js: string, args?: CustomBlockArg[]) {
   return js.replaceAll(/%(\d+)/g, (_, n) => {
@@ -23,15 +19,22 @@ function replaceArgs(block: Block, generator: Generator, js: string, args?: Cust
   });
 }
 
-for (const customBlock of ioBlocks) {
-  javascriptGenerator.forBlock[customBlock.type] = (block: Block, generator: Generator) => {
-    return Array.isArray(customBlock.js)
-      ? [
-          replaceArgs(block, generator, customBlock.js[0], customBlock.args0),
-          generator[customBlock.js[1]],
-        ]
-      : replaceArgs(block, generator, customBlock.js, customBlock.args0);
-  };
+export function initGenerator(workspace: Workspace, customBlocks?: CustomBlock[]) {
+  javascriptGenerator.init(workspace);
+  if (customBlocks) {
+    BlocklyCore.defineBlocksWithJsonArray(customBlocks);
+
+    for (const customBlock of customBlocks) {
+      javascriptGenerator.forBlock[customBlock.type] = (block: Block, generator: Generator) => {
+        return Array.isArray(customBlock.js)
+          ? [
+              replaceArgs(block, generator, customBlock.js[0], customBlock.args0),
+              generator[customBlock.js[1]],
+            ]
+          : replaceArgs(block, generator, customBlock.js, customBlock.args0);
+      };
+    }
+  }
 }
 
 export default function toJS(workspace?: WorkspaceSvg) {

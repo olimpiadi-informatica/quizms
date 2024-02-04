@@ -6,6 +6,7 @@ import { Pause, Play, RotateCcw, Send, SkipForward } from "lucide-react";
 
 import { Loading } from "~/components";
 
+import { CustomBlock } from "./custom-block";
 import useExecutor from "./executor";
 import useIcp from "./workspace-ipc";
 
@@ -23,6 +24,7 @@ type BlocklyProps = {
     logJs?: boolean;
     logVariables?: boolean;
   };
+  customBlocks?: CustomBlock[];
   Visualizer?: ComponentType<{ variables: VariableValues }>;
 };
 
@@ -31,6 +33,7 @@ export default function Workspace({
   initialBlocks,
   testcases,
   debug,
+  customBlocks,
   Visualizer,
 }: BlocklyProps) {
   const [iframe, setIframe] = useState<HTMLIFrameElement | null>(null);
@@ -48,7 +51,7 @@ export default function Workspace({
   const send = useIcp(iframe?.contentWindow, (data: any) => {
     switch (data.cmd) {
       case "init": {
-        send({ cmd: "init", toolbox, debug, initialBlocks });
+        send({ cmd: "init", toolbox, debug, initialBlocks, customBlocks });
         break;
       }
       case "ready": {
