@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 
 import {
   addMilliseconds,
@@ -35,8 +35,10 @@ async function fetcher() {
 
 export function useIsAfter(time?: Date) {
   const now = useTime();
+  const isAfter = useCallback(() => !!time && now() >= time, [time, now]);
 
-  const [, refresh] = useReducer((x) => x + 1, 0);
+  const [value, setValue] = useState(isAfter);
+  const refresh = useCallback(() => !value && isAfter() && setValue(true), [value, isAfter]);
 
   useEffect(() => {
     if (!time) return;
@@ -51,9 +53,9 @@ export function useIsAfter(time?: Date) {
   useEffect(() => {
     window.addEventListener("visibilitychange", refresh);
     return () => window.removeEventListener("visibilitychange", refresh);
-  }, []);
+  }, [refresh]);
 
-  return !!time && now() >= time;
+  return value;
 }
 
 type TimerProps =
