@@ -6,9 +6,8 @@ import { CustomBlock, CustomBlockArg } from "./custom-block";
 type Generator = CodeGenerator & Record<`ORDER_${string}`, number>;
 
 javascriptGenerator.STATEMENT_PREFIX = "highlightBlock(%1);\n";
-javascriptGenerator.INFINITE_LOOP_TRAP =
-  'if(--loopTrap === 0) throw new Error("Ciclo infinito");\n';
-javascriptGenerator.addReservedWords("exit,highlightBlock,loopTrap,input,output,hiddenState");
+javascriptGenerator.INFINITE_LOOP_TRAP = 'if(--loopTrap === 0) exit(false, "Ciclo infinito");\n';
+javascriptGenerator.addReservedWords("exit,highlightBlock,loopTrap,hiddenState");
 console.log("Blockly version:", BlocklyCore.VERSION);
 
 function replaceArgs(block: Block, generator: Generator, js: string, args?: CustomBlockArg[]) {

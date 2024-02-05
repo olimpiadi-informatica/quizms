@@ -1,4 +1,4 @@
-import React, { ComponentType, useEffect, useState } from "react";
+import React, { ComponentType, Ref, forwardRef, useEffect, useMemo, useState } from "react";
 
 import { ToolboxInfo } from "blockly/core/utils/toolbox";
 import classNames from "classnames";
@@ -33,8 +33,8 @@ type BlocklyProps = {
 
 type TestcaseStatus = {
   correct: boolean;
-  msg: string;
   index: number;
+  msg?: string;
 };
 
 export default function Workspace({
@@ -54,7 +54,7 @@ export default function Workspace({
   const [editing, setEditing] = useState(true);
   const [playing, setPlaying] = useState(false);
   const [, setBlocks] = useState({});
-  const [variableMappings, setVariableMappings] = useState([]);
+  const [variableMappings, setVariableMappings] = useState<Record<string, string>>({});
 
   const [code, setCode] = useState("");
   const [testcaseIndex, setTestcaseIndex] = useState(0);
@@ -69,7 +69,10 @@ export default function Workspace({
     testcases[testcaseIndex],
   );
 
-  const [blocklyVariables, setBlocklyVariables] = useState<Record<string, any>>({});
+  const blocklyVariables = useMemo(
+    () => Object.fromEntries(Object.entries(variableMappings).map(([k, v]) => [v, globalScope[k]])),
+    [variableMappings, globalScope],
+  );
 
   const send = useIcp(iframe?.contentWindow, (data: any) => {
     switch (data.cmd) {
@@ -88,7 +91,7 @@ export default function Workspace({
       }
       case "code": {
         setCode(data.code);
-        setEditing(true);
+        setPlaying(false);
         if (debug?.logJs) console.info(data.code);
         break;
       }
@@ -111,22 +114,8 @@ export default function Workspace({
     }
   }, [step, playing]);
 
-  useEffect(() => {
-    const blocklyVariables: Record<string, any> = {};
-    for (const [k, v] of Object.entries(variableMappings)) {
-      blocklyVariables[v] = globalScope[k];
-    }
-    setBlocklyVariables(blocklyVariables);
-  }, [globalScope, variableMappings]);
-
-  useEffect(() => {
-    if (editing) {
-      setPlaying(false);
-    }
-  }, [editing]);
-
   return (
-    <div className="relative inset-y-0 left-1/2 mb-5 w-screen -translate-x-1/2 overflow-x-hidden px-4 py-8 sm:px-8">
+    <div className="relative inset-y-0 left-1/2 mb-5 w-[calc(100vw-2rem)] -translate-x-1/2 overflow-x-hidden px-4 py-8 sm:px-8">
       <div className="flex gap-6 md:flex-col-reverse lg:flex-row">
         <div className="flex w-full flex-col gap-6">
           <div className="flex gap-6">
@@ -141,9 +130,9 @@ export default function Workspace({
                     }}
                     className={classNames(
                       "btn rounded-lg",
-                      msg != "" && !editing && "tooltip",
+                      !editing && "tooltip",
                       editing ? "btn-neutral" : correct ? "btn-success" : "btn-error",
-                      index != testcaseIndex && "scale-[0.85]",
+                      index !== testcaseIndex && "scale-[0.85]",
                     )}
                     data-tip={msg}>
                     <div className="flex items-center gap-3">
@@ -163,11 +152,9 @@ export default function Workspace({
             <div className="join join-horizontal">
               <div className="join-item tooltip" data-tip="Esegui/pausa">
                 <button
-                  className="btn btn-info rounded-[inherit]"
+                  className="btn btn-info"
                   disabled={!running || editing}
-                  onClick={() => {
-                    setPlaying(!playing);
-                  }}
+                  onClick={() => setPlaying(!playing)}
                   aria-label="Esugui un blocco">
                   {playing ? <Pause className="size-6" /> : <Play className="size-6" />}
                 </button>
@@ -225,20 +212,29 @@ export default function Workspace({
             )}
           </div>
         </div>
-        <div className="h-[640px] w-full rounded-lg">
-          <iframe
-            ref={setIframe}
-            src={import("./workspace-editor") as any}
-            className="size-full"
-            title="Area di lavoro di Blockly"
-          />
-          {!ready && (
-            <div className="absolute inset-0 z-50 bg-white text-slate-700">
-              <Loading />
-            </div>
-          )}
-        </div>
+        <Editor ref={setIframe} ready={ready} />
       </div>
     </div>
   );
 }
+
+const Editor = forwardRef(function Editor(
+  { ready }: { ready: boolean },
+  ref: Ref<HTMLIFrameElement>,
+) {
+  return (
+    <div className="h-[640px] w-full overflow-hidden rounded-xl border-2 border-[#c6c6c6]">
+      <iframe
+        ref={ref}
+        src={import("./workspace-editor") as any}
+        className="size-full"
+        title="Area di lavoro di Blockly"
+      />
+      {!ready && (
+        <div className="absolute inset-0 z-50 bg-white text-slate-700">
+          <Loading />
+        </div>
+      )}
+    </div>
+  );
+});
