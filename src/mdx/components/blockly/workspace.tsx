@@ -121,11 +121,11 @@ export default function Workspace({
   }, [editing]);
 
   return (
-    <div className="relative inset-y-0 left-1/2 mb-5 w-screen -translate-x-1/2 overflow-x-hidden px-4 sm:px-8">
-      <div className="flex gap-6 md:flex-col lg:flex-row">
+    <div className="relative inset-y-0 left-1/2 mb-5 w-screen -translate-x-1/2 overflow-x-hidden px-4 py-8 sm:px-8">
+      <div className="flex gap-6 md:flex-col-reverse lg:flex-row">
         <div className="flex w-full flex-col gap-6">
           <div className="flex gap-6">
-            <div className="join md:join-vertical lg:join-horizontal">
+            <div className="flex">
               {testcaseStatuses.map(({ index, correct, msg }) => {
                 return (
                   <button
@@ -134,16 +134,21 @@ export default function Workspace({
                       setTestcaseIndex(index);
                     }}
                     className={classNames(
-                      "btn join-item tooltip rounded-[inherit]",
+                      "btn rounded-lg",
+                      msg != "" && "tooltip",
                       correct ? "btn-success" : "btn-error",
+                      index != testcaseIndex && "scale-[0.85]",
                     )}
                     data-tip={msg}>
-                    {correct ? <Check className="size-6" /> : <X className="size-6" />}
+                    <div className="flex items-center gap-3">
+                      <p>Livello {index + 1}</p>
+                      {correct ? <Check className="size-6" /> : <X className="size-6" />}
+                    </div>
                   </button>
                 );
               })}
             </div>
-            <div className="join md:join-vertical lg:join-horizontal">
+            <div className="join join-horizontal">
               <div className="join-item tooltip" data-tip="Esegui/pausa">
                 <div
                   className={classNames(
@@ -210,7 +215,7 @@ export default function Workspace({
               </button>
             </div>
           </div>
-          <div className="h-full overflow-auto rounded-lg border-solid">
+          <div className="w-full overflow-auto rounded-lg border-solid md:h-[500px] lg:h-full">
             {Visualizer && (
               <Visualizer variables={{ blocklyVariables, hiddenState: globalScope?.hiddenState }} />
             )}
