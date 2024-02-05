@@ -136,8 +136,8 @@ export default function Workspace({
                     }}
                     className={classNames(
                       "btn rounded-lg",
-                      msg != "" && "tooltip",
-                      editing ? "btn-neutral" : correct ? "btn-success" : "btn-error",
+                      msg != "" && !editing && "tooltip",
+                      editing ? "btn-neutral" : (correct ? "btn-success" : "btn-error"),
                       index != testcaseIndex && "scale-[0.85]",
                     )}
                     data-tip={msg}>
@@ -145,11 +145,11 @@ export default function Workspace({
                       <p>Livello {index + 1}</p>
                       {editing ? (
                         <HelpCircle className="size-6" />
-                      ) : correct ? (
+                      ) : (correct ? (
                         <Check className="size-6" />
                       ) : (
                         <X className="size-6" />
-                      )}
+                      ))}
                     </div>
                   </button>
                 );
