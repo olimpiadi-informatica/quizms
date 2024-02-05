@@ -1,6 +1,6 @@
 import React, { ComponentType, useEffect, useState } from "react";
 
-import { ToolboxDefinition } from "blockly/core/utils/toolbox";
+import { ToolboxInfo } from "blockly/core/utils/toolbox";
 import classNames from "classnames";
 import { range } from "lodash-es";
 import { Check, HelpCircle, Pause, Play, RotateCcw, Send, SkipForward, X } from "lucide-react";
@@ -8,6 +8,7 @@ import { Check, HelpCircle, Pause, Play, RotateCcw, Send, SkipForward, X } from 
 import { Loading } from "~/components";
 
 import { CustomBlock } from "./custom-block";
+import defaultToolbox from "./default-toolbox";
 import useExecutor from "./executor";
 import { BlocklyInterpreter } from "./interpreter";
 import useIcp from "./workspace-ipc";
@@ -18,7 +19,7 @@ type VariableValues = {
 };
 
 type BlocklyProps = {
-  toolbox: ToolboxDefinition;
+  toolbox?: ToolboxInfo;
   initialBlocks?: object;
   testcases: Array<Record<string, any>>;
   debug?: {
@@ -44,6 +45,10 @@ export default function Workspace({
   customBlocks,
   Visualizer,
 }: BlocklyProps) {
+  if (!toolbox) {
+    toolbox = defaultToolbox;
+  }
+
   const [iframe, setIframe] = useState<HTMLIFrameElement | null>(null);
   const [ready, setReady] = useState(false);
   const [editing, setEditing] = useState(true);

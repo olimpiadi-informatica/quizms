@@ -1,6 +1,6 @@
 import { DisableTopBlocks } from "@blockly/disable-top-blocks";
 import Blockly, { BlocklyOptions, WorkspaceSvg } from "blockly";
-import { ToolboxDefinition } from "blockly/core/utils/toolbox";
+import { ToolboxInfo } from "blockly/core/utils/toolbox";
 import { javascriptGenerator } from "blockly/javascript";
 import locale from "blockly/msg/it";
 
@@ -14,84 +14,97 @@ let code: string | undefined;
 let workspace: WorkspaceSvg | undefined;
 
 type Props = {
-  toolbox: ToolboxDefinition;
-  initialBlocks?: object;
-  customBlocks?: CustomBlock[];
+    toolbox: ToolboxInfo;
+    initialBlocks?: object;
+    customBlocks?: CustomBlock[];
 };
 
 function init({ toolbox, initialBlocks, customBlocks }: Props) {
-  Blockly.setLocale(locale);
-
-  const config: BlocklyOptions = {
-    renderer: "zelos",
-    sounds: false,
-    zoom: {
-      controls: true,
-      startScale: 0.8,
-    },
-    maxBlocks: undefined,
-    maxInstances: {},
-    toolbox,
-  };
-
-  if (customBlocks) {
-    for (const block of customBlocks) {
-      if ("maxInstances" in block && block.maxInstances) {
-        config.maxInstances![block.type] = block.maxInstances;
-      }
-    }
-  }
-
-  workspace = Blockly.inject("app", config);
-  initGenerator(workspace, customBlocks);
-  workspace.addChangeListener(Blockly.Events.disableOrphans);
-  workspace.addChangeListener((event) => {
-    if (event.type === Blockly.Events.FINISHED_LOADING) {
-      send("ready");
+    Blockly.setLocale(locale);
+    if (customBlocks && toolbox.kind == "categoryToolbox") {
+        toolbox.contents.push({
+            "kind": "category",
+            "name": "Esecuzione",
+            "colour": "20",
+            "contents": customBlocks.map(block => ({
+                "kind": "block",
+                "type": block.type,
+            })),
+        });
     }
 
-    const newCode = toJS(workspace);
-    javascriptGenerator.nameDB_.setVariableMap(workspace!.getVariableMap());
-    if (newCode !== code) {
-      code = newCode;
-      send("code", { code });
-      workspace?.highlightBlock(null);
+    console.log(toolbox);
+
+    const config: BlocklyOptions = {
+        renderer: "zelos",
+        sounds: false,
+        zoom: {
+            controls: true,
+            startScale: 0.8,
+        },
+        maxBlocks: undefined,
+        maxInstances: {},
+        toolbox,
+    };
+
+    if (customBlocks) {
+        for (const block of customBlocks) {
+            if ("maxInstances" in block && block.maxInstances) {
+                config.maxInstances![block.type] = block.maxInstances;
+            }
+        }
     }
 
-    const newBlocks = Blockly.serialization.workspaces.save(workspace!);
-    if (newBlocks !== blocks) {
-      blocks = newBlocks;
-      send("blocks", { blocks });
-    }
+    workspace = Blockly.inject("app", config);
+    initGenerator(workspace, customBlocks);
+    workspace.addChangeListener(Blockly.Events.disableOrphans);
+    workspace.addChangeListener((event) => {
+        if (event.type === Blockly.Events.FINISHED_LOADING) {
+            send("ready");
+        }
 
-    const newVariables = newBlocks["variables"];
-    if (variables != newVariables) {
-      const variablesMapping: Record<string, string> = {};
-      for (const variable of newVariables) {
-        const name = variable.name;
-        const newName = javascriptGenerator.getVariableName(name);
-        variablesMapping[newName] = name;
-      }
-      variables = newVariables;
-      send("variables", { variablesMapping });
-    }
-  });
+        const newCode = toJS(workspace);
+        javascriptGenerator.nameDB_.setVariableMap(workspace!.getVariableMap());
+        if (newCode !== code) {
+            code = newCode;
+            send("code", { code });
+            workspace?.highlightBlock(null);
+        }
 
-  new DisableTopBlocks().init();
+        const newBlocks = Blockly.serialization.workspaces.save(workspace!);
+        if (newBlocks !== blocks) {
+            blocks = newBlocks;
+            send("blocks", { blocks });
+        }
 
-  Blockly.serialization.workspaces.load(initialBlocks ?? {}, workspace);
+        const newVariables = newBlocks["variables"];
+        if (variables != newVariables) {
+            const variablesMapping: Record<string, string> = {};
+            for (const variable of newVariables) {
+                const name = variable.name;
+                const newName = javascriptGenerator.getVariableName(name);
+                variablesMapping[newName] = name;
+            }
+            variables = newVariables;
+            send("variables", { variablesMapping });
+        }
+    });
+
+    new DisableTopBlocks().init();
+
+    Blockly.serialization.workspaces.load(initialBlocks ?? {}, workspace);
 }
 
 function send(cmd: string, props?: any) {
-  window.parent.postMessage({ cmd, ...props }, "*");
+    window.parent.postMessage({ cmd, ...props }, "*");
 }
 
 window.addEventListener("message", (event) => {
-  const { cmd, ...props } = event.data;
-  if (cmd === "init") {
-    init(props);
-  } else if (cmd === "highlight") {
-    workspace?.highlightBlock(props.highlightedBlock);
-  }
+    const { cmd, ...props } = event.data;
+    if (cmd === "init") {
+        init(props);
+    } else if (cmd === "highlight") {
+        workspace?.highlightBlock(props.highlightedBlock);
+    }
 });
 send("init");
