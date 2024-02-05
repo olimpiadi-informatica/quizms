@@ -182,10 +182,12 @@ export function TeacherAdmin() {
           <h2 className="card-title">Informazioni Gara</h2>
           <div className="mb-2 whitespace-pre-wrap">{contest.instructions}</div>
           {/* contest info */}
-          <div className="font-bold">
-            La gara si potrà svolgere dalle {formatTime(contest.contestWindowStart)} alle{" "}
-            {formatTime(contest.contestWindowEnd)} del {formatDate(contest.contestWindowStart)}.
-          </div>
+          {contest.hasOnline && (
+            <div className="font-bold">
+              La gara si potrà svolgere dalle {formatTime(contest.contestWindowStart)} alle{" "}
+              {formatTime(contest.contestWindowEnd)} del {formatDate(contest.contestWindowStart)}.
+            </div>
+          )}
           {contest.hasPdf && (
             <div className="not-prose mt-2 flex justify-center">
               <DownloadPdfButton />
@@ -261,7 +263,7 @@ function DownloadPdfButton() {
 
   return (
     <Button className="btn-warning" onClick={onClick}>
-      Scarica testo per prova cartacea
+      Scarica testi in formato PDF
     </Button>
   );
 }

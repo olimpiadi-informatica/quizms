@@ -15,7 +15,7 @@ import { useErrorBoundary } from "react-error-boundary";
 import useSWR, { KeyedMutator, MutatorOptions, SWRConfiguration } from "swr";
 
 import { useDb } from "~/web/firebase/base-login";
-import query, { Constraints } from "~/web/firebase/query";
+import query, { QueryOption } from "~/web/firebase/query";
 
 import { useSubscriptionListener } from "./subscription";
 
@@ -25,10 +25,7 @@ const mutationConfig: MutatorOptions = {
   populateCache: true,
 };
 
-type CollectionOptions<T> = {
-  constraints?: Constraints<T>;
-  orderBy?: keyof T & string;
-  limit?: number;
+type CollectionOptions<T> = QueryOption<T> & {
   subscribe?: boolean;
 };
 

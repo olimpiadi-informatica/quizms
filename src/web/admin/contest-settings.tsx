@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 
+import classNames from "classnames";
+
 import { useAdmin } from "./provider";
 
 export default function ContestSettings() {
@@ -38,11 +40,11 @@ function TextareaField({ label, value, setValue }: TextareaFieldProps) {
         </span>
       </div>
       <textarea
-        className="textarea textarea-bordered"
+        className={classNames("textarea textarea-bordered", editable && "textarea-warning")}
         value={value ?? ""}
         onChange={(e) => setValue(e.target.value)}
         readOnly={!editable}
-        rows={10}
+        rows={8}
       />
     </label>
   );

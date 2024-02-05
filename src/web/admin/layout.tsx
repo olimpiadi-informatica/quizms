@@ -30,7 +30,22 @@ export function AdminLayout({
 
   return (
     <div className="flex h-dvh flex-col">
-      <div className="navbar flex-none justify-between bg-error text-error-content">
+      <div className="navbar flex-none flex-row-reverse justify-between bg-error text-error-content">
+        <div className="dropdown dropdown-end max-w-full flex-none">
+          <div tabIndex={0} role="button" className="btn btn-ghost no-animation w-full flex-nowrap">
+            <UserCog className="flex-none" />
+            <div className="truncate">{user.displayName}</div>
+          </div>
+          <ul
+            className={classNames(
+              "menu dropdown-content menu-sm z-30 mt-3 w-52 p-2",
+              "highlight-border rounded-box bg-base-200 text-base-content",
+            )}>
+            <li>
+              <button onClick={logout}>Cambia utente</button>
+            </li>
+          </ul>
+        </div>
         {activeContest && (
           <div className="dropdown max-w-full flex-none">
             <div
@@ -59,21 +74,6 @@ export function AdminLayout({
             )}
           </div>
         )}
-        <div className="dropdown dropdown-end max-w-full flex-none">
-          <div tabIndex={0} role="button" className="btn btn-ghost no-animation w-full flex-nowrap">
-            <UserCog className="flex-none" />
-            <div className="truncate">{user.displayName}</div>
-          </div>
-          <ul
-            className={classNames(
-              "menu dropdown-content menu-sm z-30 mt-3 w-52 p-2",
-              "highlight-border rounded-box bg-base-200 text-base-content",
-            )}>
-            <li>
-              <button onClick={logout}>Cambia utente</button>
-            </li>
-          </ul>
-        </div>
       </div>
       <div className="flex flex-auto flex-col overflow-y-auto">
         <ErrorBoundary FallbackComponent={Error}>
