@@ -3,7 +3,7 @@ import React, { ComponentType, useEffect, useState } from "react";
 import { ToolboxDefinition } from "blockly/core/utils/toolbox";
 import classNames from "classnames";
 import { range } from "lodash-es";
-import { Check, Pause, Play, RotateCcw, Send, SkipForward, X } from "lucide-react";
+import { Check, HelpCircle, Pause, Play, RotateCcw, Send, SkipForward, X } from "lucide-react";
 
 import { Loading } from "~/components";
 
@@ -132,17 +132,24 @@ export default function Workspace({
                     key={index}
                     onClick={() => {
                       setTestcaseIndex(index);
+                      setPlaying(false);
                     }}
                     className={classNames(
                       "btn rounded-lg",
                       msg != "" && "tooltip",
-                      correct ? "btn-success" : "btn-error",
+                      editing ? "btn-neutral" : correct ? "btn-success" : "btn-error",
                       index != testcaseIndex && "scale-[0.85]",
                     )}
                     data-tip={msg}>
                     <div className="flex items-center gap-3">
                       <p>Livello {index + 1}</p>
-                      {correct ? <Check className="size-6" /> : <X className="size-6" />}
+                      {editing ? (
+                        <HelpCircle className="size-6" />
+                      ) : correct ? (
+                        <Check className="size-6" />
+                      ) : (
+                        <X className="size-6" />
+                      )}
                     </div>
                   </button>
                 );
@@ -150,30 +157,20 @@ export default function Workspace({
             </div>
             <div className="join join-horizontal">
               <div className="join-item tooltip" data-tip="Esegui/pausa">
-                <div
-                  className={classNames(
-                    "btn btn-info rounded-[inherit]",
-                    !running && "btn-disabled",
-                  )}>
-                  <label className="swap swap-rotate size-6">
-                    <input
-                      type="checkbox"
-                      disabled={!running}
-                      checked={playing}
-                      onChange={(event) => {
-                        setPlaying(event.target.checked);
-                        console.log("CLICK");
-                      }}
-                    />
-                    <Pause className="swap-on size-6" />
-                    <Play className="swap-off size-6" />
-                  </label>
-                </div>
+                <button
+                  className="btn btn-info rounded-[inherit]"
+                  disabled={!running || editing}
+                  onClick={() => {
+                    setPlaying(!playing);
+                  }}
+                  aria-label="Esugui un blocco">
+                  {playing ? <Pause className="size-6" /> : <Play className="size-6" />}
+                </button>
               </div>
               <div className="join-item tooltip" data-tip="Esegui un blocco">
                 <button
                   className="btn btn-info rounded-[inherit]"
-                  disabled={!running}
+                  disabled={!running || editing}
                   onClick={step}
                   aria-label="Esugui un blocco">
                   <SkipForward className="size-6" />
@@ -183,6 +180,7 @@ export default function Workspace({
                 <button
                   className="btn btn-info rounded-[inherit]"
                   aria-label="Esegui da capo"
+                  disabled={editing}
                   onClick={() => {
                     reset();
                     setPlaying(false);
@@ -195,6 +193,7 @@ export default function Workspace({
               <button
                 className="btn btn-success"
                 aria-label="Invia la soluzione"
+                disabled={!editing}
                 onClick={() => {
                   const newStatuses = [...testcaseStatuses];
                   for (const i of range(testcases.length)) {
