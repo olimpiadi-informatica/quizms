@@ -92,6 +92,7 @@ export default function Workspace({
       case "code": {
         setCode(data.code);
         setPlaying(false);
+        setEditing(true);
         if (debug?.logJs) console.info(data.code);
         break;
       }
