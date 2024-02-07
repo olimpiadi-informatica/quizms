@@ -109,6 +109,11 @@ export default function Workspace({
   }, [send, highlightedBlock]);
 
   useEffect(() => {
+    if (!running)
+      setPlaying(false);
+  }, [running]);
+
+  useEffect(() => {
     if (playing) {
       const interval = setInterval(step, 200);
       return () => clearInterval(interval);
