@@ -33,8 +33,6 @@ function init({ toolbox, initialBlocks, customBlocks }: Props) {
     });
   }
 
-  console.log(toolbox);
-
   const config: BlocklyOptions = {
     renderer: "zelos",
     sounds: false,
