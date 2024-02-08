@@ -1,6 +1,6 @@
 import type { ToolboxInfo } from "blockly/core/utils/toolbox";
 
-const defaultToolbox: ToolboxInfo = {
+export const defaultToolbox: ToolboxInfo = {
   kind: "categoryToolbox",
   contents: [
     {
@@ -182,4 +182,17 @@ const defaultToolbox: ToolboxInfo = {
   ],
 };
 
-export default defaultToolbox;
+export const defaultInitialBlocks = {
+  "blocks": {
+    "languageVersion": 0,
+    "blocks": [
+      {
+        "type": "start",
+        "id": "y=zq)Uya2A/{vyOtN[i6",
+        "x": 30,
+        "y": 30
+      }
+    ]
+  },
+  "variables": []
+}

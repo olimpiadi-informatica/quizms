@@ -8,7 +8,7 @@ import { Check, HelpCircle, Pause, Play, RotateCcw, Send, SkipForward, X } from 
 import { Loading } from "~/components";
 
 import { CustomBlock } from "./custom-block";
-import defaultToolbox from "./default-toolbox";
+import { defaultInitialBlocks, defaultToolbox } from "./default-blocks";
 import useExecutor from "./executor";
 import { BlocklyInterpreter } from "./interpreter";
 import useIcp from "./workspace-ipc";
@@ -47,6 +47,9 @@ export default function Workspace({
 }: BlocklyProps) {
   if (!toolbox) {
     toolbox = defaultToolbox;
+  }
+  if (!initialBlocks) {
+    initialBlocks = defaultInitialBlocks;
   }
 
   const [iframe, setIframe] = useState<HTMLIFrameElement | null>(null);
