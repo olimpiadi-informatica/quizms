@@ -7,7 +7,7 @@ body {
   width: 100vw;
 }
 
-@media (max-width: 620px) {
+@media not (min-width: 576px) {
   .blocklyToolboxDiv {
     width: 2.5rem;
   }

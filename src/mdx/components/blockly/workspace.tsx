@@ -3,7 +3,16 @@ import React, { ComponentType, Ref, forwardRef, useEffect, useMemo, useState } f
 import { ToolboxInfo } from "blockly/core/utils/toolbox";
 import classNames from "classnames";
 import { range } from "lodash-es";
-import { Check, HelpCircle, Pause, Play, RotateCcw, Send, SkipForward, X } from "lucide-react";
+import {
+  CheckCircle2,
+  HelpCircle,
+  Pause,
+  Play,
+  RotateCcw,
+  Send,
+  SkipForward,
+  XCircle,
+} from "lucide-react";
 
 import { Loading } from "~/components";
 
@@ -63,7 +72,7 @@ export default function Workspace({
   const [testcaseIndex, setTestcaseIndex] = useState(0);
   const [testcaseStatuses, setTestcaseStatuses] = useState<TestcaseStatus[]>(
     range(testcases.length).map((index) => {
-      return { correct: false, index, msg: "" };
+      return { correct: false, index };
     }),
   );
 
@@ -112,8 +121,7 @@ export default function Workspace({
   }, [send, highlightedBlock]);
 
   useEffect(() => {
-    if (!running)
-      setPlaying(false);
+    if (!running) setPlaying(false);
   }, [running]);
 
   useEffect(() => {
@@ -124,44 +132,41 @@ export default function Workspace({
   }, [step, playing]);
 
   return (
-    <div className="relative inset-y-0 left-1/2 mb-5 w-[calc(100vw-2rem)] -translate-x-1/2 overflow-x-hidden px-4 py-8 sm:px-8">
-      <div className="flex gap-6 md:flex-col-reverse lg:flex-row">
-        <div className="flex w-full flex-col gap-6">
+    <div className="relative inset-y-0 left-1/2 mb-5 w-screen -translate-x-1/2 overflow-x-hidden px-4 py-8 sm:px-8">
+      <div className="flex flex-col-reverse gap-6 lg:flex-row">
+        <div className="flex flex-col gap-6">
           <div className="flex gap-6">
-            <div className="flex">
-              {testcaseStatuses.map(({ index, correct, msg }) => {
-                return (
-                  <button
-                    key={index}
-                    onClick={() => {
-                      setTestcaseIndex(index);
-                      setPlaying(false);
-                    }}
-                    className={classNames(
-                      "btn rounded-lg",
-                      !editing && "tooltip",
-                      editing ? "btn-neutral" : correct ? "btn-success" : "btn-error",
-                      index !== testcaseIndex && "scale-[0.85]",
+            <div className="join join-horizontal flex-none">
+              {testcaseStatuses.map(({ index, correct, msg }) => (
+                <button
+                  key={index}
+                  onClick={() => {
+                    setTestcaseIndex(index);
+                    setPlaying(false);
+                  }}
+                  className={classNames(
+                    "btn join-item z-10 rounded-lg",
+                    !editing && "tooltip",
+                    index === testcaseIndex && "btn-info",
+                  )}
+                  data-tip={msg}>
+                  <div className="flex items-center gap-3">
+                    <p>Livello {index + 1}</p>
+                    {editing ? (
+                      <HelpCircle size={32} />
+                    ) : correct ? (
+                      <CheckCircle2 size={32} className="fill-success stroke-success-content" />
+                    ) : (
+                      <XCircle size={32} className="fill-error stroke-error-content" />
                     )}
-                    data-tip={msg}>
-                    <div className="flex items-center gap-3">
-                      <p>Livello {index + 1}</p>
-                      {editing ? (
-                        <HelpCircle className="size-6" />
-                      ) : correct ? (
-                        <Check className="size-6" />
-                      ) : (
-                        <X className="size-6" />
-                      )}
-                    </div>
-                  </button>
-                );
-              })}
+                  </div>
+                </button>
+              ))}
             </div>
-            <div className="join join-horizontal">
+            <div className="join join-horizontal flex-none">
               <div className="join-item tooltip" data-tip="Esegui/pausa">
                 <button
-                  className="btn btn-info"
+                  className="btn btn-info rounded-[inherit]"
                   disabled={!running || editing}
                   onClick={() => setPlaying(!playing)}
                   aria-label="Esugui un blocco">
@@ -190,7 +195,7 @@ export default function Workspace({
                 </button>
               </div>
             </div>
-            <div className="tooltip" data-tip="Invia la soluzione">
+            <div className="tooltip flex-none" data-tip="Esegui la soluzione">
               <button
                 className="btn btn-success"
                 aria-label="Invia la soluzione"
@@ -215,7 +220,7 @@ export default function Workspace({
               </button>
             </div>
           </div>
-          <div className="w-full overflow-auto rounded-lg border-solid md:h-[500px] lg:h-full">
+          <div className="grow overflow-auto rounded-xl border-2 border-[#c6c6c6] bg-white">
             {Visualizer && (
               <Visualizer variables={{ blocklyVariables, hiddenState: globalScope?.hiddenState }} />
             )}
@@ -232,7 +237,7 @@ const Editor = forwardRef(function Editor(
   ref: Ref<HTMLIFrameElement>,
 ) {
   return (
-    <div className="h-[640px] w-full overflow-hidden rounded-xl border-2 border-[#c6c6c6]">
+    <div className="relative h-[640px] grow overflow-hidden rounded-xl border-2 border-[#c6c6c6]">
       <iframe
         ref={ref}
         src={import("./workspace-editor") as any}
