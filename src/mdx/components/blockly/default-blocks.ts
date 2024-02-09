@@ -183,16 +183,16 @@ export const defaultToolbox: ToolboxInfo = {
 };
 
 export const defaultInitialBlocks = {
-  "blocks": {
-    "languageVersion": 0,
-    "blocks": [
+  blocks: {
+    languageVersion: 0,
+    blocks: [
       {
-        "type": "start",
-        "id": "y=zq)Uya2A/{vyOtN[i6",
-        "x": 30,
-        "y": 30
-      }
-    ]
+        type: "start",
+        id: "y=zq)Uya2A/{vyOtN[i6",
+        x: 30,
+        y: 30,
+      },
+    ],
   },
-  "variables": []
-}
+  variables: [],
+};

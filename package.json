@@ -8,7 +8,7 @@
     "prebuild": "yarn lint",
     "build": "NODE_ENV=production node scripts/build.js build",
     "watch": "node scripts/build.js watch",
-    "lint": "eslint --fix . && tsc --noEmit && prettier --check --cache --log-level=warn src/",
+    "lint": "eslint --fix . && tsc --noEmit && prettier --write --cache --log-level=warn src/",
     "fmt": "prettier --write --cache src/",
     "prepack": "yarn build",
     "release": "npm publish"
