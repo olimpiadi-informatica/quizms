@@ -131,6 +131,26 @@ export default function Workspace({
     }
   }, [step, playing]);
 
+  const runAll = async () => {
+    const statuses = await Promise.all(
+      testcases.map(async (testcase, index) => {
+        const interpreter = new BlocklyInterpreter(code, testcase);
+        for (let i = 0; interpreter.running; i++) {
+          interpreter.step();
+
+          if (i % 64 === 0) {
+            // wait 5 milliseconds to avoid blocking the main thread for too long
+            await new Promise((resolve) => setTimeout(resolve, 5));
+          }
+        }
+        return { ...interpreter, index };
+      }),
+    );
+
+    setTestcaseStatuses(statuses);
+    setEditing(false);
+  };
+
   return (
     <div className="relative inset-y-0 left-1/2 mb-5 w-screen -translate-x-1/2 overflow-x-hidden px-4 py-8 sm:px-8">
       <div className="flex flex-col-reverse gap-6 lg:flex-row">
@@ -200,22 +220,7 @@ export default function Workspace({
                 className="btn btn-success"
                 aria-label="Invia la soluzione"
                 disabled={!editing}
-                onClick={() => {
-                  const newStatuses = [...testcaseStatuses];
-                  for (const i of range(testcases.length)) {
-                    const interpreter = new BlocklyInterpreter(code, testcases[i]);
-                    while (interpreter.running) {
-                      interpreter.step();
-                    }
-                    newStatuses[i] = {
-                      correct: interpreter.correct,
-                      index: i,
-                      msg: interpreter.msg,
-                    };
-                  }
-                  setTestcaseStatuses(newStatuses);
-                  setEditing(false);
-                }}>
+                onClick={runAll}>
                 <Send className="size-6" />
               </button>
             </div>
