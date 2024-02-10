@@ -23,9 +23,8 @@ function assignProblemIds(tree: Root) {
 
 function parseSubProblems(tree: Root) {
   let subProblems = 0;
-  visit(tree, { type: "mdxJsxFlowElement", name: "AnswerGroup" }, () => {
-    subProblems++;
-  });
+  visit(tree, { type: "mdxJsxFlowElement", name: "AnswerGroup" }, () => void subProblems++);
+  visit(tree, { type: "mdxJsxFlowElement", name: "Blockly" }, () => void subProblems++);
   if (subProblems === 0) return;
 
   const contents: TopLevelContent[] = [];
