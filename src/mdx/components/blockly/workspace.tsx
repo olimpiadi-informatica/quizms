@@ -160,7 +160,7 @@ export default function Workspace({
     setTestcaseStatuses(statuses);
     setEditing(false);
 
-    const answers = student.answers ?? {};
+    const answers = { ...student.answers };
     for (let tc = 0; tc < testcases.length; tc++) {
       answers[`${id}.${tc + 1}`] = statuses[tc].correct ? "✅" : "❌";
     }
