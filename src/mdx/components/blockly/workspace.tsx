@@ -15,6 +15,8 @@ import {
 } from "lucide-react";
 
 import { Loading } from "~/components";
+import { useProblem } from "~/mdx/components/problem";
+import { useStudent } from "~/web/student";
 
 import { CustomBlock } from "./custom-block";
 import { defaultInitialBlocks, defaultToolbox } from "./default-blocks";
@@ -54,27 +56,29 @@ export default function Workspace({
   customBlocks,
   Visualizer,
 }: BlocklyProps) {
-  if (!toolbox) {
-    toolbox = defaultToolbox;
-  }
-  if (!initialBlocks) {
-    initialBlocks = defaultInitialBlocks;
-  }
+  const { student, setStudent } = useStudent();
+  const { id } = useProblem();
+
+  const blocks = student.extraData?.[`blockly-${id}`] ?? initialBlocks ?? defaultInitialBlocks;
+  const setBlocks = async (blocks: object) => {
+    await setStudent({
+      ...student,
+      extraData: { ...student.extraData, [`blockly-${id}`]: blocks },
+    });
+  };
 
   const [iframe, setIframe] = useState<HTMLIFrameElement | null>(null);
   const [ready, setReady] = useState(false);
+
   const [editing, setEditing] = useState(true);
   const [playing, setPlaying] = useState(false);
-  const [, setBlocks] = useState({});
   const [variableMappings, setVariableMappings] = useState<Record<string, string>>({});
 
   const [code, setCode] = useState("");
   const [testcaseIndex, setTestcaseIndex] = useState(0);
-  const [testcaseStatuses, setTestcaseStatuses] = useState<TestcaseStatus[]>(
-    range(testcases.length).map((index) => {
-      return { correct: false, index };
-    }),
-  );
+  const [testcaseStatuses, setTestcaseStatuses] = useState<TestcaseStatus[]>(() => {
+    return range(testcases.length).map((index) => ({ correct: false, index }));
+  });
 
   const [step, reset, running, highlightedBlock, globalScope] = useExecutor(
     code,
@@ -89,7 +93,13 @@ export default function Workspace({
   const send = useIcp(iframe?.contentWindow, (data: any) => {
     switch (data.cmd) {
       case "init": {
-        send({ cmd: "init", toolbox, debug, initialBlocks, customBlocks });
+        send({
+          cmd: "init",
+          toolbox: toolbox ?? defaultToolbox,
+          initialBlocks: blocks,
+          debug,
+          customBlocks,
+        });
         break;
       }
       case "ready": {
@@ -97,7 +107,7 @@ export default function Workspace({
         break;
       }
       case "blocks": {
-        setBlocks(data.blocks);
+        void setBlocks(data.blocks);
         if (debug?.logBlocks) console.info(JSON.stringify(data.blocks, undefined, 2));
         break;
       }
@@ -149,6 +159,16 @@ export default function Workspace({
 
     setTestcaseStatuses(statuses);
     setEditing(false);
+
+    const answers = student.answers ?? {};
+    for (let tc = 0; tc < testcases.length; tc++) {
+      answers[`${id}.${tc}`] = statuses[tc].correct ? "✅" : "❌";
+    }
+
+    await setStudent({
+      ...student,
+      answers,
+    });
   };
 
   return (

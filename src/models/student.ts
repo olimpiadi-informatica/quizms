@@ -14,6 +14,7 @@ export const studentSchema = z
     variant: z.string(),
     disabled: z.boolean().default(false),
     answers: z.record(z.string().optional()),
+    extraData: z.record(z.any()).optional(),
 
     createdAt: z.date(),
     updatedAt: z.date(),
