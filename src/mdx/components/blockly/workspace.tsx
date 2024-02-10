@@ -162,7 +162,7 @@ export default function Workspace({
 
     const answers = student.answers ?? {};
     for (let tc = 0; tc < testcases.length; tc++) {
-      answers[`${id}.${tc}`] = statuses[tc].correct ? "✅" : "❌";
+      answers[`${id}.${tc + 1}`] = statuses[tc].correct ? "✅" : "❌";
     }
 
     await setStudent({
