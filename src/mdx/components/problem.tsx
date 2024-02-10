@@ -6,6 +6,7 @@ import React, {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useState,
 } from "react";
 
@@ -60,7 +61,7 @@ export function Problem({ id, points, statement }: ProblemProps) {
     [variantCount],
   );
 
-  const Statement = memo(statement);
+  const Statement = useMemo(() => memo(statement), [statement]);
 
   return (
     <ProblemContext.Provider value={{ id, points, setCorrect: noop }}>
