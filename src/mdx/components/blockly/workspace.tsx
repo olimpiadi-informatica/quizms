@@ -225,7 +225,7 @@ export default function Workspace({
               </button>
             </div>
           </div>
-          <div className="grow overflow-auto rounded-xl border-2 border-[#c6c6c6] bg-white">
+          <div className="flex grow flex-col overflow-auto rounded-xl border-2 border-[#c6c6c6] bg-white *:grow">
             {Visualizer && (
               <Visualizer variables={{ blocklyVariables, hiddenState: globalScope?.hiddenState }} />
             )}
