@@ -1,19 +1,4 @@
-body {
-  margin: 0;
-}
-
 .injectionDiv {
-  height: 100vh;
-  width: 100vw;
-}
-
-@media not (min-width: 576px) {
-  .blocklyToolboxDiv {
-    width: 2.5rem;
-  }
-
-  .blocklyToolboxCategory .blocklyTreeRow {
-    border-left-width: 20px !important;
-    text-indent: 24rem;
-  }
+  position: fixed;
+  inset: 0;
 }

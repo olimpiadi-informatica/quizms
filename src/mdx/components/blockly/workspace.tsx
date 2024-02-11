@@ -18,6 +18,7 @@ import { Loading } from "~/components";
 import { useProblem } from "~/mdx/components/problem";
 import { useStudent } from "~/web/student";
 
+import blocklyAttribution from "./built-with-blockly.svg";
 import { CustomBlock } from "./custom-block";
 import { defaultInitialBlocks, defaultToolbox } from "./default-blocks";
 import useExecutor from "./executor";
@@ -173,85 +174,87 @@ export default function Workspace({
 
   return (
     <div className="relative inset-y-0 left-1/2 mb-5 w-screen -translate-x-1/2 overflow-x-hidden px-4 py-8 sm:px-8">
-      <div className="flex flex-col-reverse gap-6 lg:flex-row">
-        <div className="flex flex-col gap-6">
-          <div className="flex gap-6">
-            <div className="join join-horizontal flex-none">
-              {testcaseStatuses.map(({ index, correct, msg }) => (
-                <button
-                  key={index}
-                  onClick={() => {
-                    setTestcaseIndex(index);
-                    setPlaying(false);
-                  }}
-                  className={classNames(
-                    "btn join-item z-10 rounded-lg",
-                    !editing && "tooltip",
-                    index === testcaseIndex && "btn-info",
-                  )}
-                  data-tip={msg}>
-                  <div className="flex items-center gap-3">
-                    <p>Livello {index + 1}</p>
-                    {editing ? (
-                      <HelpCircle size={32} />
-                    ) : correct ? (
-                      <CheckCircle2 size={32} className="fill-success stroke-success-content" />
-                    ) : (
-                      <XCircle size={32} className="fill-error stroke-error-content" />
-                    )}
-                  </div>
-                </button>
-              ))}
-            </div>
-            <div className="join join-horizontal flex-none">
-              <div className="join-item tooltip" data-tip="Esegui/pausa">
-                <button
-                  className="btn btn-info rounded-[inherit]"
-                  disabled={!running || editing}
-                  onClick={() => setPlaying(!playing)}
-                  aria-label="Esugui un blocco">
-                  {playing ? <Pause className="size-6" /> : <Play className="size-6" />}
-                </button>
+      <div className="grid grid-cols-[auto_1fr] gap-6 [grid-template-areas:'editor_editor'_'level-btns_exec-btns'_'visualizer_visualizer'] lg:[grid-template-areas:'level-btns_exec-btns'_'visualizer_editor']">
+        <div className="join join-horizontal [grid-area:level-btns]">
+          {testcaseStatuses.map(({ index, correct, msg }) => (
+            <button
+              key={index}
+              onClick={() => {
+                setTestcaseIndex(index);
+                setPlaying(false);
+              }}
+              className={classNames(
+                "btn join-item z-10 rounded-lg",
+                !editing && "tooltip",
+                index === testcaseIndex && "btn-info",
+              )}
+              data-tip={msg}>
+              <div className="flex items-center gap-3">
+                <p>Livello {index + 1}</p>
+                {editing ? (
+                  <HelpCircle size={32} />
+                ) : correct ? (
+                  <CheckCircle2 size={32} className="fill-success stroke-success-content" />
+                ) : (
+                  <XCircle size={32} className="fill-error stroke-error-content" />
+                )}
               </div>
-              <div className="join-item tooltip" data-tip="Esegui un blocco">
-                <button
-                  className="btn btn-info rounded-[inherit]"
-                  disabled={!running || editing}
-                  onClick={step}
-                  aria-label="Esugui un blocco">
-                  <SkipForward className="size-6" />
-                </button>
-              </div>
-              <div className="join-item tooltip" data-tip="Esegui da capo">
-                <button
-                  className="btn btn-info rounded-[inherit]"
-                  aria-label="Esegui da capo"
-                  disabled={editing}
-                  onClick={() => {
-                    reset();
-                    setPlaying(false);
-                  }}>
-                  <RotateCcw className="size-6" />
-                </button>
-              </div>
-            </div>
-            <div className="tooltip flex-none" data-tip="Esegui la soluzione">
+            </button>
+          ))}
+        </div>
+        <div className="flex gap-6 [grid-area:exec-btns]">
+          <div className="join join-horizontal">
+            <div className="join-item tooltip" data-tip="Esegui/pausa">
               <button
-                className="btn btn-success"
-                aria-label="Invia la soluzione"
-                disabled={!editing}
-                onClick={runAll}>
-                <Send className="size-6" />
+                className="btn btn-info rounded-[inherit]"
+                disabled={!running || editing}
+                onClick={() => setPlaying(!playing)}
+                aria-label="Esugui un blocco">
+                {playing ? <Pause className="size-6" /> : <Play className="size-6" />}
+              </button>
+            </div>
+            <div className="join-item tooltip" data-tip="Esegui un blocco">
+              <button
+                className="btn btn-info rounded-[inherit]"
+                disabled={!running || editing}
+                onClick={step}
+                aria-label="Esugui un blocco">
+                <SkipForward className="size-6" />
+              </button>
+            </div>
+            <div className="join-item tooltip" data-tip="Esegui da capo">
+              <button
+                className="btn btn-info rounded-[inherit]"
+                aria-label="Esegui da capo"
+                disabled={editing}
+                onClick={() => {
+                  reset();
+                  setPlaying(false);
+                }}>
+                <RotateCcw className="size-6" />
               </button>
             </div>
           </div>
-          <div className="flex grow flex-col overflow-auto rounded-xl border-2 border-[#c6c6c6] bg-white *:grow">
+          <div className="tooltip" data-tip="Esegui la soluzione">
+            <button
+              className="btn btn-success"
+              aria-label="Invia la soluzione"
+              disabled={!editing}
+              onClick={runAll}>
+              <Send className="size-6" />
+            </button>
+          </div>
+        </div>
+        <div className="[grid-area:visualizer]">
+          <div className="overflow-auto rounded-xl border-2 border-[#c6c6c6] bg-white">
             {Visualizer && (
               <Visualizer variables={{ blocklyVariables, hiddenState: globalScope?.hiddenState }} />
             )}
           </div>
         </div>
-        <Editor ref={setIframe} ready={ready} />
+        <div className="h-[640px] grow [grid-area:editor]">
+          <Editor ref={setIframe} ready={ready} />
+        </div>
       </div>
     </div>
   );
@@ -262,7 +265,7 @@ const Editor = forwardRef(function Editor(
   ref: Ref<HTMLIFrameElement>,
 ) {
   return (
-    <div className="relative h-[640px] grow overflow-hidden rounded-xl border-2 border-[#c6c6c6]">
+    <div className="relative h-full overflow-hidden rounded-xl border-2 border-[#c6c6c6]">
       <iframe
         ref={ref}
         src={import("./workspace-editor") as any}
