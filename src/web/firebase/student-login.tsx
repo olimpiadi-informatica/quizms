@@ -92,6 +92,15 @@ function StudentLoginInner({
     contestId: filteredContests.length === 1 ? filteredContests[0].id : undefined,
     personalInformation: {},
     answers: {},
+    extraData: {
+      userAgent: navigator.userAgent,
+      windowWidth: window.innerWidth,
+      windowHeight: window.innerHeight,
+      screenWidth: window.screen.availWidth,
+      screenHeight: window.screen.availHeight,
+      pixelRatio: window.devicePixelRatio,
+      darkMode: window.matchMedia("(prefers-color-scheme: dark)").matches,
+    },
     createdAt: getNow(),
     disabled: false,
   });
