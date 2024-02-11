@@ -11,7 +11,7 @@ const remarkHighlight: Plugin<[], Root> = () => {
   return (tree: Root) => {
     visit(tree, ["code", "inlineCode"], (node, index, parent) => {
       const code = node as Code | InlineCode;
-      const lang = code.type === "code" ? code.lang ?? "text" : "srs";
+      const lang = code.type === "code" ? code.lang : "auto";
       const meta = ("meta" in code && code.meta) || "";
 
       const params = Object.fromEntries(
