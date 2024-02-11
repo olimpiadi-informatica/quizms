@@ -18,7 +18,6 @@ import { Loading } from "~/components";
 import { useProblem } from "~/mdx/components/problem";
 import { useStudent } from "~/web/student";
 
-import blocklyAttribution from "./built-with-blockly.svg";
 import { CustomBlock } from "./custom-block";
 import { defaultInitialBlocks, defaultToolbox } from "./default-blocks";
 import useExecutor from "./executor";

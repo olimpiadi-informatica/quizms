@@ -12,7 +12,7 @@ export const studentSchema = z
     startedAt: z.date(),
 
     variant: z.string(),
-    disabled: z.boolean().default(false),
+    disabled: z.boolean(),
     answers: z.record(z.string().optional()),
     extraData: z.record(z.any()).optional(),
 

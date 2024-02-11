@@ -95,12 +95,6 @@ const FinalizeModal = forwardRef(function FinalizeModal(
         ["name", "surname", "classYear", "classSection"],
         ["surname", "name", "classYear", "classSection"],
       ];
-      if (contest.personalInformation.some((f) => f.name === "birthDate")) {
-        orderings.push(
-          ["name", "surname", "classYear", "birthDate"],
-          ["surname", "name", "classYear", "birthDate"],
-        );
-      }
       return orderings.map((fields) => {
         return deburr(fields.map((field) => info[field]).join("\n"))
           .toLowerCase()

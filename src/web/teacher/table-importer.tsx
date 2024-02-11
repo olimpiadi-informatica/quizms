@@ -190,6 +190,7 @@ async function importStudents(
         participationId: participation.id,
         variant: variantId,
         answers: Object.fromEntries(contest.problemIds.map((id, i) => [id, value[off + i]])),
+        extraData: { imported: true },
         createdAt: new Date(),
         disabled: false,
       } as Student;
