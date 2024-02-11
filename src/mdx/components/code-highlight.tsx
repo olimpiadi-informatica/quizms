@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useMemo } from "react";
 
+import classNames from "classnames";
+import { RootContent } from "hast";
 import { HLJSApi, Language } from "highlight.js";
 import { createLowlight } from "lowlight";
-import SyntaxHighlighterBuilder from "react-syntax-highlighter/dist/esm/highlight";
 
 function srs(hljs: HLJSApi): Language {
   return {
@@ -49,22 +50,6 @@ function srs(hljs: HLJSApi): Language {
 
 const languages = { srs };
 const lowlight = createLowlight(languages);
-const SyntaxHighlighter = SyntaxHighlighterBuilder(
-  {
-    highlight: (lang: string, value: string) => {
-      const result = lowlight.highlight(lang, value);
-      return {
-        language: result.data?.language || null,
-        value: result.children,
-      };
-    },
-    highlightAuto: () => {
-      throw new Error("Not implemented");
-    },
-    listLanguages: () => lowlight.listLanguages(),
-  },
-  {},
-);
 
 type Props = {
   code: string;
@@ -77,25 +62,68 @@ export default function Code({ inline, ...props }: Props) {
   return inline ? <InlineCode {...props} /> : <BlockCode {...props} />;
 }
 
-function InlineCode({ code, language }: Omit<Props, "inline">) {
+function InlineCode(props: Omit<Props, "inline">) {
+  return <BaseCode {...props} noLineNumbers />;
+}
+
+type Token = {
+  className?: string;
+  value: string;
+};
+
+function BlockCode(props: Omit<Props, "inline">) {
   return (
-    <SyntaxHighlighter
-      language={language in languages ? language : "text"}
-      PreTag={({ children }) => <>{children}</>}
-      useInlineStyles={false}>
-      {code}
-    </SyntaxHighlighter>
+    <pre>
+      <BaseCode {...props} />
+    </pre>
   );
 }
 
-function BlockCode({ code, language, noLineNumbers }: Omit<Props, "inline">) {
-  return (
-    <SyntaxHighlighter
-      language={language in languages ? language : "text"}
-      wrapLines={true}
-      showLineNumbers={!noLineNumbers}
-      useInlineStyles={false}>
-      {code}
-    </SyntaxHighlighter>
-  );
+function BaseCode({ code, language, noLineNumbers }: Omit<Props, "inline">) {
+  const children = useMemo(() => {
+    if (!language) return code;
+    const hast = lowlight.highlight(language, code);
+
+    const lines: Token[][] = [[]];
+
+    for (const node of hast.children) {
+      processNode(node);
+    }
+
+    return lines.map((line, i) => (
+      <span key={i}>
+        <span
+          className={classNames(
+            "mr-6 inline-block w-7 select-none text-right",
+            noLineNumbers && "hidden",
+          )}>
+          {i + 1}
+        </span>
+        {line.map((token, j) => (
+          <span key={j} className={token.className}>
+            {token.value}
+          </span>
+        ))}
+      </span>
+    ));
+
+    function processNode(node: RootContent, className?: string) {
+      if (node.type === "element") {
+        if (node.tagName !== "span") throw new Error(`Unexpected element: ${node.tagName}`);
+        for (const child of node.children) {
+          processNode(child, classNames(className, node.properties?.className));
+        }
+      } else if (node.type === "text") {
+        const [lastLine, ...newLines] = node.value.split("\n");
+        lines[lines.length - 1].push({ className, value: lastLine });
+        for (const newLine of newLines) {
+          lines.push([{ className, value: newLine }]);
+        }
+      } else {
+        throw new Error(`Unexpected node: ${node.type}`);
+      }
+    }
+  }, [code, language, noLineNumbers]);
+
+  return <code>{children}</code>;
 }

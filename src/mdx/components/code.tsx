@@ -30,7 +30,7 @@ function CodeFallback({ inline, code, noLineNumbers }: Props) {
           <span key={i}>
             <span
               className={classNames(
-                "mr-5 inline-block w-7 pr-0.5 text-right",
+                "mr-6 inline-block w-7 select-none text-right",
                 noLineNumbers && "hidden",
               )}>
               {i + 1}
