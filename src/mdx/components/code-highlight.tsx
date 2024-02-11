@@ -81,10 +81,9 @@ function BlockCode(props: Omit<Props, "inline">) {
 
 function BaseCode({ code, language, noLineNumbers }: Omit<Props, "inline">) {
   const children = useMemo(() => {
-    const lang = language === "auto" ? /[([+]/.test(code) && "srs" : language;
-    if (!lang || lang === "text") return code;
+    if (!language || language === "text") return code;
 
-    const hast = lowlight.highlight(lang, code);
+    const hast = lowlight.highlight(language, code);
     const lines: Token[][] = [[]];
     for (const node of hast.children) {
       processNode(node);
