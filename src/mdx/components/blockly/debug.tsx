@@ -39,8 +39,8 @@ export default function Debug({ blocks, js }: Props) {
       <button className="btn btn-error" onClick={() => ref.current?.showModal()}>
         Debug
       </button>
-      <Modal ref={ref} title="Opzioni di debug" className="max-w-none">
-        <div className="flex items-stretch justify-between gap-3">
+      <Modal ref={ref} title="Opzioni di debug" className="max-w-3xl">
+        <div className="not-prose flex items-stretch justify-between gap-3">
           <div role="tablist" className="tabs-boxed tabs">
             <button
               role="tab"
