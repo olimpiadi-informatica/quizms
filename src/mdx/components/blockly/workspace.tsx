@@ -22,7 +22,7 @@ import { CustomBlock } from "./custom-block";
 import { defaultInitialBlocks, defaultToolbox } from "./default-blocks";
 import useExecutor from "./executor";
 import { BlocklyInterpreter } from "./interpreter";
-import useIcp from "./workspace-ipc";
+import useIcp from "./ipc";
 
 type VariableValues = {
   blocklyVariables: Record<string, any>;
@@ -264,7 +264,7 @@ const Editor = forwardRef(function Editor(
     <div className="relative h-full overflow-hidden rounded-xl border-2 border-[#c6c6c6]">
       <iframe
         ref={ref}
-        src={import("./workspace-editor") as any}
+        src={import("./editor") as any}
         className="size-full"
         title="Area di lavoro di Blockly"
       />
