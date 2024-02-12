@@ -42,9 +42,9 @@ export function Contest({ children }: { children: ReactNode }) {
   const ref = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
-    if (terminated && !resultShown) {
-      setResultShown(true);
-      ref.current?.showModal();
+    if (terminated !== resultShown) {
+      setResultShown(terminated);
+      if (!resultShown) ref.current?.showModal();
     }
   }, [terminated, resultShown]);
 

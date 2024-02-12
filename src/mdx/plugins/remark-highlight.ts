@@ -14,7 +14,7 @@ const remarkHighlight: Plugin<[], Root> = () => {
       const meta = ("meta" in code && code.meta) || "";
       let lang = code.type === "code" && code.lang;
 
-      lang ||= /[([+]/.test(code.value) ? "srs" : "text"; // guess language
+      lang ||= /[(+[]/.test(code.value) ? "srs" : "text"; // guess language
 
       const params = Object.fromEntries(
         (meta ?? "")

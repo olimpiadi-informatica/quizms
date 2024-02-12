@@ -165,10 +165,7 @@ export default function Workspace({
       answers[`${id}.${tc + 1}`] = statuses[tc].correct ? "✅" : "❌";
     }
 
-    await setStudent({
-      ...student,
-      answers,
-    });
+    await setStudent({ ...student, answers });
   };
 
   return (
