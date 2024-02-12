@@ -44,8 +44,7 @@ const ImportModal = forwardRef(function ImportModal(_props, ref: Ref<HTMLDialogE
 
   const placeholderDate = useMemo(() => {
     const date = new Date();
-    date.setMonth(2);
-    date.setDate(14);
+    date.setMonth(2, 14);
     return formatDate(date, { format: dateFormat });
   }, [dateFormat]);
 
@@ -199,7 +198,7 @@ async function importStudents(
     .array();
 
   const records = parseCSV(file, {
-    skipEmptyLines: true,
+    skipEmptyLines: "greedy",
   });
   if (records.errors?.length) {
     throw new Error(records.errors[0].message);
