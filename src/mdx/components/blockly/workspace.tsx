@@ -28,6 +28,7 @@ import useIcp from "./ipc";
 type VariableValues = {
   blocklyVariables: Record<string, any>;
   hiddenState: Record<string, any>;
+  msg?: string;
 };
 
 type BlocklyProps = {
@@ -81,7 +82,7 @@ export default function Workspace({
     return range(testcases.length).map((index) => ({ correct: false, index }));
   });
 
-  const [step, reset, running, highlightedBlock, globalScope] = useExecutor(
+  const { step, reset, running, highlightedBlock, globalScope, msg } = useExecutor(
     code,
     testcases[testcaseIndex],
   );
@@ -246,7 +247,9 @@ export default function Workspace({
         <div className="[grid-area:visualizer]">
           <div className="overflow-auto rounded-xl border-2 border-[#c6c6c6] bg-white">
             {Visualizer && (
-              <Visualizer variables={{ blocklyVariables, hiddenState: globalScope?.hiddenState }} />
+              <Visualizer
+                variables={{ blocklyVariables, hiddenState: globalScope?.hiddenState, msg }}
+              />
             )}
           </div>
         </div>

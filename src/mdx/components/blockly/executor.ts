@@ -48,13 +48,9 @@ export default function useExecutor(code: string, initialState: Record<string, a
     });
   };
 
-  return [
+  return {
     step,
     reset,
-    state.running,
-    state.highlightedBlock,
-    state.globalScope,
-    state.correct,
-    state.msg,
-  ] as const;
+    ...state,
+  };
 }
