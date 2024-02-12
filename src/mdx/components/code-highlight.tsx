@@ -2,7 +2,9 @@ import React, { useMemo } from "react";
 
 import classNames from "classnames";
 import { RootContent } from "hast";
-import { HLJSApi, Language } from "highlight.js";
+import { HLJSApi, Language, LanguageFn } from "highlight.js";
+import javascript from "highlight.js/lib/languages/javascript";
+import json from "highlight.js/lib/languages/json";
 import { createLowlight } from "lowlight";
 
 function srs(hljs: HLJSApi): Language {
@@ -48,7 +50,9 @@ function srs(hljs: HLJSApi): Language {
   };
 }
 
-const languages = { srs };
+const languages: Record<string, LanguageFn> = import.meta.env.DEV
+  ? { json, js: javascript, srs }
+  : { srs };
 const lowlight = createLowlight(languages);
 
 type Props = {

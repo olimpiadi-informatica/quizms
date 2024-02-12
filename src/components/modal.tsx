@@ -1,17 +1,20 @@
 import React, { ReactNode, Ref, forwardRef } from "react";
 
+import classNames from "classnames";
+
 type ModalProps = {
   title: string;
+  className?: string;
   children: ReactNode;
 };
 
 export const Modal = forwardRef(function Modal(
-  { title, children }: ModalProps,
+  { title, className, children }: ModalProps,
   ref: Ref<HTMLDialogElement>,
 ) {
   return (
     <dialog ref={ref} className="modal">
-      <form method="dialog" className="modal-box">
+      <form method="dialog" className={classNames("modal-box", className)}>
         <button
           className="btn btn-circle btn-ghost btn-sm absolute right-2 top-2"
           aria-label="Chiudi">

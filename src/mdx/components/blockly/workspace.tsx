@@ -19,6 +19,7 @@ import { useProblem } from "~/mdx/components/problem";
 import { useStudent } from "~/web/student";
 
 import { CustomBlock } from "./custom-block";
+import Debug from "./debug";
 import { defaultInitialBlocks, defaultToolbox } from "./default-blocks";
 import useExecutor from "./executor";
 import { BlocklyInterpreter } from "./interpreter";
@@ -240,6 +241,7 @@ export default function Workspace({
               <Send className="size-6" />
             </button>
           </div>
+          {import.meta.env.DEV && <Debug blocks={blocks} js={code} />}
         </div>
         <div className="[grid-area:visualizer]">
           <div className="overflow-auto rounded-xl border-2 border-[#c6c6c6] bg-white">
