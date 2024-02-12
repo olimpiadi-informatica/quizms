@@ -36,7 +36,7 @@ export function initGenerator(workspace: Workspace, customBlocks?: CustomBlock[]
   }
 }
 
-export default function toJS(workspace?: WorkspaceSvg) {
+export function toJS(workspace?: WorkspaceSvg) {
   if (!workspace) return "";
   return javascriptGenerator.workspaceToCode(workspace);
 }

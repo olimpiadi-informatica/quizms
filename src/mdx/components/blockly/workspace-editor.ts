@@ -5,7 +5,7 @@ import { javascriptGenerator } from "blockly/javascript";
 import locale from "blockly/msg/it";
 
 import { CustomBlock } from "./custom-block";
-import toJS, { initGenerator } from "./generator";
+import { initGenerator, toJS } from "./generator";
 import "./workspace-editor.css";
 
 let blocks: object | undefined;

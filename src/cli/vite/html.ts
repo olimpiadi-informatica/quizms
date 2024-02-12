@@ -20,7 +20,11 @@ const template = `\
 </html>`;
 
 export function generateHtml(...tags: HtmlTagDescriptor[]) {
-  return rehype().use(applyTransform, tags).use(rehypeFormat).process(template).then(String);
+  return rehype()
+    .use(applyTransform, tags)
+    .use(rehypeFormat, { indentInitial: false })
+    .process(template)
+    .then(String);
 }
 
 const applyTransform: Plugin<[HtmlTagDescriptor[]], Root> = (tags) => {

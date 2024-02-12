@@ -44,6 +44,7 @@ export default async function staticExport(options: ExportOptions): Promise<void
         output: {
           hoistTransitiveImports: false,
           manualChunks: (id) => {
+            if (id.includes("commonjsHelpers")) return "commonjs-helper";
             if (id.includes("node_modules/katex/")) return "katex";
             if (id.includes("node_modules/@firebase/auth/")) return "firebase-auth";
             if (id.includes("node_modules/@firebase/firestore/")) return "firestore";
