@@ -11,20 +11,15 @@ import React, {
   useState,
 } from "react";
 
-import { isNil, noop, sumBy } from "lodash-es";
+import { noop, sumBy } from "lodash-es";
 
 import { Modal } from "~/components";
+import { Schema, problemScore, score } from "~/models";
 import { randomId } from "~/utils/random";
 import { useStudent } from "~/web/student/provider";
 
-type Problem = {
-  id: string;
-  correct: string | undefined;
-  points: [number, number, number];
-};
-
 type ContestContextProps = {
-  registerProblem: (problem: Problem) => void;
+  registerProblem: (id: string, schema: Schema[string]) => void;
 };
 
 const ContestContext = createContext<ContestContextProps>({
@@ -34,12 +29,12 @@ ContestContext.displayName = "ContestContext";
 
 export function Contest({ children }: { children: ReactNode }) {
   const { student, setStudent, terminated } = useStudent();
-  const [problems, setProblems] = useState<Record<string, Problem>>({});
+  const [schema, setSchema] = useState<Schema>({});
 
-  const registerProblem = useCallback((problem: Problem) => {
-    setProblems((prev) => ({
-      ...prev,
-      [problem.id]: problem,
+  const registerProblem = useCallback((id: string, problem: Schema[string]) => {
+    setSchema((schema) => ({
+      ...schema,
+      [id]: problem,
     }));
   }, []);
 
@@ -80,51 +75,38 @@ export function Contest({ children }: { children: ReactNode }) {
           {children}
         </main>
       </div>
-      <CompletedModal ref={ref} problems={problems} />
+      <CompletedModal ref={ref} schema={schema} />
     </ContestContext.Provider>
   );
 }
 
 const CompletedModal = forwardRef(function CompletedModal(
-  { problems }: { problems: Record<string, Problem> },
+  { schema }: { schema: Schema },
   ref: Ref<HTMLDialogElement>,
 ) {
   const { student } = useStudent();
 
-  const sortedProblems = Object.values(problems);
-  sortedProblems.sort((a, b) => a.id.localeCompare(b.id, undefined, { numeric: true }));
+  const problems = Object.keys(schema);
+  problems.sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
 
-  const calcPoints = useCallback(
-    (problem: Problem) => {
-      if (student.answers?.[problem.id] === undefined) return problem.points[1];
-      if (student.answers[problem.id] === problem.correct) return problem.points[0];
-      return problem.points[2];
-    },
-    [student.answers],
-  );
+  const points = useMemo(() => {
+    const variant = {
+      id: student.variant!,
+      contestId: student.contestId!,
+      schema,
+    };
+    return score(student, { [variant.id]: variant });
+  }, [schema, student]);
 
-  const score = useMemo(() => {
-    if (
-      Object.values(problems)
-        .map((p) => p.correct)
-        .some((c) => isNil(c))
-    ) {
-      return;
-    }
-    return sumBy(Object.values(problems), calcPoints);
-  }, [problems, calcPoints]);
-
-  const maxScore = useMemo(() => {
-    return sumBy(Object.values(problems), "points[0]");
-  }, [problems]);
+  const maxPoints = sumBy(Object.values(schema), "pointsCorrect");
 
   return (
     <Modal ref={ref} title="Prova terminata">
-      {score !== undefined && (
+      <p>La prova è terminata.</p>
+      {points !== undefined && (
         <>
-          <p>La prova è terminata.</p>
           <p>
-            Hai ottenuto un punteggio di <b>{score}</b> su <b>{maxScore}</b>.
+            Hai ottenuto un punteggio di <b>{points}</b> su <b>{maxPoints}</b>.
           </p>
           <div className="w-full">
             <table className="table-fixed prose-td:truncate">
@@ -137,14 +119,18 @@ const CompletedModal = forwardRef(function CompletedModal(
                 </tr>
               </thead>
               <tbody>
-                {sortedProblems.map((problem) => (
-                  <tr key={problem.id}>
-                    <td>{problem.id}</td>
-                    <td>{student.answers?.[problem.id] ?? "-"}</td>
-                    <td>{problem.correct}</td>
-                    <td>{calcPoints(problem)}</td>
-                  </tr>
-                ))}
+                {problems.map((problem) => {
+                  const answer = student.answers?.[problem]?.trim();
+                  const problemSchema = schema[problem];
+                  return (
+                    <tr key={problem}>
+                      <td>{problem}</td>
+                      <td>{answer ?? "-"}</td>
+                      <td>{problemSchema.solution}</td>
+                      <td>{problemScore(problemSchema, answer)}</td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

@@ -37,23 +37,29 @@ export function score(student: Student, variants: Record<string, Variant>) {
     const problem = schema[id];
     const answer = answers[id]?.trim();
 
-    if (
-      problem.pointsCorrect === undefined ||
-      problem.pointsBlank === undefined ||
-      problem.pointsWrong === undefined ||
-      problem.solution === undefined
-    ) {
-      return;
-    }
-
-    if (answer === undefined || answer === "" || answer === problem.blankOption) {
-      points += problem.pointsBlank;
-    } else if (answer.toUpperCase() === problem.solution.toUpperCase()) {
-      points += problem.pointsCorrect;
-    } else {
-      points += problem.pointsWrong;
-    }
+    const problemPoints = problemScore(problem, answer);
+    if (problemPoints === undefined) return;
+    points += problemPoints;
   }
 
   return points;
+}
+
+export function problemScore(problem: Schema[string], answer?: string) {
+  if (
+    problem.pointsCorrect === undefined ||
+    problem.pointsBlank === undefined ||
+    problem.pointsWrong === undefined ||
+    problem.solution === undefined
+  ) {
+    return;
+  }
+
+  if (answer === undefined || answer === "" || answer === problem.blankOption) {
+    return problem.pointsBlank;
+  } else if (answer.toUpperCase() === problem.solution.toUpperCase()) {
+    return problem.pointsCorrect;
+  } else {
+    return problem.pointsWrong;
+  }
 }

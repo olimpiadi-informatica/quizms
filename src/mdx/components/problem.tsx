@@ -100,7 +100,13 @@ export function SubProblem({ subId, children }: SubProblemProps) {
   const [correct, setCorrect] = useState<string>();
 
   useEffect(() => {
-    registerProblem({ id: newId, correct, points });
+    registerProblem(newId, {
+      type: "text",
+      pointsCorrect: points[0],
+      pointsBlank: points[1],
+      pointsWrong: points[2],
+      solution: correct,
+    });
   }, [registerProblem, newId, correct, points]);
 
   return (
