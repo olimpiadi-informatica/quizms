@@ -36,6 +36,7 @@ function init({ toolbox, initialBlocks, customBlocks }: Props) {
   const config: BlocklyOptions = {
     renderer: "zelos",
     sounds: false,
+    media: import.meta.env.PROD ? `${import.meta.env.BASE_URL}blockly/` : undefined,
     zoom: {
       controls: true,
       startScale: 0.8,

@@ -10,6 +10,7 @@ import pc from "picocolors";
 import { InlineConfig } from "vite";
 import inspect from "vite-plugin-inspect";
 
+import blocklyMedia from "~/cli/vite/blockly-media";
 import { mdxOptions } from "~/mdx/plugins";
 import { fatal, info, warning } from "~/utils/logs";
 
@@ -50,6 +51,7 @@ export default function (
       "process.env.NODE_ENV": JSON.stringify(mode),
     },
     plugins: [
+      blocklyMedia(),
       iframe(),
       images(),
       inspect(),
