@@ -5,10 +5,17 @@ import { fileURLToPath } from "node:url";
 import { PluginOption } from "vite";
 
 export default function blocklyMedia(): PluginOption {
+  let isLib = false;
+
   return {
     name: "quizms:blockly-media",
     apply: "build",
+    configResolved(config) {
+      isLib ||= !!config.build.lib;
+    },
     async buildStart() {
+      if (isLib) return;
+
       const mediaPath = fileURLToPath(new URL("../../node_modules/blockly/media", import.meta.url));
       const files = await readdir(mediaPath, { recursive: true });
 
