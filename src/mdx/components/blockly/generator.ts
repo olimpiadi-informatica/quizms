@@ -3,7 +3,7 @@ import { javascriptGenerator } from "blockly/javascript";
 
 import { CustomBlock, CustomBlockArg } from "./custom-block";
 
-type Generator = CodeGenerator & Record<`ORDER_${string}`, number>;
+type Generator = CodeGenerator & Record<string, number>;
 
 javascriptGenerator.STATEMENT_PREFIX = "highlightBlock(%1);\n";
 javascriptGenerator.INFINITE_LOOP_TRAP = 'if(--loopTrap === 0) exit(false, "Ciclo infinito");\n';

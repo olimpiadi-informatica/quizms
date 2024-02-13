@@ -16,9 +16,10 @@ import {
 
 import { Loading } from "~/components";
 import { useProblem } from "~/mdx/components/problem";
+import validate from "~/utils/validate";
 import { useStudent } from "~/web/student";
 
-import { CustomBlock } from "./custom-block";
+import { CustomBlock, customBlockSchema } from "./custom-block";
 import Debug from "./debug";
 import { defaultInitialBlocks, defaultToolbox } from "./default-blocks";
 import useExecutor from "./executor";
@@ -40,7 +41,7 @@ type BlocklyProps = {
     logJs?: boolean;
     logVariables?: boolean;
   };
-  customBlocks?: CustomBlock[];
+  customBlocks?: any;
   Visualizer?: ComponentType<{ variables: VariableValues }>;
 };
 
@@ -92,6 +93,14 @@ export default function Workspace({
     [variableMappings, globalScope],
   );
 
+  const validatedCustomBlocks = useMemo(
+    () =>
+      validate(customBlockSchema.array(), customBlocks, {
+        prefix: "Invalid custom block definition",
+      }),
+    [customBlocks],
+  );
+
   const send = useIcp(iframe?.contentWindow, (data: any) => {
     switch (data.cmd) {
       case "init": {
@@ -100,7 +109,7 @@ export default function Workspace({
           toolbox: toolbox ?? defaultToolbox,
           initialBlocks: blocks,
           debug,
-          customBlocks,
+          customBlocks: validatedCustomBlocks,
         });
         break;
       }

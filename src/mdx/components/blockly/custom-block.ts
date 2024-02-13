@@ -1,35 +1,52 @@
-type BlocklyType = "Number" | "String" | "Array" | "Boolean";
+import { z } from "zod";
+import { fromZodError, fromZodIssue } from "zod-validation-error";
 
-export type CustomBlockArg = {
-  type: "input_value";
-  name: string;
-  check?: BlocklyType;
-};
+const blocklyTypeSchema = z.enum(["Number", "String", "Array", "Boolean"]);
+
+const customBlockArgSchema = z.object({
+  type: z.literal("input_value"),
+  name: z.string(),
+  check: blocklyTypeSchema,
+});
+
+export type CustomBlockArg = z.infer<typeof customBlockArgSchema>;
 
 // https://blockly-demo.appspot.com/static/demos/blockfactory/index.html
 // https://developers.google.com/blockly/guides/create-custom-blocks/define-blocks
 
-export type CustomBlock = {
+const baseBlockSchema = z.object({
   // Block id
-  type: string;
+  type: z.string(),
   // Text inside the block
-  message0: string;
+  message0: z.string(),
   // Block input fields
-  args0?: CustomBlockArg[];
-  // Type of the block's output
-  output?: BlocklyType;
-  // Set null if this block is the last block of a chain
-  nextStatement?: null;
-  // Set null if this block is the first block of a chain
-  previousStatement?: null;
+  args0: z.array(customBlockArgSchema).optional(),
   // Color of the block (https://developers.google.com/blockly/guides/create-custom-blocks/block-colour)
-  colour: number | string;
+  colour: z.union([z.number(), z.string()]),
   // Tooltip shown when hovering over the block
-  tooltip: string;
+  tooltip: z.string(),
   // Page to open when clicking on the "help" button
-  helpUrl: string;
+  helpUrl: z.string(),
   // Maximum number of instances of this block
-  maxInstances?: number;
+  maxInstances: z.number().optional(),
+});
+
+const statementBlockSchema = baseBlockSchema.extend({
+  // Set null if this block is the last block of a chain
+  nextStatement: z.literal(null).optional(),
+  // Set null if this block is the first block of a chain
+  previousStatement: z.literal(null).optional(),
   // Code generator for this block
-  js: [string, `ORDER_${string}`] | string;
-};
+  js: z.string(),
+});
+
+const expressionBlockSchema = baseBlockSchema.extend({
+  // Type of the block's output
+  output: blocklyTypeSchema,
+  // Code generator for this block
+  js: z.tuple([z.string(), z.string().startsWith("ORDER_")]),
+});
+
+export const customBlockSchema = z.union([statementBlockSchema, expressionBlockSchema]);
+
+export type CustomBlock = z.infer<typeof customBlockSchema>;
