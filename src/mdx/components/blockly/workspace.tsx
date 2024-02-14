@@ -257,11 +257,11 @@ export default function Workspace({
               </button>
             </div>
           </div>
-          <div className="tooltip" data-tip="Esegui la soluzione">
+          <div className="tooltip" data-tip="Correggi la soluzione">
             <button
               className="btn btn-success"
-              aria-label="Invia la soluzione"
-              disabled={!editing}
+              aria-label="Correggi la soluzione"
+              disabled={!editing || !ready}
               onClick={runAll}>
               <Send className="size-6" />
             </button>

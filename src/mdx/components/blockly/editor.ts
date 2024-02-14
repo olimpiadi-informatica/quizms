@@ -76,7 +76,7 @@ function init({ toolbox, initialBlocks, customBlocks }: Props) {
       send("blocks", { blocks });
     }
 
-    const newVariables = newBlocks["variables"];
+    const newVariables = newBlocks["variables"] ?? [];
     if (variables != newVariables) {
       const variablesMapping: Record<string, string> = {};
       for (const variable of newVariables) {
