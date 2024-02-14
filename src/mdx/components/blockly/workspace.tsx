@@ -145,12 +145,14 @@ export default function Workspace({
     if (!running) setPlaying(false);
   }, [running]);
 
+  const [speed, setSpeed] = useState(3);
   useEffect(() => {
+    const intervals = [5000, 2000, 1000, 500, 200, 100, 10];
     if (playing) {
-      const interval = setInterval(step, 200);
+      const interval = setInterval(step, intervals[speed]);
       return () => clearInterval(interval);
     }
-  }, [step, playing]);
+  }, [step, speed, playing]);
 
   const runAll = async () => {
     const statuses = await Promise.all(
@@ -250,6 +252,20 @@ export default function Workspace({
               onClick={runAll}>
               <Send className="size-6" />
             </button>
+          </div>
+          <div>
+            <input
+              className="range"
+              type="range"
+              min="0"
+              max="6"
+              value={speed}
+              onChange={(e) => setSpeed(+e.target.value)}
+            />
+            <div className="flex w-full justify-between px-2 text-xs">
+              <span>Lento</span>
+              <span>Veloce</span>
+            </div>
           </div>
           {import.meta.env.DEV && <Debug blocks={blocks} js={code} />}
         </div>
