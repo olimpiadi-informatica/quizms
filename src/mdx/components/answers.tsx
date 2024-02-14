@@ -167,7 +167,7 @@ export function OpenAnswer({ correct, type }: OpenAnswerProps) {
 
 export function Explanation({ children }: { children: ReactNode }) {
   const { terminated } = useStudent();
-  if (!terminated) return;
+  if (!import.meta.env.DEV && !terminated) return;
   return (
     <div className="my-5 rounded-xl bg-base-200 print:hidden">
       <div className="collapse">
