@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 
 import { Loading } from "~/components";
+import { useContest } from "~/mdx/components/contest";
 import { useProblem } from "~/mdx/components/problem";
 import validate from "~/utils/validate";
 import { useStudent } from "~/web/student";
@@ -62,7 +63,20 @@ export default function Workspace({
   Visualizer,
 }: BlocklyProps) {
   const { student, setStudent } = useStudent();
-  const { id } = useProblem();
+  const { registerProblem } = useContest();
+  const { id, points } = useProblem();
+
+  useEffect(() => {
+    for (let i = 0; i < testcases.length; i++) {
+      registerProblem(`${id}.${i + 1}`, {
+        type: "text",
+        pointsCorrect: points[0],
+        pointsBlank: points[1],
+        pointsWrong: points[2],
+        solution: "✅",
+      });
+    }
+  }, [registerProblem, id, testcases, points]);
 
   const blocks = student.extraData?.[`blockly-${id}`] ?? initialBlocks ?? defaultInitialBlocks;
   const setBlocks = async (blocks: object) => {
