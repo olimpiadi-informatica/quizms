@@ -182,9 +182,13 @@ export default function Workspace({
   };
 
   return (
-    <div className="relative inset-y-0 left-1/2 mb-5 w-screen -translate-x-1/2 overflow-x-hidden px-4 py-8 sm:px-8">
-      <div className="grid grid-cols-[auto_1fr] gap-6 [grid-template-areas:'editor_editor'_'level-btns_exec-btns'_'visualizer_visualizer'] lg:[grid-template-areas:'level-btns_exec-btns'_'visualizer_editor']">
-        <div className="join join-horizontal [grid-area:level-btns]">
+    <div
+      className={classNames(
+        "not-prose relative inset-y-0 left-1/2 w-screen -translate-x-1/2 p-4 pt-8",
+        "flex flex-col-reverse items-start justify-between gap-6 overflow-x-hidden *:mx-3 lg:flex-row lg:gap-0",
+      )}>
+      <div className="flex h-full max-h-[min(720px,90vh)] basis-[min(auto,50%)] flex-col gap-6 self-stretch overflow-x-hidden">
+        <div className="join join-horizontal">
           {testcaseStatuses.map(({ index, correct, msg }) => (
             <button
               key={index}
@@ -211,7 +215,16 @@ export default function Workspace({
             </button>
           ))}
         </div>
-        <div className="flex gap-6 [grid-area:exec-btns]">
+        <div className="overflow-auto rounded-xl border-2 border-[#c6c6c6] bg-white">
+          {Visualizer && (
+            <Visualizer
+              variables={{ blocklyVariables, hiddenState: globalScope?.hiddenState, msg }}
+            />
+          )}
+        </div>
+      </div>
+      <div className="flex min-h-[min(720px,90vh)] flex-[1_0_50%] flex-col-reverse gap-6 self-stretch lg:flex-col">
+        <div className="flex gap-6">
           <div className="join join-horizontal">
             <div className="join-item tooltip" data-tip="Esegui/pausa">
               <button
@@ -269,18 +282,7 @@ export default function Workspace({
           </div>
           {import.meta.env.DEV && <Debug blocks={blocks} js={code} />}
         </div>
-        <div className="[grid-area:visualizer]">
-          <div className="overflow-auto rounded-xl border-2 border-[#c6c6c6] bg-white">
-            {Visualizer && (
-              <Visualizer
-                variables={{ blocklyVariables, hiddenState: globalScope?.hiddenState, msg }}
-              />
-            )}
-          </div>
-        </div>
-        <div className="h-[640px] grow [grid-area:editor]">
-          <Editor ref={setIframe} ready={ready} />
-        </div>
+        <Editor ref={setIframe} ready={ready} />
       </div>
     </div>
   );
@@ -291,11 +293,11 @@ const Editor = forwardRef(function Editor(
   ref: Ref<HTMLIFrameElement>,
 ) {
   return (
-    <div className="relative h-full overflow-hidden rounded-xl border-2 border-[#c6c6c6]">
+    <div className="relative flex grow flex-col overflow-hidden rounded-xl border-2 border-[#c6c6c6]">
       <iframe
         ref={ref}
         src={import("./editor") as any}
-        className="size-full"
+        className="grow"
         title="Area di lavoro di Blockly"
       />
       {!ready && (
