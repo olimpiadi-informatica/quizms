@@ -92,6 +92,9 @@ export default function (
         },
       },
     },
+    css: {
+      preprocessorMaxWorkers: true,
+    },
     clearScreen: false,
     server: {
       fs: {
