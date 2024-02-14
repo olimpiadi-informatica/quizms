@@ -21,7 +21,7 @@ export default function Image({ src, alt, title }: Props) {
       height={src.height}
       alt={alt}
       title={title}
-      style={{ maxWidth: `calc(100vh * ${src.width} / ${src.height})` }}
+      style={{ maxWidth: `min(100%, calc(100vh * ${src.width} / ${src.height}))` }}
     />
   );
 }
