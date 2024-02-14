@@ -4,8 +4,10 @@ import { ToolboxInfo } from "blockly/core/utils/toolbox";
 import classNames from "classnames";
 import { range } from "lodash-es";
 import {
+  CheckCircle,
   CheckCircle2,
   HelpCircle,
+  MessageSquareOff,
   Pause,
   Play,
   RotateCcw,
@@ -83,7 +85,7 @@ export default function Workspace({
     return range(testcases.length).map((index) => ({ correct: false, index }));
   });
 
-  const { step, reset, running, highlightedBlock, globalScope, msg } = useExecutor(
+  const { step, reset, running, highlightedBlock, globalScope, correct, msg } = useExecutor(
     code,
     testcases[testcaseIndex],
   );
@@ -181,6 +183,9 @@ export default function Workspace({
     await setStudent({ ...student, answers });
   };
 
+  const [messageHidden, setMessageHidden] = useState(false);
+  useEffect(() => setMessageHidden(false), [msg]);
+
   return (
     <div
       className={classNames(
@@ -215,12 +220,27 @@ export default function Workspace({
             </button>
           ))}
         </div>
-        <div className="overflow-auto rounded-xl border-2 border-[#c6c6c6] bg-white">
-          {Visualizer && (
-            <Visualizer
-              variables={{ blocklyVariables, hiddenState: globalScope?.hiddenState, msg }}
-            />
-          )}
+        <div className="relative flex flex-col overflow-hidden shadow-xl">
+          <div className="overflow-auto rounded-xl border-2 border-[#c6c6c6] bg-white">
+            {Visualizer && (
+              <Visualizer
+                variables={{ blocklyVariables, hiddenState: globalScope?.hiddenState, msg }}
+              />
+            )}
+            {msg && !messageHidden && (
+              <div className="absolute inset-x-0 bottom-0 z-50 p-4">
+                <div
+                  role="alert"
+                  className={classNames("alert", correct ? "alert-success" : "alert-error")}>
+                  {correct ? <CheckCircle /> : <XCircle />}
+                  <span>{msg}</span>
+                  <button onClick={() => setMessageHidden(true)} aria-label="Nascondi messaggio">
+                    <MessageSquareOff />
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
       <div className="flex min-h-[min(720px,90vh)] flex-[1_0_50%] flex-col-reverse gap-6 self-stretch lg:flex-col">
