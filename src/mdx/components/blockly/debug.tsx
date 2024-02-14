@@ -18,11 +18,9 @@ export default function Debug({ blocks, js }: Props) {
   const [lang, setLang] = useState<"json" | "js">("json");
 
   const code = useMemo(() => {
-    if (lang === "json") {
-      return JSON.stringify(blocks, null, 2);
-    } else {
-      return js.replaceAll(/^\s*highlightBlock\('.+'\);\n/gm, "").trimEnd();
-    }
+    return lang === "json"
+      ? JSON.stringify(blocks, null, 2)
+      : js.replaceAll(/^\s*highlightBlock\('.+'\);\n/gm, "").trimEnd();
   }, [blocks, js, lang]);
 
   const [copyTooltip, setCopyTooltip] = useState<number>();

@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { fromZodError, fromZodIssue } from "zod-validation-error";
 
 const blocklyTypeSchema = z.enum(["Number", "String", "Array", "Boolean"]);
 

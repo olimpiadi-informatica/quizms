@@ -19,7 +19,7 @@ import { useProblem } from "~/mdx/components/problem";
 import validate from "~/utils/validate";
 import { useStudent } from "~/web/student";
 
-import { CustomBlock, customBlockSchema } from "./custom-block";
+import { customBlockSchema } from "./custom-block";
 import Debug from "./debug";
 import { defaultInitialBlocks, defaultToolbox } from "./default-blocks";
 import useExecutor from "./executor";
