@@ -1,31 +1,31 @@
-import { readFile, readdir } from "node:fs/promises";
-import { join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { readFile } from "node:fs/promises";
+import { basename, join } from "node:path";
 
+import glob from "fast-glob";
 import { PluginOption } from "vite";
 
 export default function blocklyMedia(): PluginOption {
   let isLib = false;
+  let root: string;
 
   return {
     name: "quizms:blockly-media",
     apply: "build",
     configResolved(config) {
       isLib ||= !!config.build.lib;
+      root = join(config.root, "..");
     },
     async buildStart() {
       if (isLib) return;
 
-      const mediaPath = fileURLToPath(new URL("../../node_modules/blockly/media", import.meta.url));
-      const files = await readdir(mediaPath, { recursive: true });
-
+      const files = await glob("**/node_modules/blockly/media/*", { cwd: root });
       await Promise.all(
         files.map(async (file) => {
-          const fileName = `blockly/${file}`;
+          const fileName = `blockly/${basename(file)}`;
           this.emitFile({
             fileName,
             type: "asset",
-            source: await readFile(join(mediaPath, file)),
+            source: await readFile(join(root, file)),
           });
         }),
       );
