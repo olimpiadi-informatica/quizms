@@ -41,7 +41,10 @@ export function useIsAfter(time?: Date) {
   const refresh = useCallback(() => !value && isAfter() && setValue(true), [value, isAfter]);
 
   useEffect(() => {
-    if (!time) return;
+    if (!time) {
+      setValue(false);
+      return;
+    }
 
     const diff = differenceInMilliseconds(time, now());
     if (diff < 0) return;
