@@ -42,6 +42,7 @@ export default function (
     envPrefix: "QUIZMS_",
     resolve: {
       alias: {
+        "~": root,
         vm: "vm-browserify",
       },
       dedupe: ["react", "react-dom", "@mdx-js/react"],
