@@ -1,4 +1,4 @@
-import React, { ComponentType, Ref, forwardRef, useEffect, useMemo, useState } from "react";
+import React, { ComponentType, Ref, forwardRef, useEffect, useMemo, useRef, useState } from "react";
 
 import { ToolboxInfo } from "blockly/core/utils/toolbox";
 import classNames from "classnames";
@@ -63,7 +63,7 @@ export default function Workspace({
   customBlocks,
   Visualizer,
 }: BlocklyProps) {
-  const { student, setStudent } = useStudent();
+  const { student, setStudent, terminated } = useStudent();
   const { registerProblem } = useContest();
   const { id, points } = useProblem();
 
@@ -127,6 +127,7 @@ export default function Workspace({
           initialBlocks: blocks,
           debug,
           customBlocks: validatedCustomBlocks,
+          readonly: terminated,
         });
         break;
       }
@@ -161,6 +162,15 @@ export default function Workspace({
   useEffect(() => {
     if (!running) setPlaying(false);
   }, [running]);
+
+  const prevTerminated = useRef(terminated);
+  useEffect(() => {
+    if (prevTerminated.current !== terminated) {
+      prevTerminated.current = terminated;
+      setReady(false);
+      iframe?.contentWindow?.location.reload();
+    }
+  }, [terminated, iframe?.contentWindow]);
 
   const [speed, setSpeed] = useState(3);
   useEffect(() => {

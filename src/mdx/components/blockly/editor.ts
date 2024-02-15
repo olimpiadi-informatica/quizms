@@ -17,9 +17,10 @@ type Props = {
   toolbox: ToolboxInfo;
   initialBlocks?: object;
   customBlocks?: CustomBlock[];
+  readonly?: boolean;
 };
 
-function init({ toolbox, initialBlocks, customBlocks }: Props) {
+function init({ toolbox, initialBlocks, customBlocks, readonly }: Props) {
   Blockly.setLocale(locale);
   if (customBlocks && toolbox.kind == "categoryToolbox") {
     toolbox.contents.push({
@@ -44,6 +45,7 @@ function init({ toolbox, initialBlocks, customBlocks }: Props) {
     maxBlocks: undefined,
     maxInstances: {},
     toolbox,
+    readOnly: readonly,
   };
 
   if (customBlocks) {
