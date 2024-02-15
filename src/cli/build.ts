@@ -4,7 +4,7 @@ import glob from "fast-glob";
 import license from "rollup-plugin-license";
 import { InlineConfig, build, mergeConfig } from "vite";
 
-import { fatal } from "~/utils/logs";
+import { error, fatal } from "~/utils/logs";
 
 import configs from "./vite/configs";
 
@@ -80,7 +80,8 @@ export default async function staticExport(options: ExportOptions): Promise<void
 
   try {
     await build(config);
-  } catch {
+  } catch (e) {
+    error((e as Error).message);
     fatal("Build failed.");
   }
 }
