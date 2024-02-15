@@ -7,6 +7,8 @@ import { Plugin } from "unified";
 import { visit } from "unist-util-visit";
 import { HtmlTagDescriptor } from "vite";
 
+import { warning } from "~/utils/logs";
+
 const template = `\
 <!DOCTYPE html>
 <html lang="it">
@@ -104,6 +106,16 @@ export function generateHtmlFromBundle(
   ];
 
   for (const fileName of modules) {
+    const chunk = bundle[fileName];
+
+    // Vite will discard any empty chunk from the final bundle but apparently some of these chunks
+    // are still present in the bundle of this hook. One of these chunks is a chunk which I think
+    // is supposed to import CSS files. This is a workaround to avoid adding the links to the HTML.
+    if ("moduleIds" in chunk && chunk.moduleIds.every((m) => m.endsWith(".css"))) {
+      warning(`Ignoring empty chunk: ${chunk.fileName}`);
+      continue;
+    }
+
     tags.push({
       tag: "link",
       attrs: {
