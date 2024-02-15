@@ -4,6 +4,7 @@ import { ToolboxInfo } from "blockly/core/utils/toolbox";
 import classNames from "classnames";
 import { range } from "lodash-es";
 import {
+  AlertTriangle,
   CheckCircle,
   CheckCircle2,
   HelpCircle,
@@ -246,7 +247,7 @@ export default function Workspace({
                 <div
                   role="alert"
                   className={classNames("alert", correct ? "alert-success" : "alert-error")}>
-                  {correct ? <CheckCircle /> : <XCircle />}
+                  {correct ? <CheckCircle /> : <AlertTriangle />}
                   <span>{msg}</span>
                   <button onClick={() => setMessageHidden(true)} aria-label="Nascondi messaggio">
                     <MessageSquareOff />
