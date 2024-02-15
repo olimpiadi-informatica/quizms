@@ -319,6 +319,7 @@ export default function Workspace({
               max="6"
               value={speed}
               onChange={(e) => setSpeed(+e.target.value)}
+              aria-label="Velocità di esecuzione"
             />
             <div className="flex w-full justify-between px-2 text-xs">
               <span>Lento</span>
