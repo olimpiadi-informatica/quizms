@@ -63,6 +63,7 @@ export function NoAuth({ contestName, duration, questionCount, children }: AuthP
     setStudent((student) => ({
       ...student,
       answers: {},
+      extraData: {},
       startedAt: undefined,
     }));
   }, [setStudent, setSubmitted]);
