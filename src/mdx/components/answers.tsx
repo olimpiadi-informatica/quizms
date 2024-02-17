@@ -14,6 +14,7 @@ import { Trash2 } from "lucide-react";
 import { Rng } from "~/utils/random";
 import { useStudent } from "~/web/student/provider";
 
+import { useContest } from "./contest";
 import { useProblem } from "./problem";
 
 type AnswerContextProps = {
@@ -63,7 +64,8 @@ type AnswerProps = {
 
 export function Answer({ correct, children }: AnswerProps) {
   const { id } = useContext(AnswerContext);
-  const { id: problemId, setCorrect } = useProblem();
+  const { registerProblem } = useContest();
+  const { id: problemId, points } = useProblem();
   const { student, setStudent, terminated } = useStudent();
 
   const answer = student.answers?.[problemId!];
@@ -74,10 +76,15 @@ export function Answer({ correct, children }: AnswerProps) {
   const answerId = useId();
 
   useEffect(() => {
-    if (correct === true) {
-      setCorrect(id);
-    }
-  }, [correct, setCorrect, id]);
+    if (!correct) return;
+    registerProblem(`${problemId}`, {
+      type: "text",
+      pointsCorrect: points[0],
+      pointsBlank: points[1],
+      pointsWrong: points[2],
+      solution: id,
+    });
+  }, [registerProblem, id, problemId, correct, points]);
 
   return (
     <div
@@ -128,7 +135,8 @@ type OpenAnswerProps = {
 };
 
 export function OpenAnswer({ correct, type }: OpenAnswerProps) {
-  const { id: problemId, setCorrect } = useProblem();
+  const { registerProblem } = useContest();
+  const { id: problemId, points } = useProblem();
   const { student, setStudent, terminated } = useStudent();
 
   const answer = student.answers?.[problemId!];
@@ -137,10 +145,14 @@ export function OpenAnswer({ correct, type }: OpenAnswerProps) {
   };
 
   useEffect(() => {
-    if (correct !== undefined) {
-      setCorrect(correct);
-    }
-  }, [correct, setCorrect]);
+    registerProblem(`${problemId}`, {
+      type: "text",
+      pointsCorrect: points[0],
+      pointsBlank: points[1],
+      pointsWrong: points[2],
+      solution: correct,
+    });
+  }, [registerProblem, problemId, correct, points]);
 
   return (
     <div className="px-2">

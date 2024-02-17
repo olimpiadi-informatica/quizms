@@ -5,17 +5,14 @@ import React, {
   memo,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
   useState,
 } from "react";
 
-import { defer, noop, range } from "lodash-es";
+import { defer, range } from "lodash-es";
 
 import { hash } from "~/utils/random";
 import { useStudent } from "~/web/student/provider";
-
-import { useContest } from "./contest";
 
 type StatementProps = {
   variant: () => number;
@@ -31,13 +28,11 @@ type ProblemProps = {
 type ProblemContextProps = {
   id?: string | number;
   points: [number, number, number];
-  setCorrect: (value: string) => void;
 };
 
 const ProblemContext = createContext<ProblemContextProps>({
   id: undefined,
   points: [0, 0, 0],
-  setCorrect: noop,
 });
 ProblemContext.displayName = "ProblemContext";
 
@@ -64,7 +59,7 @@ export function Problem({ id, points, statement }: ProblemProps) {
   const Statement = useMemo(() => memo(statement), [statement]);
 
   return (
-    <ProblemContext.Provider value={{ id, points, setCorrect: noop }}>
+    <ProblemContext.Provider value={{ id, points }}>
       <div className="relative">
         {import.meta.env.DEV && (
           <div className="absolute right-0 top-0 print:hidden">
@@ -96,21 +91,8 @@ export function SubProblem({ subId, children }: SubProblemProps) {
   const { id, points } = useContext(ProblemContext);
   const newId = subId ? `${id}.${subId}` : `${id}`;
 
-  const { registerProblem } = useContest();
-  const [correct, setCorrect] = useState<string>();
-
-  useEffect(() => {
-    registerProblem(newId, {
-      type: "text",
-      pointsCorrect: points[0],
-      pointsBlank: points[1],
-      pointsWrong: points[2],
-      solution: correct,
-    });
-  }, [registerProblem, newId, correct, points]);
-
   return (
-    <ProblemContext.Provider value={{ id: newId, points, setCorrect }}>
+    <ProblemContext.Provider value={{ id: newId, points }}>
       <div className="break-inside-avoid">
         <h3>Domanda {newId}</h3>
         {children}
