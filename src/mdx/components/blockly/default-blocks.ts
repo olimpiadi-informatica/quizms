@@ -28,19 +28,13 @@ export const defaultToolbox: ToolboxInfo = {
         },
         {
           kind: "block",
-          type: "math_on_list",
-          extraState: '<mutation op="SUM"></mutation>',
-          fields: { OP: "SUM" },
-        },
-        {
-          kind: "block",
-          type: "math_modulo",
-        },
-        {
-          kind: "block",
           type: "math_number_property",
-          extraState: '<mutation divisor_input="false"></mutation>',
           fields: { PROPERTY: "EVEN" },
+        },
+        {
+          kind: "block",
+          type: "math_on_list",
+          fields: { OP: "SUM" },
         },
       ],
     },
@@ -60,10 +54,6 @@ export const defaultToolbox: ToolboxInfo = {
         {
           kind: "block",
           type: "logic_negate",
-        },
-        {
-          kind: "block",
-          type: "logic_boolean",
         },
         {
           kind: "block",
@@ -156,10 +146,6 @@ export const defaultToolbox: ToolboxInfo = {
         {
           kind: "block",
           type: "lists_length",
-        },
-        {
-          kind: "block",
-          type: "lists_isEmpty",
         },
         {
           kind: "block",

@@ -23,10 +23,10 @@ type Props = {
 function init({ toolbox, initialBlocks, customBlocks, readonly }: Props) {
   Blockly.setLocale(locale);
   if (customBlocks && toolbox.kind == "categoryToolbox") {
-    toolbox.contents.push({
+    toolbox.contents.unshift({
       kind: "category",
       name: "Esecuzione",
-      colour: "20",
+      colour: "40",
       contents: customBlocks.map((block) => ({
         kind: "block",
         type: block.type,
