@@ -345,6 +345,7 @@ const Editor = forwardRef(function Editor(
         src={import("./editor") as any}
         className="grow"
         title="Area di lavoro di Blockly"
+        loading="lazy"
       />
       {!ready && (
         <div className="absolute inset-0 z-50 bg-white text-slate-700">
