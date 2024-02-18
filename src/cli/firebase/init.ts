@@ -61,7 +61,7 @@ async function copyFiles(options: InitOptions) {
 
   const configPath = join(options.dir, "firebase.json");
 
-  // See {@link https://github.com/firebase/firebase-tools/blob/master/src/firebaseConfig.ts#L236 here}.
+  // See {@link https://github.com/firebase/firebase-tools/blob/09c2641e861f2e31798dfb4aba1a180e8fd08ea5/src/firebaseConfig.ts#L244 here}.
   const configs = {
     hosting: {
       public: "dist",
@@ -74,6 +74,15 @@ async function copyFiles(options: InitOptions) {
             {
               key: "Cache-Control",
               value: "public, max-age=31536000, immutable", // 365 days
+            },
+          ],
+        },
+        {
+          source: "/blockly/**",
+          headers: [
+            {
+              key: "Cache-Control",
+              value: "public, max-age=86400", // 1 day
             },
           ],
         },
