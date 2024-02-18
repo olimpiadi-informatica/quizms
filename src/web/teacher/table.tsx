@@ -7,7 +7,7 @@ import type {
   ITooltipParams,
 } from "@ag-grid-community/core";
 import { addMinutes, isEqual as isEqualDate } from "date-fns";
-import { cloneDeep, deburr, lowerFirst, set, sumBy } from "lodash-es";
+import { cloneDeep, compact, deburr, lowerFirst, set, sumBy } from "lodash-es";
 import { AlertTriangle, FileCheck, Upload, Users } from "lucide-react";
 
 import { Button, Loading, LoadingButtons, Modal, useIsAfter } from "~/components";
@@ -396,31 +396,29 @@ function columnDefinition(
         },
       }),
     ),
-    ...(contest.hasVariants
-      ? [
-          {
-            field: "variant",
-            headerName: "Variante",
-            width: 100,
-            ...defaultOptions,
-          } as ColDef,
-        ]
-      : []),
-    {
-      headerName: "Vedi Prova",
-      width: 100,
-      cellRenderer: ({ data }: ICellRendererParams<Student>) =>
-        data?.variant && (
-          <a
-            className="link link-info"
-            href={`/teacher/test/?studentId=${data!.id}#${data!.contestId}`}
-            target="_blank"
-            rel="noreferrer">
-            apri
-          </a>
-        ),
-      sortable: false,
-    },
+    ...compact([
+      contest.hasVariants && {
+        field: "variant",
+        headerName: "Variante",
+        width: 100,
+        ...defaultOptions,
+      },
+      (contest.hasVariants || contest.hasOnline) && {
+        headerName: "Vedi Prova",
+        width: 100,
+        cellRenderer: ({ data }: ICellRendererParams<Student>) =>
+          data?.variant && (
+            <a
+              className="link link-info"
+              href={`/teacher/test/?studentId=${data!.id}#${data!.contestId}`}
+              target="_blank"
+              rel="noreferrer">
+              apri
+            </a>
+          ),
+        sortable: false,
+      },
+    ]),
     ...contest.problemIds.map(
       (id, i): ColDef => ({
         field: `answers[${id}]`,
