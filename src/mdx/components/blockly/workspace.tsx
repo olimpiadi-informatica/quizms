@@ -39,7 +39,7 @@ type VariableValues = {
 type BlocklyProps = {
   toolbox?: ToolboxInfo;
   initialBlocks?: object;
-  testcases: Array<Record<string, any>>;
+  testcases: object[];
   debug?: {
     logBlocks?: boolean;
     logJs?: boolean;

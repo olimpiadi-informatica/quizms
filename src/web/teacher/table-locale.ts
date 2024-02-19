@@ -131,9 +131,9 @@ export const agGridLocaleIT = {
   // rowDragRows: "rows",
 
   // Other
-  // loadingOoo: "Loading...",
-  // loadingError: "ERR",
-  // noRowsToShow: "No Rows To Show",
+  loadingOoo: "Caricamento...",
+  loadingError: "Errore di caricamento",
+  noRowsToShow: "Nessuno studente trovato",
   // enabled: "Enabled",
 
   // Menu

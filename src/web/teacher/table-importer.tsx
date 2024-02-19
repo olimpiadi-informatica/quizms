@@ -84,8 +84,8 @@ const ImportModal = forwardRef(function ImportModal(_props, ref: Ref<HTMLDialogE
     <Modal ref={ref} title="Importa studenti">
       <div className="prose">
         <p>
-          Importa gli studenti da un file. Il file deve essere in formato <b>CSV</b> e non deve
-          avere l&apos;intestazione.
+          Importa gli studenti da un file. Il file deve essere in formato <b>CSV</b> e{" "}
+          <b>non deve</b> avere l&apos;intestazione.
         </p>
         <p>
           Se stai usando Excel, puoi creare un file CSV andando su &ldquo;<i>Salva con nome</i>

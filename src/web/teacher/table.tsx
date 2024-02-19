@@ -39,7 +39,7 @@ export function TeacherTable() {
             <div className="hidden md:block"> studenti</div>
           </div>
         </Suspense>
-        {!participation.finalized && contest.hasPdf && (
+        {!participation.finalized && (
           <button
             className="btn btn-primary btn-sm h-10"
             onClick={() => importRef.current?.showModal()}>
@@ -247,7 +247,7 @@ function Table() {
       ? addMinutes(participation.startingTime, contest.duration)
       : undefined;
   const isContestFinished = useIsAfter(endTime);
-  const editable = isContestFinished && !participation.finalized;
+  const editable = (!contest.hasOnline || isContestFinished) && !participation.finalized;
 
   const newStudentId = useRef(randomId());
   const setStudentAndUpdateId = async (student: Student) => {

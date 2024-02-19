@@ -98,6 +98,7 @@ export default async function importData(options: ImportOptions) {
 async function importAdmins(options: ImportOptions) {
   const admins = await load(options.dir, "admins", userSchema);
   await importUsers(admins, { isAdmin: true }, options);
+  success(`Admin users imported!`);
 }
 
 async function importContests(db: Firestore, options: ImportOptions) {
@@ -199,7 +200,7 @@ async function importUsers(users: User[], customClaims: object, options: ImportO
           disabled: false,
         });
       } else {
-        fatal(`Teacher ${teacher.email} already exists. Use \`--force\` to overwrite.`);
+        fatal(`User ${teacher.email} already exists. Use \`--force\` to overwrite.`);
       }
       await auth.setCustomUserClaims(user.uid, customClaims);
     }),
