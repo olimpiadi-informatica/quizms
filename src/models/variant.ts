@@ -9,7 +9,7 @@ export const variantSchema = z.object({
     z.object({
       type: z.enum(["text", "number", "points"]),
       options: z.string().array().nonempty().optional(),
-      blankOption: z.string().optional(),
+      blankOptions: z.string().array().optional(),
       pointsCorrect: z.number().optional(),
       pointsBlank: z.number().optional(),
       pointsWrong: z.number().optional(),
@@ -59,7 +59,7 @@ export function problemScore(problem: Schema[string], answer?: string) {
     return;
   }
 
-  if (answer === undefined || answer === "" || answer === problem.blankOption) {
+  if (answer === undefined || answer === "" || problem.blankOptions?.includes(answer)) {
     return problem.pointsBlank;
   } else if (answer.toUpperCase() === problem.solution.toUpperCase()) {
     return problem.pointsCorrect;

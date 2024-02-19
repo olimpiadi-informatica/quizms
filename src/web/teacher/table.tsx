@@ -295,7 +295,7 @@ function Table() {
       }
 
       const schema = variants[student.variant!]?.schema[subfield];
-      if (value !== schema?.blankOption) {
+      if (!schema?.blankOptions?.includes(value)) {
         if (schema.type === "number" || schema.type === "points") value = Number(value);
 
         let isValid = true;

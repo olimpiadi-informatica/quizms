@@ -110,7 +110,7 @@ export function getSchema(program: Program) {
           pointsCorrect,
           pointsBlank,
           pointsWrong,
-          blankOption: "-", // TODO
+          blankOptions: ["-"],
           originalId: String(originalId),
         };
       }
