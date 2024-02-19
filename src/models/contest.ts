@@ -50,6 +50,7 @@ export const contestSchema = z.object({
   hasOnline: z.boolean(),
   hasPdf: z.boolean(),
   allowRestart: z.boolean(),
+  allowImport: z.boolean(),
 
   instructions: z.string().optional(),
 });

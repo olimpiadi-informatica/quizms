@@ -39,7 +39,7 @@ export function TeacherTable() {
             <div className="hidden md:block"> studenti</div>
           </div>
         </Suspense>
-        {!participation.finalized && (
+        {contest.allowImport && !participation.finalized && (
           <button
             className="btn btn-primary btn-sm h-10"
             onClick={() => importRef.current?.showModal()}>
