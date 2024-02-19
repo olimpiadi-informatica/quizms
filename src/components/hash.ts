@@ -14,7 +14,7 @@ export default function useHash(initialHash?: string) {
     function onHashChange() {
       setHash(window.location.hash.slice(1));
     }
-  }, []);
+  }, [initialHash]);
 
   useEffect(() => {
     if (hash !== undefined) {

@@ -486,7 +486,7 @@ function isStudentIncomplete(
   const variant = variants[student.variant!] ?? Object.values(variants)[0];
 
   for (const id of Object.keys(variant.schema)) {
-    if (!student.answers?.[id]) {
+    if (student.answers?.[id] === undefined) {
       return `Domanda ${id} mancante`;
     }
   }
