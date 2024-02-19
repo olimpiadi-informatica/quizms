@@ -7,7 +7,7 @@ export const variantSchema = z.object({
   contestId: z.string(),
   schema: z.record(
     z.object({
-      type: z.enum(["text", "number"]),
+      type: z.enum(["text", "number", "points"]),
       options: z.string().array().nonempty().optional(),
       blankOption: z.string().optional(),
       pointsCorrect: z.number().optional(),
@@ -35,7 +35,7 @@ export function score(student: Student, variants: Record<string, Variant>) {
   let points = 0;
   for (const id in schema) {
     const problem = schema[id];
-    const answer = answers[id]?.trim();
+    const answer = answers[id]?.toString()?.trim();
 
     const problemPoints = problemScore(problem, answer);
     if (problemPoints === undefined) return;
@@ -46,6 +46,10 @@ export function score(student: Student, variants: Record<string, Variant>) {
 }
 
 export function problemScore(problem: Schema[string], answer?: string) {
+  if (problem.type === "points") {
+    return Number(answer || 0);
+  }
+
   if (
     problem.pointsCorrect === undefined ||
     problem.pointsBlank === undefined ||

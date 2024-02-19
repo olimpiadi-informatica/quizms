@@ -3,7 +3,7 @@ import z from "zod";
 export const submissionSchema = z.object({
   id: z.string(),
   uid: z.string(),
-  answers: z.record(z.string().optional()),
+  answers: z.record(z.union([z.string(), z.number()]).optional()),
   submittedAt: z.date().optional(),
 });
 

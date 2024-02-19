@@ -13,7 +13,7 @@ export const studentSchema = z
 
     variant: z.string(),
     disabled: z.boolean(),
-    answers: z.record(z.string().optional()),
+    answers: z.record(z.union([z.string(), z.number()]).optional()),
     extraData: z.record(z.any()).optional(),
 
     createdAt: z.date(),

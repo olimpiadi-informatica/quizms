@@ -7,7 +7,7 @@ import type {
   ITooltipParams,
 } from "@ag-grid-community/core";
 import { addMinutes, isEqual as isEqualDate } from "date-fns";
-import { cloneDeep, compact, deburr, lowerFirst, set, sumBy } from "lodash-es";
+import { cloneDeep, compact, deburr, isString, lowerFirst, set, sumBy } from "lodash-es";
 import { AlertTriangle, FileCheck, Upload, Users } from "lucide-react";
 
 import { Button, Loading, LoadingButtons, Modal, useIsAfter } from "~/components";
@@ -290,11 +290,25 @@ function Table() {
       value = undefined;
     }
     if (field === "answers") {
-      value = value?.toUpperCase();
+      if (isString(value)) {
+        value = value!.trim().toUpperCase();
+      }
 
       const schema = variants[student.variant!]?.schema[subfield];
-      const isValid = value === schema?.blankOption || (schema?.options?.includes(value) ?? true);
-      if (!isValid) value = undefined;
+      if (value !== schema?.blankOption) {
+        if (schema.type === "number" || schema.type === "points") value = Number(value);
+
+        let isValid = true;
+        isValid &&= schema?.options?.includes(value) ?? true;
+        if (schema.type === "number" || schema.type === "points") {
+          isValid &&= Number.isInteger(value);
+        }
+        if (schema.type === "points" && schema.pointsCorrect) {
+          isValid &&= 0 <= value && value <= schema.pointsCorrect;
+        }
+
+        if (!isValid) value = undefined;
+      }
     }
     if (field === "disabled" && value) {
       const modal = modalRef.current!;
@@ -471,11 +485,9 @@ function isStudentIncomplete(
   }
   const variant = variants[student.variant!] ?? Object.values(variants)[0];
 
-  for (const [id, schema] of Object.entries(variant.schema)) {
-    const ans = student.answers?.[id];
-    if (!ans || ans === schema.blankOption) continue;
-    if (schema.type === "number" && !/^-?\d+$/.test(ans.trim())) {
-      return `La domanda ${id} deve contenere un numero intero`;
+  for (const id of Object.keys(variant.schema)) {
+    if (!student.answers?.[id]) {
+      return `Domanda ${id} mancante`;
     }
   }
 }
