@@ -35,6 +35,10 @@ service cloud.firestore {
             return participation != null && isAuthenticated(participation.data.teacher);
         }
 
+        match /announcements/{announcement} {
+            allow read: if isTeacher();
+        }
+
         match /contests/{contest} {
             allow read: if request.auth != null;
         }

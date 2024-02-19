@@ -19,8 +19,10 @@ import z, {
 } from "zod";
 
 import {
+  Announcement,
   Student,
   Submission,
+  announcementSchema,
   contestSchema,
   participationMappingSchema,
   participationSchema,
@@ -102,6 +104,16 @@ export const studentMappingUidConverter = converter(studentMappingUidSchema);
 export const studentRestoreConverter = converter(studentRestoreSchema);
 export const variantConverter = converter(variantSchema);
 export const variantMappingConverter = converter(variantMappingSchema);
+
+export const announcementConverter: FirestoreDataConverter<Announcement> = {
+  toFirestore(data) {
+    return {
+      ...convertToFirestore(data),
+      createdAt: serverTimestamp(),
+    };
+  },
+  fromFirestore: (snapshot) => parse(announcementSchema, snapshot),
+};
 
 export const studentConverter: FirestoreDataConverter<Student> = {
   toFirestore(data) {

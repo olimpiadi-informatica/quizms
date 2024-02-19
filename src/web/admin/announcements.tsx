@@ -1,0 +1,140 @@
+import React, { ChangeEvent, Fragment, Ref, forwardRef, useRef, useState } from "react";
+
+import { AlertTriangle, Info, XCircle } from "lucide-react";
+
+import { Button, Modal } from "~/components";
+import { Announcement } from "~/models";
+import { formatDate, formatTime } from "~/utils/date";
+import { randomId } from "~/utils/random";
+import { announcementConverter } from "~/web/firebase/converters";
+import { useCollection } from "~/web/firebase/hooks";
+
+import { useAdmin } from "./provider";
+
+export default function Announcements() {
+  const { contest } = useAdmin();
+  const ref = useRef<HTMLDialogElement>(null);
+
+  const [announcements, addAnnouncement] = useCollection("announcements", announcementConverter, {
+    arrayConstraints: {
+      contestIds: contest.id,
+    },
+    orderBy: ["createdAt", "desc"],
+    subscribe: true,
+  });
+
+  return (
+    <>
+      <div className="flex justify-center">
+        <button className="btn btn-error" onClick={() => ref.current?.showModal()}>
+          Aggiungi comunicazione
+        </button>
+        <AnnouncementModal ref={ref} addAnnouncement={addAnnouncement} />
+      </div>
+      <div className="prose mt-4 max-w-none">
+        {announcements.map((announcement) => (
+          <Fragment key={announcement.id}>
+            <h4 className="flex items-center gap-3">
+              {announcement.level === "info" && <Info size={20} className="text-info" />}
+              {announcement.level === "warning" && (
+                <AlertTriangle size={20} className="text-warning" />
+              )}
+              {announcement.level === "error" && <XCircle size={20} className="text-error" />}
+              {announcement.title}
+            </h4>
+            <small>
+              {formatDate(announcement.createdAt)}, {formatTime(announcement.createdAt)}
+            </small>
+            <p>{announcement.body}</p>
+            <hr className="my-5 last:hidden" />
+          </Fragment>
+        ))}
+      </div>
+    </>
+  );
+}
+
+const AnnouncementModal = forwardRef(function AnnouncementModal(
+  { addAnnouncement }: { addAnnouncement: (announcement: Announcement) => Promise<void> },
+  ref: Ref<HTMLDialogElement>,
+) {
+  const { contest } = useAdmin();
+
+  const defaultAnnouncement = (): Announcement => ({
+    id: randomId(),
+    createdAt: new Date(),
+    contestIds: [contest.id],
+    level: "info",
+    title: "",
+    body: "",
+  });
+
+  const [announcement, setAnnouncement] = useState<Announcement>(defaultAnnouncement);
+
+  const setValue =
+    (key: keyof Announcement) =>
+    (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
+      setAnnouncement((prev) => ({ ...prev, [key]: e.target.value }));
+
+  const finalize = async () => {
+    setAnnouncement(defaultAnnouncement);
+    await addAnnouncement(announcement as Announcement);
+    if (ref && "current" in ref) {
+      ref.current?.close();
+    }
+  };
+
+  return (
+    <Modal ref={ref} title="Aggiungi comunicazione">
+      <div className="flex flex-col gap-3">
+        <label className="form-control w-full">
+          <div className="label">
+            <span className="label-text">Priorità</span>
+          </div>
+          <select
+            name="priority"
+            className="select select-bordered"
+            value={announcement.level}
+            onChange={setValue("level")}>
+            <option value="info">Normale</option>
+            <option value="warning">Alta</option>
+          </select>
+        </label>
+
+        <label className="form-control w-full">
+          <div className="label">
+            <span className="label-text">Titolo</span>
+          </div>
+          <input
+            name="title"
+            type="text"
+            className="input input-bordered"
+            value={announcement.title}
+            onChange={setValue("title")}
+            placeholder="Inserisci il titolo"
+          />
+        </label>
+
+        <label className="form-control w-full">
+          <div className="label">
+            <span className="label-text">Messaggio</span>
+          </div>
+          <textarea
+            name="body"
+            className="textarea textarea-bordered"
+            rows={5}
+            value={announcement.body}
+            onChange={setValue("body")}
+            placeholder="Inserisci il messaggio"
+          />
+        </label>
+
+        <div className="flex justify-center">
+          <Button className="btn btn-error" onClick={() => finalize()}>
+            Aggiungi
+          </Button>
+        </div>
+      </div>
+    </Modal>
+  );
+});

@@ -5,6 +5,7 @@ import { Participation, Student } from "~/models";
 import { participationConverter, studentConverter } from "~/web/firebase/converters";
 import { useCount } from "~/web/firebase/hooks/count";
 
+import Announcements from "./announcements";
 import ContestSettings from "./contest-settings";
 import Export from "./export";
 import { useAdmin } from "./provider";
@@ -18,6 +19,12 @@ export function Admin() {
         <div className="card-body">
           <h2 className="card-title">Impostazioni gara</h2>
           <ContestSettings />
+        </div>
+      </div>
+      <div className="highlight-border card bg-base-200">
+        <div className="card-body">
+          <h2 className="card-title">Comunicazioni</h2>
+          <Announcements />
         </div>
       </div>
       <div className="highlight-border card bg-base-200">

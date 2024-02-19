@@ -14,6 +14,7 @@ import { Button, LoadingButtons, Modal, Timer, useIsAfter, useTime } from "~/com
 import { Contest, Participation } from "~/models";
 import { formatDate, formatTime } from "~/utils/date";
 import { randomToken } from "~/utils/random";
+import { Announcements } from "~/web/teacher/admin-announcements";
 
 import StudentRestoreList from "./admin-student-restore";
 import { useTeacher } from "./provider";
@@ -178,9 +179,16 @@ export function TeacherAdmin() {
   return (
     <div className="flex flex-col gap-5 p-5">
       <div className="highlight-border card bg-base-200">
-        <div className="prose card-body max-w-none">
+        <div className="card-body">
+          <h2 className="card-title">Comunicazioni</h2>
+          <Announcements />
+        </div>
+      </div>
+
+      <div className="highlight-border card bg-base-200">
+        <div className="card-body">
           <h2 className="card-title">Informazioni Gara</h2>
-          <div className="mb-2 whitespace-pre-wrap">{contest.instructions}</div>
+          <div className="prose mb-2 max-w-none whitespace-pre-wrap">{contest.instructions}</div>
           {/* contest info */}
           {contest.hasOnline && (
             <div className="font-bold">
