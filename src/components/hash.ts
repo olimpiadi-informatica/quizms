@@ -4,7 +4,9 @@ export default function useHash(initialHash?: string) {
   const [hash, setHash] = useState(initialHash);
 
   useEffect(() => {
-    onHashChange();
+    if (!initialHash) {
+      onHashChange();
+    }
 
     window.addEventListener("hashchange", onHashChange);
     return () => window.removeEventListener("hashchange", onHashChange);
@@ -20,5 +22,5 @@ export default function useHash(initialHash?: string) {
     }
   }, [hash]);
 
-  return [hash, setHash] as const;
+  return hash;
 }

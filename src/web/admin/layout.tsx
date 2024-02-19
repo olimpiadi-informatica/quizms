@@ -12,18 +12,11 @@ import { useDb } from "~/web/firebase/base-login";
 type Props = {
   contests: Contest[];
   activeContest?: Contest;
-  setActiveContest: (contestId: string) => void;
   logout: () => Promise<void>;
   children: ReactNode;
 };
 
-export function AdminLayout({
-  activeContest,
-  contests,
-  setActiveContest,
-  logout,
-  children,
-}: Props) {
+export function AdminLayout({ activeContest, contests, logout, children }: Props) {
   const db = useDb();
   const auth = getAuth(db.app);
   const user = auth.currentUser!;
@@ -63,11 +56,11 @@ export function AdminLayout({
                 )}>
                 {contests.map((contest) => (
                   <li key={contest.id}>
-                    <button
+                    <a
                       className={classNames(contest.id === activeContest.id && "active")}
-                      onClick={() => setActiveContest(contest.id)}>
+                      href={`#${contest.id}`}>
                       {contest.name}
-                    </button>
+                    </a>
                   </li>
                 ))}
               </ul>
@@ -83,12 +76,9 @@ export function AdminLayout({
             <div className="flex size-full flex-col items-center justify-center gap-3">
               <p className="text-2xl">Seleziona una gara</p>
               {contests.map((contest) => (
-                <button
-                  key={contest.id}
-                  className="btn btn-error"
-                  onClick={() => setActiveContest(contest.id)}>
+                <a key={contest.id} className="btn btn-error" href={`#${contest.id}`}>
                   {contest.name}
-                </button>
+                </a>
               ))}
             </div>
           )}

@@ -12,7 +12,6 @@ type Props = {
   participations: Participation[];
   activeContest?: Contest;
   activeParticipation?: Participation;
-  setActiveContest: (contestId: string) => void;
   logout: () => Promise<void>;
   children: ReactNode;
 };
@@ -22,7 +21,6 @@ export function TeacherLayout({
   participations,
   activeContest,
   activeParticipation,
-  setActiveContest,
   logout,
   children,
 }: Props) {
@@ -65,11 +63,11 @@ export function TeacherLayout({
                   const contest = contests.find((c) => c.id === p.contestId)!;
                   return (
                     <li key={p.id}>
-                      <button
+                      <a
                         className={classNames(activeContest?.id === p.contestId && "active")}
-                        onClick={() => setActiveContest(p.contestId)}>
+                        href={`#${p.contestId}`}>
                         {contest.name}
-                      </button>
+                      </a>
                     </li>
                   );
                 })}

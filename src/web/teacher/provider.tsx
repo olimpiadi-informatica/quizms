@@ -72,9 +72,7 @@ export function TeacherProvider({
   useStudentRestores,
   children,
 }: TeacherProviderProps) {
-  const [contestId, setContestId] = useHash(
-    participations.length === 1 ? participations[0]?.contestId : undefined,
-  );
+  const contestId = useHash(participations.length === 1 ? participations[0]?.contestId : undefined);
   const contest = contests.find((c) => c.id === contestId);
   const participation = participations.find((p) => p.contestId === contestId);
 
@@ -114,7 +112,6 @@ export function TeacherProvider({
       participations={participations}
       activeContest={contest}
       activeParticipation={participation}
-      setActiveContest={setContestId}
       logout={logout}>
       {participation && contest ? (
         <TeacherContext.Provider value={contextProps}>{children}</TeacherContext.Provider>
@@ -122,9 +119,9 @@ export function TeacherProvider({
         <div className="flex size-full flex-col items-center justify-center gap-3">
           <p className="text-2xl">Seleziona una gara</p>
           {participations.map((p) => (
-            <button key={p.id} className="btn btn-info" onClick={() => setContestId(p.contestId)}>
+            <a key={p.id} className="btn btn-info" href={`#${p.contestId}`}>
               {contests.find((c) => c.id === p.contestId)?.name}
-            </button>
+            </a>
           ))}
         </div>
       )}

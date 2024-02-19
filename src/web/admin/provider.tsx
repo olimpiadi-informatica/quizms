@@ -22,7 +22,7 @@ type AdminProviderProps = {
 };
 
 export function AdminProvider({ contests, setContest, logout, children }: AdminProviderProps) {
-  const [contestId, setContestId] = useHash(contests.length === 1 ? contests[0]?.id : undefined);
+  const contestId = useHash(contests.length === 1 ? contests[0]?.id : undefined);
   const contest = contests.find((c) => c.id === contestId)!;
 
   if (contestId === undefined) {
@@ -30,11 +30,7 @@ export function AdminProvider({ contests, setContest, logout, children }: AdminP
   }
 
   return (
-    <AdminLayout
-      contests={contests}
-      activeContest={contest}
-      setActiveContest={setContestId}
-      logout={logout}>
+    <AdminLayout contests={contests} activeContest={contest} logout={logout}>
       <AdminContext.Provider value={{ contest, setContest }}>{children}</AdminContext.Provider>
     </AdminLayout>
   );
