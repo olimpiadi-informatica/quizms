@@ -47,11 +47,12 @@ export function usePrecompiledPasswordAuth() {
   async function fetcher() {
     const params = new URLSearchParams(window.location.search);
     const email = params.get("email");
-    const password = params.get("password");
+    const username = params.get("user");
+    const password = params.get("pswd");
 
-    if (email && password) {
+    if ((email || username) && password) {
       try {
-        await signInWithEmailAndPassword(auth, email, password);
+        await signInWithEmailAndPassword(auth, email || `${username}@teacher.edu`, password);
       } catch {
         console.warn("Failed to sign in with precompiled credentials.");
       }

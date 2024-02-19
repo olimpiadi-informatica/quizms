@@ -1,7 +1,7 @@
-import React, { ReactNode, useCallback, useState } from "react";
+import React, { ReactNode, useCallback } from "react";
 
 import { FirebaseOptions } from "firebase/app";
-import { User, getAuth, signOut } from "firebase/auth";
+import { getAuth, signOut } from "firebase/auth";
 import {
   Firestore,
   doc,
@@ -14,7 +14,6 @@ import {
 import { getBytes, getStorage, ref } from "firebase/storage";
 import { chunk } from "lodash-es";
 
-import { Button } from "~/components";
 import { Participation, StudentRestore, studentHash } from "~/models";
 import { TeacherProvider } from "~/web/teacher/provider";
 
@@ -28,7 +27,8 @@ import {
   studentRestoreConverter,
   variantConverter,
 } from "./converters";
-import { useCollection, usePrecompiledPasswordAuth, useSignInWithPassword } from "./hooks";
+import EmailLogin from "./email-login";
+import { useAuth, useCollection } from "./hooks";
 import query from "./query";
 
 export function TeacherLogin({
@@ -40,65 +40,16 @@ export function TeacherLogin({
 }) {
   return (
     <FirebaseLogin config={config}>
-      <TeacherLoginInner>{children}</TeacherLoginInner>
+      <EmailLogin>
+        <TeacherInner>{children}</TeacherInner>
+      </EmailLogin>
     </FirebaseLogin>
   );
 }
 
-function TeacherLoginInner({ children }: { children: ReactNode }) {
-  const { signInWithPassword, error } = useSignInWithPassword();
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const signIn = () => signInWithPassword(`${username}@teacher.edu`, password);
-
-  const user = usePrecompiledPasswordAuth();
-
-  if (user?.emailVerified) {
-    return <TeacherInner user={user}>{children}</TeacherInner>;
-  }
-
-  return (
-    <div className="my-8 flex justify-center">
-      <form className="max-w-md grow p-4">
-        <div className="form-control w-full">
-          <label className="label">
-            <span className="label-text text-lg">Codice meccanografico</span>
-          </label>
-          <input
-            type="text"
-            autoComplete="username"
-            placeholder="Inserisci il codice meccanografico"
-            className="input input-bordered w-full max-w-md"
-            onChange={(e) => setUsername(e.target.value)}
-            value={username}
-          />
-        </div>
-        <div className="form-control w-full">
-          <label className="label">
-            <span className="label-text text-lg">Password</span>
-          </label>
-          <input
-            type="password"
-            autoComplete="current-password"
-            placeholder="Insersci la password"
-            className="input input-bordered w-full max-w-md"
-            onChange={(e) => setPassword(e.target.value)}
-            value={password}
-          />
-        </div>
-        <span className="pt-1 text-error">{error?.message ?? <>&nbsp;</>}</span>
-        <div className="flex justify-center pt-3">
-          <Button className="btn-success" onClick={signIn}>
-            Accedi
-          </Button>
-        </div>
-      </form>
-    </div>
-  );
-}
-
-function TeacherInner({ user, children }: { user: User; children: ReactNode }) {
+function TeacherInner({ children }: { children: ReactNode }) {
   const db = useDb();
+  const user = useAuth()!;
 
   const [participations] = useCollection("participations", participationConverter, {
     constraints: { teacher: user.uid },
