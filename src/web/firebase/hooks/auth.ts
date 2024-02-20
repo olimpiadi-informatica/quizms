@@ -46,9 +46,9 @@ export function usePrecompiledPasswordAuth() {
 
   async function fetcher() {
     const params = new URLSearchParams(window.location.search);
-    const email = params.get("email");
-    const username = params.get("user");
-    const password = params.get("pswd");
+    const email = params.get("email") || params.get("e");
+    const username = params.get("username") || params.get("user") || params.get("u");
+    const password = params.get("password") || params.get("pswd") || params.get("p");
 
     if ((email || username) && password) {
       try {
