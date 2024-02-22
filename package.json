@@ -1,6 +1,6 @@
 {
   "name": "@olinfo/quizms",
-  "version": "1.0.0-beta.12",
+  "version": "1.0.0",
   "type": "module",
   "author": "Alessandro Bortolin <bortolin.alessandro@outlook.it>",
   "license": "MIT",
@@ -11,7 +11,7 @@
     "lint": "eslint --fix . && tsc --noEmit && prettier --write --cache --log-level=warn src/",
     "fmt": "prettier --write --cache src/",
     "prepack": "yarn build",
-    "release": "npm publish"
+    "release": "npm publish --access public"
   },
   "bin": {
     "quizms": "bin/bin.js"
