@@ -7,6 +7,9 @@ module.exports = {
   content: ["./src/**/*.{ts,tsx}"],
   theme: {
     extend: {
+      width: {
+        screen: "calc(100vw - 1.25rem)",
+      },
       screens: {
         xs: "450px",
       },
