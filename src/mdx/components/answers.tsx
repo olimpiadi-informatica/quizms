@@ -121,7 +121,8 @@ export function Answer({ correct, children }: AnswerProps) {
             (answer !== id || terminated) && "hidden",
           )}
           type="button"
-          onClick={() => setAnswer(undefined)}>
+          onClick={() => setAnswer(undefined)}
+          aria-label="Cancella risposta">
           <Trash2 size={20} />
         </button>
       </div>

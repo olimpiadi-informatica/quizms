@@ -79,7 +79,7 @@ export function Layout({ children }: { children: ReactNode }) {
       <SubmitModal ref={submitRef} />
       <ErrorBoundary FallbackComponent={Error}>
         <Prose>
-          <h1 className="text-pretty">{contest.name}</h1>
+          {contest.name && <h1 className="text-pretty">{contest.name}</h1>}
           {children}
         </Prose>
       </ErrorBoundary>
