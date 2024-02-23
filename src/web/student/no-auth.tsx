@@ -45,7 +45,8 @@ export function NoAuth({ contestName, duration, questionCount, children }: AuthP
     hasOnline: true,
     hasPdf: true,
     allowRestart: true,
-    allowImport: true,
+    allowStudentImport: true,
+    allowStudentEdit: true,
     statementVersion: 1,
   };
 

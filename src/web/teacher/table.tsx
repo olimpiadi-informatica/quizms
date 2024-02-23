@@ -39,7 +39,7 @@ export function TeacherTable() {
             <div className="hidden md:block"> studenti</div>
           </div>
         </Suspense>
-        {contest.allowImport && !participation.finalized && (
+        {contest.allowStudentImport && !participation.finalized && (
           <button
             className="btn btn-primary btn-sm h-10"
             onClick={() => importRef.current?.showModal()}>
@@ -134,10 +134,12 @@ const FinalizeModal = forwardRef(function FinalizeModal(
         <div className="prose">
           <p>Non è possibile finalizzare la scuola a causa del seguente errore:</p>
           <p className="flex justify-center rounded-box bg-base-200 px-3 py-2">{error}</p>
-          <p>
-            Se questo studente è stato aggiunto per errore e vuoi rimuoverlo, puoi usare il pulsante{" "}
-            <i>Cancella</i> nell&apos;ultima colonna.
-          </p>
+          {contest.allowStudentEdit && (
+            <p>
+              Se questo studente è stato aggiunto per errore e vuoi rimuoverlo, puoi usare il
+              pulsante <i>Cancella</i> nell&apos;ultima colonna.
+            </p>
+          )}
         </div>
       )}
       {!error && (
@@ -146,7 +148,12 @@ const FinalizeModal = forwardRef(function FinalizeModal(
             <strong className="text-error">Attenzione:</strong> questa operazione è irreversibile.
           </p>
           <p>
-            Finalizzando <b>non</b> sarà più possibile <b>aggiungere</b> nuovi studenti o{" "}
+            Finalizzando <b>non</b> sarà più possibile{" "}
+            {contest.allowStudentEdit && (
+              <>
+                <b>aggiungere</b> nuovi studenti o{" "}
+              </>
+            )}
             <b>modificare</b> i dati degli studenti in questa scuola per la gara{" "}
             <i>{contest?.name}</i>.
           </p>
@@ -247,7 +254,7 @@ function Table() {
       ? addMinutes(participation.startingTime, contest.duration)
       : undefined;
   const isContestFinished = useIsAfter(endTime);
-  const editable = (!contest.hasOnline || isContestFinished) && !participation.finalized;
+  const frozen = (contest.hasOnline && !isContestFinished) || participation.finalized;
 
   const newStudentId = useRef(randomId());
   const setStudentAndUpdateId = async (student: Student) => {
@@ -256,7 +263,7 @@ function Table() {
   };
 
   const allStudents = [...students];
-  if (editable) {
+  if (contest.allowStudentEdit && !frozen) {
     allStudents.push({
       id: newStudentId.current,
       contestId: contest.id,
@@ -269,8 +276,8 @@ function Table() {
   }
 
   const colDefs = useMemo(
-    () => columnDefinition(contest, variants, editable),
-    [contest, variants, editable],
+    () => columnDefinition(contest, variants, frozen),
+    [contest, variants, frozen],
   );
 
   const onCellEditRequest = async (ev: CellEditRequestEvent) => {
@@ -343,6 +350,7 @@ function Table() {
         enableBrowserTooltips={true}
         localeText={agGridLocaleIT}
         onGridReady={(ev) => {
+          if (!contest.allowStudentEdit) return;
           ev.api.setFilterModel({
             disabled: {
               filterType: "text",
@@ -359,7 +367,7 @@ function Table() {
 function columnDefinition(
   contest: Contest,
   variants: Record<string, Variant>,
-  editable: boolean,
+  frozen: boolean,
 ): ColDef[] {
   const widths = {
     xs: 100,
@@ -373,10 +381,9 @@ function columnDefinition(
     sortable: true,
     filter: true,
     resizable: true,
-    editable,
   };
 
-  return [
+  return compact([
     ...contest.personalInformation.map(
       (field, i): ColDef => ({
         field: `personalInformation.${field.name}`,
@@ -385,6 +392,7 @@ function columnDefinition(
         cellDataType: field.type,
         width: widths[field.size ?? "md"],
         equals: field.type === "date" ? isEqualDate : undefined,
+        editable: contest.allowStudentEdit && !frozen,
         ...defaultOptions,
         tooltipValueGetter: ({ data }: ITooltipParams<Student>) => {
           return isStudentIncomplete(data!, contest, variants);
@@ -410,34 +418,34 @@ function columnDefinition(
         },
       }),
     ),
-    ...compact([
-      contest.hasVariants && {
-        field: "variant",
-        headerName: "Variante",
-        width: 100,
-        ...defaultOptions,
-      },
-      (contest.hasVariants || contest.hasOnline) && {
-        headerName: "Vedi Prova",
-        width: 100,
-        cellRenderer: ({ data }: ICellRendererParams<Student>) =>
-          data?.variant && (
-            <a
-              className="link link-info"
-              href={`/teacher/test/?studentId=${data!.id}#${data!.contestId}`}
-              target="_blank"
-              rel="noreferrer">
-              apri
-            </a>
-          ),
-        sortable: false,
-      },
-    ]),
+    contest.hasVariants && {
+      field: "variant",
+      headerName: "Variante",
+      width: 100,
+      editable: contest.allowStudentEdit && !frozen,
+      ...defaultOptions,
+    },
+    (contest.hasVariants || contest.hasOnline) && {
+      headerName: "Vedi Prova",
+      width: 100,
+      cellRenderer: ({ data }: ICellRendererParams<Student>) =>
+        data?.variant && (
+          <a
+            className="link link-info"
+            href={`/teacher/test/?studentId=${data!.id}#${data!.contestId}`}
+            target="_blank"
+            rel="noreferrer">
+            apri
+          </a>
+        ),
+      sortable: false,
+    },
     ...contest.problemIds.map(
       (id, i): ColDef => ({
         field: `answers[${id}]`,
         headerName: id,
         width: 50 + (i % 4 === 3 ? 15 : 0),
+        editable: !frozen,
         valueGetter: ({ data }) => data.answers?.[id],
         tooltipValueGetter: ({ data }) => data.answers?.[id],
         ...defaultOptions,
@@ -453,7 +461,7 @@ function columnDefinition(
       ...defaultOptions,
       editable: false,
     },
-    {
+    contest.allowStudentEdit && {
       field: "disabled",
       headerName: "Cancella",
       cellDataType: "boolean",
@@ -462,7 +470,7 @@ function columnDefinition(
       ...defaultOptions,
       sortable: false,
     },
-  ];
+  ]);
 }
 
 function isStudentIncomplete(
