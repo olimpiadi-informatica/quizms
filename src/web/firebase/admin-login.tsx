@@ -13,7 +13,7 @@ import { useCollection } from "./hooks";
 export function AdminLogin({ config, children }: { config: FirebaseOptions; children: ReactNode }) {
   return (
     <FirebaseLogin config={config}>
-      <EmailLogin>
+      <EmailLogin method="email">
         <AdminInner>{children}</AdminInner>
       </EmailLogin>
     </FirebaseLogin>

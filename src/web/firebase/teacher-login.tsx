@@ -40,7 +40,7 @@ export function TeacherLogin({
 }) {
   return (
     <FirebaseLogin config={config}>
-      <EmailLogin>
+      <EmailLogin method="username">
         <TeacherInner>{children}</TeacherInner>
       </EmailLogin>
     </FirebaseLogin>

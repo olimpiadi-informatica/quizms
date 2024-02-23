@@ -1,15 +1,22 @@
 import React, { ReactNode, useState } from "react";
 
+import { startCase } from "lodash-es";
+
 import { Button } from "~/components/button";
 
 import { usePrecompiledPasswordAuth, useSignInWithPassword } from "./hooks";
 
-export default function EmailLogin({ children }: { children: ReactNode }) {
+type Props = {
+  method: "email" | "username";
+  children: ReactNode;
+};
+
+export default function EmailLogin({ method, children }: Props) {
   const { signInWithPassword, error } = useSignInWithPassword();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const signIn = () =>
-    signInWithPassword(username.includes("@") ? username : `${username}@teacher.edu`, password);
+    signInWithPassword(method === "email" ? username : `${username}@teacher.edu`, password);
 
   const user = usePrecompiledPasswordAuth();
 
@@ -22,12 +29,12 @@ export default function EmailLogin({ children }: { children: ReactNode }) {
       <form className="max-w-md grow p-4">
         <div className="form-control w-full">
           <label className="label">
-            <span className="label-text text-lg">Email/username</span>
+            <span className="label-text text-lg">{startCase(method)}</span>
           </label>
           <input
             type="text"
-            autoComplete="username"
-            placeholder="Inserisci l'email o lo username"
+            autoComplete={method}
+            placeholder={`Inserisci ${method === "email" ? "l'email" : "lo username"}`}
             className="input input-bordered w-full max-w-md"
             onChange={(e) => setUsername(e.target.value)}
             value={username}
