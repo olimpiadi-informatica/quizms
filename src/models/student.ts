@@ -16,7 +16,7 @@ export const studentSchema = z
     answers: z.record(z.union([z.string(), z.number()]).optional()),
     extraData: z.record(z.any()).optional(),
 
-    createdAt: z.date(),
+    createdAt: z.coerce.date(),
     updatedAt: z.date(),
   })
   .partial()

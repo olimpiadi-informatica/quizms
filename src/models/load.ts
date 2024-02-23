@@ -66,8 +66,10 @@ export default async function load<T>(
 }
 
 function parseJsonl(content: string) {
-  const lines = content.split("\n");
-  return lines.map((line) => JSON.parse(line));
+  return content
+    .split("\n")
+    .filter(Boolean)
+    .map((line) => JSON.parse(line));
 }
 
 function parseCsv(content: string) {

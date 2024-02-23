@@ -6,11 +6,17 @@ import { Bucket } from "@google-cloud/storage";
 import { deleteApp } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 import { Firestore } from "firebase-admin/firestore";
-import { noop, pick, range, uniq } from "lodash-es";
+import { groupBy, noop, pick, range, uniq } from "lodash-es";
 import { isMatch } from "picomatch";
 import z from "zod";
 
-import { Participation, contestSchema, participationSchema, variantSchema } from "~/models";
+import {
+  Participation,
+  contestSchema,
+  participationSchema,
+  studentSchema,
+  variantSchema,
+} from "~/models";
 import { generationConfigSchema } from "~/models/generation-config";
 import load from "~/models/load";
 import { fatal, success, warning } from "~/utils/logs";
@@ -21,6 +27,7 @@ import { importCollection } from "./utils/collection";
 import {
   contestConverter,
   participationConverter,
+  studentConverter,
   variantConverter,
   variantMappingConverter,
 } from "./utils/converters-admin";
@@ -38,6 +45,7 @@ type ImportOptions = {
   pdfs?: true;
   schools?: true;
   statements?: true;
+  students?: true;
   teachers?: true;
   variantMappings?: true;
   variants?: true;
@@ -58,6 +66,7 @@ export default async function importData(options: ImportOptions) {
     "pdfs",
     "schools",
     "statements",
+    "students",
     "teachers",
     "variantMappings",
     "variants",
@@ -77,6 +86,9 @@ export default async function importData(options: ImportOptions) {
   }
   if (options.schools || options.teachers) {
     await importParticipations(db, options);
+  }
+  if (options.students) {
+    await importStudents(db, options);
   }
   if (options.pdfs) {
     await importPdf(bucket, options);
@@ -164,6 +176,22 @@ async function importParticipations(db: Firestore, options: ImportOptions) {
 
     await importCollection(db, "participations", participations, participationConverter, options);
   }
+}
+
+async function importStudents(db: Firestore, options: ImportOptions) {
+  const students = await load(options.dir, "students", studentSchema);
+  const participations = groupBy(students, "participationId");
+  await Promise.all(
+    Object.entries(participations).map(([participationId, students]) =>
+      importCollection(
+        db,
+        `participations/${participationId}/students`,
+        students,
+        studentConverter,
+        options,
+      ),
+    ),
+  );
 }
 
 async function importPdf(bucket: Bucket, options: ImportOptions) {

@@ -40,6 +40,7 @@ export default function firebaseCommand() {
     .option("--pdfs", "Import the pdf files.")
     .option("--schools", "Import the schools.")
     .option("--statements", "Import the statements.")
+    .option("--students", "Import the students.")
     .option("--teachers", "Import the teachers.")
     .option("--variant-mappings", "Import the variant mappings.")
     .option("--variants", "Import the variants.")
