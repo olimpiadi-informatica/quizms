@@ -5,7 +5,7 @@
   "author": "Alessandro Bortolin <bortolin.alessandro@outlook.it>",
   "license": "MIT",
   "scripts": {
-    "prebuild": "yarn lint",
+    "prebuild": "eslint . && prettier --check --cache --log-level=warn src/",
     "build": "NODE_ENV=production node scripts/build.js build",
     "watch": "node scripts/build.js watch",
     "lint": "eslint --fix . && tsc --noEmit && prettier --write --cache --log-level=warn src/",
@@ -220,6 +220,7 @@
       "@typescript-eslint/no-explicit-any": "off",
       "@typescript-eslint/no-non-null-assertion": "off",
       "unicorn/catch-error-name": "off",
+      "unicorn/no-nested-ternary": "off",
       "unicorn/no-null": "off",
       "unicorn/prevent-abbreviations": "off",
       "no-duplicate-imports": "warn",

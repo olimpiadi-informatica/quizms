@@ -51,12 +51,6 @@ export default async function staticExport(options: ExportOptions): Promise<void
             if (id.includes("node_modules/@firebase/")) return "firebase";
             if (id.includes("node_modules/zod/")) return "zod";
             if (id.includes("node_modules/react-dom/")) return "react-dom";
-
-            for (const module of ["rendering", "columns", "widgets"]) {
-              if (id.includes(`node_modules/@ag-grid-community/core/dist/esm/es6/${module}`)) {
-                return `ag-grid`;
-              }
-            }
           },
         },
       },

@@ -93,6 +93,5 @@
    ```
 4. Carica le regole di sicurezza e gli indici:
    ```shell
-   firebase deploy --only firestore
-   firebase deploy --only storage
+   firebase deploy --only firestore,storage
    ```

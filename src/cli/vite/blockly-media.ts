@@ -2,7 +2,6 @@ import { readFile, readdir } from "node:fs/promises";
 import { basename, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import glob from "fast-glob";
 import { PluginOption } from "vite";
 
 export default function blocklyMedia(): PluginOption {
