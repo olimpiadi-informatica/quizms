@@ -24,8 +24,6 @@ export type Schema = Variant["schema"];
 
 export const variantMappingSchema = z.object({ id: z.string(), variant: z.string() });
 
-export type VariantMapping = z.infer<typeof variantMappingSchema>;
-
 export function score(student: Student, variants: Record<string, Variant>) {
   const answers = student.answers;
   const schema = variants[student.variant!]?.schema;
@@ -59,9 +57,9 @@ export function problemScore(problem: Schema[string], answer?: string) {
     return;
   }
 
-  if (answer === undefined || answer === "" || problem.blankOptions?.includes(answer)) {
+  if (answer && problem.blankOptions?.includes(answer)) {
     return problem.pointsBlank;
-  } else if (answer.toUpperCase() === problem.solution.toUpperCase()) {
+  } else if (answer?.toUpperCase() === problem.solution.toUpperCase()) {
     return problem.pointsCorrect;
   } else {
     return problem.pointsWrong;

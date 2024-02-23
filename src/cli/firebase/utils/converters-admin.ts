@@ -1,9 +1,4 @@
-import {
-  DocumentSnapshot,
-  FieldValue,
-  FirestoreDataConverter,
-  Timestamp,
-} from "firebase-admin/firestore";
+import { DocumentSnapshot, FirestoreDataConverter, Timestamp } from "firebase-admin/firestore";
 import { cloneDeepWith, isDate, isString, mapValues, omit } from "lodash-es";
 import z, {
   ZodArray,
@@ -19,8 +14,6 @@ import z, {
 } from "zod";
 
 import {
-  Student,
-  Submission,
   contestSchema,
   participationMappingSchema,
   participationSchema,
@@ -94,25 +87,7 @@ function converter<T extends object>(schema: ZodType<T, any, any>): FirestoreDat
 export const contestConverter = converter(contestSchema);
 export const participationConverter = converter(participationSchema);
 export const participationMappingConverter = converter(participationMappingSchema);
+export const studentConverter = converter(studentSchema);
+export const submissionConverter = converter(submissionSchema);
 export const variantConverter = converter(variantSchema);
 export const variantMappingConverter = converter(variantMappingSchema);
-
-export const studentConverter: FirestoreDataConverter<Student> = {
-  toFirestore(data) {
-    return {
-      ...convertToFirestore(data),
-      updatedAt: FieldValue.serverTimestamp(),
-    };
-  },
-  fromFirestore: (snapshot) => parse(studentSchema, snapshot),
-};
-
-export const submissionConverter: FirestoreDataConverter<Submission> = {
-  toFirestore(data: Submission) {
-    return {
-      ...convertToFirestore(data),
-      submittedAt: FieldValue.serverTimestamp(),
-    };
-  },
-  fromFirestore: (snapshot) => parse(submissionSchema, snapshot),
-};

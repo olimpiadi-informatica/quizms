@@ -32,17 +32,7 @@
   "fieldOverrides": [
     {
       "collectionGroup": "students",
-      "fieldPath": "personalInformation",
-      "indexes": []
-    },
-    {
-      "collectionGroup": "students",
       "fieldPath": "answers",
-      "indexes": []
-    },
-    {
-      "collectionGroup": "students",
-      "fieldPath": "startedAt",
       "indexes": []
     },
     {

@@ -369,6 +369,8 @@ function columnDefinition(
   variants: Record<string, Variant>,
   frozen: boolean,
 ): ColDef[] {
+  const sampleVariant = Object.values(variants)[0];
+
   const widths = {
     xs: 100,
     sm: 125,
@@ -404,6 +406,7 @@ function columnDefinition(
           if (
             i === 0 &&
             field.type === "text" &&
+            data?.updatedAt &&
             !api.getSelectedRows().some((s: Student) => s.id === data?.id) &&
             isStudentIncomplete(data!, contest, variants)
           ) {
@@ -440,19 +443,22 @@ function columnDefinition(
         ),
       sortable: false,
     },
-    ...contest.problemIds.map(
-      (id, i): ColDef => ({
+    ...contest.problemIds.map((id, i): ColDef => {
+      let width = sampleVariant?.schema[id]?.type === "number" ? 100 : 50;
+      if (i % 4 === 3) width += 15;
+
+      return {
         field: `answers[${id}]`,
         headerName: id,
-        width: 50 + (i % 4 === 3 ? 15 : 0),
+        width,
         editable: !frozen,
         valueGetter: ({ data }) => data.answers?.[id],
         tooltipValueGetter: ({ data }) => data.answers?.[id],
         ...defaultOptions,
         sortable: false,
         filter: false,
-      }),
-    ),
+      };
+    }),
     {
       headerName: "Punti",
       pinned: "right",

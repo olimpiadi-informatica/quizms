@@ -218,11 +218,7 @@ export function TeacherAdmin() {
                 {canUndoContest(now, participation) && <StopContestButton />}
               </>
             )}
-            <a /* TODO */
-              className="btn btn-info"
-              href={`./students/#${participation.contestId}`}
-              target="_blank"
-              rel="noreferrer">
+            <a className="btn btn-info" href={`./students/#${participation.contestId}`}>
               Gestisci studenti e risposte
             </a>
           </div>
