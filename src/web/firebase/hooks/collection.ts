@@ -89,23 +89,23 @@ async function setDocument<T extends { id: string }>(
     async (prev) => {
       const docRef = doc(ref, newDoc.id);
       await setDoc(docRef, newDoc);
-      return merge(prev, [newDoc], options);
+      return merge(prev, newDoc, options);
     },
     {
       ...mutationConfig,
-      optimisticData: (prev) => merge(prev, [newDoc], options),
+      optimisticData: (prev) => merge(prev, newDoc, options),
     },
   );
 }
 
 function merge<T extends { id: string }>(
   prev: T[] | undefined,
-  newDocs: T[],
+  newDoc: T,
   options?: CollectionOptions<T>,
 ) {
-  if (!prev) return newDocs;
-  let coll = prev.filter((doc) => !newDocs.some((newDoc) => newDoc.id === doc.id));
-  coll.push(...newDocs);
+  if (!prev) return [newDoc];
+  let coll = prev.filter((doc) => newDoc.id !== doc.id);
+  coll.push(newDoc);
   coll = sortBy(coll, [options?.orderBy ?? "id"]);
   if (options?.limit) coll = coll.slice(0, options.limit);
   return coll;
