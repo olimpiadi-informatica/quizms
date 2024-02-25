@@ -223,6 +223,7 @@
       "unicorn/no-nested-ternary": "off",
       "unicorn/no-null": "off",
       "unicorn/prevent-abbreviations": "off",
+      "unicorn/switch-case-braces": "off",
       "no-duplicate-imports": "warn",
       "no-restricted-imports": [
         "warn",

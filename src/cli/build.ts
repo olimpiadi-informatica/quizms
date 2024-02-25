@@ -53,6 +53,11 @@ export default async function staticExport(options: ExportOptions): Promise<void
             if (id.includes("node_modules/react-dom/")) return "react-dom";
           },
         },
+        treeshake: {
+          moduleSideEffects: (id) => {
+            return !id.includes("node_modules/acorn/");
+          },
+        },
       },
       sourcemap: options.training,
     },

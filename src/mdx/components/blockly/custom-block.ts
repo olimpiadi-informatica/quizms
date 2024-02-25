@@ -1,4 +1,7 @@
+import { Program, parse as rawParse } from "acorn";
 import { z } from "zod";
+
+import order from "./custom-block-order";
 
 const blocklyTypeSchema = z.enum(["Number", "String", "Array", "Boolean"]);
 
@@ -30,21 +33,73 @@ const baseBlockSchema = z.object({
   maxInstances: z.number().optional(),
 });
 
-const statementBlockSchema = baseBlockSchema.extend({
-  // Set null if this block is the last block of a chain
-  nextStatement: z.literal(null).optional(),
-  // Set null if this block is the first block of a chain
-  previousStatement: z.literal(null).optional(),
-  // Code generator for this block
-  js: z.string(),
-});
+const statementBlockSchema = baseBlockSchema
+  .extend({
+    // Set null if this block is the last block of a chain
+    nextStatement: z.literal(null).optional(),
+    // Set null if this block is the first block of a chain
+    previousStatement: z.literal(null).optional(),
+    // Code generator for this block
+    js: z.string(),
+  })
+  .superRefine((block, ctx) => {
+    if (import.meta.env.DEV) {
+      try {
+        parse(block.js);
+      } catch (e) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `Invalid JavaScript code for block \`${block.type}\`: ${(e as SyntaxError).message}`,
+          path: ["js"],
+        });
+      }
+    }
+  });
 
-const expressionBlockSchema = baseBlockSchema.extend({
-  // Type of the block's output
-  output: blocklyTypeSchema,
-  // Code generator for this block
-  js: z.tuple([z.string(), z.string().startsWith("ORDER_")]),
-});
+const expressionBlockSchema = baseBlockSchema
+  .extend({
+    // Type of the block's output
+    output: blocklyTypeSchema,
+    // Code generator for this block
+    js: z.tuple([z.string(), z.string().startsWith("ORDER_")]),
+  })
+  .superRefine((block, ctx) => {
+    if (import.meta.env.DEV) {
+      try {
+        const ast = parse(block.js[0]);
+        if (ast.body.length !== 1 || ast.body[0].type !== "ExpressionStatement") {
+          throw new Error("Must be a single expression");
+        }
+
+        const expression = ast.body[0].expression;
+        const priority = order(expression);
+        if (!priority) {
+          throw new Error(`Unsupported expression: ${expression.type}`);
+        }
+
+        if (priority !== block.js[1]) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: `Invalid priority for block \`${block.type}\`: expected ${priority} but got ${block.js[1]}`,
+            path: ["js", 1],
+          });
+        }
+      } catch (e) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `Invalid JavaScript code for block \`${block.type}\`: ${(e as Error).message}`,
+          path: ["js", 0],
+        });
+      }
+    }
+  });
+
+function parse(js: string): Program {
+  return rawParse(js.replaceAll(/%(\d+)/g, "0, $$$1"), {
+    ecmaVersion: 5,
+    sourceType: "script",
+  });
+}
 
 export const customBlockSchema = z.union([statementBlockSchema, expressionBlockSchema]);
 
