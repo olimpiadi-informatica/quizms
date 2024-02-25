@@ -8,7 +8,7 @@ import type {
 } from "@ag-grid-community/core";
 import { addMinutes, isEqual as isEqualDate } from "date-fns";
 import { cloneDeep, compact, deburr, isString, lowerFirst, set, sumBy } from "lodash-es";
-import { AlertTriangle, FileCheck, Upload, Users } from "lucide-react";
+import { AlertTriangle, Download, FileCheck, Upload, Users } from "lucide-react";
 
 import { Button, Loading, LoadingButtons, Modal, useIsAfter } from "~/components";
 import {
@@ -22,6 +22,7 @@ import {
 import { randomId } from "~/utils/random";
 
 import { useTeacher, useTeacherStudents } from "./provider";
+import Exporter from "./table-exporter";
 import ImportModal from "./table-importer";
 import { agGridLocaleIT } from "./table-locale";
 
@@ -33,6 +34,7 @@ const AgGridReact = lazy(() => import("~/components/ag-grid"));
 export function TeacherTable() {
   const { contest, participation } = useTeacher();
   const importRef = useRef<HTMLDialogElement>(null);
+  const exportRef = useRef<HTMLButtonElement>(null);
   const finalizeRef = useRef<HTMLDialogElement>(null);
 
   return (
@@ -53,6 +55,10 @@ export function TeacherTable() {
             <div className="hidden md:block">Importa studenti</div>
           </button>
         )}
+        <button className="btn btn-primary btn-sm h-10" onClick={() => exportRef.current?.click()}>
+          <Download />
+          <div className="hidden md:block">Esporta</div>
+        </button>
         {!participation.finalized && (
           <button
             className="btn btn-primary btn-sm h-10"
@@ -67,6 +73,7 @@ export function TeacherTable() {
         <Suspense fallback={<Loading />}>
           <Table key={participation.id} />
           <ImportModal ref={importRef} />
+          <Exporter ref={exportRef} />
         </Suspense>
       </div>
     </>
