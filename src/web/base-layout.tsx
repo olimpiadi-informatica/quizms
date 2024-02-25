@@ -1,15 +1,22 @@
-import React, { ReactNode } from "react";
+import React, { Children, ReactNode, isValidElement } from "react";
 
 import classNames from "classnames";
+import { partition } from "lodash-es";
 import { LucideIcon } from "lucide-react";
 import { ErrorBoundary } from "react-error-boundary";
 
 import { Error } from "~/components";
 
 export function BaseLayout({ children }: { children: ReactNode }) {
+  const [navbar, other] = partition(
+    Children.toArray(children),
+    (node) => isValidElement(node) && node.type === Navbar,
+  );
+
   return (
     <div className="fixed inset-0 flex flex-col screen:overflow-y-scroll">
-      <ErrorBoundary FallbackComponent={Error}>{children}</ErrorBoundary>
+      {navbar}
+      <ErrorBoundary FallbackComponent={Error}>{other}</ErrorBoundary>
     </div>
   );
 }
