@@ -288,10 +288,7 @@ function Table() {
     } as Student);
   }
 
-  const colDefs = useMemo(
-    () => columnDefinition(contest, variants, frozen),
-    [contest, variants, frozen],
-  );
+  const colDefs = useMemo(() => columnDefinition(contest, variants), [contest, variants]);
 
   const onCellEditRequest = async (ev: CellEditRequestEvent) => {
     let student = ev.data as Student;
@@ -365,6 +362,7 @@ function Table() {
         getRowId={(row) => (row.data as Student).id}
         columnDefs={colDefs}
         singleClickEdit={true}
+        suppressClickEdit={frozen}
         readOnlyEdit={true}
         rowSelection="single"
         onCellEditRequest={onCellEditRequest}
@@ -385,11 +383,7 @@ function Table() {
   );
 }
 
-function columnDefinition(
-  contest: Contest,
-  variants: Record<string, Variant>,
-  frozen: boolean,
-): ColDef[] {
+function columnDefinition(contest: Contest, variants: Record<string, Variant>): ColDef[] {
   const sampleVariant = Object.values(variants)[0];
 
   const widths = {
@@ -415,7 +409,7 @@ function columnDefinition(
         cellDataType: field.type,
         width: widths[field.size ?? "md"],
         equals: field.type === "date" ? isEqualDate : undefined,
-        editable: contest.allowStudentEdit && !frozen,
+        editable: contest.allowStudentEdit,
         ...defaultOptions,
         tooltipValueGetter: ({ data }: ITooltipParams<Student>) => {
           return isStudentIncomplete(data!, contest, variants);
@@ -443,7 +437,7 @@ function columnDefinition(
       field: "variant",
       headerName: "Variante",
       width: 100,
-      editable: !frozen,
+      editable: true,
       ...defaultOptions,
     },
     (contest.hasVariants || contest.hasOnline) && {
@@ -469,12 +463,10 @@ function columnDefinition(
         field: `answers[${id}]`,
         headerName: id,
         width,
-        editable: !frozen,
         valueGetter: ({ data }) => data.answers?.[id],
         tooltipValueGetter: ({ data }) => data.answers?.[id],
-        ...defaultOptions,
-        sortable: false,
-        filter: false,
+        editable: true,
+        resizable: true,
       };
     }),
     {
@@ -483,7 +475,6 @@ function columnDefinition(
       width: 100,
       valueGetter: ({ data }) => (isStudentEmpty(data) ? "" : score(data, variants)),
       ...defaultOptions,
-      editable: false,
     },
     contest.allowStudentEdit && {
       field: "disabled",
