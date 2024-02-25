@@ -261,7 +261,7 @@ function DownloadPdfButton() {
       }
     }
 
-    const blob = new Blob([await pdf.save()]);
+    const blob = new Blob([await pdf.save()], { type: "application/pdf" });
     saveAs(blob, `${contest.id}-${participation.schoolId}.pdf`);
   };
 

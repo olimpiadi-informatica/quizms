@@ -443,7 +443,7 @@ function columnDefinition(
       field: "variant",
       headerName: "Variante",
       width: 100,
-      editable: contest.allowStudentEdit && !frozen,
+      editable: !frozen,
       ...defaultOptions,
     },
     (contest.hasVariants || contest.hasOnline) && {

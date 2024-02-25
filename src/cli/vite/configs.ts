@@ -10,10 +10,10 @@ import pc from "picocolors";
 import { InlineConfig } from "vite";
 import inspect from "vite-plugin-inspect";
 
-import blocklyMedia from "~/cli/vite/blockly-media";
 import { mdxOptions } from "~/mdx/plugins";
 import { fatal, info, warning } from "~/utils/logs";
 
+import blocklyMedia from "./blockly-media";
 import iframe from "./iframe";
 import images from "./images";
 import python from "./python";
