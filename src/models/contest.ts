@@ -3,6 +3,7 @@ import { parse as parseDate, subMinutes } from "date-fns";
 import { isDate } from "lodash-es";
 import z from "zod";
 
+import { Student } from "~/models/student";
 import { formatDate } from "~/utils/date";
 
 const basePersonalInformation = z.object({
@@ -126,4 +127,17 @@ export function parsePersonalInformation(
       return [date, undefined];
     }
   }
+}
+
+export function formatPersonalInformation(
+  student: Student | undefined,
+  schema: Contest["personalInformation"][number],
+  options?: { dateStyle?: "short" | "long" },
+): string {
+  const value = student?.personalInformation?.[schema?.name];
+  if (value === undefined) return "";
+  if (isDate(value) || schema?.type === "date") {
+    return formatDate(value as Date, { style: options?.dateStyle ?? "long" });
+  }
+  return value.toString();
 }

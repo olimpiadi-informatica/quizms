@@ -11,8 +11,14 @@ import { cloneDeep, compact, deburr, isString, lowerFirst, set, sumBy } from "lo
 import { AlertTriangle, FileCheck, Upload, Users } from "lucide-react";
 
 import { Button, Loading, LoadingButtons, Modal, useIsAfter } from "~/components";
-import { Contest, Student, Variant, parsePersonalInformation, score } from "~/models";
-import { formatDate } from "~/utils/date";
+import {
+  Contest,
+  Student,
+  Variant,
+  formatPersonalInformation,
+  parsePersonalInformation,
+  score,
+} from "~/models";
 import { randomId } from "~/utils/random";
 
 import { useTeacher, useTeacherStudents } from "./provider";
@@ -395,7 +401,7 @@ function columnDefinition(
 
   return compact([
     ...contest.personalInformation.map(
-      (field, i): ColDef => ({
+      (field): ColDef => ({
         field: `personalInformation.${field.name}`,
         headerName: field.label,
         pinned: field.pinned,
@@ -408,12 +414,9 @@ function columnDefinition(
           return isStudentIncomplete(data!, contest, variants);
         },
         cellRenderer: ({ api, data, value }: ICellRendererParams<Student>) => {
-          if (field.type === "date" && value) {
-            return formatDate(value, { style: "short" });
-          }
+          value = formatPersonalInformation(data, field, { dateStyle: "short" });
           if (
-            i === 0 &&
-            field.type === "text" &&
+            field.pinned &&
             data?.updatedAt &&
             !api.getSelectedRows().some((s: Student) => s.id === data?.id) &&
             isStudentIncomplete(data!, contest, variants)

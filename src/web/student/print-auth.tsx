@@ -3,9 +3,8 @@ import React, { ReactNode } from "react";
 import { noop } from "lodash-es";
 import contests from "virtual:quizms-contests";
 
-import { Participation, Student } from "~/models";
+import { Participation, Student, formatPersonalInformation } from "~/models";
 import { GenerationConfig } from "~/models/generation-config";
-import { formatDate } from "~/utils/date";
 
 import { StudentProvider, useStudent } from "./provider";
 import { RemoteStatement } from "./remote-statement";
@@ -83,12 +82,6 @@ export function PrintAuth({ children }: AuthProps) {
   );
 }
 
-function formatField(value: string | number | Date | undefined) {
-  if (value === undefined) return "";
-  if (value instanceof Date) return formatDate(value);
-  return value.toString();
-}
-
 export function PrintForm() {
   const { contest, student } = useStudent();
 
@@ -103,7 +96,7 @@ export function PrintForm() {
             type="text"
             className="input input-bordered w-full max-w-md"
             readOnly
-            value={formatField(student.personalInformation![field.name])}
+            value={formatPersonalInformation(student, field)}
           />
         </div>
       ))}
