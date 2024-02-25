@@ -47,20 +47,28 @@ const ExportModal = forwardRef(function StudentExportModal(
   return (
     <Modal ref={ref} title={`Esporta ${label}`}>
       <div className="flex flex-col gap-3">
-        <div>
-          Stai per esportare i dati di {description} della gara <b>{contest.name}</b>. Questa
-          operazione esegue un grande numero di query al database che richiederà del tempo e potrà
-          incidere sulla fatturazione del progetto.
-        </div>
-        <div className="flex items-center gap-2">
-          <AlertTriangle size={16} className="text-warning" />
-          <span>Per esportare i dati devi usare un browser Chrome o Edge.</span>
-        </div>
-        <div className="flex justify-center">
-          <Button className="btn btn-error" onClick={onExport}>
-            Esporta
-          </Button>
-        </div>
+        {window.showSaveFilePicker === undefined ? (
+          <div className="flex items-center gap-3">
+            <AlertTriangle size={20} className="flex-none text-warning" />
+            <span>
+              Il tuo browser non supporta l&apos;esportazione dei dati. Usa un browser Chrome o
+              Edge.
+            </span>
+          </div>
+        ) : (
+          <>
+            <div>
+              Stai per esportare i dati di {description} della gara <b>{contest.name}</b>. Questa
+              operazione esegue un grande numero di query al database che richiederà del tempo e
+              potrà incidere sulla fatturazione del progetto.
+            </div>
+            <div className="flex justify-center">
+              <Button className="btn btn-error" onClick={onExport}>
+                Esporta
+              </Button>
+            </div>
+          </>
+        )}
       </div>
     </Modal>
   );
