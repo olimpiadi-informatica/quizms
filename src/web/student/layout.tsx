@@ -2,10 +2,10 @@ import React, { ReactNode, Ref, forwardRef, useEffect, useRef } from "react";
 
 import { sumBy } from "lodash-es";
 import { User } from "lucide-react";
-import { ErrorBoundary } from "react-error-boundary";
 
-import { Error, Modal, Progress, Timer } from "~/components";
+import { Modal, Progress, Timer } from "~/components";
 import Prose from "~/mdx/components/prose";
+import { BaseLayout, Navbar } from "~/web/base-layout";
 
 import { useStudent } from "./provider";
 
@@ -32,25 +32,15 @@ export function Layout({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <div className="h-dvh screen:overflow-y-scroll">
-      <div className="navbar sticky top-0 z-20 h-16 justify-between bg-base-300/85 px-3 text-base-content backdrop-blur print:hidden">
-        <div className="dropdown max-w-full flex-none">
-          <div tabIndex={0} role="button" className="btn btn-ghost no-animation w-full flex-nowrap">
-            <User className="flex-none" />
-            <div className="truncate uppercase">
-              {name} {surname}
-            </div>
-          </div>
-          {logout && (
-            <ul className="menu dropdown-content menu-sm z-30 mt-3 w-52 rounded-box bg-base-300 p-2 text-base-content shadow-lg">
-              <li>
-                <button onClick={logout}>Cambia utente</button>
-              </li>
-            </ul>
-          )}
-        </div>
+    <BaseLayout>
+      <Navbar
+        user={`${name} ${surname}`}
+        userIcon={User}
+        logout={logout}
+        color="bg-base-300 text-base-content"
+        flow="flex-row">
         <div className="h-full gap-3">
-          <Progress className="hidden min-w-[5rem] sm:block" percentage={progress}>
+          <Progress className="hidden w-20 sm:block" percentage={progress}>
             {progress}%
           </Progress>
           <div className="flex-none px-3">
@@ -75,15 +65,13 @@ export function Layout({ children }: { children: ReactNode }) {
             )}
           </div>
         </div>
-      </div>
+      </Navbar>
       <SubmitModal ref={submitRef} />
-      <ErrorBoundary FallbackComponent={Error}>
-        <Prose>
-          {contest.name && <h1 className="text-pretty">{contest.name}</h1>}
-          {children}
-        </Prose>
-      </ErrorBoundary>
-    </div>
+      <Prose>
+        {contest.name && <h1 className="text-pretty">{contest.name}</h1>}
+        {children}
+      </Prose>
+    </BaseLayout>
   );
 }
 

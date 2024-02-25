@@ -2,10 +2,10 @@ import React, { ReactNode, Suspense } from "react";
 
 import classNames from "classnames";
 import { ChevronDown, GraduationCap } from "lucide-react";
-import { ErrorBoundary } from "react-error-boundary";
 
-import { Error, Loading } from "~/components";
+import { Loading } from "~/components";
 import { Contest, Participation } from "~/models";
+import { BaseLayout, Navbar } from "~/web/base-layout";
 
 type Props = {
   contests: Contest[];
@@ -17,33 +17,20 @@ type Props = {
 };
 
 export function TeacherLayout({
-  contests,
+  activeParticipation,
   participations,
   activeContest,
-  activeParticipation,
+  contests,
   logout,
   children,
 }: Props) {
   return (
-    <div className="flex h-dvh flex-col">
-      <div className="navbar flex-none flex-row-reverse justify-between bg-primary text-primary-content print:hidden">
-        <div className="dropdown dropdown-end max-w-full flex-none">
-          <div tabIndex={0} role="button" className="btn btn-ghost no-animation w-full flex-nowrap">
-            <GraduationCap className="flex-none" />
-            <div className="truncate">
-              {activeParticipation?.name ?? participations[0]?.name ?? "Scuola invalida"}
-            </div>
-          </div>
-          <ul
-            className={classNames(
-              "menu dropdown-content menu-sm z-30 mt-3 w-52 p-2",
-              "highlight-border rounded-box bg-base-200 text-base-content",
-            )}>
-            <li>
-              <button onClick={logout}>Cambia scuola</button>
-            </li>
-          </ul>
-        </div>
+    <BaseLayout>
+      <Navbar
+        user={activeParticipation?.name ?? participations[0]?.name}
+        userIcon={GraduationCap}
+        logout={logout}
+        color="bg-primary text-primary-content">
         {activeContest && (
           <div className="dropdown max-w-full flex-none">
             <div
@@ -54,11 +41,7 @@ export function TeacherLayout({
               {participations.length > 1 && <ChevronDown className="size-3 flex-none" />}
             </div>
             {participations.length > 1 && (
-              <ul
-                className={classNames(
-                  "menu dropdown-content menu-sm z-30 mt-3 w-52 gap-1 p-2",
-                  "highlight-border rounded-box bg-base-200 text-base-content",
-                )}>
+              <ul className="highlight-border menu dropdown-content menu-sm z-30 mt-3 w-52 gap-1 rounded-box bg-base-200 p-2 text-base-content">
                 {participations.map((p) => {
                   const contest = contests.find((c) => c.id === p.contestId)!;
                   return (
@@ -75,12 +58,8 @@ export function TeacherLayout({
             )}
           </div>
         )}
-      </div>
-      <div className="flex flex-auto flex-col screen:overflow-y-auto">
-        <ErrorBoundary FallbackComponent={Error}>
-          <Suspense fallback={<Loading />}>{children}</Suspense>
-        </ErrorBoundary>
-      </div>
-    </div>
+      </Navbar>
+      <Suspense fallback={<Loading />}>{children}</Suspense>
+    </BaseLayout>
   );
 }
