@@ -8,13 +8,15 @@ export const variantSchema = z.object({
   schema: z.record(
     z.object({
       type: z.enum(["text", "number", "points"]),
-      options: z.string().array().nonempty().optional(),
-      blankOptions: z.string().array().optional(),
+      originalId: z.coerce.string().optional(),
+
+      optionsCorrect: z.string().array().optional(),
+      optionsBlank: z.string().array().optional(),
+      optionsWrong: z.string().array().optional(),
+
       pointsCorrect: z.number().optional(),
       pointsBlank: z.number().optional(),
       pointsWrong: z.number().optional(),
-      solution: z.string().optional(),
-      originalId: z.coerce.string().optional(),
     }),
   ),
 });
@@ -52,14 +54,16 @@ export function problemScore(problem: Schema[string], answer?: string) {
     problem.pointsCorrect === undefined ||
     problem.pointsBlank === undefined ||
     problem.pointsWrong === undefined ||
-    problem.solution === undefined
+    problem.optionsCorrect === undefined
   ) {
     return;
   }
 
-  if (answer && problem.blankOptions?.includes(answer)) {
+  if (answer === undefined) return 0;
+
+  if (problem.optionsBlank?.includes(answer)) {
     return problem.pointsBlank;
-  } else if (answer?.toUpperCase() === problem.solution.toUpperCase()) {
+  } else if (problem.optionsCorrect.includes(answer)) {
     return problem.pointsCorrect;
   } else {
     return problem.pointsWrong;

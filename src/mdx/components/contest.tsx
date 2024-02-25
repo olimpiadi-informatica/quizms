@@ -126,7 +126,7 @@ const CompletedModal = forwardRef(function CompletedModal(
                     <tr key={problem}>
                       <td>{problem}</td>
                       <td>{answer ?? "-"}</td>
-                      <td>{problemSchema.solution}</td>
+                      <td>{problemSchema.optionsCorrect?.join(", ")}</td>
                       <td>{problemScore(problemSchema, answer)}</td>
                     </tr>
                   );

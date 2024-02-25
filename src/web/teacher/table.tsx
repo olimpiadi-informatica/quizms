@@ -302,11 +302,19 @@ function Table() {
       }
 
       const schema = variants[student.variant!]?.schema[subfield];
-      if (!schema?.blankOptions?.includes(value)) {
-        if (schema.type === "number" || schema.type === "points") value = Number(value);
+      const options = [schema?.optionsCorrect, schema?.optionsBlank, schema?.optionsWrong]
+        .filter(Boolean)
+        .flat();
+
+      if (schema && !options.includes(value)) {
+        if (schema.type === "number" || schema.type === "points") {
+          value = Number(value);
+        }
 
         let isValid = true;
-        isValid &&= schema?.options?.includes(value) ?? true;
+        if (schema.type === "text") {
+          isValid = false;
+        }
         if (schema.type === "number" || schema.type === "points") {
           isValid &&= Number.isInteger(value);
         }

@@ -82,7 +82,7 @@ export function Answer({ correct, children }: AnswerProps) {
       pointsCorrect: points[0],
       pointsBlank: points[1],
       pointsWrong: points[2],
-      solution: id,
+      optionsCorrect: [id],
     });
   }, [registerProblem, id, problemId, correct, points]);
 
@@ -151,7 +151,7 @@ export function OpenAnswer({ correct, type }: OpenAnswerProps) {
       pointsCorrect: points[0],
       pointsBlank: points[1],
       pointsWrong: points[2],
-      solution: correct,
+      optionsCorrect: correct ? [correct] : undefined,
     });
   }, [registerProblem, problemId, correct, points]);
 

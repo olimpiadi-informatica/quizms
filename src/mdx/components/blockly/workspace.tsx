@@ -74,7 +74,7 @@ export default function Workspace({
         pointsCorrect: points[0],
         pointsBlank: points[1],
         pointsWrong: points[2],
-        solution: "✅",
+        optionsCorrect: ["✅"],
       });
     }
   }, [registerProblem, id, testcases, points]);

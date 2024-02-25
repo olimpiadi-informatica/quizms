@@ -4,7 +4,7 @@ import { Node } from "estree-toolkit/dist/estree";
 import { countBy, isString, mapKeys } from "lodash-es";
 
 import { Schema } from "~/models";
-import { error, warning } from "~/utils/logs";
+import { error } from "~/utils/logs";
 import { Rng } from "~/utils/random";
 
 export function shuffleAnswers(program: Program, variant: string) {
@@ -110,7 +110,7 @@ export function getSchema(program: Program) {
           pointsCorrect,
           pointsBlank,
           pointsWrong,
-          blankOptions: ["-"],
+          optionsBlank: ["-"],
           originalId: String(originalId),
         };
       }
@@ -118,17 +118,14 @@ export function getSchema(program: Program) {
       if (isQuizmsComponent(comp, "Answer")) {
         const problemSchema = schema[`${id}`];
         const label = String.fromCodePoint(65 + answerId++);
-        if (problemSchema.options) {
-          problemSchema.options!.push(label);
-        } else {
-          problemSchema.options = [label];
-        }
+
         const correct = getPropValue(props, "correct");
         if (correct) {
-          if ("solution" in problemSchema) {
-            warning(`Problem ${id} has multiple solutions.`);
-          }
-          problemSchema.solution = label;
+          problemSchema.optionsCorrect = [label];
+        } else if (problemSchema.optionsWrong) {
+          problemSchema.optionsWrong!.push(label);
+        } else {
+          problemSchema.optionsWrong = [label];
         }
       }
 
@@ -138,10 +135,7 @@ export function getSchema(program: Program) {
         if (!correct || !isString(correct)) {
           error(`Problem ${id} solution must be a non-empty string.`);
         } else {
-          if ("solution" in problemSchema) {
-            warning(`Problem ${id} has multiple solutions.`);
-          }
-          problemSchema.solution = correct;
+          problemSchema.optionsCorrect = [correct];
           if (/^\d+$/.test(correct)) {
             problemSchema.type = "number";
           }
