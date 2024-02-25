@@ -24,6 +24,8 @@ export default function EmailLogin({ method, children }: Props) {
     return children;
   }
 
+  const message = error?.message.match(/^Firebase: (.*) \([/a-z-]+\)\.$/)?.[1] || error?.message;
+
   return (
     <div className="my-8 flex justify-center">
       <form className="max-w-md grow p-4">
@@ -53,7 +55,7 @@ export default function EmailLogin({ method, children }: Props) {
             value={password}
           />
         </div>
-        <span className="pt-1 text-error">{error?.message ?? <>&nbsp;</>}</span>
+        <span className="pt-1 text-error">{message || <>&nbsp;</>}</span>
         <div className="flex justify-center pt-3">
           <Button className="btn-success" onClick={signIn}>
             Accedi
