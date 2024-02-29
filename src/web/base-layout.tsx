@@ -5,7 +5,7 @@ import { partition } from "lodash-es";
 import { LucideIcon } from "lucide-react";
 import { ErrorBoundary } from "react-error-boundary";
 
-import { Error } from "~/components";
+import { Dropdown, DropdownButton, DropdownItem, Error } from "~/components";
 
 export function BaseLayout({ children }: { children: ReactNode }) {
   const [navbar, other] = partition(
@@ -38,19 +38,15 @@ export function Navbar({ color, flow, user, userIcon: UserIcon, logout, children
         flow ?? "flex-row-reverse",
         color,
       )}>
-      <div className="dropdown dropdown-end max-w-full flex-none">
-        <div tabIndex={0} role="button" className="btn btn-ghost no-animation w-full flex-nowrap">
-          <UserIcon className="flex-none" />
+      <Dropdown align="dropdown-end">
+        <DropdownButton>
+          <UserIcon />
           <div className="truncate uppercase">{user ?? "Utente anonimo"}</div>
-        </div>
-        {logout && (
-          <ul className="highlight-border menu dropdown-content menu-sm z-30 mt-3 w-52 rounded-box bg-base-200 p-2 text-base-content">
-            <li>
-              <button onClick={logout}>Cambia utente</button>
-            </li>
-          </ul>
-        )}
-      </div>
+        </DropdownButton>
+        <DropdownItem hidden={!logout}>
+          <button onClick={logout}>Cambia utente</button>
+        </DropdownItem>
+      </Dropdown>
       {children}
     </div>
   );
