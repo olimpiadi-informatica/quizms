@@ -8,13 +8,14 @@ type ContextProps = {
 };
 
 const LoadingButtonsContext = createContext<ContextProps>({});
+LoadingButtonsContext.displayName = "LoadingButtonsContext";
 
-export function LoadingButtons({ children }: { children: ReactNode }) {
+export function Buttons({ className, children }: { className?: string; children: ReactNode }) {
   const [contextLoading, setContextLoading] = useState<string>();
 
   return (
     <LoadingButtonsContext.Provider value={{ contextLoading, setContextLoading }}>
-      {children}
+      <div className={classNames("flex justify-center gap-3", className)}>{children}</div>
     </LoadingButtonsContext.Provider>
   );
 }

@@ -10,7 +10,7 @@ import {
 import { saveAs } from "file-saver";
 import { range } from "lodash-es";
 
-import { Button, Card, LoadingButtons, Modal, Timer, useIsAfter, useTime } from "~/components";
+import { Button, Buttons, Card, Modal, Timer, useIsAfter, useTime } from "~/components";
 import { Contest, Participation } from "~/models";
 import { formatDate, formatTime } from "~/utils/date";
 import { randomToken } from "~/utils/random";
@@ -49,22 +49,20 @@ function StartContestButton() {
 
   return (
     <>
-      <button className="btn btn-success" onClick={() => modalRef.current?.showModal()}>
+      <Button className="btn-success" onClick={() => modalRef.current?.showModal()}>
         Inizia prova online
-      </button>
+      </Button>
       <Modal ref={modalRef} title="Conferma">
         <p>Sei sicuro di voler iniziare la gara?</p>
         <span className="pt-1 text-error">
           {error?.message ? `Errore: ${error?.message}` : <>&nbsp;</>}
         </span>
-        <div className="mt-3 flex flex-row justify-center gap-3">
-          <LoadingButtons>
-            <Button className="btn-info">Annulla</Button>
-            <Button className="btn-warning" onClick={start}>
-              Conferma
-            </Button>
-          </LoadingButtons>
-        </div>
+        <Buttons className="mt-3">
+          <Button className="btn-info">Annulla</Button>
+          <Button className="btn-warning" onClick={start}>
+            Conferma
+          </Button>
+        </Buttons>
       </Modal>
     </>
   );
@@ -85,22 +83,20 @@ function StopContestButton() {
 
   return (
     <>
-      <button className="btn btn-error" onClick={() => modalRef.current?.showModal()}>
+      <Button className="btn-error" onClick={() => modalRef.current?.showModal()}>
         Annulla inizio gara
-      </button>
+      </Button>
       <Modal ref={modalRef} title="Conferma">
         <p>Sei sicuro di voler annullare l&apos;inizio della gara?</p>
         <span className="pt-1 text-error">
           {error?.message ? `Errore: ${error?.message}` : <>&nbsp;</>}
         </span>
-        <div className="mt-3 flex flex-row justify-center gap-3">
-          <LoadingButtons>
-            <Button className="btn-info">Annulla</Button>
-            <Button className="btn-warning" onClick={undoContestStart}>
-              Conferma
-            </Button>
-          </LoadingButtons>
-        </div>
+        <Buttons className="mt-3">
+          <Button className="btn-info">Annulla</Button>
+          <Button className="btn-warning" onClick={undoContestStart}>
+            Conferma
+          </Button>
+        </Buttons>
       </Modal>
     </>
   );
@@ -190,27 +186,24 @@ export function TeacherAdmin() {
           </div>
         )}
         {contest.hasPdf && (
-          <div className="not-prose mt-2 flex justify-center">
+          <Buttons className="not-prose mt-2">
             <DownloadPdfButton />
-          </div>
+          </Buttons>
         )}
       </Card>
       <Card title="Gestione Gara">
         {/* contest data */}
         {contest.hasOnline &&
           (participation.startingTime ? <ContestData /> : <p>La gara non è ancora iniziata!</p>)}
-        <div className="mt-2 flex flex-wrap justify-center gap-3">
-          {contest.hasOnline && (
-            /* contest buttons */
-            <>
-              {canStartContest(now, participation, contest) && <StartContestButton />}
-              {canUndoContest(now, participation) && <StopContestButton />}
-            </>
+        <Buttons className="mt-2 flex-wrap">
+          {contest.hasOnline && canStartContest(now, participation, contest) && (
+            <StartContestButton />
           )}
+          {contest.hasOnline && canUndoContest(now, participation) && <StopContestButton />}
           <a className="btn btn-info" href={`./students/#${participation.contestId}`}>
             Gestisci studenti e risposte
           </a>
-        </div>
+        </Buttons>
       </Card>
       {contest.hasOnline && (
         <Card title="Richieste di accesso">

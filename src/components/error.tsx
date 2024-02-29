@@ -3,6 +3,8 @@ import React, { useEffect } from "react";
 import { RotateCw } from "lucide-react";
 import { FallbackProps } from "react-error-boundary";
 
+import { Button, Buttons } from "~/components";
+
 export function Error({ error, resetErrorBoundary }: Partial<FallbackProps>) {
   useEffect(() => {
     if (import.meta.hot) {
@@ -19,12 +21,12 @@ export function Error({ error, resetErrorBoundary }: Partial<FallbackProps>) {
     <div className="flex size-full flex-col items-center justify-center">
       <p className="mx-8 break-words text-center text-error">Errore: {error.message}</p>
       {resetErrorBoundary && (
-        <div className="mt-5 flex flex-row justify-center">
-          <button className="btn btn-error" onClick={resetErrorBoundary}>
+        <Buttons className="mt-5">
+          <Button className="btn-error" onClick={resetErrorBoundary}>
             <RotateCw />
             Ricarica
-          </button>
-        </div>
+          </Button>
+        </Buttons>
       )}
     </div>
   );

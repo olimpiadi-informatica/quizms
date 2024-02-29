@@ -3,7 +3,7 @@ import React, { Ref, forwardRef, useRef } from "react";
 import { DocumentSnapshot, Firestore, FirestoreDataConverter, getDocs } from "firebase/firestore";
 import { AlertTriangle } from "lucide-react";
 
-import { Button, Modal } from "~/components";
+import { Button, Buttons, Modal } from "~/components";
 import { useDb } from "~/web/firebase/base-login";
 import query, { QueryOption } from "~/web/firebase/query";
 
@@ -62,11 +62,11 @@ const ExportModal = forwardRef(function StudentExportModal(
               operazione esegue un grande numero di query al database che richiederà del tempo e
               potrà incidere sulla fatturazione del progetto.
             </div>
-            <div className="flex justify-center">
-              <Button className="btn btn-error" onClick={onExport}>
+            <Buttons>
+              <Button className="btn-error" onClick={onExport}>
                 Esporta
               </Button>
-            </div>
+            </Buttons>
           </>
         )}
       </div>

@@ -1,6 +1,6 @@
 import React, { Suspense } from "react";
 
-import { Card, Loading } from "~/components";
+import { Buttons, Card, Loading } from "~/components";
 import { Participation, Student } from "~/models";
 import { participationConverter, studentConverter } from "~/web/firebase/converters";
 import { useCount } from "~/web/firebase/hooks/count";
@@ -29,7 +29,7 @@ export function Admin() {
         </div>
       </Card>
       <Card title="Esportazione">
-        <div className="flex justify-center gap-5">
+        <Buttons>
           <Export
             label="scuole"
             description="tutte le scuole"
@@ -47,7 +47,7 @@ export function Admin() {
               group: true,
             }}
           />
-        </div>
+        </Buttons>
       </Card>
     </div>
   );

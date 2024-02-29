@@ -3,7 +3,7 @@ import React, { Suspense, useRef, useState } from "react";
 import { groupBy, sortBy } from "lodash-es";
 import { Check, X } from "lucide-react";
 
-import { Button, Modal } from "~/components";
+import { Button, Buttons, Modal } from "~/components";
 import { StudentRestore } from "~/models";
 import { hash } from "~/utils/random";
 
@@ -71,14 +71,14 @@ function StudentRestoreEntry({
               className="input input-bordered w-full"
             />
           </label>
-          <div className="mt-3 flex flex-row justify-center gap-3">
+          <Buttons className="mt-3">
             <Button
               className="btn-error"
               onClick={approveRequest}
               disabled={!targetCodes.includes(code)}>
               Approva
             </Button>
-          </div>
+          </Buttons>
         </Modal>
       </td>
     </tr>

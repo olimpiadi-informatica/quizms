@@ -13,7 +13,7 @@ import React, {
 
 import { noop, sumBy } from "lodash-es";
 
-import { Modal } from "~/components";
+import { Button, Buttons, Modal } from "~/components";
 import { Schema, problemScore, score } from "~/models";
 import { randomId } from "~/utils/random";
 import { useStudent } from "~/web/student/provider";
@@ -58,12 +58,12 @@ export function Contest({ children }: { children: ReactNode }) {
     };
 
     return (
-      <div className="flex h-[50vh] justify-center">
-        <div className="flex flex-col justify-center">
-          <button className="btn btn-success btn-lg" onClick={start}>
+      <div className="flex h-[50vh] flex-col justify-center">
+        <Buttons>
+          <Button className="btn-success btn-lg" onClick={start}>
             Inizia
-          </button>
-        </div>
+          </Button>
+        </Buttons>
       </div>
     );
   }

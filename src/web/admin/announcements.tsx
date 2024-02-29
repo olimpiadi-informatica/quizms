@@ -2,7 +2,7 @@ import React, { ChangeEvent, Fragment, Ref, forwardRef, useRef, useState } from 
 
 import { AlertTriangle, Info, XCircle } from "lucide-react";
 
-import { Button, Modal } from "~/components";
+import { Button, Buttons, Modal } from "~/components";
 import { Announcement } from "~/models";
 import { formatDate, formatTime } from "~/utils/date";
 import { randomId } from "~/utils/random";
@@ -25,12 +25,12 @@ export default function Announcements() {
 
   return (
     <>
-      <div className="flex justify-center">
-        <button className="btn btn-error" onClick={() => ref.current?.showModal()}>
+      <Buttons>
+        <Button className="btn-error" onClick={() => ref.current?.showModal()}>
           Aggiungi comunicazione
-        </button>
+        </Button>
         <AnnouncementModal ref={ref} addAnnouncement={addAnnouncement} />
-      </div>
+      </Buttons>
       <div className="prose mt-4 max-w-none">
         {announcements.map((announcement) => (
           <Fragment key={announcement.id}>
@@ -129,11 +129,11 @@ const AnnouncementModal = forwardRef(function AnnouncementModal(
           />
         </label>
 
-        <div className="flex justify-center">
-          <Button className="btn btn-error" onClick={() => finalize()}>
+        <Buttons>
+          <Button className="btn-error" onClick={() => finalize()}>
             Aggiungi
           </Button>
-        </div>
+        </Buttons>
       </div>
     </Modal>
   );

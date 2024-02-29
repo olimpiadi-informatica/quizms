@@ -3,7 +3,7 @@ import React, { ReactNode, Ref, forwardRef, useEffect, useRef } from "react";
 import { sumBy } from "lodash-es";
 import { User } from "lucide-react";
 
-import { Modal, Progress, Timer } from "~/components";
+import { Button, Buttons, Modal, Progress, Timer } from "~/components";
 import Prose from "~/mdx/components/prose";
 import { BaseLayout, Navbar } from "~/web/base-layout";
 
@@ -81,12 +81,12 @@ const SubmitModal = forwardRef(function SubmitModal(_, ref: Ref<HTMLDialogElemen
   return (
     <Modal ref={ref} title="Confermi di voler terminare?">
       <p>Confermando non potrai più modificare le tue risposte.</p>
-      <div className="mt-3 flex flex-row justify-center gap-5">
-        <button className="btn btn-info">Annulla</button>
-        <button className="btn btn-error" onClick={() => submit()}>
+      <Buttons className="mt-3">
+        <Button className="btn-info">Annulla</Button>
+        <Button className="btn-error" onClick={() => submit()}>
           Conferma
-        </button>
-      </div>
+        </Button>
+      </Buttons>
     </Modal>
   );
 });

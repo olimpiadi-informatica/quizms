@@ -2,7 +2,7 @@ import React, { ReactNode, useState } from "react";
 
 import { startCase } from "lodash-es";
 
-import { Button } from "~/components/button";
+import { Button, Buttons } from "~/components";
 
 import { usePrecompiledPasswordAuth, useSignInWithPassword } from "./hooks";
 
@@ -56,11 +56,11 @@ export default function EmailLogin({ method, children }: Props) {
           />
         </div>
         <span className="pt-1 text-error">{message || <>&nbsp;</>}</span>
-        <div className="flex justify-center pt-3">
+        <Buttons className="pt-3">
           <Button className="btn-success" onClick={signIn}>
             Accedi
           </Button>
-        </div>
+        </Buttons>
       </form>
     </div>
   );

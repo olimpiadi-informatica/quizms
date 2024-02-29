@@ -17,7 +17,7 @@ import {
 import { defer, isDate, isEqual } from "lodash-es";
 import { AlertCircle } from "lucide-react";
 
-import { Button, Modal, useIsAfter, useTime } from "~/components";
+import { Button, Buttons, Modal, useIsAfter, useTime } from "~/components";
 import { Contest, Student, parsePersonalInformation, studentHash } from "~/models";
 import { hash, randomId } from "~/utils/random";
 import { StudentProvider } from "~/web/student/provider";
@@ -210,11 +210,11 @@ function StudentLoginInner({
               <p className="pt-3 text-error">
                 {error ? <>Errore: {error.message}</> : <>&nbsp;</>}
               </p>
-              <div className="flex justify-center pt-1">
+              <Buttons className="pt-1">
                 <Button className="btn-success" onClick={start} disabled={loading || !completed}>
                   Inizia
                 </Button>
-              </div>
+              </Buttons>
             </>
           )}
         </form>

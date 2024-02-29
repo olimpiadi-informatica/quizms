@@ -10,7 +10,7 @@ import { addMinutes, isEqual as isEqualDate } from "date-fns";
 import { cloneDeep, compact, deburr, isString, lowerFirst, set, sumBy } from "lodash-es";
 import { AlertTriangle, Download, FileCheck, Upload, Users } from "lucide-react";
 
-import { Button, Loading, LoadingButtons, Modal, useIsAfter } from "~/components";
+import { Button, Buttons, Loading, Modal, useIsAfter } from "~/components";
 import {
   Contest,
   Student,
@@ -181,18 +181,13 @@ const FinalizeModal = forwardRef(function FinalizeModal(
               onChange={(e) => setConfirm(e.target.value)}
             />
           </p>
-          <div className="flex justify-center gap-5">
-            <LoadingButtons>
-              <Button className="btn-neutral">Annulla</Button>
-              <Button
-                className="btn-error"
-                onClick={finalize}
-                disabled={confirm !== correctConfirm}>
-                <AlertTriangle />
-                Conferma
-              </Button>
-            </LoadingButtons>
-          </div>
+          <Buttons>
+            <Button className="btn-neutral">Annulla</Button>
+            <Button className="btn-error" onClick={finalize} disabled={confirm !== correctConfirm}>
+              <AlertTriangle />
+              Conferma
+            </Button>
+          </Buttons>
         </div>
       )}
     </Modal>
@@ -244,12 +239,12 @@ const DeleteModal = forwardRef(function DeleteModal(
             <span className="label-text">Non mostrarmi più questo pop-up</span>
           </label>
         </div>
-        <div className="flex justify-center gap-5">
+        <Buttons>
           <Button className="btn-info">Annulla</Button>
           <Button className="btn-warning" onClick={() => confirm()}>
             Continua
           </Button>
-        </div>
+        </Buttons>
       </div>
     </Modal>
   );
