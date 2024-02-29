@@ -3,20 +3,26 @@ import React, { Ref, forwardRef } from "react";
 import { saveAs } from "file-saver";
 import { unparse as stringifyCSV } from "papaparse";
 
-import { Contest, Student, formatPersonalInformation } from "~/models";
+import { Contest, Student, Variant, formatPersonalInformation, score } from "~/models";
 
 import { useTeacher, useTeacherStudents } from "./provider";
 
 const Exporter = forwardRef(function Exporter(_, ref: Ref<HTMLButtonElement> | null) {
-  const { contest } = useTeacher();
+  const { contest, variants } = useTeacher();
   const [students] = useTeacherStudents();
 
-  return <button ref={ref} className="hidden" onClick={() => exportStudents(students, contest)} />;
+  return (
+    <button
+      ref={ref}
+      className="hidden"
+      onClick={() => exportStudents(students, contest, variants)}
+    />
+  );
 });
 
 export default Exporter;
 
-function exportStudents(students: Student[], contest: Contest) {
+function exportStudents(students: Student[], contest: Contest, variants: Record<string, Variant>) {
   const flatStudents = students.map((student) => {
     return [
       ...contest.personalInformation.map((field) =>
@@ -24,6 +30,7 @@ function exportStudents(students: Student[], contest: Contest) {
       ),
       ...(contest.hasVariants ? [student.variant] : []),
       ...contest.problemIds.map((id) => student.answers?.[id]),
+      score(student, variants),
     ];
   });
 
@@ -31,6 +38,7 @@ function exportStudents(students: Student[], contest: Contest) {
     ...contest.personalInformation.map((field) => field.label),
     ...(contest.hasVariants ? ["Variante"] : []),
     ...contest.problemIds,
+    "Punteggio",
   ]);
 
   const csv = stringifyCSV(flatStudents, {
