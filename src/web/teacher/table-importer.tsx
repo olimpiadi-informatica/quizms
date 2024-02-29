@@ -4,7 +4,7 @@ import { ArrowUpFromLine } from "lucide-react";
 import { parse as parseCSV } from "papaparse";
 import z from "zod";
 
-import { Button, Modal } from "~/components";
+import { Button, Buttons, Modal } from "~/components";
 import {
   Contest,
   Participation,
@@ -48,32 +48,19 @@ const ImportModal = forwardRef(function ImportModal(_props, ref: Ref<HTMLDialogE
     return formatDate(date, { format: dateFormat });
   }, [dateFormat]);
 
-  const [file, setFile] = useState<string>();
-  const [error, setError] = useState<Error>();
+  const [file, setFile] = useState<File>();
 
   const { variants } = useTeacher();
   const [, setStudent] = useTeacherStudents();
 
-  const onChange = async (file?: File) => {
-    setError(undefined);
+  const onClick = async () => {
     try {
       const text = await file?.text();
-      setFile(text);
-    } catch (e) {
-      setError(e as Error);
-    }
-  };
-
-  const onClick = async () => {
-    setError(undefined);
-    try {
-      await importStudents(file ?? "", contest, variants, participation, setStudent, dateFormat);
+      await importStudents(text ?? "", contest, variants, participation, setStudent, dateFormat);
       if (ref && "current" in ref) {
         ref.current?.close();
       }
-    } catch (e) {
-      setFile(undefined);
-      setError(e as Error);
+    } finally {
       if (inputRef.current) {
         inputRef.current.value = "";
       }
@@ -118,13 +105,18 @@ const ImportModal = forwardRef(function ImportModal(_props, ref: Ref<HTMLDialogE
             type="file"
             className="file-input file-input-bordered file-input-primary max-w-full"
             accept="text/csv"
-            onChange={(e) => onChange(e.target.files?.[0])}
+            onChange={(e) => setFile(e.target.files?.[0])}
           />
-          <Button className="btn-primary" icon={ArrowUpFromLine} onClick={onClick} disabled={!file}>
-            Importa
-          </Button>
+          <Buttons showError>
+            <Button
+              className="btn-primary"
+              icon={ArrowUpFromLine}
+              onClick={onClick}
+              disabled={!file}>
+              Importa
+            </Button>
+          </Buttons>
         </div>
-        <div className="text-error">{error?.message}</div>
       </div>
     </Modal>
   );

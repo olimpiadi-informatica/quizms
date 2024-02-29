@@ -1,6 +1,3 @@
-import { useCallback, useState } from "react";
-
-import { FirebaseError } from "firebase/app";
 import {
   User,
   getAuth,
@@ -73,25 +70,4 @@ export function useAnonymousAuth() {
 
   if (!user) throw mutate();
   return user;
-}
-
-export function useSignInWithPassword() {
-  const db = useDb();
-  const auth = getAuth(db.app);
-
-  const [error, setError] = useState<FirebaseError>();
-
-  const signInWithPassword = useCallback(
-    async (email: string, password: string) => {
-      setError(undefined);
-      try {
-        await signInWithEmailAndPassword(auth, email, password);
-      } catch (error) {
-        setError(error as FirebaseError);
-      }
-    },
-    [auth],
-  );
-
-  return { signInWithPassword, error };
 }

@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef } from "react";
 
 import {
   addMinutes,
@@ -34,17 +34,12 @@ function StartContestButton() {
   const { participation, setParticipation } = useTeacher();
 
   const modalRef = useRef<HTMLDialogElement>(null);
-  const [error, setError] = useState<Error>();
   const getNow = useTime();
 
   const start = async () => {
-    try {
-      const token = await randomToken();
-      const startingTime = roundToNearestMinutes(addSeconds(getNow(), 3.5 * 60));
-      await setParticipation({ ...participation, token, startingTime });
-    } catch (e) {
-      setError(e as Error);
-    }
+    const token = await randomToken();
+    const startingTime = roundToNearestMinutes(addSeconds(getNow(), 3.5 * 60));
+    await setParticipation({ ...participation, token, startingTime });
   };
 
   return (
@@ -54,10 +49,7 @@ function StartContestButton() {
       </Button>
       <Modal ref={modalRef} title="Conferma">
         <p>Sei sicuro di voler iniziare la gara?</p>
-        <span className="pt-1 text-error">
-          {error?.message ? `Errore: ${error?.message}` : <>&nbsp;</>}
-        </span>
-        <Buttons className="mt-3">
+        <Buttons className="mt-3" showError>
           <Button className="btn-info">Annulla</Button>
           <Button className="btn-warning" onClick={start}>
             Conferma
@@ -71,15 +63,9 @@ function StartContestButton() {
 function StopContestButton() {
   const { participation, setParticipation } = useTeacher();
   const modalRef = useRef<HTMLDialogElement>(null);
-  const [error, setError] = useState<Error>();
 
-  const undoContestStart = async () => {
-    try {
-      await setParticipation({ ...participation, token: undefined, startingTime: undefined });
-    } catch (e) {
-      setError(e as Error);
-    }
-  };
+  const undoContestStart = () =>
+    setParticipation({ ...participation, token: undefined, startingTime: undefined });
 
   return (
     <>
@@ -88,10 +74,7 @@ function StopContestButton() {
       </Button>
       <Modal ref={modalRef} title="Conferma">
         <p>Sei sicuro di voler annullare l&apos;inizio della gara?</p>
-        <span className="pt-1 text-error">
-          {error?.message ? `Errore: ${error?.message}` : <>&nbsp;</>}
-        </span>
-        <Buttons className="mt-3">
+        <Buttons className="mt-1" showError>
           <Button className="btn-info">Annulla</Button>
           <Button className="btn-warning" onClick={undoContestStart}>
             Conferma
@@ -186,7 +169,7 @@ export function TeacherAdmin() {
           </div>
         )}
         {contest.hasPdf && (
-          <Buttons className="not-prose mt-2">
+          <Buttons className="mt-2">
             <DownloadPdfButton />
           </Buttons>
         )}
@@ -195,7 +178,7 @@ export function TeacherAdmin() {
         {/* contest data */}
         {contest.hasOnline &&
           (participation.startingTime ? <ContestData /> : <p>La gara non è ancora iniziata!</p>)}
-        <Buttons className="mt-2 flex-wrap">
+        <Buttons className="mt-2">
           {contest.hasOnline && canStartContest(now, participation, contest) && (
             <StartContestButton />
           )}

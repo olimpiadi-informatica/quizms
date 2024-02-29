@@ -106,7 +106,6 @@ function StudentLoginInner({
   });
   const contest = contests.find((c) => c.id === student.contestId);
 
-  const [error, setError] = useState<Error>();
   const [loading, setLoading] = useState(false);
   const modalRef = useRef<HTMLDialogElement>(null);
 
@@ -130,23 +129,18 @@ function StudentLoginInner({
 
   const start = async () => {
     setLoading(true);
-    setError(undefined);
     try {
       await createStudent(db, { ...student });
     } catch (e) {
       if (e instanceof DuplicateStudentError) {
-        try {
-          await createStudentRestore(db, {
-            ...student,
-            id: e.studentId,
-            participationId: e.participationId,
-          });
-          modalRef.current?.showModal();
-        } catch (e) {
-          setError(e as Error);
-        }
+        await createStudentRestore(db, {
+          ...student,
+          id: e.studentId,
+          participationId: e.participationId,
+        });
+        modalRef.current?.showModal();
       } else {
-        setError(e as Error);
+        throw e;
       }
       setLoading(false);
     }
@@ -207,10 +201,7 @@ function StudentLoginInner({
                   required
                 />
               </div>
-              <p className="pt-3 text-error">
-                {error ? <>Errore: {error.message}</> : <>&nbsp;</>}
-              </p>
-              <Buttons className="pt-1">
+              <Buttons className="pt-3" showError>
                 <Button className="btn-success" onClick={start} disabled={loading || !completed}>
                   Inizia
                 </Button>

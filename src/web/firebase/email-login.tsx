@@ -1,10 +1,12 @@
 import React, { ReactNode, useState } from "react";
 
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { startCase } from "lodash-es";
 
 import { Button, Buttons } from "~/components";
 
-import { usePrecompiledPasswordAuth, useSignInWithPassword } from "./hooks";
+import { useDb } from "./base-login";
+import { usePrecompiledPasswordAuth } from "./hooks";
 
 type Props = {
   method: "email" | "username";
@@ -12,19 +14,25 @@ type Props = {
 };
 
 export default function EmailLogin({ method, children }: Props) {
-  const { signInWithPassword, error } = useSignInWithPassword();
+  const db = useDb();
+
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const signIn = () =>
-    signInWithPassword(method === "email" ? username : `${username}@teacher.edu`, password);
+
+  const signIn = async () => {
+    const auth = getAuth(db.app);
+    await signInWithEmailAndPassword(
+      auth,
+      method === "email" ? username : `${username}@teacher.edu`,
+      password,
+    );
+  };
 
   const user = usePrecompiledPasswordAuth();
 
   if (user?.emailVerified) {
     return children;
   }
-
-  const message = error?.message.match(/^Firebase: (.*) \([/a-z-]+\)\.$/)?.[1] || error?.message;
 
   return (
     <div className="my-8 flex justify-center">
@@ -55,8 +63,7 @@ export default function EmailLogin({ method, children }: Props) {
             value={password}
           />
         </div>
-        <span className="pt-1 text-error">{message || <>&nbsp;</>}</span>
-        <Buttons className="pt-3">
+        <Buttons className="pt-3" showError>
           <Button className="btn-success" onClick={signIn}>
             Accedi
           </Button>
