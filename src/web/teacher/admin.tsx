@@ -10,7 +10,7 @@ import {
 import { saveAs } from "file-saver";
 import { range } from "lodash-es";
 
-import { Button, LoadingButtons, Modal, Timer, useIsAfter, useTime } from "~/components";
+import { Button, Card, LoadingButtons, Modal, Timer, useIsAfter, useTime } from "~/components";
 import { Contest, Participation } from "~/models";
 import { formatDate, formatTime } from "~/utils/date";
 import { randomToken } from "~/utils/random";
@@ -178,59 +178,46 @@ export function TeacherAdmin() {
 
   return (
     <div className="flex flex-col gap-5 p-5">
-      <div className="highlight-border card bg-base-200">
-        <div className="card-body">
-          <h2 className="card-title">Comunicazioni</h2>
-          <Announcements />
-        </div>
-      </div>
-
-      <div className="highlight-border card bg-base-200">
-        <div className="card-body">
-          <h2 className="card-title">Informazioni Gara</h2>
-          <div className="prose mb-2 max-w-none whitespace-pre-wrap">{contest.instructions}</div>
-          {/* contest info */}
-          {contest.hasOnline && (
-            <div className="font-bold">
-              La gara si potrà svolgere dalle {formatTime(contest.contestWindowStart)} alle{" "}
-              {formatTime(contest.contestWindowEnd)} del {formatDate(contest.contestWindowStart)}.
-            </div>
-          )}
-          {contest.hasPdf && (
-            <div className="not-prose mt-2 flex justify-center">
-              <DownloadPdfButton />
-            </div>
-          )}
-        </div>
-      </div>
-
-      <div className="highlight-border card bg-base-200">
-        <div className="card-body">
-          <h2 className="card-title">Gestione Gara</h2>
-          {/* contest data */}
-          {contest.hasOnline &&
-            (participation.startingTime ? <ContestData /> : <p>La gara non è ancora iniziata!</p>)}
-          <div className="mt-2 flex flex-wrap justify-center gap-3">
-            {contest.hasOnline && (
-              /* contest buttons */
-              <>
-                {canStartContest(now, participation, contest) && <StartContestButton />}
-                {canUndoContest(now, participation) && <StopContestButton />}
-              </>
-            )}
-            <a className="btn btn-info" href={`./students/#${participation.contestId}`}>
-              Gestisci studenti e risposte
-            </a>
+      <Card title="Comunicazioni">
+        <Announcements />
+      </Card>
+      <Card title="Informazioni Gara">
+        <div className="prose mb-2 max-w-none whitespace-pre-wrap">{contest.instructions}</div>
+        {contest.hasOnline && (
+          <div className="font-bold">
+            La gara si potrà svolgere dalle {formatTime(contest.contestWindowStart)} alle{" "}
+            {formatTime(contest.contestWindowEnd)} del {formatDate(contest.contestWindowStart)}.
           </div>
+        )}
+        {contest.hasPdf && (
+          <div className="not-prose mt-2 flex justify-center">
+            <DownloadPdfButton />
+          </div>
+        )}
+      </Card>
+      <Card title="Gestione Gara">
+        {/* contest data */}
+        {contest.hasOnline &&
+          (participation.startingTime ? <ContestData /> : <p>La gara non è ancora iniziata!</p>)}
+        <div className="mt-2 flex flex-wrap justify-center gap-3">
+          {contest.hasOnline && (
+            /* contest buttons */
+            <>
+              {canStartContest(now, participation, contest) && <StartContestButton />}
+              {canUndoContest(now, participation) && <StopContestButton />}
+            </>
+          )}
+          <a className="btn btn-info" href={`./students/#${participation.contestId}`}>
+            Gestisci studenti e risposte
+          </a>
         </div>
-      </div>
+      </Card>
       {contest.hasOnline && (
-        <div className="highlight-border card bg-base-200">
-          <div className="card-body h-[28rem] max-h-screen">
-            <h2 className="card-title">Richieste di accesso</h2>
+        <Card title="Richieste di accesso">
+          <div className="h-96 max-h-screen">
             <StudentRestoreList />
           </div>
-        </div>
+        </Card>
       )}
     </div>
   );

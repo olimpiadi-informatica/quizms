@@ -1,6 +1,6 @@
 import React, { Suspense } from "react";
 
-import { Loading } from "~/components";
+import { Card, Loading } from "~/components";
 import { Participation, Student } from "~/models";
 import { participationConverter, studentConverter } from "~/web/firebase/converters";
 import { useCount } from "~/web/firebase/hooks/count";
@@ -15,50 +15,40 @@ export function Admin() {
 
   return (
     <div className="flex flex-col gap-5 p-5">
-      <div className="highlight-border card bg-base-200">
-        <div className="card-body">
-          <h2 className="card-title">Impostazioni gara</h2>
-          <ContestSettings />
-        </div>
-      </div>
-      <div className="highlight-border card bg-base-200">
-        <div className="card-body">
-          <h2 className="card-title">Comunicazioni</h2>
-          <Announcements />
-        </div>
-      </div>
-      <div className="highlight-border card bg-base-200">
-        <div className="card-body h-44">
-          <h2 className="card-title">Statistiche</h2>
+      <Card title="Impostazioni gara">
+        <ContestSettings />
+      </Card>
+      <Card title="Comunicazioni">
+        <Announcements />
+      </Card>
+      <Card title="Statistiche">
+        <div className="h-20">
           <Suspense fallback={<Loading />}>
             <ContestInformation />
           </Suspense>
         </div>
-      </div>
-      <div className="highlight-border card bg-base-200">
-        <div className="card-body">
-          <h2 className="card-title">Esportazione</h2>
-          <div className="flex justify-center gap-5">
-            <Export
-              label="scuole"
-              description="tutte le scuole"
-              collection="participations"
-              converter={participationConverter}
-              options={{ constraints: { contestId: contest.id } }}
-            />
-            <Export
-              label="studenti"
-              description="tutti gli studenti"
-              collection="students"
-              converter={studentConverter}
-              options={{
-                constraints: { contestId: contest.id, disabled: false },
-                group: true,
-              }}
-            />
-          </div>
+      </Card>
+      <Card title="Esportazione">
+        <div className="flex justify-center gap-5">
+          <Export
+            label="scuole"
+            description="tutte le scuole"
+            collection="participations"
+            converter={participationConverter}
+            options={{ constraints: { contestId: contest.id } }}
+          />
+          <Export
+            label="studenti"
+            description="tutti gli studenti"
+            collection="students"
+            converter={studentConverter}
+            options={{
+              constraints: { contestId: contest.id, disabled: false },
+              group: true,
+            }}
+          />
         </div>
-      </div>
+      </Card>
     </div>
   );
 }
