@@ -312,15 +312,13 @@ function Table() {
         .flat();
 
       if (schema && !options.includes(value)) {
-        if (schema.type === "number" || schema.type === "points") {
-          value = Number(value);
-        }
-
         let isValid = true;
+
         if (schema.type === "text") {
           isValid = false;
         }
         if (schema.type === "number" || schema.type === "points") {
+          value = value && Number(value);
           isValid &&= Number.isInteger(value);
         }
         if (schema.type === "points" && schema.pointsCorrect) {
@@ -442,7 +440,7 @@ function columnDefinition(contest: Contest, variants: Record<string, Variant>): 
         data?.variant && (
           <a
             className="link link-info"
-            href={`/teacher/test/?studentId=${data!.id}#${data!.contestId}`}
+            href={`./test/?studentId=${data!.id}#${data!.contestId}`}
             target="_blank"
             rel="noreferrer">
             apri
@@ -512,7 +510,7 @@ function isStudentIncomplete(
 
 function isStudentEmpty(student: Student) {
   return (
-    !Object.values(student.personalInformation ?? {}).some(Boolean) &&
-    !Object.values(student.answers ?? {}).some(Boolean)
+    !Object.values(student.personalInformation ?? {}).some((x) => x !== undefined) &&
+    !Object.values(student.answers ?? {}).some((x) => x !== undefined)
   );
 }

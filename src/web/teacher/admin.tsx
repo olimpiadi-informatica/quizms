@@ -200,7 +200,7 @@ export function TeacherAdmin() {
 }
 
 function DownloadPdfButton() {
-  const { participation, contest, getPdfStatements } = useTeacher();
+  const { participation, getPdfStatements } = useTeacher();
 
   const onClick = async () => {
     const statements = await getPdfStatements();
@@ -225,7 +225,7 @@ function DownloadPdfButton() {
     }
 
     const blob = new Blob([await pdf.save()], { type: "application/pdf" });
-    saveAs(blob, `${contest.id}-${participation.schoolId}.pdf`);
+    saveAs(blob, `${participation.id}.pdf`);
   };
 
   return (

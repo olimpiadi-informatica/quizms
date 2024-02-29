@@ -137,7 +137,7 @@ async function importStudents(
     .min(contest.personalInformation.length)
     .transform<Student>((value, ctx) => {
       const off = contest.personalInformation.length + Number(contest.hasVariants || 0);
-      const variantId = contest.hasVariants ? value[off - 1] : variants[0].id;
+      const variantId = contest.hasVariants ? value[off - 1] : Object.values(variants)[0].id;
 
       if (variantId) {
         const variant = variants[variantId];

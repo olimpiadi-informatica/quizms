@@ -26,7 +26,7 @@ type NavbarProps = {
   flow?: "flex-row" | "flex-row-reverse";
   user?: string | null;
   userIcon: LucideIcon;
-  logout?: () => Promise<void> | void;
+  logout?: () => Promise<void>;
   children: ReactNode;
 };
 
