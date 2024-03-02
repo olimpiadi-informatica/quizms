@@ -28,7 +28,7 @@ export default function order(expression: Expression): `ORDER_${string}` | undef
     case "ObjectExpression":
       return "ORDER_ATOMIC";
     case "ParenthesizedExpression":
-      return "ORDER_ATOMIC";
+      throw new Error("Expression must not be wrapper in parentheses");
     case "SequenceExpression":
       return "ORDER_COMMA";
     case "ThisExpression":
@@ -39,6 +39,8 @@ export default function order(expression: Expression): `ORDER_${string}` | undef
       return unaryOperatorOrder(expression.operator);
     case "YieldExpression":
       return "ORDER_YIELD";
+    default:
+      throw new Error(`Unsupported expression: ${expression.type}`);
   }
 }
 
@@ -64,6 +66,8 @@ function unaryOperatorOrder(
       return "ORDER_INCREMENT";
     case "--":
       return "ORDER_DECREMENT";
+    default:
+      throw new Error(`Unsupported operator: ${operator}`);
   }
 }
 
@@ -111,5 +115,7 @@ function binaryOperatorOrder(
       return "ORDER_IN";
     case "instanceof":
       return "ORDER_INSTANCEOF";
+    default:
+      throw new Error(`Unsupported operator: ${operator}`);
   }
 }

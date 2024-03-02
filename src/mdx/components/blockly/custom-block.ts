@@ -98,6 +98,7 @@ function parse(js: string): Program {
   return rawParse(js.replaceAll(/%(\d+)/g, "0, $$$1"), {
     ecmaVersion: 5,
     sourceType: "script",
+    preserveParens: true,
   });
 }
 
