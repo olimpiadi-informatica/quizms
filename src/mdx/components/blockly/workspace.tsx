@@ -219,8 +219,8 @@ export default function Workspace({
   return (
     <div
       className={classNames(
-        "not-prose relative inset-y-0 left-1/2 w-screen -translate-x-1/2 p-4 pt-8",
-        "flex flex-col-reverse items-start justify-between gap-6 overflow-x-hidden *:mx-3 lg:flex-row lg:gap-0",
+        "not-prose relative inset-y-0 left-1/2 w-screen -translate-x-1/2 p-2 pt-8",
+        "flex flex-col-reverse items-start justify-between gap-6 overflow-x-hidden lg:flex-row",
       )}>
       <div className="flex h-full max-h-[min(720px,90vh)] basis-[min(auto,50%)] flex-col gap-6 self-stretch overflow-x-hidden">
         <div className="join join-horizontal">

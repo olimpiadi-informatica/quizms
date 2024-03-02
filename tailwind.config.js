@@ -8,7 +8,7 @@ module.exports = {
   theme: {
     extend: {
       width: {
-        screen: "calc(100vw - 1.25rem)",
+        screen: "calc(100vw - 2rem)",
       },
     },
   },
