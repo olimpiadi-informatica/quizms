@@ -10,18 +10,44 @@ import Code from "~/mdx/components/code";
 type Props = {
   blocks: object;
   js: string;
+  svg: string;
 };
 
-export default function Debug({ blocks, js }: Props) {
+type Format = "json" | "js" | "svg";
+
+const formats: Record<Format, { label: string; lang: string; mime: string }> = {
+  json: {
+    label: "Blocchi",
+    lang: "json",
+    mime: "application/json;charset=utf-8",
+  },
+  js: {
+    label: "JavaScript",
+    lang: "javascript",
+    mime: "text/javascript;charset=utf-8",
+  },
+  svg: {
+    label: "Immagine",
+    lang: "xml",
+    mime: "image/svg+xml;charset=utf-8",
+  },
+};
+
+export default function Debug({ blocks, js, svg }: Props) {
   const ref = useRef<HTMLDialogElement>(null);
 
-  const [lang, setLang] = useState<"json" | "js">("json");
+  const [format, setFormat] = useState<Format>("json");
 
   const code = useMemo(() => {
-    return lang === "json"
-      ? JSON.stringify(blocks, null, 2)
-      : js.replaceAll(/^\s*highlightBlock\('.+'\);\n/gm, "").trimEnd();
-  }, [blocks, js, lang]);
+    switch (format) {
+      case "json":
+        return JSON.stringify(blocks, null, 2);
+      case "js":
+        return js.replaceAll(/^\s*highlightBlock\('.+'\);\n/gm, "").trimEnd();
+      case "svg":
+        return svg;
+    }
+  }, [format, blocks, js, svg]);
 
   const [copyTooltip, setCopyTooltip] = useState<number>();
   const copy = async () => {
@@ -40,20 +66,16 @@ export default function Debug({ blocks, js }: Props) {
       <Modal ref={ref} title="Opzioni di debug" className="max-w-3xl">
         <div className="not-prose flex items-stretch justify-between gap-3">
           <div role="tablist" className="tabs-boxed tabs">
-            <button
-              role="tab"
-              type="button"
-              className={classNames("tab h-full", lang === "json" && "tab-active")}
-              onClick={() => setLang("json")}>
-              Blocchi
-            </button>
-            <button
-              role="tab"
-              type="button"
-              className={classNames("tab h-full", lang === "js" && "tab-active")}
-              onClick={() => setLang("js")}>
-              JavaScript
-            </button>
+            {Object.entries(formats).map(([f, { label }]) => (
+              <button
+                key={f}
+                role="tab"
+                type="button"
+                className={classNames("tab h-full", format === f && "tab-active")}
+                onClick={() => setFormat(f as Format)}>
+                {label}
+              </button>
+            ))}
           </div>
           <div className="flex gap-3">
             <div
@@ -70,13 +92,22 @@ export default function Debug({ blocks, js }: Props) {
             <button
               type="button"
               className="!btn !btn-error"
-              onClick={() => saveAs(code, `blocks.${lang}`)}>
+              onClick={() =>
+                saveAs(new Blob([code], { type: formats[format].mime }), `blocks.${format}`)
+              }>
               <Download /> Salva
             </button>
           </div>
         </div>
-        <div role="tabpanel" className="mt-3 text-sm">
-          <Code code={code} language={lang} />
+        <div role="tabpanel" className="mt-3 text-sm *:overflow-x-auto">
+          {format !== "svg" && <Code code={code} language={formats[format].lang} />}
+          {format === "svg" && (
+            <img
+              className="mx-auto"
+              src={`data:image/svg+xml,${encodeURIComponent(svg)}`}
+              alt="Blocchi"
+            />
+          )}
         </div>
       </Modal>
     </>

@@ -93,6 +93,7 @@ export default function Workspace({
   const [editing, setEditing] = useState(true);
   const [playing, setPlaying] = useState(false);
   const [variableMappings, setVariableMappings] = useState<Record<string, string>>({});
+  const [svg, setSvg] = useState("");
 
   const [code, setCode] = useState("");
   const [testcaseIndex, setTestcaseIndex] = useState(0);
@@ -150,6 +151,10 @@ export default function Workspace({
       case "variables": {
         setVariableMappings(data.variablesMapping);
         if (debug?.logVariables) console.info(data.variablesMapping);
+        break;
+      }
+      case "svg": {
+        setSvg(data.svg);
         break;
       }
     }
@@ -326,7 +331,7 @@ export default function Workspace({
               <span>Veloce</span>
             </div>
           </div>
-          {import.meta.env.DEV && <Debug blocks={blocks} js={code} />}
+          {import.meta.env.DEV && <Debug blocks={blocks} js={code} svg={svg} />}
         </div>
         <Editor ref={setIframe} ready={ready} />
       </div>

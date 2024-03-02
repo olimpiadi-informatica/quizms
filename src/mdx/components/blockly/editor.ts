@@ -76,6 +76,26 @@ function init({ toolbox, initialBlocks, customBlocks, readonly }: Props) {
     if (newBlocks !== blocks) {
       blocks = newBlocks;
       send("blocks", { blocks });
+
+      if (import.meta.env.DEV) {
+        const box = workspace!.svgBlockCanvas_.getBoundingClientRect();
+        const se = new XMLSerializer();
+
+        const svg = `\
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  width="${2 * box.width}"
+  height="${2 * box.height}"
+  viewBox="${box.x} ${box.y} ${box.width} ${box.height}"
+  class="blocklySvg ${config.renderer}-renderer classic-theme">
+  ${document.querySelector(`#blockly-renderer-style-${config.renderer}-classic`)!.outerHTML}
+  ${document.querySelector("#blockly-common-style")!.outerHTML}
+  <g class="blocklyWorkspace">  
+    ${se.serializeToString(workspace!.svgBlockCanvas_)}
+  </g>
+</svg>`;
+        send("svg", { svg });
+      }
     }
 
     const newVariables = newBlocks["variables"] ?? [];

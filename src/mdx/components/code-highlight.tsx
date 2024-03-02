@@ -5,6 +5,7 @@ import { RootContent } from "hast";
 import { HLJSApi, Language, LanguageFn } from "highlight.js";
 import javascript from "highlight.js/lib/languages/javascript";
 import json from "highlight.js/lib/languages/json";
+import xml from "highlight.js/lib/languages/xml";
 import { createLowlight } from "lowlight";
 
 function srs(hljs: HLJSApi): Language {
@@ -51,7 +52,7 @@ function srs(hljs: HLJSApi): Language {
 }
 
 const languages: Record<string, LanguageFn> = import.meta.env.DEV
-  ? { json, js: javascript, srs }
+  ? { srs, json, javascript, xml }
   : { srs };
 const lowlight = createLowlight(languages);
 
