@@ -3,6 +3,7 @@ import Blockly, { BlocklyOptions, WorkspaceSvg } from "blockly";
 import { ToolboxInfo } from "blockly/core/utils/toolbox";
 import { javascriptGenerator } from "blockly/javascript";
 import locale from "blockly/msg/it";
+import { isEqual } from "lodash-es";
 
 import { CustomBlock } from "./custom-block";
 import "./editor.css";
@@ -73,7 +74,7 @@ function init({ toolbox, initialBlocks, customBlocks, readonly }: Props) {
     }
 
     const newBlocks = Blockly.serialization.workspaces.save(workspace!);
-    if (newBlocks !== blocks) {
+    if (!isEqual(newBlocks, blocks)) {
       blocks = newBlocks;
       send("blocks", { blocks });
 

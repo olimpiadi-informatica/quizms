@@ -61,7 +61,7 @@ const expressionBlockSchema = baseBlockSchema
     // Type of the block's output
     output: blocklyTypeSchema,
     // Code generator for this block
-    js: z.tuple([z.string(), z.string().startsWith("ORDER_")]),
+    js: z.tuple([z.string().trim(), z.string().startsWith("ORDER_")]),
   })
   .superRefine((block, ctx) => {
     if (import.meta.env.DEV) {

@@ -28,7 +28,7 @@ const commonConfig = {
 /** @type {import("tsup").Options} */
 const webConfig = {
   ...commonConfig,
-  entryPoints: glob.sync("src/web/*/index.ts"),
+  entryPoints: await glob("src/web/*/index.ts"),
   platform: "browser",
   loader: { ".css": "copy" },
   minifyWhitespace: false,
@@ -37,7 +37,7 @@ const webConfig = {
 /** @type {import("tsup").Options} */
 const cliConfig = {
   ...commonConfig,
-  entryPoints: glob.sync("src/{cli,jsx-runtime}/index.ts"),
+  entryPoints: await glob("src/{cli,jsx-runtime}/index.ts"),
   target: "esnext",
   platform: "node",
   loader: { ".rules": "file" },

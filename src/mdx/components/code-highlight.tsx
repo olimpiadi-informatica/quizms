@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
 
 import classNames from "classnames";
-import { RootContent } from "hast";
+import { RootContent, Text } from "hast";
 import { HLJSApi, Language, LanguageFn } from "highlight.js";
 import javascript from "highlight.js/lib/languages/javascript";
 import json from "highlight.js/lib/languages/json";
@@ -86,9 +86,11 @@ function BlockCode(props: Omit<Props, "inline">) {
 
 function BaseCode({ code, language, noLineNumbers }: Omit<Props, "inline">) {
   const children = useMemo(() => {
-    if (!language || language === "text") return code;
+    const hast =
+      !language || language === "text"
+        ? { type: "root", children: [{ type: "text", value: code } as Text] }
+        : lowlight.highlight(language, code);
 
-    const hast = lowlight.highlight(language, code);
     const lines: Token[][] = [[]];
     for (const node of hast.children) {
       processNode(node);
