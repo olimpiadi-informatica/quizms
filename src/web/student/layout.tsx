@@ -68,7 +68,7 @@ export function Layout({ children }: { children: ReactNode }) {
       </Navbar>
       <SubmitModal ref={submitRef} />
       <Prose>
-        {contest.name && <h1 className="text-pretty">{contest.name}</h1>}
+        {contest.longName && <h1 className="text-pretty">{contest.longName}</h1>}
         {children}
       </Prose>
     </BaseLayout>

@@ -32,6 +32,7 @@ const personalInformationDate = basePersonalInformation.extend({
 export const contestSchema = z.object({
   id: z.string(),
   name: z.string(),
+  longName: z.string(),
   problemIds: z.coerce.string().array(),
 
   contestWindowStart: z.date().optional(),

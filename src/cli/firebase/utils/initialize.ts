@@ -49,6 +49,10 @@ async function getFirebaseBucket(app: App) {
     fatal(`Failed to get project information: ${e}`);
   }
 
+  if (!bucketName) {
+    fatal("Failed to get storage bucket name. Maybe sure you have initialized Firebase Storage.");
+  }
+
   const storage = getStorage(app);
   return storage.bucket(bucketName);
 }

@@ -142,6 +142,7 @@ function StudentLoginInner({
       } else {
         throw e;
       }
+    } finally {
       setLoading(false);
     }
   };

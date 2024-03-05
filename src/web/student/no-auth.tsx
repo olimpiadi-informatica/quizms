@@ -38,6 +38,7 @@ export function NoAuth({ contestName, duration, questionCount, children }: AuthP
   const mockContest: Contest = {
     id: "",
     name: contestName,
+    longName: contestName,
     problemIds: range(questionCount ?? 0).map((i) => i.toString()),
     duration,
     personalInformation: [],
