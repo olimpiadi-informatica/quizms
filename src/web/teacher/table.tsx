@@ -440,7 +440,7 @@ function columnDefinition(contest: Contest, variants: Record<string, Variant>): 
         data?.variant && (
           <a
             className="link link-info"
-            href={`./test/?studentId=${data!.id}#${data!.contestId}`}
+            href={`/teacher/students/test/?studentId=${data!.id}#${data!.contestId}`}
             target="_blank"
             rel="noreferrer">
             apri

@@ -183,7 +183,7 @@ export function TeacherAdmin() {
             <StartContestButton />
           )}
           {contest.hasOnline && canUndoContest(now, participation) && <StopContestButton />}
-          <a className="btn btn-info" href={`./students/#${participation.contestId}`}>
+          <a className="btn btn-info" href={`/teacher/students/#${participation.contestId}`}>
             Gestisci studenti e risposte
           </a>
         </Buttons>
