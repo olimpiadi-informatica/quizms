@@ -46,31 +46,6 @@ body {
   --ag-cell-horizontal-padding: 0.5rem;
 }
 
-code {
-  @apply !bg-transparent !px-0.5 !font-normal;
-}
-
-code::before,
-code::after {
-  @apply !content-none;
-}
-
-pre {
-  @apply !bg-base-200 !pl-5 !text-base-content print:!px-0;
-}
-
 label pre {
   @apply !my-2 border border-base-content !p-3;
-}
-
-pre code {
-  @apply block;
-}
-
-pre code > span {
-  @apply block min-w-fit rounded py-px pr-4 hover:bg-base-300 print:whitespace-pre-wrap;
-}
-
-pre code .linenumber {
-  @apply mx-2;
 }

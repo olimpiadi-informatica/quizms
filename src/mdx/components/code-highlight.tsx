@@ -58,34 +58,16 @@ const lowlight = createLowlight(languages);
 
 type Props = {
   code: string;
-  inline?: boolean;
-  noLineNumbers?: boolean;
   language: string;
 };
-
-export default function Code({ inline, ...props }: Props) {
-  return inline ? <InlineCode {...props} /> : <BlockCode {...props} />;
-}
-
-function InlineCode(props: Omit<Props, "inline">) {
-  return <BaseCode {...props} noLineNumbers />;
-}
 
 type Token = {
   className?: string;
   value: string;
 };
 
-function BlockCode(props: Omit<Props, "inline">) {
-  return (
-    <pre>
-      <BaseCode {...props} />
-    </pre>
-  );
-}
-
-function BaseCode({ code, language, noLineNumbers }: Omit<Props, "inline">) {
-  const children = useMemo(() => {
+export default function CodeHighlight({ code, language }: Props) {
+  return useMemo(() => {
     const hast =
       !language || language === "text"
         ? { type: "root", children: [{ type: "text", value: code } as Text] }
@@ -98,13 +80,6 @@ function BaseCode({ code, language, noLineNumbers }: Omit<Props, "inline">) {
 
     return lines.map((line, i) => (
       <span key={i}>
-        <span
-          className={classNames(
-            "mr-6 inline-block w-7 select-none text-right",
-            noLineNumbers && "hidden",
-          )}>
-          {i + 1}
-        </span>
         {line.map((token, j) => (
           <span key={j} className={token.className}>
             {token.value}
@@ -129,7 +104,5 @@ function BaseCode({ code, language, noLineNumbers }: Omit<Props, "inline">) {
         throw new Error(`Unexpected node: ${node.type}`);
       }
     }
-  }, [code, language, noLineNumbers]);
-
-  return <code>{children}</code>;
+  }, [code, language]);
 }
