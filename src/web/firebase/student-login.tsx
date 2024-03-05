@@ -18,7 +18,7 @@ import { defer, isDate, isEqual } from "lodash-es";
 import { AlertCircle } from "lucide-react";
 
 import { Button, Buttons, Modal, useIsAfter, useTime } from "~/components";
-import { Contest, Student, parsePersonalInformation, studentHash } from "~/models";
+import { Contest, Student, StudentRestore, parsePersonalInformation, studentHash } from "~/models";
 import { hash, randomId } from "~/utils/random";
 import { StudentProvider } from "~/web/student/provider";
 
@@ -377,18 +377,21 @@ async function createStudentRestore(db: Firestore, student: Student) {
   // If it fails, it means that the token is too old
 
   try {
+    const restore: StudentRestore = {
+      id: student.uid!,
+      studentId: student.id,
+      participationId: student.participationId!,
+      token: student.token!,
+      name: student.personalInformation!.name as string,
+      surname: student.personalInformation!.surname as string,
+    };
+
     await setDoc(
       doc(
         db,
         `participations/${student.participationId}/studentRestore/${student.uid}`,
       ).withConverter(studentRestoreConverter),
-      {
-        id: student.uid,
-        studentId: student.id,
-        token: student.token!,
-        name: student.personalInformation!.name as string,
-        surname: student.personalInformation!.surname as string,
-      },
+      restore,
     );
   } catch {
     throw new Error("Codice scaduto");
