@@ -1,5 +1,6 @@
 import React, {
   ComponentType,
+  MouseEvent,
   ReactNode,
   createContext,
   useCallback,
@@ -75,11 +76,14 @@ export function Button({ className, icon: Icon, onClick, disabled, children }: B
   const id = useId();
   const spinning = loading === id;
 
-  const handleClick = async () => {
+  const handleClick = async (e: MouseEvent) => {
+    if (!onClick) return;
+
+    e.preventDefault();
     setLoading(id);
     throwError?.();
     try {
-      await onClick?.();
+      await onClick();
     } catch (err) {
       throwError?.(err as Error);
     }
@@ -90,7 +94,6 @@ export function Button({ className, icon: Icon, onClick, disabled, children }: B
     <button
       className={classNames("btn", className)}
       onClick={handleClick}
-      type={onClick ? "button" : "submit"}
       disabled={!!loading || disabled}>
       {spinning && <span className="loading loading-spinner" />}
       {!spinning && Icon && <Icon />}
