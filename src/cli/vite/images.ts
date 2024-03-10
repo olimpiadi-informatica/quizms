@@ -132,9 +132,11 @@ async function transformAsymptote(
   try {
     if (platform() === "darwin") {
       const pdfFile = temporaryFile({ extension: "pdf" });
-      await execFile("asy", [path, "-f", "pdf", "-autoimport", injectFile, "-o", pdfFile], {
-        cwd: dirname(path),
-      });
+      await execFile(
+        "asy",
+        [path, "-f", "pdf", "-autoimport", injectFile, "-o", pdfFile.replace(/\.pdf$/, "")],
+        { cwd: dirname(path) },
+      );
 
       await execFile("pdf2svg", [pdfFile, svgFile]);
       await fs.unlink(pdfFile);
