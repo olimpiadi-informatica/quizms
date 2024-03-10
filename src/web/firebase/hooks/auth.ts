@@ -3,6 +3,7 @@ import {
   getAuth,
   onAuthStateChanged,
   signInAnonymously,
+  signInWithCustomToken,
   signInWithEmailAndPassword,
 } from "firebase/auth";
 import { noop } from "lodash-es";
@@ -33,6 +34,32 @@ export function useAuth() {
   });
 }
 
+export function useTokenAuth() {
+  const db = useDb();
+  const auth = getAuth(db.app);
+
+  useSWR("firebase/token-auth", fetcher, swrConfig);
+
+  return useAuth();
+
+  async function fetcher() {
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get("token");
+
+    if (token) {
+      try {
+        await signInWithCustomToken(auth, token);
+      } catch (e) {
+        console.warn(`Failed to sign in with token: ${(e as Error).message}`);
+      }
+
+      window.history.replaceState(undefined, "", window.location.pathname);
+    }
+
+    return 0;
+  }
+}
+
 export function usePrecompiledPasswordAuth() {
   const db = useDb();
   const auth = getAuth(db.app);
@@ -50,8 +77,8 @@ export function usePrecompiledPasswordAuth() {
     if ((email || username) && password) {
       try {
         await signInWithEmailAndPassword(auth, email || `${username}@teacher.edu`, password);
-      } catch {
-        console.warn("Failed to sign in with precompiled credentials.");
+      } catch (e) {
+        console.warn(`Failed to sign in with precompiled credentials: ${(e as Error).message}`);
       }
 
       window.history.replaceState(undefined, "", window.location.pathname);

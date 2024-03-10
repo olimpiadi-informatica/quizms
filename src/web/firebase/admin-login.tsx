@@ -9,13 +9,34 @@ import { FirebaseLogin, useDb } from "./base-login";
 import { contestConverter } from "./converters";
 import EmailLogin from "./email-login";
 import { useCollection } from "./hooks";
+import SsoLogin from "./sso-login";
 
-export function AdminLogin({ config, children }: { config: FirebaseOptions; children: ReactNode }) {
+type Props = {
+  ssoUrl?: string;
+  ssoLogo?: object;
+  config: FirebaseOptions;
+  children: ReactNode;
+};
+
+export function AdminLogin({ ssoUrl, ssoLogo, config, children }: Props) {
+  const Login = useCallback(
+    function Login({ children }: { children: ReactNode }) {
+      return ssoUrl ? (
+        <SsoLogin url={ssoUrl} logo={ssoLogo}>
+          {children}
+        </SsoLogin>
+      ) : (
+        <EmailLogin method="email">{children}</EmailLogin>
+      );
+    },
+    [ssoUrl, ssoLogo],
+  );
+
   return (
     <FirebaseLogin config={config}>
-      <EmailLogin method="email">
+      <Login>
         <AdminInner>{children}</AdminInner>
-      </EmailLogin>
+      </Login>
     </FirebaseLogin>
   );
 }
