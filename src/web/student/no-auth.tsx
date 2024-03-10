@@ -16,8 +16,6 @@ type AuthProps = {
 };
 
 export function NoAuth({ contestName, duration, questionCount, children }: AuthProps) {
-  const [submitted, setSubmitted] = useLocalStorage("submit", false);
-
   const [student, setStudent] = useLocalStorage<Student>("student", {
     id: "",
     personalInformation: {
@@ -62,14 +60,14 @@ export function NoAuth({ contestName, duration, questionCount, children }: AuthP
   };
 
   const reset = useCallback(() => {
-    setSubmitted(false);
     setStudent((student) => ({
       ...student,
       answers: {},
       extraData: {},
       startedAt: undefined,
+      submittedAt: undefined,
     }));
-  }, [setStudent, setSubmitted]);
+  }, [setStudent]);
 
   return (
     <StudentProvider
@@ -77,9 +75,8 @@ export function NoAuth({ contestName, duration, questionCount, children }: AuthP
       participation={mockParticipation}
       student={student}
       setStudent={async (s) => setStudent(s)}
-      submit={() => setSubmitted(true)}
       reset={reset}
-      terminated={terminated || submitted}>
+      terminated={terminated}>
       {children}
     </StudentProvider>
   );

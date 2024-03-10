@@ -13,8 +13,6 @@ type StudentProviderProps = {
   contest: Contest;
   /** Scuola dello studente */
   participation: Participation;
-  /** Funzione per terminare la prova e inviare le risposte */
-  submit: () => void;
   /** Funzione per resettare le risposte e ricominciare la prova (opzionale) */
   reset?: () => void;
   /** Funzione per cambiare utente */
@@ -28,12 +26,17 @@ StudentContext.displayName = "StudentContext";
 
 export function StudentProvider({
   children,
-  ...rest
+  ...props
 }: StudentProviderProps & {
   children: ReactNode;
 }) {
+  const value: StudentProviderProps = {
+    ...props,
+    terminated: props.terminated || !!props.student.submittedAt,
+  };
+
   return (
-    <StudentContext.Provider value={{ ...rest }}>
+    <StudentContext.Provider value={value}>
       <Layout>{children}</Layout>
     </StudentContext.Provider>
   );

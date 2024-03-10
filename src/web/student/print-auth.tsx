@@ -1,6 +1,5 @@
 import React, { ReactNode } from "react";
 
-import { noop } from "lodash-es";
 import contests from "virtual:quizms-contests";
 
 import { Participation, Student, formatPersonalInformation } from "~/models";
@@ -75,7 +74,6 @@ export function PrintAuth({ children }: AuthProps) {
       participation={mockParticipation}
       student={student}
       setStudent={async () => {}}
-      submit={noop}
       terminated={false}>
       {children}
     </StudentProvider>

@@ -15,7 +15,6 @@ export function ImpersonificationAuth({ id, children }: { id: string; children: 
       participation={participation}
       student={student}
       setStudent={async () => {}}
-      submit={async () => {}}
       reset={async () => {}}
       terminated={true}>
       {children}

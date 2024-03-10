@@ -336,7 +336,7 @@ function StudentInner({
     () => addMinutes(participation.startingTime!, contest.duration!),
     [participation.startingTime, contest.duration],
   );
-  const terminated = useIsAfter(endingTime);
+  const terminated = useIsAfter(endingTime) || !!student.extraData?.submitted;
 
   const logout = async () => {
     await signOut(getAuth(db.app));
@@ -364,8 +364,8 @@ function StudentInner({
       participation={participation}
       student={student}
       setStudent={setStudentAndSubmit}
-      submit={logout}
       logout={logout}
+      reset={logout}
       terminated={terminated}>
       {children}
     </StudentProvider>

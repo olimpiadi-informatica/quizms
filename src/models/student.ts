@@ -18,6 +18,7 @@ export const studentSchema = z
 
     createdAt: z.coerce.date(),
     updatedAt: z.date(),
+    submittedAt: z.date().optional(),
   })
   .partial()
   .extend({

@@ -112,7 +112,7 @@ service cloud.firestore {
                 return isAuthenticated(resource.data.uid)
                     && checkToken()
                     && checkEndingTime()
-                    && keys.hasOnly(['answers', 'updatedAt', 'extraData'])
+                    && keys.hasOnly(['answers', 'updatedAt', 'submittedAt', 'extraData'])
                     && hasTimestamp('updatedAt');
             }
 
