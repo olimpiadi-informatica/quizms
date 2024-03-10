@@ -13,7 +13,7 @@ import classNames from "classnames";
 import { noop, pull } from "lodash-es";
 
 type Props = {
-  align?: "dropdown-end";
+  align?: "dropdown-end" | false;
   children?: ReactNode;
 };
 
@@ -52,7 +52,7 @@ export function Dropdown({ align, children }: Props) {
         />
         <ul
           className={classNames(
-            "highlight-border menu dropdown-content menu-sm z-30 mt-3 w-52 gap-1 rounded-box bg-base-200 p-2 text-base-content",
+            "highlight-border menu dropdown-content menu-sm z-30 mt-3 w-fit min-w-52 gap-1 rounded-box bg-base-200 p-2 text-base-content",
             items.length === 0 && "hidden",
           )}>
           {children}

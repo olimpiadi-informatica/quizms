@@ -79,7 +79,7 @@ export function parsePersonalInformation(
         const helpUtf8 = /[^\p{ASCII}]/u.test(value) ? " e che la codifica sia UTF-8" : "";
         return [
           undefined,
-          `Il campo ${label} contiene caratteri non validi. Assicurati che non ci siano simboli${helpUtf8}.`,
+          `Il campo ${label} contiene caratteri non validi. Assicurati che non ci siano numeri o simboli${helpUtf8}.`,
         ];
       }
       if (value.length > 256) {

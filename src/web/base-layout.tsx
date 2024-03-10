@@ -38,7 +38,7 @@ export function Navbar({ color, flow, user, userIcon: UserIcon, logout, children
         flow ?? "flex-row-reverse",
         color,
       )}>
-      <Dropdown align="dropdown-end">
+      <Dropdown align={flow !== "flex-row" && "dropdown-end"}>
         <DropdownButton>
           <UserIcon />
           <div className="truncate uppercase">{user ?? "Utente anonimo"}</div>

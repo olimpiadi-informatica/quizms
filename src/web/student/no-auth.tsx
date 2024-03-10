@@ -85,7 +85,7 @@ export function NoAuth({ contestName, duration, questionCount, children }: AuthP
   );
 }
 
-export function useLocalStorage<T>(key: string, defaultValue: T, parser?: (value: string) => T) {
+function useLocalStorage<T>(key: string, defaultValue: T, parser?: (value: string) => T) {
   const fullKey = `${window.location.pathname}#${key}`;
   const prev = localStorage.getItem(fullKey);
 

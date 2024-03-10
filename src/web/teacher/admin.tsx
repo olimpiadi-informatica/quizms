@@ -4,6 +4,7 @@ import {
   addMinutes,
   addSeconds,
   differenceInMinutes,
+  isSameDay,
   roundToNearestMinutes,
   subMinutes,
 } from "date-fns";
@@ -164,8 +165,11 @@ export function TeacherAdmin() {
         <div className="prose mb-2 max-w-none whitespace-pre-wrap">{contest.instructions}</div>
         {contest.hasOnline && (
           <div className="font-bold">
-            La gara si potrà svolgere dalle {formatTime(contest.contestWindowStart)} alle{" "}
-            {formatTime(contest.contestWindowEnd)} del {formatDate(contest.contestWindowStart)}.
+            La gara si potrà svolgere dalle {formatTime(contest.contestWindowStart)}{" "}
+            {!isSameDay(contest.contestWindowStart, contest.contestWindowEnd) && (
+              <>del {formatDate(contest.contestWindowStart)} </>
+            )}
+            alle {formatTime(contest.contestWindowEnd)} del {formatDate(contest.contestWindowEnd)}.
           </div>
         )}
         {contest.hasPdf && (

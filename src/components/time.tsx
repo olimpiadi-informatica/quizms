@@ -101,7 +101,7 @@ export function Timer(props: TimerProps) {
     timeLeft = Math.min(timeLeft, props.duration * 60);
   }
 
-  const minutes = Math.floor(timeLeft / 60);
+  const minutes = Math.floor(timeLeft / 60) % 100;
   const seconds = timeLeft % 60;
 
   return (
