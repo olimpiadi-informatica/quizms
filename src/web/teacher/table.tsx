@@ -475,6 +475,7 @@ function columnDefinition(contest: Contest, variants: Record<string, Variant>): 
       cellDataType: "boolean",
       width: 120,
       valueGetter: ({ data }) => data.disabled ?? false,
+      editable: true,
       ...defaultOptions,
       sortable: false,
     },
