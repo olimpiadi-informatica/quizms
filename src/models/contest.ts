@@ -30,17 +30,26 @@ const personalInformationDate = basePersonalInformation.extend({
 });
 
 export const contestSchema = z.object({
+  // Identificativo univoco della gara
   id: z.string(),
+  // Nome corto della gara
   name: z.string(),
+  // Nome lungo della gara
   longName: z.string(),
+  // ID dei problemi della gara
   problemIds: z.coerce.string().array(),
 
+  // Orario da cui è possibile far partire la gara
   contestWindowStart: z.date().optional(),
+  // Orario entro cui è possibile far partire la gara
   contestWindowEnd: z.date().optional(),
+  // Durata della gara in minuti
   duration: z.coerce.number().positive().optional(),
 
+  // Versione dei testi, deve essere incrementata ogni volta che si modificano i testi
   statementVersion: z.number(),
 
+  // Informazioni personali richieste agli studenti
   personalInformation: z.array(
     z.discriminatedUnion("type", [
       personalInformationText,
@@ -48,9 +57,14 @@ export const contestSchema = z.object({
       personalInformationDate,
     ]),
   ),
+
+  // Se i testi della gara hanno più varianti
   hasVariants: z.boolean(),
+  // Se la gara può essere svolta online
   hasOnline: z.boolean(),
+  // Se la gara può essere svolta in modalità cartacea
   hasPdf: z.boolean(),
+  // Se la gara può essere svolta su più turni
   allowRestart: z.boolean(),
 
   // Se permette all'insegnante di aggiungere o importare studenti
@@ -62,6 +76,7 @@ export const contestSchema = z.object({
   // Se permette all'insegnante di eliminare gli studenti
   allowStudentDelete: z.boolean(),
 
+  // Testo delle istruzioni per la gara da mostrare agli insegnanti
   instructions: z.string().optional(),
 });
 
