@@ -6,7 +6,7 @@ import { Bucket } from "@google-cloud/storage";
 import { deleteApp } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 import { Firestore } from "firebase-admin/firestore";
-import { groupBy, noop, pick, range, uniq } from "lodash-es";
+import { chunk, groupBy, noop, pick, range, uniq } from "lodash-es";
 import { isMatch } from "picomatch";
 import z from "zod";
 
@@ -126,7 +126,7 @@ async function importParticipations(db: Firestore, options: ImportOptions) {
       contestId: true,
     })
     .extend({
-      contestIds: z.union([z.string(), z.array(z.string())]),
+      contestIds: z.union([z.string(), z.array(z.string())]).default("*"),
       password: z.string(),
     })
     .transform((school) => ({
@@ -208,31 +208,34 @@ async function importPdf(bucket: Bucket, options: ImportOptions) {
 
 async function importUsers(users: User[], customClaims: object, options: ImportOptions) {
   const auth = getAuth();
-  await Promise.all(
-    users.map(async (teacher) => {
-      let user = await auth.getUserByEmail(teacher.email).catch(noop);
-      if (!user) {
-        user = await auth.createUser({
-          email: teacher.email,
-          emailVerified: true,
-          password: teacher.password,
-          displayName: teacher.name,
-          disabled: false,
-        });
-      } else if (options.force) {
-        await auth.updateUser(user.uid, {
-          email: teacher.email,
-          emailVerified: true,
-          password: teacher.password,
-          displayName: teacher.name,
-          disabled: false,
-        });
-      } else {
-        fatal(`User ${teacher.email} already exists. Use \`--force\` to overwrite.`);
-      }
-      await auth.setCustomUserClaims(user.uid, customClaims);
-    }),
-  );
+  for (const group of chunk(users, 10)) {
+    await Promise.all([
+      new Promise((resolve) => setTimeout(resolve, 1100)), // avoid rate limiting
+      ...group.map(async (record) => {
+        let user = await auth.getUserByEmail(record.email).catch(noop);
+        if (!user) {
+          user = await auth.createUser({
+            email: record.email,
+            emailVerified: true,
+            password: record.password,
+            displayName: record.name,
+            disabled: false,
+          });
+        } else if (options.force) {
+          await auth.updateUser(user.uid, {
+            email: record.email,
+            emailVerified: true,
+            password: record.password,
+            displayName: record.name,
+            disabled: false,
+          });
+        } else {
+          fatal(`User ${record.email} already exists. Use \`--force\` to overwrite.`);
+        }
+        await auth.setCustomUserClaims(user.uid, customClaims);
+      }),
+    ]);
+  }
 }
 
 async function importVariants(db: Firestore, options: ImportOptions) {

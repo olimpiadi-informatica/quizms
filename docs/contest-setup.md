@@ -51,6 +51,7 @@
 7. Clicca su "Aggiungi un nuovo provider";
 8. Seleziona tra i provider nativi _"Anonimo"_;
 9. Abilita _"Anonimo"_ e clicca su _"Salva"_;
+10. Vai nella tab _"Impostazioni"_ e nella sezione _"Azioni utente"_ disabilita _"Protezione enumerazione email"_;
 
 ### Configurare hosting
 
