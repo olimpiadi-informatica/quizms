@@ -20,7 +20,8 @@ body {
   @apply overflow-auto pb-3;
 }
 
-.highlight-border {
+.card,
+.dropdown-content {
   @apply border border-white/5 shadow-xl outline outline-1 outline-black/5;
 }
 
