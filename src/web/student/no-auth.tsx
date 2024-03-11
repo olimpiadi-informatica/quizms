@@ -46,6 +46,8 @@ export function NoAuth({ contestName, duration, questionCount, children }: AuthP
     allowRestart: true,
     allowStudentImport: true,
     allowStudentEdit: true,
+    allowStudentDelete: true,
+    allowAnswerEdit: true,
     statementVersion: 1,
   };
 
