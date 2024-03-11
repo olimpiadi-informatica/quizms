@@ -7,7 +7,7 @@ import type {
   ITooltipParams,
 } from "@ag-grid-community/core";
 import { addMinutes, isEqual as isEqualDate } from "date-fns";
-import { cloneDeep, compact, deburr, isString, lowerFirst, set, sumBy } from "lodash-es";
+import { cloneDeep, deburr, isString, lowerFirst, set, sumBy } from "lodash-es";
 import { AlertTriangle, Download, FileCheck, Upload, Users } from "lucide-react";
 
 import { Button, Buttons, Loading, Modal, useIsAfter } from "~/components";
@@ -147,7 +147,7 @@ const FinalizeModal = forwardRef(function FinalizeModal(
         <div className="prose">
           <p>Non è possibile finalizzare la scuola a causa del seguente errore:</p>
           <p className="flex justify-center rounded-box bg-base-200 px-3 py-2">{error}</p>
-          {contest.allowStudentEdit && (
+          {contest.allowStudentDelete && (
             <p>
               Se questo studente è stato aggiunto per errore e vuoi rimuoverlo, puoi usare il
               pulsante <i>Cancella</i> nell&apos;ultima colonna.
@@ -162,7 +162,7 @@ const FinalizeModal = forwardRef(function FinalizeModal(
           </p>
           <p>
             Finalizzando <b>non</b> sarà più possibile{" "}
-            {contest.allowStudentEdit && (
+            {contest.allowStudentImport && (
               <>
                 <b>aggiungere</b> nuovi studenti o{" "}
               </>
@@ -271,7 +271,7 @@ function Table() {
   };
 
   const allStudents = [...students];
-  if (contest.allowStudentEdit && !frozen) {
+  if (contest.allowStudentImport && !frozen) {
     allStudents.push({
       id: newStudentId.current,
       contestId: contest.id,
@@ -362,7 +362,7 @@ function Table() {
         enableBrowserTooltips={true}
         localeText={agGridLocaleIT}
         onGridReady={(ev) => {
-          if (!contest.allowStudentEdit) return;
+          if (!contest.allowStudentDelete) return;
           ev.api.setFilterModel({
             disabled: {
               filterType: "text",
@@ -393,7 +393,7 @@ function columnDefinition(contest: Contest, variants: Record<string, Variant>): 
     resizable: true,
   };
 
-  return compact([
+  return [
     ...contest.personalInformation.map(
       (field): ColDef => ({
         field: `personalInformation.${field.name}`,
@@ -426,14 +426,15 @@ function columnDefinition(contest: Contest, variants: Record<string, Variant>): 
         },
       }),
     ),
-    contest.hasVariants && {
+    {
       field: "variant",
       headerName: "Variante",
       width: 100,
       editable: true,
       ...defaultOptions,
+      hide: !contest.hasVariants,
     },
-    (contest.hasVariants || contest.hasOnline) && {
+    {
       headerName: "Vedi Prova",
       width: 100,
       cellRenderer: ({ data }: ICellRendererParams<Student>) =>
@@ -447,6 +448,7 @@ function columnDefinition(contest: Contest, variants: Record<string, Variant>): 
           </a>
         ),
       sortable: false,
+      hide: !contest.hasOnline,
     },
     ...contest.problemIds.map((id, i): ColDef => {
       let width = sampleVariant?.schema[id]?.type === "number" ? 100 : 50;
@@ -458,7 +460,7 @@ function columnDefinition(contest: Contest, variants: Record<string, Variant>): 
         width,
         valueGetter: ({ data }) => data.answers?.[id],
         tooltipValueGetter: ({ data }) => data.answers?.[id],
-        editable: true,
+        editable: contest.allowAnswerEdit,
         resizable: true,
       };
     }),
@@ -469,7 +471,7 @@ function columnDefinition(contest: Contest, variants: Record<string, Variant>): 
       valueGetter: ({ data }) => (isStudentEmpty(data) ? "" : score(data, variants)),
       ...defaultOptions,
     },
-    contest.allowStudentEdit && {
+    {
       field: "disabled",
       headerName: "Cancella",
       cellDataType: "boolean",
@@ -478,8 +480,9 @@ function columnDefinition(contest: Contest, variants: Record<string, Variant>): 
       editable: true,
       ...defaultOptions,
       sortable: false,
+      hide: !contest.allowStudentDelete,
     },
-  ]);
+  ];
 }
 
 function isStudentIncomplete(

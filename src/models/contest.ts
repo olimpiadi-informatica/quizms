@@ -52,8 +52,15 @@ export const contestSchema = z.object({
   hasOnline: z.boolean(),
   hasPdf: z.boolean(),
   allowRestart: z.boolean(),
+
+  // Se permette all'insegnante di aggiungere o importare studenti
   allowStudentImport: z.boolean(),
+  // Se permette all'insegnante di modificare i dati personali degli studenti
   allowStudentEdit: z.boolean(),
+  // Se permette all'insegnante di modificare le risposte degli studenti
+  allowAnswerEdit: z.boolean(),
+  // Se permette all'insegnante di eliminare gli studenti
+  allowStudentDelete: z.boolean(),
 
   instructions: z.string().optional(),
 });
