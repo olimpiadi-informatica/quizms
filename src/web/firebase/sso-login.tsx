@@ -1,7 +1,5 @@
 import React, { ReactNode, useCallback } from "react";
 
-import { Button } from "~/components/button";
-
 import { useTokenAuth } from "./hooks";
 
 type Props = {
@@ -13,13 +11,8 @@ type Props = {
 export default function SsoLogin({ url, logo, children }: Props) {
   const user = useTokenAuth();
 
-  const login = () => {
-    const redirect = new URL(url);
-    redirect.searchParams.set("url", window.location.href);
-    window.location.replace(redirect);
-
-    return new Promise<void>(() => {});
-  };
+  const redirect = new URL(url);
+  redirect.searchParams.set("url", window.location.href);
 
   const Logo = useCallback(
     function Logo() {
@@ -32,9 +25,10 @@ export default function SsoLogin({ url, logo, children }: Props) {
 
   return (
     <div className="flex h-full items-center justify-center">
-      <Button className="btn-info" icon={Logo} onClick={login}>
+      <a className="btn btn-info" href={redirect.href}>
+        <Logo />
         Accedi
-      </Button>
+      </a>
     </div>
   );
 }
