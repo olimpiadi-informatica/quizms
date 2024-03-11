@@ -4,6 +4,7 @@ import { isFunction } from "lodash-es";
 import useSWR from "swr/immutable";
 
 import { components } from "~/mdx/components";
+import { BaseStatement } from "~/web/student/base-statement";
 
 type Props =
   | {
@@ -15,7 +16,15 @@ type Props =
       url: () => string | Promise<string>;
     };
 
-export function RemoteStatement({ id, url }: Props) {
+export function RemoteStatement(props: Props) {
+  return (
+    <BaseStatement>
+      <InnerStatement {...props} />
+    </BaseStatement>
+  );
+}
+
+function InnerStatement({ id, url }: Props) {
   const { data: Statement } = useSWR(id ?? url, () => fetcher(url), {
     suspense: true,
   });
