@@ -1,9 +1,11 @@
 import z from "zod";
 
+import { studentSchema } from "./student";
+
 export const submissionSchema = z.object({
   id: z.string(),
   uid: z.string(),
-  answers: z.record(z.union([z.string(), z.number()]).optional()),
+  student: studentSchema,
   submittedAt: z.date().optional(),
 });
 

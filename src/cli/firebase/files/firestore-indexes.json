@@ -42,7 +42,7 @@
     },
     {
       "collectionGroup": "submissions",
-      "fieldPath": "answers",
+      "fieldPath": "student",
       "indexes": []
     },
     {

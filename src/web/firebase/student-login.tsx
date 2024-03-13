@@ -354,7 +354,7 @@ function StudentInner({
     await addDoc(submissionRef, {
       id: "",
       uid: newStudent.uid!,
-      answers: newStudent.answers!,
+      student: newStudent,
     });
   };
 
