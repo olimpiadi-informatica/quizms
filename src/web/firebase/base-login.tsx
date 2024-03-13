@@ -2,12 +2,7 @@ import React, { ReactNode, Suspense, createContext, useContext, useMemo } from "
 
 import { FirebaseOptions, initializeApp } from "firebase/app";
 import { browserLocalPersistence, debugErrorMap, getAuth, initializeAuth } from "firebase/auth";
-import {
-  Firestore,
-  initializeFirestore,
-  persistentLocalCache,
-  persistentMultipleTabManager,
-} from "firebase/firestore";
+import { Firestore, getFirestore } from "firebase/firestore";
 import { ErrorBoundary, FallbackProps } from "react-error-boundary";
 
 import { Error, Loading, useTime } from "~/components";
@@ -26,10 +21,7 @@ export function FirebaseLogin({ config, children }: Props) {
       errorMap: debugErrorMap,
       persistence: browserLocalPersistence,
     });
-    const setting = import.meta.env.PROD
-      ? { localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }) }
-      : {};
-    return initializeFirestore(app, setting);
+    return getFirestore(app);
   }, [config]);
 
   if (!config) {
