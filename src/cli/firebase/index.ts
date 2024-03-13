@@ -2,6 +2,7 @@ import { cwd } from "node:process";
 
 import { Command } from "commander";
 
+import definalize from "./definalize";
 import exportData from "./export";
 import importData from "./import";
 import init from "./init";
@@ -47,6 +48,12 @@ export default function firebaseCommand() {
     .option("-d, --delete", "Delete existing collections.")
     .option("-f, --force", "Overwrite existing documents.")
     .action((dir, options) => importData({ dir, ...options }));
+
+  command
+    .command("definalize")
+    .description("Definalize all participations.")
+    .argument("[directory]", "The directory of the contest.", cwd())
+    .action((dir, options) => definalize({ dir, ...options }));
 
   return command;
 }
