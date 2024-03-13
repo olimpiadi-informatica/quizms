@@ -14,7 +14,9 @@ type StudentProviderProps = {
   /** Scuola dello studente */
   participation: Participation;
   /** Funzione per resettare le risposte e ricominciare la prova (opzionale) */
-  reset?: () => void;
+  reset?: () => Promise<void>;
+  /** Funzione per terminare la prova (opzionale) */
+  submit?: () => Promise<void>;
   /** Funzione per cambiare utente */
   logout?: () => Promise<void>;
   /** Flag che indica se la prova è terminata */

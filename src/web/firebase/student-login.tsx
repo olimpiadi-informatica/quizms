@@ -13,6 +13,7 @@ import {
   getDoc,
   runTransaction,
   setDoc,
+  waitForPendingWrites,
 } from "firebase/firestore";
 import { defer, isDate, isEqual } from "lodash-es";
 import { AlertCircle } from "lucide-react";
@@ -338,12 +339,17 @@ function StudentInner({
   );
   const terminated = useIsAfter(endingTime) || !!student.extraData?.submitted;
 
+  const submit = async () => {
+    await waitForPendingWrites(db);
+  };
+
   const logout = async () => {
+    await waitForPendingWrites(db);
     await signOut(getAuth(db.app));
     window.location.reload();
   };
 
-  const setStudentAndSubmit = async (newStudent: Student) => {
+  const setStudentAndSubmission = async (newStudent: Student) => {
     if (isEqual(student, newStudent)) return;
 
     localStorage.setItem(`backup-${newStudent.id}`, JSON.stringify(newStudent));
@@ -364,9 +370,10 @@ function StudentInner({
       contest={contest}
       participation={participation}
       student={student}
-      setStudent={setStudentAndSubmit}
+      setStudent={setStudentAndSubmission}
       logout={logout}
       reset={logout}
+      submit={submit}
       terminated={terminated}>
       {children}
     </StudentProvider>

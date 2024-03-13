@@ -61,7 +61,7 @@ export function NoAuth({ contestName, duration, questionCount, children }: AuthP
     finalized: false,
   };
 
-  const reset = useCallback(() => {
+  const reset = useCallback(async () => {
     setStudent((student) => ({
       ...student,
       answers: {},

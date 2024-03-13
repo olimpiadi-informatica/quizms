@@ -76,14 +76,15 @@ export function Layout({ children }: { children: ReactNode }) {
 }
 
 const SubmitModal = forwardRef(function SubmitModal(_, ref: Ref<HTMLDialogElement>) {
-  const { student, setStudent } = useStudent();
+  const { student, setStudent, submit } = useStudent();
   const now = useTime();
 
-  const submit = async () => {
+  const confirm = async () => {
     await setStudent({
       ...student,
       submittedAt: now(),
     });
+    await submit?.();
     if (ref && "current" in ref) {
       ref.current?.close();
     }
@@ -94,7 +95,7 @@ const SubmitModal = forwardRef(function SubmitModal(_, ref: Ref<HTMLDialogElemen
       <p>Confermando non potrai più modificare le tue risposte.</p>
       <Buttons className="mt-3">
         <Button className="btn-info">Annulla</Button>
-        <Button className="btn-error" onClick={submit}>
+        <Button className="btn-error" onClick={confirm}>
           Conferma
         </Button>
       </Buttons>
