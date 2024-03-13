@@ -79,11 +79,16 @@ export default function Workspace({
     }
   }, [registerProblem, id, testcases, points]);
 
-  const blocks = student.extraData?.[`blockly-${id}`] ?? initialBlocks ?? defaultInitialBlocks;
+  const savedBlocks = student.extraData?.[`blockly-${id}`];
+  const blocks = savedBlocks ? JSON.parse(savedBlocks) : initialBlocks ?? defaultInitialBlocks;
+
   const setBlocks = async (blocks: object) => {
     await setStudent({
       ...student,
-      extraData: { ...student.extraData, [`blockly-${id}`]: blocks },
+      extraData: {
+        ...student.extraData,
+        [`blockly-${id}`]: JSON.stringify(blocks),
+      },
     });
   };
 
