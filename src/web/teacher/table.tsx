@@ -296,10 +296,12 @@ function Table() {
     const [field, subfield] = ev.colDef.field!.split(/[.[\]]/);
     if (field === "personalInformation") {
       const schema = contest.personalInformation.find((f) => f.name === subfield);
-      [value] = parsePersonalInformation(value, schema);
+      const [newValue, error] = parsePersonalInformation(value, schema);
+      if (error) throw new Error(error);
+      value = newValue;
     }
     if (field === "variant" && !variants[value]) {
-      value = undefined;
+      throw new Error(`La variante ${value} non è valida`);
     }
     if (field === "answers") {
       if (isString(value)) {
@@ -312,20 +314,20 @@ function Table() {
         .flat();
 
       if (schema && !options.includes(value)) {
-        let isValid = true;
-
         if (schema.type === "text") {
-          isValid = false;
+          throw new Error(`La risposta "${value}" non è valida`);
         }
         if (schema.type === "number" || schema.type === "points") {
           value = value && Number(value);
-          isValid &&= Number.isInteger(value);
+          if (!Number.isInteger(value)) throw new Error("La risposta deve essere un numero intero");
         }
-        if (schema.type === "points" && schema.pointsCorrect) {
-          isValid &&= 0 <= value && value <= schema.pointsCorrect;
+        if (
+          schema.type === "points" &&
+          schema.pointsCorrect &&
+          !(0 <= value && value <= schema.pointsCorrect)
+        ) {
+          throw new Error(`Il punteggio deve essere compreso tra 0 e ${schema.pointsCorrect}`);
         }
-
-        if (!isValid) value = undefined;
       }
     }
     if (field === "disabled" && value) {

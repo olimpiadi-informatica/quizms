@@ -1,11 +1,14 @@
-import React, { Children, ReactNode, isValidElement } from "react";
+import React, { Children, ReactNode, isValidElement, useEffect, useState } from "react";
 
 import classNames from "classnames";
+import { addSeconds } from "date-fns";
 import { partition } from "lodash-es";
-import { LucideIcon } from "lucide-react";
+import { AlertTriangle, LucideIcon } from "lucide-react";
 import { ErrorBoundary } from "react-error-boundary";
 
-import { Dropdown, DropdownButton, DropdownItem, Error } from "~/components";
+import { Dropdown, DropdownButton, DropdownItem, Error, useIsAfter } from "~/components";
+
+type ErrorWithTimestamp = Error & { timestamp: Date };
 
 export function BaseLayout({ children }: { children: ReactNode }) {
   const [navbar, other] = partition(
@@ -13,10 +16,39 @@ export function BaseLayout({ children }: { children: ReactNode }) {
     (node) => isValidElement(node) && node.type === Navbar,
   );
 
+  const [errors, setErrors] = useState<ErrorWithTimestamp[]>([]);
+
+  useEffect(() => {
+    window.addEventListener("unhandledrejection", handleException);
+    return () => window.removeEventListener("unhandledrejection", handleException);
+
+    function handleException(e: PromiseRejectionEvent) {
+      const error = e.reason;
+      error.timestamp = new Date();
+      setErrors((errors) => [...errors, error]);
+    }
+  }, []);
+
   return (
     <div className="fixed inset-0 flex flex-col screen:overflow-y-scroll">
       {navbar}
       <ErrorBoundary FallbackComponent={Error}>{other}</ErrorBoundary>
+      <div className="toast">
+        {errors.map((error, i) => (
+          <ErrorToast error={error} key={i} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ErrorToast({ error }: { error: ErrorWithTimestamp }) {
+  const hide = useIsAfter(addSeconds(error.timestamp, 10));
+
+  return (
+    <div className={classNames("alert alert-error w-screen max-w-sm", hide && "hidden")}>
+      <AlertTriangle />
+      <div className="text-wrap">{error.message}</div>
     </div>
   );
 }
