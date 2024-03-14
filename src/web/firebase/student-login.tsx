@@ -199,7 +199,7 @@ function StudentLoginInner({
                   name="token"
                   placeholder="Inserisci codice"
                   className="input input-bordered w-full max-w-md"
-                  onChange={(e) => setStudent({ ...student, token: e.target.value })}
+                  onChange={(e) => setStudent({ ...student, token: e.target.value.trim() })}
                   value={student.token ?? ""}
                   disabled={loading}
                   required

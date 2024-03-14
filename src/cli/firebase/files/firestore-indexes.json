@@ -55,6 +55,11 @@
       "indexes": []
     },
     {
+      "collectionGroup": "students",
+      "fieldPath": "extraData",
+      "indexes": []
+    },
+    {
       "collectionGroup": "submissions",
       "fieldPath": "student",
       "indexes": []

@@ -261,7 +261,7 @@ function Table() {
     participation.startingTime && contest.duration
       ? addMinutes(participation.startingTime, contest.duration)
       : undefined;
-  const isContestFinished = useIsAfter(endTime);
+  const isContestFinished = useIsAfter(endTime) || !endTime;
   const frozen = (contest.hasOnline && !isContestFinished) || participation.finalized;
 
   const newStudentId = useRef(randomId());
