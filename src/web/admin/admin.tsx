@@ -9,6 +9,7 @@ import Announcements from "./announcements";
 import ContestSettings from "./contest-settings";
 import Export from "./export";
 import { useAdmin } from "./provider";
+import TokenList from "./token-list";
 
 export function Admin() {
   const { contest } = useAdmin();
@@ -28,6 +29,13 @@ export function Admin() {
           </Suspense>
         </div>
       </Card>
+      {contest.hasOnline && (
+        <Card title="Ultimi token">
+          <div className="h-64 max-h-screen">
+            <TokenList />
+          </div>
+        </Card>
+      )}
       <Card title="Esportazione">
         <Buttons>
           <Export

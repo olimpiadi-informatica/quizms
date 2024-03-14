@@ -18,7 +18,7 @@ export function Error({ error, resetErrorBoundary }: Partial<FallbackProps>) {
   }, [resetErrorBoundary]);
 
   return (
-    <div className="flex size-full flex-col items-center justify-center">
+    <div className="flex size-full flex-col justify-center">
       <p className="mx-8 break-words text-center text-error">Errore: {error.message}</p>
       {resetErrorBoundary && (
         <Buttons className="mt-5">

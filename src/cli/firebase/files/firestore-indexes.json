@@ -27,6 +27,20 @@
           "order": "ASCENDING"
         }
       ]
+    },
+    {
+      "collectionGroup": "participationMapping",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "contestId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "startingTime",
+          "order": "DESCENDING"
+        }
+      ]
     }
   ],
   "fieldOverrides": [
