@@ -421,8 +421,8 @@ export const agGridLocaleIT = {
   // decimalSeparator: ".",
 
   // Data types
-  true: "Cancellato",
-  false: "Non cancellato",
+  true: "Vero",
+  false: "Falso",
   invalidDate: "Data non valida",
   invalidNumber: "Numero non valido",
   january: "Gennaio",

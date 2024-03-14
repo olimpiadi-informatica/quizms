@@ -27,6 +27,8 @@ export type Schema = Variant["schema"];
 export const variantMappingSchema = z.object({ id: z.string(), variant: z.string() });
 
 export function score(student: Student, variants: Record<string, Variant>) {
+  if (student.absent || student.disabled) return;
+
   const answers = student.answers;
   const schema = variants[student.variant!]?.schema;
 

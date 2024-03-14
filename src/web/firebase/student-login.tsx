@@ -105,6 +105,7 @@ function StudentLoginInner({
       darkMode: window.matchMedia("(prefers-color-scheme: dark)").matches,
     },
     createdAt: getNow(),
+    absent: false,
     disabled: false,
   });
   const contest = contests.find((c) => c.id === student.contestId);

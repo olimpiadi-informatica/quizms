@@ -4,6 +4,7 @@ import type {
   CellEditRequestEvent,
   ColDef,
   ICellRendererParams,
+  IFilterOptionDef,
   ITooltipParams,
 } from "@ag-grid-community/core";
 import { addMinutes, isEqual as isEqualDate } from "date-fns";
@@ -279,6 +280,7 @@ function Table() {
       variant: contest.hasVariants ? undefined : Object.keys(variants)[0],
       createdAt: new Date(),
       answers: {},
+      absent: false,
       disabled: false,
     } as Student);
   }
@@ -381,7 +383,7 @@ function Table() {
           ev.api.setFilterModel({
             disabled: {
               filterType: "text",
-              type: "false",
+              type: "enabled",
             },
           });
         }}
@@ -452,8 +454,9 @@ function columnDefinition(contest: Contest, variants: Record<string, Variant>): 
     {
       headerName: "Vedi Prova",
       width: 100,
-      cellRenderer: ({ data }: ICellRendererParams<Student>) =>
-        data?.variant && (
+      cellRenderer: ({ data }: ICellRendererParams<Student>) => {
+        if (data?.absent || data?.disabled || !data?.variant) return;
+        return (
           <a
             className="link link-info"
             href={`/teacher/students/test/?studentId=${data!.id}#${data!.contestId}`}
@@ -461,7 +464,8 @@ function columnDefinition(contest: Contest, variants: Record<string, Variant>): 
             rel="noreferrer">
             apri
           </a>
-        ),
+        );
+      },
       sortable: false,
       hide: !contest.hasOnline,
     },
@@ -475,11 +479,12 @@ function columnDefinition(contest: Contest, variants: Record<string, Variant>): 
         headerName: id,
         width,
         valueGetter: ({ data }) => {
+          if (data.absent || data.disabled) return "";
           if (!(id in (data.answers ?? {}))) return "";
           return data.answers[id] ?? schema?.optionsBlank?.[0] ?? "";
         },
         tooltipValueGetter: ({ data }) => data.answers?.[id],
-        editable: contest.allowAnswerEdit,
+        editable: ({ data }) => contest.allowAnswerEdit && !data.absent && !data.disabled,
         resizable: true,
       };
     }),
@@ -491,6 +496,39 @@ function columnDefinition(contest: Contest, variants: Record<string, Variant>): 
       ...defaultOptions,
     },
     {
+      field: "absent",
+      headerName: "Assente",
+      cellDataType: "boolean",
+      width: 120,
+      valueGetter: ({ data }) => data.absent ?? false,
+      editable: true,
+      ...defaultOptions,
+      sortable: false,
+      hide: !contest.hasPdf || !contest.allowAnswerEdit,
+      filterParams: {
+        filterOptions: [
+          {
+            displayKey: "all",
+            displayName: "Seleziona tutti",
+            predicate: () => true,
+            numberOfInputs: 0,
+          },
+          {
+            displayKey: "absent",
+            displayName: "Assenti",
+            predicate: (_filter: any[], absent: boolean) => absent,
+            numberOfInputs: 0,
+          },
+          {
+            displayKey: "present",
+            displayName: "Presenti",
+            predicate: (_filter: any[], absent: boolean) => !absent,
+            numberOfInputs: 0,
+          },
+        ] as IFilterOptionDef[],
+      },
+    },
+    {
       field: "disabled",
       headerName: "Cancella",
       cellDataType: "boolean",
@@ -500,6 +538,28 @@ function columnDefinition(contest: Contest, variants: Record<string, Variant>): 
       ...defaultOptions,
       sortable: false,
       hide: !contest.allowStudentDelete,
+      filterParams: {
+        filterOptions: [
+          {
+            displayKey: "all",
+            displayName: "Seleziona tutti",
+            predicate: () => true,
+            numberOfInputs: 0,
+          },
+          {
+            displayKey: "disabled",
+            displayName: "Cancellati",
+            predicate: (_filter: any[], disabled: boolean) => disabled,
+            numberOfInputs: 0,
+          },
+          {
+            displayKey: "enabled",
+            displayName: "Non cancellati",
+            predicate: (_filter: any[], disabled: boolean) => !disabled,
+            numberOfInputs: 0,
+          },
+        ] as IFilterOptionDef[],
+      },
     },
   ];
 }
@@ -510,7 +570,7 @@ function isStudentIncomplete(
   variants: Record<string, Variant>,
 ) {
   if (isStudentEmpty(student)) return;
-  if (student.disabled) return;
+  if (student.absent || student.disabled) return;
 
   for (const field of contest.personalInformation) {
     if (!student.personalInformation?.[field.name]) {

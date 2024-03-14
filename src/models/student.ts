@@ -6,13 +6,15 @@ export const studentSchema = z
     uid: z.string(),
     personalInformation: z.record(z.union([z.string(), z.number(), z.date()]).optional()),
 
+    absent: z.boolean(),
+    disabled: z.boolean(),
+
     participationId: z.string(),
     contestId: z.string(),
     token: z.string(),
     startedAt: z.date(),
 
     variant: z.string(),
-    disabled: z.boolean(),
     answers: z.record(z.union([z.string(), z.number(), z.undefined()])), // undefined means blank
     extraData: z.record(z.any()).optional(),
 

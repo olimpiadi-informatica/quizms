@@ -183,6 +183,7 @@ async function importStudents(
         answers: Object.fromEntries(contest.problemIds.map((id, i) => [id, value[off + i]])),
         extraData: { imported: true },
         createdAt: new Date(),
+        absent: false,
         disabled: false,
       } as Student;
     })
