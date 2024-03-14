@@ -92,7 +92,9 @@ function StudentLoginInner({
     uid: user?.uid,
     contestId: filteredContests.length === 1 ? filteredContests[0].id : undefined,
     personalInformation: {},
-    answers: {},
+    answers: Object.fromEntries(
+      filteredContests.flatMap((c) => c.problemIds).map((id) => [id, undefined]),
+    ),
     extraData: {
       userAgent: navigator.userAgent,
       windowWidth: window.innerWidth,

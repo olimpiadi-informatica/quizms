@@ -34,6 +34,8 @@ export function score(student: Student, variants: Record<string, Variant>) {
 
   let points = 0;
   for (const id in schema) {
+    if (!(id in answers)) continue;
+
     const problem = schema[id];
     const answer = answers[id]?.toString()?.trim();
 
@@ -59,9 +61,7 @@ export function problemScore(problem: Schema[string], answer?: string) {
     return;
   }
 
-  if (answer === undefined) return 0;
-
-  if (problem.optionsBlank?.includes(answer)) {
+  if (answer === undefined || problem.optionsBlank?.includes(answer)) {
     return problem.pointsBlank;
   } else if (problem.optionsCorrect.includes(answer)) {
     return problem.pointsCorrect;

@@ -7,7 +7,7 @@ import type {
   ITooltipParams,
 } from "@ag-grid-community/core";
 import { addMinutes, isEqual as isEqualDate } from "date-fns";
-import { cloneDeep, deburr, isString, lowerFirst, set, sumBy } from "lodash-es";
+import { cloneDeep, deburr, isString, lowerFirst, omit, set, sumBy } from "lodash-es";
 import { AlertTriangle, Download, FileCheck, Upload, Users } from "lucide-react";
 
 import { Button, Buttons, Loading, Modal, useIsAfter } from "~/components";
@@ -307,26 +307,35 @@ function Table() {
       if (isString(value)) {
         value = value!.trim().toUpperCase();
       }
+      if (value === "") {
+        value = undefined;
+      }
 
       const schema = variants[student.variant!]?.schema[subfield];
       const options = [schema?.optionsCorrect, schema?.optionsBlank, schema?.optionsWrong]
         .filter(Boolean)
         .flat();
 
-      if (schema && !options.includes(value)) {
+      if (value !== undefined && schema && !options.includes(value)) {
         if (schema.type === "text") {
           throw new Error(`La risposta "${value}" non è valida`);
         }
-        if (schema.type === "number" || schema.type === "points") {
-          value = value && Number(value);
-          if (!Number.isInteger(value)) throw new Error("La risposta deve essere un numero intero");
+
+        if (schema.type === "number") {
+          value = Number(value);
+          if (!Number.isInteger(value)) {
+            throw new TypeError("La risposta deve essere un numero intero");
+          }
         }
-        if (
-          schema.type === "points" &&
-          schema.pointsCorrect &&
-          !(0 <= value && value <= schema.pointsCorrect)
-        ) {
-          throw new Error(`Il punteggio deve essere compreso tra 0 e ${schema.pointsCorrect}`);
+
+        if (schema.type === "points") {
+          value = Number(value);
+          if (!Number.isInteger(value)) {
+            throw new TypeError("Il punteggio deve essere un numero intero");
+          }
+          if (schema.pointsCorrect && !(0 <= value && value <= schema.pointsCorrect)) {
+            throw new Error(`Il punteggio deve essere compreso tra 0 e ${schema.pointsCorrect}`);
+          }
         }
       }
     }
@@ -343,8 +352,12 @@ function Table() {
       }
     }
 
-    student = cloneDeep(student);
-    set(student, ev.colDef.field!, value);
+    if (value === undefined) {
+      student = omit(student, ev.colDef.field!) as Student;
+    } else {
+      student = cloneDeep(student);
+      set(student, ev.colDef.field!, value);
+    }
     await setStudentAndUpdateId(student);
 
     ev.api.refreshCells({ force: true });
@@ -453,14 +466,18 @@ function columnDefinition(contest: Contest, variants: Record<string, Variant>): 
       hide: !contest.hasOnline,
     },
     ...contest.problemIds.map((id, i): ColDef => {
-      let width = sampleVariant?.schema[id]?.type === "number" ? 100 : 50;
+      const schema = sampleVariant?.schema[id];
+      let width = schema?.type === "number" ? 100 : 50;
       if (i % 4 === 3) width += 15;
 
       return {
         field: `answers[${id}]`,
         headerName: id,
         width,
-        valueGetter: ({ data }) => data.answers?.[id],
+        valueGetter: ({ data }) => {
+          if (!(id in (data.answers ?? {}))) return "";
+          return data.answers[id] ?? schema?.optionsBlank?.[0] ?? "";
+        },
         tooltipValueGetter: ({ data }) => data.answers?.[id],
         editable: contest.allowAnswerEdit,
         resizable: true,
@@ -508,7 +525,7 @@ function isStudentIncomplete(
   const variant = variants[student.variant!] ?? Object.values(variants)[0];
 
   for (const id of Object.keys(variant.schema)) {
-    if (student.answers?.[id] === undefined) {
+    if (!(id in (student.answers ?? {}))) {
       return `Domanda ${id} mancante`;
     }
   }

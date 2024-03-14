@@ -13,7 +13,7 @@ export const studentSchema = z
 
     variant: z.string(),
     disabled: z.boolean(),
-    answers: z.record(z.union([z.string(), z.number()]).optional()),
+    answers: z.record(z.union([z.string(), z.number(), z.undefined()])), // undefined means blank
     extraData: z.record(z.any()).optional(),
 
     createdAt: z.coerce.date(),

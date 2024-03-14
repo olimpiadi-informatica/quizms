@@ -61,7 +61,10 @@ function toFirebaseSchema(schema: ZodTypeAny): ZodTypeAny {
     return z.object(mapValues(schema.shape, (field) => toFirebaseSchema(field)));
   }
   if (schema instanceof ZodRecord) {
-    return z.record(toFirebaseSchema(schema.element));
+    // https://github.com/colinhacks/zod/issues/2762
+    return z
+      .record(toFirebaseSchema(schema.element.nullable()))
+      .transform((record) => mapValues(record, (value) => (value === null ? undefined : value)));
   }
   if (schema instanceof ZodArray) {
     return toFirebaseSchema(schema.element).array();
