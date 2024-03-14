@@ -4,7 +4,6 @@ import {
   onAuthStateChanged,
   signInAnonymously,
   signInWithCustomToken,
-  signInWithEmailAndPassword,
 } from "firebase/auth";
 import { noop } from "lodash-es";
 import { useErrorBoundary } from "react-error-boundary";
@@ -51,34 +50,6 @@ export function useTokenAuth() {
         await signInWithCustomToken(auth, token);
       } catch (e) {
         console.warn(`Failed to sign in with token: ${(e as Error).message}`);
-      }
-
-      window.history.replaceState(undefined, "", window.location.pathname);
-    }
-
-    return 0;
-  }
-}
-
-export function usePrecompiledPasswordAuth() {
-  const db = useDb();
-  const auth = getAuth(db.app);
-
-  useSWR("firebase/precompiled-password-auth", fetcher, swrConfig);
-
-  return useAuth();
-
-  async function fetcher() {
-    const params = new URLSearchParams(window.location.search);
-    const email = params.get("email") || params.get("e");
-    const username = params.get("username") || params.get("user") || params.get("u");
-    const password = params.get("password") || params.get("pswd") || params.get("p");
-
-    if ((email || username) && password) {
-      try {
-        await signInWithEmailAndPassword(auth, email || `${username}@teacher.edu`, password);
-      } catch (e) {
-        console.warn(`Failed to sign in with precompiled credentials: ${(e as Error).message}`);
       }
 
       window.history.replaceState(undefined, "", window.location.pathname);

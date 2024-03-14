@@ -1,4 +1,4 @@
-import React, { ReactNode, useState } from "react";
+import React, { ReactNode, useEffect, useState } from "react";
 
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { startCase } from "lodash-es";
@@ -6,7 +6,7 @@ import { startCase } from "lodash-es";
 import { Button, Buttons } from "~/components";
 
 import { useDb } from "./base-login";
-import { usePrecompiledPasswordAuth } from "./hooks";
+import { useAuth } from "./hooks";
 
 type Props = {
   method: "email" | "username";
@@ -15,9 +15,20 @@ type Props = {
 
 export default function EmailLogin({ method, children }: Props) {
   const db = useDb();
+  const params = new URLSearchParams(window.location.search);
 
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    url.searchParams.delete("email");
+    url.searchParams.delete("username");
+    url.searchParams.delete("password");
+    window.history.replaceState(undefined, "", url.href);
+  }, []);
+
+  const [username, setUsername] = useState(
+    () => (method === "email" ? params.get("email") : params.get("username")) ?? "",
+  );
+  const [password, setPassword] = useState(params.get("password") ?? "");
 
   const signIn = async () => {
     const auth = getAuth(db.app);
@@ -28,7 +39,7 @@ export default function EmailLogin({ method, children }: Props) {
     );
   };
 
-  const user = usePrecompiledPasswordAuth();
+  const user = useAuth();
 
   if (user?.emailVerified) {
     return children;
@@ -64,7 +75,7 @@ export default function EmailLogin({ method, children }: Props) {
           />
         </div>
         <Buttons className="pt-3" showError>
-          <Button className="btn-success" onClick={signIn}>
+          <Button className="btn-success" onClick={signIn} disabled={!username || !password}>
             Accedi
           </Button>
         </Buttons>

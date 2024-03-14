@@ -10,6 +10,7 @@ import React, {
 } from "react";
 
 import classNames from "classnames";
+import { FirebaseError } from "firebase/app";
 
 type ContextProps = {
   contextLoading?: string;
@@ -34,12 +35,11 @@ export function Buttons({
 
   const throwError = useCallback(
     (error?: Error) => {
-      if (showError) {
-        const message = error?.message.replace(/^Firebase: /, "").replace(/ \([/a-z-]+\)\.$/, "");
-        setError(message && `Errore: ${message}`);
-      }
       if (error) {
         console.error(error);
+        if (showError) {
+          setError(`Errore: ${cleanFirebaseError(error)}`);
+        }
       }
     },
     [showError],
@@ -53,6 +53,24 @@ export function Buttons({
       </div>
     </LoadingButtonsContext.Provider>
   );
+}
+
+function cleanFirebaseError(error: Error) {
+  if (!(error instanceof FirebaseError)) {
+    return error.message;
+  }
+
+  switch (error.code) {
+    case "auth/invalid-email":
+    case "auth/user-not-found":
+      return "Username non corretto.";
+    case "auth/wrong-password":
+      return "Password non corretta.";
+    case "auth/too-many-requests":
+      return "Troppi tentativi. Riprova più tardi.";
+    default:
+      return error.message.replace(/^Firebase: /, "").replace(/ \([/a-z-]+\)\.$/, "");
+  }
 }
 
 type ButtonProps = {
