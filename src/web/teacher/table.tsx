@@ -112,7 +112,7 @@ const FinalizeModal = forwardRef(function FinalizeModal(
       return orderings.map((fields) => {
         return deburr(fields.map((field) => info[field]).join("\n"))
           .toLowerCase()
-          .replaceAll(/[^\na-z]/g, "");
+          .replaceAll(/[^\w\n]/g, "");
       });
     }
 
