@@ -7,7 +7,7 @@ import { deleteApp } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 import { Firestore } from "firebase-admin/firestore";
 import { chunk, groupBy, noop, pick, range, uniq } from "lodash-es";
-import { isMatch } from "picomatch";
+import picomatch from "picomatch";
 import z from "zod";
 
 import {
@@ -149,7 +149,7 @@ async function importParticipations(db: Firestore, options: ImportOptions) {
       const rng = new Rng(`${config.secret}-${config.id}-participations`);
 
       for (const school of schools) {
-        if (!isMatch(config.id, school.contestIds)) continue;
+        if (!picomatch.isMatch(config.id, school.contestIds)) continue;
 
         const pdfVariants = rng.sample(config.pdfVariantIds, config.pdfPerSchool);
 
