@@ -141,9 +141,11 @@ async function transformAsymptote(
       await execFile("pdf2svg", [pdfFile, svgFile]);
       await fs.unlink(pdfFile);
     } else {
-      await execFile("asy", [path, "-f", "svg", "-autoimport", injectFile, "-o", svgFile], {
-        cwd: dirname(path),
-      });
+      await execFile(
+        "asy",
+        [path, "-f", "svg", "-tex", "pdflatex", "-autoimport", injectFile, "-o", svgFile],
+        { cwd: dirname(path) },
+      );
     }
   } catch (err: any) {
     throw new Error(`Failed to compile asymptote:\n${err.stderr}`);
