@@ -143,7 +143,7 @@ async function transformAsymptote(
     } else {
       await execFile(
         "asy",
-        [path, "-f", "svg", "-tex", "pdflatex", "-autoimport", injectFile, "-o", svgFile],
+        [path, "-f", "svg", "-tex", "pdflatex", "-autoimport", injectFile, "-o", svgFile.replace(/\.svg/, "")],
         { cwd: dirname(path) },
       );
     }
