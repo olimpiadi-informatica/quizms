@@ -6,6 +6,7 @@ type StateType = {
   highlightedBlock: string;
   running: boolean;
   correct: boolean;
+  pauseRequired: number;
   msg: string;
   globalScope: Record<string, any>;
 };
@@ -17,6 +18,7 @@ export default function useExecutor(code: string, initialState: Record<string, a
     highlightedBlock: "",
     running: true,
     correct: false,
+    pauseRequired: 0,
     msg: "",
     globalScope: {},
   });
@@ -30,6 +32,7 @@ export default function useExecutor(code: string, initialState: Record<string, a
       correct: interpreter?.correct ?? false,
       msg: interpreter?.msg ?? "",
       globalScope: interpreter?.pseudoToNative(interpreter.globalScope.object) ?? {},
+      pauseRequired: interpreter?.pauseRequired ?? false,
     });
   }, [code, initialState]);
 
@@ -45,6 +48,7 @@ export default function useExecutor(code: string, initialState: Record<string, a
       correct: interpreter?.correct ?? false,
       msg: interpreter?.msg ?? "",
       globalScope: interpreter?.pseudoToNative(interpreter.globalScope.object) ?? {},
+      pauseRequired: interpreter?.pauseRequired ?? false,
     });
   };
 

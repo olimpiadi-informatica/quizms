@@ -106,7 +106,7 @@ export default function Workspace({
     return range(testcases.length).map((index) => ({ correct: false, index }));
   });
 
-  const { step, reset, running, highlightedBlock, globalScope, correct, msg } = useExecutor(
+  const { step, reset, running, highlightedBlock, globalScope, correct, msg, pauseRequired } = useExecutor(
     code,
     testcases[testcaseIndex],
   );
@@ -185,11 +185,15 @@ export default function Workspace({
   const [speed, setSpeed] = useState(3);
   useEffect(() => {
     const intervals = [5000, 2000, 1000, 500, 200, 100, 10];
-    if (playing) {
+    if (pauseRequired != 0) {
+      const interval = setInterval(step, intervals[speed]*pauseRequired);
+      return () => clearInterval(interval);
+    }
+    else if (playing) {
       const interval = setInterval(step, intervals[speed]);
       return () => clearInterval(interval);
     }
-  }, [step, speed, playing]);
+  }, [step, speed, playing, pauseRequired]);
 
   const runAll = async () => {
     const statuses = await Promise.all(
