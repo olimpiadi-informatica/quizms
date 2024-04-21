@@ -106,10 +106,8 @@ export default function Workspace({
     return range(testcases.length).map((index) => ({ correct: false, index }));
   });
 
-  const { step, reset, running, highlightedBlock, globalScope, correct, msg, pauseRequired } = useExecutor(
-    code,
-    testcases[testcaseIndex],
-  );
+  const { step, reset, running, highlightedBlock, globalScope, correct, msg, pauseRequired } =
+    useExecutor(code, testcases[testcaseIndex]);
 
   const blocklyVariables = useMemo(
     () => Object.fromEntries(Object.entries(variableMappings).map(([k, v]) => [v, globalScope[k]])),
@@ -186,10 +184,9 @@ export default function Workspace({
   useEffect(() => {
     const intervals = [5000, 2000, 1000, 500, 200, 100, 10];
     if (pauseRequired != 0) {
-      const interval = setInterval(step, intervals[speed]*pauseRequired);
+      const interval = setInterval(step, intervals[speed] * pauseRequired);
       return () => clearInterval(interval);
-    }
-    else if (playing) {
+    } else if (playing) {
       const interval = setInterval(step, intervals[speed]);
       return () => clearInterval(interval);
     }

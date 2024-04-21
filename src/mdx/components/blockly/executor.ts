@@ -32,7 +32,7 @@ export default function useExecutor(code: string, initialState: Record<string, a
       correct: interpreter?.correct ?? false,
       msg: interpreter?.msg ?? "",
       globalScope: interpreter?.pseudoToNative(interpreter.globalScope.object) ?? {},
-      pauseRequired: interpreter?.pauseRequired ?? false,
+      pauseRequired: interpreter?.pauseRequired ?? 0,
     });
   }, [code, initialState]);
 
@@ -48,7 +48,7 @@ export default function useExecutor(code: string, initialState: Record<string, a
       correct: interpreter?.correct ?? false,
       msg: interpreter?.msg ?? "",
       globalScope: interpreter?.pseudoToNative(interpreter.globalScope.object) ?? {},
-      pauseRequired: interpreter?.pauseRequired ?? false,
+      pauseRequired: interpreter?.pauseRequired ?? 0,
     });
   };
 
