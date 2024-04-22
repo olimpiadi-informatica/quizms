@@ -14,7 +14,9 @@ function replaceArgs(block: Block, generator: Generator, js: string, args?: Cust
   return js.replaceAll(/%(\d+)/g, (_, n) => {
     const arg = args?.[Number(n)];
     if (!arg) throw new Error(`Missing argument ${n} for block ${block.type}`);
-    return generator.valueToCode(block, arg.name, generator.ORDER_NONE);
+    const code = generator.valueToCode(block, arg.name, generator.ORDER_NONE);
+    if (!code) return 'exit(false, "il blocco ha bisogno di un parametro")';
+    return code;
   });
 }
 
