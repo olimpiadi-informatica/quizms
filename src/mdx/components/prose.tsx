@@ -1,4 +1,4 @@
-import React, { ReactNode } from "react";
+import { ReactNode } from "react";
 
 import { MDXProvider } from "@mdx-js/react";
 import classNames from "classnames";

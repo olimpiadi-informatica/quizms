@@ -1,4 +1,4 @@
-import React, { Suspense } from "react";
+import { Suspense } from "react";
 
 import { formatDate, formatTime } from "~/utils/date";
 import { participationMappingConverter } from "~/web/firebase/converters";

@@ -1,4 +1,4 @@
-import React, { ReactNode } from "react";
+import { ReactNode } from "react";
 
 import { useTeacher, useTeacherStudents } from "~/web/teacher/provider";
 

@@ -1,4 +1,4 @@
-import React, { ReactNode, createContext, useContext } from "react";
+import { ReactNode, createContext, useContext } from "react";
 
 import { Contest, Participation, Student } from "~/models";
 

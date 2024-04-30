@@ -1,4 +1,4 @@
-import React, { Ref, forwardRef, useMemo, useRef, useState } from "react";
+import { Ref, forwardRef, useMemo, useRef, useState } from "react";
 
 import { ArrowUpFromLine } from "lucide-react";
 import { parse as parseCSV } from "papaparse";

@@ -1,4 +1,4 @@
-import React, { Suspense } from "react";
+import { Suspense } from "react";
 
 import { Buttons, Card, Loading } from "~/components";
 import { Participation, Student } from "~/models";

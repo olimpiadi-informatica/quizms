@@ -1,4 +1,4 @@
-import React, { ReactNode } from "react";
+import { ReactNode } from "react";
 
 export function Card({ title, children }: { title: string; children: ReactNode }) {
   return (

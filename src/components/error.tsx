@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 
 import { RotateCw } from "lucide-react";
 import { FallbackProps } from "react-error-boundary";

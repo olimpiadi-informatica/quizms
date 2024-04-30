@@ -1,4 +1,4 @@
-import React, { ComponentType, Ref, forwardRef, useEffect, useMemo, useRef, useState } from "react";
+import { ComponentType, Ref, forwardRef, useEffect, useMemo, useRef, useState } from "react";
 
 import { ToolboxInfo } from "blockly/core/utils/toolbox";
 import classNames from "classnames";

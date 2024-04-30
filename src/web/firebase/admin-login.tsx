@@ -1,4 +1,4 @@
-import React, { ReactNode, useCallback } from "react";
+import { ReactNode, useCallback } from "react";
 
 import { FirebaseOptions } from "firebase/app";
 import { getAuth, signOut } from "firebase/auth";

@@ -1,4 +1,4 @@
-import React, { ChangeEvent, ReactNode, forwardRef, useId, useMemo, useRef, useState } from "react";
+import { ChangeEvent, ReactNode, Ref, forwardRef, useId, useMemo, useRef, useState } from "react";
 
 import classNames from "classnames";
 import { addMinutes, formatISO } from "date-fns";
@@ -289,7 +289,7 @@ function PersonalInformationField({
 
 const StudentRestoreModal = forwardRef(function StudentRestoreModal(
   _props,
-  ref: React.Ref<HTMLDialogElement>,
+  ref: Ref<HTMLDialogElement>,
 ) {
   const db = useDb();
   const auth = getAuth(db.app);

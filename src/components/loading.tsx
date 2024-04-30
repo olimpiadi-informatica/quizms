@@ -1,5 +1,3 @@
-import React from "react";
-
 import { Progress } from "./progress";
 
 export function Loading() {

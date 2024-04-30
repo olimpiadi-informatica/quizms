@@ -1,4 +1,4 @@
-import React, { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { startCase } from "lodash-es";

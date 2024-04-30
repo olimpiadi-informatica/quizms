@@ -1,4 +1,4 @@
-import React, { ReactNode, Suspense, createContext, useContext, useMemo } from "react";
+import { ReactNode, Suspense, createContext, useContext, useMemo } from "react";
 
 import { FirebaseOptions, initializeApp } from "firebase/app";
 import { browserLocalPersistence, debugErrorMap, getAuth, initializeAuth } from "firebase/auth";

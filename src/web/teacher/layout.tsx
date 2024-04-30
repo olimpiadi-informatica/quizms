@@ -1,4 +1,4 @@
-import React, { ReactNode, Suspense } from "react";
+import { ReactNode, Suspense } from "react";
 
 import classNames from "classnames";
 import { ChevronDown, GraduationCap } from "lucide-react";

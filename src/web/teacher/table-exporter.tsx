@@ -1,4 +1,4 @@
-import React, { Ref, forwardRef } from "react";
+import { Ref, forwardRef } from "react";
 
 import { saveAs } from "file-saver";
 import { unparse as stringifyCSV } from "papaparse";

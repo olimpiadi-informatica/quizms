@@ -1,4 +1,4 @@
-import React, { Suspense, useRef, useState } from "react";
+import { Suspense, useRef, useState } from "react";
 
 import { groupBy, sortBy } from "lodash-es";
 import { Check, X } from "lucide-react";

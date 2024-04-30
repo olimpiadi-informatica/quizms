@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 
 import classNames from "classnames";
 import { saveAs } from "file-saver";

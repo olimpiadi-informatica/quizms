@@ -1,5 +1,3 @@
-import React from "react";
-
 import { getDownloadURL, getStorage, ref } from "firebase/storage";
 
 import { RemoteStatement, useStudent } from "~/web/student";

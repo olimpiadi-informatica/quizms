@@ -1,5 +1,3 @@
-import React from "react";
-
 type ImageSrc = {
   src: string;
   width: string;
