@@ -8,6 +8,8 @@ import { ErrorBoundary } from "react-error-boundary";
 
 import { Dropdown, DropdownButton, DropdownItem, Error, useIsAfter } from "~/components";
 
+import "./css/index.css";
+
 type ErrorWithTimestamp = Error & { timestamp: Date };
 
 export function BaseLayout({ children }: { children: ReactNode }) {

@@ -1,7 +1,7 @@
 import child_process from "node:child_process";
 import fs from "node:fs/promises";
 import { platform } from "node:os";
-import { basename, dirname, extname, format as formatPath, join as joinPath } from "node:path";
+import path from "node:path";
 import process from "node:process";
 import { promisify } from "node:util";
 
@@ -44,9 +44,9 @@ export default function images(): PluginOption {
       isBuild = command === "build";
     },
     async load(rawPath) {
-      const [path, query] = rawPath.split("?");
+      const [pathname, query] = rawPath.split("?");
       const params = new URLSearchParams(query);
-      const ext = extname(path);
+      const ext = path.extname(pathname);
 
       if (params.has("url") || params.has("raw")) return;
 
@@ -57,33 +57,36 @@ export default function images(): PluginOption {
 
       if (ext === ".asy") {
         if (params.has("v")) {
-          return await transformAsymptoteVariants(path, params);
+          return await transformAsymptoteVariants(pathname, params);
         }
 
-        const imports = await findAsymptoteDependencies(path);
+        const imports = await findAsymptoteDependencies(pathname);
         const header = imports.map((f) => `import "${f}?url";`).join("\n");
 
         const inject = params.get("inject");
 
-        const image = await transformAsymptote(path, options, inject);
-        return emitFile(this, path, image, isBuild, header);
+        const image = await transformAsymptote(pathname, options, inject);
+        return emitFile(this, pathname, image, isBuild, header);
       }
 
       if (ext === ".svg") {
-        const image = await transformSvg(path, options);
-        return emitFile(this, path, image, isBuild);
+        const image = await transformSvg(pathname, options);
+        return emitFile(this, pathname, image, isBuild);
       }
 
       if (imageExtensions.has(ext)) {
-        const image = await transformImage(path, options);
-        return emitFile(this, path, image, isBuild);
+        const image = await transformImage(pathname, options);
+        return emitFile(this, pathname, image, isBuild);
       }
     },
   };
 }
 
-async function transformAsymptoteVariants(path: string, params: URLSearchParams): Promise<string> {
-  const variantFile = joinPath(dirname(path), params.get("v")!);
+async function transformAsymptoteVariants(
+  fileName: string,
+  params: URLSearchParams,
+): Promise<string> {
+  const variantFile = path.join(path.dirname(fileName), params.get("v")!);
   const variants = await executePython(variantFile);
 
   if (!Array.isArray(variants) || !isPlainObject(variants[0])) {
@@ -100,7 +103,7 @@ async function transformAsymptoteVariants(path: string, params: URLSearchParams)
 
       params.set("inject", inject);
 
-      return `import img_${i} from "${path}?${params.toString()}";`;
+      return `import img_${i} from "${fileName}?${params.toString()}";`;
     })
     .join("\n");
 
@@ -116,7 +119,7 @@ export default function img(variant) {
 }
 
 async function transformAsymptote(
-  path: string,
+  fileName: string,
   options: ImageOptions,
   inject: string | null,
 ): Promise<Image> {
@@ -134,8 +137,8 @@ async function transformAsymptote(
       const pdfFile = temporaryFile({ extension: "pdf" });
       await execFile(
         "asy",
-        [path, "-f", "pdf", "-autoimport", injectFile, "-o", pdfFile.replace(/\.pdf$/, "")],
-        { cwd: dirname(path) },
+        [fileName, "-f", "pdf", "-autoimport", injectFile, "-o", pdfFile.replace(/\.pdf$/, "")],
+        { cwd: path.dirname(fileName) },
       );
 
       await execFile("pdf2svg", [pdfFile, svgFile]);
@@ -144,7 +147,7 @@ async function transformAsymptote(
       await execFile(
         "asy",
         [
-          path,
+          fileName,
           "-f",
           "svg",
           "-tex",
@@ -154,7 +157,7 @@ async function transformAsymptote(
           "-o",
           svgFile.replace(/\.svg/, ""),
         ],
-        { cwd: dirname(path) },
+        { cwd: path.dirname(fileName) },
       );
     }
   } catch (err: any) {
@@ -168,8 +171,8 @@ async function transformAsymptote(
   return image;
 }
 
-async function transformSvg(path: string, options: ImageOptions): Promise<Image> {
-  const content = await fs.readFile(path, { encoding: "utf8" });
+async function transformSvg(fileName: string, options: ImageOptions): Promise<Image> {
+  const content = await fs.readFile(fileName, { encoding: "utf8" });
 
   const originalSize: { width?: number; height?: number } = {};
 
@@ -191,11 +194,11 @@ async function transformSvg(path: string, options: ImageOptions): Promise<Image>
       },
       sizePlugin(originalSize),
     ],
-    path,
+    path: fileName,
   });
 
   if (!originalSize.width || !originalSize.height) {
-    throw new Error(`Unable to determine size of SVG image: ${path}`);
+    throw new Error(`Unable to determine size of SVG image: ${fileName}`);
   }
 
   let width: number, height: number;
@@ -213,11 +216,11 @@ async function transformSvg(path: string, options: ImageOptions): Promise<Image>
   return { format: ".svg", data, width, height };
 }
 
-async function transformImage(path: string, options: ImageOptions): Promise<Image> {
-  let process = sharp(path).webp();
+async function transformImage(fileName: string, options: ImageOptions): Promise<Image> {
+  let process = sharp(fileName).webp();
 
   if ("scale" in options) {
-    const metadata = await sharp(path).metadata();
+    const metadata = await sharp(fileName).metadata();
     options = {
       width: metadata.width! * options.scale,
     };
@@ -238,7 +241,7 @@ async function transformImage(path: string, options: ImageOptions): Promise<Imag
 
 function emitFile(
   ctx: PluginContext,
-  path: string,
+  fileName: string,
   image: Image,
   isBuild: boolean,
   header?: string,
@@ -247,7 +250,7 @@ function emitFile(
   if (isBuild && process.env.QUIZMS_MODE !== "contest" && process.env.QUIZMS_MODE !== "pdf") {
     const id = ctx.emitFile({
       type: "asset",
-      name: basename(path, extname(path)) + image.format,
+      name: path.basename(fileName, path.extname(fileName)) + image.format,
       source: image.data,
     });
     src = `import.meta.ROLLUP_FILE_URL_${id}`;
@@ -282,9 +285,9 @@ async function findAsymptoteDependencies(asyPath: string) {
     );
     for (const match of matches) {
       const matchPath = match[1] ?? match[2];
-      const matchFile = formatPath({
-        dir: joinPath(dirname(file), dirname(matchPath)),
-        name: basename(matchPath, ".asy"),
+      const matchFile = path.format({
+        dir: path.join(path.dirname(file), path.dirname(matchPath)),
+        name: path.basename(matchPath, ".asy"),
         ext: ".asy",
       });
 

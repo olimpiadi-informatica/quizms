@@ -1,5 +1,5 @@
 import { readFile, readdir } from "node:fs/promises";
-import { basename, join } from "node:path";
+import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { PluginOption } from "vite";
@@ -16,16 +16,16 @@ export default function blocklyMedia(): PluginOption {
     async buildStart() {
       if (isLib) return;
 
-      const mediaDir = join(fileURLToPath(import.meta.resolve("blockly")), "..", "media");
+      const mediaDir = path.join(fileURLToPath(import.meta.resolve("blockly")), "..", "media");
       const files = await readdir(mediaDir);
 
       await Promise.all(
         files.map(async (file) => {
-          const fileName = `blockly/${basename(file)}`;
+          const fileName = `blockly/${path.basename(file)}`;
           this.emitFile({
             fileName,
             type: "asset",
-            source: await readFile(join(mediaDir, file)),
+            source: await readFile(path.join(mediaDir, file)),
           });
         }),
       );

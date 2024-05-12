@@ -1,4 +1,4 @@
-import { dirname, extname, join } from "node:path";
+import path from "node:path";
 
 import glob from "fast-glob";
 import license from "rollup-plugin-license";
@@ -17,24 +17,26 @@ export type ExportOptions = {
 export default async function staticExport(options: ExportOptions): Promise<void> {
   process.env.QUIZMS_MODE = options.training ? "training" : "contest";
 
-  const root = join(options.dir, "src");
+  const root = path.join(options.dir, "src");
   const pages = await glob("**/index.{html,jsx}", {
     cwd: root,
   });
   const input = Object.fromEntries(
     pages.map((p) => {
-      const dir = dirname(p);
+      const dir = path.dirname(p);
       const name = dir === "." ? "index" : dir.replaceAll(/\W/g, "-");
       const entry =
-        extname(p) === ".jsx" ? `virtual:react-entry?src=${encodeURIComponent(p)}` : join(root, p);
+        path.extname(p) === ".jsx"
+          ? `virtual:react-entry?src=${encodeURIComponent(p)}`
+          : path.join(root, p);
       return ["page-" + name, entry];
     }),
   );
 
-  const outDir = join(options.dir, options.outDir);
+  const outDir = path.join(options.dir, options.outDir);
 
-  const config = mergeConfig(configs(join(options.dir, "src"), "production"), {
-    publicDir: join(options.dir, "public"),
+  const config = mergeConfig(configs(path.join(options.dir, "src"), "production"), {
+    publicDir: path.join(options.dir, "public"),
     build: {
       outDir,
       emptyOutDir: true,
@@ -69,7 +71,7 @@ export default async function staticExport(options: ExportOptions): Promise<void
       license({
         thirdParty: {
           output: {
-            file: join(outDir, "LICENSES.txt"),
+            file: path.join(outDir, "LICENSES.txt"),
           },
         },
       }),
@@ -79,8 +81,8 @@ export default async function staticExport(options: ExportOptions): Promise<void
 
   try {
     await build(config);
-  } catch (e) {
-    error((e as Error).message);
+  } catch (err) {
+    error((err as Error).message);
     fatal("Build failed.");
   }
 }

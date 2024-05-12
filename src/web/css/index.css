@@ -1,16 +1,4 @@
-@import "code-theme.less";
-
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-html {
-  @apply overflow-y-hidden;
-}
-
-body {
-  @apply min-w-[360px];
-}
+@import "./code-theme.less";
 
 .katex-mathml {
   @apply select-none;

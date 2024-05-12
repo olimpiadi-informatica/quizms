@@ -1,5 +1,5 @@
 import { existsSync } from "node:fs";
-import { join } from "node:path";
+import path from "node:path";
 
 import { App, initializeApp } from "firebase-admin/app";
 import { getFirestore } from "firebase-admin/firestore";
@@ -10,9 +10,9 @@ import { fatal } from "~/utils/logs";
 import restApi from "./rest-api";
 
 export function loadServiceAccountKey(dir: string) {
-  const path = join(dir, "serviceAccountKey.json");
+  const fileName = path.join(dir, "serviceAccountKey.json");
 
-  if (!existsSync(path)) {
+  if (!existsSync(fileName)) {
     fatal(`\
 Il file con le credenziali di Firebase non è stato trovato.
 
@@ -26,7 +26,7 @@ Per generare il file:
 `);
   }
 
-  process.env.GOOGLE_APPLICATION_CREDENTIALS = path;
+  process.env.GOOGLE_APPLICATION_CREDENTIALS = fileName;
 }
 
 export async function initializeFirebase(dir: string) {
@@ -45,8 +45,8 @@ async function getFirebaseBucket(app: App) {
   try {
     const data = await restApi(app, "firebase", "v1beta1", "");
     bucketName = data.resources.storageBucket;
-  } catch (e) {
-    fatal(`Failed to get project information: ${e}`);
+  } catch (err) {
+    fatal(`Failed to get project information: ${err}`);
   }
 
   if (!bucketName) {

@@ -1,5 +1,5 @@
 import { existsSync } from "node:fs";
-import { join } from "node:path";
+import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { CompileOptions as MdxOptions } from "@mdx-js/mdx";
@@ -24,7 +24,7 @@ type Options = {
   mdx?: MdxOptions;
 };
 
-export default function (
+export default function configs(
   root: string,
   mode: "development" | "production",
   options?: Options,
@@ -99,7 +99,7 @@ export default function (
     clearScreen: false,
     server: {
       fs: {
-        allow: [join(root, ".."), fileURLToPath(new URL("../..", import.meta.url))],
+        allow: [path.join(root, ".."), fileURLToPath(new URL("../..", import.meta.url))],
       },
       host: false,
     },

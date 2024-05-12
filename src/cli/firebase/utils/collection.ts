@@ -47,13 +47,13 @@ export async function importCollection<T extends { id: string }>(
     }
     try {
       await batch.commit();
-    } catch (e: any) {
-      if (e.code === GrpcStatus.ALREADY_EXISTS) {
+    } catch (err: any) {
+      if (err.code === GrpcStatus.ALREADY_EXISTS) {
         fatal(
           `Document already exists in \`${collection}\`. Use \`--force\` to overwrite existing documents.`,
         );
       } else {
-        fatal(`Cannot import ${collection}: ${e}`);
+        fatal(`Cannot import ${collection}: ${err}`);
       }
     }
   }

@@ -1,6 +1,6 @@
 import child_process from "node:child_process";
 import { existsSync } from "node:fs";
-import { basename, dirname, extname, join } from "node:path";
+import path from "node:path";
 import { promisify } from "node:util";
 
 import { PluginOption } from "vite";
@@ -11,11 +11,11 @@ export default function python(): PluginOption {
   return {
     name: "quizms:python",
     async load(rawPath) {
-      const [path] = rawPath.split("?");
-      const ext = extname(path);
+      const [pathname] = rawPath.split("?");
+      const ext = path.extname(pathname);
 
       if (ext === ".py") {
-        return `const module = ${JSON.stringify(await executePython(path))};
+        return `const module = ${JSON.stringify(await executePython(pathname))};
 export default module;`;
       }
     },
@@ -23,16 +23,16 @@ export default module;`;
 }
 
 export async function executePython(file: string): Promise<any> {
-  const fileRelative = join(basename(dirname(file)), basename(file));
+  const fileRelative = path.join(path.basename(path.dirname(file)), path.basename(file));
   if (!existsSync(file)) {
     throw new Error(`Cannot import \`${fileRelative}\`: file does not exist.`);
   }
   const { stdout } = await execFile("python3", [file]);
   try {
     return JSON.parse(stdout);
-  } catch (e: any) {
+  } catch (err) {
     throw new Error(
-      `Cannot import \`${fileRelative}\`: output must be a valid JSON: ${e.message}.`,
+      `Cannot import \`${fileRelative}\`: output must be a valid JSON: ${(err as Error).message}.`,
     );
   }
 }

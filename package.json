@@ -5,11 +5,11 @@
   "author": "Alessandro Bortolin <bortolin.alessandro@outlook.it>",
   "license": "MIT",
   "scripts": {
-    "prebuild": "eslint . && prettier --check --cache --log-level=warn src/",
+    "prebuild": "eslint src && prettier --check --cache --log-level=warn src",
     "build": "NODE_ENV=production node scripts/build.js build",
     "watch": "node scripts/build.js watch",
-    "lint": "eslint --fix . && tsc --noEmit && prettier --write --cache --log-level=warn src/",
-    "fmt": "prettier --write --cache src/",
+    "lint": "eslint --fix src && tsc --noEmit && prettier --write --cache --log-level=warn src",
+    "fmt": "prettier --write --cache src",
     "prepack": "yarn build",
     "release": "npm publish --access public"
   },
@@ -21,7 +21,6 @@
     "./student": "./dist/student/index.js",
     "./teacher": "./dist/teacher/index.js",
     "./firebase": "./dist/firebase/index.js",
-    "./css": "./dist/index.css",
     "./jsx-runtime": "./dist/jsx-runtime/index.js"
   },
   "typesVersions": {
@@ -117,8 +116,9 @@
   },
   "devDependencies": {
     "@mdx-js/react": "^3.0",
-    "@tailwindcss/typography": "^0.5",
-    "@trivago/prettier-plugin-sort-imports": "^4.1",
+    "@olinfo/eslint": "^0.2",
+    "@olinfo/prettier": "^0.1",
+    "@olinfo/tailwind": "^0.1",
     "@types/file-saver": "^2.0",
     "@types/js-yaml": "^4.0",
     "@types/lodash-es": "^4.17",
@@ -128,112 +128,16 @@
     "@types/react": "^18.0",
     "@types/react-dom": "^18.2",
     "@types/wicg-file-system-access": "^2023.10.4",
-    "@typescript-eslint/eslint-plugin": "^7.0",
-    "@typescript-eslint/parser": "^7.0",
-    "autoprefixer": "^10.4",
-    "daisyui": "^4.4",
-    "eslint": "^8.34",
-    "eslint-plugin-react": "^7.32",
-    "eslint-plugin-react-hooks": "^4.6",
-    "eslint-plugin-tailwindcss": "^3.13.1",
-    "eslint-plugin-unicorn": "^51.0",
     "highlight.js": "^11.8",
     "less": "^4.1",
     "postcss": "^8.4",
-    "prettier": "^3.0",
-    "prettier-plugin-tailwindcss": "^0.5",
-    "tailwindcss": "^3.2",
     "tsup": "^8.0",
     "typescript": "^5.1"
   },
   "postcss": {
     "plugins": {
-      "tailwindcss": {},
-      "autoprefixer": {}
+      "tailwindcss": {}
     }
   },
-  "prettier": {
-    "trailingComma": "all",
-    "tabWidth": 2,
-    "semi": true,
-    "singleQuote": false,
-    "printWidth": 100,
-    "endOfLine": "lf",
-    "bracketSameLine": true,
-    "importOrder": [
-      "^server-only$",
-      "^node:",
-      "^(react|react-dom)(/|$)",
-      "<THIRD_PARTY_MODULES>",
-      "^(@|~)/",
-      "^..?/",
-      "\\.css$"
-    ],
-    "importOrderSeparation": true,
-    "importOrderSortSpecifiers": true,
-    "tailwindFunctions": [
-      "jsxAttribute"
-    ],
-    "plugins": [
-      "@trivago/prettier-plugin-sort-imports",
-      "prettier-plugin-tailwindcss"
-    ]
-  },
-  "eslintConfig": {
-    "env": {
-      "es2021": true,
-      "node": true
-    },
-    "ignorePatterns": [
-      "*.js",
-      "dist/"
-    ],
-    "parser": "@typescript-eslint/parser",
-    "parserOptions": {
-      "ecmaVersion": "latest",
-      "sourceType": "module"
-    },
-    "settings": {
-      "react": {
-        "version": "18"
-      }
-    },
-    "plugins": [
-      "react",
-      "react-hooks",
-      "@typescript-eslint",
-      "unicorn",
-      "tailwindcss"
-    ],
-    "extends": [
-      "eslint:recommended",
-      "plugin:react/recommended",
-      "plugin:react-hooks/recommended",
-      "plugin:@typescript-eslint/recommended",
-      "plugin:unicorn/recommended",
-      "plugin:tailwindcss/recommended"
-    ],
-    "rules": {
-      "linebreak-style": "off",
-      "quotes": "off",
-      "semi": "off",
-      "@typescript-eslint/no-empty-function": "off",
-      "@typescript-eslint/no-explicit-any": "off",
-      "@typescript-eslint/no-non-null-assertion": "off",
-      "unicorn/catch-error-name": "off",
-      "unicorn/no-nested-ternary": "off",
-      "unicorn/no-null": "off",
-      "unicorn/prevent-abbreviations": "off",
-      "unicorn/switch-case-braces": "off",
-      "no-duplicate-imports": "warn",
-      "no-restricted-imports": [
-        "warn",
-        {
-          "patterns": [
-            "../*"
-          ]
-        }
-      ]
-    }
-  }
+  "prettier": "@olinfo/prettier"
 }

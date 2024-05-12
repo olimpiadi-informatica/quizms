@@ -135,16 +135,16 @@ function StudentLoginInner({
     setLoading(true);
     try {
       await createStudent(db, { ...student });
-    } catch (e) {
-      if (e instanceof DuplicateStudentError) {
+    } catch (err) {
+      if (err instanceof DuplicateStudentError) {
         await createStudentRestore(db, {
           ...student,
-          id: e.studentId,
-          participationId: e.participationId,
+          id: err.studentId,
+          participationId: err.participationId,
         });
         modalRef.current?.showModal();
       } else {
-        throw e;
+        throw err;
       }
     } finally {
       setLoading(false);
@@ -474,11 +474,11 @@ async function createStudent(db: Firestore, student: Student) {
         participationId: student.participationId,
       });
     });
-  } catch (e) {
-    if ((e as FirestoreError).code === "permission-denied") {
+  } catch (err) {
+    if ((err as FirestoreError).code === "permission-denied") {
       throw new Error("Codice scaduto.");
     }
-    throw e;
+    throw err;
   }
 
   return student;

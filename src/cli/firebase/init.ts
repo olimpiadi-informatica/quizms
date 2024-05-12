@@ -1,6 +1,6 @@
 import { existsSync } from "node:fs";
 import { cp, mkdir, writeFile } from "node:fs/promises";
-import { basename, join, relative } from "node:path";
+import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { Bucket } from "@google-cloud/storage";
@@ -39,27 +39,27 @@ export default async function init(options: InitOptions) {
 async function copyFiles(options: InitOptions) {
   info(`Copying files...`);
 
-  const data = join(options.dir, "firebase");
+  const data = path.join(options.dir, "firebase");
   await mkdir(data, { recursive: true });
 
-  const firestoreRulesPath = join(data, "firestore.rules");
+  const firestoreRulesPath = path.join(data, "firestore.rules");
   if (await overwrite(firestoreRulesPath, options)) {
     const from = fileURLToPath(new URL(firestoreRules, import.meta.url));
     await cp(from, firestoreRulesPath);
   }
 
-  const firestoreIndexesPath = join(data, "firestore-indexes.json");
+  const firestoreIndexesPath = path.join(data, "firestore-indexes.json");
   if (await overwrite(firestoreIndexesPath, options)) {
     await writeFile(firestoreIndexesPath, JSON.stringify(firestoreIndexes, undefined, 2));
   }
 
-  const storageRulesPath = join(data, "storage.rules");
+  const storageRulesPath = path.join(data, "storage.rules");
   if (await overwrite(storageRulesPath, options)) {
     const from = fileURLToPath(new URL(storageRules, import.meta.url));
     await cp(from, storageRulesPath);
   }
 
-  const configPath = join(options.dir, "firebase.json");
+  const configPath = path.join(options.dir, "firebase.json");
 
   // See {@link https://github.com/firebase/firebase-tools/blob/09c2641e861f2e31798dfb4aba1a180e8fd08ea5/src/firebaseConfig.ts#L244 here}.
   const configs = {
@@ -90,11 +90,11 @@ async function copyFiles(options: InitOptions) {
       predeploy: "npx quizms build",
     },
     firestore: {
-      rules: relative(options.dir, firestoreRulesPath),
-      indexes: relative(options.dir, firestoreIndexesPath),
+      rules: path.relative(options.dir, firestoreRulesPath),
+      indexes: path.relative(options.dir, firestoreIndexesPath),
     },
     storage: {
-      rules: relative(options.dir, storageRulesPath),
+      rules: path.relative(options.dir, storageRulesPath),
     },
   };
 
@@ -122,8 +122,8 @@ async function enableBackups(app: App) {
     });
     success(`Backups enabled!`);
     return 0;
-  } catch (e) {
-    error(`Failed to enable Firestore backups: ${e}`);
+  } catch (err) {
+    error(`Failed to enable Firestore backups: ${err}`);
     return 1;
   }
 }
@@ -141,8 +141,8 @@ async function enableCors(bucket: Bucket) {
     ]);
     success(`CORS enabled!`);
     return 0;
-  } catch (e) {
-    error(`Failed to set CORS configuration: ${e}`);
+  } catch (err) {
+    error(`Failed to set CORS configuration: ${err}`);
     return 1;
   }
 }
@@ -150,7 +150,7 @@ async function enableCors(bucket: Bucket) {
 async function overwrite(dest: string, options?: InitOptions) {
   if (options?.force || !existsSync(dest)) return true;
   return await confirm(
-    `The file ${pc.bold(basename(dest))} already exists. Do you want to overwrite it?`,
+    `The file ${pc.bold(path.basename(dest))} already exists. Do you want to overwrite it?`,
     false,
   );
 }

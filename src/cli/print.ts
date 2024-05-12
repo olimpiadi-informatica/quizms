@@ -1,6 +1,6 @@
 import { existsSync } from "node:fs";
 import { rm } from "node:fs/promises";
-import { join } from "node:path";
+import path from "node:path";
 import { promisify } from "node:util";
 
 import { mapValues, noop } from "lodash-es";
@@ -28,8 +28,8 @@ export default async function print(options: PrintOptions) {
 
   const generationConfigs = await load(options.dir, "contests", generationConfigSchema);
 
-  const root = join(options.dir, "src");
-  const entry = join(root, options.entry);
+  const root = path.join(options.dir, "src");
+  const entry = path.join(root, options.entry);
   if (!existsSync(entry)) {
     fatal(`\
 Entry file ${pc.bold(pc.red(options.entry))} does not exists. \
@@ -41,9 +41,9 @@ Make sure it exists or specify a different entry file using \`--entry\`.`);
   const statements = mapValues(variants, 1);
 
   info("Building website...");
-  const buildDir = join(options.dir, options.outDir, ".pdf-build");
-  const buildConfig = mergeConfig(configs(join(options.dir, "src"), "production"), {
-    publicDir: join(options.dir, "public"),
+  const buildDir = path.join(options.dir, options.outDir, ".pdf-build");
+  const buildConfig = mergeConfig(configs(path.join(options.dir, "src"), "production"), {
+    publicDir: path.join(options.dir, "public"),
     build: {
       outDir: buildDir,
       emptyOutDir: true,

@@ -1,4 +1,4 @@
-import { dirname, join } from "node:path";
+import path from "node:path";
 
 import { Node as AcornNode } from "acorn";
 import { is, traverse } from "estree-toolkit";
@@ -21,14 +21,14 @@ export default function iframe(): PluginOption {
       isBuild = command === "build";
     },
     resolveId(id) {
-      const [path] = id.split("?");
-      if (path === "virtual:iframe-entry") {
+      const [pathname] = id.split("?");
+      if (pathname === "virtual:iframe-entry") {
         return "\0" + id;
       }
     },
     load(id) {
-      const [path, query] = id.split("?");
-      if (path === "\0virtual:iframe-entry") {
+      const [pathname, query] = id.split("?");
+      if (pathname === "\0virtual:iframe-entry") {
         return `void import("${query}");`;
       }
     },
@@ -39,8 +39,8 @@ export default function iframe(): PluginOption {
       const ast = this.parse(code);
 
       traverse(ast, {
-        CallExpression: (path) => {
-          const node = path.node!;
+        CallExpression: (nodePath) => {
+          const node = nodePath.node!;
           const [comp, props] = node.arguments;
 
           if (
@@ -66,7 +66,7 @@ export default function iframe(): PluginOption {
                 continue;
               }
 
-              const srcPath = join(dirname(id), prop.value.source.value);
+              const srcPath = path.join(path.dirname(id), prop.value.source.value);
 
               let srcValue: string;
               if (isBuild) {

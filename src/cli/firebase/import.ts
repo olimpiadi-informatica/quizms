@@ -1,6 +1,6 @@
 import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
-import { join } from "node:path";
+import path from "node:path";
 
 import { Bucket } from "@google-cloud/storage";
 import { deleteApp } from "firebase-admin/app";
@@ -54,7 +54,7 @@ type ImportOptions = {
 export default async function importData(options: ImportOptions) {
   process.env.QUIZMS_MODE = "contest";
 
-  if (!existsSync(join(options.dir, "data"))) {
+  if (!existsSync(path.join(options.dir, "data"))) {
     fatal(
       `Cannot find data directory at ${options.dir}. Make sure you're in the root of a QuizMS project or specify a different directory, use \`--help\` for usage.`,
     );
@@ -198,8 +198,8 @@ async function importPdf(bucket: Bucket, options: ImportOptions) {
   const generationConfigs = await load(options.dir, "contests", generationConfigSchema);
   const pdfs = generationConfigs.flatMap((c) =>
     uniq([...c.variantIds, ...c.pdfVariantIds]).map((id): [string, string] => [
-      join(options.dir, "variants", id, "statement.pdf"),
-      join("statements", id, `statement-${c.statementVersion}.pdf`),
+      path.join(options.dir, "variants", id, "statement.pdf"),
+      path.join("statements", id, `statement-${c.statementVersion}.pdf`),
     ]),
   );
 
@@ -244,17 +244,17 @@ async function importVariants(db: Firestore, options: ImportOptions) {
     generationConfigs
       .flatMap((c) => uniq([...c.variantIds, ...c.pdfVariantIds]))
       .map(async (id) => {
-        const path = join(options.dir, "variants", id, "schema.json");
+        const fileName = path.join(options.dir, "variants", id, "schema.json");
         let schema: string;
         try {
-          schema = await readFile(path, "utf8");
+          schema = await readFile(fileName, "utf8");
         } catch {
           fatal(`Cannot find schema for variant ${id}. Use \`quizms variants\` to generate it.`);
         }
         try {
           return validate(variantSchema, JSON.parse(schema));
-        } catch (e) {
-          fatal(`Invalid schema for variant ${id}: ${e}`);
+        } catch (err) {
+          fatal(`Invalid schema for variant ${id}: ${err}`);
         }
       }),
   );
@@ -266,8 +266,8 @@ async function importStatements(bucket: Bucket, options: ImportOptions) {
 
   const statements = generationConfigs.flatMap((c) =>
     uniq([...c.variantIds, ...c.pdfVariantIds]).map((id): [string, string] => [
-      join(options.dir, "variants", id, "statement.js"),
-      join("statements", id, `statement-${c.statementVersion}.js`),
+      path.join(options.dir, "variants", id, "statement.js"),
+      path.join("statements", id, `statement-${c.statementVersion}.js`),
     ]),
   );
   await importStorage(bucket, "statements", statements, options);

@@ -30,8 +30,8 @@ const webConfig = {
   ...commonConfig,
   entryPoints: await glob("src/web/*/index.ts"),
   platform: "browser",
-  loader: { ".css": "copy" },
   minifyWhitespace: false,
+  esbuildPlugins: [lessPlugin],
 };
 
 /** @type {import("tsup").Options} */
@@ -43,13 +43,6 @@ const cliConfig = {
   loader: { ".rules": "file" },
 };
 
-/** @type {import("tsup").Options} */
-const cssConfig = {
-  ...commonConfig,
-  entryPoints: ["src/web/css/index.css"],
-  esbuildPlugins: [lessPlugin],
-};
-
 const command = new Command();
 
 command
@@ -58,7 +51,7 @@ command
   .action(async () => {
     await rm("dist", { recursive: true, force: true });
     await Promise.all(
-      [webConfig, cliConfig, cssConfig].map((config) => {
+      [webConfig, cliConfig].map((config) => {
         return build({
           minifyIdentifiers: true,
           minifySyntax: true,
@@ -75,12 +68,8 @@ command
   .description("Watch for changes and rebuild")
   .action(async () => {
     await Promise.all(
-      [webConfig, cliConfig, cssConfig].map((config) => {
-        return build({
-          watch: true,
-          ...config,
-          ...(config.platform === "browser" ? { onSuccess: () => void build(cssConfig) } : {}),
-        });
+      [webConfig, cliConfig].map((config) => {
+        return build({ ...config, watch: true });
       }),
     );
   });

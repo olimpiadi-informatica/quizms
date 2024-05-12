@@ -1,4 +1,4 @@
-import { isAbsolute } from "node:path";
+import path from "node:path";
 
 import { Parser } from "acorn";
 import { Directive, Expression, ModuleDeclaration } from "estree";
@@ -27,16 +27,16 @@ const remarkImages: Plugin<[], Root> = () => {
         throw new Error("Image must have a parent");
       }
 
-      const url = (isAbsolute(image.url) ? "" : "./") + image.url;
+      const url = (path.isAbsolute(image.url) ? "" : "./") + image.url;
       const { alt, title } = image;
       const name = `__img__${imports.length}__`;
 
-      const [path, query] = url.split("?");
+      const [pathname, query] = url.split("?");
       let imgSrc: Expression;
 
       if (URL.canParse(image.url)) {
         imgSrc = b.literal(image.url);
-      } else if (path.includes("{")) {
+      } else if (pathname.includes("{")) {
         const params = new URLSearchParams(query).entries();
 
         imports.push(
@@ -50,7 +50,7 @@ const remarkImages: Plugin<[], Root> = () => {
                     b.identifier("glob"),
                   ),
                   [
-                    b.literal(path.replaceAll(/{.*?}/g, "*")),
+                    b.literal(pathname.replaceAll(/{.*?}/g, "*")),
                     b.objectExpression([
                       b.property("init", b.identifier("eager"), b.literal(true)),
                       b.property("init", b.identifier("import"), b.literal("default")),
@@ -71,7 +71,7 @@ const remarkImages: Plugin<[], Root> = () => {
           ),
         );
 
-        const templateLiteral = `String.raw\`${path.replaceAll("{", "${")}\``;
+        const templateLiteral = `String.raw\`${pathname.replaceAll("{", "${")}\``;
         const template = Parser.parse(templateLiteral, {
           ecmaVersion: "latest",
           sourceType: "module",

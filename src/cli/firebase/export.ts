@@ -1,5 +1,5 @@
 import { mkdir, open } from "node:fs/promises";
-import { format, join } from "node:path";
+import path from "node:path";
 
 import { deleteApp } from "firebase-admin/app";
 import { Query } from "firebase-admin/firestore";
@@ -31,7 +31,7 @@ export default async function exportContests(options: ExportOptions) {
   const { app, db } = await initializeFirebase(options.dir);
 
   const timestamp = new Date().toISOString();
-  const outDir = join(options.dir, "export", timestamp);
+  const outDir = path.join(options.dir, "export", timestamp);
   await mkdir(outDir, { recursive: true });
 
   if (options.students) {
@@ -68,7 +68,7 @@ async function exportCollection(ref: Query, collection: string, dir: string) {
   const chunkSize = 25_000;
   let snapshot = await ref.limit(chunkSize).get();
 
-  const file = await open(format({ dir, name: collection, ext: ".jsonl" }), "w");
+  const file = await open(path.format({ dir, name: collection, ext: ".jsonl" }), "w");
   let sum = 0;
 
   while (!snapshot.empty) {

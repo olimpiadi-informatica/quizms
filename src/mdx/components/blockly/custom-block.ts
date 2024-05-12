@@ -46,10 +46,10 @@ const statementBlockSchema = baseBlockSchema
     if (import.meta.env.DEV) {
       try {
         parse(block.js);
-      } catch (e) {
+      } catch (err) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: `Invalid JavaScript code for block \`${block.type}\`: ${(e as SyntaxError).message}`,
+          message: `Invalid JavaScript code for block \`${block.type}\`: ${(err as SyntaxError).message}`,
           path: ["js"],
         });
       }
@@ -84,10 +84,10 @@ const expressionBlockSchema = baseBlockSchema
             path: ["js", 1],
           });
         }
-      } catch (e) {
+      } catch (err) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: `Invalid JavaScript code for block \`${block.type}\`: ${(e as Error).message}`,
+          message: `Invalid JavaScript code for block \`${block.type}\`: ${(err as Error).message}`,
           path: ["js", 0],
         });
       }

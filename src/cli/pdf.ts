@@ -1,5 +1,5 @@
 import { mkdir, writeFile } from "node:fs/promises";
-import { join } from "node:path";
+import path from "node:path";
 
 import { PDFDocument, PDFPageDrawTextOptions, StandardFonts } from "@cantoo/pdf-lib";
 import { map, range, size, uniq } from "lodash-es";
@@ -63,8 +63,8 @@ async function generatePdf(
 
   const pdf = await doc.save();
 
-  await mkdir(join(outDir, variant), { recursive: true });
-  await writeFile(join(outDir, variant, "statement.pdf"), pdf);
+  await mkdir(path.join(outDir, variant), { recursive: true });
+  await writeFile(path.join(outDir, variant, "statement.pdf"), pdf);
 }
 
 export default async function generatePdfs(

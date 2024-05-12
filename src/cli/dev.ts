@@ -1,4 +1,4 @@
-import { join } from "node:path";
+import path from "node:path";
 
 import { noop } from "lodash-es";
 import { createServer } from "vite";
@@ -14,8 +14,8 @@ export default async function devServer(options: DevOptions) {
   process.env.QUIZMS_MODE = "development";
 
   const server = await createServer({
-    ...configs(join(options.dir, "src"), "development"),
-    publicDir: join(options.dir, "public"),
+    ...configs(path.join(options.dir, "src"), "development"),
+    publicDir: path.join(options.dir, "public"),
   });
   await server.listen(options.port);
 

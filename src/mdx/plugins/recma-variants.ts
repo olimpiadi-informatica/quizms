@@ -1,4 +1,4 @@
-import { basename, join } from "node:path";
+import path from "node:path";
 
 import { AssignmentProperty, Program } from "estree";
 import { builders as b, is, traverse } from "estree-toolkit";
@@ -8,9 +8,12 @@ const recmaVariants: Plugin<[], Program> = () => {
   return (ast, file) => {
     const found = findVariants(ast);
     if (found) {
-      injectLocalVariables(ast, join(basename(file.dirname ?? ""), file.basename ?? ""));
+      injectLocalVariables(ast, path.join(path.basename(file.dirname ?? ""), file.basename ?? ""));
     } else {
-      checkUndefinedVariables(ast, join(basename(file.dirname ?? ""), file.basename ?? ""));
+      checkUndefinedVariables(
+        ast,
+        path.join(path.basename(file.dirname ?? ""), file.basename ?? ""),
+      );
     }
   };
 };
@@ -20,12 +23,12 @@ export default recmaVariants;
 function findVariants(ast: Program) {
   let variantsFound = false;
   traverse(ast, {
-    ImportDeclaration(path) {
-      const node = path.node!;
+    ImportDeclaration(nodePath) {
+      const node = nodePath.node!;
       variantsFound ||= node.specifiers.some((specifier) => specifier.local.name === "variants");
     },
-    VariableDeclarator(path) {
-      const node = path.node!;
+    VariableDeclarator(nodePath) {
+      const node = nodePath.node!;
       variantsFound ||= is.identifier(node.id) && node.id.name === "variants";
       variantsFound ||=
         is.identifier(node.id) &&
@@ -47,12 +50,12 @@ function injectLocalVariables(ast: Program, file: string) {
   traverse(ast, {
     $: { scope: true },
 
-    FunctionDeclaration(path) {
-      const variableNames = Object.keys(path.scope!.globalBindings).filter(
+    FunctionDeclaration(nodePath) {
+      const variableNames = Object.keys(nodePath.scope!.globalBindings).filter(
         (name) => /^([a-z]|[A-Z]$)/.test(name) && name !== "import" && name !== "undefined",
       );
 
-      const node = path.node!;
+      const node = nodePath.node!;
       if (node.id?.name === "_createMdxContent") {
         // const _allVariants = frontmatter?.variants ?? variants;
         const allVariants = b.variableDeclaration("const", [
@@ -191,12 +194,12 @@ function checkUndefinedVariables(ast: Program, file: string) {
   traverse(ast, {
     $: { scope: true },
 
-    FunctionDeclaration(path) {
-      const variableNames = Object.keys(path.scope!.globalBindings).filter(
+    FunctionDeclaration(nodePath) {
+      const variableNames = Object.keys(nodePath.scope!.globalBindings).filter(
         (name) => /^([a-z]|[A-Z]$)/.test(name) && name !== "import" && name !== "undefined",
       );
 
-      const node = path.node!;
+      const node = nodePath.node!;
       if (node.id?.name === "_createMdxContent" && variableNames.length > 0) {
         node.body.body.unshift(
           b.throwStatement(

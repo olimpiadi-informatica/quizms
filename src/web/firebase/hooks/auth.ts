@@ -48,8 +48,8 @@ export function useTokenAuth() {
     if (token) {
       try {
         await signInWithCustomToken(auth, token);
-      } catch (e) {
-        console.warn(`Failed to sign in with token: ${(e as Error).message}`);
+      } catch (err) {
+        console.warn(`Failed to sign in with token: ${(err as Error).message}`);
       }
 
       window.history.replaceState(undefined, "", window.location.pathname);

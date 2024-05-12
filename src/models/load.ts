@@ -1,5 +1,5 @@
 import { readFile } from "node:fs/promises";
-import { join, relative } from "node:path";
+import path from "node:path";
 import { cwd } from "node:process";
 
 import yaml from "js-yaml";
@@ -24,24 +24,24 @@ export default async function load<T>(
     { ext: ".csv", parser: parseCsv },
   ];
 
-  const path = join(dir, "data", collection);
+  const fileName = path.join(dir, "data", collection);
 
   for (const { ext, parser } of parsers) {
-    const relativePath = relative(cwd(), collection) + ext;
+    const relativePath = path.relative(cwd(), collection) + ext;
 
     let content: string;
     try {
-      content = await readFile(path + ext, "utf8");
+      content = await readFile(fileName + ext, "utf8");
     } catch {
       continue;
     }
-    info(`Reading from ${relativePath}...`);
+    info(`Reading from ${fileName}...`);
 
     let rawData: any;
     try {
       rawData = parser(content);
-    } catch (e) {
-      fatal(`Cannot parse ${relativePath}: ${e}`);
+    } catch (err) {
+      fatal(`Cannot parse ${relativePath}: ${err}`);
     }
 
     try {
@@ -57,8 +57,8 @@ export default async function load<T>(
       } else {
         fatal(`Cannot parse ${relativePath}: not an array or object`);
       }
-    } catch (e) {
-      fatal(`Cannot parse ${relativePath}: ${e}`);
+    } catch (err) {
+      fatal(`Cannot parse ${relativePath}: ${err}`);
     }
   }
 

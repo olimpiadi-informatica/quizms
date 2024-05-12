@@ -22,8 +22,8 @@ export function parseFunction(...args: any[]) {
         args.map((arg) => parseValue(arg, options)),
       ),
     );
-  } catch (e) {
-    throw new Error(`Failed to parse code: ${e});`);
+  } catch (err) {
+    throw new Error(`Failed to parse code: ${err});`);
   }
 }
 

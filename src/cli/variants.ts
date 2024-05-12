@@ -1,6 +1,6 @@
 import { existsSync } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
-import { join } from "node:path";
+import path from "node:path";
 import { pathToFileURL } from "node:url";
 
 import { transform } from "esbuild";
@@ -59,7 +59,7 @@ function buildBaseStatements(
     return Object.fromEntries(
       await Promise.all(
         generationConfigs.map(async (c) => {
-          const statementUrl = pathToFileURL(join(outDir, `base-statement-${c.id}.mjs`));
+          const statementUrl = pathToFileURL(path.join(outDir, `base-statement-${c.id}.mjs`));
           const { default: baseStatement } = await import(statementUrl.href);
           info(`Statement for \`${c.id}\` built.`);
 
@@ -105,7 +105,7 @@ export type ExportVariantsOptions = {
 export default async function variants(options: ExportVariantsOptions) {
   process.env.QUIZMS_MODE = "contest";
 
-  const root = join(options.dir, "src");
+  const root = path.join(options.dir, "src");
   if (!existsSync(root)) {
     fatal(
       `Invalid directory. Make sure you're in the root of a QuizMS project or specify a different directory, use \`--help\` for usage.`,
@@ -117,10 +117,10 @@ export default async function variants(options: ExportVariantsOptions) {
 
   const res = await Promise.all(
     Object.values(variants).map(async ([variant, statement]) => {
-      const dir = join(options.dir, options.outDir, variant.id);
+      const dir = path.join(options.dir, options.outDir, variant.id);
       await mkdir(dir, { recursive: true });
-      await writeFile(join(dir, "schema.json"), JSON.stringify(variant));
-      await writeFile(join(dir, "statement.js"), statement);
+      await writeFile(path.join(dir, "schema.json"), JSON.stringify(variant));
+      await writeFile(path.join(dir, "statement.js"), statement);
     }),
   );
 

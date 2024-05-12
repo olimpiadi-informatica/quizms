@@ -1,5 +1,5 @@
 import { access } from "node:fs/promises";
-import { extname, join } from "node:path";
+import path from "node:path";
 
 import { is, traverse } from "estree-toolkit";
 import { isString, stubFalse, stubTrue } from "lodash-es";
@@ -24,22 +24,22 @@ export default function reactEntry(): PluginOption {
       root = config.root;
     },
     resolveId(id) {
-      const [path] = id.split("?");
-      if (path === "virtual:react-entry") {
+      const [pathname] = id.split("?");
+      if (pathname === "virtual:react-entry") {
         return "\0" + id;
       }
-      if (path === "react-dom/server") {
+      if (pathname === "react-dom/server") {
         return "\0" + id;
       }
     },
     async load(this, id) {
-      const [path, query] = id.split("?");
-      if (path === "\0virtual:react-entry") {
+      const [pathname, query] = id.split("?");
+      if (pathname === "\0virtual:react-entry") {
         const params = new URLSearchParams(query);
         const page = params.get("src")!;
 
         const isVirtual = page.startsWith("virtual:");
-        const entry = isVirtual ? page : join(root, page);
+        const entry = isVirtual ? page : path.join(root, page);
 
         if (isBuild) {
           const pageId = this.emitFile({
@@ -67,7 +67,7 @@ createRoot(document.getElementById("app")).render(
   createElement(StrictMode, null, createElement(App))
 );`;
       }
-      if (path === "\0react-dom/server") {
+      if (pathname === "\0react-dom/server") {
         return `\
 export function renderToStaticMarkup() { throw new Error("react-dom/server is not available in the browser"); }`;
       }
@@ -85,13 +85,13 @@ export function renderToStaticMarkup() { throw new Error("react-dom/server is no
     configureServer(server) {
       server.middlewares.use(async (req, res, next) => {
         const url = new URL(req.url!, `http://${req.headers.host}`);
-        const ext = extname(url.pathname);
+        const ext = path.extname(url.pathname);
 
         if (ext === "" || ext === ".html") {
-          const path = url.pathname.replace(/(\.html|\/)$/, "");
-          const entry = join(".", path, "index.jsx");
+          const dir = url.pathname.replace(/(\.html|\/)$/, "");
+          const entry = path.join(".", dir, "index.jsx");
 
-          const exists = await access(join(root, entry)).then(stubTrue, stubFalse);
+          const exists = await access(path.join(root, entry)).then(stubTrue, stubFalse);
           if (exists) {
             if (url.pathname.endsWith("/")) {
               const tag: HtmlTagDescriptor = {
@@ -107,7 +107,7 @@ export function renderToStaticMarkup() { throw new Error("react-dom/server is no
               res.end(finalHtml);
             } else {
               res.writeHead(307, {
-                Location: path + "/",
+                Location: dir + "/",
               });
               res.end();
             }
@@ -127,8 +127,8 @@ async function extractMeta(ctx: PluginContext, id: string, file: string) {
 
   const meta: Record<string, string | undefined> = {};
   traverse(ast, {
-    ExportNamedDeclaration(path) {
-      const node = path.node!;
+    ExportNamedDeclaration(nodePath) {
+      const node = nodePath.node!;
       if (!is.variableDeclaration(node.declaration)) return;
       for (const declarator of node.declaration.declarations) {
         if (!is.identifier(declarator.id)) continue;
