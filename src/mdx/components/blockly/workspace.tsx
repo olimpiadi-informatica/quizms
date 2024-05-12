@@ -258,9 +258,9 @@ export default function Workspace({
         </div>
         <div className="relative flex flex-col overflow-hidden shadow-xl">
           <div className="overflow-auto rounded-xl border-2 border-[#c6c6c6] bg-white [color-scheme:light]">
-            {Visualizer && (
+            {Visualizer && globalScope?.hiddenState && (
               <Visualizer
-                variables={{ blocklyVariables, hiddenState: globalScope?.hiddenState, msg }}
+                variables={{ blocklyVariables, hiddenState: globalScope.hiddenState, msg }}
               />
             )}
             {msg && !messageHidden && (
