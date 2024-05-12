@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 
 import classNames from "classnames";
 import { saveAs } from "file-saver";
@@ -77,7 +77,7 @@ export default function Debug({ blocks, js, svg }: Props) {
               </button>
             ))}
           </div>
-          <div className="flex gap-3">
+          <div className={classNames("flex gap-3", format === "svg" && "hidden")}>
             <div
               className={classNames("tooltip-open", copyTooltip && "tooltip")}
               data-tip="Copiato!">
@@ -102,14 +102,33 @@ export default function Debug({ blocks, js, svg }: Props) {
         <div role="tabpanel" className="mt-3 text-sm *:overflow-x-auto">
           {format !== "svg" && <Code code={code} language={formats[format].lang} />}
           {format === "svg" && (
-            <img
-              className="mx-auto"
-              src={`data:image/svg+xml,${encodeURIComponent(svg)}`}
-              alt="Blocchi"
-            />
+            <BlocksCanvas uri={`data:image/svg+xml,${encodeURIComponent(svg)}`} />
           )}
         </div>
       </Modal>
     </>
   );
+}
+
+function BlocksCanvas({ uri }: { uri: string }) {
+  const ref = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = ref.current;
+    const ctx = canvas?.getContext("2d");
+    if (!ctx) return;
+
+    const img = new Image();
+    img.src = uri;
+    img.addEventListener("load", onLoad);
+    return () => img.removeEventListener("load", onLoad);
+
+    function onLoad() {
+      canvas!.width = img.width;
+      canvas!.height = img.height;
+      ctx!.drawImage(img, 0, 0);
+    }
+  }, [uri]);
+
+  return <canvas ref={ref} className="mx-auto min-w-0 max-w-full" />;
 }
