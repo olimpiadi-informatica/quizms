@@ -39,59 +39,70 @@ export default function iframe(): PluginOption {
       const ast = this.parse(code);
 
       traverse(ast, {
+        $: { scope: true },
         CallExpression: (nodePath) => {
           const node = nodePath.node!;
           const [comp, props] = node.arguments;
 
           if (
-            is.memberExpression(node.callee) &&
-            is.identifier(node.callee.property) &&
-            node.callee.property.name === "createElement" &&
+            is.identifier(node.callee) &&
             is.literal(comp) &&
             comp.value === "iframe" &&
             is.objectExpression(props)
           ) {
-            for (const prop of props.properties) {
-              if (!is.property(prop) || !is.identifier(prop.key)) {
-                warning(`cannot analyze iframe property: ${prop.type}`);
-                continue;
+            const jsxBinding = nodePath.scope?.getBinding(node.callee.name)?.identifierPath;
+            const importSpec = jsxBinding?.parent;
+            const importDecl = jsxBinding?.parentPath?.parent;
+
+            if (
+              is.importSpecifier(importSpec) &&
+              importSpec.imported.name === "jsx" &&
+              is.importDeclaration(importDecl) &&
+              is.literal(importDecl.source) &&
+              importDecl.source.value === "react/jsx-runtime"
+            ) {
+              for (const prop of props.properties) {
+                if (!is.property(prop) || !is.identifier(prop.key)) {
+                  warning(`cannot analyze iframe property: ${prop.type}`);
+                  continue;
+                }
+                if (prop.key.name !== "src") continue;
+                if (!is.importExpression(prop.value)) {
+                  warning(`iframe src is not an import expression: ${prop.type}`);
+                  continue;
+                }
+                if (!is.literal(prop.value.source) || !isString(prop.value.source.value)) {
+                  warning(`iframe src is not a literal: ${prop.type}`);
+                  continue;
+                }
+
+                const srcPath = path.join(path.dirname(id), prop.value.source.value);
+
+                let srcValue: string;
+                if (isBuild) {
+                  const srcId = this.emitFile({
+                    type: "chunk",
+                    name: "iframe",
+                    id: `virtual:iframe-entry?${srcPath}`,
+                  });
+
+                  const iframeId = this.emitFile({
+                    type: "asset",
+                    fileName: `assets/iframe-${srcId}.html`,
+                  });
+                  iframeIds.push([srcId, iframeId]);
+
+                  srcValue = `import.meta.ROLLUP_FILE_URL_${iframeId}`;
+                } else {
+                  srcValue = `"/__iframe.html?src=${encodeURIComponent(srcPath)}"`;
+                }
+
+                s.update(
+                  (prop.value as unknown as AcornNode).start,
+                  (prop.value as unknown as AcornNode).end,
+                  srcValue,
+                );
               }
-              if (prop.key.name !== "src") continue;
-              if (!is.importExpression(prop.value)) {
-                warning(`iframe src is not an import expression: ${prop.type}`);
-                continue;
-              }
-              if (!is.literal(prop.value.source) || !isString(prop.value.source.value)) {
-                warning(`iframe src is not a literal: ${prop.type}`);
-                continue;
-              }
-
-              const srcPath = path.join(path.dirname(id), prop.value.source.value);
-
-              let srcValue: string;
-              if (isBuild) {
-                const srcId = this.emitFile({
-                  type: "chunk",
-                  name: "iframe",
-                  id: `virtual:iframe-entry?${srcPath}`,
-                });
-
-                const iframeId = this.emitFile({
-                  type: "asset",
-                  fileName: `assets/iframe-${srcId}.html`,
-                });
-                iframeIds.push([srcId, iframeId]);
-
-                srcValue = `import.meta.ROLLUP_FILE_URL_${iframeId}`;
-              } else {
-                srcValue = `"/__iframe.html?src=${encodeURIComponent(srcPath)}"`;
-              }
-
-              s.update(
-                (prop.value as unknown as AcornNode).start,
-                (prop.value as unknown as AcornNode).end,
-                srcValue,
-              );
             }
           }
         },

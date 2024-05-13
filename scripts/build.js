@@ -1,22 +1,9 @@
-import { readFile, rm } from "node:fs/promises";
+import { rm } from "node:fs/promises";
 import { argv, exit } from "node:process";
 
 import { Command } from "commander";
 import glob from "fast-glob";
-import less from "less";
 import { build } from "tsup";
-
-/** @type {import("esbuild").Plugin} */
-const lessPlugin = {
-  name: "less",
-  setup(build) {
-    build.onLoad({ filter: /\.less$/ }, async (args) => {
-      const content = await readFile(args.path, "utf8");
-      const { css } = await less.render(content, { filename: args.path });
-      return { contents: css, loader: "css" };
-    });
-  },
-};
 
 /** @type {import("tsup").Options} */
 const commonConfig = {
@@ -31,7 +18,7 @@ const webConfig = {
   entryPoints: await glob("src/web/*/index.ts"),
   platform: "browser",
   minifyWhitespace: false,
-  esbuildPlugins: [lessPlugin],
+  loader: { ".css": "copy" },
 };
 
 /** @type {import("tsup").Options} */

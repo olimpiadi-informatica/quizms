@@ -1,5 +1,3 @@
-@import "./code-theme.less";
-
 .katex-mathml {
   @apply select-none;
 }
