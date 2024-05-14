@@ -1,9 +1,9 @@
 import { ReactNode, SetStateAction, useCallback, useMemo, useState } from "react";
 
+import { useIsAfter } from "@olinfo/react-components";
 import { addMinutes } from "date-fns";
 import { isFunction, range } from "lodash-es";
 
-import { useIsAfter } from "~/components";
 import { Contest, Participation, Student } from "~/models";
 
 import { StudentProvider } from "./provider";
@@ -31,7 +31,7 @@ export function NoAuth({ contestName, duration, questionCount, children }: AuthP
     [student.startedAt, duration],
   );
 
-  const terminated = useIsAfter(endTime);
+  const terminated = useIsAfter(endTime) ?? false;
 
   const mockContest: Contest = {
     id: "",

@@ -55,6 +55,7 @@
     "@mdx-js/rollup": "^3.0",
     "@modyfi/vite-plugin-yaml": "^1.1.0",
     "@noble/hashes": "^1.3",
+    "@olinfo/react-components": "^0.2.0",
     "@swc/plugin-transform-imports": "^1.5",
     "@vitejs/plugin-react-swc": "^3.3",
     "acorn": "^8.10",

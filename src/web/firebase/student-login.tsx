@@ -1,5 +1,6 @@
 import { ChangeEvent, ReactNode, Ref, forwardRef, useId, useMemo, useRef, useState } from "react";
 
+import { useIsAfter } from "@olinfo/react-components";
 import classNames from "classnames";
 import { addMinutes, formatISO } from "date-fns";
 import { FirebaseOptions } from "firebase/app";
@@ -18,7 +19,7 @@ import {
 import { defer, isDate, isEqual } from "lodash-es";
 import { AlertCircle } from "lucide-react";
 
-import { Button, Buttons, Modal, useIsAfter, useTime } from "~/components";
+import { Button, Buttons, Modal } from "~/components";
 import { Contest, Student, StudentRestore, parsePersonalInformation, studentHash } from "~/models";
 import { hash, randomId } from "~/utils/random";
 import { StudentProvider } from "~/web/student/provider";
@@ -70,7 +71,6 @@ function StudentLoginInner({
   children: ReactNode;
 }) {
   const db = useDb();
-  const getNow = useTime();
 
   const user = useAnonymousAuth();
   const [contests] = useCollection("contests", contestConverter, {
@@ -104,7 +104,7 @@ function StudentLoginInner({
       pixelRatio: window.devicePixelRatio,
       darkMode: window.matchMedia("(prefers-color-scheme: dark)").matches,
     },
-    createdAt: getNow(),
+    createdAt: new Date(),
     absent: false,
     disabled: false,
   });

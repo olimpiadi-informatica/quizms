@@ -1,8 +1,9 @@
 import { ReactNode, Suspense, useMemo } from "react";
 
+import { WithinTimeRange } from "@olinfo/react-components";
 import { addMilliseconds } from "date-fns";
 
-import { Loading, Timer, useIsAfter } from "~/components";
+import { Loading, Timer } from "~/components";
 import { useStudent } from "~/web/student/provider";
 
 export function BaseStatement({ children }: { children: ReactNode }) {
@@ -12,26 +13,26 @@ export function BaseStatement({ children }: { children: ReactNode }) {
     [participation.startingTime],
   );
 
-  const started = useIsAfter(startingTime);
-  if (!started) {
-    return (
-      <div className="flex h-[50vh] items-center justify-center text-2xl">
-        La gara inizierà tra
-        <span className="px-2">
-          <Timer endTime={participation.startingTime!} />
-        </span>
-      </div>
-    );
-  }
-
   return (
-    <Suspense
-      fallback={
-        <div className="h-[50vh]">
-          <Loading />
+    <>
+      <WithinTimeRange end={startingTime}>
+        <div className="flex h-[50vh] items-center justify-center text-2xl">
+          La gara inizierà tra
+          <span className="px-2">
+            <Timer endTime={participation.startingTime!} />
+          </span>
         </div>
-      }>
-      {children}
-    </Suspense>
+      </WithinTimeRange>
+      <WithinTimeRange start={startingTime}>
+        <Suspense
+          fallback={
+            <div className="h-[50vh]">
+              <Loading />
+            </div>
+          }>
+          {children}
+        </Suspense>
+      </WithinTimeRange>
+    </>
   );
 }

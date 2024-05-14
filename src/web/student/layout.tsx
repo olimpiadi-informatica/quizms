@@ -3,7 +3,7 @@ import React, { ReactNode, Ref, forwardRef, useEffect, useRef } from "react";
 import { sumBy } from "lodash-es";
 import { User } from "lucide-react";
 
-import { Button, Buttons, Modal, Progress, Timer, useTime } from "~/components";
+import { Button, Buttons, Modal, Progress, Timer } from "~/components";
 import Prose from "~/mdx/components/prose";
 import { BaseLayout, Navbar } from "~/web/base-layout";
 
@@ -77,12 +77,11 @@ export function Layout({ children }: { children: ReactNode }) {
 
 const SubmitModal = forwardRef(function SubmitModal(_, ref: Ref<HTMLDialogElement>) {
   const { student, setStudent, submit } = useStudent();
-  const now = useTime();
 
   const confirm = async () => {
     await setStudent({
       ...student,
-      submittedAt: now(),
+      submittedAt: new Date(),
     });
     await submit?.();
     if (ref && "current" in ref) {

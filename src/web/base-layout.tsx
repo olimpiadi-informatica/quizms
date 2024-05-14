@@ -1,12 +1,13 @@
 import React, { Children, ReactNode, isValidElement, useEffect, useState } from "react";
 
+import { useIsAfter } from "@olinfo/react-components";
 import classNames from "classnames";
 import { addSeconds } from "date-fns";
 import { partition } from "lodash-es";
 import { AlertTriangle, LucideIcon } from "lucide-react";
 import { ErrorBoundary } from "react-error-boundary";
 
-import { Dropdown, DropdownButton, DropdownItem, Error, useIsAfter } from "~/components";
+import { Dropdown, DropdownButton, DropdownItem, Error } from "~/components";
 
 import "./css/index.css";
 

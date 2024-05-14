@@ -1102,6 +1102,16 @@
     prettier "^3.2"
     prettier-plugin-tailwindcss "^0.5"
 
+"@olinfo/react-components@^0.2.0":
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/@olinfo/react-components/-/react-components-0.2.0.tgz#69b98d73ba92fd29a11fc741ab6bc4142c67950c"
+  integrity sha512-zjP0wsmhK+6ZfJSdy5nEd4GZxvt4Sxtfm72ERNQFgW2wuuYrpxW1rMWzMd0eF8yp1+NJyL5l5o19f5B3ttbYpg==
+  dependencies:
+    "@olinfo/training-api" "^0.1"
+    clsx "^2.1"
+    date-fns "^3.6"
+    lucide-react "^0.378"
+
 "@olinfo/tailwind@^0.1":
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/@olinfo/tailwind/-/tailwind-0.1.0.tgz#bf8143ef3ba272ece31e5e09f271831ce37997e1"
@@ -1110,6 +1120,16 @@
     "@tailwindcss/typography" "^0.5.10"
     daisyui "^4.8"
     tailwindcss "^3.4"
+
+"@olinfo/training-api@^0.1":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@olinfo/training-api/-/training-api-0.1.0.tgz#91298b1d7fdea283828db4551827266976cfd6f9"
+  integrity sha512-OUwuMP+FKxLNFcezH71VC1rXHZmcymqnMn9yOCj0KWRXb/F/jPmE24lb4TOy2xfBNUvuWsY2Lrfxz5Fx2ISnSA==
+  dependencies:
+    "@types/node" "^20"
+    jwt-decode "^4.0"
+    zod "^3.22"
+    zod-validation-error "^3.0"
 
 "@pdf-lib/standard-fonts@^1.0.0":
   version "1.0.0"
@@ -2282,6 +2302,11 @@ cliui@^8.0.1:
     strip-ansi "^6.0.1"
     wrap-ansi "^7.0.0"
 
+clsx@^2.1:
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/clsx/-/clsx-2.1.1.tgz#eed397c9fd8bd882bfb18deab7102049a2f32999"
+  integrity sha512-eYm0QWBtUrBWZWG0d386OGAw16Z995PiOVo2B7bjWSbHedGl5e0ZWaq65kOGgUSNesEIDkB9ISbTg/JK9dhCZA==
+
 collapse-white-space@^2.0.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/collapse-white-space/-/collapse-white-space-2.1.0.tgz#640257174f9f42c740b40f3b55ee752924feefca"
@@ -2805,7 +2830,7 @@ data-view-byte-offset@^1.0.0:
     es-errors "^1.3.0"
     is-data-view "^1.0.1"
 
-date-fns@^3.0:
+date-fns@^3.0, date-fns@^3.6:
   version "3.6.0"
   resolved "https://registry.yarnpkg.com/date-fns/-/date-fns-3.6.0.tgz#f20ca4fe94f8b754951b24240676e8618c0206bf"
   integrity sha512-fRHTG8g/Gif+kSh50gaGEdToemgfj74aRX3swtiouboip5JDLAyDE9F11nHMIcvOaXeOC6D7SpNhi7uFyB7Uww==
@@ -4843,6 +4868,11 @@ jws@^4.0.0:
   dependencies:
     jwa "^2.0.0"
     safe-buffer "^5.0.1"
+
+jwt-decode@^4.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/jwt-decode/-/jwt-decode-4.0.0.tgz#2270352425fd413785b2faf11f6e755c5151bd4b"
+  integrity sha512-+KJGIyHgkGuIq3IEBNftfhW/LfWhXUIY6OmyVWjliu5KH1y0fw7VQ8YndE2O4qZdMSd9SqbnC8GOcZEy0Om7sA==
 
 katex@^0.16, katex@^0.16.0, katex@^0.16.9:
   version "0.16.10"

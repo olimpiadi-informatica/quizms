@@ -5,7 +5,7 @@ import { browserLocalPersistence, debugErrorMap, getAuth, initializeAuth } from 
 import { Firestore, getFirestore } from "firebase/firestore";
 import { ErrorBoundary, FallbackProps } from "react-error-boundary";
 
-import { Error, Loading, useTime } from "~/components";
+import { Error, Loading } from "~/components";
 
 type Props = {
   config: FirebaseOptions;
@@ -36,18 +36,11 @@ export function FirebaseLogin({ config, children }: Props) {
     <FirebaseContext.Provider value={db}>
       <div className="h-dvh">
         <ErrorBoundary FallbackComponent={ErrorLogout}>
-          <Suspense fallback={<Loading />}>
-            <TimeWrapper>{children}</TimeWrapper>
-          </Suspense>
+          <Suspense fallback={<Loading />}>{children}</Suspense>
         </ErrorBoundary>
       </div>
     </FirebaseContext.Provider>
   );
-}
-
-function TimeWrapper({ children }: { children: ReactNode }) {
-  useTime();
-  return children;
 }
 
 const FirebaseContext = createContext<Firestore | undefined>(undefined);
