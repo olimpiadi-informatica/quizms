@@ -11,17 +11,9 @@ const remarkHighlight: Plugin<[], Root> = () => {
   return (tree: Root) => {
     visit(tree, ["code", "inlineCode"], (node, index, parent) => {
       const code = node as Code | InlineCode;
-      const meta = ("meta" in code && code.meta) || "";
       let lang = code.type === "code" && (code.lang || "text");
 
       lang ||= /[(+[{]/.test(code.value) ? "srs" : "text"; // guess language
-
-      const params = Object.fromEntries(
-        (meta ?? "")
-          .split(/\s+/)
-          .map((m) => decodeURIComponent(m))
-          .map((m) => m.split("=", 2)),
-      );
 
       const value =
         lang === "srs"
@@ -49,7 +41,6 @@ const remarkHighlight: Plugin<[], Root> = () => {
           jsxAttribute("code", (template.body[0] as Directive).expression),
           jsxAttribute("inline", code.type === "inlineCode"),
           jsxAttribute("language", lang),
-          jsxAttribute("noLineNumbers", "noLineNumbers" in params),
         ],
       } as MdxJsxFlowElement;
     });
