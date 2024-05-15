@@ -1,4 +1,4 @@
-import { Ref, forwardRef, useMemo, useRef, useState } from "react";
+import { Ref, forwardRef, useRef, useState } from "react";
 
 import { ArrowUpFromLine } from "lucide-react";
 import { parse as parseCSV } from "papaparse";
@@ -13,7 +13,6 @@ import {
   parsePersonalInformation,
   studentSchema,
 } from "~/models";
-import { formatDate } from "~/utils/date";
 import { randomId } from "~/utils/random";
 import validate from "~/utils/validate";
 
@@ -30,24 +29,6 @@ const ImportModal = forwardRef(function ImportModal(_props, ref: Ref<HTMLDialogE
     .filter((field) => field.type === "date")
     .map((field) => field.label.toLowerCase());
 
-  const dateFormat = useMemo(() => {
-    return new Intl.DateTimeFormat("it-IT")
-      .formatToParts()
-      .map((e) => {
-        if (e.type === "day") return "dd";
-        if (e.type === "month") return "MM";
-        if (e.type === "year") return "yyyy";
-        return e.value;
-      })
-      .join("");
-  }, []);
-
-  const placeholderDate = useMemo(() => {
-    const date = new Date();
-    date.setMonth(2, 14);
-    return formatDate(date, { format: dateFormat });
-  }, [dateFormat]);
-
   const [file, setFile] = useState<File>();
 
   const { variants } = useTeacher();
@@ -56,7 +37,7 @@ const ImportModal = forwardRef(function ImportModal(_props, ref: Ref<HTMLDialogE
   const onClick = async () => {
     try {
       const text = await file?.text();
-      await importStudents(text ?? "", contest, variants, participation, setStudent, dateFormat);
+      await importStudents(text ?? "", contest, variants, participation, setStudent);
       if (ref && "current" in ref) {
         ref.current?.close();
       }
@@ -95,8 +76,8 @@ const ImportModal = forwardRef(function ImportModal(_props, ref: Ref<HTMLDialogE
         {dates.length > 0 && (
           <p>
             I campi <b>{dates.join(", ")}</b> devono essere nel formato{" "}
-            <span className="whitespace-nowrap font-bold">{dateFormat.toUpperCase()}</span>, ad
-            esempio <span className="whitespace-nowrap">{placeholderDate}</span>.
+            <span className="whitespace-nowrap font-bold">dd/mm/yyyy</span>, ad esempio{" "}
+            <span className="whitespace-nowrap">14/03/{new Date().getFullYear()}</span>.
           </p>
         )}
         <div className="mt-5 flex flex-col items-center gap-3">
@@ -130,7 +111,6 @@ async function importStudents(
   variants: Record<string, Variant>,
   participation: Participation,
   addStudent: (student: Student) => Promise<void>,
-  dateFormat: string,
 ) {
   const schema = z
     .array(z.string().trim().max(256))
@@ -161,7 +141,7 @@ async function importStudents(
       const personalInformation: Student["personalInformation"] = {};
       for (const [i, field] of contest.personalInformation.entries()) {
         const [validated, error] = parsePersonalInformation(value[i], field, {
-          dateFormat,
+          dateFormat: "dd/MM/yyyy",
         });
         if (error) {
           ctx.addIssue({

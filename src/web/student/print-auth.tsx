@@ -2,7 +2,7 @@ import { ReactNode } from "react";
 
 import contests from "virtual:quizms-contests";
 
-import { Participation, Student, formatPersonalInformation } from "~/models";
+import { Participation, Student } from "~/models";
 import { GenerationConfig } from "~/models/generation-config";
 
 import { StudentProvider, useStudent } from "./provider";
@@ -77,41 +77,6 @@ export function PrintAuth({ children }: AuthProps) {
       terminated={false}>
       {children}
     </StudentProvider>
-  );
-}
-
-export function PrintForm() {
-  const { contest, student } = useStudent();
-
-  return (
-    <div className="grid grid-cols-2 gap-2 pb-10">
-      {contest.personalInformation.map((field) => (
-        <div key={field.name} className="form-control w-full">
-          <label className="label">
-            <span className="label-text text-lg">{field.label}</span>
-          </label>
-          <input
-            type="text"
-            className="input input-bordered w-full max-w-md"
-            readOnly
-            value={formatPersonalInformation(student, field)}
-          />
-        </div>
-      ))}
-      {contest.hasVariants && (
-        <div className="form-control w-full">
-          <label className="label">
-            <span className="label-text text-lg">Variante</span>
-          </label>
-          <input
-            type="text"
-            className="input input-bordered w-full max-w-md"
-            value={student.variant}
-            readOnly
-          />
-        </div>
-      )}
-    </div>
   );
 }
 

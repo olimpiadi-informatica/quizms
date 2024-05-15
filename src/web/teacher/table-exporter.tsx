@@ -25,9 +25,7 @@ export default Exporter;
 function exportStudents(students: Student[], contest: Contest, variants: Record<string, Variant>) {
   const flatStudents = students.map((student) => {
     return [
-      ...contest.personalInformation.map((field) =>
-        formatPersonalInformation(student, field, { dateStyle: "short" }),
-      ),
+      ...contest.personalInformation.map((field) => formatPersonalInformation(student, field)),
       ...(contest.hasVariants ? [student.variant] : []),
       ...contest.problemIds.map((id) => student.answers?.[id]),
       score(student, variants),

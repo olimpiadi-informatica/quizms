@@ -1,10 +1,9 @@
 import { UTCDateMini } from "@date-fns/utc";
-import { parse as parseDate, subMinutes } from "date-fns";
+import { intlFormat, parse as parseDate, subMinutes } from "date-fns";
 import { isDate } from "lodash-es";
 import z from "zod";
 
 import { Student } from "~/models/student";
-import { formatDate } from "~/utils/date";
 
 const basePersonalInformation = z.object({
   name: z.string(),
@@ -138,13 +137,13 @@ export function parsePersonalInformation(
       if (date < schema?.min) {
         return [
           undefined,
-          `Il campo ${label} deve contenere una data successiva al ${formatDate(schema.min)}.`,
+          `Il campo ${label} deve contenere una data successiva al ${intlFormat(schema.min, { dateStyle: "short" })}.`,
         ];
       }
       if (date > schema?.max) {
         return [
           undefined,
-          `Il campo ${label} deve contenere una data precedente al ${formatDate(schema.max)}.`,
+          `Il campo ${label} deve contenere una data precedente al ${intlFormat(schema.max, { dateStyle: "short" })}.`,
         ];
       }
       return [date, undefined];
@@ -155,12 +154,11 @@ export function parsePersonalInformation(
 export function formatPersonalInformation(
   student: Student | undefined,
   schema: Contest["personalInformation"][number],
-  options?: { dateStyle?: "short" | "long" },
 ): string {
   const value = student?.personalInformation?.[schema?.name];
   if (value === undefined) return "";
   if (isDate(value) || schema?.type === "date") {
-    return formatDate(value as Date, { style: options?.dateStyle ?? "long" });
+    return intlFormat(value as Date, { dateStyle: "short" });
   }
   return value.toString();
 }

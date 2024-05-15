@@ -1,8 +1,9 @@
 import { getDownloadURL, getStorage, ref } from "firebase/storage";
 
-import { RemoteStatement, useStudent } from "~/web/student";
+import { useStudent } from "~/web/student/provider";
+import { RemoteStatement } from "~/web/student/remote-statement";
 
-import { useDb } from "./base-login";
+import { useDb } from "./common/base-login";
 
 export function FirebaseStatement() {
   const db = useDb();

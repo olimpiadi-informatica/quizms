@@ -1,8 +1,8 @@
 import { FirestoreDataConverter, Query, getCountFromServer } from "firebase/firestore";
 import useSWR, { SWRConfiguration } from "swr";
 
-import { useDb } from "~/web/firebase/base-login";
-import query, { Constraints } from "~/web/firebase/query";
+import { useDb } from "~/web/firebase/common/base-login";
+import query, { Constraints } from "~/web/firebase/common/query";
 
 const emptyConverter: FirestoreDataConverter<any> = {
   toFirestore: (data) => data,

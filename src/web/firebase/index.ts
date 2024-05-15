@@ -1,4 +1,4 @@
-export { AdminLogin } from "./admin-login";
-export { StudentLogin } from "./student-login";
-export { TeacherLogin } from "./teacher-login";
-export { FirebaseStatement } from "./statement";
+export { FirebaseAdmin } from "./admin-login";
+export { FirebaseTeacher } from "./teacher-login";
+export { FirebaseStudentLogin } from "./student-login";
+export { FirebaseStatement } from "./student-statement";

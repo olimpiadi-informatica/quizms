@@ -21,7 +21,7 @@ import { Loading } from "~/components";
 import { useContest } from "~/mdx/components/contest";
 import { useProblem } from "~/mdx/components/problem";
 import validate from "~/utils/validate";
-import { useStudent } from "~/web/student";
+import { useStudent } from "~/web/student/provider";
 
 import { customBlockSchema } from "./custom-block";
 import Debug from "./debug";

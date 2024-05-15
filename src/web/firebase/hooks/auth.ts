@@ -1,16 +1,10 @@
-import {
-  User,
-  getAuth,
-  onAuthStateChanged,
-  signInAnonymously,
-  signInWithCustomToken,
-} from "firebase/auth";
+import { User, getAuth, onAuthStateChanged, signInAnonymously } from "firebase/auth";
 import { noop } from "lodash-es";
 import { useErrorBoundary } from "react-error-boundary";
 import { SWRConfiguration } from "swr";
 import useSWR from "swr/immutable";
 
-import { useDb } from "~/web/firebase/base-login";
+import { useDb } from "~/web/firebase/common/base-login";
 
 import { useSubscription } from "./subscription";
 
@@ -31,32 +25,6 @@ export function useAuth() {
     });
     return () => unsubscribe();
   });
-}
-
-export function useTokenAuth() {
-  const db = useDb();
-  const auth = getAuth(db.app);
-
-  useSWR("firebase/token-auth", fetcher, swrConfig);
-
-  return useAuth();
-
-  async function fetcher() {
-    const params = new URLSearchParams(window.location.search);
-    const token = params.get("token");
-
-    if (token) {
-      try {
-        await signInWithCustomToken(auth, token);
-      } catch (err) {
-        console.warn(`Failed to sign in with token: ${(err as Error).message}`);
-      }
-
-      window.history.replaceState(undefined, "", window.location.pathname);
-    }
-
-    return 0;
-  }
 }
 
 export function useAnonymousAuth() {

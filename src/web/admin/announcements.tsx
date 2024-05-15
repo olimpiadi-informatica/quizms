@@ -1,12 +1,12 @@
 import { ChangeEvent, Fragment, Ref, forwardRef, useRef, useState } from "react";
 
+import { DateTime } from "@olinfo/react-components";
 import { AlertTriangle, Info, XCircle } from "lucide-react";
 
 import { Button, Buttons, Modal } from "~/components";
 import { Announcement } from "~/models";
-import { formatDate, formatTime } from "~/utils/date";
 import { randomId } from "~/utils/random";
-import { announcementConverter } from "~/web/firebase/converters";
+import { announcementConverter } from "~/web/firebase/common/converters";
 import { useCollection } from "~/web/firebase/hooks";
 
 import { useAdmin } from "./provider";
@@ -43,7 +43,7 @@ export default function Announcements() {
               {announcement.title}
             </h4>
             <small>
-              {formatDate(announcement.createdAt)}, {formatTime(announcement.createdAt)}
+              <DateTime date={announcement.createdAt} />
             </small>
             <p>{announcement.body}</p>
             <hr className="my-5 last:hidden" />

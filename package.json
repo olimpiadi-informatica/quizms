@@ -17,22 +17,18 @@
     "quizms": "bin/bin.js"
   },
   "exports": {
-    "./admin": "./dist/admin/index.js",
+    "./internal": "./dist/internal/index.js",
     "./student": "./dist/student/index.js",
-    "./teacher": "./dist/teacher/index.js",
     "./firebase": "./dist/firebase/index.js",
     "./jsx-runtime": "./dist/jsx-runtime/index.js"
   },
   "typesVersions": {
     "*": {
-      "admin": [
-        "./dist/admin/index.d.ts"
+      "internal": [
+        "./dist/internal/index.d.ts"
       ],
       "student": [
         "./dist/student/index.d.ts"
-      ],
-      "teacher": [
-        "./dist/teacher/index.d.ts"
       ],
       "firebase": [
         "./dist/firebase/index.d.ts"
@@ -107,6 +103,7 @@
     "vite": "^5.0",
     "vite-plugin-inspect": "^0.8",
     "vm-browserify": "^1.1",
+    "wouter": "^3.1.3",
     "zod": "^3.22",
     "zod-validation-error": "^3.0"
   },

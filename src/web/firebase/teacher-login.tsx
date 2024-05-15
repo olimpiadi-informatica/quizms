@@ -1,4 +1,4 @@
-import { ReactNode, useCallback } from "react";
+import { useCallback } from "react";
 
 import { FirebaseOptions } from "firebase/app";
 import { getAuth, signOut } from "firebase/auth";
@@ -17,7 +17,7 @@ import { chunk } from "lodash-es";
 import { Participation, StudentRestore, studentHash } from "~/models";
 import { TeacherProvider } from "~/web/teacher/provider";
 
-import { FirebaseLogin, useDb } from "./base-login";
+import { FirebaseLogin, useDb } from "./common/base-login";
 import {
   contestConverter,
   participationConverter,
@@ -26,28 +26,22 @@ import {
   studentMappingUidConverter,
   studentRestoreConverter,
   variantConverter,
-} from "./converters";
-import EmailLogin from "./email-login";
+} from "./common/converters";
+import PasswordLogin from "./common/password-login";
+import query from "./common/query";
 import { useAuth, useCollection } from "./hooks";
-import query from "./query";
 
-export function TeacherLogin({
-  config,
-  children,
-}: {
-  config: FirebaseOptions;
-  children: ReactNode;
-}) {
+export function FirebaseTeacher({ config }: { config: FirebaseOptions }) {
   return (
     <FirebaseLogin config={config}>
-      <EmailLogin method="username">
-        <TeacherInner>{children}</TeacherInner>
-      </EmailLogin>
+      <PasswordLogin>
+        <TeacherInner />
+      </PasswordLogin>
     </FirebaseLogin>
   );
 }
 
-function TeacherInner({ children }: { children: ReactNode }) {
+function TeacherInner() {
   const db = useDb();
   const user = useAuth()!;
 
@@ -76,9 +70,8 @@ function TeacherInner({ children }: { children: ReactNode }) {
         getPdfStatements(db, statementVersion, variantIds)
       }
       useStudents={useStudents}
-      useStudentRestores={useStudentRestores}>
-      {children}
-    </TeacherProvider>
+      useStudentRestores={useStudentRestores}
+    />
   );
 }
 

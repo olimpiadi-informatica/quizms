@@ -4,8 +4,8 @@ import { DocumentSnapshot, Firestore, FirestoreDataConverter, getDocs } from "fi
 import { AlertTriangle } from "lucide-react";
 
 import { Button, Buttons, Modal } from "~/components";
-import { useDb } from "~/web/firebase/base-login";
-import query, { QueryOption } from "~/web/firebase/query";
+import { useDb } from "~/web/firebase/common/base-login";
+import query, { QueryOption } from "~/web/firebase/common/query";
 
 import { useAdmin } from "./provider";
 

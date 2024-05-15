@@ -107,7 +107,7 @@ function StudentRestoreListInner() {
   ));
 }
 
-export default function StudentRestoreList() {
+export function StudentRestoreList() {
   return (
     <div className="flex h-full flex-col items-start gap-3 overflow-auto rounded-lg border border-base-content/15">
       <table className="table table-pin-rows">

@@ -2,23 +2,8 @@
   @apply select-none;
 }
 
-.katex-display .katex-html {
-  @apply overflow-auto pb-3;
-}
-
-.card,
-.dropdown-content {
-  @apply border border-white/5 shadow-xl outline outline-1 outline-black/5;
-}
-
-.tooltip:hover:before,
-.tooltip:hover:after {
-  @apply delay-300;
-}
-
-.tooltip:before,
-.tooltip:after {
-  @apply z-30;
+.katex-display {
+  @apply overflow-auto;
 }
 
 .ag-theme-quartz-auto-dark {

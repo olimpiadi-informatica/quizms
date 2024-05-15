@@ -33,7 +33,7 @@ import "@ag-grid-community/styles/ag-theme-quartz.css";
 
 const AgGridReact = lazy(() => import("~/components/ag-grid"));
 
-export function TeacherTable() {
+export default function TeacherTable() {
   const { contest, participation } = useTeacher();
   const importRef = useRef<HTMLDialogElement>(null);
   const exportRef = useRef<HTMLButtonElement>(null);
@@ -41,7 +41,7 @@ export function TeacherTable() {
 
   return (
     <>
-      <div className="m-5 flex flex-none justify-end gap-5">
+      <div className="mb-4 flex flex-none justify-start gap-4">
         <Suspense>
           <div className="flex h-10 items-center gap-2 rounded-btn bg-primary px-3 text-primary-content">
             <Users />
@@ -71,13 +71,11 @@ export function TeacherTable() {
         )}
         <FinalizeModal key={contest.id} ref={finalizeRef} />
       </div>
-      <div className="min-h-0 flex-auto">
-        <Suspense fallback={<Loading />}>
-          <Table key={participation.id} />
-          <ImportModal ref={importRef} />
-          <Exporter ref={exportRef} />
-        </Suspense>
-      </div>
+      <Suspense fallback={<Loading />}>
+        <Table key={participation.id} />
+        <ImportModal ref={importRef} />
+        <Exporter ref={exportRef} />
+      </Suspense>
     </>
   );
 }
@@ -367,28 +365,30 @@ function Table() {
   };
 
   return (
-    <div className="ag-theme-quartz-auto-dark h-full p-2">
-      <AgGridReact
-        rowData={allStudents}
-        getRowId={(row) => (row.data as Student).id}
-        columnDefs={colDefs}
-        singleClickEdit={true}
-        suppressClickEdit={frozen}
-        readOnlyEdit={true}
-        rowSelection="single"
-        onCellEditRequest={onCellEditRequest}
-        enableBrowserTooltips={true}
-        localeText={agGridLocaleIT}
-        onGridReady={(ev) => {
-          if (!contest.allowStudentDelete) return;
-          ev.api.setFilterModel({
-            disabled: {
-              filterType: "text",
-              type: "enabled",
-            },
-          });
-        }}
-      />
+    <div className="ag-theme-quartz-auto-dark relative grow p-2">
+      <div className="absolute inset-0">
+        <AgGridReact
+          rowData={allStudents}
+          getRowId={(row) => (row.data as Student).id}
+          columnDefs={colDefs}
+          singleClickEdit={true}
+          suppressClickEdit={frozen}
+          readOnlyEdit={true}
+          rowSelection="single"
+          onCellEditRequest={onCellEditRequest}
+          enableBrowserTooltips={true}
+          localeText={agGridLocaleIT}
+          onGridReady={(ev) => {
+            if (!contest.allowStudentDelete) return;
+            ev.api.setFilterModel({
+              disabled: {
+                filterType: "text",
+                type: "enabled",
+              },
+            });
+          }}
+        />
+      </div>
       <DeleteModal studentName={currentStudent} ref={modalRef} />
     </div>
   );
@@ -426,7 +426,7 @@ function columnDefinition(contest: Contest, variants: Record<string, Variant>): 
           return isStudentIncomplete(data!, contest, variants);
         },
         cellRenderer: ({ api, data, value }: ICellRendererParams<Student>) => {
-          value = formatPersonalInformation(data, field, { dateStyle: "short" });
+          value = formatPersonalInformation(data, field);
           if (
             field.pinned &&
             data?.updatedAt &&
@@ -460,9 +460,8 @@ function columnDefinition(contest: Contest, variants: Record<string, Variant>): 
         return (
           <a
             className="link link-info"
-            href={`/teacher/students/test/?studentId=${data!.id}#${data!.contestId}`}
-            target="_blank"
-            rel="noreferrer">
+            href={`${window.location.pathname}${data.id}/`}
+            target="_blank">
             apri
           </a>
         );

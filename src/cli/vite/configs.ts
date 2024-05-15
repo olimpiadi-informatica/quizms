@@ -17,8 +17,8 @@ import blocklyMedia from "./blockly-media";
 import iframe from "./iframe";
 import images from "./images";
 import python from "./python";
-import reactEntry from "./react-entry";
 import resolveContests from "./resolve-contests";
+import routes from "./routes";
 
 type Options = {
   mdx?: MdxOptions;
@@ -45,7 +45,7 @@ export default function configs(
         "~": root,
         vm: "vm-browserify",
       },
-      dedupe: ["react", "react-dom", "@mdx-js/react"],
+      dedupe: ["react", "react-dom", "@mdx-js/react", "wouter"],
       extensions: [".js", ".jsx", ".ts", ".tsx", ".md", ".mdx"],
     },
     define: {
@@ -59,7 +59,7 @@ export default function configs(
       { enforce: "pre", ...mdxPlugin({ ...mdxOptions, ...options?.mdx }) },
       python(),
       react({ plugins: swcPlugins }),
-      reactEntry(),
+      routes(),
       resolveContests(),
       yaml(),
     ],

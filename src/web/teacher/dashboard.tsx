@@ -1,16 +1,16 @@
 import { useRef } from "react";
 
-import { Card, CardBody, WithinTimeRange } from "@olinfo/react-components";
+import { Card, CardBody, DateTime, WithinTimeRange } from "@olinfo/react-components";
 import { addMinutes, addSeconds, isSameDay, roundToNearestMinutes, subMinutes } from "date-fns";
 import { saveAs } from "file-saver";
 import { range } from "lodash-es";
+import { Link } from "wouter";
 
 import { Button, Buttons, Modal, Timer } from "~/components";
-import { formatDate, formatTime } from "~/utils/date";
 import { randomToken } from "~/utils/random";
 
-import { Announcements } from "./admin-announcements";
-import StudentRestoreList from "./admin-student-restore";
+import { Announcements } from "./dashboard-announcements";
+import { StudentRestoreList } from "./dashboard-student-restore";
 import { useTeacher } from "./provider";
 
 function StartContestButton() {
@@ -74,12 +74,14 @@ function ContestData({ startingTime }: { startingTime: Date }) {
   const contestEnd = addMinutes(startingTime, contest.duration!);
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-2">
       <WithinTimeRange end={startingTime}>
         <p className="my-2 text-lg">
           <b>Codice:</b> <span className="font-mono">{participation.token}</span>
         </p>
-        <p>La gara inizierà alle ore {formatTime(startingTime)}.</p>
+        <p>
+          La gara inizierà alle ore <DateTime date={startingTime} dateStyle="hidden" />.
+        </p>
         <p>
           Tempo rimanente all&apos;inizio: <Timer endTime={startingTime} />
         </p>
@@ -94,23 +96,27 @@ function ContestData({ startingTime }: { startingTime: Date }) {
         <p>
           <b>Codice:</b> <span className="font-mono">{participation.token}</span>
         </p>
-        <p>La gara terminerà alle {formatTime(contestEnd)}.</p>
+        <p>
+          La gara terminerà alle <DateTime date={contestEnd} dateStyle="hidden" />.
+        </p>
         <p>
           Tempo rimanente: <Timer endTime={contestEnd} />
         </p>
         <div className="mx-auto flex flex-col items-center justify-center gap-2 text-2xl">
-          Gara iniziata alle ore {formatTime(participation.startingTime!)}.
+          Gara iniziata alle ore <DateTime date={startingTime} dateStyle="hidden" />.
         </div>
       </WithinTimeRange>
       <WithinTimeRange start={contestEnd}>
-        <p>Gara iniziata alle ore {formatTime(startingTime)}.</p>
+        <p>
+          Gara iniziata alle ore <DateTime date={startingTime} dateStyle="hidden" />.
+        </p>
         <p>La gara è terminata.</p>
       </WithinTimeRange>
     </div>
   );
 }
 
-export function TeacherAdmin() {
+export default function TeacherDashboard() {
   const { contest, participation } = useTeacher();
 
   if (!contest.contestWindowEnd || !contest.contestWindowStart) {
@@ -121,7 +127,7 @@ export function TeacherAdmin() {
   }
 
   return (
-    <div className="flex flex-col gap-5 p-5">
+    <div className="flex flex-col gap-4">
       <Card>
         <CardBody title="Comunicazioni">
           <Announcements />
@@ -132,11 +138,17 @@ export function TeacherAdmin() {
           <div className="prose mb-2 max-w-none whitespace-pre-wrap">{contest.instructions}</div>
           {contest.hasOnline && (
             <div className="font-bold">
-              La gara si potrà svolgere dalle {formatTime(contest.contestWindowStart)}{" "}
-              {!isSameDay(contest.contestWindowStart, contest.contestWindowEnd) && (
-                <>del {formatDate(contest.contestWindowStart)} </>
+              La gara si potrà svolgere dal{" "}
+              <DateTime date={contest.contestWindowStart} dateStyle="long" />{" "}
+              {isSameDay(contest.contestWindowStart, contest.contestWindowEnd) ? (
+                <>
+                  alle <DateTime date={contest.contestWindowStart} dateStyle="hidden" />
+                </>
+              ) : (
+                <>
+                  al <DateTime date={contest.contestWindowStart} dateStyle="long" />
+                </>
               )}
-              alle {formatTime(contest.contestWindowEnd)} del {formatDate(contest.contestWindowEnd)}
               .
             </div>
           )}
@@ -176,9 +188,9 @@ export function TeacherAdmin() {
                 <StopContestButton />
               </WithinTimeRange>
             )}
-            <a className="btn btn-info" href={`/teacher/students/#${participation.contestId}`}>
+            <Link className="btn btn-info" href="/students/">
               Gestisci studenti e risposte
-            </a>
+            </Link>
           </Buttons>
         </CardBody>
       </Card>

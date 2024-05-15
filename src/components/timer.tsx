@@ -20,7 +20,6 @@ export function Timer(props: TimerProps) {
   const endTime = props.endTime ?? addMinutes(props.startTime, props.duration);
 
   useEffect(() => {
-    if (!endTime) return;
     const id = setInterval(() => {
       const now = Date.now();
       setCurrentTime(now);
@@ -30,10 +29,6 @@ export function Timer(props: TimerProps) {
     }, 100);
     return () => clearInterval(id);
   }, [endTime]);
-
-  if (!endTime) {
-    return <span className="font-mono">--:--</span>;
-  }
 
   let timeLeft = Math.max(differenceInSeconds(endTime!, currentTime), 0);
 

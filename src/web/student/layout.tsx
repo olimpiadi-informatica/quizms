@@ -1,21 +1,19 @@
-import React, { ReactNode, Ref, forwardRef, useEffect, useRef } from "react";
+import { ReactNode, Ref, forwardRef, useEffect, useRef } from "react";
 
+import { Dropdown, DropdownButton, DropdownMenu, Navbar } from "@olinfo/react-components";
 import { sumBy } from "lodash-es";
-import { User } from "lucide-react";
+import { LogOut } from "lucide-react";
+import { ErrorBoundary } from "react-error-boundary";
 
-import { Button, Buttons, Modal, Progress, Timer } from "~/components";
+import { Button, Buttons, Error, Modal, Progress, Timer } from "~/components";
 import Prose from "~/mdx/components/prose";
-import { BaseLayout, Navbar } from "~/web/base-layout";
 
 import { useStudent } from "./provider";
 
-export function Layout({ children }: { children: ReactNode }) {
+export function StudentLayout({ children }: { children: ReactNode }) {
   const submitRef = useRef<HTMLDialogElement>(null);
 
-  const { contest, student, reset, participation, terminated, logout } = useStudent();
-
-  const name = student.personalInformation?.name as string;
-  const surname = student.personalInformation?.surname as string;
+  const { contest, student, reset, participation, terminated } = useStudent();
 
   const progress = Math.round(
     (sumBy(Object.values(student.answers ?? {}), (s) => Number(!!s)) / contest.problemIds.length) *
@@ -26,20 +24,16 @@ export function Layout({ children }: { children: ReactNode }) {
     if (import.meta.env.QUIZMS_MODE === "contest") {
       console.error(
         "%cAprire la console è severamente vietato dal regolamento. Questo incidente verrà segnalato agli amministratori del sito e al tuo insegnante. Qualsiasi tentativo di manomettere la piattaforma comporta la squalifica.",
-        "color: #ff0000",
+        "color: #f00",
       );
     }
   }, []);
 
   return (
-    <BaseLayout>
-      <Navbar
-        user={`${name} ${surname}`}
-        userIcon={User}
-        logout={logout}
-        color="bg-base-300 text-base-content"
-        flow="flex-row">
-        <div className="h-full gap-3">
+    <>
+      <Navbar color="bg-base-300 text-base-content">
+        <div>Olimpiadi di Informatica</div>
+        <div className="gap-3">
           <Progress className="hidden w-20 sm:block" percentage={progress}>
             {progress}%
           </Progress>
@@ -65,13 +59,42 @@ export function Layout({ children }: { children: ReactNode }) {
             )}
           </div>
         </div>
+        <UserDropdown />
       </Navbar>
-      <SubmitModal ref={submitRef} />
-      <Prose>
-        {contest.longName && <h1 className="text-pretty">{contest.longName}</h1>}
-        {children}
-      </Prose>
-    </BaseLayout>
+      <div className="mx-auto flex w-full max-w-screen-xl grow flex-col p-4 pb-8">
+        <ErrorBoundary FallbackComponent={Error}>
+          <SubmitModal ref={submitRef} />
+          <Prose>
+            {contest.longName && <h1 className="text-pretty">{contest.longName}</h1>}
+            {children}
+          </Prose>
+        </ErrorBoundary>
+      </div>
+    </>
+  );
+}
+
+function UserDropdown() {
+  const { student, logout } = useStudent();
+
+  const name = student.personalInformation?.name as string;
+  const surname = student.personalInformation?.surname as string;
+
+  return (
+    <Dropdown className="dropdown-end">
+      <DropdownButton>
+        <div className="truncate uppercase">
+          {name} {surname}
+        </div>
+      </DropdownButton>
+      <DropdownMenu>
+        <li>
+          <Button className="flex justify-between gap-4" onClick={logout}>
+            Esci <LogOut size={20} />
+          </Button>
+        </li>
+      </DropdownMenu>
+    </Dropdown>
   );
 }
 

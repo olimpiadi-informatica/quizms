@@ -1,18 +1,26 @@
-import { ReactNode, createContext, useContext, useMemo } from "react";
+import { createContext, lazy, useContext } from "react";
 
-import { Loading } from "~/components";
-import useHash from "~/components/hash";
+import { Link, Redirect, Route, Switch, useParams } from "wouter";
+
 import { Contest, Participation, Student, StudentRestore, Variant } from "~/models";
+import { ImpersonificationAuth } from "~/web/student/impersonification-auth";
+import { PersonalInformationForm } from "~/web/student/personal-information-form";
 
 import { TeacherLayout } from "./layout";
 
 type TeacherContextProps = {
-  /** Gara attiva */
+  /** Tutte le partecipazioni */
+  participations: Participation[];
+  /** Partecipazione selezionata */
   participation: Participation;
   /** Funzione per modificare i dati della scuola */
   setParticipation: (participation: Participation) => Promise<void>;
-  /** Contest attivi */
+
+  /** Tutte le gare */
+  contests: Contest[];
+  /** Gara selezionata */
   contest: Contest;
+
   /** Varianti dei testi */
   variants: Record<string, Variant>;
   /** Funzione per effettuare il logout */
@@ -58,10 +66,44 @@ type TeacherProviderProps = {
     (request: StudentRestore) => Promise<void>,
     (studentId: string) => Promise<void>,
   ];
-  children: ReactNode;
 };
 
 export function TeacherProvider({
+  participations,
+  contests,
+  logout,
+  ...props
+}: TeacherProviderProps) {
+  return (
+    <TeacherLayout participations={participations} contests={contests} logout={logout}>
+      <Route path="/">
+        <div className="flex w-full grow flex-col items-center justify-center gap-4">
+          <p className="text-2xl">Seleziona una gara</p>
+          <div className="flex flex-wrap justify-center gap-4">
+            {participations.map((p) => (
+              <Link key={p.id} className="btn btn-info" href={`/${p.contestId}/`}>
+                {contests.find((c) => c.id === p.contestId)?.name}
+              </Link>
+            ))}
+          </div>
+        </div>
+      </Route>
+      <Route path="/:contestId" nest>
+        <ProviderInner
+          participations={participations}
+          contests={contests}
+          logout={logout}
+          {...props}
+        />
+      </Route>
+    </TeacherLayout>
+  );
+}
+
+const TeacherDashboard = lazy(() => import("./dashboard"));
+const TeacherTable = lazy(() => import("./table"));
+
+function ProviderInner({
   participations,
   setParticipation,
   contests,
@@ -70,62 +112,53 @@ export function TeacherProvider({
   getPdfStatements,
   useStudents,
   useStudentRestores,
-  children,
 }: TeacherProviderProps) {
-  const contestId = useHash(participations.length === 1 ? participations[0]?.contestId : undefined);
+  const { contestId } = useParams();
+
   const contest = contests.find((c) => c.id === contestId);
   const participation = participations.find((p) => p.contestId === contestId);
-
-  const contextProps: TeacherContextProps = useMemo(() => {
-    const filteredVariants = Object.fromEntries(
-      variants.filter((v) => v.contestId === contest?.id).map((v) => [v.id, v]),
-    );
-    return {
-      contest: contest!,
-      participation: participation!,
-      setParticipation,
-      variants: filteredVariants,
-      logout,
-      getPdfStatements: () =>
-        getPdfStatements(contest?.statementVersion ?? 0, participation?.pdfVariants ?? []),
-      useStudentRestores,
-      useStudents,
-    };
-  }, [
-    contest,
-    getPdfStatements,
-    logout,
-    participation,
-    setParticipation,
-    useStudentRestores,
-    useStudents,
-    variants,
-  ]);
-
-  if (contestId === undefined) {
-    return <Loading />;
+  if (!contest || !participation) {
+    return <Redirect to="/" />;
   }
 
+  const contestVariants = Object.fromEntries(
+    variants.filter((v) => v.contestId === contest?.id).map((v) => [v.id, v]),
+  );
+
+  const contextProps: TeacherContextProps = {
+    contests,
+    contest,
+    participations,
+    participation,
+    setParticipation,
+    variants: contestVariants,
+    logout,
+    getPdfStatements: () =>
+      getPdfStatements(contest.statementVersion, participation.pdfVariants ?? []),
+    useStudentRestores,
+    useStudents,
+  };
+
   return (
-    <TeacherLayout
-      contests={contests}
-      participations={participations}
-      activeContest={contest}
-      activeParticipation={participation}
-      logout={logout}>
-      {participation && contest ? (
-        <TeacherContext.Provider value={contextProps}>{children}</TeacherContext.Provider>
-      ) : (
-        <div className="flex size-full flex-col items-center justify-center gap-3">
-          <p className="text-2xl">Seleziona una gara</p>
-          {participations.map((p) => (
-            <a key={p.id} className="btn btn-info" href={`#${p.contestId}`}>
-              {contests.find((c) => c.id === p.contestId)?.name}
-            </a>
-          ))}
-        </div>
-      )}
-    </TeacherLayout>
+    <TeacherContext.Provider value={contextProps}>
+      <Switch>
+        <Route path="/">
+          <TeacherDashboard />
+        </Route>
+        <Route path="/students">
+          <TeacherTable />
+        </Route>
+        <Route path="/students/:studentId">
+          <ImpersonificationAuth>
+            <PersonalInformationForm />
+            {/* TODO: statement */}
+          </ImpersonificationAuth>
+        </Route>
+        <Route>
+          <Redirect to="/" />
+        </Route>
+      </Switch>
+    </TeacherContext.Provider>
   );
 }
 

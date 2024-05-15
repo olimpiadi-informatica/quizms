@@ -2,7 +2,7 @@ import { ReactNode, createContext, useContext } from "react";
 
 import { Contest, Participation, Student } from "~/models";
 
-import { Layout } from "./layout";
+import { StudentLayout } from "./layout";
 
 type StudentProviderProps = {
   /** Dati dello studente */
@@ -39,7 +39,7 @@ export function StudentProvider({
 
   return (
     <StudentContext.Provider value={value}>
-      <Layout>{children}</Layout>
+      <StudentLayout>{children}</StudentLayout>
     </StudentContext.Provider>
   );
 }

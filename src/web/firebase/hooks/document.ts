@@ -11,7 +11,7 @@ import {
 import { useErrorBoundary } from "react-error-boundary";
 import useSWR, { KeyedMutator, MutatorOptions, SWRConfiguration } from "swr";
 
-import { useDb } from "~/web/firebase/base-login";
+import { useDb } from "~/web/firebase/common/base-login";
 
 import { useSubscriptionListener } from "./subscription";
 

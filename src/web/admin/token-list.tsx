@@ -1,7 +1,8 @@
 import { Suspense } from "react";
 
-import { formatDate, formatTime } from "~/utils/date";
-import { participationMappingConverter } from "~/web/firebase/converters";
+import { DateTime } from "@olinfo/react-components";
+
+import { participationMappingConverter } from "~/web/firebase/common/converters";
 import { useCollection } from "~/web/firebase/hooks";
 
 import { useAdmin } from "./provider";
@@ -46,7 +47,7 @@ function TokenListInner() {
       <td>{token.participationId}</td>
       <td>{token.id}</td>
       <td>
-        {formatDate(token.startingTime, { style: "short" })} {formatTime(token.startingTime)}
+        <DateTime date={token.startingTime} />
       </td>
     </tr>
   ));

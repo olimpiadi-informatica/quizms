@@ -1,63 +1,88 @@
-import { ReactNode } from "react";
+import { ReactNode, Suspense, useEffect, useRef } from "react";
 
+import {
+  Dropdown,
+  DropdownButton,
+  DropdownMenu,
+  Navbar,
+  NavbarMenu,
+} from "@olinfo/react-components";
 import classNames from "classnames";
-import { getAuth } from "firebase/auth";
-import { ChevronDown, UserCog } from "lucide-react";
+import { LogOut } from "lucide-react";
+import { ErrorBoundary } from "react-error-boundary";
+import { Link, useLocation, useRoute } from "wouter";
 
-import { Dropdown, DropdownButton, DropdownItem } from "~/components";
+import { Button, Error, Loading } from "~/components";
 import { Contest } from "~/models";
-import { BaseLayout, Navbar } from "~/web/base-layout";
-import { useDb } from "~/web/firebase/base-login";
 
 type Props = {
+  name: string;
   contests: Contest[];
-  activeContest?: Contest;
   logout: () => Promise<void>;
   children: ReactNode;
 };
 
-export function AdminLayout({ activeContest, contests, logout, children }: Props) {
-  const db = useDb();
-  const auth = getAuth(db.app);
-  const user = auth.currentUser!;
+export function AdminLayout({ name, contests, logout, children }: Props) {
+  const location = useLocation();
+  const ref = useRef<HTMLDetailsElement>(null);
+
+  useEffect(() => {
+    ref.current?.removeAttribute("open");
+  }, [location]);
+
+  const [, params] = useRoute("/:contestId/*");
+  const contest = contests.find((c) => c.id === params?.contestId);
 
   return (
-    <BaseLayout>
-      <Navbar
-        user={user.displayName}
-        userIcon={UserCog}
-        logout={logout}
-        color="bg-error text-error-content">
-        {activeContest && (
-          <Dropdown>
-            <DropdownButton>
-              <div className="truncate">{activeContest.name}</div>
-              {contests.length > 1 && <ChevronDown className="size-3" />}
-            </DropdownButton>
-            {contests.map((contest) => (
-              <DropdownItem key={contest.id} hidden={contests.length === 1}>
-                <a
-                  className={classNames(contest.id === activeContest.id && "active")}
-                  href={`#${contest.id}`}>
-                  {contest.name}
-                </a>
-              </DropdownItem>
-            ))}
-          </Dropdown>
-        )}
-      </Navbar>
-      {activeContest ? (
-        children
-      ) : (
-        <div className="flex size-full flex-col items-center justify-center gap-3">
-          <p className="text-2xl">Seleziona una gara</p>
-          {contests.map((contest) => (
-            <a key={contest.id} className="btn btn-error" href={`#${contest.id}`}>
-              {contest.name}
-            </a>
-          ))}
+    <>
+      <Navbar color="bg-error text-error-content">
+        <div>
+          <div className="btn btn-ghost no-animation cursor-auto">Olimpiadi di Informatica</div>
+          {contest && contests.length >= 2 && (
+            <NavbarMenu>
+              <li>
+                <details ref={ref}>
+                  <summary className="after:forced-color-adjust-none">{contest.name}</summary>
+                  <ul>
+                    {contests.map((c) => (
+                      <li key={c.id}>
+                        <Link
+                          className={classNames(contest.id === c.id && "active")}
+                          href={`/${c.id}/${params!["*"]}`}>
+                          {contests.find((c) => c.id === contest.id)?.name}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </details>
+              </li>
+            </NavbarMenu>
+          )}
         </div>
-      )}
-    </BaseLayout>
+        <UserDropdown name={name} logout={logout} />
+      </Navbar>
+      <div className="mx-auto flex w-full max-w-screen-xl grow flex-col p-4 pb-8">
+        <ErrorBoundary FallbackComponent={Error}>
+          <Suspense fallback={<Loading />}>{children}</Suspense>
+        </ErrorBoundary>
+      </div>
+    </>
+  );
+}
+
+function UserDropdown({ name, logout }: { name: string; logout: () => Promise<void> }) {
+  return (
+    <Dropdown className="dropdown-end">
+      <DropdownButton>
+        <div className="truncate uppercase">{name}</div>
+      </DropdownButton>
+      <DropdownMenu>
+        <li>
+          <Button className="flex justify-between gap-4" onClick={logout}>
+            Esci <LogOut size={20} />
+          </Button>
+        </li>
+      </DropdownMenu>
+    </Dropdown>
   );
 }

@@ -14,8 +14,8 @@ import { sortBy } from "lodash-es";
 import { useErrorBoundary } from "react-error-boundary";
 import useSWR, { KeyedMutator, MutatorOptions, SWRConfiguration } from "swr";
 
-import { useDb } from "~/web/firebase/base-login";
-import query, { QueryOption } from "~/web/firebase/query";
+import { useDb } from "~/web/firebase/common/base-login";
+import query, { QueryOption } from "~/web/firebase/common/query";
 
 import { useSubscriptionListener } from "./subscription";
 

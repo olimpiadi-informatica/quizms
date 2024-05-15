@@ -1,48 +1,42 @@
-import { ReactNode, useCallback } from "react";
+import { useCallback } from "react";
 
 import { FirebaseOptions } from "firebase/app";
 import { getAuth, signOut } from "firebase/auth";
 
 import { AdminProvider } from "~/web/admin/provider";
 
-import { FirebaseLogin, useDb } from "./base-login";
-import { contestConverter } from "./converters";
-import EmailLogin from "./email-login";
+import { FirebaseLogin, useDb } from "./common/base-login";
+import { contestConverter } from "./common/converters";
+import PasswordLogin from "./common/password-login";
+import SsoLogin from "./common/sso-login";
 import { useCollection } from "./hooks";
-import SsoLogin from "./sso-login";
 
 type Props = {
   ssoUrl?: string;
   ssoLogo?: object;
   config: FirebaseOptions;
-  children: ReactNode;
 };
 
-export function AdminLogin({ ssoUrl, ssoLogo, config, children }: Props) {
-  const Login = useCallback(
-    function Login({ children }: { children: ReactNode }) {
-      return ssoUrl ? (
-        <SsoLogin url={ssoUrl} logo={ssoLogo}>
-          {children}
-        </SsoLogin>
-      ) : (
-        <EmailLogin method="email">{children}</EmailLogin>
-      );
-    },
-    [ssoUrl, ssoLogo],
-  );
-
+export function FirebaseAdmin({ ssoUrl, ssoLogo, config }: Props) {
   return (
     <FirebaseLogin config={config}>
-      <Login>
-        <AdminInner>{children}</AdminInner>
-      </Login>
+      {ssoUrl ? (
+        <SsoLogin url={ssoUrl} logo={ssoLogo}>
+          <AdminInner />
+        </SsoLogin>
+      ) : (
+        <PasswordLogin>
+          <AdminInner />
+        </PasswordLogin>
+      )}
     </FirebaseLogin>
   );
 }
 
-function AdminInner({ children }: { children: ReactNode }) {
+function AdminInner() {
   const db = useDb();
+  const auth = getAuth(db.app);
+  const name = auth.currentUser?.displayName ?? "Utente anonimo";
 
   const [contests, setContest] = useCollection("contests", contestConverter, {
     subscribe: true,
@@ -53,9 +47,5 @@ function AdminInner({ children }: { children: ReactNode }) {
     window.location.reload();
   }, [db]);
 
-  return (
-    <AdminProvider contests={contests} setContest={setContest} logout={logout}>
-      {children}
-    </AdminProvider>
-  );
+  return <AdminProvider name={name} contests={contests} setContest={setContest} logout={logout} />;
 }

@@ -4,7 +4,7 @@ import { Card, CardBody } from "@olinfo/react-components";
 
 import { Buttons, Loading } from "~/components";
 import { Participation, Student } from "~/models";
-import { participationConverter, studentConverter } from "~/web/firebase/converters";
+import { participationConverter, studentConverter } from "~/web/firebase/common/converters";
 import { useCount } from "~/web/firebase/hooks/count";
 
 import Announcements from "./announcements";
@@ -13,11 +13,11 @@ import Export from "./export";
 import { useAdmin } from "./provider";
 import TokenList from "./token-list";
 
-export function Admin() {
+export default function Dashboard() {
   const { contest } = useAdmin();
 
   return (
-    <div className="flex flex-col gap-5 p-5">
+    <div className="flex flex-col gap-4">
       <Card>
         <CardBody title="Impostazioni gara">
           <ContestSettings />

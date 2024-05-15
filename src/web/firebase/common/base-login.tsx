@@ -25,20 +25,14 @@ export function FirebaseLogin({ config, children }: Props) {
   }, [config]);
 
   if (!config) {
-    return (
-      <div className="h-dvh">
-        <Error error={{ message: "No Firebase configuration provided." }} />
-      </div>
-    );
+    return <Error error={{ message: "No Firebase configuration provided." }} />;
   }
 
   return (
     <FirebaseContext.Provider value={db}>
-      <div className="h-dvh">
-        <ErrorBoundary FallbackComponent={ErrorLogout}>
-          <Suspense fallback={<Loading />}>{children}</Suspense>
-        </ErrorBoundary>
-      </div>
+      <ErrorBoundary FallbackComponent={ErrorLogout}>
+        <Suspense fallback={<Loading />}>{children}</Suspense>
+      </ErrorBoundary>
     </FirebaseContext.Provider>
   );
 }
