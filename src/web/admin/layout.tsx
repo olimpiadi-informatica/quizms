@@ -7,7 +7,7 @@ import {
   Navbar,
   NavbarMenu,
 } from "@olinfo/react-components";
-import classNames from "classnames";
+import clsx from "clsx";
 import { LogOut } from "lucide-react";
 import { ErrorBoundary } from "react-error-boundary";
 import { Link, useLocation, useRoute } from "wouter";
@@ -47,7 +47,7 @@ export function AdminLayout({ name, contests, logout, children }: Props) {
                     {contests.map((c) => (
                       <li key={c.id}>
                         <Link
-                          className={classNames(contest.id === c.id && "active")}
+                          className={clsx(contest.id === c.id && "active")}
                           href={`/${c.id}/${params!["*"]}`}>
                           {contests.find((c) => c.id === contest.id)?.name}
                         </Link>

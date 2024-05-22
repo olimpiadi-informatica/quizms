@@ -1,5 +1,5 @@
 import { Parser } from "acorn";
-import classNames from "classnames";
+import clsx from "clsx";
 import { Directive } from "estree";
 import { Code, InlineCode, Root } from "mdast";
 import { MdxJsxFlowElement } from "mdast-util-mdx";
@@ -44,7 +44,7 @@ const remarkHighlight: Plugin<[], Root> = () => {
           jsxAttribute("lang", lang),
           jsxAttribute(
             "className",
-            classNames(
+            clsx(
               "text-sm",
               code.type === "inlineCode" && "overflow-x-auto border border-base-content/40 p-4",
             ),

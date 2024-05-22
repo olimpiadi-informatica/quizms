@@ -1,7 +1,7 @@
 import { ReactNode, createContext, useContext, useEffect, useId, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 
-import classNames from "classnames";
+import clsx from "clsx";
 import { noop, pull } from "lodash-es";
 
 type Props = {
@@ -35,7 +35,7 @@ export function Dropdown({ align, children }: Props) {
 
   return (
     <DropdownContext.Provider value={context}>
-      <div className={classNames("dropdown max-w-full flex-none", align)}>
+      <div className={clsx("dropdown max-w-full flex-none", align)}>
         <div
           ref={setButton}
           tabIndex={0}
@@ -43,7 +43,7 @@ export function Dropdown({ align, children }: Props) {
           className="btn btn-ghost no-animation w-full flex-nowrap"
         />
         <ul
-          className={classNames(
+          className={clsx(
             "menu dropdown-content menu-sm z-30 mt-3 w-fit min-w-52 gap-1 rounded-box bg-base-200 p-2 text-base-content",
             items.length === 0 && "hidden",
           )}>

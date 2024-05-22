@@ -56,7 +56,7 @@
     "@vitejs/plugin-react-swc": "^3.3",
     "acorn": "^8.10",
     "blockly": "^10.0",
-    "classnames": "^2.3",
+    "clsx": "^2.1.1",
     "commander": "^12.0",
     "date-fns": "^3.0",
     "dotenv": "^16.3",

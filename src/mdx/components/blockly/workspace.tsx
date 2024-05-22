@@ -1,7 +1,7 @@
 import { ComponentType, Ref, forwardRef, useEffect, useMemo, useRef, useState } from "react";
 
 import { ToolboxInfo } from "blockly/core/utils/toolbox";
-import classNames from "classnames";
+import clsx from "clsx";
 import { range } from "lodash-es";
 import {
   AlertTriangle,
@@ -224,7 +224,7 @@ export default function Workspace({
 
   return (
     <div
-      className={classNames(
+      className={clsx(
         "not-prose relative inset-y-0 left-1/2 w-[calc(100vw-2rem)] -translate-x-1/2 p-2 pt-8",
         "flex flex-col-reverse items-start justify-between gap-6 overflow-x-hidden lg:flex-row",
       )}>
@@ -237,7 +237,7 @@ export default function Workspace({
                 setTestcaseIndex(index);
                 setPlaying(false);
               }}
-              className={classNames(
+              className={clsx(
                 "btn join-item z-10 rounded-lg",
                 !editing && "tooltip",
                 index === testcaseIndex && "btn-info",
@@ -267,7 +267,7 @@ export default function Workspace({
               <div className="absolute inset-x-0 bottom-0 z-50 p-4">
                 <div
                   role="alert"
-                  className={classNames("alert", correct ? "alert-success" : "alert-error")}>
+                  className={clsx("alert", correct ? "alert-success" : "alert-error")}>
                   {correct ? <CheckCircle /> : <AlertTriangle />}
                   <span>{msg}</span>
                   <button onClick={() => setMessageHidden(true)} aria-label="Nascondi messaggio">

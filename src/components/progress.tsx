@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 
-import classNames from "classnames";
+import clsx from "clsx";
 import { clamp } from "lodash-es";
 
 type ProgressBlockProps = {
@@ -16,7 +16,7 @@ export function Progress({ percentage, className, children }: ProgressBlockProps
   }
 
   return (
-    <div className={classNames("relative p-2 pt-0 text-center", className)}>
+    <div className={clsx("relative p-2 pt-0 text-center", className)}>
       <div className="relative z-10">{children}</div>
       <progress className="progress progress-info absolute inset-x-0" value={value} max="100" />
     </div>

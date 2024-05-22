@@ -1,6 +1,6 @@
 import { Children, ReactNode, createContext, useContext, useEffect, useId, useMemo } from "react";
 
-import classNames from "classnames";
+import clsx from "clsx";
 import { Trash2 } from "lucide-react";
 
 import { Rng } from "~/utils/random";
@@ -36,9 +36,9 @@ export function AnswerGroup({ children }: AnswerGroupProps) {
 
   return (
     <form
-      className={classNames(
-        "answer-group my-5 flex-wrap rounded-xl bg-base-200 p-3",
-        "prose-p:my-1 print:flex print:border print:border-[var(--tw-prose-hr)] print:p-1",
+      className={clsx(
+        "my-5 flex-wrap rounded-xl bg-base-200 p-3 prose-p:my-1",
+        "print:flex print:border print:border-[var(--tw-prose-hr)] print:p-1",
       )}>
       {answers.map((answer, i) => (
         <AnswerContext.Provider key={i} value={{ id: String.fromCodePoint(65 + i) }}>
@@ -80,8 +80,8 @@ export function Answer({ correct, children }: AnswerProps) {
 
   return (
     <div
-      className={classNames(
-        "answer relative my-1 flex rounded-lg pl-2 pr-1 hover:bg-base-300 print:mr-4",
+      className={clsx(
+        "relative my-1 flex rounded-lg pl-2 pr-1 hover:bg-base-300 print:mr-4",
         terminated && {
           "border-2 border-success": correct === true,
           "border-2 border-error": answer === id && correct === false,
@@ -90,7 +90,7 @@ export function Answer({ correct, children }: AnswerProps) {
       <input
         id={answerId}
         checked={answer === id}
-        className={classNames(
+        className={clsx(
           "radio radio-sm my-auto mr-4 bg-base-100 [print-color-adjust:exact] disabled:opacity-90 print:mr-2",
           terminated &&
             answer === id && {
@@ -108,7 +108,7 @@ export function Answer({ correct, children }: AnswerProps) {
       </label>
       <div className="absolute right-0 top-0 mr-1 flex h-full justify-center print:hidden">
         <button
-          className={classNames(
+          className={clsx(
             "btn btn-square btn-ghost btn-sm my-auto",
             (answer !== id || terminated) && "hidden",
           )}
@@ -150,7 +150,7 @@ export function OpenAnswer({ correct, type }: OpenAnswerProps) {
   return (
     <div className="px-2">
       <input
-        className={classNames(
+        className={clsx(
           "input input-bordered w-72 max-w-full border-2 print:placeholder:text-transparent",
           terminated &&
             correct !== undefined && {

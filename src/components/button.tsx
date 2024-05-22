@@ -9,7 +9,7 @@ import {
   useState,
 } from "react";
 
-import classNames from "classnames";
+import clsx from "clsx";
 import { FirebaseError } from "firebase/app";
 
 type ContextProps = {
@@ -47,7 +47,7 @@ export function Buttons({
 
   return (
     <LoadingButtonsContext.Provider value={{ contextLoading, setContextLoading, throwError }}>
-      <div className={classNames("not-prose", className)}>
+      <div className={clsx("not-prose", className)}>
         {showError && <p className="mb-1.5 text-error">{error || <>&nbsp;</>}</p>}
         <div className="flex flex-wrap justify-center gap-3">{children}</div>
       </div>
@@ -110,7 +110,7 @@ export function Button({ className, icon: Icon, onClick, disabled, children }: B
 
   return (
     <button
-      className={classNames("btn", className)}
+      className={clsx("btn", className)}
       onClick={handleClick}
       disabled={!!loading || disabled}>
       {spinning && <span className="loading loading-spinner" />}

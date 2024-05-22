@@ -7,7 +7,7 @@ import {
   Navbar,
   NavbarMenu,
 } from "@olinfo/react-components";
-import classNames from "classnames";
+import clsx from "clsx";
 import { LogOut } from "lucide-react";
 import { ErrorBoundary } from "react-error-boundary";
 import { Link, useLocation, useRoute } from "wouter";
@@ -49,7 +49,7 @@ export function TeacherLayout({ contests, participations, logout, children }: Pr
                       {participations.map((p) => (
                         <li key={p.id}>
                           <Link
-                            className={classNames(contest.id === p.contestId && "active")}
+                            className={clsx(contest.id === p.contestId && "active")}
                             href={`/${p.contestId}/${params!["*"]}`}>
                             {contests.find((c) => c.id === p.contestId)?.name}
                           </Link>

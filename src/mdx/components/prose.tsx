@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 
 import { MDXProvider } from "@mdx-js/react";
-import classNames from "classnames";
+import clsx from "clsx";
 
 import { components } from "./index";
 
@@ -9,7 +9,7 @@ export default function Prose({ children }: { children: ReactNode }) {
   return (
     <MDXProvider components={components}>
       <div
-        className={classNames(
+        className={clsx(
           "prose prose-lg max-w-full",
           "prose-table:mx-auto prose-table:w-auto prose-table:text-center",
           "print:prose-sm print:prose-headings:mt-2 print:prose-hr:my-4",

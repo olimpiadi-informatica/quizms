@@ -1,7 +1,7 @@
 import { ReactNode, useEffect, useMemo, useState } from "react";
 
 import { Navbar } from "@olinfo/react-components";
-import classNames from "classnames";
+import clsx from "clsx";
 import { getAuth, signInWithCustomToken } from "firebase/auth";
 import { useLocation, useSearch } from "wouter";
 
@@ -54,7 +54,7 @@ export default function SsoLogin({ url, logo, children }: Props) {
       </Navbar>
       <div className="flex grow flex-col items-center justify-center gap-4 p-4 pb-8">
         <h1 className="text-xl font-bold">Accedi usando le tue credenziali di {redirect.host}</h1>
-        <a className={classNames("btn btn-info", loading && "btn-disabled")} href={redirect.href}>
+        <a className={clsx("btn btn-info", loading && "btn-disabled")} href={redirect.href}>
           {loading ? (
             <span className="loading loading-spinner" />
           ) : (

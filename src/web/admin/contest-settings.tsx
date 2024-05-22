@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import classNames from "classnames";
+import clsx from "clsx";
 
 import { useAdmin } from "./provider";
 
@@ -40,7 +40,7 @@ function TextareaField({ label, value, setValue }: TextareaFieldProps) {
         </span>
       </div>
       <textarea
-        className={classNames("textarea textarea-bordered", editable && "textarea-warning")}
+        className={clsx("textarea textarea-bordered", editable && "textarea-warning")}
         value={value ?? ""}
         onChange={(e) => setValue(e.target.value)}
         readOnly={!editable}

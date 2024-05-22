@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { Code } from "@olinfo/react-components";
-import classNames from "classnames";
+import clsx from "clsx";
 import { saveAs } from "file-saver";
 import { Copy, Download } from "lucide-react";
 
@@ -65,7 +65,7 @@ export default function Debug({ blocks, js, svg }: Props) {
                 key={f}
                 role="tab"
                 type="button"
-                className={classNames("tab h-full", format === f && "tab-active")}
+                className={clsx("tab h-full", format === f && "tab-active")}
                 onClick={() => setFormat(f as keyof typeof formats)}>
                 {label}
               </button>
@@ -73,9 +73,7 @@ export default function Debug({ blocks, js, svg }: Props) {
           </div>
           {format !== "svg" && (
             <div className="flex gap-3">
-              <div
-                className={classNames("tooltip-open", copyTooltip && "tooltip")}
-                data-tip="Copiato!">
+              <div className={clsx("tooltip-open", copyTooltip && "tooltip")} data-tip="Copiato!">
                 <button
                   type="button"
                   className="!btn !btn-error"
