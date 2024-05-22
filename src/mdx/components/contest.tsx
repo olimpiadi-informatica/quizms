@@ -11,9 +11,10 @@ import {
   useState,
 } from "react";
 
+import { Modal } from "@olinfo/react-components";
 import { noop, sumBy } from "lodash-es";
 
-import { Button, Buttons, Modal } from "~/components";
+import { Button, Buttons } from "~/components";
 import { Schema, problemScore, score } from "~/models";
 import { randomId } from "~/utils/random";
 import { useStudent } from "~/web/student/provider";

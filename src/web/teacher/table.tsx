@@ -7,12 +7,12 @@ import type {
   IFilterOptionDef,
   ITooltipParams,
 } from "@ag-grid-community/core";
-import { useIsAfter } from "@olinfo/react-components";
+import { Modal, useIsAfter } from "@olinfo/react-components";
 import { addMinutes, isEqual as isEqualDate } from "date-fns";
 import { cloneDeep, deburr, isString, lowerFirst, omit, set, sumBy } from "lodash-es";
 import { AlertTriangle, Download, FileCheck, Upload, Users } from "lucide-react";
 
-import { Button, Buttons, Loading, Modal } from "~/components";
+import { Button, Buttons, Loading } from "~/components";
 import {
   Contest,
   Student,

@@ -1,9 +1,9 @@
 import { ChangeEvent, Fragment, Ref, forwardRef, useRef, useState } from "react";
 
-import { DateTime } from "@olinfo/react-components";
+import { DateTime, Modal } from "@olinfo/react-components";
 import { AlertTriangle, Info, XCircle } from "lucide-react";
 
-import { Button, Buttons, Modal } from "~/components";
+import { Button, Buttons } from "~/components";
 import { Announcement } from "~/models";
 import { randomId } from "~/utils/random";
 import { announcementConverter } from "~/web/firebase/common/converters";

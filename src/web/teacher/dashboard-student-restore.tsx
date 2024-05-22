@@ -1,9 +1,10 @@
 import { Suspense, useRef, useState } from "react";
 
+import { Modal } from "@olinfo/react-components";
 import { groupBy, sortBy } from "lodash-es";
 import { Check, X } from "lucide-react";
 
-import { Button, Buttons, Modal } from "~/components";
+import { Button, Buttons } from "~/components";
 import { StudentRestore } from "~/models";
 import { hash } from "~/utils/random";
 

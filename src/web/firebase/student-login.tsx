@@ -2,6 +2,7 @@ import { ReactNode, useMemo, useRef } from "react";
 
 import {
   Form,
+  Modal,
   Navbar,
   SelectField,
   SubmitButton,
@@ -14,7 +15,6 @@ import { getAuth, signOut } from "firebase/auth";
 import { addDoc, collection, waitForPendingWrites } from "firebase/firestore";
 import { isEqual, mapValues } from "lodash-es";
 
-import { Modal } from "~/components";
 import { Contest, Student } from "~/models";
 import { hash } from "~/utils/random";
 import { PersonalInformationField } from "~/web/student/personal-information-form";

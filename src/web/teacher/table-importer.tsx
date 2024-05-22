@@ -1,10 +1,11 @@
 import { Ref, forwardRef, useRef, useState } from "react";
 
+import { Modal } from "@olinfo/react-components";
 import { ArrowUpFromLine } from "lucide-react";
 import { parse as parseCSV } from "papaparse";
 import z from "zod";
 
-import { Button, Buttons, Modal } from "~/components";
+import { Button, Buttons } from "~/components";
 import {
   Contest,
   Participation,

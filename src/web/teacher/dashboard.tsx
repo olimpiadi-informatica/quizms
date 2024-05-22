@@ -1,12 +1,12 @@
 import { useRef } from "react";
 
-import { Card, CardBody, DateTime, WithinTimeRange } from "@olinfo/react-components";
+import { Card, CardBody, DateTime, Modal, WithinTimeRange } from "@olinfo/react-components";
 import { addMinutes, addSeconds, isSameDay, roundToNearestMinutes, subMinutes } from "date-fns";
 import { saveAs } from "file-saver";
 import { range } from "lodash-es";
 import { Link } from "wouter";
 
-import { Button, Buttons, Modal, Timer } from "~/components";
+import { Button, Buttons, Timer } from "~/components";
 import { randomToken } from "~/utils/random";
 
 import { Announcements } from "./dashboard-announcements";

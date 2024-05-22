@@ -1,11 +1,11 @@
 import { ReactNode, Ref, forwardRef, useEffect, useRef } from "react";
 
-import { Dropdown, DropdownButton, DropdownMenu, Navbar } from "@olinfo/react-components";
+import { Dropdown, DropdownButton, DropdownMenu, Modal, Navbar } from "@olinfo/react-components";
 import { sumBy } from "lodash-es";
 import { LogOut } from "lucide-react";
 import { ErrorBoundary } from "react-error-boundary";
 
-import { Button, Buttons, Error, Modal, Progress, Timer } from "~/components";
+import { Button, Buttons, Error, Progress, Timer } from "~/components";
 import Prose from "~/mdx/components/prose";
 
 import { useStudent } from "./provider";

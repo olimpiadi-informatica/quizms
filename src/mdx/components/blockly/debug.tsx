@@ -1,11 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { Code } from "@olinfo/react-components";
+import { Code, Modal } from "@olinfo/react-components";
 import clsx from "clsx";
 import { saveAs } from "file-saver";
 import { Copy, Download } from "lucide-react";
-
-import { Modal } from "~/components";
 
 type Props = {
   blocks: object;

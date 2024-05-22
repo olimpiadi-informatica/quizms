@@ -1,9 +1,10 @@
 import { Ref, forwardRef, useRef } from "react";
 
+import { Modal } from "@olinfo/react-components";
 import { DocumentSnapshot, Firestore, FirestoreDataConverter, getDocs } from "firebase/firestore";
 import { AlertTriangle } from "lucide-react";
 
-import { Button, Buttons, Modal } from "~/components";
+import { Button, Buttons } from "~/components";
 import { useDb } from "~/web/firebase/common/base-login";
 import query, { QueryOption } from "~/web/firebase/common/query";
 
