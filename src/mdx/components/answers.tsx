@@ -103,7 +103,7 @@ export function Answer({ correct, children }: AnswerProps) {
         disabled={terminated}
       />
       <div className="my-auto w-6 screen:hidden">{id})</div>
-      <label htmlFor={answerId} className="grow">
+      <label htmlFor={answerId} className="grow [&_pre]:!my-2 [&_pre]:!p-3">
         {children}
       </label>
       <div className="absolute right-0 top-0 mr-1 flex h-full justify-center print:hidden">

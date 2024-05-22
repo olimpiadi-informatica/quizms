@@ -1,4 +1,5 @@
 import { Parser } from "acorn";
+import classNames from "classnames";
 import { Directive } from "estree";
 import { Code, InlineCode, Root } from "mdast";
 import { MdxJsxFlowElement } from "mdast-util-mdx";
@@ -40,7 +41,14 @@ const remarkHighlight: Plugin<[], Root> = () => {
         attributes: [
           jsxAttribute("code", (template.body[0] as Directive).expression),
           jsxAttribute("inline", code.type === "inlineCode"),
-          jsxAttribute("language", lang),
+          jsxAttribute("lang", lang),
+          jsxAttribute(
+            "className",
+            classNames(
+              "text-sm",
+              code.type === "inlineCode" && "overflow-x-auto border border-base-content/40 p-4",
+            ),
+          ),
         ],
       } as MdxJsxFlowElement;
     });

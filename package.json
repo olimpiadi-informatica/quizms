@@ -93,7 +93,6 @@
     "rollup": "^4.9",
     "rollup-plugin-license": "^3.2",
     "sharp": "^0.32",
-    "shiki": "^1.5.1",
     "smol-toml": "^1.1",
     "svgo": "^3.0",
     "swr": "^2.2",

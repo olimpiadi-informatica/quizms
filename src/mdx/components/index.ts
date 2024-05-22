@@ -1,8 +1,9 @@
 import { ComponentType, memo } from "react";
 
+import { Code } from "@olinfo/react-components";
+
 import { Answer, AnswerGroup, Explanation, OpenAnswer } from "./answers";
 import Blockly from "./blockly/workspace";
-import Code from "./code";
 import { Contest } from "./contest";
 import Image from "./image";
 import MathExpr from "./math";

@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
+import { Code } from "@olinfo/react-components";
 import classNames from "classnames";
 import { saveAs } from "file-saver";
 import { Copy, Download } from "lucide-react";
 
 import { Modal } from "~/components";
-import Code from "~/mdx/components/code";
 
 type Props = {
   blocks: object;
@@ -13,30 +13,24 @@ type Props = {
   svg: string;
 };
 
-type Format = "json" | "js" | "svg";
-
-const formats: Record<Format, { label: string; lang: string; mime: string }> = {
+const formats = {
   json: {
     label: "Blocchi",
-    lang: "json",
     mime: "application/json;charset=utf-8",
   },
   js: {
     label: "JavaScript",
-    lang: "javascript",
     mime: "text/javascript;charset=utf-8",
   },
   svg: {
     label: "Immagine",
-    lang: "xml",
-    mime: "image/svg+xml;charset=utf-8",
   },
 };
 
 export default function Debug({ blocks, js, svg }: Props) {
   const ref = useRef<HTMLDialogElement>(null);
 
-  const [format, setFormat] = useState<Format>("json");
+  const [format, setFormat] = useState<keyof typeof formats>("json");
 
   const code = useMemo(() => {
     switch (format) {
@@ -72,35 +66,37 @@ export default function Debug({ blocks, js, svg }: Props) {
                 role="tab"
                 type="button"
                 className={classNames("tab h-full", format === f && "tab-active")}
-                onClick={() => setFormat(f as Format)}>
+                onClick={() => setFormat(f as keyof typeof formats)}>
                 {label}
               </button>
             ))}
           </div>
-          <div className={classNames("flex gap-3", format === "svg" && "hidden")}>
-            <div
-              className={classNames("tooltip-open", copyTooltip && "tooltip")}
-              data-tip="Copiato!">
+          {format !== "svg" && (
+            <div className="flex gap-3">
+              <div
+                className={classNames("tooltip-open", copyTooltip && "tooltip")}
+                data-tip="Copiato!">
+                <button
+                  type="button"
+                  className="!btn !btn-error"
+                  onClick={() => copy()}
+                  data-tip="Copiato!">
+                  <Copy /> Copia
+                </button>
+              </div>
               <button
                 type="button"
                 className="!btn !btn-error"
-                onClick={() => copy()}
-                data-tip="Copiato!">
-                <Copy /> Copia
+                onClick={() =>
+                  saveAs(new Blob([code], { type: formats[format].mime }), `blocks.${format}`)
+                }>
+                <Download /> Salva
               </button>
             </div>
-            <button
-              type="button"
-              className="!btn !btn-error"
-              onClick={() =>
-                saveAs(new Blob([code], { type: formats[format].mime }), `blocks.${format}`)
-              }>
-              <Download /> Salva
-            </button>
-          </div>
+          )}
         </div>
         <div role="tabpanel" className="mt-3 text-sm *:overflow-x-auto">
-          {format !== "svg" && <Code code={code} language={formats[format].lang} />}
+          {format !== "svg" && <Code code={code} lang={format} />}
           {format === "svg" && (
             <BlocksCanvas uri={`data:image/svg+xml,${encodeURIComponent(svg)}`} />
           )}
