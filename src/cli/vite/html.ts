@@ -126,16 +126,5 @@ export function generateHtmlFromBundle(
     });
   }
 
-  if (process.env.QUIZMS_TIME_SERVER) {
-    tags.push({
-      tag: "link",
-      attrs: {
-        rel: "preconnect",
-        href: process.env.QUIZMS_TIME_SERVER,
-      },
-      injectTo: "head",
-    });
-  }
-
   return generateHtml(...tags);
 }

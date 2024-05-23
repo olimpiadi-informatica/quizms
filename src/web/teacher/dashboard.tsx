@@ -160,11 +160,11 @@ export default function TeacherDashboard() {
               <DateTime date={contest.contestWindowStart} dateStyle="long" />{" "}
               {isSameDay(contest.contestWindowStart, contest.contestWindowEnd) ? (
                 <>
-                  alle <DateTime date={contest.contestWindowStart} dateStyle="hidden" />
+                  alle <DateTime date={contest.contestWindowEnd} dateStyle="hidden" />
                 </>
               ) : (
                 <>
-                  al <DateTime date={contest.contestWindowStart} dateStyle="long" />
+                  al <DateTime date={contest.contestWindowEnd} dateStyle="long" />
                 </>
               )}
               .

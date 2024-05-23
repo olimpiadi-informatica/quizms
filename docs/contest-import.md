@@ -145,6 +145,5 @@ npx quizms firebase import --pdfs
 Per eseguire il deploy del sito usa i comandi:
 
 ```shell
-export QUIZMS_TIME_SERVER="https://time1.olinfo.it"
 firebase deploy --only hosting
 ```

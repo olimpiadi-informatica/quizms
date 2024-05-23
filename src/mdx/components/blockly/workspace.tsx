@@ -229,7 +229,7 @@ export default function Workspace({
         "flex flex-col-reverse items-start justify-between gap-6 overflow-x-hidden lg:flex-row",
       )}>
       <div className="flex h-full max-h-[min(720px,90vh)] basis-[min(auto,50%)] flex-col gap-6 self-stretch overflow-x-hidden">
-        <div>
+        <div className="flex flex-wrap gap-2">
           {testcaseStatuses.map(({ index, correct, msg }) => (
             <button
               key={index}

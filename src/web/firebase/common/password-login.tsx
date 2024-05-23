@@ -7,6 +7,7 @@ import {
   SubmitButton,
   UsernameField,
 } from "@olinfo/react-components";
+import { FirebaseError } from "firebase/app";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { useSearch } from "wouter";
 
@@ -36,11 +37,26 @@ export default function PasswordLogin({ children }: Props) {
 
   const signIn = async (credential: { username: string; password: string }) => {
     const auth = getAuth(db.app);
-    await signInWithEmailAndPassword(
-      auth,
-      `${credential.username}@teacher.edu`,
-      credential.password,
-    );
+    try {
+      await signInWithEmailAndPassword(
+        auth,
+        `${credential.username}@teacher.edu`,
+        credential.password,
+      );
+    } catch (err) {
+      if (!(err instanceof FirebaseError)) throw err;
+      switch (err.code) {
+        case "auth/invalid-email":
+        case "auth/user-not-found":
+          throw new Error("Username non corretto.");
+        case "auth/wrong-password":
+          throw new Error("Password non corretta.");
+        case "auth/too-many-requests":
+          throw new Error("Troppi tentativi, aspetta 5 minuti e poi riprova.");
+        default:
+          throw new Error(err.message.replace(/^Firebase: /, "").replace(/ \([/a-z-]+\)\.$/, ""));
+      }
+    }
   };
 
   const user = useAuth();

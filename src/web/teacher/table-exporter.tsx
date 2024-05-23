@@ -23,14 +23,16 @@ const Exporter = forwardRef(function Exporter(_, ref: Ref<HTMLButtonElement> | n
 export default Exporter;
 
 function exportStudents(students: Student[], contest: Contest, variants: Record<string, Variant>) {
-  const flatStudents = students.map((student) => {
-    return [
-      ...contest.personalInformation.map((field) => formatPersonalInformation(student, field)),
-      ...(contest.hasVariants ? [student.variant] : []),
-      ...contest.problemIds.map((id) => student.answers?.[id]),
-      score(student, variants),
-    ];
-  });
+  const flatStudents = students
+    .filter((student) => !student.disabled)
+    .map((student) => {
+      return [
+        ...contest.personalInformation.map((field) => formatPersonalInformation(student, field)),
+        ...(contest.hasVariants ? [student.variant] : []),
+        ...contest.problemIds.map((id) => student.answers?.[id]),
+        student.absent ? "" : score(student, variants),
+      ];
+    });
 
   flatStudents.unshift([
     ...contest.personalInformation.map((field) => field.label),
