@@ -1,11 +1,21 @@
 import { ReactNode, Ref, forwardRef, useEffect, useRef } from "react";
 
-import { Dropdown, DropdownButton, DropdownMenu, Modal, Navbar } from "@olinfo/react-components";
+import {
+  Button,
+  Dropdown,
+  DropdownButton,
+  DropdownMenu,
+  Form,
+  FormButton,
+  Modal,
+  Navbar,
+  SubmitButton,
+} from "@olinfo/react-components";
 import { sumBy } from "lodash-es";
 import { LogOut } from "lucide-react";
 import { ErrorBoundary } from "react-error-boundary";
 
-import { Button, Buttons, Error, Progress, Timer } from "~/components";
+import { Error, Progress, Timer } from "~/components";
 import Prose from "~/mdx/components/prose";
 
 import { useStudent } from "./provider";
@@ -33,7 +43,7 @@ export function StudentLayout({ children }: { children: ReactNode }) {
     <>
       <Navbar color="bg-base-300 text-base-content">
         <div>Olimpiadi di Informatica</div>
-        <div className="gap-3">
+        <div className="gap-2 self-stretch">
           <Progress className="hidden w-20 sm:block" percentage={progress}>
             {progress}%
           </Progress>
@@ -44,18 +54,18 @@ export function StudentLayout({ children }: { children: ReactNode }) {
               <Timer startTime={participation.startingTime} duration={contest.duration} />
             )}
           </div>
-          <div className="h-full flex-none py-0.5">
+          <div className="h-full flex-none">
             {terminated && reset ? (
-              <button className="btn btn-warning btn-sm h-full" onClick={reset}>
+              <Button className="btn-warning btn-sm h-full" onClick={reset}>
                 Ricomincia
-              </button>
+              </Button>
             ) : (
-              <button
-                className="btn btn-success btn-sm h-full"
+              <Button
+                className="btn-success btn-sm h-full"
                 disabled={terminated || !participation.startingTime}
                 onClick={() => submitRef.current?.showModal()}>
                 Termina
-              </button>
+              </Button>
             )}
           </div>
         </div>
@@ -101,26 +111,33 @@ function UserDropdown() {
 const SubmitModal = forwardRef(function SubmitModal(_, ref: Ref<HTMLDialogElement>) {
   const { student, setStudent, submit } = useStudent();
 
-  const confirm = async () => {
-    await setStudent({
-      ...student,
-      submittedAt: new Date(),
-    });
-    await submit?.();
+  const close = () => {
     if (ref && "current" in ref) {
       ref.current?.close();
+    }
+  };
+
+  const confirm = async () => {
+    try {
+      await setStudent({
+        ...student,
+        submittedAt: new Date(),
+      });
+      await submit?.();
+    } finally {
+      close();
     }
   };
 
   return (
     <Modal ref={ref} title="Confermi di voler terminare?">
       <p>Confermando non potrai più modificare le tue risposte.</p>
-      <Buttons className="mt-3">
-        <Button className="btn-info">Annulla</Button>
-        <Button className="btn-error" onClick={confirm}>
-          Conferma
-        </Button>
-      </Buttons>
+      <Form onSubmit={confirm} className="!max-w-full">
+        <div className="flex flex-wrap justify-center gap-2">
+          <FormButton onClick={close}>Annulla</FormButton>
+          <SubmitButton className="btn-error">Conferma</SubmitButton>
+        </div>
+      </Form>
     </Modal>
   );
 });

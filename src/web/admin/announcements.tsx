@@ -1,9 +1,18 @@
-import { ChangeEvent, Fragment, Ref, forwardRef, useRef, useState } from "react";
+import { Fragment, Ref, forwardRef, useRef } from "react";
 
-import { DateTime, Modal } from "@olinfo/react-components";
+import {
+  Button,
+  CardActions,
+  DateTime,
+  Form,
+  Modal,
+  SelectField,
+  SubmitButton,
+  TextAreaField,
+  TextField,
+} from "@olinfo/react-components";
 import { AlertTriangle, Info, XCircle } from "lucide-react";
 
-import { Button, Buttons } from "~/components";
 import { Announcement } from "~/models";
 import { randomId } from "~/utils/random";
 import { announcementConverter } from "~/web/firebase/common/converters";
@@ -25,12 +34,6 @@ export default function Announcements() {
 
   return (
     <>
-      <Buttons>
-        <Button className="btn-error" onClick={() => ref.current?.showModal()}>
-          Aggiungi comunicazione
-        </Button>
-        <AnnouncementModal ref={ref} addAnnouncement={addAnnouncement} />
-      </Buttons>
       <div className="prose mt-4 max-w-none">
         {announcements.map((announcement) => (
           <Fragment key={announcement.id}>
@@ -50,6 +53,12 @@ export default function Announcements() {
           </Fragment>
         ))}
       </div>
+      <CardActions>
+        <Button className="btn-primary" onClick={() => ref.current?.showModal()}>
+          Aggiungi comunicazione
+        </Button>
+      </CardActions>
+      <AnnouncementModal ref={ref} addAnnouncement={addAnnouncement} />
     </>
   );
 }
@@ -60,81 +69,44 @@ const AnnouncementModal = forwardRef(function AnnouncementModal(
 ) {
   const { contest } = useAdmin();
 
-  const defaultAnnouncement = (): Announcement => ({
-    id: randomId(),
-    createdAt: new Date(),
-    contestIds: [contest.id],
-    level: "info",
-    title: "",
-    body: "",
-  });
-
-  const [announcement, setAnnouncement] = useState<Announcement>(defaultAnnouncement);
-
-  const setValue =
-    (key: keyof Announcement) =>
-    (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
-      setAnnouncement((prev) => ({ ...prev, [key]: e.target.value }));
-
-  const finalize = async () => {
-    setAnnouncement(defaultAnnouncement);
-    await addAnnouncement(announcement as Announcement);
-    if (ref && "current" in ref) {
-      ref.current?.close();
+  const finalize = async ({
+    level,
+    title,
+    body,
+  }: Pick<Announcement, "level" | "title" | "body">) => {
+    try {
+      await addAnnouncement({
+        id: randomId(),
+        createdAt: new Date(),
+        contestIds: [contest.id],
+        level,
+        title,
+        body,
+      });
+    } finally {
+      if (ref && "current" in ref) {
+        ref.current?.close();
+      }
     }
   };
 
   return (
     <Modal ref={ref} title="Aggiungi comunicazione">
-      <div className="flex flex-col gap-3">
-        <label className="form-control w-full">
-          <div className="label">
-            <span className="label-text">Priorità</span>
-          </div>
-          <select
-            name="priority"
-            className="select select-bordered"
-            value={announcement.level}
-            onChange={setValue("level")}>
-            <option value="info">Normale</option>
-            <option value="warning">Alta</option>
-          </select>
-        </label>
-
-        <label className="form-control w-full">
-          <div className="label">
-            <span className="label-text">Titolo</span>
-          </div>
-          <input
-            name="title"
-            type="text"
-            className="input input-bordered"
-            value={announcement.title}
-            onChange={setValue("title")}
-            placeholder="Inserisci il titolo"
-          />
-        </label>
-
-        <label className="form-control w-full">
-          <div className="label">
-            <span className="label-text">Messaggio</span>
-          </div>
-          <textarea
-            name="body"
-            className="textarea textarea-bordered"
-            rows={5}
-            value={announcement.body}
-            onChange={setValue("body")}
-            placeholder="Inserisci il messaggio"
-          />
-        </label>
-
-        <Buttons>
-          <Button className="btn-error" onClick={() => finalize()}>
-            Aggiungi
-          </Button>
-        </Buttons>
-      </div>
+      <Form onSubmit={finalize} className="!max-w-full">
+        <SelectField
+          field="level"
+          label="Priorità"
+          options={{ info: "Normale", warning: "Alta" }}
+        />
+        <TextField field="title" label="Titolo" placeholder="Inserisci il titolo" />
+        <TextAreaField
+          field="body"
+          label="Messaggio"
+          placeholder="Inserisci il messaggio"
+          rows={5}
+        />
+        <SubmitButton>Aggiungi</SubmitButton>
+      </Form>
     </Modal>
   );
 });

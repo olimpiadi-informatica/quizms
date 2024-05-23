@@ -1,12 +1,23 @@
 import { useRef } from "react";
 
-import { Card, CardBody, DateTime, Modal, WithinTimeRange } from "@olinfo/react-components";
+import {
+  Button,
+  Card,
+  CardActions,
+  CardBody,
+  DateTime,
+  Form,
+  FormButton,
+  Modal,
+  SubmitButton,
+  WithinTimeRange,
+} from "@olinfo/react-components";
 import { addMinutes, addSeconds, isSameDay, roundToNearestMinutes, subMinutes } from "date-fns";
 import { saveAs } from "file-saver";
 import { range } from "lodash-es";
 import { Link } from "wouter";
 
-import { Button, Buttons, Timer } from "~/components";
+import { Timer } from "~/components";
 import { randomToken } from "~/utils/random";
 
 import { Announcements } from "./dashboard-announcements";
@@ -18,10 +29,13 @@ function StartContestButton() {
 
   const modalRef = useRef<HTMLDialogElement>(null);
 
+  const close = () => modalRef.current?.close();
+
   const start = async () => {
     const token = await randomToken();
     const startingTime = roundToNearestMinutes(addSeconds(Date.now(), 3.5 * 60));
     await setParticipation({ ...participation, token, startingTime });
+    close();
   };
 
   return (
@@ -31,12 +45,12 @@ function StartContestButton() {
       </Button>
       <Modal ref={modalRef} title="Conferma">
         <p>Sei sicuro di voler iniziare la gara?</p>
-        <Buttons className="mt-3" showError>
-          <Button className="btn-info">Annulla</Button>
-          <Button className="btn-warning" onClick={start}>
-            Conferma
-          </Button>
-        </Buttons>
+        <Form onSubmit={start} className="!max-w-full">
+          <div className="flex flex-wrap justify-center gap-2">
+            <FormButton onClick={close}>Annulla</FormButton>
+            <SubmitButton className="btn-warning">Conferma</SubmitButton>
+          </div>
+        </Form>
       </Modal>
     </>
   );
@@ -46,8 +60,12 @@ function StopContestButton() {
   const { participation, setParticipation } = useTeacher();
   const modalRef = useRef<HTMLDialogElement>(null);
 
-  const undoContestStart = () =>
-    setParticipation({ ...participation, token: undefined, startingTime: undefined });
+  const close = () => modalRef.current?.close();
+
+  const undoContestStart = async () => {
+    await setParticipation({ ...participation, token: undefined, startingTime: undefined });
+    close();
+  };
 
   return (
     <>
@@ -56,12 +74,12 @@ function StopContestButton() {
       </Button>
       <Modal ref={modalRef} title="Conferma">
         <p>Sei sicuro di voler annullare l&apos;inizio della gara?</p>
-        <Buttons className="mt-1" showError>
-          <Button className="btn-info">Annulla</Button>
-          <Button className="btn-warning" onClick={undoContestStart}>
-            Conferma
-          </Button>
-        </Buttons>
+        <Form onSubmit={undoContestStart} className="!max-w-full">
+          <div className="flex flex-wrap justify-center gap-2">
+            <FormButton onClick={close}>Indietro</FormButton>
+            <SubmitButton className="btn-warning">Conferma</SubmitButton>
+          </div>
+        </Form>
       </Modal>
     </>
   );
@@ -153,9 +171,9 @@ export default function TeacherDashboard() {
             </div>
           )}
           {contest.hasPdf && (
-            <Buttons className="mt-2">
+            <CardActions>
               <DownloadPdfButton />
-            </Buttons>
+            </CardActions>
           )}
         </CardBody>
       </Card>
@@ -168,7 +186,7 @@ export default function TeacherDashboard() {
             ) : (
               <p>La gara non è ancora iniziata!</p>
             ))}
-          <Buttons className="mt-2">
+          <CardActions>
             {contest.hasOnline && (
               <WithinTimeRange start={contest.contestWindowStart} end={contest.contestWindowEnd}>
                 {participation.startingTime ? (
@@ -188,10 +206,10 @@ export default function TeacherDashboard() {
                 <StopContestButton />
               </WithinTimeRange>
             )}
-            <Link className="btn btn-info" href="/students/">
+            <Link className="btn btn-primary" href="/students/">
               Gestisci studenti e risposte
             </Link>
-          </Buttons>
+          </CardActions>
         </CardBody>
       </Card>
       {contest.hasOnline && (

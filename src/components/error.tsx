@@ -1,9 +1,8 @@
 import { useEffect } from "react";
 
+import { Button } from "@olinfo/react-components";
 import { RotateCw } from "lucide-react";
 import { FallbackProps } from "react-error-boundary";
-
-import { Button, Buttons } from "~/components";
 
 export function Error({ error, resetErrorBoundary }: Partial<FallbackProps>) {
   useEffect(() => {
@@ -18,15 +17,12 @@ export function Error({ error, resetErrorBoundary }: Partial<FallbackProps>) {
   }, [resetErrorBoundary]);
 
   return (
-    <div className="flex w-full grow flex-col justify-center">
+    <div className="flex w-full grow flex-col items-center justify-center gap-4">
       <p className="break-words text-center text-error">Errore: {error.message}</p>
       {resetErrorBoundary && (
-        <Buttons className="mt-4">
-          <Button className="btn-error" onClick={resetErrorBoundary}>
-            <RotateCw />
-            Ricarica
-          </Button>
-        </Buttons>
+        <Button className="btn-error" icon={RotateCw} onClick={() => resetErrorBoundary()}>
+          Ricarica
+        </Button>
       )}
     </div>
   );

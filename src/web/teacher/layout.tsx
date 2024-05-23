@@ -1,6 +1,7 @@
 import { ReactNode, Suspense, useEffect, useRef } from "react";
 
 import {
+  Button,
   Dropdown,
   DropdownButton,
   DropdownMenu,
@@ -12,7 +13,7 @@ import { LogOut } from "lucide-react";
 import { ErrorBoundary } from "react-error-boundary";
 import { Link, useLocation, useRoute } from "wouter";
 
-import { Button, Error, Loading } from "~/components";
+import { Error, Loading } from "~/components";
 import { Contest, Participation } from "~/models";
 
 type Props = {

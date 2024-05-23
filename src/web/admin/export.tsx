@@ -1,10 +1,9 @@
 import { Ref, forwardRef, useRef } from "react";
 
-import { Modal } from "@olinfo/react-components";
+import { Button, Modal } from "@olinfo/react-components";
 import { DocumentSnapshot, Firestore, FirestoreDataConverter, getDocs } from "firebase/firestore";
 import { AlertTriangle } from "lucide-react";
 
-import { Button, Buttons } from "~/components";
 import { useDb } from "~/web/firebase/common/base-login";
 import query, { QueryOption } from "~/web/firebase/common/query";
 
@@ -23,9 +22,9 @@ export default function Export<T>(props: Props<T>) {
 
   return (
     <>
-      <button className="btn btn-error" onClick={() => ref.current?.showModal()}>
+      <Button className="btn-primary" onClick={() => ref.current?.showModal()}>
         Esporta {props.label}
-      </button>
+      </Button>
       <ExportModal ref={ref} {...props} />
     </>
   );
@@ -47,30 +46,27 @@ const ExportModal = forwardRef(function StudentExportModal(
 
   return (
     <Modal ref={ref} title={`Esporta ${label}`}>
-      <div className="flex flex-col gap-3">
-        {window.showSaveFilePicker === undefined ? (
-          <div className="flex items-center gap-3">
-            <AlertTriangle size={20} className="flex-none text-warning" />
-            <span>
-              Il tuo browser non supporta l&apos;esportazione dei dati. Usa un browser Chrome o
-              Edge.
-            </span>
+      {window.showSaveFilePicker === undefined ? (
+        <div className="flex items-center gap-3">
+          <AlertTriangle size={20} className="flex-none text-warning" />
+          <span>
+            Il tuo browser non supporta l&apos;esportazione dei dati. Usa un browser Chrome o Edge.
+          </span>
+        </div>
+      ) : (
+        <>
+          <div>
+            Stai per esportare i dati di {description} della gara <b>{contest.name}</b>. Questa
+            operazione esegue un grande numero di query al database che richiederà del tempo e potrà
+            incidere sulla fatturazione del progetto.
           </div>
-        ) : (
-          <>
-            <div>
-              Stai per esportare i dati di {description} della gara <b>{contest.name}</b>. Questa
-              operazione esegue un grande numero di query al database che richiederà del tempo e
-              potrà incidere sulla fatturazione del progetto.
-            </div>
-            <Buttons>
-              <Button className="btn-error" onClick={onExport}>
-                Esporta
-              </Button>
-            </Buttons>
-          </>
-        )}
-      </div>
+          <div className="mt-4 flex flex-wrap justify-center gap-2">
+            <Button className="btn-primary" onClick={onExport}>
+              Esporta
+            </Button>
+          </div>
+        </>
+      )}
     </Modal>
   );
 });

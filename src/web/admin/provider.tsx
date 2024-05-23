@@ -29,9 +29,9 @@ export function AdminProvider({ name, contests, setContest, logout }: AdminProvi
       <Route path="/">
         <div className="flex w-full grow flex-col items-center justify-center gap-4">
           <p className="text-2xl">Seleziona una gara</p>
-          <div className="flex flex-wrap justify-center gap-4">
+          <div className="flex flex-wrap justify-center gap-2">
             {contests.map((c) => (
-              <Link key={c.id} className="btn btn-info" href={`/${c.id}/`}>
+              <Link key={c.id} className="btn btn-primary" href={`/${c.id}/`}>
                 {c.name}
               </Link>
             ))}

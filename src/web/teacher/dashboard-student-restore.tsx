@@ -1,10 +1,9 @@
-import { Suspense, useRef, useState } from "react";
+import { Suspense, useMemo, useRef } from "react";
 
-import { Modal } from "@olinfo/react-components";
+import { Form, Modal, NumberField, SubmitButton } from "@olinfo/react-components";
 import { groupBy, sortBy } from "lodash-es";
 import { Check, X } from "lucide-react";
 
-import { Button, Buttons } from "~/components";
 import { StudentRestore } from "~/models";
 import { hash } from "~/utils/random";
 
@@ -20,16 +19,14 @@ function StudentRestoreEntry({
   reject: (studentId: string) => Promise<void>;
 }) {
   const modalRef = useRef<HTMLDialogElement>(null);
-  const [code, setCode] = useState("");
 
-  const targetCodes = studentRestore.map((request) =>
-    `${hash(request.id) % 1000}`.padStart(3, "0"),
+  const targetCodes = useMemo(
+    () => new Set(studentRestore.map((request) => hash(request.id) % 1000)),
+    [studentRestore],
   );
 
-  const approveRequest = async () => {
-    const request = studentRestore.find(
-      (request) => String(hash(request.id) % 1000).padStart(3, "0") === code,
-    );
+  const approveRequest = async ({ restoreCode }: { restoreCode: number }) => {
+    const request = studentRestore.find((request) => hash(request.id) % 1000 === restoreCode);
     if (request) {
       await approve(request);
     }
@@ -59,27 +56,16 @@ function StudentRestoreEntry({
             {studentRestore[0].name} {studentRestore[0].surname} sta cercando di accedere alla gara.
             Per approvarlo, inserisci il codice di conferma che gli è stato mostrato.
           </p>
-          <label className="form-control mt-3 w-full">
-            <div className="label">
-              <span className="label-text">Codice di conferma</span>
-            </div>
-            <input
-              id={`restore-${studentRestore[0].studentId}`}
-              type="number"
+          <Form onSubmit={approveRequest} className="!max-w-full">
+            <NumberField
+              field="restoreCode"
+              label="Codice di conferma"
               placeholder="Inserisci codice"
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
-              className="input input-bordered w-full"
             />
-          </label>
-          <Buttons className="mt-3">
-            <Button
-              className="btn-error"
-              onClick={approveRequest}
-              disabled={!targetCodes.includes(code)}>
-              Approva
-            </Button>
-          </Buttons>
+            {({ restoreCode }) => (
+              <SubmitButton disabled={!targetCodes.has(restoreCode ?? -1)}>Approva</SubmitButton>
+            )}
+          </Form>
         </Modal>
       </td>
     </tr>
@@ -110,7 +96,7 @@ function StudentRestoreListInner() {
 
 export function StudentRestoreList() {
   return (
-    <div className="flex h-full flex-col items-start gap-3 overflow-auto rounded-lg border border-base-content/15">
+    <div className="h-full overflow-auto rounded-lg border border-base-content/15">
       <table className="table table-pin-rows">
         <thead>
           <tr>

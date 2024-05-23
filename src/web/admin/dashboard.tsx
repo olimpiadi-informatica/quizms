@@ -1,8 +1,8 @@
 import { Suspense } from "react";
 
-import { Card, CardBody } from "@olinfo/react-components";
+import { Card, CardActions, CardBody } from "@olinfo/react-components";
 
-import { Buttons, Loading } from "~/components";
+import { Loading } from "~/components";
 import { Participation, Student } from "~/models";
 import { participationConverter, studentConverter } from "~/web/firebase/common/converters";
 import { useCount } from "~/web/firebase/hooks/count";
@@ -48,7 +48,7 @@ export default function Dashboard() {
       )}
       <Card>
         <CardBody title="Esportazione">
-          <Buttons>
+          <CardActions>
             <Export
               label="scuole"
               description="tutte le scuole"
@@ -66,7 +66,7 @@ export default function Dashboard() {
                 group: true,
               }}
             />
-          </Buttons>
+          </CardActions>
         </CardBody>
       </Card>
     </div>

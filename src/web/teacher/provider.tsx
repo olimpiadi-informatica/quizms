@@ -79,9 +79,9 @@ export function TeacherProvider({
       <Route path="/">
         <div className="flex w-full grow flex-col items-center justify-center gap-4">
           <p className="text-2xl">Seleziona una gara</p>
-          <div className="flex flex-wrap justify-center gap-4">
+          <div className="flex flex-wrap justify-center gap-2">
             {participations.map((p) => (
-              <Link key={p.id} className="btn btn-info" href={`/${p.contestId}/`}>
+              <Link key={p.id} className="btn btn-primary" href={`/${p.contestId}/`}>
                 {contests.find((c) => c.id === p.contestId)?.name}
               </Link>
             ))}

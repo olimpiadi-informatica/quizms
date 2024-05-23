@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { Code, Modal } from "@olinfo/react-components";
+import { Button, Code, Modal } from "@olinfo/react-components";
 import clsx from "clsx";
 import { saveAs } from "file-saver";
 import { Copy, Download } from "lucide-react";
@@ -52,11 +52,11 @@ export default function Debug({ blocks, js, svg }: Props) {
 
   return (
     <>
-      <button className="btn btn-error" onClick={() => ref.current?.showModal()}>
+      <Button className="btn-error" onClick={() => ref.current?.showModal()}>
         Debug
-      </button>
+      </Button>
       <Modal ref={ref} title="Opzioni di debug" className="max-w-3xl">
-        <div className="not-prose flex items-stretch justify-between gap-3">
+        <div className="not-prose flex items-stretch justify-between gap-4">
           <div role="tablist" className="tabs-boxed tabs">
             {Object.entries(formats).map(([f, { label }]) => (
               <button
@@ -70,29 +70,31 @@ export default function Debug({ blocks, js, svg }: Props) {
             ))}
           </div>
           {format !== "svg" && (
-            <div className="flex gap-3">
+            <div className="flex gap-2">
               <div className={clsx("tooltip-open", copyTooltip && "tooltip")} data-tip="Copiato!">
-                <button
-                  type="button"
-                  className="!btn !btn-error"
-                  onClick={() => copy()}
-                  data-tip="Copiato!">
-                  <Copy /> Copia
-                </button>
+                <Button className="btn-error" icon={Copy} onClick={copy}>
+                  Copia
+                </Button>
               </div>
-              <button
-                type="button"
-                className="!btn !btn-error"
-                onClick={() =>
-                  saveAs(new Blob([code], { type: formats[format].mime }), `blocks.${format}`)
-                }>
-                <Download /> Salva
-              </button>
+              <Button
+                className="btn-error"
+                icon={Download}
+                onClick={() => {
+                  saveAs(new Blob([code], { type: formats[format].mime }), `blocks.${format}`);
+                }}>
+                Salva
+              </Button>
             </div>
           )}
         </div>
         <div role="tabpanel" className="mt-3 text-sm *:overflow-x-auto">
-          {format !== "svg" && <Code code={code} lang={format} />}
+          {format !== "svg" && (
+            <Code
+              code={code}
+              lang={format}
+              className="overflow-hidden rounded-box border border-base-content/40 text-sm *:overflow-x-auto *:p-4"
+            />
+          )}
           {format === "svg" && (
             <BlocksCanvas uri={`data:image/svg+xml,${encodeURIComponent(svg)}`} />
           )}

@@ -1,11 +1,10 @@
-import { Ref, forwardRef, useRef, useState } from "react";
+import { Ref, forwardRef } from "react";
 
-import { Modal } from "@olinfo/react-components";
+import { Form, Modal, SingleFileField, SubmitButton } from "@olinfo/react-components";
 import { ArrowUpFromLine } from "lucide-react";
 import { parse as parseCSV } from "papaparse";
 import z from "zod";
 
-import { Button, Buttons } from "~/components";
 import {
   Contest,
   Participation,
@@ -22,29 +21,22 @@ import { useTeacher, useTeacherStudents } from "./provider";
 const ImportModal = forwardRef(function ImportModal(_props, ref: Ref<HTMLDialogElement> | null) {
   const { contest, participation } = useTeacher();
 
-  const inputRef = useRef<HTMLInputElement>(null);
-
   const labels = contest.personalInformation.map((field) => field.label);
 
   const dates = contest.personalInformation
     .filter((field) => field.type === "date")
     .map((field) => field.label.toLowerCase());
 
-  const [file, setFile] = useState<File>();
-
   const { variants } = useTeacher();
   const [, setStudent] = useTeacherStudents();
 
-  const onClick = async () => {
+  const submit = async ({ file }: { file: File }) => {
     try {
-      const text = await file?.text();
-      await importStudents(text ?? "", contest, variants, participation, setStudent);
+      const text = await file.text();
+      await importStudents(text, contest, variants, participation, setStudent);
+    } finally {
       if (ref && "current" in ref) {
         ref.current?.close();
-      }
-    } finally {
-      if (inputRef.current) {
-        inputRef.current.value = "";
       }
     }
   };
@@ -81,24 +73,10 @@ const ImportModal = forwardRef(function ImportModal(_props, ref: Ref<HTMLDialogE
             <span className="whitespace-nowrap">14/03/{new Date().getFullYear()}</span>.
           </p>
         )}
-        <div className="mt-5 flex flex-col items-center gap-3">
-          <input
-            ref={inputRef}
-            type="file"
-            className="file-input file-input-bordered file-input-primary max-w-full"
-            accept="text/csv"
-            onChange={(e) => setFile(e.target.files?.[0])}
-          />
-          <Buttons showError>
-            <Button
-              className="btn-primary"
-              icon={ArrowUpFromLine}
-              onClick={onClick}
-              disabled={!file}>
-              Importa
-            </Button>
-          </Buttons>
-        </div>
+        <Form onSubmit={submit} className="!max-w-full">
+          <SingleFileField field="file" label="File CSV" accept="text/csv" />
+          <SubmitButton icon={ArrowUpFromLine}>Importa</SubmitButton>
+        </Form>
       </div>
     </Modal>
   );

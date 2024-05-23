@@ -45,8 +45,9 @@ const remarkHighlight: Plugin<[], Root> = () => {
           jsxAttribute(
             "className",
             clsx(
-              "text-sm",
-              code.type === "inlineCode" && "overflow-x-auto border border-base-content/40 p-4",
+              "not-prose p-0",
+              code.type === "code" &&
+                "overflow-hidden rounded-box border border-base-content/40 text-sm *:overflow-x-auto *:p-4",
             ),
           ),
         ],

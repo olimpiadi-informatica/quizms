@@ -7,12 +7,21 @@ import type {
   IFilterOptionDef,
   ITooltipParams,
 } from "@ag-grid-community/core";
-import { Modal, useIsAfter } from "@olinfo/react-components";
+import {
+  Button,
+  CheckboxField,
+  Form,
+  FormButton,
+  Modal,
+  SubmitButton,
+  TextField,
+  useIsAfter,
+} from "@olinfo/react-components";
 import { addMinutes, isEqual as isEqualDate } from "date-fns";
 import { cloneDeep, deburr, isString, lowerFirst, omit, set, sumBy } from "lodash-es";
 import { AlertTriangle, Download, FileCheck, Upload, Users } from "lucide-react";
 
-import { Button, Buttons, Loading } from "~/components";
+import { Loading } from "~/components";
 import {
   Contest,
   Student,
@@ -41,7 +50,7 @@ export default function TeacherTable() {
 
   return (
     <>
-      <div className="mb-4 flex flex-none justify-start gap-4">
+      <div className="mb-3 flex flex-none justify-start gap-2">
         <Suspense>
           <div className="flex h-10 items-center gap-2 rounded-btn bg-primary px-3 text-primary-content">
             <Users />
@@ -50,24 +59,26 @@ export default function TeacherTable() {
           </div>
         </Suspense>
         {contest.allowStudentImport && !participation.finalized && (
-          <button
-            className="btn btn-primary btn-sm h-10"
+          <Button
+            className="btn-primary btn-sm h-10"
+            icon={Upload}
             onClick={() => importRef.current?.showModal()}>
-            <Upload />
             <div className="hidden md:block">Importa studenti</div>
-          </button>
+          </Button>
         )}
-        <button className="btn btn-primary btn-sm h-10" onClick={() => exportRef.current?.click()}>
-          <Download />
+        <Button
+          className="btn-primary btn-sm h-10"
+          icon={Download}
+          onClick={() => exportRef.current?.click()}>
           <div className="hidden md:block">Esporta</div>
-        </button>
+        </Button>
         {!participation.finalized && (
-          <button
-            className="btn btn-primary btn-sm h-10"
+          <Button
+            className="btn-primary btn-sm h-10"
+            icon={FileCheck}
             onClick={() => finalizeRef.current?.showModal()}>
-            <FileCheck />
             <div className="hidden md:block">Finalizza</div>
-          </button>
+          </Button>
         )}
         <FinalizeModal key={contest.id} ref={finalizeRef} />
       </div>
@@ -95,7 +106,6 @@ const FinalizeModal = forwardRef(function FinalizeModal(
 ) {
   const { contest, participation, variants, setParticipation } = useTeacher();
   const [students] = useTeacherStudents();
-  const [confirm, setConfirm] = useState("");
 
   const error = useMemo(() => {
     const prevStudents = new Set<string>();
@@ -137,13 +147,23 @@ const FinalizeModal = forwardRef(function FinalizeModal(
 
   const correctConfirm = "tutti gli studenti sono stati correttamente inseriti";
 
+  const close = () => {
+    if (ref && "current" in ref) {
+      ref.current?.close();
+    }
+  };
+
   const finalize = async () => {
-    await setParticipation({ ...participation, finalized: true });
+    try {
+      await setParticipation({ ...participation, finalized: true });
+    } finally {
+      close();
+    }
   };
 
   return (
     <Modal ref={ref} title="Finalizza scuola">
-      {error && (
+      {error ? (
         <div className="prose">
           <p>Non è possibile finalizzare la scuola a causa del seguente errore:</p>
           <p className="flex justify-center rounded-box bg-base-200 px-3 py-2">{error}</p>
@@ -154,41 +174,39 @@ const FinalizeModal = forwardRef(function FinalizeModal(
             </p>
           )}
         </div>
-      )}
-      {!error && (
-        <div className="prose">
-          <p>
-            <strong className="text-error">Attenzione:</strong> questa operazione è irreversibile.
-          </p>
-          <p>
-            Finalizzando <b>non</b> sarà più possibile{" "}
-            {contest.allowStudentImport && (
-              <>
-                <b>aggiungere</b> nuovi studenti o{" "}
-              </>
-            )}
-            <b>modificare</b> i dati degli studenti in questa scuola per la gara{" "}
-            <i>{contest?.name}</i>.
-          </p>
-          <p>
-            Se hai capito e sei d&apos;accordo, scrivi &ldquo;<i>{correctConfirm}</i>&rdquo;.
-          </p>
-          <p>
-            <input
-              type="text"
-              className="input input-bordered w-full px-5"
-              value={confirm}
-              onChange={(e) => setConfirm(e.target.value)}
-            />
-          </p>
-          <Buttons>
-            <Button className="btn-neutral">Annulla</Button>
-            <Button className="btn-error" onClick={finalize} disabled={confirm !== correctConfirm}>
-              <AlertTriangle />
-              Conferma
-            </Button>
-          </Buttons>
-        </div>
+      ) : (
+        <Form onSubmit={finalize} className="!max-w-full">
+          <div className="prose">
+            <p>
+              <strong className="text-error">Attenzione:</strong> questa operazione è irreversibile.
+            </p>
+            <p>
+              Finalizzando <b>non</b> sarà più possibile{" "}
+              {contest.allowStudentImport && (
+                <>
+                  <b>aggiungere</b> nuovi studenti o{" "}
+                </>
+              )}
+              <b>modificare</b> i dati degli studenti in questa scuola per la gara{" "}
+              <i>{contest?.name}</i>.
+            </p>
+            <p>
+              Se hai capito e sei d&apos;accordo, scrivi &ldquo;<i>{correctConfirm}</i>&rdquo;.
+            </p>
+          </div>
+          <TextField field="confirm" label="Conferma" placeholder="tutti gli studenti..." />
+          {({ confirm }) => (
+            <div className="flex flex-wrap justify-center gap-2">
+              <FormButton onClick={close}>Annulla</FormButton>
+              <SubmitButton
+                className="btn-error"
+                icon={AlertTriangle}
+                disabled={confirm !== correctConfirm}>
+                Conferma
+              </SubmitButton>
+            </div>
+          )}
+        </Form>
       )}
     </Modal>
   );
@@ -200,13 +218,16 @@ const DeleteModal = forwardRef(function DeleteModal(
   { studentName }: { studentName: string },
   ref: Ref<HTMLDialogElement> | null,
 ) {
-  const [checked, setChecked] = useState(sessionStorage.getItem(deleteConfirmStorageKey) === "1");
-
-  const confirm = () => {
+  const close = (value: string) => {
     if (ref && "current" in ref && ref.current) {
-      ref.current.returnValue = "1";
+      ref.current.returnValue = value;
       ref.current.close();
     }
+  };
+
+  const confirm = async ({ notAgain }: { notAgain: boolean }) => {
+    sessionStorage.setItem(deleteConfirmStorageKey, notAgain ? "1" : "0");
+    close("1");
   };
 
   return (
@@ -225,26 +246,13 @@ const DeleteModal = forwardRef(function DeleteModal(
           testata della colonna &ldquo;<i>Cancella</i>&rdquo; e scegliendo &ldquo;
           <i>Seleziona tutti</i>&rdquo; come filtro.
         </p>
-        <div className="form-control mb-2">
-          <label className="label cursor-pointer justify-start gap-3">
-            <input
-              type="checkbox"
-              className="checkbox"
-              checked={checked}
-              onChange={(e) => {
-                setChecked(e.target.checked);
-                sessionStorage.setItem(deleteConfirmStorageKey, String(+e.target.checked));
-              }}
-            />
-            <span className="label-text">Non mostrarmi più questo pop-up</span>
-          </label>
-        </div>
-        <Buttons>
-          <Button className="btn-info">Annulla</Button>
-          <Button className="btn-warning" onClick={() => confirm()}>
-            Continua
-          </Button>
-        </Buttons>
+        <Form onSubmit={confirm} className="!max-w-full">
+          <CheckboxField field="notAgain" label="Non mostrare più questo pop-up" />
+          <div className="flex flex-wrap justify-center gap-2">
+            <FormButton onClick={() => close("0")}>Annulla</FormButton>
+            <SubmitButton className="btn-warning">Continua</SubmitButton>
+          </div>
+        </Form>
       </div>
     </Modal>
   );

@@ -11,10 +11,9 @@ import {
   useState,
 } from "react";
 
-import { Modal } from "@olinfo/react-components";
+import { Button, Modal } from "@olinfo/react-components";
 import { noop, sumBy } from "lodash-es";
 
-import { Button, Buttons } from "~/components";
 import { Schema, problemScore, score } from "~/models";
 import { randomId } from "~/utils/random";
 import { useStudent } from "~/web/student/provider";
@@ -50,8 +49,8 @@ export function Contest({ children }: { children: ReactNode }) {
   }, [terminated, resultShown]);
 
   if (import.meta.env.QUIZMS_MODE === "training" && !student.startedAt) {
-    const start = () => {
-      void setStudent({
+    const start = async () => {
+      await setStudent({
         ...student,
         startedAt: new Date(),
         variant: import.meta.env.PROD ? randomId() : "",
@@ -60,11 +59,9 @@ export function Contest({ children }: { children: ReactNode }) {
 
     return (
       <div className="flex h-[50vh] flex-col justify-center">
-        <Buttons>
-          <Button className="btn-success btn-lg" onClick={start}>
-            Inizia
-          </Button>
-        </Buttons>
+        <Button className="btn-success btn-lg" onClick={start}>
+          Inizia
+        </Button>
       </div>
     );
   }
