@@ -20,10 +20,8 @@ import {
 import { Loading } from "~/components";
 import { useContest } from "~/mdx/components/contest";
 import { useProblem } from "~/mdx/components/problem";
-import validate from "~/utils/validate";
 import { useStudent } from "~/web/student/provider";
 
-import { customBlockSchema } from "./custom-block";
 import Debug from "./debug";
 import { defaultInitialBlocks, defaultToolbox } from "./default-blocks";
 import useExecutor from "./executor";
@@ -114,14 +112,6 @@ export default function Workspace({
     [variableMappings, globalScope],
   );
 
-  const validatedCustomBlocks = useMemo(
-    () =>
-      validate(customBlockSchema.array(), customBlocks, {
-        prefix: "Invalid custom block definition",
-      }),
-    [customBlocks],
-  );
-
   const send = useIcp(iframe?.contentWindow, (data: any) => {
     switch (data.cmd) {
       case "init": {
@@ -130,7 +120,7 @@ export default function Workspace({
           toolbox: toolbox ?? defaultToolbox,
           initialBlocks: blocks,
           debug,
-          customBlocks: validatedCustomBlocks,
+          customBlocks,
           readonly: terminated,
         });
         break;
@@ -246,18 +236,18 @@ export default function Workspace({
               <div className="flex items-center gap-3">
                 <p>Livello {index + 1}</p>
                 {editing ? (
-                  <HelpCircle size={32} />
+                  <HelpCircle size={24} />
                 ) : correct ? (
-                  <CheckCircle2 size={32} className="fill-success stroke-success-content" />
+                  <CheckCircle2 size={24} className="fill-success stroke-success-content" />
                 ) : (
-                  <XCircle size={32} className="fill-error stroke-error-content" />
+                  <XCircle size={24} className="fill-error stroke-error-content" />
                 )}
               </div>
             </button>
           ))}
         </div>
-        <div className="relative flex flex-col overflow-hidden shadow-xl">
-          <div className="overflow-auto rounded-xl border-2 border-[#c6c6c6] bg-white [color-scheme:light]">
+        <div className="relative flex flex-col overflow-hidden rounded-xl border-2 border-[#c6c6c6] shadow-xl">
+          <div className="overflow-auto bg-white [color-scheme:light]">
             {Visualizer && globalScope?.hiddenState && (
               <Visualizer
                 variables={{ blocklyVariables, hiddenState: globalScope.hiddenState, msg }}

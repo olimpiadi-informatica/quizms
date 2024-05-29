@@ -11,9 +11,9 @@ javascriptGenerator.addReservedWords("exit,highlightBlock,loopTrap,hiddenState")
 console.log("Blockly version:", BlocklyCore.VERSION);
 
 function replaceArgs(block: Block, generator: Generator, js: string, args?: CustomBlockArg[]) {
-  return js.replaceAll(/%(\d+)/g, (_, n) => {
-    const arg = args?.[Number(n)];
-    if (!arg) throw new Error(`Missing argument ${n} for block ${block.type}`);
+  return js.replaceAll(/_ARG\d+/g, (name) => {
+    const arg = args?.find((b) => b.name === name);
+    if (!arg) throw new Error(`Missing argument ${name} for block ${block.type}`);
     const code = generator.valueToCode(block, arg.name, generator.ORDER_NONE);
     if (!code) return 'exit(false, "il blocco ha bisogno di un parametro")';
     return code;
@@ -28,10 +28,7 @@ export function initGenerator(workspace: Workspace, customBlocks?: CustomBlock[]
     for (const customBlock of customBlocks) {
       javascriptGenerator.forBlock[customBlock.type] = (block: Block, generator: Generator) => {
         return Array.isArray(customBlock.js)
-          ? [
-              replaceArgs(block, generator, customBlock.js[0], customBlock.args0),
-              generator[customBlock.js[1]],
-            ]
+          ? [replaceArgs(block, generator, customBlock.js[0], customBlock.args0), customBlock.js[1]]
           : replaceArgs(block, generator, customBlock.js, customBlock.args0);
       };
     }

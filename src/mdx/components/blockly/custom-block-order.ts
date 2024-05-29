@@ -1,120 +1,119 @@
 import { Expression, LogicalOperator, UnaryOperator } from "acorn";
+import blocklyJavascript from "blockly/javascript.js";
 import { BinaryOperator, UpdateOperator } from "estree";
 
-export default function order(expression: Expression): `ORDER_${string}` | undefined {
+const gen = blocklyJavascript.javascriptGenerator;
+
+export default function order(expression: Expression): number {
   switch (expression.type) {
     case "ArrayExpression":
-      return "ORDER_ATOMIC";
+      return gen.ORDER_ATOMIC;
     case "AssignmentExpression":
-      return "ORDER_ASSIGNMENT";
+      return gen.ORDER_ASSIGNMENT;
     case "BinaryExpression":
       return binaryOperatorOrder(expression.operator);
     case "CallExpression":
-      return "ORDER_FUNCTION_CALL";
+      return gen.ORDER_FUNCTION_CALL;
     case "ConditionalExpression":
-      return "ORDER_CONDITIONAL";
+      return gen.ORDER_CONDITIONAL;
     case "FunctionExpression":
-      return "ORDER_ATOMIC";
+      return gen.ORDER_ATOMIC;
     case "Identifier":
-      return "ORDER_ATOMIC";
+      return gen.ORDER_ATOMIC;
     case "Literal":
-      return "ORDER_ATOMIC";
+      return gen.ORDER_ATOMIC;
     case "LogicalExpression":
       return binaryOperatorOrder(expression.operator);
     case "MemberExpression":
-      return "ORDER_MEMBER";
+      return gen.ORDER_MEMBER;
     case "NewExpression":
-      return "ORDER_NEW";
+      return gen.ORDER_NEW;
     case "ObjectExpression":
-      return "ORDER_ATOMIC";
+      return gen.ORDER_ATOMIC;
     case "ParenthesizedExpression":
       throw new Error("Expression must not be wrapper in parentheses");
     case "SequenceExpression":
-      return "ORDER_COMMA";
+      return gen.ORDER_COMMA;
     case "ThisExpression":
-      return "ORDER_ATOMIC";
+      return gen.ORDER_ATOMIC;
     case "UnaryExpression":
       return unaryOperatorOrder(expression.operator);
     case "UpdateExpression":
       return unaryOperatorOrder(expression.operator);
     case "YieldExpression":
-      return "ORDER_YIELD";
+      return gen.ORDER_YIELD;
     default:
       throw new Error(`Unsupported expression: ${expression.type}`);
   }
 }
 
-function unaryOperatorOrder(
-  operator: UnaryOperator | UpdateOperator,
-): `ORDER_${string}` | undefined {
+function unaryOperatorOrder(operator: UnaryOperator | UpdateOperator): number {
   switch (operator) {
     case "delete":
-      return "ORDER_DELETE";
+      return gen.ORDER_DELETE;
     case "void":
-      return "ORDER_VOID";
+      return gen.ORDER_VOID;
     case "typeof":
-      return "ORDER_TYPEOF";
+      return gen.ORDER_TYPEOF;
     case "+":
-      return "ORDER_UNARY_PLUS";
+      return gen.ORDER_UNARY_PLUS;
     case "-":
-      return "ORDER_UNARY_NEGATION";
+      return gen.ORDER_UNARY_NEGATION;
     case "~":
-      return "ORDER_BITWISE_NOT";
+      return gen.ORDER_BITWISE_NOT;
     case "!":
-      return "ORDER_LOGICAL_NOT";
+      return gen.ORDER_LOGICAL_NOT;
     case "++":
-      return "ORDER_INCREMENT";
+      return gen.ORDER_INCREMENT;
     case "--":
-      return "ORDER_DECREMENT";
+      return gen.ORDER_DECREMENT;
     default:
       throw new Error(`Unsupported operator: ${operator}`);
   }
 }
 
-function binaryOperatorOrder(
-  operator: BinaryOperator | LogicalOperator,
-): `ORDER_${string}` | undefined {
+function binaryOperatorOrder(operator: BinaryOperator | LogicalOperator): number {
   switch (operator) {
     case "&&":
-      return "ORDER_LOGICAL_AND";
+      return gen.ORDER_LOGICAL_AND;
     case "||":
-      return "ORDER_LOGICAL_OR";
+      return gen.ORDER_LOGICAL_OR;
     case "==":
     case "!=":
     case "===":
     case "!==":
-      return "ORDER_EQUALITY";
+      return gen.ORDER_EQUALITY;
     case "<":
     case "<=":
     case ">":
     case ">=":
-      return "ORDER_RELATIONAL";
+      return gen.ORDER_RELATIONAL;
     case "<<":
     case ">>":
     case ">>>":
-      return "ORDER_BITWISE_SHIFT";
+      return gen.ORDER_BITWISE_SHIFT;
     case "+":
-      return "ORDER_ADDITION";
+      return gen.ORDER_ADDITION;
     case "-":
-      return "ORDER_SUBTRACTION";
+      return gen.ORDER_SUBTRACTION;
     case "*":
-      return "ORDER_MULTIPLICATION";
+      return gen.ORDER_MULTIPLICATION;
     case "/":
-      return "ORDER_DIVISION";
+      return gen.ORDER_DIVISION;
     case "%":
-      return "ORDER_MODULUS";
+      return gen.ORDER_MODULUS;
     case "**":
-      return "ORDER_EXPONENTIATION";
+      return gen.ORDER_EXPONENTIATION;
     case "|":
-      return "ORDER_BITWISE_OR";
+      return gen.ORDER_BITWISE_OR;
     case "^":
-      return "ORDER_BITWISE_XOR";
+      return gen.ORDER_BITWISE_XOR;
     case "&":
-      return "ORDER_BITWISE_AND";
+      return gen.ORDER_BITWISE_AND;
     case "in":
-      return "ORDER_IN";
+      return gen.ORDER_IN;
     case "instanceof":
-      return "ORDER_INSTANCEOF";
+      return gen.ORDER_INSTANCEOF;
     default:
       throw new Error(`Unsupported operator: ${operator}`);
   }

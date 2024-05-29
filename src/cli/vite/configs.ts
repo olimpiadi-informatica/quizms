@@ -4,7 +4,6 @@ import { fileURLToPath } from "node:url";
 
 import { CompileOptions as MdxOptions } from "@mdx-js/mdx";
 import mdxPlugin from "@mdx-js/rollup";
-import yaml from "@modyfi/vite-plugin-yaml";
 import react from "@vitejs/plugin-react-swc";
 import pc from "picocolors";
 import { InlineConfig } from "vite";
@@ -13,6 +12,7 @@ import inspect from "vite-plugin-inspect";
 import { mdxOptions } from "~/mdx/plugins";
 import { fatal, info, warning } from "~/utils/logs";
 
+import blocklyBlocks from "./blockly-blocks";
 import blocklyMedia from "./blockly-media";
 import iframe from "./iframe";
 import images from "./images";
@@ -52,6 +52,7 @@ export default function configs(
       "process.env.NODE_ENV": JSON.stringify(mode),
     },
     plugins: [
+      blocklyBlocks(),
       blocklyMedia(),
       iframe(),
       images(),
@@ -61,7 +62,6 @@ export default function configs(
       react({ plugins: swcPlugins }),
       routes(),
       resolveContests(),
-      yaml(),
     ],
     build: {
       rollupOptions: {
