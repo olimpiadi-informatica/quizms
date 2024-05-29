@@ -5,18 +5,19 @@ import {
   memo,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
 } from "react";
 
-import { defer, range } from "lodash-es";
+import { range } from "lodash-es";
 
 import { hash } from "~/utils/random";
 import { useStudent } from "~/web/student/provider";
 
 type StatementProps = {
   variant: () => number;
-  setVariantCount: (count: number) => void;
+  useVariantCount: (count: number) => void;
 };
 
 type ProblemProps = {
@@ -47,14 +48,9 @@ export function Problem({ id, points, statement }: ProblemProps) {
   );
 
   const getVariant = useCallback(() => variant, [variant]);
-  const setVariantCountOnce = useCallback(
-    (count: number) => {
-      if (count && count !== variantCount) {
-        defer(() => setVariantCount(count));
-      }
-    },
-    [variantCount],
-  );
+  const useVariantCount = (count: number) => {
+    useEffect(() => setVariantCount(count), [count]);
+  };
 
   const Statement = useMemo(() => memo(statement), [statement]);
 
@@ -75,7 +71,7 @@ export function Problem({ id, points, statement }: ProblemProps) {
             </select>
           </div>
         )}
-        <Statement variant={getVariant} setVariantCount={setVariantCountOnce} />
+        <Statement variant={getVariant} useVariantCount={useVariantCount} />
       </div>
       <hr className="last:hidden" />
     </ProblemContext.Provider>

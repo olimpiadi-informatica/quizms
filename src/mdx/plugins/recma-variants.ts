@@ -168,10 +168,10 @@ function injectLocalVariables(ast: Program, file: string) {
           ),
         ]);
 
-        // props?.setVariantCount?.(_allVariants.length);
-        const setVariantCount = b.expressionStatement(
+        // props?.useVariantCount?.(_allVariants.length);
+        const useVariantCount = b.expressionStatement(
           b.callExpression(
-            b.memberExpression(b.identifier("props"), b.identifier("setVariantCount"), false, true),
+            b.memberExpression(b.identifier("props"), b.identifier("useVariantCount"), false, true),
             [b.memberExpression(b.identifier("_allVariants"), b.identifier("length"))],
             true,
           ),
@@ -183,7 +183,7 @@ function injectLocalVariables(ast: Program, file: string) {
           checkVariableNames,
           ...checkVariables,
           variables,
-          setVariantCount,
+          useVariantCount,
         );
       }
     },
