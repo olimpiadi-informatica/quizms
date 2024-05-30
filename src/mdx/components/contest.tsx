@@ -58,7 +58,7 @@ export function Contest({ children }: { children: ReactNode }) {
     };
 
     return (
-      <div className="flex h-[50vh] flex-col justify-center">
+      <div className="flex h-[50vh] flex-col items-center justify-center">
         <Button className="btn-success btn-lg" onClick={start}>
           Inizia
         </Button>

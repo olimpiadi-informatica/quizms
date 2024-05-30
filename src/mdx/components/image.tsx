@@ -1,7 +1,7 @@
 type ImageSrc = {
   src: string;
-  width: string;
-  height: string;
+  width: number;
+  height: number;
 };
 
 type Props = {
@@ -19,7 +19,7 @@ export default function Image({ src, alt, title }: Props) {
       height={src.height}
       alt={alt}
       title={title}
-      style={{ maxWidth: `min(100%, calc(90vh * ${src.width} / ${src.height}))` }}
+      style={{ maxWidth: `min(100%, ${(90 * src.width) / src.height}vh)` }}
     />
   );
 }

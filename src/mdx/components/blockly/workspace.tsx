@@ -349,8 +349,10 @@ const Editor = forwardRef(function Editor(
         loading="lazy"
       />
       {!ready && (
-        <div className="absolute inset-0 z-50 bg-white text-slate-700">
-          <Loading />
+        <div className="absolute inset-0 z-50 bg-white">
+          <div className="flex h-full text-slate-700">
+            <Loading />
+          </div>
         </div>
       )}
     </div>

@@ -263,8 +263,8 @@ function emitFile(
   return `${header ?? ""}
 const image = {
   src: ${src},
-  width: "${image.width}",
-  height: "${image.height}",
+  width: ${image.width},
+  height: ${image.height},
 };
 export default image;`;
 }
