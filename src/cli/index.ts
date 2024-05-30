@@ -35,6 +35,7 @@ async function main() {
     .argument("[directory]", "The directory of the contest.", cwd())
     .option("-d, --outDir <directory>", "The directory to output the bundle.", "dist")
     .option("-t, --training", "Embed the questions and the answers in the export.")
+    .option("-l, --library", "Build the project as a library.")
     .action((dir, options) => staticExport({ dir, ...options }));
 
   program

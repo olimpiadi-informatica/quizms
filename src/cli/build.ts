@@ -12,37 +12,38 @@ export type ExportOptions = {
   dir: string;
   outDir: string;
   training?: boolean;
+  library?: boolean;
 };
 
 export default async function staticExport(options: ExportOptions): Promise<void> {
   process.env.QUIZMS_MODE = options.training ? "training" : "contest";
 
   const root = path.join(options.dir, "src");
-  const pages = await glob("**/index.{html,jsx}", {
-    cwd: root,
-  });
-  const input = Object.fromEntries(
-    pages.map((p) => {
-      const dir = path.dirname(p);
-      const name = dir === "." ? "index" : dir.replaceAll(/\W/g, "-");
-      const entry =
-        path.extname(p) === ".jsx"
-          ? `virtual:react-entry?src=${encodeURIComponent(p)}`
-          : path.join(root, p);
-      return ["page-" + name, entry];
-    }),
+  const config = mergeConfig(
+    configs(root, "production"),
+    await (options.library ? libraryConfigs : standaloneConfigs)(root, options),
   );
 
+  try {
+    await build(config);
+  } catch (err) {
+    error((err as Error).message);
+    fatal("Build failed.");
+  }
+}
+
+async function standaloneConfigs(_root: string, options: ExportOptions): Promise<InlineConfig> {
   const outDir = path.join(options.dir, options.outDir);
 
-  const config = mergeConfig(configs(path.join(options.dir, "src"), "production"), {
+  return {
     publicDir: path.join(options.dir, "public"),
     build: {
       outDir,
       emptyOutDir: true,
+      target: "es2022",
       assetsInlineLimit: 1024,
       rollupOptions: {
-        input,
+        input: "virtual:quizms-routes",
         output: {
           hoistTransitiveImports: false,
           manualChunks: (id) => {
@@ -77,12 +78,30 @@ export default async function staticExport(options: ExportOptions): Promise<void
       }),
     ],
     logLevel: "info",
-  } as InlineConfig);
+  } as InlineConfig;
+}
 
-  try {
-    await build(config);
-  } catch (err) {
-    error((err as Error).message);
-    fatal("Build failed.");
-  }
+async function libraryConfigs(root: string, options: ExportOptions): Promise<InlineConfig> {
+  const outDir = path.join(options.dir, options.outDir);
+
+  const pages = await glob("**/page.{js,jsx,ts,tsx}", { cwd: root });
+  const entry = Object.fromEntries(pages.map((page) => [page.replace(/\.\w+$/, ""), page]));
+
+  return {
+    build: {
+      outDir,
+      emptyOutDir: true,
+      lib: {
+        entry,
+        formats: ["es"],
+      },
+      rollupOptions: {
+        external: /^[^./~]|\/node_modules\//,
+        output: {
+          preserveModules: true,
+          preserveModulesRoot: root,
+        },
+      },
+    },
+  };
 }

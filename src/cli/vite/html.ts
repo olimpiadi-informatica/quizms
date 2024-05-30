@@ -15,6 +15,7 @@ const template = `\
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Caricamento...</title>
   </head>
   <body>
     <div id="app"></div>
@@ -65,8 +66,6 @@ export function generateHtmlFromBundle(
   entry: OutputChunk,
   bundle: OutputBundle,
   options?: {
-    title?: string;
-    description?: string;
     includeDynamicImports?: boolean;
   },
 ) {
@@ -88,16 +87,6 @@ export function generateHtmlFromBundle(
   }
 
   const tags: HtmlTagDescriptor[] = [
-    {
-      tag: "title",
-      children: options?.title ?? "QuizMS",
-      injectTo: "head",
-    },
-    {
-      tag: "meta",
-      attrs: { name: "description", content: options?.description ?? "" },
-      injectTo: "head",
-    },
     {
       tag: "script",
       attrs: { type: "module", src: "/" + entry.fileName },

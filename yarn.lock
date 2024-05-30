@@ -5044,7 +5044,7 @@ lucide-react@^0.378:
   resolved "https://registry.yarnpkg.com/lucide-react/-/lucide-react-0.378.0.tgz#232acb99c6baedfa90959a2c0dd11327b058bde8"
   integrity sha512-u6EPU8juLUk9ytRcyapkWI18epAv3RU+6+TC23ivjR0e+glWKBobFeSgRwOIJihzktILQuy6E0E80P2jVTDR5g==
 
-magic-string@^0.30, magic-string@~0.30.0:
+magic-string@^0.30, magic-string@^0.30.5, magic-string@~0.30.0:
   version "0.30.10"
   resolved "https://registry.yarnpkg.com/magic-string/-/magic-string-0.30.10.tgz#123d9c41a0cb5640c892b041d4cfb3bd0aa4b39e"
   integrity sha512-iIRwTIf0QKV3UAnYK4PU8uiEc4SRh5jX0mwpIwETPpHdhVM4f53RSwS/vXvN1JhGX+Cs7B8qIq3d6AH49O5fAQ==
@@ -7032,6 +7032,13 @@ rollup-plugin-license@^3.2:
     package-name-regex "~2.0.6"
     spdx-expression-validate "~2.0.0"
     spdx-satisfies "~5.0.1"
+
+rollup-preserve-directives@^1.1:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/rollup-preserve-directives/-/rollup-preserve-directives-1.1.1.tgz#40d58b412ff791278ef06e0fa0944cbca3d6bd6d"
+  integrity sha512-+eQafbuEfDPfxQ9hQPlwaROfin4yiVRxap8hnrvvvcSGoukv1tTiYpAW9mvm3uR8J+fe4xd8FdVd5rz9q7jZ+Q==
+  dependencies:
+    magic-string "^0.30.5"
 
 rollup@^4.0.2, rollup@^4.13.0, rollup@^4.9:
   version "4.17.2"

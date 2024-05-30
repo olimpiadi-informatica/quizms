@@ -4,19 +4,22 @@ import path from "node:path";
 import { transform } from "esbuild";
 import glob from "fast-glob";
 import { sortBy } from "lodash-es";
+import { OutputChunk } from "rollup";
 import { HtmlTagDescriptor, PluginOption } from "vite";
 
 import { error } from "~/utils/logs";
 
-import { generateHtml } from "./html";
+import { generateHtml, generateHtmlFromBundle } from "./html";
 
 export default function routes(): PluginOption {
+  let isLib = false;
   let root = "";
 
   return {
     name: "quizms:routes",
     enforce: "pre",
     configResolved(config) {
+      isLib = !!config.build.lib;
       root = config.root;
     },
     resolveId(id) {
@@ -32,11 +35,13 @@ export default function routes(): PluginOption {
       if (id === "\0virtual:quizms-routes") {
         const pages = await glob(`**/page.{js,jsx,ts,tsx}`, { cwd: root });
 
-        if (existsSync(path.join(root, "src", "global.css"))) {
+        if (!existsSync(path.join(root, "global.css"))) {
           error("Missing global.css file");
         }
 
-        const imports = pages.map((page, i) => `const Page${i} = lazy(() => import("~/${page}"));`);
+        const imports = pages.map(
+          (page, i) => `const Page${i} = lazy(() => page(import("~/${page}")));`,
+        );
         const routes = pages.map(
           (page, i) =>
             `<Route path="/${path.dirname(page).replace(/^\.$/, "")}" nest><Page${i} /></Route>`,
@@ -46,7 +51,7 @@ export default function routes(): PluginOption {
 import { lazy, StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 
-import { BaseLayout } from "@olinfo/quizms/internal";
+import { page, BaseLayout } from "@olinfo/quizms/internal";
 import { Route, Switch } from "wouter";
 
 import "~/global.css";
@@ -72,6 +77,19 @@ createRoot(document.getElementById("app")).render(
         return `\
 export function renderToStaticMarkup() { throw new Error("react-dom/server is not available in the browser"); }`;
       }
+    },
+    async generateBundle(this, _, bundle) {
+      if (isLib) return;
+
+      const entry = Object.values(bundle).find(
+        (chunk) => "facadeModuleId" in chunk && chunk.facadeModuleId === "\0virtual:quizms-routes",
+      ) as OutputChunk;
+
+      this.emitFile({
+        type: "asset",
+        fileName: "index.html",
+        source: await generateHtmlFromBundle(entry, bundle),
+      });
     },
     configureServer(server) {
       server.middlewares.use(async (req, res, next) => {

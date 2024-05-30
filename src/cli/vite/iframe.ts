@@ -113,7 +113,7 @@ export default function iframe(): PluginOption {
         map: s.generateMap({ hires: true }),
       };
     },
-    async generateBundle(this, options, bundle) {
+    async generateBundle(this, _options, bundle) {
       for (const [srcId, iframeId] of iframeIds) {
         const entry = bundle[this.getFileName(srcId)] as OutputChunk;
 

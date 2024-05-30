@@ -6,6 +6,7 @@ import { CompileOptions as MdxOptions } from "@mdx-js/mdx";
 import mdxPlugin from "@mdx-js/rollup";
 import react from "@vitejs/plugin-react-swc";
 import pc from "picocolors";
+import preserveDirectives from "rollup-preserve-directives";
 import { InlineConfig } from "vite";
 import inspect from "vite-plugin-inspect";
 
@@ -58,6 +59,7 @@ export default function configs(
       images(),
       inspect(),
       { enforce: "pre", ...mdxPlugin({ ...mdxOptions, ...options?.mdx }) },
+      preserveDirectives(),
       python(),
       react({ plugins: swcPlugins }),
       routes(),

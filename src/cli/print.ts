@@ -42,7 +42,7 @@ Make sure it exists or specify a different entry file using \`--entry\`.`);
 
   info("Building website...");
   const buildDir = path.join(options.dir, options.outDir, ".pdf-build");
-  const buildConfig = mergeConfig(configs(path.join(options.dir, "src"), "production"), {
+  const buildConfig = mergeConfig(configs(root, "production"), {
     publicDir: path.join(options.dir, "public"),
     build: {
       outDir: buildDir,
@@ -68,7 +68,7 @@ Make sure it exists or specify a different entry file using \`--entry\`.`);
     plugins: [printPlugin(statements)],
   } as InlineConfig);
   const server = await preview(serverConfig);
-  const url = server.resolvedUrls!.local[0] + options.entry.replace(/\.jsx?$/, "");
+  const url = server.resolvedUrls!.local[0] + options.entry.replace(/\.\w+?$/, "");
 
   if (options.server) {
     success(`Server started: ${pc.bold(pc.cyan(url))}`);
