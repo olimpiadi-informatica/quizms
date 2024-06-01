@@ -2,7 +2,7 @@ import { ReactNode, SetStateAction, useCallback, useMemo, useState } from "react
 
 import { useIsAfter } from "@olinfo/react-components";
 import { addMinutes } from "date-fns";
-import { isFunction, range } from "lodash-es";
+import { isFunction } from "lodash-es";
 
 import { Contest, Participation, Student } from "~/models";
 
@@ -11,11 +11,10 @@ import { StudentProvider } from "./provider";
 type AuthProps = {
   contestName: string;
   duration: number;
-  questionCount?: number;
   children: ReactNode;
 };
 
-export function NoAuth({ contestName, duration, questionCount, children }: AuthProps) {
+export function NoAuth({ contestName, duration, children }: AuthProps) {
   const [student, setStudent] = useLocalStorage<Student>("student", {
     id: "",
     personalInformation: {
@@ -37,7 +36,7 @@ export function NoAuth({ contestName, duration, questionCount, children }: AuthP
     id: "",
     name: contestName,
     longName: contestName,
-    problemIds: range(questionCount ?? 0).map((i) => i.toString()),
+    problemIds: [],
     duration,
     personalInformation: [],
     hasVariants: true,

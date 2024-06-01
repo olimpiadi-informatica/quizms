@@ -1,6 +1,16 @@
-import { ReactNode, createContext, useContext } from "react";
+import {
+  Dispatch,
+  ReactNode,
+  SetStateAction,
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 
-import { Contest, Participation, Student } from "~/models";
+import { isEqual } from "lodash-es";
+
+import { Contest, Participation, Schema, Student } from "~/models";
 
 import { StudentLayout } from "./layout";
 
@@ -23,7 +33,12 @@ type StudentProviderProps = {
   terminated: boolean;
 };
 
-const StudentContext = createContext<StudentProviderProps>({} as StudentProviderProps);
+type StudentContextProps = StudentProviderProps & {
+  schema: Schema;
+  registerSchema: Dispatch<SetStateAction<Schema>>;
+};
+
+const StudentContext = createContext<StudentContextProps>({} as StudentContextProps);
 StudentContext.displayName = "StudentContext";
 
 export function StudentProvider({
@@ -32,10 +47,24 @@ export function StudentProvider({
 }: StudentProviderProps & {
   children: ReactNode;
 }) {
-  const value: StudentProviderProps = {
+  const [schema, registerSchema] = useState<Schema>({});
+
+  const value: StudentContextProps = {
     ...props,
     terminated: props.terminated || !!props.student.submittedAt,
+    schema,
+    registerSchema,
   };
+
+  useEffect(() => {
+    const answers = { ...props.student.answers };
+    for (const id in schema) {
+      answers[id] = undefined;
+    }
+    if (!isEqual(answers, props.student.answers)) {
+      props.setStudent({ ...props.student, answers });
+    }
+  }, [props, schema]);
 
   return (
     <StudentContext.Provider value={value}>

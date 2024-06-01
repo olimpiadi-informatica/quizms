@@ -1,20 +1,9 @@
-import {
-  ReactNode,
-  Ref,
-  createContext,
-  forwardRef,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { ReactNode, createContext, useCallback, useContext } from "react";
 
-import { Button, Modal } from "@olinfo/react-components";
-import { noop, sumBy } from "lodash-es";
+import { Button } from "@olinfo/react-components";
+import { noop } from "lodash-es";
 
-import { Schema, problemScore, score } from "~/models";
+import { Schema } from "~/models";
 import { randomId } from "~/utils/random";
 import { useStudent } from "~/web/student/provider";
 
@@ -28,25 +17,16 @@ const ContestContext = createContext<ContestContextProps>({
 ContestContext.displayName = "ContestContext";
 
 export function Contest({ children }: { children: ReactNode }) {
-  const { student, setStudent, terminated } = useStudent();
-  const [schema, setSchema] = useState<Schema>({});
-
-  const registerProblem = useCallback((id: string, problem: Schema[string]) => {
-    setSchema((schema) => ({
-      ...schema,
-      [id]: problem,
-    }));
-  }, []);
-
-  const [resultShown, setResultShown] = useState(false);
-  const ref = useRef<HTMLDialogElement>(null);
-
-  useEffect(() => {
-    if (terminated !== resultShown) {
-      setResultShown(terminated);
-      if (!resultShown) ref.current?.showModal();
-    }
-  }, [terminated, resultShown]);
+  const { student, setStudent, registerSchema } = useStudent();
+  const registerProblem = useCallback(
+    (id: string, problem: Schema[string]) => {
+      registerSchema((schema) => ({
+        ...schema,
+        [id]: problem,
+      }));
+    },
+    [registerSchema],
+  );
 
   if (import.meta.env.QUIZMS_MODE === "training" && !student.startedAt) {
     const start = async () => {
@@ -73,70 +53,9 @@ export function Contest({ children }: { children: ReactNode }) {
           {children}
         </main>
       </div>
-      <CompletedModal ref={ref} schema={schema} />
     </ContestContext.Provider>
   );
 }
-
-const CompletedModal = forwardRef(function CompletedModal(
-  { schema }: { schema: Schema },
-  ref: Ref<HTMLDialogElement>,
-) {
-  const { student } = useStudent();
-
-  const problems = Object.keys(schema);
-  problems.sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
-
-  const points = useMemo(() => {
-    const variant = {
-      id: student.variant!,
-      contestId: student.contestId!,
-      schema,
-    };
-    return score(student, { [variant.id]: variant });
-  }, [schema, student]);
-
-  const maxPoints = sumBy(Object.values(schema), "pointsCorrect");
-
-  return (
-    <Modal ref={ref} title="Prova terminata">
-      <p>La prova è terminata.</p>
-      {points !== undefined && (
-        <>
-          <p>
-            Hai ottenuto un punteggio di <b>{points}</b> su <b>{maxPoints}</b>.
-          </p>
-          <div className="w-full">
-            <table className="table-fixed prose-td:truncate">
-              <thead>
-                <tr>
-                  <th scope="col">Domanda</th>
-                  <th scope="col">Risposta</th>
-                  <th scope="col">Soluzione</th>
-                  <th scope="col">Punteggio</th>
-                </tr>
-              </thead>
-              <tbody>
-                {problems.map((problem) => {
-                  const answer = student.answers?.[problem]?.toString()?.trim();
-                  const problemSchema = schema[problem];
-                  return (
-                    <tr key={problem}>
-                      <td>{problem}</td>
-                      <td>{answer ?? "-"}</td>
-                      <td>{problemSchema.optionsCorrect?.join(", ")}</td>
-                      <td>{problemScore(problemSchema, answer)}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </>
-      )}
-    </Modal>
-  );
-});
 
 export function useContest() {
   return useContext(ContestContext);
