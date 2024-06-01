@@ -8,17 +8,17 @@ type StudentProviderProps = {
   /** Dati dello studente */
   student: Student;
   /** Funzione per aggiornare i dati dello studente */
-  setStudent: (value: Student) => Promise<void>;
+  setStudent: (value: Student) => Promise<void> | void;
   /** Contest dello studente */
   contest: Contest;
   /** Scuola dello studente */
   participation: Participation;
   /** Funzione per resettare le risposte e ricominciare la prova (opzionale) */
-  reset?: () => Promise<void>;
+  reset?: () => Promise<void> | void;
   /** Funzione per terminare la prova (opzionale) */
-  submit?: () => Promise<void>;
+  submit?: () => Promise<void> | void;
   /** Funzione per cambiare utente */
-  logout?: () => Promise<void>;
+  logout?: () => Promise<void> | void;
   /** Flag che indica se la prova è terminata */
   terminated: boolean;
 };

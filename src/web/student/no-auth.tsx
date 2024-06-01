@@ -76,7 +76,7 @@ export function NoAuth({ contestName, duration, questionCount, children }: AuthP
       contest={mockContest}
       participation={mockParticipation}
       student={student}
-      setStudent={async (s) => setStudent(s)}
+      setStudent={setStudent}
       reset={reset}
       terminated={terminated}>
       {children}

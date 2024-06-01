@@ -73,7 +73,7 @@ export function PrintAuth({ children }: AuthProps) {
       contest={contest}
       participation={mockParticipation}
       student={student}
-      setStudent={async () => {}}
+      setStudent={() => {}}
       terminated={false}>
       {children}
     </StudentProvider>

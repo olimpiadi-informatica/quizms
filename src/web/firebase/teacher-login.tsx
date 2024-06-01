@@ -62,7 +62,7 @@ function TeacherInner() {
   return (
     <TeacherProvider
       participations={participations}
-      setParticipation={async (p) => setParticipation(db, participations, p)}
+      setParticipation={(p) => setParticipation(db, participations, p)}
       contests={contests}
       variants={variants}
       logout={logout}

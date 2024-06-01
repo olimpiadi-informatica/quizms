@@ -24,8 +24,8 @@ export function ImpersonificationAuth({ children }: { children: ReactNode }) {
           contest={contest}
           participation={participation}
           student={student}
-          setStudent={async () => {}}
-          reset={async () => {}}
+          setStudent={() => {}}
+          reset={() => {}}
           terminated={true}>
           {children}
         </StudentProvider>
