@@ -17,21 +17,22 @@
     "quizms": "bin/bin.js"
   },
   "exports": {
-    "./internal": "./dist/internal/index.js",
-    "./student": "./dist/student/index.js",
-    "./firebase": "./dist/firebase/index.js",
+    "./internal": "./dist/web/internal/index.js",
+    "./internal/blockly-editor": "./dist/mdx/components/blockly/editor.js",
+    "./student": "./dist/web/student/index.js",
+    "./firebase": "./dist/web/firebase/index.js",
     "./jsx-runtime": "./dist/jsx-runtime/index.js"
   },
   "typesVersions": {
     "*": {
       "internal": [
-        "./dist/internal/index.d.ts"
+        "./dist/web/internal/index.d.ts"
       ],
       "student": [
-        "./dist/student/index.d.ts"
+        "./dist/web/student/index.d.ts"
       ],
       "firebase": [
-        "./dist/firebase/index.d.ts"
+        "./dist/web/firebase/index.d.ts"
       ]
     }
   },
@@ -44,8 +45,8 @@
     "@ag-grid-community/core": "^31.0",
     "@ag-grid-community/react": "^31.0",
     "@ag-grid-community/styles": "^31.0",
-    "@blockly/disable-top-blocks": "^0.4",
-    "@cantoo/pdf-lib": "^1.20.0",
+    "@blockly/disable-top-blocks": "^0.5",
+    "@cantoo/pdf-lib": "^2.1",
     "@date-fns/utc": "^1.1",
     "@mdx-js/mdx": "^3.0",
     "@mdx-js/rollup": "^3.0",
@@ -54,7 +55,7 @@
     "@swc/plugin-transform-imports": "^1.5",
     "@vitejs/plugin-react-swc": "^3.3",
     "acorn": "^8.10",
-    "blockly": "^10.0",
+    "blockly": "^11.1",
     "clsx": "^2.1.1",
     "commander": "^12.0",
     "date-fns": "^3.0",
@@ -88,7 +89,7 @@
     "remark-math": "^6.0",
     "remark-mdx-frontmatter": "^4.0",
     "remark-mdx-math-enhanced": "=0.0.1-beta.3",
-    "remark-smartypants": "^2.0",
+    "remark-smartypants": "^3.0",
     "rollup": "^4.9",
     "rollup-plugin-license": "^3.2",
     "rollup-preserve-directives": "^1.1",
@@ -102,7 +103,7 @@
     "vite": "^5.0",
     "vite-plugin-inspect": "^0.8",
     "vm-browserify": "^1.1",
-    "wouter": "^3.1.3",
+    "wouter": "^3.1",
     "zod": "^3.22",
     "zod-validation-error": "^3.0"
   },

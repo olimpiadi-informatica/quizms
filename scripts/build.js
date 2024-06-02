@@ -15,7 +15,7 @@ const commonConfig = {
 /** @type {import("tsup").Options} */
 const webConfig = {
   ...commonConfig,
-  entryPoints: await glob("src/web/*/index.ts"),
+  entry: [...(await glob("src/web/*/index.ts")), "src/mdx/components/blockly/editor.tsx"],
   platform: "browser",
   minifyWhitespace: false,
   loader: { ".css": "copy" },
@@ -24,7 +24,7 @@ const webConfig = {
 /** @type {import("tsup").Options} */
 const cliConfig = {
   ...commonConfig,
-  entryPoints: await glob("src/{cli,jsx-runtime}/index.ts"),
+  entry: await glob("src/{cli,jsx-runtime}/index.ts"),
   target: "esnext",
   platform: "node",
   loader: { ".rules": "file" },

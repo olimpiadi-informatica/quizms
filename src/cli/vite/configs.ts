@@ -15,7 +15,6 @@ import { fatal, info, warning } from "~/utils/logs";
 
 import blocklyBlocks from "./blockly-blocks";
 import blocklyMedia from "./blockly-media";
-import iframe from "./iframe";
 import images from "./images";
 import python from "./python";
 import resolveContests from "./resolve-contests";
@@ -55,7 +54,6 @@ export default function configs(
     plugins: [
       blocklyBlocks(),
       blocklyMedia(),
-      iframe(),
       images(),
       inspect(),
       { enforce: "pre", ...mdxPlugin({ ...mdxOptions, ...options?.mdx }) },

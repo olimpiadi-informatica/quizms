@@ -56,12 +56,16 @@ import { Route, Switch } from "wouter";
 
 import "~/global.css";
 
+const BlocklyIframe = lazy(() => import("@olinfo/quizms/internal/blockly-editor"));
 ${imports.join("\n")}
 
 createRoot(document.getElementById("app")).render(
   <StrictMode>
     <BaseLayout>
       <Switch>
+        <Route path="/__blockly_iframe">
+          <BlocklyIframe />
+        </Route>
         ${sortBy(routes, "length").reverse().join("\n        ")}
       </Switch>
     </BaseLayout>

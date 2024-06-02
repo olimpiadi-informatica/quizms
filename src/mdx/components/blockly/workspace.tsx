@@ -24,6 +24,7 @@ import { useStudent } from "~/web/student/provider";
 
 import Debug from "./debug";
 import { defaultInitialBlocks, defaultToolbox } from "./default-blocks";
+import { InitProps } from "./editor";
 import useExecutor from "./executor";
 import { BlocklyInterpreter } from "./interpreter";
 import useIcp from "./ipc";
@@ -119,10 +120,9 @@ export default function Workspace({
           cmd: "init",
           toolbox: toolbox ?? defaultToolbox,
           initialBlocks: blocks,
-          debug,
           customBlocks,
           readonly: terminated,
-        });
+        } as InitProps);
         break;
       }
       case "ready": {
@@ -343,7 +343,7 @@ const Editor = forwardRef(function Editor(
     <div className="relative flex grow flex-col overflow-hidden rounded-xl border-2 border-[#c6c6c6]">
       <iframe
         ref={ref}
-        src={import("./editor") as any}
+        src="/__blockly_iframe/"
         className="grow"
         title="Area di lavoro di Blockly"
         loading="lazy"

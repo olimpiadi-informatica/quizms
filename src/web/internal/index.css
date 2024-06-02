@@ -17,3 +17,7 @@
 .ag-cell {
   --ag-cell-horizontal-padding: 0.5rem;
 }
+
+[display="none"] {
+  @apply !hidden;
+}
