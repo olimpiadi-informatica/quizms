@@ -14,7 +14,8 @@ import { ToolboxInfo } from "blockly/core/utils/toolbox";
 import { javascriptGenerator } from "blockly/javascript";
 import * as locale from "blockly/msg/it";
 
-import { CustomBlock } from "./custom-block";
+import { CustomBlock } from "~/models/blockly-custom-block";
+
 import { initGenerator, toJS } from "./generator";
 
 setLocale(locale);
@@ -23,7 +24,7 @@ function send(cmd: string, props?: any) {
   window.parent.postMessage({ cmd, ...props }, "*");
 }
 
-export default function BlocklyEditor() {
+export function BlocklyEditor() {
   const id = useId();
   const [workspace, setWorkspace] = useState<WorkspaceSvg>();
 

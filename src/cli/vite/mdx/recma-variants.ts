@@ -1,8 +1,10 @@
 import path from "node:path";
 
-import { AssignmentProperty, Program } from "estree";
+import { AssignmentProperty, Node, Program, Property, Statement } from "estree";
 import { builders as b, is, traverse } from "estree-toolkit";
 import { Plugin } from "unified";
+
+import { hash } from "~/utils/random";
 
 const recmaVariants: Plugin<[], Program> = () => {
   return (ast, file) => {
@@ -57,6 +59,15 @@ function injectLocalVariables(ast: Program, file: string) {
 
       const node = nodePath.node!;
       if (node.id?.name === "_createMdxContent") {
+        if (process.env.QUIZMS_MODE !== "contest") {
+          // import React from "react";
+          const importReact = b.importDeclaration(
+            [b.importDefaultSpecifier(b.identifier("_react$q"))],
+            b.literal("react"),
+          );
+          ast.body.unshift(importReact);
+        }
+
         // const _allVariants = frontmatter?.variants ?? variants;
         const allVariants = b.variableDeclaration("const", [
           b.variableDeclarator(
@@ -74,25 +85,52 @@ function injectLocalVariables(ast: Program, file: string) {
           ),
         ]);
 
-        // const _variant = (props?.variant ?? 0) % _allVariants.length;
-        const variant = b.variableDeclaration("const", [
-          b.variableDeclarator(
-            b.identifier("_variant"),
-            b.binaryExpression(
-              "%",
-              b.logicalExpression(
-                "??",
-                b.callExpression(
-                  b.memberExpression(b.identifier("props"), b.identifier("variant"), false, true),
-                  [],
-                  true,
+        let variant: Statement;
+        if (process.env.QUIZMS_MODE === "contest") {
+          const problem = path.dirname(file);
+          console.info(`hash(${problem}) = ${hash(problem) % 524_287}`);
+
+          // A prime number smaller than √ MAX_SAFE_INTEGER
+          const MODULE = 14_985_317;
+
+          // const _variant = ((QUIZMS_VARIANT % MODULE) * (hash % MODULE) % MODULE) % _allVariants.length;
+          variant = b.variableDeclaration("const", [
+            b.variableDeclarator(
+              b.identifier("_variant"),
+              b.binaryExpression(
+                "%",
+                b.binaryExpression(
+                  "%",
+                  b.binaryExpression(
+                    "*",
+                    b.binaryExpression(
+                      "%",
+                      b.memberExpression(
+                        b.memberExpression(b.identifier("process"), b.identifier("env")),
+                        b.identifier("QUIZMS_VARIANT"),
+                      ),
+                      b.literal(MODULE),
+                    ),
+                    b.literal(hash(problem) % MODULE),
+                  ),
+                  b.literal(MODULE),
                 ),
-                b.literal(0),
+                b.memberExpression(b.identifier("_allVariants"), b.identifier("length")),
               ),
-              b.memberExpression(b.identifier("_allVariants"), b.identifier("length")),
             ),
-          ),
-        ]);
+          ]);
+        } else {
+          // const [_variant, _setVariant] = useState(0);
+          variant = b.variableDeclaration("const", [
+            b.variableDeclarator(
+              b.arrayPattern([b.identifier("_variant"), b.identifier("_setVariant")]),
+              b.callExpression(
+                b.memberExpression(b.identifier("_react$q"), b.identifier("useState")),
+                [b.literal(0)],
+              ),
+            ),
+          ]);
+        }
 
         // for (const _variable of Object.keys(_allVariants[_variant]))
         //   if (/^[^a-z]./.test(name))
@@ -168,26 +206,122 @@ function injectLocalVariables(ast: Program, file: string) {
           ),
         ]);
 
-        // props?.useVariantCount?.(_allVariants.length);
-        const useVariantCount = b.expressionStatement(
-          b.callExpression(
-            b.memberExpression(b.identifier("props"), b.identifier("useVariantCount"), false, true),
-            [b.memberExpression(b.identifier("_allVariants"), b.identifier("length"))],
-            true,
-          ),
-        );
-
         node.body.body.unshift(
           allVariants,
           variant,
           checkVariableNames,
           ...checkVariables,
           variables,
-          useVariantCount,
         );
+
+        if (process.env.QUIZMS_MODE === "development") {
+          injectVariantSelect(node.body.body.at(-1));
+        }
       }
     },
   });
+}
+
+function injectVariantSelect(ret?: Node) {
+  // return jsx(SubProblem, {
+  //   children: [
+  //     <select>{...}</select>,   <-- inject here
+  //     ...
+  //   ]
+  // });
+  if (
+    ret?.type !== "ReturnStatement" ||
+    ret.argument?.type !== "CallExpression" ||
+    ret.argument.callee.type !== "Identifier" ||
+    ret.argument.callee.name !== "_jsxDEV"
+  ) {
+    throw new Error("Invalid return statement");
+  }
+
+  const props = ret.argument.arguments[1];
+  if (props.type !== "ObjectExpression") throw new Error("Invalid return expression");
+
+  const children = props.properties.find(
+    (p) => p.type === "Property" && p.key.type === "Identifier" && p.key.name === "children",
+  ) as Property | undefined;
+  if (children?.value.type !== "ArrayExpression") {
+    throw new Error("Invalid return expression");
+  }
+
+  /*
+    <select
+      className="select select-ghost absolute right-0 top-0"
+      value={variant}
+      onChange={(e) => setVariant(+e.target.value)}>
+      {Array.from({ length: _allVariants.length }, (_, i) => (
+        <option key={i} value={i}>
+          Variante {i + 1}
+        </option>
+      ))}
+    </select>
+  */
+  children.value.elements.push(
+    b.callExpression(b.identifier("_jsxDEV"), [
+      b.literal("select"),
+      b.objectExpression([
+        b.property(
+          "init",
+          b.identifier("className"),
+          b.literal("select select-ghost absolute right-0 top-0"),
+        ),
+        b.property("init", b.identifier("value"), b.identifier("_variant")),
+        b.property(
+          "init",
+          b.identifier("onChange"),
+          b.arrowFunctionExpression(
+            [b.identifier("e")],
+            b.callExpression(b.identifier("_setVariant"), [
+              b.unaryExpression(
+                "+",
+                b.memberExpression(
+                  b.memberExpression(b.identifier("e"), b.identifier("target")),
+                  b.identifier("value"),
+                ),
+                true,
+              ),
+            ]),
+          ),
+        ),
+        b.property(
+          "init",
+          b.identifier("children"),
+          b.callExpression(b.memberExpression(b.identifier("Array"), b.identifier("from")), [
+            b.objectExpression([
+              b.property(
+                "init",
+                b.identifier("length"),
+                b.memberExpression(b.identifier("_allVariants"), b.identifier("length")),
+              ),
+            ]),
+            b.arrowFunctionExpression(
+              [b.identifier("_"), b.identifier("i")],
+              b.callExpression(b.identifier("_jsxDEV"), [
+                b.literal("option"),
+                b.objectExpression([
+                  b.property("init", b.identifier("value"), b.identifier("i")),
+                  b.property(
+                    "init",
+                    b.identifier("children"),
+                    b.binaryExpression(
+                      "+",
+                      b.literal("Variante "),
+                      b.binaryExpression("+", b.identifier("i"), b.literal(1)),
+                    ),
+                  ),
+                ]),
+                b.identifier("i"),
+              ]),
+            ),
+          ]),
+        ),
+      ]),
+    ]),
+  );
 }
 
 function checkUndefinedVariables(ast: Program, file: string) {

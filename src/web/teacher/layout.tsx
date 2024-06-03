@@ -13,8 +13,8 @@ import { LogOut } from "lucide-react";
 import { ErrorBoundary } from "react-error-boundary";
 import { Link, useLocation, useRoute } from "wouter";
 
-import { Error, Loading } from "~/components";
 import { Contest, Participation } from "~/models";
+import { Error, Loading } from "~/web/components";
 
 type Props = {
   contests: Contest[];

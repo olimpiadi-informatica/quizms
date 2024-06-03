@@ -59,7 +59,7 @@ export function StudentProvider({
   useEffect(() => {
     const answers = { ...props.student.answers };
     for (const id in schema) {
-      answers[id] = undefined;
+      answers[id] ??= undefined;
     }
     if (!isEqual(answers, props.student.answers)) {
       props.setStudent({ ...props.student, answers });

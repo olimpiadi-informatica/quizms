@@ -15,7 +15,7 @@ const commonConfig = {
 /** @type {import("tsup").Options} */
 const webConfig = {
   ...commonConfig,
-  entry: [...(await glob("src/web/*/index.ts")), "src/mdx/components/blockly/editor.tsx"],
+  entry: await glob("src/web/**/index.ts"),
   platform: "browser",
   minifyWhitespace: false,
   loader: { ".css": "copy" },

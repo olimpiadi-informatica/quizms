@@ -7,7 +7,7 @@ import {
 } from "blockly/core";
 import { JavascriptGenerator, Order, javascriptGenerator } from "blockly/javascript";
 
-import { CustomBlock, CustomBlockArg } from "./custom-block";
+import { CustomBlock, CustomBlockArg } from "~/models/blockly-custom-block";
 
 javascriptGenerator.STATEMENT_PREFIX = "highlightBlock(%1);\n";
 javascriptGenerator.INFINITE_LOOP_TRAP = 'if(--loopTrap === 0) exit(false, "Ciclo infinito");\n';

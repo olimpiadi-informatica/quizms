@@ -15,8 +15,8 @@ export default function python(): PluginOption {
       const ext = path.extname(pathname);
 
       if (ext === ".py") {
-        return `const module = ${JSON.stringify(await executePython(pathname))};
-export default module;`;
+        const output = await executePython(pathname);
+        return `export default JSON.parse(${JSON.stringify(JSON.stringify(output))});`;
       }
     },
   };

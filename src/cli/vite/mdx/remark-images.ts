@@ -4,10 +4,9 @@ import { Parser } from "acorn";
 import { Directive, Expression, ModuleDeclaration } from "estree";
 import { builders as b } from "estree-toolkit";
 import { compact } from "lodash-es";
-import { Image, Parent, Root, Text } from "mdast";
-import { MdxJsxTextElement, MdxjsEsm } from "mdast-util-mdx";
+import { Image, Parent, Root } from "mdast";
+import { MdxjsEsm } from "mdast-util-mdx";
 import { Plugin } from "unified";
-import { Node } from "unist";
 import { SKIP, visit } from "unist-util-visit";
 
 import { jsxAttribute } from "./utils";
@@ -90,30 +89,7 @@ const remarkImages: Plugin<[], Root> = () => {
         imgSrc = b.identifier(name);
       }
 
-      let siblingIndex = index - 1;
-      let sibling: Node | undefined = parent.children[siblingIndex];
-      while (sibling?.type === "text" && /^\s*$/.test((sibling as Text).value)) {
-        siblingIndex -= 1;
-        sibling = parent.children[siblingIndex];
-      }
-
-      let container: MdxJsxTextElement;
-      if (sibling?.data?.imgContainer) {
-        container = sibling as MdxJsxTextElement;
-        parent.children.splice(siblingIndex + 1, index - siblingIndex);
-        index = siblingIndex + 1;
-      } else {
-        container = {
-          type: "mdxJsxTextElement",
-          name: "span",
-          attributes: [jsxAttribute("className", "flex justify-center")],
-          data: { imgContainer: true },
-          children: [],
-        };
-        parent.children[index] = container;
-      }
-
-      container.children.push({
+      parent.children[index] = {
         type: "mdxJsxTextElement",
         name: "Image",
         children: [],
@@ -129,7 +105,7 @@ const remarkImages: Plugin<[], Root> = () => {
           ),
           title && jsxAttribute("title", title),
         ]),
-      });
+      };
 
       return [SKIP, index];
     });

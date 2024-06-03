@@ -1,5 +1,4 @@
 import { Parser } from "acorn";
-import clsx from "clsx";
 import { Directive } from "estree";
 import { Code, InlineCode, Root } from "mdast";
 import { MdxJsxFlowElement } from "mdast-util-mdx";
@@ -44,11 +43,9 @@ const remarkHighlight: Plugin<[], Root> = () => {
           jsxAttribute("lang", lang),
           jsxAttribute(
             "className",
-            clsx(
-              "not-prose p-0 text-sm",
-              code.type === "code" &&
-                "overflow-hidden rounded-box border border-base-content/40 *:overflow-x-auto *:p-4",
-            ),
+            code.type === "code"
+              ? "overflow-hidden rounded-box border border-base-content/40 text-sm *:overflow-x-auto *:p-4"
+              : "p-0 text-base",
           ),
         ],
       } as MdxJsxFlowElement;

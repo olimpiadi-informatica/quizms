@@ -3,7 +3,7 @@ import React, { memo } from "react";
 import { isFunction } from "lodash-es";
 import useSWR from "swr/immutable";
 
-import { components } from "~/mdx/components";
+import { useMDXComponents } from "~/web/mdx";
 import { BaseStatement } from "~/web/student/base-statement";
 
 type Props =
@@ -37,6 +37,7 @@ async function fetcher(url: Props["url"]) {
   const { default: statement } = await import(/* @vite-ignore */ url);
 
   return memo(function Statement() {
+    const components = useMDXComponents();
     return statement(React, components);
   });
 }

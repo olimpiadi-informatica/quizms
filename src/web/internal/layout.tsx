@@ -3,7 +3,7 @@ import { ReactNode, Suspense } from "react";
 import { Layout, useNotifications } from "@olinfo/react-components";
 import { SWRConfig } from "swr";
 
-import { Loading } from "~/components";
+import { Loading } from "~/web/components";
 
 import "./index.css";
 

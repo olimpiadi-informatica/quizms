@@ -150,6 +150,7 @@ export function OpenAnswer({ correct, type }: OpenAnswerProps) {
   return (
     <div className="px-2">
       <input
+        id={`answer-${problemId}`}
         className={clsx(
           "input input-bordered w-72 max-w-full border-2 print:placeholder:text-transparent",
           terminated &&

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 
+import clsx from "clsx";
 import { addMinutes, differenceInSeconds, isAfter } from "date-fns";
 
 type TimerProps =
@@ -7,11 +8,13 @@ type TimerProps =
       startTime?: undefined;
       duration?: undefined;
       endTime: Date;
+      noAnimation?: boolean;
     }
   | {
       startTime: Date;
       duration: number;
       endTime?: undefined;
+      noAnimation?: boolean;
     };
 
 export function Timer(props: TimerProps) {
@@ -41,12 +44,14 @@ export function Timer(props: TimerProps) {
   const seconds = timeLeft % 60;
 
   return hours > 0 ? (
-    <span className="countdown font-mono">
+    <span
+      className={clsx("countdown font-mono", props.noAnimation && "[&_*:before]:transition-none")}>
       <span style={{ "--value": hours } as any} />h
       <span style={{ "--value": minutes } as any} />m
     </span>
   ) : (
-    <span className="countdown font-mono">
+    <span
+      className={clsx("countdown font-mono", props.noAnimation && "[&_*:before]:transition-none")}>
       <span style={{ "--value": minutes } as any} />m
       <span style={{ "--value": seconds } as any} />s
     </span>

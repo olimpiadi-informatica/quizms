@@ -17,17 +17,14 @@
     "quizms": "bin/bin.js"
   },
   "exports": {
-    "./internal": "./dist/web/internal/index.js",
-    "./internal/blockly-editor": "./dist/mdx/components/blockly/editor.js",
-    "./student": "./dist/web/student/index.js",
-    "./firebase": "./dist/web/firebase/index.js",
-    "./jsx-runtime": "./dist/jsx-runtime/index.js"
+    "./internal": "./dist/internal/index.js",
+    "./internal/blockly-editor": "./dist/internal/blockly-editor/index.js",
+    "./internal/mdx-components": "./dist/mdx/index.js",
+    "./student": "./dist/student/index.js",
+    "./firebase": "./dist/firebase/index.js"
   },
   "typesVersions": {
     "*": {
-      "internal": [
-        "./dist/web/internal/index.d.ts"
-      ],
       "student": [
         "./dist/web/student/index.d.ts"
       ],
@@ -108,12 +105,10 @@
     "zod-validation-error": "^3.0"
   },
   "peerDependencies": {
-    "@mdx-js/react": "^3.0",
     "react": "^18",
     "react-dom": "^18"
   },
   "devDependencies": {
-    "@mdx-js/react": "^3.0",
     "@olinfo/eslint": "^0.2",
     "@olinfo/prettier": "^0.1",
     "@olinfo/tailwind": "^0.1",

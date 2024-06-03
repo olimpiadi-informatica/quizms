@@ -5,7 +5,7 @@ import { browserLocalPersistence, debugErrorMap, getAuth, initializeAuth } from 
 import { Firestore, getFirestore } from "firebase/firestore";
 import { ErrorBoundary, FallbackProps } from "react-error-boundary";
 
-import { Error, Loading } from "~/components";
+import { Error, Loading } from "~/web/components";
 
 type Props = {
   config: FirebaseOptions;

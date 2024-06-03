@@ -3,19 +3,18 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { CompileOptions as MdxOptions } from "@mdx-js/mdx";
-import mdxPlugin from "@mdx-js/rollup";
 import react from "@vitejs/plugin-react-swc";
 import pc from "picocolors";
-import preserveDirectives from "rollup-preserve-directives";
 import { InlineConfig } from "vite";
 import inspect from "vite-plugin-inspect";
 
-import { mdxOptions } from "~/mdx/plugins";
 import { fatal, info, warning } from "~/utils/logs";
 
 import blocklyBlocks from "./blockly-blocks";
 import blocklyMedia from "./blockly-media";
+import directives from "./directives";
 import images from "./images";
+import mdx from "./mdx";
 import python from "./python";
 import resolveContests from "./resolve-contests";
 import routes from "./routes";
@@ -45,7 +44,7 @@ export default function configs(
         "~": root,
         vm: "vm-browserify",
       },
-      dedupe: ["react", "react-dom", "@mdx-js/react", "wouter"],
+      dedupe: ["react", "react-dom", "wouter"],
       extensions: [".js", ".jsx", ".ts", ".tsx", ".md", ".mdx"],
     },
     define: {
@@ -54,10 +53,10 @@ export default function configs(
     plugins: [
       blocklyBlocks(),
       blocklyMedia(),
+      directives(),
       images(),
       inspect(),
-      { enforce: "pre", ...mdxPlugin({ ...mdxOptions, ...options?.mdx }) },
-      preserveDirectives(),
+      mdx(options?.mdx),
       python(),
       react({ plugins: swcPlugins }),
       routes(),
@@ -95,6 +94,9 @@ export default function configs(
     },
     css: {
       preprocessorMaxWorkers: true,
+    },
+    json: {
+      stringify: true,
     },
     clearScreen: false,
     server: {

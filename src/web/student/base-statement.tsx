@@ -3,7 +3,7 @@ import { ReactNode, Suspense, useMemo } from "react";
 import { WithinTimeRange } from "@olinfo/react-components";
 import { addMilliseconds } from "date-fns";
 
-import { Loading, Timer } from "~/components";
+import { Loading, Timer } from "~/web/components";
 import { useStudent } from "~/web/student/provider";
 
 export function BaseStatement({ children }: { children: ReactNode }) {

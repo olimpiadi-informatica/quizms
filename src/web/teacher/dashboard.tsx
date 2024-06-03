@@ -17,8 +17,8 @@ import { saveAs } from "file-saver";
 import { range } from "lodash-es";
 import { Link } from "wouter";
 
-import { Timer } from "~/components";
 import { randomToken } from "~/utils/random";
+import { Timer } from "~/web/components";
 
 import { Announcements } from "./dashboard-announcements";
 import { StudentRestoreList } from "./dashboard-student-restore";

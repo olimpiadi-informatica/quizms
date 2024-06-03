@@ -13,8 +13,8 @@ import { LogOut } from "lucide-react";
 import { ErrorBoundary } from "react-error-boundary";
 import { Link, useLocation, useRoute } from "wouter";
 
-import { Error, Loading } from "~/components";
 import { Contest } from "~/models";
+import { Error, Loading } from "~/web/components";
 
 type Props = {
   name: string;
@@ -50,7 +50,7 @@ export function AdminLayout({ name, contests, logout, children }: Props) {
                         <Link
                           className={clsx(contest.id === c.id && "active")}
                           href={`/${c.id}/${params!["*"]}`}>
-                          {contests.find((c) => c.id === contest.id)?.name}
+                          {c.name}
                         </Link>
                       </li>
                     ))}

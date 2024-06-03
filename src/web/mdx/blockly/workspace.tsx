@@ -17,14 +17,13 @@ import {
   XCircle,
 } from "lucide-react";
 
-import { Loading } from "~/components";
-import { useContest } from "~/mdx/components/contest";
-import { useProblem } from "~/mdx/components/problem";
+import { Loading } from "~/web/components";
+import { useContest } from "~/web/mdx/contest";
+import { useProblem } from "~/web/mdx/problem";
 import { useStudent } from "~/web/student/provider";
 
 import Debug from "./debug";
 import { defaultInitialBlocks, defaultToolbox } from "./default-blocks";
-import { InitProps } from "./editor";
 import useExecutor from "./executor";
 import { BlocklyInterpreter } from "./interpreter";
 import useIcp from "./ipc";
@@ -54,7 +53,7 @@ type TestcaseStatus = {
   msg?: string;
 };
 
-export default function Workspace({
+export function Blockly({
   toolbox,
   initialBlocks,
   testcases,
@@ -122,7 +121,7 @@ export default function Workspace({
           initialBlocks: blocks,
           customBlocks,
           readonly: terminated,
-        } as InitProps);
+        });
         break;
       }
       case "ready": {
@@ -228,7 +227,7 @@ export default function Workspace({
                 setPlaying(false);
               }}
               className={clsx(
-                "btn join-item z-10 rounded-lg",
+                "btn join-item z-10",
                 !editing && "tooltip",
                 index === testcaseIndex && "btn-info",
               )}
@@ -343,7 +342,7 @@ const Editor = forwardRef(function Editor(
     <div className="relative flex grow flex-col overflow-hidden rounded-xl border-2 border-[#c6c6c6]">
       <iframe
         ref={ref}
-        src="/__blockly_iframe/"
+        src={import.meta.env.BASE_URL + "__blockly_iframe/"}
         className="grow"
         title="Area di lavoro di Blockly"
         loading="lazy"

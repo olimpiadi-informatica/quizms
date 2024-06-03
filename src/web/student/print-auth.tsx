@@ -3,7 +3,6 @@ import { ReactNode } from "react";
 import contests from "virtual:quizms-contests";
 
 import { Participation, Student } from "~/models";
-import { GenerationConfig } from "~/models/generation-config";
 
 import { StudentProvider, useStudent } from "./provider";
 import { RemoteStatement } from "./remote-statement";
@@ -16,7 +15,7 @@ export function PrintAuth({ children }: AuthProps) {
   const urlParams = new URLSearchParams(window.location.search);
   const variant = urlParams.get("v");
 
-  const allContests = contests() as GenerationConfig[];
+  const allContests = contests();
   const contest = allContests.find(
     (c) => c.variantIds.includes(variant!) || c.pdfVariantIds.includes(variant!),
   );

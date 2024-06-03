@@ -1,4 +1,5 @@
 import { CompileOptions } from "@mdx-js/mdx";
+import mdxPlugin from "@mdx-js/rollup";
 import remarkFrontmatter from "remark-frontmatter";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
@@ -6,6 +7,7 @@ import remarkMdxFrontmatter from "remark-mdx-frontmatter";
 import remarkMdxMathEnhancedPlugin from "remark-mdx-math-enhanced";
 import remarkSmartypants from "remark-smartypants";
 import { PluggableList } from "unified";
+import { PluginOption } from "vite";
 
 import recmaRemoveExports from "./recma-remove-exports";
 import recmaVariants from "./recma-variants";
@@ -16,7 +18,7 @@ import remarkImages from "./remark-images";
 import remarkMermaid from "./remark-mermaid";
 import remarkProblemIds from "./remark-problem-ids";
 
-export const remarkPlugins: PluggableList = [
+const remarkPlugins: PluggableList = [
   remarkAnswers,
   remarkFrontmatter,
   remarkGfm,
@@ -25,20 +27,26 @@ export const remarkPlugins: PluggableList = [
   remarkMath,
   remarkMdxFrontmatter,
   remarkImages,
-  [remarkMdxMathEnhancedPlugin, { component: "MathExpr" }],
+  [remarkMdxMathEnhancedPlugin, { component: "Equation" }],
   remarkProblemIds,
   [remarkSmartypants, { dashes: "oldschool" }],
 ];
 
-export const rehypePlugins: PluggableList = [rehypeFixWrap];
+const rehypePlugins: PluggableList = [rehypeFixWrap];
 
-export const recmaPlugins: PluggableList = [recmaRemoveExports, recmaVariants];
+const recmaPlugins: PluggableList = [recmaRemoveExports, recmaVariants];
 
-export const mdxOptions: CompileOptions = {
-  remarkPlugins,
-  rehypePlugins,
-  recmaPlugins,
-  providerImportSource: "@mdx-js/react",
-  format: "mdx",
-  mdxExtensions: [".md", ".mdx"],
-};
+export default function mdx(options?: CompileOptions): PluginOption {
+  return {
+    enforce: "pre",
+    ...mdxPlugin({
+      remarkPlugins,
+      rehypePlugins,
+      recmaPlugins,
+      providerImportSource: "@olinfo/quizms/internal/mdx-components",
+      format: "mdx",
+      mdxExtensions: [".md", ".mdx"],
+      ...options,
+    }),
+  };
+}

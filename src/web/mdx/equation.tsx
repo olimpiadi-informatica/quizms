@@ -9,7 +9,7 @@ type MathProps = {
   children: string;
 };
 
-export default function Math({ display, children }: MathProps) {
+export function Equation({ display, children }: MathProps) {
   const ref = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {

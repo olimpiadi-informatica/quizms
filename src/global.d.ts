@@ -9,6 +9,7 @@ declare module "js-interpreter" {
     createNativeFunction(fn: (...args: any[]) => any): any;
 
     nativeToPseudo(value: any): any;
+
     pseudoToNative(value: any): any;
 
     setProperty(object: any, name: string, value: any): void;
@@ -24,6 +25,8 @@ declare module "*.rules" {
   export default path;
 }
 
-declare module "virtual:*" {
-  export default any;
+declare module "virtual:quizms-contests" {
+  import { GenerationConfig } from "~/models/generation-config";
+
+  export default function contests(): GenerationConfig[];
 }

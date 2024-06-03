@@ -15,9 +15,8 @@ import { sumBy } from "lodash-es";
 import { FileBarChart2, LogOut, RotateCcw } from "lucide-react";
 import { ErrorBoundary } from "react-error-boundary";
 
-import { Error, Progress, Timer } from "~/components";
-import Prose from "~/mdx/components/prose";
 import { Schema, problemScore, score } from "~/models";
+import { Error, Progress, Prose, Timer } from "~/web/components";
 
 import { useStudent } from "./provider";
 
@@ -65,7 +64,11 @@ export function StudentLayout({ children }: { children: ReactNode }) {
             {terminated || !participation.startingTime || !contest.duration ? (
               <span className="font-mono">00:00</span>
             ) : (
-              <Timer startTime={participation.startingTime} duration={contest.duration} />
+              <Timer
+                startTime={participation.startingTime}
+                duration={contest.duration}
+                noAnimation
+              />
             )}
           </div>
           {terminated && reset ? (

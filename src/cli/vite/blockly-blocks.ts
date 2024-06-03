@@ -2,9 +2,10 @@ import { readFile } from "node:fs/promises";
 
 import { load } from "js-yaml";
 import { PluginOption } from "vite";
-import { fromError } from "zod-validation-error";
+import { ZodError } from "zod";
+import { fromZodError } from "zod-validation-error";
 
-import { customBlockSchema } from "~/mdx/components/blockly/custom-block";
+import { customBlockSchema } from "~/models/blockly-custom-block";
 
 export default function blocklyBlocks(): PluginOption {
   return {
@@ -19,11 +20,11 @@ export default function blocklyBlocks(): PluginOption {
       try {
         const blocks = await customBlockSchema.array().parseAsync(yaml);
         return {
-          code: `const blocks = ${JSON.stringify(blocks)}; export default blocks;`,
+          code: `export default JSON.parse(${JSON.stringify(JSON.stringify(blocks))});`,
           map: { mappings: "" },
         };
       } catch (err) {
-        throw fromError(err, {
+        throw fromZodError(err as ZodError, {
           prefix: "Invalid custom block definition",
         });
       }
