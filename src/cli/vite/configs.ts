@@ -17,6 +17,7 @@ import images from "./images";
 import mdx from "./mdx";
 import python from "./python";
 import resolveContests from "./resolve-contests";
+import resolveMdxComponents from "./resolve-mdx-components";
 import routes from "./routes";
 
 type Options = {
@@ -58,9 +59,10 @@ export default function configs(
       inspect(),
       mdx(options?.mdx),
       python(),
-      react({ plugins: swcPlugins }),
+      react(),
       routes(),
       resolveContests(),
+      resolveMdxComponents(),
     ],
     build: {
       rollupOptions: {
@@ -107,14 +109,3 @@ export default function configs(
     },
   };
 }
-
-const swcPlugins: [string, Record<string, any>][] = [
-  [
-    "@swc/plugin-transform-imports",
-    {
-      problemset: {
-        transform: "./{{ kebabCase member }}/question",
-      },
-    },
-  ],
-];

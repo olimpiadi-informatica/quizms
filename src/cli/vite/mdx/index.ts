@@ -43,7 +43,7 @@ export default function mdx(options?: CompileOptions): PluginOption {
       remarkPlugins,
       rehypePlugins,
       recmaPlugins,
-      providerImportSource: "@olinfo/quizms/internal/mdx-components",
+      providerImportSource: "virtual:quizms-mdx-components",
       format: "mdx",
       mdxExtensions: [".md", ".mdx"],
       ...options,
