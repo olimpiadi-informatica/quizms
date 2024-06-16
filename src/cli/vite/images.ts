@@ -39,12 +39,11 @@ export default function images(): PluginOption {
 
   return {
     name: "quizms:optimize-image",
-    enforce: "pre",
     configResolved({ command }) {
       isBuild = command === "build";
     },
-    async load(rawPath) {
-      const [pathname, query] = rawPath.split("?");
+    async transform(_code, id) {
+      const [pathname, query] = id.split("?");
       const params = new URLSearchParams(query);
       const ext = path.extname(pathname);
 
