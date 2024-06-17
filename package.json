@@ -63,6 +63,7 @@
     "file-saver": "^2.0",
     "firebase": "^10.6",
     "firebase-admin": "^12.0",
+    "image-size": "^1.1",
     "js-interpreter": "^5.0",
     "katex": "^0.16",
     "lodash-es": "^4.17",

@@ -1,26 +1,17 @@
-import child_process from "node:child_process";
-import fs from "node:fs/promises";
-import { platform } from "node:os";
+import { readFile } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
-import { promisify } from "node:util";
 
-import { isPlainObject, stubFalse, stubTrue } from "lodash-es";
+import sizeOf from "image-size";
 import svgToMiniDataURI from "mini-svg-data-uri";
 import { PluginContext } from "rollup";
 import sharp, { ResizeOptions } from "sharp";
-import { CustomPlugin as SvgoPlugin, optimize } from "svgo";
-import { temporaryFile, temporaryWrite } from "tempy";
+import { optimize } from "svgo";
 import { PluginOption } from "vite";
-
-import { jsToAsy } from "./asymptote";
-import { executePython } from "./python";
-
-const execFile = promisify(child_process.execFile);
 
 const imageExtensions = new Set([".png", ".jpg", ".jpeg", ".tiff", ".gif", ".webp", ".avif"]);
 
-type ImageOptions = ResizeOptions | { scale: number };
+type ImageOptions = ResizeOptions & { scale?: number };
 
 type SvgImage = {
   format: ".svg";
@@ -38,143 +29,58 @@ export default function images(): PluginOption {
   let isBuild = true;
 
   return {
-    name: "quizms:optimize-image",
+    name: "quizms:images",
     configResolved({ command }) {
       isBuild = command === "build";
     },
-    async transform(_code, id) {
+    load: {
+      order: "pre",
+      handler(id) {
+        const [pathname, query] = id.split("?");
+        const params = new URLSearchParams(query);
+        const ext = path.extname(pathname);
+        if (
+          (imageExtensions.has(ext) || ext === ".svg" || ext === ".asy") &&
+          !params.has("url") &&
+          !params.has("raw")
+        ) {
+          return readFile(pathname, "utf8");
+        }
+      },
+    },
+    async transform(code, id) {
       const [pathname, query] = id.split("?");
       const params = new URLSearchParams(query);
       const ext = path.extname(pathname);
 
-      if (params.has("url") || params.has("raw")) return;
+      if (params.has("url") || params.has("raw") || params.has("v")) return;
 
-      const width = params.has("w") ? Number(params.get("w")) : undefined;
-      const height = params.has("h") ? Number(params.get("h")) : undefined;
-      const scale = params.has("s") ? Number(params.get("s")) : undefined;
-      const options: ImageOptions = scale ? { scale } : { width, height };
+      const options: ImageOptions = {
+        scale: Number(params.get("s")),
+        width: Number(params.get("w")),
+        height: Number(params.get("h")),
+      };
 
-      if (ext === ".asy") {
-        if (params.has("v")) {
-          return await transformAsymptoteVariants(pathname, params);
-        }
+      let image: Image | undefined;
 
-        const imports = await findAsymptoteDependencies(pathname);
-        const header = imports.map((f) => `import "${f}?url";`).join("\n");
-
-        const inject = params.get("inject");
-
-        const image = await transformAsymptote(pathname, options, inject);
-        return emitFile(this, pathname, image, isBuild, header);
+      if (ext === ".svg" || ext === ".asy") {
+        image = await transformSvg(pathname, code, options);
       }
-
-      if (ext === ".svg") {
-        const image = await transformSvg(pathname, options);
-        return emitFile(this, pathname, image, isBuild);
-      }
-
       if (imageExtensions.has(ext)) {
-        const image = await transformImage(pathname, options);
-        return emitFile(this, pathname, image, isBuild);
+        image = await transformImage(pathname, options);
+      }
+
+      if (image) {
+        return {
+          code: emitFile(this, pathname, image, isBuild),
+          map: { mappings: "" },
+        };
       }
     },
   };
 }
 
-async function transformAsymptoteVariants(
-  fileName: string,
-  params: URLSearchParams,
-): Promise<string> {
-  const variantFile = path.join(path.dirname(fileName), params.get("v")!);
-  const variants = await executePython(variantFile);
-
-  if (!Array.isArray(variants) || !isPlainObject(variants[0])) {
-    throw new TypeError("Variant file must export an array of objects");
-  }
-
-  params.delete("v");
-
-  const imports = variants
-    .map((v, i) => {
-      const inject = Object.entries(v)
-        .map(([key, val]) => jsToAsy(key, val))
-        .join("\n");
-
-      params.set("inject", inject);
-
-      return `import img_${i} from "${fileName}?${params.toString()}";`;
-    })
-    .join("\n");
-
-  return `${imports}
-import "${variantFile}?url";
-
-const variants = [${variants.map((_, i) => `img_${i}`).join(", ")}];
-
-export default function img(variant) {
-  return variants[variant];
-}
-`;
-}
-
-async function transformAsymptote(
-  fileName: string,
-  options: ImageOptions,
-  inject: string | null,
-): Promise<Image> {
-  const svgFile = temporaryFile({ extension: "svg" });
-
-  // ????????? https://github.com/vitejs/vite/pull/2614
-  while (inject?.includes("%")) {
-    inject = decodeURIComponent(inject);
-  }
-
-  const injectFile = await temporaryWrite(inject ?? "", { extension: "asy" });
-
-  try {
-    if (platform() === "darwin") {
-      const pdfFile = temporaryFile({ extension: "pdf" });
-      await execFile(
-        "asy",
-        [fileName, "-f", "pdf", "-autoimport", injectFile, "-o", pdfFile.replace(/\.pdf$/, "")],
-        { cwd: path.dirname(fileName) },
-      );
-
-      await execFile("pdf2svg", [pdfFile, svgFile]);
-      await fs.unlink(pdfFile);
-    } else {
-      await execFile(
-        "asy",
-        [
-          fileName,
-          "-f",
-          "svg",
-          "-tex",
-          "pdflatex",
-          "-autoimport",
-          injectFile,
-          "-o",
-          svgFile.replace(/\.svg/, ""),
-        ],
-        { cwd: path.dirname(fileName) },
-      );
-    }
-  } catch (err: any) {
-    throw new Error(`Failed to compile asymptote:\n${err.stderr}`);
-  }
-
-  const image = await transformSvg(svgFile, options);
-  await fs.unlink(svgFile);
-  // await fs.unlink(injectFile);
-
-  return image;
-}
-
-async function transformSvg(fileName: string, options: ImageOptions): Promise<Image> {
-  const content = await fs.readFile(fileName, { encoding: "utf8" });
-
-  const originalSize: { width?: number; height?: number } = {};
-
+async function transformSvg(id: string, content: string, options: ImageOptions): Promise<Image> {
   const { data } = optimize(content, {
     multipass: true,
     plugins: [
@@ -191,25 +97,22 @@ async function transformSvg(fileName: string, options: ImageOptions): Promise<Im
           },
         },
       },
-      sizePlugin(originalSize),
     ],
-    path: fileName,
+    path: id,
   });
 
-  if (!originalSize.width || !originalSize.height) {
-    throw new Error(`Unable to determine size of SVG image: ${fileName}`);
+  let { width, height } = sizeOf(Buffer.from(data, "utf8"));
+  if (!width || !height) {
+    throw new Error(`Unable to determine size of SVG image`);
   }
 
-  let width: number, height: number;
-  if ("scale" in options) {
-    width = originalSize.width * options.scale;
-    height = originalSize.height * options.scale;
+  if (options.scale) {
+    width *= options.scale;
+    height *= options.scale;
   } else if (options.width || options.height) {
-    width = options.width || (options.height! * originalSize.width) / originalSize.height;
-    height = options.height || (options.width! * originalSize.height) / originalSize.width;
-  } else {
-    width = originalSize.width;
-    height = originalSize.height;
+    const aspectRatio = width / height;
+    width = options.width || options.height! * aspectRatio;
+    height = options.height || options.width! / aspectRatio;
   }
 
   return { format: ".svg", data, width, height };
@@ -218,14 +121,15 @@ async function transformSvg(fileName: string, options: ImageOptions): Promise<Im
 async function transformImage(fileName: string, options: ImageOptions): Promise<Image> {
   let process = sharp(fileName).webp();
 
-  if ("scale" in options) {
-    const metadata = await sharp(fileName).metadata();
-    options = {
-      width: metadata.width! * options.scale,
-    };
+  if (options.scale) {
+    const size = sizeOf(fileName);
+    options.width = Math.round(size.width! * options.scale);
+    options.height = Math.round(size.height! * options.scale);
   }
 
   if (options.width || options.height) {
+    options.width ||= undefined;
+    options.height ||= undefined;
     process = process.resize(options);
   }
 
@@ -238,13 +142,7 @@ async function transformImage(fileName: string, options: ImageOptions): Promise<
   };
 }
 
-function emitFile(
-  ctx: PluginContext,
-  fileName: string,
-  image: Image,
-  isBuild: boolean,
-  header?: string,
-) {
+function emitFile(ctx: PluginContext, fileName: string, image: Image, isBuild: boolean) {
   let src: string;
   if (isBuild && process.env.QUIZMS_MODE !== "contest" && process.env.QUIZMS_MODE !== "pdf") {
     const id = ctx.emitFile({
@@ -259,75 +157,10 @@ function emitFile(
     src = `"data:image/webp;base64,${image.data.toString("base64")}"`;
   }
 
-  return `${header ?? ""}
-const image = {
+  return `\
+export default {
   src: ${src},
   width: ${image.width},
   height: ${image.height},
-};
-export default image;`;
-}
-
-async function findAsymptoteDependencies(asyPath: string) {
-  const imports = new Set<string>();
-  const newImports: string[] = [asyPath];
-
-  while (newImports.length > 0) {
-    const file = newImports.pop()!;
-    if (imports.has(file)) continue;
-    imports.add(file);
-
-    const content = await fs.readFile(file, { encoding: "utf8" });
-
-    const matches = content.matchAll(
-      /^(?:access|from|import|include)\s+(?:"([^\n"]+)"|([^\s"]+);)/gm,
-    );
-    for (const match of matches) {
-      const matchPath = match[1] ?? match[2];
-      const matchFile = path.format({
-        dir: path.join(path.dirname(file), path.dirname(matchPath)),
-        name: path.basename(matchPath, ".asy"),
-        ext: ".asy",
-      });
-
-      const exists = await fs.access(matchFile).then(stubTrue, stubFalse);
-      if (exists) newImports.push(matchFile);
-    }
-  }
-
-  imports.delete(asyPath);
-  return [...imports];
-}
-
-function sizePlugin(out: { width?: number; height?: number }): SvgoPlugin {
-  return {
-    name: "size",
-    fn: () => ({
-      element: {
-        enter: (node) => {
-          if (node.name === "svg") {
-            out.width = convertUnit(node.attributes.width);
-            out.height = convertUnit(node.attributes.height);
-          }
-        },
-      },
-    }),
-  };
-}
-
-function convertUnit(length: string | undefined): number | undefined {
-  const match = length?.match(/^(\d+(?:\.\d+)?)(in|cm|mm|pt|pc|px)?$/);
-  if (!match) return;
-
-  const PPI = 96;
-  const conversion = {
-    in: PPI,
-    cm: PPI / 2.54,
-    mm: PPI / 25.4,
-    pt: PPI / 72,
-    pc: PPI / 6,
-    px: 1,
-  };
-
-  return Number(match[1]) * conversion[(match[2] as keyof typeof conversion) ?? "px"];
+};`;
 }

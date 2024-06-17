@@ -10,6 +10,7 @@ import inspect from "vite-plugin-inspect";
 
 import { fatal, info, warning } from "~/utils/logs";
 
+import asymptote from "./asymptote";
 import blocklyBlocks from "./blockly-blocks";
 import blocklyMedia from "./blockly-media";
 import directives from "./directives";
@@ -52,6 +53,7 @@ export default function configs(
       "process.env.NODE_ENV": JSON.stringify(mode),
     },
     plugins: [
+      asymptote(),
       blocklyBlocks(),
       blocklyMedia(),
       directives(),
