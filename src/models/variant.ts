@@ -26,11 +26,10 @@ export type Schema = Variant["schema"];
 
 export const variantMappingSchema = z.object({ id: z.string(), variant: z.string() });
 
-export function score(student: Student, variants: Record<string, Variant>) {
+export function calcScore(student: Student, schema?: Schema) {
   if (student.absent || student.disabled) return;
 
   const answers = student.answers;
-  const schema = variants[student.variant!]?.schema;
 
   if (!schema || !answers) return;
 
@@ -41,7 +40,7 @@ export function score(student: Student, variants: Record<string, Variant>) {
     const problem = schema[id];
     const answer = answers[id]?.toString()?.trim();
 
-    const problemPoints = problemScore(problem, answer);
+    const problemPoints = calcProblemScore(problem, answer);
     if (problemPoints === undefined) return;
     points += problemPoints;
   }
@@ -49,7 +48,7 @@ export function score(student: Student, variants: Record<string, Variant>) {
   return points;
 }
 
-export function problemScore(problem: Schema[string], answer?: string) {
+export function calcProblemScore(problem: Schema[string], answer?: string) {
   if (problem.type === "points") {
     return Number(answer || 0);
   }

@@ -10,7 +10,7 @@ import {
 
 import { isEqual } from "lodash-es";
 
-import { Contest, Participation, Schema, Student } from "~/models";
+import { Contest, Participation, Schema, Student, calcScore } from "~/models";
 
 import { StudentLayout } from "./layout";
 
@@ -42,6 +42,7 @@ const StudentContext = createContext<StudentContextProps>({} as StudentContextPr
 StudentContext.displayName = "StudentContext";
 
 export function StudentProvider({
+  setStudent,
   children,
   ...props
 }: StudentProviderProps & {
@@ -51,20 +52,23 @@ export function StudentProvider({
 
   const value: StudentContextProps = {
     ...props,
+    setStudent: (student) => setStudent({ ...student, score: calcScore(student, schema) }),
     terminated: props.terminated || !!props.student.submittedAt,
     schema,
     registerSchema,
   };
 
   useEffect(() => {
+    let maxScore = 0;
     const answers = { ...props.student.answers };
     for (const id in schema) {
+      maxScore += schema[id].pointsCorrect ?? 0;
       answers[id] ??= undefined;
     }
-    if (!isEqual(answers, props.student.answers)) {
-      props.setStudent({ ...props.student, answers });
+    if (maxScore !== props.student.maxScore || !isEqual(answers, props.student.answers)) {
+      setStudent({ ...props.student, maxScore, answers });
     }
-  }, [props, schema]);
+  }, [props, setStudent, schema]);
 
   return (
     <StudentContext.Provider value={value}>

@@ -25,9 +25,9 @@ import {
   Contest,
   Student,
   Variant,
+  calcScore,
   formatPersonalInformation,
   parsePersonalInformation,
-  score,
 } from "~/models";
 import { randomId } from "~/utils/random";
 import { Loading } from "~/web/components";
@@ -367,6 +367,7 @@ function Table() {
       student = cloneDeep(student);
       set(student, ev.colDef.field!, value);
     }
+    student.score = calcScore(student, variants[student.variant!]?.schema);
     await setStudentAndUpdateId(student);
 
     ev.api.refreshCells({ force: true });
@@ -497,10 +498,10 @@ function columnDefinition(contest: Contest, variants: Record<string, Variant>): 
       };
     }),
     {
+      field: "score",
       headerName: "Punti",
       pinned: "right",
       width: 100,
-      valueGetter: ({ data }) => (isStudentEmpty(data) ? "" : score(data, variants)),
       ...defaultOptions,
     },
     {

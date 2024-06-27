@@ -3,26 +3,20 @@ import { Ref, forwardRef } from "react";
 import { saveAs } from "file-saver";
 import { unparse as stringifyCSV } from "papaparse";
 
-import { Contest, Student, Variant, formatPersonalInformation, score } from "~/models";
+import { Contest, Student, formatPersonalInformation } from "~/models";
 
 import { useTeacher, useTeacherStudents } from "./provider";
 
 const Exporter = forwardRef(function Exporter(_, ref: Ref<HTMLButtonElement> | null) {
-  const { contest, variants } = useTeacher();
+  const { contest } = useTeacher();
   const [students] = useTeacherStudents();
 
-  return (
-    <button
-      ref={ref}
-      className="hidden"
-      onClick={() => exportStudents(students, contest, variants)}
-    />
-  );
+  return <button ref={ref} className="hidden" onClick={() => exportStudents(students, contest)} />;
 });
 
 export default Exporter;
 
-function exportStudents(students: Student[], contest: Contest, variants: Record<string, Variant>) {
+function exportStudents(students: Student[], contest: Contest) {
   const flatStudents = students
     .filter((student) => !student.disabled)
     .map((student) => {
@@ -30,7 +24,7 @@ function exportStudents(students: Student[], contest: Contest, variants: Record<
         ...contest.personalInformation.map((field) => formatPersonalInformation(student, field)),
         ...(contest.hasVariants ? [student.variant] : []),
         ...contest.problemIds.map((id) => student.answers?.[id]),
-        student.absent ? "" : score(student, variants),
+        student.score ?? "",
       ];
     });
 

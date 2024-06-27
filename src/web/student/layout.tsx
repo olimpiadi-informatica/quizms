@@ -1,4 +1,4 @@
-import React, { ReactNode, Ref, forwardRef, useEffect, useMemo, useRef } from "react";
+import React, { ReactNode, Ref, forwardRef, useEffect, useRef } from "react";
 
 import {
   Button,
@@ -15,7 +15,7 @@ import { sumBy } from "lodash-es";
 import { FileBarChart2, LogOut, RotateCcw } from "lucide-react";
 import { ErrorBoundary } from "react-error-boundary";
 
-import { Schema, problemScore, score } from "~/models";
+import { Schema, calcProblemScore } from "~/models";
 import { Error, Progress, Prose, Timer } from "~/web/components";
 
 import { useStudent } from "./provider";
@@ -148,24 +148,15 @@ const CompletedModal = forwardRef(function CompletedModal(
   const problems = Object.keys(schema);
   problems.sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
 
-  const points = useMemo(() => {
-    const variant = {
-      id: student.variant!,
-      contestId: student.contestId!,
-      schema,
-    };
-    return score(student, { [variant.id]: variant });
-  }, [schema, student]);
-
   const maxPoints = sumBy(Object.values(schema), "pointsCorrect");
 
   return (
     <Modal ref={ref} title="Prova terminata">
       <p>La prova è terminata.</p>
-      {points !== undefined && (
+      {student.score !== undefined && (
         <>
           <p>
-            Hai ottenuto un punteggio di <b>{points}</b> su <b>{maxPoints}</b>.
+            Hai ottenuto un punteggio di <b>{student.score}</b> su <b>{maxPoints}</b>.
           </p>
           <table className="table table-sm mt-4">
             <thead>
@@ -185,7 +176,7 @@ const CompletedModal = forwardRef(function CompletedModal(
                     <td>{problem}</td>
                     <td>{answer ?? "-"}</td>
                     <td>{problemSchema.optionsCorrect?.join(", ")}</td>
-                    <td>{problemScore(problemSchema, answer)}</td>
+                    <td>{calcProblemScore(problemSchema, answer)}</td>
                   </tr>
                 );
               })}
