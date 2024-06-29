@@ -1,7 +1,4 @@
 import { ReactNode, SetStateAction, useCallback, useMemo, useState } from "react";
-
-import { useIsAfter } from "@olinfo/react-components";
-import { addMinutes } from "date-fns";
 import { isFunction } from "lodash-es";
 
 import { Contest, Participation, Student } from "~/models";
@@ -24,13 +21,6 @@ export function NoAuth({ contestName, duration, children }: AuthProps) {
     answers: {},
     variant: "0",
   });
-
-  const endTime = useMemo(
-    () => student.startedAt && addMinutes(student.startedAt, duration),
-    [student.startedAt, duration],
-  );
-
-  const terminated = useIsAfter(endTime) ?? false;
 
   const mockContest: Contest = {
     id: "",
@@ -61,13 +51,15 @@ export function NoAuth({ contestName, duration, children }: AuthProps) {
   };
 
   const reset = useCallback(async () => {
-    setStudent((student) => ({
-      ...student,
-      answers: {},
-      extraData: {},
-      startedAt: undefined,
-      submittedAt: undefined,
-    }));
+    setStudent(
+      (student): Student => ({
+        ...student,
+        answers: {},
+        extraData: {},
+        startedAt: undefined,
+        finishedAt: undefined,
+      }),
+    );
   }, [setStudent]);
 
   return (
@@ -76,8 +68,7 @@ export function NoAuth({ contestName, duration, children }: AuthProps) {
       participation={mockParticipation}
       student={student}
       setStudent={setStudent}
-      reset={reset}
-      terminated={terminated}>
+      reset={reset}>
       {children}
     </StudentProvider>
   );

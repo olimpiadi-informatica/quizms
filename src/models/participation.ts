@@ -8,6 +8,7 @@ export const participationSchema = z.object({
   teacher: z.string(),
   token: z.string().optional(),
   startingTime: z.date().optional(),
+  endingTime: z.date().optional(),
   finalized: z.boolean().default(false),
   pdfVariants: z.array(z.coerce.string()).optional(),
 });
@@ -19,6 +20,7 @@ export const participationMappingSchema = z.object({
   participationId: z.string(),
   contestId: z.string(),
   startingTime: z.date(),
+  endingTime: z.date(),
 });
 
 export type ParticipationMapping = z.infer<typeof participationMappingSchema>;

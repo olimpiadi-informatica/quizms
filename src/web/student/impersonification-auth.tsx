@@ -23,10 +23,9 @@ export function ImpersonificationAuth({ children }: { children: ReactNode }) {
         <StudentProvider
           contest={contest}
           participation={participation}
-          student={student}
+          student={{ ...student, finishedAt: new Date(0) }}
           setStudent={() => {}}
-          reset={() => {}}
-          terminated={true}>
+          reset={() => {}}>
           {children}
         </StudentProvider>
       </div>

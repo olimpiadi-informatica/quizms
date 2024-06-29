@@ -117,6 +117,7 @@ async function createStudent(db: Firestore, student: Student) {
   }
   student.participationId = participationMappingData.participationId;
   student.startedAt = participationMappingData.startingTime;
+  student.finishedAt = participationMappingData.endingTime;
 
   // Try to create the new student:
   // - check that there is no identical hash already in "studentMappingHash"

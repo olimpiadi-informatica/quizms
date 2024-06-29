@@ -13,16 +13,16 @@ export const studentSchema = z
     contestId: z.string(),
     token: z.string(),
     startedAt: z.date(),
+    finishedAt: z.date(),
 
     variant: z.string(),
     answers: z.record(z.union([z.string(), z.number(), z.undefined()])), // undefined means blank
-    score: z.number().optional(),
-    maxScore: z.number().optional(),
-    extraData: z.record(z.any()).optional(),
+    score: z.number(),
+    maxScore: z.number(),
+    extraData: z.record(z.any()),
 
     createdAt: z.coerce.date(),
     updatedAt: z.date(),
-    submittedAt: z.date().optional(),
   })
   .partial()
   .extend({

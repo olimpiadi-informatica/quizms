@@ -25,7 +25,7 @@ import { StudentRestoreList } from "./dashboard-student-restore";
 import { useTeacher } from "./provider";
 
 function StartContestButton() {
-  const { participation, setParticipation } = useTeacher();
+  const { contest, participation, setParticipation } = useTeacher();
 
   const modalRef = useRef<HTMLDialogElement>(null);
 
@@ -34,7 +34,8 @@ function StartContestButton() {
   const start = async () => {
     const token = await randomToken();
     const startingTime = roundToNearestMinutes(addSeconds(Date.now(), 3.5 * 60));
-    await setParticipation({ ...participation, token, startingTime });
+    const endingTime = addMinutes(startingTime, contest.duration ?? 0);
+    await setParticipation({ ...participation, token, startingTime, endingTime });
     close();
   };
 
@@ -63,7 +64,12 @@ function StopContestButton() {
   const close = () => modalRef.current?.close();
 
   const undoContestStart = async () => {
-    await setParticipation({ ...participation, token: undefined, startingTime: undefined });
+    await setParticipation({
+      ...participation,
+      token: undefined,
+      startingTime: undefined,
+      endingTime: undefined,
+    });
     close();
   };
 
@@ -85,11 +91,10 @@ function StopContestButton() {
   );
 }
 
-function ContestData({ startingTime }: { startingTime: Date }) {
-  const { contest, participation } = useTeacher();
+function ContestData({ startingTime, endingTime }: { startingTime: Date; endingTime: Date }) {
+  const { participation } = useTeacher();
 
-  const undoEnd = subMinutes(startingTime, 1);
-  const contestEnd = addMinutes(startingTime, contest.duration!);
+  const undoEnd = subMinutes(startingTime!, 1);
 
   return (
     <div className="flex flex-col gap-2">
@@ -110,21 +115,21 @@ function ContestData({ startingTime }: { startingTime: Date }) {
           </p>
         </WithinTimeRange>
       </WithinTimeRange>
-      <WithinTimeRange start={startingTime} end={contestEnd}>
+      <WithinTimeRange start={startingTime} end={endingTime}>
         <p>
           <b>Codice:</b> <span className="font-mono">{participation.token}</span>
         </p>
         <p>
-          La gara terminerà alle <DateTime date={contestEnd} dateStyle="hidden" />.
+          La gara terminerà alle <DateTime date={endingTime} dateStyle="hidden" />.
         </p>
         <p>
-          Tempo rimanente: <Timer endTime={contestEnd} />
+          Tempo rimanente: <Timer endTime={endingTime} />
         </p>
         <div className="mx-auto flex flex-col items-center justify-center gap-2 text-2xl">
           Gara iniziata alle ore <DateTime date={startingTime} dateStyle="hidden" />.
         </div>
       </WithinTimeRange>
-      <WithinTimeRange start={contestEnd}>
+      <WithinTimeRange start={endingTime}>
         <p>
           Gara iniziata alle ore <DateTime date={startingTime} dateStyle="hidden" />.
         </p>
@@ -181,8 +186,11 @@ export default function TeacherDashboard() {
         <CardBody title="Gestione Gara">
           {/* contest data */}
           {contest.hasOnline &&
-            (participation.startingTime ? (
-              <ContestData startingTime={participation.startingTime} />
+            (participation.startingTime && participation.endingTime ? (
+              <ContestData
+                startingTime={participation.startingTime}
+                endingTime={participation.endingTime}
+              />
             ) : (
               <p>La gara non è ancora iniziata!</p>
             ))}

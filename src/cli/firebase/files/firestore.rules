@@ -53,7 +53,7 @@ service cloud.firestore {
             }
 
             allow read: if isAuthenticated(resource.data.teacher) || isStudentParticipation();
-            allow update: if isAuthenticated(resource.data.teacher) && affectedKeys().hasOnly(['token', 'startingTime', 'finalized']);
+            allow update: if isAuthenticated(resource.data.teacher) && affectedKeys().hasOnly(['token', 'startingTime', 'endingTime', 'finalized']);
         }
 
         match /participationMapping/{token} {
@@ -62,6 +62,7 @@ service cloud.firestore {
                 return participation != null
                     && participation.data.token == token
                     && participation.data.startingTime == request.resource.data.startingTime
+                    && participation.data.endingTime == request.resource.data.endingTime
                     && participation.data.contestId == request.resource.data.contestId;
             }
 
@@ -76,20 +77,15 @@ service cloud.firestore {
         }
 
         match /participations/{participationId}/students/{student} {
-            function checkEndingTime() {
-                let participation = getParticipation(participationId);
-                let contest = get(/databases/$(database)/documents/contests/$(participation.data.contestId));
-                let endingTime = participation.data.startingTime + duration.value(contest.data.duration * 60 + 30, 's');
-                return request.time <= endingTime;
-            }
-
             function checkToken() {
                 let participation = getParticipation(participationId);
                 return participation != null
                     && participation.data.token != null
                     && participation.data.token == request.resource.data.token
                     && participation.data.startingTime == request.resource.data.startedAt
-                    && participation.data.contestId == request.resource.data.contestId;
+                    && participation.data.endingTime >= request.resource.data.finishedAt
+                    && participation.data.contestId == request.resource.data.contestId
+                    && request.time <= resource.data.finishedAt + duration.value(10, 's');
             }
 
             function checkVariant(data) {
@@ -111,8 +107,7 @@ service cloud.firestore {
                 let keys = affectedKeys();
                 return isAuthenticated(resource.data.uid)
                     && checkToken()
-                    && checkEndingTime()
-                    && keys.hasOnly(['answers', 'updatedAt', 'submittedAt', 'extraData'])
+                    && keys.hasOnly(['answers', 'updatedAt', 'finishedAt', 'extraData'])
                     && hasTimestamp('updatedAt');
             }
 

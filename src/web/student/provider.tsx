@@ -8,6 +8,7 @@ import {
   useState,
 } from "react";
 
+import { useIsAfter } from "@olinfo/react-components";
 import { isEqual } from "lodash-es";
 
 import { Contest, Participation, Schema, Student, calcScore } from "~/models";
@@ -25,8 +26,8 @@ type StudentProviderProps = {
   participation: Participation;
   /** Funzione per resettare le risposte e ricominciare la prova (opzionale) */
   reset?: () => Promise<void> | void;
-  /** Funzione per terminare la prova (opzionale) */
-  submit?: () => Promise<void> | void;
+  /** Funzione eseguita quando lo studente ha terminato la prova (opzionale) */
+  onSubmit?: () => Promise<void> | void;
   /** Funzione per cambiare utente */
   logout?: () => Promise<void> | void;
   /** Flag che indica se la prova è terminata */
@@ -45,15 +46,16 @@ export function StudentProvider({
   setStudent,
   children,
   ...props
-}: StudentProviderProps & {
+}: Omit<StudentProviderProps, "terminated"> & {
   children: ReactNode;
 }) {
   const [schema, registerSchema] = useState<Schema>({});
+  const terminated = useIsAfter(props.student.finishedAt) ?? false;
 
   const value: StudentContextProps = {
     ...props,
     setStudent: (student) => setStudent({ ...student, score: calcScore(student, schema) }),
-    terminated: props.terminated || !!props.student.submittedAt,
+    terminated,
     schema,
     registerSchema,
   };

@@ -1,6 +1,7 @@
 import { ReactNode, createContext, useCallback, useContext } from "react";
 
 import { Button } from "@olinfo/react-components";
+import { addMinutes } from "date-fns";
 import { noop } from "lodash-es";
 
 import { Schema } from "~/models";
@@ -17,7 +18,7 @@ const ContestContext = createContext<ContestContextProps>({
 ContestContext.displayName = "ContestContext";
 
 export function Contest({ children }: { children: ReactNode }) {
-  const { student, setStudent, registerSchema } = useStudent();
+  const { student, setStudent, contest, registerSchema } = useStudent();
   const registerProblem = useCallback(
     (id: string, problem: Schema[string]) => {
       registerSchema((schema) => ({
@@ -30,9 +31,11 @@ export function Contest({ children }: { children: ReactNode }) {
 
   if (import.meta.env.QUIZMS_MODE === "training" && !student.startedAt) {
     const start = async () => {
+      const now = new Date();
       await setStudent({
         ...student,
-        startedAt: new Date(),
+        startedAt: now,
+        finishedAt: addMinutes(now, contest.duration ?? 0),
         variant: import.meta.env.PROD ? randomId() : "",
       });
     };

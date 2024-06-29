@@ -113,6 +113,7 @@ async function setParticipation(
         id: participation.token,
         participationId: participation.id,
         startingTime: participation.startingTime,
+        endingTime: participation.endingTime,
         contestId: participation.contestId,
       });
     });

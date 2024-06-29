@@ -1,4 +1,4 @@
-import { ReactNode, useMemo, useRef } from "react";
+import { ReactNode, useRef } from "react";
 
 import {
   Form,
@@ -7,9 +7,7 @@ import {
   SelectField,
   SubmitButton,
   TextField,
-  useIsAfter,
 } from "@olinfo/react-components";
-import { addMinutes } from "date-fns";
 import { FirebaseOptions } from "firebase/app";
 import { getAuth, signOut } from "firebase/auth";
 import { addDoc, collection, waitForPendingWrites } from "firebase/firestore";
@@ -177,13 +175,8 @@ function StudentInner({
   );
 
   const contest = contests.find((c) => c.id === student.contestId)!;
-  const endingTime = useMemo(
-    () => addMinutes(participation.startingTime!, contest.duration!),
-    [participation.startingTime, contest.duration],
-  );
-  const terminated = useIsAfter(endingTime) || !!student.extraData?.submitted;
 
-  const submit = async () => {
+  const onSubmit = async () => {
     await waitForPendingWrites(db);
   };
 
@@ -215,8 +208,7 @@ function StudentInner({
       setStudent={setStudentAndSubmission}
       logout={logout}
       reset={logout}
-      submit={submit}
-      terminated={terminated}>
+      onSubmit={onSubmit}>
       {children}
     </StudentProvider>
   );

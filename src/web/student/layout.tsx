@@ -189,7 +189,7 @@ const CompletedModal = forwardRef(function CompletedModal(
 });
 
 const SubmitModal = forwardRef(function SubmitModal(_, ref: Ref<HTMLDialogElement>) {
-  const { student, setStudent, submit } = useStudent();
+  const { student, setStudent, onSubmit } = useStudent();
 
   const close = () => {
     if (ref && "current" in ref) {
@@ -201,9 +201,9 @@ const SubmitModal = forwardRef(function SubmitModal(_, ref: Ref<HTMLDialogElemen
     try {
       await setStudent({
         ...student,
-        submittedAt: new Date(),
+        finishedAt: new Date(),
       });
-      await submit?.();
+      await onSubmit?.();
       if (ref && "current" in ref && ref.current) {
         ref.current.returnValue = "1";
       }
