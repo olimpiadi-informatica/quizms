@@ -1,17 +1,27 @@
-import { ReactNode, Suspense } from "react";
+import { ReactNode, Suspense, useDeferredValue } from "react";
 
 import { Layout, useNotifications } from "@olinfo/react-components";
 import { SWRConfig } from "swr";
+import { BaseLocationHook, Router, Switch, useLocation } from "wouter";
 
 import { Loading } from "~/web/components";
 
 import "./index.css";
 
 export function BaseLayout({ children }: { children: ReactNode }) {
+  const [location, setLocation] = useLocation();
+  const deferredLocation = useDeferredValue(location);
+
+  const hook: BaseLocationHook = () => [deferredLocation, setLocation];
+
   return (
     <Layout>
       <LayoutInner>
-        <Suspense fallback={<Loading />}>{children}</Suspense>
+        <Suspense fallback={<Loading />}>
+          <Router hook={hook}>
+            <Switch>{children}</Switch>
+          </Router>
+        </Suspense>
       </LayoutInner>
     </Layout>
   );

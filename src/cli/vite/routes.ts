@@ -52,7 +52,7 @@ import { lazy, StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 
 import { page, BaseLayout } from "@olinfo/quizms/internal";
-import { Route, Switch } from "wouter";
+import { Route } from "wouter";
 
 import "~/global.css";
 
@@ -62,12 +62,10 @@ ${imports.join("\n")}
 createRoot(document.getElementById("app")).render(
   <StrictMode>
     <BaseLayout>
-      <Switch>
-        <Route path="/__blockly_iframe">
-          <BlocklyIframe />
-        </Route>
-        ${sortBy(routes, "length").reverse().join("\n        ")}
-      </Switch>
+      <Route path="/__blockly_iframe">
+        <BlocklyIframe />
+      </Route>
+      ${sortBy(routes, "length").reverse().join("\n      ")}
     </BaseLayout>
   </StrictMode>
 );`;
