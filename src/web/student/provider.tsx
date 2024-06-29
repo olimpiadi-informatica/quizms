@@ -65,10 +65,12 @@ export function StudentProvider({
     const answers = { ...props.student.answers };
     for (const id in schema) {
       maxScore += schema[id].pointsCorrect ?? 0;
-      answers[id] ??= undefined;
+      answers[id] ??= null;
     }
     if (maxScore !== props.student.maxScore || !isEqual(answers, props.student.answers)) {
-      setStudent({ ...props.student, maxScore, answers });
+      const newStudent: Student = { ...props.student, maxScore, answers };
+      newStudent.score = calcScore(newStudent, schema);
+      setStudent(newStudent);
     }
   }, [props, setStudent, schema]);
 

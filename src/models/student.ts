@@ -16,7 +16,7 @@ export const studentSchema = z
     finishedAt: z.date(),
 
     variant: z.string(),
-    answers: z.record(z.union([z.string(), z.number(), z.undefined()])), // undefined means blank
+    answers: z.record(z.union([z.string(), z.number(), z.null()])), // null means blank
     score: z.number(),
     maxScore: z.number(),
     extraData: z.record(z.any()),

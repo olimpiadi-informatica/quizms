@@ -61,7 +61,7 @@ export function Answer({ correct, children }: AnswerProps) {
   const { student, setStudent, terminated } = useStudent();
 
   const answer = student.answers?.[problemId!];
-  const setAnswer = async (value: string | undefined) => {
+  const setAnswer = async (value: string | null) => {
     await setStudent({ ...student, answers: { ...student.answers, [problemId!]: value } });
   };
 
@@ -98,7 +98,7 @@ export function Answer({ correct, children }: AnswerProps) {
               "radio-error": correct === false,
             },
         )}
-        onChange={(e) => setAnswer(e.target.checked ? id : undefined)}
+        onChange={(e) => setAnswer(e.target.checked ? id : null)}
         type="radio"
         disabled={terminated}
       />
@@ -113,7 +113,7 @@ export function Answer({ correct, children }: AnswerProps) {
             (answer !== id || terminated) && "hidden",
           )}
           type="button"
-          onClick={() => setAnswer(undefined)}
+          onClick={() => setAnswer(null)}
           aria-label="Cancella risposta">
           <Trash2 size={20} />
         </button>
@@ -133,7 +133,7 @@ export function OpenAnswer({ correct, type }: OpenAnswerProps) {
   const { student, setStudent, terminated } = useStudent();
 
   const answer = student.answers?.[problemId!];
-  const setAnswer = async (value: string | undefined) => {
+  const setAnswer = async (value: string | null) => {
     await setStudent({ ...student, answers: { ...student.answers, [problemId!]: value } });
   };
 
@@ -159,7 +159,7 @@ export function OpenAnswer({ correct, type }: OpenAnswerProps) {
               "disabled:input-error": correct !== answer,
             },
         )}
-        onChange={(e) => setAnswer(e.target.value || undefined)}
+        onChange={(e) => setAnswer(e.target.value || null)}
         onWheel={(e) => e.currentTarget.blur()}
         placeholder="Inserisci la risposta"
         type={type}

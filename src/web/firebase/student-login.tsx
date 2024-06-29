@@ -92,11 +92,7 @@ function StudentLoginInner({ contestFilter, children }: Omit<LoginProps, "config
         contestId,
         token,
         personalInformation,
-        answers: Object.fromEntries(
-          Object.values(filteredContests)
-            .flatMap((c) => c.problemIds)
-            .map((id) => [id, undefined]),
-        ),
+        answers: {},
       });
     } catch (err) {
       if (err instanceof DuplicateStudentError) {
