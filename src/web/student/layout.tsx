@@ -55,7 +55,7 @@ export function StudentLayout({ children }: { children: ReactNode }) {
   return (
     <>
       <Navbar color="bg-base-300 text-base-content">
-        <div className="btn btn-ghost no-animation cursor-auto">Olimpiadi di Informatica</div>
+        <div className="btn btn-ghost no-animation cursor-auto">{contest.name}</div>
         <div className="gap-2 self-stretch *:flex-none">
           <Progress className="hidden w-20 sm:block" percentage={progress}>
             {progress}%

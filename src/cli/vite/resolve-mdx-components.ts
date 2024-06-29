@@ -26,17 +26,24 @@ export default function resolveMdxComponents(): PluginOption {
         if (importer) {
           const dir = path.dirname(importer);
           const files = await glob("*/question.(md|mdx)", { cwd: dir });
-          questions = files.map((file) => [file, upperFirst(camelCase(path.dirname(file)))]);
+          questions = files.map((file) => [
+            path.join(dir, file),
+            upperFirst(camelCase(path.dirname(file))),
+          ]);
         }
+        if (questions.length === 0) {
+          return 'export { useMDXComponents } from "@olinfo/quizms/internal/mdx-components";';
+        }
+
         return `\
 import { useMDXComponents as quizmsComponents } from "@olinfo/quizms/internal/mdx-components";
 
-${questions.map(([file, name]) => `import ${name} from "${path.join(importer!, "..", file)}";`).join("\n")}
+${questions.map(([file, name]) => `import ${name} from "${file}";`).join("\n")}
 
 export function useMDXComponents() {
   return {
     ...quizmsComponents(),
-    ${questions.map(([, name]) => name).join(",\n    ")}
+    ${questions.map(([, name]) => name).join(",\n    ")},
   };
 }`;
       }

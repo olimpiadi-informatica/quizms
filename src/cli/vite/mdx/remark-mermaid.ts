@@ -49,10 +49,15 @@ const remarkMermaid: Plugin<[], Root> = () => {
 
         const file = await temporaryWrite(data, { extension: "svg" });
         parent.children[index] = {
-          type: "image",
-          url: `${file}?${new URLSearchParams(params)}`,
-          alt: params.alt,
-          title: params.title,
+          type: "paragraph",
+          children: [
+            {
+              type: "image",
+              url: `${file}?${new URLSearchParams(params)}`,
+              alt: params.alt,
+              title: params.title,
+            },
+          ],
         };
       }),
     );

@@ -189,7 +189,6 @@ function StudentInner({
   const setStudentAndSubmission = async (newStudent: Student) => {
     if (isEqual(student, newStudent)) return;
 
-    localStorage.setItem(`backup-${newStudent.id}`, JSON.stringify(newStudent));
     await setStudent({ ...newStudent });
 
     const submissionRef = collection(db, "submissions").withConverter(submissionConverter);

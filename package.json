@@ -26,10 +26,10 @@
   "typesVersions": {
     "*": {
       "student": [
-        "./dist/web/student/index.d.ts"
+        "./dist/student/index.d.ts"
       ],
       "firebase": [
-        "./dist/web/firebase/index.d.ts"
+        "./dist/firebase/index.d.ts"
       ]
     }
   },

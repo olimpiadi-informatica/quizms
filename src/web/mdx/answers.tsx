@@ -173,11 +173,12 @@ export function OpenAnswer({ correct, type }: OpenAnswerProps) {
 
 export function Explanation({ children }: { children: ReactNode }) {
   const { terminated } = useStudent();
+  const { id } = useProblem();
   if (!import.meta.env.DEV && !terminated) return;
   return (
     <div className="my-5 rounded-xl bg-base-200 print:hidden">
       <div className="collapse">
-        <input type="checkbox" />
+        <input type="checkbox" name={`show-solution-${id}`} />
         <div className="collapse-title text-xl font-medium">Mostra soluzione</div>
         <div className="collapse-content">{children}</div>
       </div>
