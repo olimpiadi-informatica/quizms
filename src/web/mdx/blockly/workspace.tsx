@@ -217,22 +217,22 @@ export function Blockly({
         "flex flex-col-reverse items-start justify-between gap-6 overflow-x-hidden lg:flex-row",
       )}>
       <div className="flex h-full max-h-[min(720px,90vh)] basis-[min(auto,50%)] flex-col gap-6 self-stretch overflow-x-hidden">
-        <div className="flex flex-wrap gap-2">
-          {testcaseStatuses.map(({ index, correct, msg }) => (
-            <button
-              key={index}
-              onClick={() => {
-                setTestcaseIndex(index);
-                setPlaying(false);
-              }}
-              className={clsx(
-                "btn join-item z-10",
-                !editing && "tooltip",
-                index === testcaseIndex && "btn-info",
-              )}
-              data-tip={msg}>
-              <div className="flex items-center gap-3">
-                <p>Livello {index + 1}</p>
+        <div className="flex items-center gap-4">
+          <div className="pl-2 text-xl font-bold max-xl:hidden">Livello:</div>
+          <div className="join">
+            {testcaseStatuses.map(({ index, correct, msg }) => (
+              <button
+                key={index}
+                onClick={() => {
+                  setTestcaseIndex(index);
+                  setPlaying(false);
+                }}
+                className={clsx(
+                  "btn join-item z-10 px-3",
+                  !editing && "tooltip",
+                  index === testcaseIndex && "btn-info",
+                )}
+                data-tip={msg}>
                 {editing ? (
                   <HelpCircle size={24} />
                 ) : correct ? (
@@ -240,9 +240,9 @@ export function Blockly({
                 ) : (
                   <XCircle size={24} className="fill-error stroke-error-content" />
                 )}
-              </div>
-            </button>
-          ))}
+              </button>
+            ))}
+          </div>
         </div>
         <div className="relative flex flex-col overflow-hidden rounded-xl border-2 border-[#c6c6c6] shadow-xl">
           <div className="overflow-auto bg-white [color-scheme:light]">
