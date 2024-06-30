@@ -8,7 +8,6 @@ export class BlocklyInterpreter extends Interpreter {
   public highlightedBlock = "";
   public running = true;
   public correct = false;
-  public pauseRequired = 0;
   public msg: string | undefined;
 
   constructor(code: string, initialState: Record<string, any>) {
@@ -25,9 +24,8 @@ export class BlocklyInterpreter extends Interpreter {
       interpreter.setProperty(
         global,
         "pause",
-        interpreter.createNativeFunction((time: number) => {
+        interpreter.createNativeFunction(() => {
           this.stepFinished = true;
-          this.pauseRequired = time;
         }),
       );
 
@@ -48,7 +46,6 @@ export class BlocklyInterpreter extends Interpreter {
 
   public step = () => {
     if (!this.running) return false;
-    this.pauseRequired = 0;
 
     do {
       this.stepFinished = false;

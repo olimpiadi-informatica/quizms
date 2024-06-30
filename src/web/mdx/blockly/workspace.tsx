@@ -104,8 +104,10 @@ export function Blockly({
     return range(testcases.length).map((index) => ({ correct: false, index }));
   });
 
-  const { step, reset, running, highlightedBlock, globalScope, correct, msg, pauseRequired } =
-    useExecutor(code, testcases[testcaseIndex]);
+  const { step, reset, running, highlightedBlock, globalScope, correct, msg } = useExecutor(
+    code,
+    testcases[testcaseIndex],
+  );
 
   const blocklyVariables = useMemo(
     () => Object.fromEntries(Object.entries(variableMappings).map(([k, v]) => [v, globalScope[k]])),
@@ -172,14 +174,11 @@ export function Blockly({
   const [speed, setSpeed] = useState(3);
   useEffect(() => {
     const intervals = [5000, 2000, 1000, 500, 200, 100, 10];
-    if (pauseRequired != 0) {
-      const interval = setInterval(step, intervals[speed] * pauseRequired);
-      return () => clearInterval(interval);
-    } else if (playing) {
+    if (playing) {
       const interval = setInterval(step, intervals[speed]);
       return () => clearInterval(interval);
     }
-  }, [step, speed, playing, pauseRequired]);
+  }, [step, speed, playing]);
 
   const runAll = async () => {
     const statuses = await Promise.all(
