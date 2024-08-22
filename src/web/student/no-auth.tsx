@@ -1,5 +1,4 @@
-import { ReactNode, SetStateAction, useCallback, useMemo, useState } from "react";
-import { isFunction } from "lodash-es";
+import { ReactNode, useCallback, useEffect, useState } from "react";
 
 import { Contest, Participation, Student } from "~/models";
 
@@ -7,12 +6,13 @@ import { StudentProvider } from "./provider";
 
 type AuthProps = {
   contestName: string;
+  contestLongName: string;
   duration: number;
   children: ReactNode;
 };
 
-export function NoAuth({ contestName, duration, children }: AuthProps) {
-  const [student, setStudent] = useLocalStorage<Student>("student", {
+export function NoAuth({ contestName, contestLongName, duration, children }: AuthProps) {
+  const [student, setStudent] = useLocalStorage<Student>({
     id: "",
     personalInformation: {
       name: "Utente",
@@ -25,7 +25,7 @@ export function NoAuth({ contestName, duration, children }: AuthProps) {
   const mockContest: Contest = {
     id: "",
     name: contestName,
-    longName: contestName,
+    longName: contestLongName,
     problemIds: [],
     duration,
     personalInformation: [],
@@ -74,26 +74,18 @@ export function NoAuth({ contestName, duration, children }: AuthProps) {
   );
 }
 
-function useLocalStorage<T>(key: string, defaultValue: T, parser?: (value: string) => T) {
-  const fullKey = `${window.location.pathname}#${key}`;
-  const prev = localStorage.getItem(fullKey);
+function useLocalStorage<T>(defaultValue: T) {
+  const key = window.location.pathname;
 
-  const [value, setValue] = useState<T>(prev ? (parser ?? JSON.parse)(prev) : defaultValue);
+  const [value, setValue] = useState<T>(() => {
+    return JSON.parse(localStorage.getItem("quizms") ?? "{}")[key] ?? defaultValue;
+  });
 
-  const set = useCallback(
-    (value: SetStateAction<T>) => {
-      setValue((oldValue) => {
-        const newValue = isFunction(value) ? value(oldValue) : value;
-        if (newValue === undefined) {
-          localStorage.removeItem(fullKey);
-        } else {
-          localStorage.setItem(fullKey, JSON.stringify(newValue));
-        }
-        return newValue;
-      });
-    },
-    [fullKey],
-  );
+  useEffect(() => {
+    const storage = JSON.parse(localStorage.getItem("quizms") ?? "{}");
+    storage[key] = value;
+    localStorage.setItem("quizms", JSON.stringify(storage));
+  }, [key, value]);
 
-  return [value, set] as const;
+  return [value, setValue] as const;
 }
