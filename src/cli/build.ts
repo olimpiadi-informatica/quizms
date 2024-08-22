@@ -40,7 +40,6 @@ async function standaloneConfigs(_root: string, options: ExportOptions): Promise
     build: {
       outDir,
       emptyOutDir: true,
-      target: "es2022",
       assetsInlineLimit: 1024,
       rollupOptions: {
         input: "virtual:quizms-routes",

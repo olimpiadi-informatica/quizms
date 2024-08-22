@@ -95,6 +95,10 @@ export default function configs(
           }
         },
       },
+      target: "es2022",
+    },
+    optimizeDeps: {
+      esbuildOptions: { target: "es2022" },
     },
     css: {
       preprocessorMaxWorkers: true,

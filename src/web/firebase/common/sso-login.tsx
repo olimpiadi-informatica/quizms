@@ -1,6 +1,6 @@
 import { type ReactNode, useEffect, useMemo, useState } from "react";
 
-import { Navbar } from "@olinfo/react-components";
+import { Navbar, NavbarBrand } from "@olinfo/react-components";
 import clsx from "clsx";
 import { getAuth, signInWithCustomToken } from "firebase/auth";
 import { useLocation, useSearch } from "wouter";
@@ -50,7 +50,9 @@ export default function SsoLogin({ url, logo, children }: Props) {
   return (
     <>
       <Navbar color="bg-base-300 text-base-content">
-        <div className="btn btn-ghost no-animation cursor-auto">Olimpiadi di Informatica</div>
+        <NavbarBrand>
+          <div className="flex items-center h-full font-bold">Olimpiadi di Informatica</div>
+        </NavbarBrand>
       </Navbar>
       <div className="flex grow flex-col items-center justify-center gap-4 p-4 pb-8">
         <h1 className="text-xl font-bold">Accedi usando le tue credenziali di {redirect.host}</h1>

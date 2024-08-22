@@ -1,16 +1,21 @@
-import { type ReactNode, Suspense, useEffect, useRef } from "react";
+import { type ReactNode, Suspense } from "react";
 
 import {
   Button,
   Dropdown,
   DropdownButton,
+  DropdownItem,
   DropdownMenu,
   Navbar,
+  NavbarBrand,
+  NavbarContent,
   NavbarMenu,
+  NavbarMenuItem,
+  NavbarSubmenu,
 } from "@olinfo/react-components";
 import clsx from "clsx";
 import { LogOut } from "lucide-react";
-import { Link, useLocation, useRoute } from "wouter";
+import { Link, useRoute } from "wouter";
 
 import type { Contest } from "~/models";
 import { ErrorBoundary, Loading } from "~/web/components";
@@ -23,43 +28,33 @@ type Props = {
 };
 
 export function AdminLayout({ name, contests, logout, children }: Props) {
-  const location = useLocation();
-  const ref = useRef<HTMLDetailsElement>(null);
-
-  useEffect(() => {
-    ref.current?.removeAttribute("open");
-  }, [location]);
-
   const [, params] = useRoute("/:contestId/*");
   const contest = contests.find((c) => c.id === params?.contestId);
 
   return (
     <>
       <Navbar color="bg-error text-error-content">
-        <div>
-          <div className="btn btn-ghost no-animation cursor-auto">Olimpiadi di Informatica</div>
-          {contest && contests.length >= 2 && (
-            <NavbarMenu>
-              <li>
-                <details ref={ref}>
-                  <summary className="after:forced-color-adjust-none">{contest.name}</summary>
-                  <ul>
-                    {contests.map((c) => (
-                      <li key={c.id}>
-                        <Link
-                          className={clsx(contest.id === c.id && "active")}
-                          href={`/${c.id}/${params!["*"]}`}>
-                          {c.name}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                </details>
-              </li>
-            </NavbarMenu>
-          )}
-        </div>
-        <UserDropdown name={name} logout={logout} />
+        <NavbarBrand>
+          <div className="flex items-center h-full font-bold">Olimpiadi di Informatica</div>
+        </NavbarBrand>
+        {contest && contests.length >= 2 && (
+          <NavbarMenu>
+            <NavbarSubmenu title={contest.name}>
+              {contests.map((c) => (
+                <NavbarMenuItem key={c.id}>
+                  <Link
+                    className={clsx(contest.id === c.id && "active")}
+                    href={`/${c.id}/${params!["*"]}`}>
+                    {c.name}
+                  </Link>
+                </NavbarMenuItem>
+              ))}
+            </NavbarSubmenu>
+          </NavbarMenu>
+        )}
+        <NavbarContent>
+          <UserDropdown name={name} logout={logout} />
+        </NavbarContent>
       </Navbar>
       <div className="mx-auto flex w-full max-w-screen-xl grow flex-col p-4 pb-8">
         <ErrorBoundary>
@@ -77,11 +72,11 @@ function UserDropdown({ name, logout }: { name: string; logout: () => Promise<vo
         <div className="truncate uppercase">{name}</div>
       </DropdownButton>
       <DropdownMenu>
-        <li>
+        <DropdownItem>
           <Button className="flex justify-between gap-4" onClick={logout}>
             Esci <LogOut size={20} />
           </Button>
-        </li>
+        </DropdownItem>
       </DropdownMenu>
     </Dropdown>
   );

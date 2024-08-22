@@ -4,6 +4,7 @@ import {
   Form,
   Modal,
   Navbar,
+  NavbarBrand,
   SelectField,
   SubmitButton,
   TextField,
@@ -106,7 +107,9 @@ function StudentLoginInner({ contestFilter, children }: Omit<LoginProps, "config
   return (
     <>
       <Navbar color="bg-base-300 text-base-content">
-        <div className="btn btn-ghost no-animation cursor-auto">Olimpiadi di Informatica</div>
+        <NavbarBrand>
+          <div className="flex items-center h-full font-bold">Olimpiadi di Informatica</div>
+        </NavbarBrand>
       </Navbar>
       <Form defaultValue={defaultValue} onSubmit={submit} className="p-4 pb-8">
         <h1 className="mb-2 text-xl font-bold">Accedi alla gara</h1>

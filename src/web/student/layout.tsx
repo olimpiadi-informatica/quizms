@@ -4,11 +4,14 @@ import {
   Button,
   Dropdown,
   DropdownButton,
+  DropdownItem,
   DropdownMenu,
   Form,
   FormButton,
   Modal,
   Navbar,
+  NavbarBrand,
+  NavbarContent,
   SubmitButton,
 } from "@olinfo/react-components";
 import { sumBy } from "lodash-es";
@@ -55,51 +58,55 @@ export function StudentLayout({ children }: { children: ReactNode }) {
   return (
     <>
       <Navbar color="bg-base-300 text-base-content">
-        <div className="btn btn-ghost no-animation cursor-auto">{contest.name}</div>
-        <div className="gap-2 self-stretch *:flex-none">
-          <Progress className="hidden w-20 sm:block" percentage={progress}>
-            {progress}%
-          </Progress>
-          <div className="px-3">
-            {terminated || !participation.startingTime || !contest.duration ? (
-              <span className="font-mono">00:00</span>
+        <NavbarBrand>
+          <div className="flex items-center h-full font-bold">{contest.name}</div>
+        </NavbarBrand>
+        <NavbarContent>
+          <div className="flex items-center gap-2">
+            <Progress className="hidden w-20 sm:block" percentage={progress}>
+              {progress}%
+            </Progress>
+            <div className="px-3">
+              {terminated || !participation.startingTime || !contest.duration ? (
+                <span className="font-mono">00:00</span>
+              ) : (
+                <Timer
+                  startTime={participation.startingTime}
+                  duration={contest.duration}
+                  noAnimation
+                />
+              )}
+            </div>
+            {terminated && reset ? (
+              <>
+                <div className="tooltip tooltip-bottom h-full" data-tip="Mostra risultati">
+                  <Button
+                    className="btn-primary btn-sm h-full"
+                    onClick={() => completedRef.current?.showModal()}
+                    aria-label="Mostra risultati">
+                    <FileBarChart2 />
+                  </Button>
+                </div>
+                <div className="tooltip tooltip-bottom h-full" data-tip="Ricomincia">
+                  <Button
+                    className="btn-primary btn-sm h-full"
+                    onClick={reset}
+                    aria-label="Ricomincia">
+                    <RotateCcw />
+                  </Button>
+                </div>
+              </>
             ) : (
-              <Timer
-                startTime={participation.startingTime}
-                duration={contest.duration}
-                noAnimation
-              />
+              <Button
+                className="btn-primary btn-sm h-full"
+                disabled={terminated || (import.meta.env.PROD && !participation.startingTime)}
+                onClick={submit}>
+                Termina
+              </Button>
             )}
+            <UserDropdown />
           </div>
-          {terminated && reset ? (
-            <>
-              <div className="tooltip tooltip-bottom h-full" data-tip="Mostra risultati">
-                <Button
-                  className="btn-primary btn-sm h-full"
-                  onClick={() => completedRef.current?.showModal()}
-                  aria-label="Mostra risultati">
-                  <FileBarChart2 />
-                </Button>
-              </div>
-              <div className="tooltip tooltip-bottom h-full" data-tip="Ricomincia">
-                <Button
-                  className="btn-primary btn-sm h-full"
-                  onClick={reset}
-                  aria-label="Ricomincia">
-                  <RotateCcw />
-                </Button>
-              </div>
-            </>
-          ) : (
-            <Button
-              className="btn-primary btn-sm h-full"
-              disabled={terminated || (import.meta.env.PROD && !participation.startingTime)}
-              onClick={submit}>
-              Termina
-            </Button>
-          )}
-        </div>
-        <UserDropdown />
+        </NavbarContent>
       </Navbar>
       <div className="mx-auto flex w-full max-w-screen-xl grow flex-col p-4 pb-8">
         <ErrorBoundary>
@@ -129,11 +136,11 @@ function UserDropdown() {
         </div>
       </DropdownButton>
       <DropdownMenu>
-        <li>
-          <Button className="flex justify-between gap-4" onClick={logout}>
+        <DropdownItem>
+          <button type="button" className="flex justify-between gap-4" onClick={logout}>
             Esci <LogOut size={20} />
-          </Button>
-        </li>
+          </button>
+        </DropdownItem>
       </DropdownMenu>
     </Dropdown>
   );

@@ -1,16 +1,21 @@
-import { type ReactNode, Suspense, useEffect, useRef } from "react";
+import { type ReactNode, Suspense } from "react";
 
 import {
   Button,
   Dropdown,
   DropdownButton,
+  DropdownItem,
   DropdownMenu,
   Navbar,
+  NavbarBrand,
+  NavbarContent,
   NavbarMenu,
+  NavbarMenuItem,
+  NavbarSubmenu,
 } from "@olinfo/react-components";
 import clsx from "clsx";
 import { LogOut } from "lucide-react";
-import { Link, useLocation, useRoute } from "wouter";
+import { Link, useRoute } from "wouter";
 
 import type { Contest, Participation } from "~/models";
 import { ErrorBoundary, Loading } from "~/web/components";
@@ -23,13 +28,6 @@ type Props = {
 };
 
 export function TeacherLayout({ contests, participations, logout, children }: Props) {
-  const location = useLocation();
-  const ref = useRef<HTMLDetailsElement>(null);
-
-  useEffect(() => {
-    ref.current?.removeAttribute("open");
-  }, [location]);
-
   const [, params] = useRoute("/:contestId/*");
   const contest = contests.find((c) => c.id === params?.contestId);
   const participation = participations.find((p) => p.contestId === params?.contestId);
@@ -37,42 +35,39 @@ export function TeacherLayout({ contests, participations, logout, children }: Pr
   return (
     <>
       <Navbar color="bg-base-300 text-base-content">
-        <div>
-          <div className="btn btn-ghost no-animation cursor-auto">Olimpiadi di Informatica</div>
-          {contest && (
-            <NavbarMenu>
-              {participations.length >= 2 && (
-                <li>
-                  <details ref={ref}>
-                    <summary className="after:forced-color-adjust-none">{contest.name}</summary>
-                    <ul>
-                      {participations.map((p) => (
-                        <li key={p.id}>
-                          <Link
-                            className={clsx(contest.id === p.contestId && "active")}
-                            href={`/${p.contestId}/${params!["*"]}`}>
-                            {contests.find((c) => c.id === p.contestId)?.name}
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                  </details>
-                </li>
-              )}
-              <li>
-                <Link href={`/${contest.id}/`}>Gestione gara</Link>
-              </li>
-              <li>
-                <Link href={`/${contest.id}/students/`}>Gestione studenti</Link>
-              </li>
-            </NavbarMenu>
-          )}
-        </div>
-        <UserDropdown
-          participation={participation}
-          participations={participations}
-          logout={logout}
-        />
+        <NavbarBrand>
+          <div className="flex items-center h-full font-bold">Olimpiadi di Informatica</div>
+        </NavbarBrand>
+        {contest && (
+          <NavbarMenu>
+            {participations.length >= 2 && (
+              <NavbarSubmenu title={contest.name}>
+                {participations.map((p) => (
+                  <NavbarMenuItem key={p.id}>
+                    <Link
+                      className={clsx(contest.id === p.contestId && "active")}
+                      href={`/${p.contestId}/${params!["*"]}`}>
+                      {contests.find((c) => c.id === p.contestId)?.name}
+                    </Link>
+                  </NavbarMenuItem>
+                ))}
+              </NavbarSubmenu>
+            )}
+            <NavbarMenuItem>
+              <Link href={`/${contest.id}/`}>Gestione gara</Link>
+            </NavbarMenuItem>
+            <NavbarMenuItem>
+              <Link href={`/${contest.id}/students/`}>Gestione studenti</Link>
+            </NavbarMenuItem>
+          </NavbarMenu>
+        )}
+        <NavbarContent>
+          <UserDropdown
+            participation={participation}
+            participations={participations}
+            logout={logout}
+          />
+        </NavbarContent>
       </Navbar>
       <div className="mx-auto flex w-full max-w-screen-xl grow flex-col p-4 pb-8">
         <ErrorBoundary>
@@ -96,11 +91,11 @@ function UserDropdown({ participation, participations, logout }: DropdownProps) 
         <div className="truncate uppercase">{(participation ?? participations[0]).name}</div>
       </DropdownButton>
       <DropdownMenu>
-        <li>
+        <DropdownItem>
           <Button className="flex justify-between gap-4" onClick={logout}>
             Esci <LogOut size={20} />
           </Button>
-        </li>
+        </DropdownItem>
       </DropdownMenu>
     </Dropdown>
   );
