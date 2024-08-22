@@ -215,8 +215,8 @@ export function Blockly({
     await setStudent({ ...student, answers });
   };
 
-  const [messageHidden, setMessageHidden] = useState(false);
-  useEffect(() => setMessageHidden(false), [msg]);
+  const [alert, setAlert] = useState<string>();
+  useEffect(() => setAlert(msg), [msg]);
 
   return (
     <div
@@ -260,16 +260,16 @@ export function Blockly({
                 variables={{ blocklyVariables, hiddenState: globalScope.hiddenState, msg }}
               />
             )}
-            {msg && !messageHidden && (
+            {alert && (
               <div className="absolute inset-x-0 bottom-0 z-50 p-4">
                 <div
                   role="alert"
                   className={clsx("alert", correct ? "alert-success" : "alert-error")}>
                   {correct ? <CheckCircle /> : <AlertTriangle />}
-                  <span>{msg}</span>
+                  <span>{alert}</span>
                   <button
                     type="button"
-                    onClick={() => setMessageHidden(true)}
+                    onClick={() => setAlert(undefined)}
                     aria-label="Nascondi messaggio">
                     <MessageSquareOff />
                   </button>

@@ -33,6 +33,7 @@ export default function useExecutor(code: string, initialState: Record<string, a
     });
   }, [code, initialState]);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: biome incorrectly reports code and initialState as "outer scope values"
   useEffect(() => {
     reset();
   }, [reset, code, initialState]);
