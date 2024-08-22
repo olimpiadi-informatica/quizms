@@ -7,6 +7,7 @@ import type {
   IFilterOptionDef,
   ITooltipParams,
 } from "@ag-grid-community/core";
+import { AG_GRID_LOCALE_IT } from "@ag-grid-community/locale";
 import {
   Button,
   CheckboxField,
@@ -35,7 +36,6 @@ import { Loading } from "~/web/components";
 import { useTeacher, useTeacherStudents } from "./provider";
 import Exporter from "./table-exporter";
 import ImportModal from "./table-importer";
-import { agGridLocaleIT } from "./table-locale";
 
 import "@ag-grid-community/styles/ag-grid.css";
 import "@ag-grid-community/styles/ag-theme-quartz.css";
@@ -386,7 +386,7 @@ function Table() {
           rowSelection="single"
           onCellEditRequest={onCellEditRequest}
           enableBrowserTooltips={true}
-          localeText={agGridLocaleIT}
+          localeText={AG_GRID_LOCALE_IT}
           onGridReady={(ev) => {
             if (!contest.allowStudentDelete) return;
             ev.api.setFilterModel({
