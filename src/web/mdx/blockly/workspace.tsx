@@ -36,10 +36,10 @@ import useExecutor from "./executor";
 import { BlocklyInterpreter } from "./interpreter";
 import useIcp from "./ipc";
 
-type VariableValues = {
-  blocklyVariables: Record<string, any>;
-  hiddenState: Record<string, any>;
-  msg?: string;
+type VisualizerProps = {
+  variables: Record<string, any>;
+  state: Record<string, any>;
+  message?: string;
 };
 
 type BlocklyProps = {
@@ -52,7 +52,7 @@ type BlocklyProps = {
     logVariables?: boolean;
   };
   customBlocks?: any;
-  Visualizer?: ComponentType<{ variables: VariableValues }>;
+  visualizer?: ComponentType<VisualizerProps>;
 };
 
 type TestcaseStatus = {
@@ -67,7 +67,7 @@ export function Blockly({
   testcases,
   debug,
   customBlocks,
-  Visualizer,
+  visualizer: Visualizer,
 }: BlocklyProps) {
   const { student, setStudent, terminated } = useStudent();
   const { registerProblem } = useContest();
@@ -117,7 +117,7 @@ export function Blockly({
     testcases[testcaseIndex],
   );
 
-  const blocklyVariables = useMemo(
+  const variables = useMemo(
     () => Object.fromEntries(Object.entries(variableMappings).map(([k, v]) => [v, globalScope[k]])),
     [variableMappings, globalScope],
   );
@@ -255,10 +255,8 @@ export function Blockly({
         </div>
         <div className="relative flex flex-col overflow-hidden rounded-xl border-2 border-[#c6c6c6] shadow-xl">
           <div className="overflow-auto bg-white [color-scheme:light]">
-            {Visualizer && globalScope?.hiddenState && (
-              <Visualizer
-                variables={{ blocklyVariables, hiddenState: globalScope.hiddenState, msg }}
-              />
+            {Visualizer && globalScope?.state && (
+              <Visualizer variables={variables} state={globalScope.state} message={msg} />
             )}
             {alert && (
               <div className="absolute inset-x-0 bottom-0 z-50 p-4">

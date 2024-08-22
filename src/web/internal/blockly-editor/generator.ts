@@ -11,7 +11,7 @@ import type { CustomBlock, CustomBlockArg } from "~/models/blockly-custom-block"
 
 javascriptGenerator.STATEMENT_PREFIX = "highlightBlock(%1);\n";
 javascriptGenerator.INFINITE_LOOP_TRAP = 'if(--loopTrap === 0) exit(false, "Ciclo infinito");\n';
-javascriptGenerator.addReservedWords("exit,highlightBlock,loopTrap,hiddenState");
+javascriptGenerator.addReservedWords("exit,highlightBlock,loopTrap,state");
 console.log("Blockly version:", BlocklyVersion);
 
 function replaceArgs(

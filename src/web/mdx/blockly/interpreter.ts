@@ -38,7 +38,7 @@ export class BlocklyInterpreter extends Interpreter {
           this.msg = msg;
         }),
       );
-      interpreter.setProperty(global, "hiddenState", interpreter.nativeToPseudo(initialState));
+      interpreter.setProperty(global, "state", interpreter.nativeToPseudo(initialState));
 
       interpreter.setProperty(global, "loopTrap", MAX_LOOP_ITERATIONS);
     });
