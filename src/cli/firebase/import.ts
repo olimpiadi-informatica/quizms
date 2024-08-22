@@ -2,16 +2,16 @@ import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 
-import { Bucket } from "@google-cloud/storage";
+import type { Bucket } from "@google-cloud/storage";
 import { deleteApp } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
-import { Firestore } from "firebase-admin/firestore";
+import type { Firestore } from "firebase-admin/firestore";
 import { chunk, groupBy, noop, pick, range, uniq } from "lodash-es";
 import picomatch from "picomatch";
 import z from "zod";
 
 import {
-  Participation,
+  type Participation,
   contestSchema,
   participationSchema,
   studentSchema,
@@ -72,7 +72,7 @@ export default async function importData(options: ImportOptions) {
     "variants",
   ];
   if (collections.every((key) => !options[key])) {
-    warning(`Nothing to import. Use \`--help\` for usage.`);
+    warning("`Nothing to import. Use `--help` for usage.`");
     return;
   }
 
@@ -110,7 +110,7 @@ export default async function importData(options: ImportOptions) {
 async function importAdmins(options: ImportOptions) {
   const admins = await load(options.dir, "admins", userSchema);
   await importUsers(admins, { isAdmin: true }, options);
-  success(`Admin users imported!`);
+  success("Admin users imported!");
 }
 
 async function importContests(db: Firestore, options: ImportOptions) {
@@ -275,18 +275,16 @@ async function importStatements(bucket: Bucket, options: ImportOptions) {
 
 async function importVariantMappings(db: Firestore, options: ImportOptions) {
   const generationConfigs = await load(options.dir, "contests", generationConfigSchema);
-  const mappings = await Promise.all(
-    generationConfigs.flatMap((config) => {
-      const rng = new Rng(`${config.secret}-${config.id}-variantMappings`);
-      return range(4096).map(async (i) => {
-        const suffix = i.toString(16).padStart(3, "0").toUpperCase();
-        return {
-          id: `${config.id}-${suffix}`,
-          variant: rng.choice(config.variantIds),
-        };
-      });
-    }),
-  );
+  const mappings = generationConfigs.flatMap((config) => {
+    const rng = new Rng(`${config.secret}-${config.id}-variantMappings`);
+    return range(4096).map((i) => {
+      const suffix = i.toString(16).padStart(3, "0").toUpperCase();
+      return {
+        id: `${config.id}-${suffix}`,
+        variant: rng.choice(config.variantIds),
+      };
+    });
+  });
   await importCollection(db, "variantMappings", mappings, variantMappingConverter, options);
 }
 

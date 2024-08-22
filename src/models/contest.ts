@@ -3,7 +3,7 @@ import { intlFormat, parse as parseDate, subMinutes } from "date-fns";
 import { isDate } from "lodash-es";
 import z from "zod";
 
-import { Student } from "~/models/student";
+import type { Student } from "~/models/student";
 
 const basePersonalInformation = z.object({
   name: z.string(),
@@ -92,12 +92,12 @@ export function parsePersonalInformation(
   const label = `"${schema.label}"`.toLowerCase();
   switch (schema.type) {
     case "text": {
-      value = value
+      const normalized = value
         .replaceAll(/\s+/g, " ")
         .replaceAll(/[`´‘’]/g, "'")
         .trim();
-      if (/[^-'\s\p{Alpha}]/u.test(value)) {
-        const helpUtf8 = /[^\p{ASCII}]/u.test(value) ? " e che la codifica sia UTF-8" : "";
+      if (/[^-'\s\p{Alpha}]/u.test(normalized)) {
+        const helpUtf8 = /[^\p{ASCII}]/u.test(normalized) ? " e che la codifica sia UTF-8" : "";
         return [
           undefined,
           `Il campo ${label} contiene caratteri non validi. Assicurati che non ci siano numeri o simboli${helpUtf8}.`,

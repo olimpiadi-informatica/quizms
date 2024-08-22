@@ -4,8 +4,8 @@ import path from "node:path";
 import { transform } from "esbuild";
 import glob from "fast-glob";
 import { sortBy } from "lodash-es";
-import { OutputChunk } from "rollup";
-import { HtmlTagDescriptor, PluginOption } from "vite";
+import type { OutputChunk } from "rollup";
+import type { HtmlTagDescriptor, PluginOption } from "vite";
 
 import { error } from "~/utils/logs";
 
@@ -25,15 +25,15 @@ export default function routes(): PluginOption {
     resolveId(id) {
       const [pathname] = id.split("?");
       if (pathname === "virtual:quizms-routes") {
-        return "\0" + id;
+        return `\0${id}`;
       }
       if (pathname === "react-dom/server") {
-        return "\0" + id;
+        return `\0${id}`;
       }
     },
     async load(this, id) {
       if (id === "\0virtual:quizms-routes") {
-        const pages = await glob(`**/page.{js,jsx,ts,tsx}`, { cwd: root });
+        const pages = await glob("**/page.{js,jsx,ts,tsx}", { cwd: root });
 
         if (!existsSync(path.join(root, "global.css"))) {
           error("Missing global.css file");

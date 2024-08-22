@@ -1,8 +1,8 @@
 import { Parser } from "acorn";
-import { Directive } from "estree";
-import { Code, InlineCode, Root } from "mdast";
-import { MdxJsxFlowElement } from "mdast-util-mdx";
-import { Plugin } from "unified";
+import type { Directive } from "estree";
+import type { Code, InlineCode, Root } from "mdast";
+import type { MdxJsxFlowElement } from "mdast-util-mdx";
+import type { Plugin } from "unified";
 import { visit } from "unist-util-visit";
 
 import { jsxAttribute } from "./utils";

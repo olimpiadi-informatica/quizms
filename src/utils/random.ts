@@ -1,5 +1,5 @@
 import { sha256 } from "@noble/hashes/sha256";
-import { RandomGenerator, unsafeUniformIntDistribution, xoroshiro128plus } from "pure-rand";
+import { type RandomGenerator, unsafeUniformIntDistribution, xoroshiro128plus } from "pure-rand";
 
 export class Rng {
   private readonly rng: RandomGenerator;

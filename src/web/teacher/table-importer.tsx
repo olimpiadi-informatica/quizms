@@ -1,4 +1,4 @@
-import { Ref, forwardRef } from "react";
+import { type Ref, forwardRef } from "react";
 
 import { Form, Modal, SingleFileField, SubmitButton } from "@olinfo/react-components";
 import { ArrowUpFromLine } from "lucide-react";
@@ -6,10 +6,10 @@ import { parse as parseCSV } from "papaparse";
 import z from "zod";
 
 import {
-  Contest,
-  Participation,
-  Student,
-  Variant,
+  type Contest,
+  type Participation,
+  type Student,
+  type Variant,
   parsePersonalInformation,
   studentSchema,
 } from "~/models";
@@ -112,7 +112,7 @@ async function importStudents(
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           path: [contest.personalInformation.length],
-          message: `Variante mancante`,
+          message: "Variante mancante",
         });
         return z.NEVER;
       }

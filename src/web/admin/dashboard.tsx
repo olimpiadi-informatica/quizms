@@ -2,7 +2,7 @@ import { Suspense } from "react";
 
 import { Card, CardActions, CardBody } from "@olinfo/react-components";
 
-import { Participation, Student } from "~/models";
+import type { Participation, Student } from "~/models";
 import { Loading } from "~/web/components";
 import { participationConverter, studentConverter } from "~/web/firebase/common/converters";
 import { useCount } from "~/web/firebase/hooks/count";

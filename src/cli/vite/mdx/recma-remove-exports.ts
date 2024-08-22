@@ -1,6 +1,6 @@
-import { Program } from "estree";
+import type { Program } from "estree";
 import { traverse } from "estree-toolkit";
-import { Plugin } from "unified";
+import type { Plugin } from "unified";
 
 const recmaRemoveExports: Plugin<[], Program> = () => {
   return (ast) => {

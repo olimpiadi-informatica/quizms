@@ -2,18 +2,27 @@ import { useEffect } from "react";
 
 import { Button } from "@olinfo/react-components";
 import { RotateCw } from "lucide-react";
-import { FallbackProps } from "react-error-boundary";
+import {
+  ErrorBoundary as BaseErrorBoundary,
+  type ErrorBoundaryPropsWithComponent,
+  type FallbackProps,
+} from "react-error-boundary";
 
-export function Error({ error, resetErrorBoundary }: Partial<FallbackProps>) {
+export function ErrorBoundary({
+  children,
+  ...props
+}: Omit<ErrorBoundaryPropsWithComponent, "FallbackComponent">) {
+  return (
+    <BaseErrorBoundary {...props} FallbackComponent={ErrorBoundaryContent}>
+      {children}
+    </BaseErrorBoundary>
+  );
+}
+
+function ErrorBoundaryContent({ error, resetErrorBoundary }: FallbackProps) {
   useEffect(() => {
-    if (import.meta.hot) {
-      import.meta.hot.on("vite:afterUpdate", onHmr);
-      return () => import.meta.hot?.off("vite:afterUpdate", onHmr);
-    }
-
-    function onHmr() {
-      resetErrorBoundary?.();
-    }
+    import.meta.hot?.on("vite:afterUpdate", resetErrorBoundary);
+    return () => import.meta.hot?.off("vite:afterUpdate", resetErrorBoundary);
   }, [resetErrorBoundary]);
 
   return (

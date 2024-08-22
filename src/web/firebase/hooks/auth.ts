@@ -1,7 +1,7 @@
-import { User, getAuth, onAuthStateChanged, signInAnonymously } from "firebase/auth";
+import { type User, getAuth, onAuthStateChanged, signInAnonymously } from "firebase/auth";
 import { noop } from "lodash-es";
 import { useErrorBoundary } from "react-error-boundary";
-import { SWRConfiguration } from "swr";
+import type { SWRConfiguration } from "swr";
 import useSWR from "swr/immutable";
 
 import { useDb } from "~/web/firebase/common/base-login";

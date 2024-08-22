@@ -2,7 +2,7 @@ import { createContext, lazy, useContext } from "react";
 
 import { Link, Redirect, Route, Switch, useParams } from "wouter";
 
-import { Contest, Participation, Student, StudentRestore, Variant } from "~/models";
+import type { Contest, Participation, Student, StudentRestore, Variant } from "~/models";
 import { ImpersonificationAuth } from "~/web/student/impersonification-auth";
 import { PersonalInformationForm } from "~/web/student/personal-information-form";
 

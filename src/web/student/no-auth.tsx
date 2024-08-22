@@ -1,6 +1,6 @@
-import { ReactNode, useCallback, useEffect, useState } from "react";
+import { type ReactNode, useCallback, useEffect, useState } from "react";
 
-import { Contest, Participation, Student } from "~/models";
+import type { Contest, Participation, Student } from "~/models";
 
 import { StudentProvider } from "./provider";
 

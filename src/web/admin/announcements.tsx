@@ -1,4 +1,4 @@
-import { Fragment, Ref, forwardRef, useRef } from "react";
+import { Fragment, type Ref, forwardRef, useRef } from "react";
 
 import {
   Button,
@@ -13,7 +13,7 @@ import {
 } from "@olinfo/react-components";
 import { AlertTriangle, Info, XCircle } from "lucide-react";
 
-import { Announcement } from "~/models";
+import type { Announcement } from "~/models";
 import { randomId } from "~/utils/random";
 import { announcementConverter } from "~/web/firebase/common/converters";
 import { useCollection } from "~/web/firebase/hooks";

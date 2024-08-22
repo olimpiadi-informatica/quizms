@@ -1,11 +1,10 @@
-import { ReactNode, Suspense, createContext, useContext, useMemo } from "react";
+import { type ReactNode, Suspense, createContext, useCallback, useContext, useMemo } from "react";
 
-import { FirebaseOptions, initializeApp } from "firebase/app";
+import { type FirebaseOptions, initializeApp } from "firebase/app";
 import { browserLocalPersistence, debugErrorMap, getAuth, initializeAuth } from "firebase/auth";
-import { Firestore, getFirestore } from "firebase/firestore";
-import { ErrorBoundary, FallbackProps } from "react-error-boundary";
+import { type Firestore, getFirestore } from "firebase/firestore";
 
-import { Error, Loading } from "~/web/components";
+import { ErrorBoundary, Loading } from "~/web/components";
 
 type Props = {
   config: FirebaseOptions;
@@ -13,9 +12,11 @@ type Props = {
 };
 
 export function FirebaseLogin({ config, children }: Props) {
-  const db = useMemo(() => {
-    if (!config) return;
+  if (!config) {
+    throw new Error("No Firebase configuration provided.");
+  }
 
+  const db = useMemo(() => {
     const app = initializeApp(config);
     initializeAuth(app, {
       errorMap: debugErrorMap,
@@ -24,13 +25,15 @@ export function FirebaseLogin({ config, children }: Props) {
     return getFirestore(app);
   }, [config]);
 
-  if (!config) {
-    return <Error error={{ message: "No Firebase configuration provided." }} />;
-  }
+  const onReset = useCallback(async () => {
+    const auth = getAuth(db.app);
+    await auth.signOut();
+    window.location.reload();
+  }, [db]);
 
   return (
     <FirebaseContext.Provider value={db}>
-      <ErrorBoundary FallbackComponent={ErrorLogout}>
+      <ErrorBoundary onReset={onReset}>
         <Suspense fallback={<Loading />}>{children}</Suspense>
       </ErrorBoundary>
     </FirebaseContext.Provider>
@@ -42,16 +45,4 @@ FirebaseContext.displayName = "FirebaseContext";
 
 export function useDb() {
   return useContext(FirebaseContext)!;
-}
-
-function ErrorLogout({ error }: FallbackProps) {
-  const db = useDb();
-  const auth = getAuth(db.app);
-
-  const onReset = async () => {
-    await auth.signOut();
-    window.location.reload();
-  };
-
-  return <Error error={error} resetErrorBoundary={onReset} />;
 }

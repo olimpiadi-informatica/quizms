@@ -1,7 +1,14 @@
 import { getAuth } from "firebase/auth";
-import { Firestore, FirestoreError, doc, getDoc, runTransaction, setDoc } from "firebase/firestore";
+import {
+  type Firestore,
+  type FirestoreError,
+  doc,
+  getDoc,
+  runTransaction,
+  setDoc,
+} from "firebase/firestore";
 
-import { Student, StudentRestore, studentHash } from "~/models";
+import { type Student, type StudentRestore, studentHash } from "~/models";
 import { randomId } from "~/utils/random";
 
 import {

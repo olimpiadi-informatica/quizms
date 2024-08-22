@@ -1,4 +1,4 @@
-import { Ref, Suspense, forwardRef, lazy, useMemo, useRef, useState } from "react";
+import { type Ref, Suspense, forwardRef, lazy, useMemo, useRef, useState } from "react";
 
 import type {
   CellEditRequestEvent,
@@ -23,9 +23,9 @@ import { cloneDeep, deburr, isString, lowerFirst, omit, set, sumBy } from "lodas
 import { AlertTriangle, Download, FileCheck, Upload, Users } from "lucide-react";
 
 import {
-  Contest,
-  Student,
-  Variant,
+  type Contest,
+  type Student,
+  type Variant,
   calcScore,
   formatPersonalInformation,
   parsePersonalInformation,
@@ -225,7 +225,7 @@ const DeleteModal = forwardRef(function DeleteModal(
     }
   };
 
-  const confirm = async ({ notAgain }: { notAgain: boolean }) => {
+  const confirm = ({ notAgain }: { notAgain: boolean }) => {
     sessionStorage.setItem(deleteConfirmStorageKey, notAgain ? "1" : "0");
     close("1");
   };
@@ -355,8 +355,9 @@ function Table() {
 
         modal.returnValue = "0";
         modal.showModal();
-        // eslint-disable-next-line unicorn/prefer-add-event-listener
-        await new Promise<void>((resolve) => (modal.onclose = () => resolve()));
+        await new Promise<void>((resolve) => {
+          modal.onclose = () => resolve();
+        });
         value = modal.returnValue === "1";
       }
     }
@@ -470,7 +471,8 @@ function columnDefinition(contest: Contest, variants: Record<string, Variant>): 
           <a
             className="link link-info"
             href={`${window.location.pathname}${data.id}/`}
-            target="_blank">
+            target="_blank"
+            rel="noreferrer">
             apri
           </a>
         );

@@ -5,7 +5,7 @@ import pc from "picocolors";
 
 const rl = readline.createInterface({ input: stdin, output: stdout });
 
-rl.on("SIGINT", () => fatal(`Command cancelled.`));
+rl.on("SIGINT", () => fatal("Command cancelled."));
 
 export async function confirm(question: string, terminate = true) {
   const ans = await rl.question(`${pc.bold(pc.yellow("?"))} ${question} (y/N) `);

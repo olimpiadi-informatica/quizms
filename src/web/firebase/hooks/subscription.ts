@@ -46,7 +46,9 @@ function useBaseSubscription<T>(
   let subscription = subscriptions.get(key) as Subscription<T>;
   if (!subscription) {
     let resolve!: () => void;
-    const promise = new Promise<void>((r) => (resolve = r));
+    const promise = new Promise<void>((r) => {
+      resolve = r;
+    });
 
     const unsubscribe = subscribe((value) => {
       resolve();

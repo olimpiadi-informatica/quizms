@@ -6,7 +6,7 @@ import { initializeFirebase } from "./utils/initialize";
 export default async function definalize(options: { dir: string }) {
   const { db } = await initializeFirebase(options.dir);
 
-  info(`Definalizing all participations.`);
+  info("Definalizing all participations.");
 
   const ref = db.collection("participations").withConverter(participationConverter);
 
@@ -31,5 +31,5 @@ export default async function definalize(options: { dir: string }) {
     snapshot = await ref.startAfter(last).limit(chunkSize).get();
   }
 
-  success(`All participations are definalized.`);
+  success("All participations are definalized.");
 }

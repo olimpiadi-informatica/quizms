@@ -5,11 +5,10 @@
   "author": "Alessandro Bortolin <bortolin.alessandro@outlook.it>",
   "license": "MIT",
   "scripts": {
-    "prebuild": "eslint src && prettier --check --cache --log-level=warn src",
+    "prebuild": "biome check",
     "build": "NODE_ENV=production node scripts/build.js build",
     "watch": "node scripts/build.js watch",
-    "lint": "eslint --fix src && tsc --noEmit && prettier --write --cache --log-level=warn src",
-    "fmt": "prettier --write --cache src",
+    "lint": "biome check --write && tsc --noEmit",
     "prepack": "yarn build",
     "release": "npm publish --access public"
   },
@@ -110,8 +109,7 @@
     "react-dom": "^18"
   },
   "devDependencies": {
-    "@olinfo/eslint": "^0.2",
-    "@olinfo/prettier": "^0.1",
+    "@biomejs/biome": "^1.8",
     "@olinfo/tailwind": "^0.1",
     "@types/file-saver": "^2.0",
     "@types/js-yaml": "^4.0",
@@ -130,6 +128,5 @@
     "plugins": {
       "tailwindcss": {}
     }
-  },
-  "prettier": "@olinfo/prettier"
+  }
 }

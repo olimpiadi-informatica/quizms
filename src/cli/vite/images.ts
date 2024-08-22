@@ -4,10 +4,10 @@ import process from "node:process";
 
 import sizeOf from "image-size";
 import svgToMiniDataURI from "mini-svg-data-uri";
-import { PluginContext } from "rollup";
-import sharp, { ResizeOptions } from "sharp";
+import type { PluginContext } from "rollup";
+import sharp, { type ResizeOptions } from "sharp";
 import { optimize } from "svgo";
-import { PluginOption } from "vite";
+import type { PluginOption } from "vite";
 
 const imageExtensions = new Set([".png", ".jpg", ".jpeg", ".tiff", ".gif", ".webp", ".avif"]);
 
@@ -64,7 +64,7 @@ export default function images(): PluginOption {
       let image: Image | undefined;
 
       if (ext === ".svg" || ext === ".asy") {
-        image = await transformSvg(pathname, code, options);
+        image = transformSvg(pathname, code, options);
       }
       if (imageExtensions.has(ext)) {
         image = await transformImage(pathname, options);
@@ -80,7 +80,7 @@ export default function images(): PluginOption {
   };
 }
 
-async function transformSvg(id: string, content: string, options: ImageOptions): Promise<Image> {
+function transformSvg(id: string, content: string, options: ImageOptions): Image {
   const { data } = optimize(content, {
     multipass: true,
     plugins: [
@@ -103,7 +103,7 @@ async function transformSvg(id: string, content: string, options: ImageOptions):
 
   let { width, height } = sizeOf(Buffer.from(data, "utf8"));
   if (!width || !height) {
-    throw new Error(`Unable to determine size of SVG image`);
+    throw new Error("Unable to determine size of SVG image");
   }
 
   if (options.scale) {

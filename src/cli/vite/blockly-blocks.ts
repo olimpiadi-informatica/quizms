@@ -1,9 +1,16 @@
-import { TransformPluginContext } from "rollup";
-import { PluginOption } from "vite";
-import { Scalar, YAMLError, YAMLMap, Node as YAMLNode, parse, parseDocument } from "yaml";
-import { ZodError } from "zod";
+import type { TransformPluginContext } from "rollup";
+import type { PluginOption } from "vite";
+import {
+  type Scalar,
+  type YAMLError,
+  type YAMLMap,
+  type Node as YAMLNode,
+  parse,
+  parseDocument,
+} from "yaml";
+import type { ZodError } from "zod";
 
-import { CustomBlock, customBlockSchema } from "~/models/blockly-custom-block";
+import { type CustomBlock, customBlockSchema } from "~/models/blockly-custom-block";
 
 export default function blocklyBlocks(): PluginOption {
   return {

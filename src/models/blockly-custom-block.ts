@@ -1,6 +1,6 @@
-import { Expression, LogicalOperator, UnaryOperator, parse } from "acorn";
+import { type Expression, type LogicalOperator, type UnaryOperator, parse } from "acorn";
 import { Order } from "blockly/javascript";
-import { BinaryOperator, UpdateOperator } from "estree";
+import type { BinaryOperator, UpdateOperator } from "estree";
 import { z } from "zod";
 
 const blocklyTypeSchema = z.enum(["Number", "String", "Array", "Boolean"]);

@@ -1,7 +1,7 @@
 import {
-  Dispatch,
-  ReactNode,
-  SetStateAction,
+  type Dispatch,
+  type ReactNode,
+  type SetStateAction,
   createContext,
   useContext,
   useEffect,
@@ -11,7 +11,7 @@ import {
 import { useIsAfter } from "@olinfo/react-components";
 import { isEqual } from "lodash-es";
 
-import { Contest, Participation, Schema, Student, calcScore } from "~/models";
+import { type Contest, type Participation, type Schema, type Student, calcScore } from "~/models";
 
 import { StudentLayout } from "./layout";
 
@@ -45,15 +45,17 @@ StudentContext.displayName = "StudentContext";
 export function StudentProvider({
   setStudent,
   children,
+  student,
   ...props
 }: Omit<StudentProviderProps, "terminated"> & {
   children: ReactNode;
 }) {
   const [schema, registerSchema] = useState<Schema>({});
-  const terminated = useIsAfter(props.student.finishedAt) ?? false;
+  const terminated = useIsAfter(student.finishedAt) ?? false;
 
   const value: StudentContextProps = {
     ...props,
+    student,
     setStudent: (student) => setStudent({ ...student, score: calcScore(student, schema) }),
     terminated,
     schema,
@@ -62,17 +64,17 @@ export function StudentProvider({
 
   useEffect(() => {
     let maxScore = 0;
-    const answers = { ...props.student.answers };
+    const answers = { ...student.answers };
     for (const id in schema) {
       maxScore += schema[id].pointsCorrect ?? 0;
       answers[id] ??= null;
     }
-    if (maxScore !== props.student.maxScore || !isEqual(answers, props.student.answers)) {
-      const newStudent: Student = { ...props.student, maxScore, answers };
+    if (maxScore !== student.maxScore || !isEqual(answers, student.answers)) {
+      const newStudent: Student = { ...student, maxScore, answers };
       newStudent.score = calcScore(newStudent, schema);
       setStudent(newStudent);
     }
-  }, [props, setStudent, schema]);
+  }, [student, setStudent, schema]);
 
   return (
     <StudentContext.Provider value={value}>

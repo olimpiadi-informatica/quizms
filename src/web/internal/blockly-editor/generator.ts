@@ -1,13 +1,13 @@
 import {
-  Block,
+  type Block,
   VERSION as BlocklyVersion,
-  Workspace,
-  WorkspaceSvg,
+  type Workspace,
+  type WorkspaceSvg,
   defineBlocksWithJsonArray,
 } from "blockly/core";
-import { JavascriptGenerator, Order, javascriptGenerator } from "blockly/javascript";
+import { type JavascriptGenerator, Order, javascriptGenerator } from "blockly/javascript";
 
-import { CustomBlock, CustomBlockArg } from "~/models/blockly-custom-block";
+import type { CustomBlock, CustomBlockArg } from "~/models/blockly-custom-block";
 
 javascriptGenerator.STATEMENT_PREFIX = "highlightBlock(%1);\n";
 javascriptGenerator.INFINITE_LOOP_TRAP = 'if(--loopTrap === 0) exit(false, "Ciclo infinito");\n';

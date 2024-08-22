@@ -1,6 +1,6 @@
 import {
-  DocumentSnapshot,
-  FirestoreDataConverter,
+  type DocumentSnapshot,
+  type FirestoreDataConverter,
   Timestamp,
   serverTimestamp,
 } from "firebase/firestore";
@@ -13,15 +13,15 @@ import z, {
   ZodObject,
   ZodOptional,
   ZodRecord,
-  ZodType,
-  ZodTypeAny,
+  type ZodType,
+  type ZodTypeAny,
   ZodUnion,
 } from "zod";
 
 import {
-  Announcement,
-  Student,
-  Submission,
+  type Announcement,
+  type Student,
+  type Submission,
   announcementSchema,
   contestSchema,
   participationMappingSchema,

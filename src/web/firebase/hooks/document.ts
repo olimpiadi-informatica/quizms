@@ -1,15 +1,15 @@
 import { useCallback } from "react";
 
 import {
-  DocumentReference,
-  FirestoreDataConverter,
+  type DocumentReference,
+  type FirestoreDataConverter,
   doc,
   getDoc,
   onSnapshot,
   setDoc,
 } from "firebase/firestore";
 import { useErrorBoundary } from "react-error-boundary";
-import useSWR, { KeyedMutator, MutatorOptions, SWRConfiguration } from "swr";
+import useSWR, { type KeyedMutator, type MutatorOptions, type SWRConfiguration } from "swr";
 
 import { useDb } from "~/web/firebase/common/base-login";
 

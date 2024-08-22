@@ -1,6 +1,6 @@
 import { DateField, Form, NumberField, TextField } from "@olinfo/react-components";
 
-import { Contest } from "~/models";
+import type { Contest } from "~/models";
 import { useStudent } from "~/web/student/provider";
 
 export function PersonalInformationForm() {

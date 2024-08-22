@@ -1,6 +1,6 @@
 import { Form, SubmitButton, TextAreaField } from "@olinfo/react-components";
 
-import { Contest } from "~/models";
+import type { Contest } from "~/models";
 
 import { useAdmin } from "./provider";
 

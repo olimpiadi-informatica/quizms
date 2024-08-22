@@ -1,4 +1,4 @@
-import { ComponentType, ReactNode, useEffect } from "react";
+import { type ComponentType, type ReactNode, useEffect } from "react";
 
 type Module = {
   default: ComponentType;

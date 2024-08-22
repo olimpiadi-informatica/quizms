@@ -1,4 +1,4 @@
-import { ToolboxInfo } from "blockly/core/utils/toolbox";
+import type { ToolboxInfo } from "blockly/core/utils/toolbox";
 
 export const defaultToolbox: ToolboxInfo = {
   kind: "categoryToolbox",

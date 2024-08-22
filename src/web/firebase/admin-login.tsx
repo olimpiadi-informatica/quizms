@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 
-import { FirebaseOptions } from "firebase/app";
+import type { FirebaseOptions } from "firebase/app";
 import { getAuth, signOut } from "firebase/auth";
 
 import { AdminProvider } from "~/web/admin/provider";

@@ -2,7 +2,7 @@ import { mkdir, open } from "node:fs/promises";
 import path from "node:path";
 
 import { deleteApp } from "firebase-admin/app";
-import { Query } from "firebase-admin/firestore";
+import type { Query } from "firebase-admin/firestore";
 import { capitalize } from "lodash-es";
 
 import { info, success } from "~/utils/logs";
@@ -73,7 +73,7 @@ async function exportCollection(ref: Query, collection: string, dir: string) {
 
   while (!snapshot.empty) {
     for (const doc of snapshot.docs) {
-      await file.write(JSON.stringify(doc.data()) + "\n");
+      await file.write(`${JSON.stringify(doc.data())}\n`);
     }
 
     sum += snapshot.size;

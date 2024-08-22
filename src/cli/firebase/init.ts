@@ -3,8 +3,8 @@ import { cp, mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { Bucket } from "@google-cloud/storage";
-import { App } from "firebase-admin/app";
+import type { Bucket } from "@google-cloud/storage";
+import type { App } from "firebase-admin/app";
 import pc from "picocolors";
 
 import { confirm, error, info, success } from "~/utils/logs";
@@ -30,14 +30,14 @@ export default async function init(options: InitOptions) {
   if (await enableCors(bucket)) initialized = false;
 
   if (initialized) {
-    success(`Project initialized!`);
+    success("Project initialized!");
   } else {
-    error(`The initialization was not completed due to some previous errors.`);
+    error("The initialization was not completed due to some previous errors.");
   }
 }
 
 async function copyFiles(options: InitOptions) {
-  info(`Copying files...`);
+  info("Copying files...");
 
   const data = path.join(options.dir, "firebase");
   await mkdir(data, { recursive: true });
@@ -102,12 +102,12 @@ async function copyFiles(options: InitOptions) {
     await writeFile(configPath, JSON.stringify(configs, undefined, 2));
   }
 
-  success(`Files copied!`);
+  success("Files copied!");
   return 0;
 }
 
 async function enableBackups(app: App) {
-  info(`Enabling Firestore backups...`);
+  info("Enabling Firestore backups...");
 
   try {
     await restApi(app, "firestore", "v1", "/databases/(default)/backupSchedules", {
@@ -120,7 +120,7 @@ async function enableBackups(app: App) {
       },
       retention: "8467200s",
     });
-    success(`Backups enabled!`);
+    success("Backups enabled!");
     return 0;
   } catch (err) {
     error(`Failed to enable Firestore backups: ${err}`);
@@ -129,7 +129,7 @@ async function enableBackups(app: App) {
 }
 
 async function enableCors(bucket: Bucket) {
-  info(`Enabling CORS for Firebase bucket...`);
+  info("Enabling CORS for Firebase bucket...");
 
   try {
     await bucket.setCorsConfiguration([
@@ -139,7 +139,7 @@ async function enableCors(bucket: Bucket) {
         maxAgeSeconds: 3600,
       },
     ]);
-    success(`CORS enabled!`);
+    success("CORS enabled!");
     return 0;
   } catch (err) {
     error(`Failed to set CORS configuration: ${err}`);

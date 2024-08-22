@@ -1,8 +1,8 @@
-import { Node } from "acorn";
+import type { Node } from "acorn";
 import { isString } from "lodash-es";
 import MagicString from "magic-string";
 import preserveDirectives from "rollup-preserve-directives";
-import { PluginOption } from "vite";
+import type { PluginOption } from "vite";
 
 export default function directives(): PluginOption[] {
   // vite glob imports add some imports to the top of the files without

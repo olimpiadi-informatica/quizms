@@ -2,10 +2,10 @@ import { existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { CompileOptions as MdxOptions } from "@mdx-js/mdx";
+import type { CompileOptions as MdxOptions } from "@mdx-js/mdx";
 import react from "@vitejs/plugin-react-swc";
 import pc from "picocolors";
-import { InlineConfig } from "vite";
+import type { InlineConfig } from "vite";
 import inspect from "vite-plugin-inspect";
 
 import { fatal, info, warning } from "~/utils/logs";
@@ -85,7 +85,7 @@ export default function configs(
             if (log.frame) {
               message += log.frame
                 .split("\n")
-                .map((l) => " " + l)
+                .map((l) => ` ${l}`)
                 .join("\n");
             }
           }

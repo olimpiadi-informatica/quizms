@@ -1,4 +1,4 @@
-import { Firestore, FirestoreDataConverter, GrpcStatus } from "firebase-admin/firestore";
+import { type Firestore, type FirestoreDataConverter, GrpcStatus } from "firebase-admin/firestore";
 import { upperFirst } from "lodash-es";
 import pc from "picocolors";
 

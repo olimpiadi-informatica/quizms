@@ -1,7 +1,7 @@
-import { Expression, Literal } from "estree";
+import type { Expression, Literal } from "estree";
 import { builders as b } from "estree-toolkit";
 import { isObject } from "lodash-es";
-import { MdxJsxAttribute } from "mdast-util-mdx-jsx";
+import type { MdxJsxAttribute } from "mdast-util-mdx-jsx";
 
 export function jsxAttribute(name: string, value: Literal["value"] | Expression): MdxJsxAttribute {
   return {

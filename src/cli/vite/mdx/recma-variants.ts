@@ -1,8 +1,8 @@
 import path from "node:path";
 
-import { AssignmentProperty, Node, Program, Property, Statement } from "estree";
+import type { AssignmentProperty, Node, Program, Property, Statement } from "estree";
 import { builders as b, is, traverse } from "estree-toolkit";
-import { Plugin } from "unified";
+import type { Plugin } from "unified";
 
 import { hash } from "~/utils/random";
 
@@ -160,7 +160,7 @@ function injectLocalVariables(ast: Program, file: string) {
                   "+",
                   b.binaryExpression(
                     "+",
-                    b.literal(`Invalid variable name \``),
+                    b.literal("Invalid variable name `"),
                     b.identifier("_variable"),
                   ),
                   b.literal(

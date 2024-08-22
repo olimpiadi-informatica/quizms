@@ -1,10 +1,10 @@
 import process from "node:process";
 
 import { Parser } from "acorn";
-import { Directive } from "estree";
-import { Blockquote, List, Paragraph, Parent, Root } from "mdast";
-import { MdxJsxFlowElement } from "mdast-util-mdx-jsx";
-import { Plugin } from "unified";
+import type { Directive } from "estree";
+import type { Blockquote, List, Paragraph, Parent, Root } from "mdast";
+import type { MdxJsxFlowElement } from "mdast-util-mdx-jsx";
+import type { Plugin } from "unified";
 import { visit } from "unist-util-visit";
 
 import { jsxAttribute } from "./utils";

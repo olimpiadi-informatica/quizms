@@ -4,7 +4,7 @@ import { Form, Modal, NumberField, SubmitButton } from "@olinfo/react-components
 import { groupBy, sortBy } from "lodash-es";
 import { Check, X } from "lucide-react";
 
-import { StudentRestore } from "~/models";
+import type { StudentRestore } from "~/models";
 import { hash } from "~/utils/random";
 
 import { useTeacherStudentRestores } from "./provider";
@@ -41,12 +41,13 @@ function StudentRestoreEntry({
       <td>{studentRestore[0].surname}</td>
       <td>{studentRestore[0].name}</td>
       <td>
-        <button className="btn btn-square btn-error btn-sm" onClick={rejectRequest}>
+        <button type="button" className="btn btn-square btn-error btn-sm" onClick={rejectRequest}>
           <X />
         </button>
       </td>
       <td>
         <button
+          type="button"
           className="btn btn-square btn-success btn-sm"
           onClick={() => modalRef.current?.showModal()}>
           <Check />

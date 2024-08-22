@@ -1,4 +1,4 @@
-import { ReactNode, Suspense, useEffect, useRef } from "react";
+import { type ReactNode, Suspense, useEffect, useRef } from "react";
 
 import {
   Button,
@@ -10,11 +10,10 @@ import {
 } from "@olinfo/react-components";
 import clsx from "clsx";
 import { LogOut } from "lucide-react";
-import { ErrorBoundary } from "react-error-boundary";
 import { Link, useLocation, useRoute } from "wouter";
 
-import { Contest } from "~/models";
-import { Error, Loading } from "~/web/components";
+import type { Contest } from "~/models";
+import { ErrorBoundary, Loading } from "~/web/components";
 
 type Props = {
   name: string;
@@ -63,7 +62,7 @@ export function AdminLayout({ name, contests, logout, children }: Props) {
         <UserDropdown name={name} logout={logout} />
       </Navbar>
       <div className="mx-auto flex w-full max-w-screen-xl grow flex-col p-4 pb-8">
-        <ErrorBoundary FallbackComponent={Error}>
+        <ErrorBoundary>
           <Suspense fallback={<Loading />}>{children}</Suspense>
         </ErrorBoundary>
       </div>

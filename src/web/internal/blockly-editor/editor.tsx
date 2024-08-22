@@ -3,18 +3,18 @@ import { useEffect, useId, useState } from "react";
 import { DisableTopBlocks } from "@blockly/disable-top-blocks";
 import "blockly/blocks";
 import {
-  BlocklyOptions,
+  type BlocklyOptions,
   Events,
-  WorkspaceSvg,
+  type WorkspaceSvg,
   inject,
   serialization,
   setLocale,
 } from "blockly/core";
-import { ToolboxInfo } from "blockly/core/utils/toolbox";
+import type { ToolboxInfo } from "blockly/core/utils/toolbox";
 import { javascriptGenerator } from "blockly/javascript";
 import * as locale from "blockly/msg/it";
 
-import { CustomBlock } from "~/models/blockly-custom-block";
+import type { CustomBlock } from "~/models/blockly-custom-block";
 
 import { initGenerator, toJS } from "./generator";
 
@@ -87,7 +87,7 @@ function onWorkspaceChange(workspace: WorkspaceSvg, config: BlocklyOptions) {
   send("blocks", { blocks });
 
   const variablesMapping: Record<string, string> = {};
-  for (const variable of blocks["variables"] ?? []) {
+  for (const variable of blocks.variables ?? []) {
     const name = variable.name;
     const newName = javascriptGenerator.getVariableName(name);
     variablesMapping[newName] = name;
@@ -100,7 +100,7 @@ function onWorkspaceChange(workspace: WorkspaceSvg, config: BlocklyOptions) {
 }
 
 function createConfig({ toolbox, customBlocks, readonly }: InitProps): BlocklyOptions {
-  if (customBlocks && toolbox.kind == "categoryToolbox") {
+  if (customBlocks && toolbox.kind === "categoryToolbox") {
     toolbox.contents.unshift({
       kind: "category",
       name: "Esecuzione",

@@ -1,11 +1,11 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 
-import { PDFDocument, PDFPageDrawTextOptions, StandardFonts } from "@cantoo/pdf-lib";
+import { PDFDocument, type PDFPageDrawTextOptions, StandardFonts } from "@cantoo/pdf-lib";
 import { map, range, size, uniq } from "lodash-es";
-import { BrowserContext, chromium } from "playwright";
+import { type BrowserContext, chromium } from "playwright";
 
-import { GenerationConfig } from "~/models/generation-config";
+import type { GenerationConfig } from "~/models/generation-config";
 import { info } from "~/utils/logs";
 
 async function generatePdf(

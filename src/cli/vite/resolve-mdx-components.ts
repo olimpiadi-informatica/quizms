@@ -2,7 +2,7 @@ import path from "node:path";
 
 import glob from "fast-glob";
 import { camelCase, upperFirst } from "lodash-es";
-import { PluginOption } from "vite";
+import type { PluginOption } from "vite";
 
 export default function resolveMdxComponents(): PluginOption {
   return {

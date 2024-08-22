@@ -2,7 +2,7 @@ import { createContext, lazy, useContext } from "react";
 
 import { Link, Redirect, Route, useParams } from "wouter";
 
-import { Contest } from "~/models";
+import type { Contest } from "~/models";
 
 import { AdminLayout } from "./layout";
 

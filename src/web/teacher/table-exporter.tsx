@@ -1,9 +1,9 @@
-import { Ref, forwardRef } from "react";
+import { type Ref, forwardRef } from "react";
 
 import { saveAs } from "file-saver";
 import { unparse as stringifyCSV } from "papaparse";
 
-import { Contest, Student, formatPersonalInformation } from "~/models";
+import { type Contest, type Student, formatPersonalInformation } from "~/models";
 
 import { useTeacher, useTeacherStudents } from "./provider";
 
@@ -11,7 +11,14 @@ const Exporter = forwardRef(function Exporter(_, ref: Ref<HTMLButtonElement> | n
   const { contest } = useTeacher();
   const [students] = useTeacherStudents();
 
-  return <button ref={ref} className="hidden" onClick={() => exportStudents(students, contest)} />;
+  return (
+    <button
+      ref={ref}
+      type="button"
+      className="hidden"
+      onClick={() => exportStudents(students, contest)}
+    />
+  );
 });
 
 export default Exporter;

@@ -1,10 +1,10 @@
-import { ReactNode, createContext, useCallback, useContext } from "react";
+import { type ReactNode, createContext, useCallback, useContext } from "react";
 
 import { Button } from "@olinfo/react-components";
 import { addMinutes } from "date-fns";
 import { noop } from "lodash-es";
 
-import { Schema } from "~/models";
+import type { Schema } from "~/models";
 import { randomId } from "~/utils/random";
 import { useStudent } from "~/web/student/provider";
 

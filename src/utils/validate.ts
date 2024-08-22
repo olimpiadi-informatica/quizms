@@ -1,5 +1,5 @@
-import { ZodType } from "zod";
-import { FromZodErrorOptions, fromZodError } from "zod-validation-error";
+import type { ZodType } from "zod";
+import { type FromZodErrorOptions, fromZodError } from "zod-validation-error";
 
 export default function validate<In, Out>(
   schema: ZodType<Out, any, In>,

@@ -1,4 +1,4 @@
-import { PluginOption } from "vite";
+import type { PluginOption } from "vite";
 
 export default function resolveContests(): PluginOption {
   const api = {
@@ -14,7 +14,7 @@ export default function resolveContests(): PluginOption {
     }),
     resolveId(id) {
       if (id === "virtual:quizms-contests") {
-        return "\0" + id;
+        return `\0${id}`;
       }
     },
     load(id) {

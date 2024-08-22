@@ -1,6 +1,14 @@
-import { ComponentType, Ref, forwardRef, useEffect, useMemo, useRef, useState } from "react";
+import {
+  type ComponentType,
+  type Ref,
+  forwardRef,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
-import { ToolboxInfo } from "blockly/core/utils/toolbox";
+import type { ToolboxInfo } from "blockly/core/utils/toolbox";
 import clsx from "clsx";
 import { range } from "lodash-es";
 import {
@@ -78,7 +86,7 @@ export function Blockly({
   }, [registerProblem, id, testcases, points]);
 
   const savedBlocks = student.extraData?.[`blockly-${id}`];
-  const blocks = savedBlocks ? JSON.parse(savedBlocks) : (initialBlocks ?? defaultInitialBlocks);
+  const blocks = savedBlocks ? JSON.parse(savedBlocks) : initialBlocks ?? defaultInitialBlocks;
 
   const setBlocks = async (blocks: object) => {
     await setStudent({
@@ -223,6 +231,7 @@ export function Blockly({
             {testcaseStatuses.map(({ index, correct, msg }) => (
               <button
                 key={index}
+                type="button"
                 onClick={() => {
                   setTestcaseIndex(index);
                   setPlaying(false);
@@ -258,7 +267,10 @@ export function Blockly({
                   className={clsx("alert", correct ? "alert-success" : "alert-error")}>
                   {correct ? <CheckCircle /> : <AlertTriangle />}
                   <span>{msg}</span>
-                  <button onClick={() => setMessageHidden(true)} aria-label="Nascondi messaggio">
+                  <button
+                    type="button"
+                    onClick={() => setMessageHidden(true)}
+                    aria-label="Nascondi messaggio">
                     <MessageSquareOff />
                   </button>
                 </div>
@@ -272,6 +284,7 @@ export function Blockly({
           <div className="join join-horizontal">
             <div className="join-item tooltip" data-tip="Esegui/pausa">
               <button
+                type="button"
                 className="btn btn-info rounded-[inherit]"
                 disabled={!running || editing}
                 onClick={() => setPlaying(!playing)}
@@ -281,6 +294,7 @@ export function Blockly({
             </div>
             <div className="join-item tooltip" data-tip="Esegui un blocco">
               <button
+                type="button"
                 className="btn btn-info rounded-[inherit]"
                 disabled={!running || editing}
                 onClick={step}
@@ -290,6 +304,7 @@ export function Blockly({
             </div>
             <div className="join-item tooltip" data-tip="Esegui da capo">
               <button
+                type="button"
                 className="btn btn-info rounded-[inherit]"
                 aria-label="Esegui da capo"
                 disabled={editing}
@@ -303,6 +318,7 @@ export function Blockly({
           </div>
           <div className="tooltip" data-tip="Correggi la soluzione">
             <button
+              type="button"
               className="btn btn-success"
               aria-label="Correggi la soluzione"
               disabled={!editing || !ready}
@@ -341,7 +357,7 @@ const Editor = forwardRef(function Editor(
     <div className="relative flex grow flex-col overflow-hidden rounded-xl border-2 border-[#c6c6c6]">
       <iframe
         ref={ref}
-        src={import.meta.env.BASE_URL + "__blockly_iframe/"}
+        src={`${import.meta.env.BASE_URL}__blockly_iframe/`}
         className="grow"
         title="Area di lavoro di Blockly"
         loading="lazy"

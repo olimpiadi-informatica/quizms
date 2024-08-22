@@ -1,11 +1,16 @@
-import { Ref, forwardRef, useRef } from "react";
+import { type Ref, forwardRef, useRef } from "react";
 
 import { Button, Modal } from "@olinfo/react-components";
-import { DocumentSnapshot, Firestore, FirestoreDataConverter, getDocs } from "firebase/firestore";
+import {
+  type DocumentSnapshot,
+  type Firestore,
+  type FirestoreDataConverter,
+  getDocs,
+} from "firebase/firestore";
 import { AlertTriangle } from "lucide-react";
 
 import { useDb } from "~/web/firebase/common/base-login";
-import query, { QueryOption } from "~/web/firebase/common/query";
+import query, { type QueryOption } from "~/web/firebase/common/query";
 
 import { useAdmin } from "./provider";
 
@@ -97,7 +102,7 @@ async function saveExport<T>(
     if (snapshot.empty) break;
 
     for (const doc of snapshot.docs) {
-      await writableStream.write(JSON.stringify(doc.data()) + "\n");
+      await writableStream.write(`${JSON.stringify(doc.data())}\n`);
     }
 
     last = snapshot.docs.at(-1);

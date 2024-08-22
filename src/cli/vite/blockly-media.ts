@@ -2,7 +2,7 @@ import { readFile, readdir } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { PluginOption } from "vite";
+import type { PluginOption } from "vite";
 
 export default function blocklyMedia(): PluginOption {
   let isLib = false;

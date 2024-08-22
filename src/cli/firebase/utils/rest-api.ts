@@ -1,4 +1,4 @@
-import { App } from "firebase-admin/app";
+import type { App } from "firebase-admin/app";
 import type { ServiceAccountCredential } from "firebase-admin/lib/app/credential-internal";
 
 import { fatal } from "~/utils/logs";

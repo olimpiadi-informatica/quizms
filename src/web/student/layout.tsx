@@ -1,4 +1,4 @@
-import React, { ReactNode, Ref, forwardRef, useEffect, useRef } from "react";
+import { type ReactNode, type Ref, forwardRef, useEffect, useRef } from "react";
 
 import {
   Button,
@@ -13,10 +13,9 @@ import {
 } from "@olinfo/react-components";
 import { sumBy } from "lodash-es";
 import { FileBarChart2, LogOut, RotateCcw } from "lucide-react";
-import { ErrorBoundary } from "react-error-boundary";
 
-import { Schema, calcProblemScore } from "~/models";
-import { Error, Progress, Prose, Timer } from "~/web/components";
+import { type Schema, calcProblemScore } from "~/models";
+import { ErrorBoundary, Progress, Prose, Timer } from "~/web/components";
 
 import { useStudent } from "./provider";
 
@@ -36,8 +35,9 @@ export function StudentLayout({ children }: { children: ReactNode }) {
 
     modal.returnValue = "0";
     modal.showModal();
-    // eslint-disable-next-line unicorn/prefer-add-event-listener
-    await new Promise<void>((resolve) => (modal.onclose = () => resolve()));
+    await new Promise<void>((resolve) => {
+      modal.onclose = () => resolve();
+    });
     if (modal.returnValue === "1") {
       completedRef.current?.showModal();
     }
@@ -102,7 +102,7 @@ export function StudentLayout({ children }: { children: ReactNode }) {
         <UserDropdown />
       </Navbar>
       <div className="mx-auto flex w-full max-w-screen-xl grow flex-col p-4 pb-8">
-        <ErrorBoundary FallbackComponent={Error}>
+        <ErrorBoundary>
           <CompletedModal ref={completedRef} schema={schema} />
           <SubmitModal ref={submitRef} />
           <Prose>

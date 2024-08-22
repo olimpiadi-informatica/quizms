@@ -16,7 +16,7 @@ export function Equation({ display, children }: MathProps) {
     if (ref.current) {
       katex.render(children, ref.current, { displayMode: display });
     }
-  }, [ref, children, display]);
+  }, [children, display]);
 
   return <span ref={ref} />;
 }

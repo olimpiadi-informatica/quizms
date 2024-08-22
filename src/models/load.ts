@@ -6,7 +6,7 @@ import yaml from "js-yaml";
 import { camelCase, cloneDeepWith, isPlainObject } from "lodash-es";
 import Papa from "papaparse";
 import * as toml from "smol-toml";
-import { ZodType } from "zod";
+import type { ZodType } from "zod";
 
 import { fatal, info } from "~/utils/logs";
 import validate from "~/utils/validate";
@@ -47,16 +47,16 @@ export default async function load<T>(
     try {
       if (Array.isArray(rawData)) {
         return validate(schema.array(), renameKeys(rawData));
-      } else if (isPlainObject(rawData)) {
+      }
+      if (isPlainObject(rawData)) {
         return Object.entries(rawData).map(([id, record]) => {
           if (!isPlainObject(record)) {
             fatal(`Cannot parse ${relativePath}: ${id} is not an object`);
           }
           return validate(schema, renameKeys({ id, ...(record as object) }));
         });
-      } else {
-        fatal(`Cannot parse ${relativePath}: not an array or object`);
       }
+      fatal(`Cannot parse ${relativePath}: not an array or object`);
     } catch (err) {
       fatal(`Cannot parse ${relativePath}: ${err}`);
     }

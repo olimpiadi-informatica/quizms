@@ -32,8 +32,8 @@ function InnerStatement({ id, url }: Props) {
   return <Statement />;
 }
 
-async function fetcher(url: Props["url"]) {
-  if (isFunction(url)) url = await url();
+async function fetcher(getUrl: Props["url"]) {
+  const url = isFunction(getUrl) ? await getUrl() : getUrl;
   const { default: statement } = await import(/* @vite-ignore */ url);
 
   return memo(function Statement() {

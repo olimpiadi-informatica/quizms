@@ -1,9 +1,9 @@
-import { Program, Property } from "estree";
+import type { Program, Property } from "estree";
 import { builders as b, is, traverse } from "estree-toolkit";
-import { Node } from "estree-toolkit/dist/estree";
+import type { Node } from "estree-toolkit/dist/estree";
 import { countBy, isString, mapKeys } from "lodash-es";
 
-import { Schema } from "~/models";
+import type { Schema } from "~/models";
 import { error } from "~/utils/logs";
 import { Rng } from "~/utils/random";
 

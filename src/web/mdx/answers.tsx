@@ -1,4 +1,12 @@
-import { Children, ReactNode, createContext, useContext, useEffect, useId, useMemo } from "react";
+import {
+  Children,
+  type ReactNode,
+  createContext,
+  useContext,
+  useEffect,
+  useId,
+  useMemo,
+} from "react";
 
 import clsx from "clsx";
 import { Trash2 } from "lucide-react";

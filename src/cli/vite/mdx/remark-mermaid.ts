@@ -1,8 +1,8 @@
-import { Code, Parent, Root } from "mdast";
+import type { Code, Parent, Root } from "mdast";
 import { createMermaidRenderer } from "mermaid-isomorphic";
 import { optimize } from "svgo";
 import { temporaryWrite } from "tempy";
-import { Plugin } from "unified";
+import type { Plugin } from "unified";
 import { visit } from "unist-util-visit";
 
 const remarkMermaid: Plugin<[], Root> = () => {

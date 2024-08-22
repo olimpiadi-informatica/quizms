@@ -1,8 +1,8 @@
-import { ReactNode } from "react";
+import { Fragment, type ReactNode } from "react";
 
 import contests from "virtual:quizms-contests";
 
-import { Participation, Student } from "~/models";
+import type { Participation, Student } from "~/models";
 
 import { StudentProvider, useStudent } from "./provider";
 import { RemoteStatement } from "./remote-statement";
@@ -26,7 +26,7 @@ export function PrintAuth({ children }: AuthProps) {
         <div className="prose mx-auto p-4 lg:max-w-4xl">
           {variant && <h3 className="text-error">Variante non trovata.</h3>}
           {allContests.map((c) => (
-            <>
+            <Fragment key={c.id}>
               <h3>{c.name}</h3>
               <h4>Varianti su carta</h4>
               <ul className="columns-3 first:*:mt-0 lg:columns-4">
@@ -44,7 +44,7 @@ export function PrintAuth({ children }: AuthProps) {
                   </li>
                 ))}
               </ul>
-            </>
+            </Fragment>
           ))}
         </div>
       </div>

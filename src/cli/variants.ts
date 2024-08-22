@@ -8,12 +8,12 @@ import { toJs } from "estree-util-to-js";
 import { uniq } from "lodash-es";
 import { name as quizmsImportSource } from "package.json";
 import { temporaryDirectoryTask } from "tempy";
-import { InlineConfig, build, mergeConfig } from "vite";
+import { type InlineConfig, build, mergeConfig } from "vite";
 
-import { ExpressionWrapper, shuffleStatement } from "~/jsx-runtime/parser";
+import { type ExpressionWrapper, shuffleStatement } from "~/jsx-runtime/parser";
 import { cleanStatement, getSchema } from "~/jsx-runtime/shuffle";
-import { Variant } from "~/models";
-import { GenerationConfig, generationConfigSchema } from "~/models/generation-config";
+import type { Variant } from "~/models";
+import { type GenerationConfig, generationConfigSchema } from "~/models/generation-config";
 import load from "~/models/load";
 import { fatal, info, success } from "~/utils/logs";
 

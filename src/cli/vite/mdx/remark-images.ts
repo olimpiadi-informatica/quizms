@@ -1,12 +1,12 @@
 import path from "node:path";
 
 import { Parser } from "acorn";
-import { Directive, Expression, ModuleDeclaration } from "estree";
+import type { Directive, Expression, ModuleDeclaration } from "estree";
 import { builders as b } from "estree-toolkit";
 import { compact } from "lodash-es";
-import { Image, Parent, Root } from "mdast";
-import { MdxjsEsm } from "mdast-util-mdx";
-import { Plugin } from "unified";
+import type { Image, Parent, Root } from "mdast";
+import type { MdxjsEsm } from "mdast-util-mdx";
+import type { Plugin } from "unified";
 import { SKIP, visit } from "unist-util-visit";
 
 import { jsxAttribute } from "./utils";

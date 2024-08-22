@@ -1,8 +1,8 @@
-import { ReactNode, Suspense, useDeferredValue } from "react";
+import { type ReactNode, Suspense, useDeferredValue } from "react";
 
 import { Layout, useNotifications } from "@olinfo/react-components";
 import { SWRConfig } from "swr";
-import { BaseLocationHook, Router, Switch, useLocation } from "wouter";
+import { type BaseLocationHook, Router, Switch, useLocation } from "wouter";
 
 import { Loading } from "~/web/components";
 

@@ -1,9 +1,9 @@
 import { useCallback } from "react";
 
-import { FirebaseOptions } from "firebase/app";
+import type { FirebaseOptions } from "firebase/app";
 import { getAuth, signOut } from "firebase/auth";
 import {
-  Firestore,
+  type Firestore,
   doc,
   getDocs,
   runTransaction,
@@ -14,7 +14,7 @@ import {
 import { getBytes, getStorage, ref } from "firebase/storage";
 import { chunk } from "lodash-es";
 
-import { Participation, StudentRestore, studentHash } from "~/models";
+import { type Participation, type StudentRestore, studentHash } from "~/models";
 import { TeacherProvider } from "~/web/teacher/provider";
 
 import { FirebaseLogin, useDb } from "./common/base-login";

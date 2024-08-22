@@ -1,4 +1,4 @@
-import { ReactNode, useRef } from "react";
+import { type ReactNode, useRef } from "react";
 
 import {
   Form,
@@ -8,12 +8,12 @@ import {
   SubmitButton,
   TextField,
 } from "@olinfo/react-components";
-import { FirebaseOptions } from "firebase/app";
+import type { FirebaseOptions } from "firebase/app";
 import { getAuth, signOut } from "firebase/auth";
 import { addDoc, collection, waitForPendingWrites } from "firebase/firestore";
 import { isEqual, mapValues } from "lodash-es";
 
-import { Contest, Student } from "~/models";
+import type { Contest, Student } from "~/models";
 import { hash } from "~/utils/random";
 import { PersonalInformationField } from "~/web/student/personal-information-form";
 import { StudentProvider } from "~/web/student/provider";

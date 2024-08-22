@@ -1,9 +1,9 @@
 import { useCallback } from "react";
 
 import {
-  CollectionReference,
-  FirestoreDataConverter,
-  Query,
+  type CollectionReference,
+  type FirestoreDataConverter,
+  type Query,
   collection,
   doc,
   getDocs,
@@ -12,10 +12,10 @@ import {
 } from "firebase/firestore";
 import { sortBy } from "lodash-es";
 import { useErrorBoundary } from "react-error-boundary";
-import useSWR, { KeyedMutator, MutatorOptions, SWRConfiguration } from "swr";
+import useSWR, { type KeyedMutator, type MutatorOptions, type SWRConfiguration } from "swr";
 
 import { useDb } from "~/web/firebase/common/base-login";
-import query, { QueryOption } from "~/web/firebase/common/query";
+import query, { type QueryOption } from "~/web/firebase/common/query";
 
 import { useSubscriptionListener } from "./subscription";
 

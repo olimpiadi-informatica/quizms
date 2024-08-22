@@ -1,4 +1,4 @@
-import { ReactNode, Suspense, useMemo } from "react";
+import { type ReactNode, Suspense, useMemo } from "react";
 
 import { WithinTimeRange } from "@olinfo/react-components";
 import { addMilliseconds } from "date-fns";

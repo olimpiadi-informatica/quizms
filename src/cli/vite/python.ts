@@ -2,7 +2,7 @@ import child_process from "node:child_process";
 import path from "node:path";
 import { promisify } from "node:util";
 
-import { PluginOption } from "vite";
+import type { PluginOption } from "vite";
 
 const execFile = promisify(child_process.execFile);
 
@@ -25,7 +25,7 @@ export default function python(): PluginOption {
 }
 
 export async function executePython(file: string): Promise<any> {
-  let output;
+  let output: string;
   try {
     const child = await execFile("python3", [file]);
     output = child.stdout;

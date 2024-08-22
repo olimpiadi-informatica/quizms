@@ -1,4 +1,8 @@
-import { DocumentSnapshot, FirestoreDataConverter, Timestamp } from "firebase-admin/firestore";
+import {
+  type DocumentSnapshot,
+  type FirestoreDataConverter,
+  Timestamp,
+} from "firebase-admin/firestore";
 import { cloneDeepWith, isDate, isString, mapValues, omit } from "lodash-es";
 import z, {
   ZodArray,
@@ -8,8 +12,8 @@ import z, {
   ZodObject,
   ZodOptional,
   ZodRecord,
-  ZodType,
-  ZodTypeAny,
+  type ZodType,
+  type ZodTypeAny,
   ZodUnion,
 } from "zod";
 

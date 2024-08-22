@@ -1,6 +1,6 @@
 import z from "zod";
 
-import { Student } from "~/models/student";
+import type { Student } from "~/models/student";
 
 export const variantSchema = z.object({
   id: z.string(),
@@ -64,9 +64,9 @@ export function calcProblemScore(problem: Schema[string], answer?: string) {
 
   if (answer === undefined || problem.optionsBlank?.includes(answer)) {
     return problem.pointsBlank;
-  } else if (problem.optionsCorrect.includes(answer)) {
-    return problem.pointsCorrect;
-  } else {
-    return problem.pointsWrong;
   }
+  if (problem.optionsCorrect.includes(answer)) {
+    return problem.pointsCorrect;
+  }
+  return problem.pointsWrong;
 }

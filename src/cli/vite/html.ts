@@ -1,11 +1,11 @@
-import { Element, Root } from "hast";
+import type { Element, Root } from "hast";
 import { isString } from "lodash-es";
 import { rehype } from "rehype";
 import rehypeFormat from "rehype-format";
-import { OutputBundle, OutputChunk } from "rollup";
-import { Plugin } from "unified";
+import type { OutputBundle, OutputChunk } from "rollup";
+import type { Plugin } from "unified";
 import { visit } from "unist-util-visit";
-import { HtmlTagDescriptor } from "vite";
+import type { HtmlTagDescriptor } from "vite";
 
 import { warning } from "~/utils/logs";
 
@@ -37,7 +37,7 @@ const applyTransform: Plugin<[HtmlTagDescriptor[]], Root> = (tags) => {
         if (node.tagName === (tag.injectTo ?? "body")) {
           node.children.push(tagToHast(tag));
         }
-        if (node.tagName + "-prepend" === tag.injectTo) {
+        if (`${node.tagName}-prepend` === tag.injectTo) {
           node.children.unshift(tagToHast(tag));
         }
       }
@@ -89,7 +89,7 @@ export function generateHtmlFromBundle(
   const tags: HtmlTagDescriptor[] = [
     {
       tag: "script",
-      attrs: { type: "module", src: "/" + entry.fileName },
+      attrs: { type: "module", src: `/${entry.fileName}` },
       injectTo: "body",
     },
   ];
@@ -109,7 +109,7 @@ export function generateHtmlFromBundle(
       tag: "link",
       attrs: {
         rel: fileName.endsWith(".css") ? "stylesheet" : "modulepreload",
-        href: "/" + fileName,
+        href: `/${fileName}`,
       },
       injectTo: "head",
     });

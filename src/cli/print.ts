@@ -5,9 +5,9 @@ import { promisify } from "node:util";
 
 import { mapValues, noop } from "lodash-es";
 import pc from "picocolors";
-import { InlineConfig, PluginOption, build, mergeConfig, preview } from "vite";
+import { type InlineConfig, type PluginOption, build, mergeConfig, preview } from "vite";
 
-import { GenerationConfig, generationConfigSchema } from "~/models/generation-config";
+import { type GenerationConfig, generationConfigSchema } from "~/models/generation-config";
 import load from "~/models/load";
 import { fatal, info, success } from "~/utils/logs";
 
@@ -97,7 +97,7 @@ function printPlugin(statements: Record<string, string>): PluginOption {
     name: "quizms:print",
     apply: "serve",
     configurePreviewServer(server) {
-      server.middlewares.use(async (req, res, next) => {
+      server.middlewares.use((req, res, next) => {
         const url = new URL(req.url!, `http://${req.headers.host}`);
         if (url.pathname === "/pdf/statement.js") {
           const variant = url.searchParams.get("v");

@@ -1,6 +1,6 @@
 import { existsSync } from "node:fs";
 
-import { Bucket } from "@google-cloud/storage";
+import type { Bucket } from "@google-cloud/storage";
 import { upperFirst } from "lodash-es";
 import pc from "picocolors";
 

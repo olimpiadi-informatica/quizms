@@ -5,9 +5,9 @@ import path from "node:path";
 import { promisify } from "node:util";
 
 import { isPlainObject, stubFalse, stubTrue } from "lodash-es";
-import { PluginContext } from "rollup";
+import type { PluginContext } from "rollup";
 import { temporaryFile, temporaryWrite } from "tempy";
-import { PluginOption } from "vite";
+import type { PluginOption } from "vite";
 
 import { executePython } from "./python";
 
@@ -79,11 +79,12 @@ async function transformAsymptote(fileName: string, inject: string | null): Prom
   const svgFile = temporaryFile({ extension: "svg" });
 
   // ????????? https://github.com/vitejs/vite/pull/2614
-  while (inject?.includes("%")) {
-    inject = decodeURIComponent(inject);
+  let decodedInject = inject;
+  while (decodedInject?.includes("%")) {
+    decodedInject = decodeURIComponent(decodedInject);
   }
 
-  const injectFile = await temporaryWrite(inject ?? "", { extension: "asy" });
+  const injectFile = await temporaryWrite(decodedInject ?? "", { extension: "asy" });
 
   try {
     if (platform() === "darwin") {
@@ -175,7 +176,7 @@ function getAsyTypeName(val: any): string {
     return "string";
   }
   if (Array.isArray(val)) {
-    return getAsyTypeName(val[0]) + "[]";
+    return `${getAsyTypeName(val[0])}[]`;
   }
 
   throw new TypeError("Unknown type");

@@ -2,7 +2,7 @@ import path from "node:path";
 
 import glob from "fast-glob";
 import license from "rollup-plugin-license";
-import { InlineConfig, build, mergeConfig } from "vite";
+import { type InlineConfig, build, mergeConfig } from "vite";
 
 import { error, fatal } from "~/utils/logs";
 
