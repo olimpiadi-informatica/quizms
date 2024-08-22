@@ -112,7 +112,6 @@
     "@biomejs/biome": "^1.8",
     "@olinfo/tailwind": "^0.1",
     "@types/file-saver": "^2.0",
-    "@types/js-yaml": "^4.0",
     "@types/lodash-es": "^4.17",
     "@types/node": "^22",
     "@types/papaparse": "^5.3",

@@ -2,28 +2,28 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { cwd } from "node:process";
 
-import yaml from "js-yaml";
 import { camelCase, cloneDeepWith, isPlainObject } from "lodash-es";
 import Papa from "papaparse";
 import * as toml from "smol-toml";
+import yaml from "yaml";
 import type { ZodType } from "zod";
 
 import { fatal, info } from "~/utils/logs";
 import validate from "~/utils/validate";
+
+const parsers: { ext: string; parser: (str: string) => any }[] = [
+  { ext: ".toml", parser: toml.parse },
+  { ext: ".yaml", parser: yaml.parse },
+  { ext: ".json", parser: JSON.parse },
+  { ext: ".jsonl", parser: parseJsonl },
+  { ext: ".csv", parser: parseCsv },
+];
 
 export default async function load<T>(
   dir: string,
   collection: string,
   schema: ZodType<T, any, any>,
 ) {
-  const parsers = [
-    { ext: ".toml", parser: toml.parse },
-    { ext: ".yaml", parser: yaml.load },
-    { ext: ".json", parser: JSON.parse },
-    { ext: ".jsonl", parser: parseJsonl },
-    { ext: ".csv", parser: parseCsv },
-  ];
-
   const fileName = path.join(dir, "data", collection);
 
   for (const { ext, parser } of parsers) {
