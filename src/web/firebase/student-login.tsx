@@ -16,8 +16,8 @@ import { isEqual, mapValues } from "lodash-es";
 
 import type { Contest, Student } from "~/models";
 import { hash } from "~/utils/random";
-import { PersonalInformationField } from "~/web/student/personal-information-form";
 import { StudentProvider } from "~/web/student/provider";
+import { UserDataField } from "~/web/student/user-data-form";
 
 import { FirebaseLogin, useDb } from "./common/base-login";
 import {
@@ -85,14 +85,14 @@ function StudentLoginInner({ contestFilter, children }: Omit<LoginProps, "config
   type FormStudent = {
     contestId: string;
     token: string;
-  } & Student["personalInformation"];
+  } & Student["userData"];
 
-  const submit = async ({ contestId, token, ...personalInformation }: FormStudent) => {
+  const submit = async ({ contestId, token, ...userData }: FormStudent) => {
     try {
       await loginAction(db, {
         contestId,
         token,
-        personalInformation,
+        userData,
         answers: {},
       });
     } catch (err) {
@@ -124,8 +124,8 @@ function StudentLoginInner({ contestFilter, children }: Omit<LoginProps, "config
           if (!contest) return;
           return (
             <>
-              {contest.personalInformation.map((field) => (
-                <PersonalInformationField key={field.name} field={field} />
+              {contest.userData.map((field) => (
+                <UserDataField key={field.name} field={field} />
               ))}
               <TextField field="token" label="Codice prova" placeholder="aaaaa-bbbbb-ccccc" />
               <SubmitButton>Inizia la prova</SubmitButton>

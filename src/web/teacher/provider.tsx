@@ -4,7 +4,7 @@ import { Link, Redirect, Route, Switch, useParams } from "wouter";
 
 import type { Contest, Participation, Student, StudentRestore, Variant } from "~/models";
 import { ImpersonificationAuth } from "~/web/student/impersonification-auth";
-import { PersonalInformationForm } from "~/web/student/personal-information-form";
+import { UserDataForm } from "~/web/student/user-data-form";
 
 import { TeacherLayout } from "./layout";
 
@@ -150,7 +150,7 @@ function ProviderInner({
         </Route>
         <Route path="/students/:studentId">
           <ImpersonificationAuth>
-            <PersonalInformationForm />
+            <UserDataForm />
             {/* TODO: statement */}
           </ImpersonificationAuth>
         </Route>

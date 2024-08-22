@@ -4,7 +4,7 @@ import z from "zod";
 export const studentSchema = z
   .object({
     uid: z.string(),
-    personalInformation: z.record(z.union([z.string(), z.number(), z.date()]).optional()),
+    userData: z.record(z.union([z.string(), z.number(), z.date()]).optional()),
 
     absent: z.boolean(),
     disabled: z.boolean(),
@@ -33,10 +33,10 @@ export type Student = z.infer<typeof studentSchema>;
 
 export function studentHash(student: Student) {
   const joined = [
-    student.personalInformation?.name,
-    student.personalInformation?.surname,
-    student.personalInformation?.classYear,
-    student.personalInformation?.classSection,
+    student.userData?.name,
+    student.userData?.surname,
+    student.userData?.classYear,
+    student.userData?.classSection,
     student.token,
   ]
     .join("$")

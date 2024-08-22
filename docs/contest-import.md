@@ -19,7 +19,7 @@ YAML, CSV, JSON o JSONL.
 I contests sono descritti dal file `data/contests.{toml,yaml,csv,json,jsonl}`. Il formato è il seguente:
 
 | Campo                  | Descrizione                                                              | Tipo       | Note                                                                 |
-| ---------------------- | ------------------------------------------------------------------------ | ---------- | -------------------------------------------------------------------- |
+|------------------------|--------------------------------------------------------------------------|------------|----------------------------------------------------------------------|
 | `id`                   | ID della gara.                                                           | `string`   |                                                                      |
 | `name`                 | Nome della gara.                                                         | `string`   |                                                                      |
 | `long_name`            | Nome esteso della gara.                                                  | `string`   | Opzionale.                                                           |
@@ -40,13 +40,13 @@ I contests sono descritti dal file `data/contests.{toml,yaml,csv,json,jsonl}`. I
 | `pdf_variant_ids`      | ID delle varianti cartacee.                                              | `string[]` |                                                                      |
 | `pdf_per_school`       | Numero di varianti cartacee da assegnare ad ogni scuola.                 | `number`   |                                                                      |
 | `statement_version`    | Versione dei testi.                                                      | `number`   | Deve essere incrementato ogni volta che i testi vengono reimportati. |
-| `personal_information` | Informazioni personali richieste agli studenti durante la registrazione. | `object[]` |                                                                      |
+| `user_data`            | Informazioni personali richieste agli studenti durante la registrazione. | `object[]` |                                                                      |
 | `instructions`         | Informazioni generali che vengono mostrare nella pagina dell'insegnante. | `string`   |                                                                      |
 
 Le informazioni personali devono avere il seguente formato:
 
 | Campo    | Descrizione                                                      | Tipo                            | Note                                                        |
-| -------- | ---------------------------------------------------------------- | ------------------------------- | ----------------------------------------------------------- |
+|----------|------------------------------------------------------------------|---------------------------------|-------------------------------------------------------------|
 | `name`   | Nome del campo.                                                  | `string`                        |                                                             |
 | `label`  | Nome leggibile del campo.                                        | `string`                        |                                                             |
 | `type`   | Tipo del campo.                                                  | `"text"`, `"number"` o `"date"` |                                                             |
@@ -78,7 +78,7 @@ variant_ids = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
 pdf_variant_ids = [20, 21, 22, 23, 24, 25, 26, 27, 28, 29]
 pdf_per_school = 3
 statement_version = 1
-personal_information = [
+user_data = [
     { name = "surname",      label = "Cognome",         type = "text",   pinned = true },
     { name = "name",         label = "Nome",            type = "text" },
     { name = "classYear",    label = "Classe",          type = "number", size = "xs", min = 1, max = 5 },

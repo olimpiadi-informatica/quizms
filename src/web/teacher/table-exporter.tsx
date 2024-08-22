@@ -3,7 +3,7 @@ import { type Ref, forwardRef } from "react";
 import { saveAs } from "file-saver";
 import { unparse as stringifyCSV } from "papaparse";
 
-import { type Contest, type Student, formatPersonalInformation } from "~/models";
+import { type Contest, type Student, formatUserData } from "~/models";
 
 import { useTeacher, useTeacherStudents } from "./provider";
 
@@ -28,7 +28,7 @@ function exportStudents(students: Student[], contest: Contest) {
     .filter((student) => !student.disabled)
     .map((student) => {
       return [
-        ...contest.personalInformation.map((field) => formatPersonalInformation(student, field)),
+        ...contest.userData.map((field) => formatUserData(student, field)),
         ...(contest.hasVariants ? [student.variant] : []),
         ...contest.problemIds.map((id) => student.answers?.[id]),
         student.score ?? "",
@@ -36,7 +36,7 @@ function exportStudents(students: Student[], contest: Contest) {
     });
 
   flatStudents.unshift([
-    ...contest.personalInformation.map((field) => field.label),
+    ...contest.userData.map((field) => field.label),
     ...(contest.hasVariants ? ["Variante"] : []),
     ...contest.problemIds,
     "Punteggio",

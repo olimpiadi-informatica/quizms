@@ -10,7 +10,7 @@ import {
   type Participation,
   type Student,
   type Variant,
-  parsePersonalInformation,
+  parseUserData,
   studentSchema,
 } from "~/models";
 import { randomId } from "~/utils/random";
@@ -21,9 +21,9 @@ import { useTeacher, useTeacherStudents } from "./provider";
 const ImportModal = forwardRef(function ImportModal(_props, ref: Ref<HTMLDialogElement> | null) {
   const { contest, participation } = useTeacher();
 
-  const labels = contest.personalInformation.map((field) => field.label);
+  const labels = contest.userData.map((field) => field.label);
 
-  const dates = contest.personalInformation
+  const dates = contest.userData
     .filter((field) => field.type === "date")
     .map((field) => field.label.toLowerCase());
 
@@ -93,9 +93,9 @@ async function importStudents(
 ) {
   const schema = z
     .array(z.string().trim().max(256))
-    .min(contest.personalInformation.length)
+    .min(contest.userData.length)
     .transform<Student>((value, ctx) => {
-      const off = contest.personalInformation.length + Number(contest.hasVariants || 0);
+      const off = contest.userData.length + Number(contest.hasVariants || 0);
       const variantId = contest.hasVariants ? value[off - 1] : Object.values(variants)[0].id;
 
       if (variantId) {
@@ -103,23 +103,23 @@ async function importStudents(
         if (!variant) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
-            path: [contest.personalInformation.length],
+            path: [contest.userData.length],
             message: `La variante ${variantId} non è valida`,
           });
           return z.NEVER;
         }
-      } else if (value.slice(contest.personalInformation.length).some(Boolean)) {
+      } else if (value.slice(contest.userData.length).some(Boolean)) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          path: [contest.personalInformation.length],
+          path: [contest.userData.length],
           message: "Variante mancante",
         });
         return z.NEVER;
       }
 
-      const personalInformation: Student["personalInformation"] = {};
-      for (const [i, field] of contest.personalInformation.entries()) {
-        const [validated, error] = parsePersonalInformation(value[i], field, {
+      const userData: Student["userData"] = {};
+      for (const [i, field] of contest.userData.entries()) {
+        const [validated, error] = parseUserData(value[i], field, {
           dateFormat: "dd/MM/yyyy",
         });
         if (error) {
@@ -130,12 +130,12 @@ async function importStudents(
           });
           return z.NEVER;
         }
-        personalInformation[field.name] = validated;
+        userData[field.name] = validated;
       }
 
       return {
         id: randomId(),
-        personalInformation,
+        userData,
         contestId: contest.id,
         participationId: participation.id,
         variant: variantId,

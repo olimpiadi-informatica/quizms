@@ -27,8 +27,8 @@ import {
   type Student,
   type Variant,
   calcScore,
-  formatPersonalInformation,
-  parsePersonalInformation,
+  formatUserData,
+  parseUserData,
 } from "~/models";
 import { randomId } from "~/utils/random";
 import { Loading } from "~/web/components";
@@ -113,7 +113,7 @@ const FinalizeModal = forwardRef(function FinalizeModal(
     // Generate a list of string that can uniquely identify a student. Multiple
     // strings are generated to prevent possible errors during data entry.
     function normalize(student: Student) {
-      const info = student.personalInformation!;
+      const info = student.userData!;
       const orderings = [
         ["name", "surname", "classYear", "classSection"],
         ["surname", "name", "classYear", "classSection"],
@@ -128,7 +128,7 @@ const FinalizeModal = forwardRef(function FinalizeModal(
     for (const student of students) {
       if (student.disabled) continue;
 
-      const { name, surname } = student.personalInformation ?? {};
+      const { name, surname } = student.userData ?? {};
 
       const reason = isStudentIncomplete(student, contest, variants);
       if (reason) {
@@ -296,16 +296,14 @@ function Table() {
 
   const onCellEditRequest = async (ev: CellEditRequestEvent) => {
     let student = ev.data as Student;
-    const name = [student.personalInformation?.surname, student.personalInformation?.name]
-      .filter(Boolean)
-      .join(" ");
+    const name = [student.userData?.surname, student.userData?.name].filter(Boolean).join(" ");
     setCurrentStudent(name);
 
     let value = ev.newValue;
     const [field, subfield] = ev.colDef.field!.split(/[.[\]]/);
-    if (field === "personalInformation") {
-      const schema = contest.personalInformation.find((f) => f.name === subfield);
-      const [newValue, error] = parsePersonalInformation(value, schema);
+    if (field === "userData") {
+      const schema = contest.userData.find((f) => f.name === subfield);
+      const [newValue, error] = parseUserData(value, schema);
       if (error) throw new Error(error);
       value = newValue;
     }
@@ -422,9 +420,9 @@ function columnDefinition(contest: Contest, variants: Record<string, Variant>): 
   };
 
   return [
-    ...contest.personalInformation.map(
+    ...contest.userData.map(
       (field): ColDef => ({
-        field: `personalInformation.${field.name}`,
+        field: `userData.${field.name}`,
         headerName: field.label,
         pinned: field.pinned,
         cellDataType: field.type,
@@ -436,7 +434,7 @@ function columnDefinition(contest: Contest, variants: Record<string, Variant>): 
           return isStudentIncomplete(data!, contest, variants);
         },
         cellRenderer: ({ api, data, value }: ICellRendererParams<Student>) => {
-          value = formatPersonalInformation(data, field);
+          value = formatUserData(data, field);
           if (
             field.pinned &&
             data?.updatedAt &&
@@ -583,8 +581,8 @@ function isStudentIncomplete(
   if (isStudentEmpty(student)) return;
   if (student.absent || student.disabled) return;
 
-  for (const field of contest.personalInformation) {
-    if (!student.personalInformation?.[field.name]) {
+  for (const field of contest.userData) {
+    if (!student.userData?.[field.name]) {
       return `${field.label} mancante`;
     }
   }
@@ -604,7 +602,7 @@ function isStudentIncomplete(
 
 function isStudentEmpty(student: Student) {
   return (
-    !Object.values(student.personalInformation ?? {}).some((x) => x !== undefined) &&
+    !Object.values(student.userData ?? {}).some((x) => x !== undefined) &&
     !Object.values(student.answers ?? {}).some((x) => x !== undefined)
   );
 }

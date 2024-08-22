@@ -74,8 +74,8 @@ async function createStudentRestore(db: Firestore, student: Student) {
       studentId: student.id,
       participationId: student.participationId!,
       token: student.token!,
-      name: student.personalInformation!.name as string,
-      surname: student.personalInformation!.surname as string,
+      name: student.userData!.name as string,
+      surname: student.userData!.surname as string,
     };
 
     await setDoc(
@@ -94,7 +94,7 @@ async function createStudent(db: Firestore, student: Student) {
   // to create the student we first need to find
   // - the variant assigned to the student
   // - the school of the student
-  // Then, we need to check that there is no other student with the same personalInformation and token already in the db
+  // Then, we need to check that there is no other student with the same userData and token already in the db
   student.id = randomId();
 
   // Get the variant assigned to the student

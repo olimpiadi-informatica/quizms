@@ -71,7 +71,7 @@ service cloud.firestore {
         }
 
         function studentHash(student) {
-            let data = student.personalInformation;
+            let data = student.userData;
             let joined = [data.name, data.surname, data.classYear, data.classSection, student.token].join('$').lower();
             return hashing.sha256(joined).toHexString()[0: 24];
         }
@@ -97,7 +97,7 @@ service cloud.firestore {
 
             function canStudentCreate() {
                 return isAuthenticated(request.resource.data.uid)
-                    && request.resource.data.personalInformation != null
+                    && request.resource.data.userData != null
                     && request.resource.data.contestId != null
                     && checkToken()
                     && checkVariant(request.resource.data);
@@ -129,7 +129,7 @@ service cloud.firestore {
                 let student = getStudentById(participationId, request.resource.data.studentId);
                 return student != null
                     && isAuthenticated(student.data.uid)
-                    && student.data.personalInformation != null
+                    && student.data.userData != null
                     && studentHash(student.data) == id;
             }
 

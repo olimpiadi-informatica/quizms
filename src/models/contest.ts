@@ -5,24 +5,24 @@ import z from "zod";
 
 import type { Student } from "~/models/student";
 
-const basePersonalInformation = z.object({
+const baseUserData = z.object({
   name: z.string(),
   label: z.string(),
   size: z.enum(["xs", "sm", "md", "lg", "xl"]).optional(),
   pinned: z.boolean().optional(),
 });
 
-const personalInformationText = basePersonalInformation.extend({
+const userDataText = baseUserData.extend({
   type: z.literal("text"),
 });
 
-const personalInformationNumber = basePersonalInformation.extend({
+const userDataNumber = baseUserData.extend({
   type: z.literal("number"),
   min: z.number().optional(),
   max: z.number().optional(),
 });
 
-const personalInformationDate = basePersonalInformation.extend({
+const userDataDate = baseUserData.extend({
   type: z.literal("date"),
   min: z.date(),
   max: z.date(),
@@ -49,13 +49,7 @@ export const contestSchema = z.object({
   statementVersion: z.number(),
 
   // Informazioni personali richieste agli studenti
-  personalInformation: z.array(
-    z.discriminatedUnion("type", [
-      personalInformationText,
-      personalInformationNumber,
-      personalInformationDate,
-    ]),
-  ),
+  userData: z.array(z.discriminatedUnion("type", [userDataText, userDataNumber, userDataDate])),
 
   // Se i testi della gara hanno più varianti
   hasVariants: z.boolean(),
@@ -81,9 +75,9 @@ export const contestSchema = z.object({
 
 export type Contest = z.infer<typeof contestSchema>;
 
-export function parsePersonalInformation(
+export function parseUserData(
   value: string | undefined,
-  schema?: Contest["personalInformation"][number],
+  schema?: Contest["userData"][number],
   options?: { dateFormat?: string },
 ): [string | number | Date | undefined, string | undefined] {
   if (value === undefined || !schema) {
@@ -151,11 +145,11 @@ export function parsePersonalInformation(
   }
 }
 
-export function formatPersonalInformation(
+export function formatUserData(
   student: Student | undefined,
-  schema: Contest["personalInformation"][number],
+  schema: Contest["userData"][number],
 ): string {
-  const value = student?.personalInformation?.[schema?.name];
+  const value = student?.userData?.[schema?.name];
   if (value === undefined) return "";
   if (isDate(value) || schema?.type === "date") {
     return intlFormat(value as Date, { dateStyle: "short" });

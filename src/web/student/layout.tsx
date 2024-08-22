@@ -125,8 +125,8 @@ export function StudentLayout({ children }: { children: ReactNode }) {
 function UserDropdown() {
   const { student, logout } = useStudent();
 
-  const name = student.personalInformation?.name as string;
-  const surname = student.personalInformation?.surname as string;
+  const name = student.userData?.name as string;
+  const surname = student.userData?.surname as string;
 
   return (
     <Dropdown className="dropdown-end">

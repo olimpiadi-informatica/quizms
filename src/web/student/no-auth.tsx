@@ -14,7 +14,7 @@ type AuthProps = {
 export function NoAuth({ contestName, contestLongName, duration, children }: AuthProps) {
   const [student, setStudent] = useLocalStorage<Student>({
     id: "",
-    personalInformation: {
+    userData: {
       name: "Utente",
       surname: "anonimo",
     },
@@ -28,7 +28,7 @@ export function NoAuth({ contestName, contestLongName, duration, children }: Aut
     longName: contestLongName,
     problemIds: [],
     duration,
-    personalInformation: [],
+    userData: [],
     hasVariants: true,
     hasOnline: true,
     hasPdf: true,

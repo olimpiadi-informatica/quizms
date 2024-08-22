@@ -3,18 +3,18 @@ import { DateField, Form, NumberField, TextField } from "@olinfo/react-component
 import type { Contest } from "~/models";
 import { useStudent } from "~/web/student/provider";
 
-export function PersonalInformationForm() {
+export function UserDataForm() {
   const { contest, student } = useStudent();
 
   return (
     <Form
-      defaultValue={{ variant: student.variant, ...student.personalInformation }}
+      defaultValue={{ variant: student.variant, ...student.userData }}
       onSubmit={() => {}}
       className="!max-w-full !flex-row flex-wrap *:basis-1/2 odd:*:pr-2 even:*:pl-2"
       disabled>
-      {contest.personalInformation.map((field) => (
+      {contest.userData.map((field) => (
         <div key={field.name}>
-          <PersonalInformationField field={field} />
+          <UserDataField field={field} />
         </div>
       ))}
       {contest.hasVariants && (
@@ -26,10 +26,10 @@ export function PersonalInformationForm() {
   );
 }
 
-export function PersonalInformationField({
+export function UserDataField({
   field,
 }: {
-  field: Contest["personalInformation"][number];
+  field: Contest["userData"][number];
 }) {
   const commonProps = {
     field: field.name,

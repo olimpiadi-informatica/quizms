@@ -62,7 +62,7 @@ export function PrintAuth({ children }: AuthProps) {
 
   const student: Student = {
     id: "",
-    personalInformation: {},
+    userData: {},
     answers: {},
     variant,
   };
