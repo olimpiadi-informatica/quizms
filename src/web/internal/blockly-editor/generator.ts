@@ -12,7 +12,7 @@ import type { CustomBlock, CustomBlockArg } from "~/models/blockly-custom-block"
 javascriptGenerator.STATEMENT_PREFIX = "highlightBlock(%1);\n";
 javascriptGenerator.INFINITE_LOOP_TRAP = 'if(--loopTrap === 0) exit(false, "Ciclo infinito");\n';
 javascriptGenerator.addReservedWords("exit,highlightBlock,loopTrap,state");
-console.log("Blockly version:", BlocklyVersion);
+console.info("Blockly version:", BlocklyVersion);
 
 function replaceArgs(
   block: Block,
@@ -20,12 +20,20 @@ function replaceArgs(
   js: string,
   args?: CustomBlockArg[],
 ) {
-  return js.replaceAll(/_ARG\d+/g, (name) => {
+  return js.replaceAll(/_ARG\d+/g, (name): string => {
     const arg = args?.find((b) => b.name === name);
     if (!arg) throw new Error(`Missing argument ${name} for block ${block.type}`);
-    const code = generator.valueToCode(block, arg.name, Order.NONE);
-    if (!code) return 'exit(false, "il blocco ha bisogno di un parametro")';
-    return code;
+
+    switch (arg.type) {
+      case "input_value": {
+        const code = generator.valueToCode(block, arg.name, Order.NONE);
+        if (!code) return 'exit(false, "il blocco ha bisogno di un parametro")';
+        return code;
+      }
+      case "field_dropdown": {
+        return block.getFieldValue(arg.name);
+      }
+    }
   });
 }
 

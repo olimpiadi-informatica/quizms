@@ -5,11 +5,18 @@ import { type ZodError, z } from "zod";
 
 const blocklyTypeSchema = z.enum(["Number", "String", "Array", "Boolean"]);
 
+const inputArgSchema = z.object({
+  type: z.literal("input_value"),
+  check: blocklyTypeSchema,
+});
+
+const dropdownArgSchema = z.object({
+  type: z.literal("field_dropdown"),
+  options: z.tuple([z.string(), z.string()]).array(),
+});
+
 const customBlockArgSchema = z
-  .object({
-    type: z.literal("input_value"),
-    check: blocklyTypeSchema,
-  })
+  .discriminatedUnion("type", [inputArgSchema, dropdownArgSchema])
   .transform((block, ctx) => ({ ...block, name: `_ARG${ctx.path.at(-1)}` }));
 
 const jsSchema = z
@@ -30,6 +37,8 @@ const baseBlockSchema = z
     message0: z.string(),
     // Block input fields
     args0: z.array(customBlockArgSchema).optional(),
+    // Whether to keep arguments on the same line
+    inputsInline: z.boolean().default(true),
     // Color of the block (https://developers.google.com/blockly/guides/create-custom-blocks/block-colour)
     colour: z.union([z.number(), z.string()]),
     // Tooltip shown when hovering over the block
