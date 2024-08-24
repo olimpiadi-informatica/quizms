@@ -22,7 +22,7 @@ const customBlockArgSchema = z
 const jsSchema = z
   .string()
   .trim()
-  .transform((js) => js.replaceAll(/%(\d+)/g, (_, idx) => `_ARG${idx}`));
+  .transform((js) => js.replaceAll(/%(\d+)/g, (_, idx) => `_ARG${idx - 1}`));
 
 export type CustomBlockArg = z.infer<typeof customBlockArgSchema>;
 
