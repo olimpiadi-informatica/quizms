@@ -1,0 +1,44 @@
+.workspace {
+    @apply relative inset-y-0 left-1/2 -translate-x-1/2 p-2 pt-8;
+    @apply grid gap-6;
+    grid-template-areas:
+            "editor"
+            "editor-buttons"
+            "visualizer-buttons"
+            "visualizer";
+    width: calc(100vw - 2rem);
+}
+
+@media screen(lg) {
+    .workspace {
+        grid-template-areas:
+                "visualizer-buttons editor-buttons"
+                "visualizer         editor";
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.visualizerButtons {
+    @apply flex items-center gap-4;
+    grid-area: visualizer-buttons;
+}
+
+.visualizer {
+    @apply relative rounded-xl overflow-auto bg-white;
+    grid-area: visualizer;
+    border: 2px solid #c6c6c6;
+    color-scheme: light;
+    max-height: min(720px, calc(100vh - 8rem));
+}
+
+.editorButtons {
+    @apply flex gap-6;
+    grid-area: editor-buttons;
+}
+
+.editor {
+    @apply relative rounded-xl overflow-hidden;
+    grid-area: editor;
+    border: 2px solid #c6c6c6;
+    height: min(720px, calc(100vh - 8rem));
+}

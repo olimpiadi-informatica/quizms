@@ -35,6 +35,7 @@ import { defaultInitialBlocks, defaultToolbox } from "./default-blocks";
 import useExecutor from "./executor";
 import { BlocklyInterpreter } from "./interpreter";
 import useIcp from "./ipc";
+import style from "./workspace.module.css";
 
 type VisualizerProps = {
   variables: Record<string, any>;
@@ -219,130 +220,116 @@ export function Blockly({
   useEffect(() => setAlert(msg), [msg]);
 
   return (
-    <div
-      className={clsx(
-        "not-prose relative inset-y-0 left-1/2 w-[calc(100vw-2rem)] -translate-x-1/2 p-2 pt-8",
-        "flex flex-col-reverse items-start justify-between gap-6 overflow-x-hidden lg:flex-row",
-      )}>
-      <div className="flex h-full max-h-[min(720px,90vh)] basis-[min(auto,50%)] flex-col gap-6 self-stretch overflow-x-hidden">
-        <div className="flex items-center gap-4">
-          <div className="pl-2 text-xl font-bold max-xl:hidden">Livello:</div>
-          <div className="join">
-            {testcaseStatuses.map(({ index, correct, msg }) => (
-              <button
-                key={index}
-                type="button"
-                onClick={() => {
-                  setTestcaseIndex(index);
-                  setPlaying(false);
-                }}
-                className={clsx(
-                  "btn join-item z-10 px-3",
-                  !editing && "tooltip",
-                  index === testcaseIndex && "btn-info",
-                )}
-                data-tip={msg}>
-                {editing ? (
-                  <HelpCircle size={24} />
-                ) : correct ? (
-                  <CheckCircle2 size={24} className="fill-success stroke-success-content" />
-                ) : (
-                  <XCircle size={24} className="fill-error stroke-error-content" />
-                )}
-              </button>
-            ))}
-          </div>
-        </div>
-        <div className="relative flex flex-col overflow-hidden rounded-xl border-2 border-[#c6c6c6] shadow-xl">
-          <div className="overflow-auto bg-white [color-scheme:light]">
-            {Visualizer && globalScope?.state && (
-              <Visualizer variables={variables} state={globalScope.state} message={msg} />
-            )}
-            {alert && (
-              <div className="absolute inset-x-0 bottom-0 z-50 p-4">
-                <div
-                  role="alert"
-                  className={clsx("alert", correct ? "alert-success" : "alert-error")}>
-                  {correct ? <CheckCircle /> : <AlertTriangle />}
-                  <span>{alert}</span>
-                  <button
-                    type="button"
-                    onClick={() => setAlert(undefined)}
-                    aria-label="Nascondi messaggio">
-                    <MessageSquareOff />
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
+    <div className={clsx(style.workspace, "not-prose")}>
+      <div className={style.visualizerButtons}>
+        <div className="pl-2 text-xl font-bold max-sm:hidden lg:max-xl:hidden">Livello</div>
+        <div className="join">
+          {testcaseStatuses.map(({ index, correct, msg }) => (
+            <button
+              key={index}
+              type="button"
+              onClick={() => {
+                setTestcaseIndex(index);
+                setPlaying(false);
+              }}
+              className={clsx(
+                "btn join-item z-10 px-3",
+                !editing && "tooltip",
+                index === testcaseIndex && "btn-info",
+              )}
+              data-tip={msg}>
+              {editing ? (
+                <HelpCircle size={24} />
+              ) : correct ? (
+                <CheckCircle2 size={24} className="fill-success stroke-success-content" />
+              ) : (
+                <XCircle size={24} className="fill-error stroke-error-content" />
+              )}
+            </button>
+          ))}
         </div>
       </div>
-      <div className="flex min-h-[min(720px,90vh)] flex-[1_0_50%] flex-col-reverse gap-6 self-stretch lg:flex-col">
-        <div className="flex gap-6">
-          <div className="join join-horizontal">
-            <div className="join-item tooltip" data-tip="Esegui/pausa">
-              <button
-                type="button"
-                className="btn btn-info rounded-[inherit]"
-                disabled={!running || editing}
-                onClick={() => setPlaying(!playing)}
-                aria-label="Esugui un blocco">
-                {playing ? <Pause className="size-6" /> : <Play className="size-6" />}
-              </button>
-            </div>
-            <div className="join-item tooltip" data-tip="Esegui un blocco">
-              <button
-                type="button"
-                className="btn btn-info rounded-[inherit]"
-                disabled={!running || editing}
-                onClick={step}
-                aria-label="Esugui un blocco">
-                <SkipForward className="size-6" />
-              </button>
-            </div>
-            <div className="join-item tooltip" data-tip="Esegui da capo">
-              <button
-                type="button"
-                className="btn btn-info rounded-[inherit]"
-                aria-label="Esegui da capo"
-                disabled={editing}
-                onClick={() => {
-                  reset();
-                  setPlaying(false);
-                }}>
-                <RotateCcw className="size-6" />
-              </button>
-            </div>
-          </div>
-          <div className="tooltip" data-tip="Correggi la soluzione">
+      <div className={style.visualizer}>
+        {Visualizer && globalScope?.state && (
+          <Visualizer variables={variables} state={globalScope.state} message={msg} />
+        )}
+        <div className={clsx("sticky left-0 bottom-0 z-50 p-4", !alert && "invisible")}>
+          <div role="alert" className={clsx("alert", correct ? "alert-success" : "alert-error")}>
+            {correct ? <CheckCircle /> : <AlertTriangle />}
+            <span>{alert}</span>
             <button
               type="button"
-              className="btn btn-success"
-              aria-label="Correggi la soluzione"
-              disabled={!editing || !ready}
-              onClick={runAll}>
-              <Send className="size-6" />
+              onClick={() => setAlert(undefined)}
+              aria-label="Nascondi messaggio">
+              <MessageSquareOff />
             </button>
           </div>
-          <div>
-            <input
-              className="range"
-              type="range"
-              min="0"
-              max="6"
-              value={speed}
-              onChange={(e) => setSpeed(+e.target.value)}
-              aria-label="Velocità di esecuzione"
-            />
-            <div className="flex w-full justify-between px-2 text-xs">
-              <span>Lento</span>
-              <span>Veloce</span>
-            </div>
-          </div>
-          {import.meta.env.DEV && <Debug blocks={blocks} js={code} svg={svg} />}
         </div>
-        <Editor ref={setIframe} ready={ready} />
       </div>
+      <div className={style.editorButtons}>
+        <div className="join join-horizontal">
+          <div className="join-item tooltip" data-tip="Esegui/pausa">
+            <button
+              type="button"
+              className="btn btn-info rounded-[inherit]"
+              disabled={!running || editing}
+              onClick={() => setPlaying(!playing)}
+              aria-label="Esugui un blocco">
+              {playing ? <Pause className="size-6" /> : <Play className="size-6" />}
+            </button>
+          </div>
+          <div className="join-item tooltip" data-tip="Esegui un blocco">
+            <button
+              type="button"
+              className="btn btn-info rounded-[inherit]"
+              disabled={!running || editing}
+              onClick={step}
+              aria-label="Esugui un blocco">
+              <SkipForward className="size-6" />
+            </button>
+          </div>
+          <div className="join-item tooltip" data-tip="Esegui da capo">
+            <button
+              type="button"
+              className="btn btn-info rounded-[inherit]"
+              aria-label="Esegui da capo"
+              disabled={editing}
+              onClick={() => {
+                reset();
+                setPlaying(false);
+              }}>
+              <RotateCcw className="size-6" />
+            </button>
+          </div>
+        </div>
+        <div className="tooltip" data-tip="Correggi la soluzione">
+          <button
+            type="button"
+            className="btn btn-success"
+            aria-label="Correggi la soluzione"
+            disabled={!editing || !ready}
+            onClick={runAll}>
+            <Send className="size-6" />
+          </button>
+        </div>
+        <div>
+          <input
+            className="range"
+            type="range"
+            min="0"
+            max="6"
+            value={speed}
+            onChange={(e) => setSpeed(+e.target.value)}
+            aria-label="Velocità di esecuzione"
+          />
+          <div className="flex w-full justify-between px-2 text-xs">
+            <span>Lento</span>
+            <span>Veloce</span>
+          </div>
+        </div>
+        {import.meta.env.DEV && <Debug blocks={blocks} js={code} svg={svg} />}
+      </div>
+      <Editor ref={setIframe} ready={ready} />
     </div>
   );
 }
@@ -352,11 +339,11 @@ const Editor = forwardRef(function Editor(
   ref: Ref<HTMLIFrameElement>,
 ) {
   return (
-    <div className="relative flex grow flex-col overflow-hidden rounded-xl border-2 border-[#c6c6c6]">
+    <div className={style.editor}>
       <iframe
         ref={ref}
         src={`${import.meta.env.BASE_URL}__blockly_iframe/`}
-        className="grow"
+        className="size-full"
         title="Area di lavoro di Blockly"
         loading="lazy"
       />

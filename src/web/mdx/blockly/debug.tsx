@@ -56,7 +56,7 @@ export default function Debug({ blocks, js, svg }: Props) {
         Debug
       </Button>
       <Modal ref={ref} title="Opzioni di debug" className="max-w-3xl">
-        <div className="not-prose flex items-stretch justify-between gap-4">
+        <div className="not-prose flex items-stretch justify-between gap-4 h-12">
           <div role="tablist" className="tabs-boxed tabs">
             {Object.entries(formats).map(([f, { label }]) => (
               <button
