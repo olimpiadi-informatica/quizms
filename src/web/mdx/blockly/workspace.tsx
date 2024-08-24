@@ -24,6 +24,7 @@ import {
   SkipForward,
   XCircle,
 } from "lucide-react";
+import { useErrorBoundary } from "react-error-boundary";
 
 import { Loading } from "~/web/components";
 import { useContest } from "~/web/mdx/contest";
@@ -74,6 +75,7 @@ export function Blockly({
   const { student, setStudent, terminated } = useStudent();
   const { registerProblem } = useContest();
   const { id, points } = useProblem();
+  const { showBoundary } = useErrorBoundary();
 
   useEffect(() => {
     for (let i = 0; i < testcases.length; i++) {
@@ -159,6 +161,10 @@ export function Blockly({
       }
       case "svg": {
         setSvg(data.svg);
+        break;
+      }
+      case "error": {
+        showBoundary(new Error(data.message));
         break;
       }
     }

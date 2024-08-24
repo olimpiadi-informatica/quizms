@@ -1,7 +1,7 @@
 import { type Expression, type LogicalOperator, type UnaryOperator, parse } from "acorn";
 import { Order } from "blockly/javascript";
 import type { BinaryOperator, UpdateOperator } from "estree";
-import { z } from "zod";
+import { type ZodError, z } from "zod";
 
 const blocklyTypeSchema = z.enum(["Number", "String", "Array", "Boolean"]);
 
@@ -81,13 +81,13 @@ const expressionBlockSchema = baseBlockSchema
       });
 
       if (ast.body.length !== 1 || ast.body[0].type !== "ExpressionStatement") {
-        throw "Must be a single expression.";
+        throw new Error("Must be a single expression.");
       }
 
       const expression = ast.body[0].expression;
       const priority = order(expression);
       if (!priority) {
-        throw `Unsupported expression: ${expression.type}.`;
+        throw new Error(`Unsupported expression: ${expression.type}.`);
       }
 
       return { ...block, js: [js, priority] as [string, number] };
@@ -101,7 +101,27 @@ const expressionBlockSchema = baseBlockSchema
     }
   });
 
-export const customBlockSchema = z.union([expressionBlockSchema, statementBlockSchema]);
+export const customBlockSchema = z.record(z.any()).transform((blocks, ctx) => {
+  let error: ZodError;
+  if ("output" in blocks) {
+    const expression = expressionBlockSchema.safeParse(blocks);
+    if (expression.success) {
+      return expression.data;
+    }
+    error = expression.error;
+  } else {
+    const statement = statementBlockSchema.safeParse(blocks);
+    if (statement.success) {
+      return statement.data;
+    }
+    error = statement.error;
+  }
+
+  for (const issue of error.issues) {
+    ctx.addIssue(issue);
+  }
+  return z.NEVER;
+});
 
 export type CustomBlock = z.infer<typeof customBlockSchema>;
 

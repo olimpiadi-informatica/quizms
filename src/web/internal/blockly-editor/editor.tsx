@@ -69,7 +69,12 @@ function init(id: string, props: InitProps) {
       send("ready");
     }
 
-    onWorkspaceChange(workspace, config);
+    try {
+      onWorkspaceChange(workspace, config);
+    } catch (err) {
+      console.error(err);
+      send("error", { message: (err as Error).message });
+    }
   });
 
   serialization.workspaces.load(props.initialBlocks ?? {}, workspace);
