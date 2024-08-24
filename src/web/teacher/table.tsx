@@ -312,7 +312,7 @@ function Table() {
     }
     if (field === "answers") {
       if (isString(value)) {
-        value = value!.trim().toUpperCase();
+        value = value.trim().toUpperCase();
       }
       if (value === "") {
         value = undefined;

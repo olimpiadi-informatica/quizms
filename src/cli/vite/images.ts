@@ -53,7 +53,7 @@ export default function images(): PluginOption {
       const params = new URLSearchParams(query);
       const ext = path.extname(pathname);
 
-      if (params.has("url") || params.has("raw") || params.has("v")) return;
+      if (params.has("v")) return;
 
       const options: ImageOptions = {
         scale: Number(params.get("s")),

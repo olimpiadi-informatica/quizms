@@ -40,6 +40,7 @@ import style from "./workspace.module.css";
 type VisualizerProps = {
   variables: Record<string, any>;
   state: Record<string, any>;
+  testcase: number;
   message?: string;
 };
 
@@ -251,7 +252,12 @@ export function Blockly({
       </div>
       <div className={style.visualizer}>
         {Visualizer && globalScope?.state && (
-          <Visualizer variables={variables} state={globalScope.state} message={msg} />
+          <Visualizer
+            variables={variables}
+            state={globalScope.state}
+            testcase={testcaseIndex}
+            message={msg}
+          />
         )}
         <div className={clsx("sticky left-0 bottom-0 z-50 p-4", !alert && "invisible")}>
           <div role="alert" className={clsx("alert", correct ? "alert-success" : "alert-error")}>

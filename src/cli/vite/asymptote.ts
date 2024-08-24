@@ -7,7 +7,7 @@ import { promisify } from "node:util";
 import { isPlainObject, stubFalse, stubTrue } from "lodash-es";
 import type { PluginContext } from "rollup";
 import { temporaryFile, temporaryWrite } from "tempy";
-import type { PluginOption } from "vite";
+import type { PluginOption, TransformResult } from "vite";
 
 import { executePython } from "./python";
 
@@ -16,13 +16,11 @@ export default function asymptote(): PluginOption {
     name: "quizms:asymptote",
     async transform(_code, id) {
       const [pathname, query] = id.split("?");
-      const params = new URLSearchParams(query);
       if (path.extname(pathname) !== ".asy") return;
 
-      if (params.has("url") || params.has("raw")) return;
-
+      const params = new URLSearchParams(query);
       if (params.has("v")) {
-        return await transformAsymptoteVariants(pathname, params);
+        return transformAsymptoteVariants(pathname, params);
       }
 
       await findAsymptoteDependencies(this, pathname);
@@ -41,7 +39,7 @@ export default function asymptote(): PluginOption {
 async function transformAsymptoteVariants(
   fileName: string,
   params: URLSearchParams,
-): Promise<string> {
+): Promise<TransformResult> {
   const variantFile = path.join(path.dirname(fileName), params.get("v")!);
   const variants = await executePython(variantFile);
 
@@ -63,7 +61,7 @@ async function transformAsymptoteVariants(
     })
     .join("\n");
 
-  return `${imports}
+  const code = `${imports}
 import "${variantFile}";
 
 const variants = [${variants.map((_, i) => `img_${i}`).join(", ")}];
@@ -71,6 +69,11 @@ const variants = [${variants.map((_, i) => `img_${i}`).join(", ")}];
 export default function img(variant) {
   return variants[variant];
 }`;
+
+  return {
+    code,
+    map: { mappings: "" },
+  };
 }
 
 const execFile = promisify(child_process.execFile);

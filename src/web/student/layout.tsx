@@ -165,7 +165,7 @@ const CompletedModal = forwardRef(function CompletedModal(
           <p>
             Hai ottenuto un punteggio di <b>{student.score}</b> su <b>{maxPoints}</b>.
           </p>
-          <table className="table table-sm mt-4">
+          <table className="table table-sm text-center mt-4">
             <thead>
               <tr>
                 <th scope="col">Domanda</th>

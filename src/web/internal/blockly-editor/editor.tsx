@@ -1,4 +1,4 @@
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useRef } from "react";
 
 import { DisableTopBlocks } from "@blockly/disable-top-blocks";
 import "blockly/blocks";
@@ -26,7 +26,7 @@ function send(cmd: string, props?: any) {
 
 export function BlocklyEditor() {
   const id = useId();
-  const [workspace, setWorkspace] = useState<WorkspaceSvg>();
+  const workspace = useRef<WorkspaceSvg>();
 
   useEffect(() => {
     window.addEventListener("message", onMessage);
@@ -35,16 +35,16 @@ export function BlocklyEditor() {
     function onMessage(event: MessageEvent) {
       const { cmd, ...props } = event.data;
       if (cmd === "init") {
-        setWorkspace(init(id, props));
+        workspace.current?.dispose();
+        workspace.current = init(id, props);
       } else if (cmd === "highlight") {
-        workspace?.highlightBlock(props.highlightedBlock);
+        workspace.current?.highlightBlock(props.highlightedBlock);
       }
     }
-  }, [id, workspace]);
+  }, [id]);
 
-  useEffect(() => {
-    send("init");
-  }, []);
+  useEffect(() => send("init"), []);
+  useEffect(() => document.documentElement.setAttribute("data-theme", "light"), []);
 
   return <div className="!fixed !inset-0 [all:initial]" id={id} />;
 }
@@ -151,7 +151,7 @@ function exportSvg(workspace: WorkspaceSvg, renderer: string) {
   ${document.querySelector(`#blockly-renderer-style-${renderer}-classic`)!.outerHTML}
   ${document.querySelector("#blockly-common-style")!.outerHTML}
   <g class="blocklyWorkspace">  
-    ${se.serializeToString(workspace!.svgBlockCanvas_)}
+    ${se.serializeToString(workspace.svgBlockCanvas_)}
   </g>
 </svg>`;
 }
