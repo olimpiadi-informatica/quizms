@@ -1,7 +1,7 @@
 import { type Ref, forwardRef } from "react";
 
 import { Form, Modal, SingleFileField, SubmitButton } from "@olinfo/react-components";
-import { ArrowUpFromLine } from "lucide-react";
+import { Upload } from "lucide-react";
 import { parse as parseCSV } from "papaparse";
 import z from "zod";
 
@@ -75,7 +75,7 @@ const ImportModal = forwardRef(function ImportModal(_props, ref: Ref<HTMLDialogE
         )}
         <Form onSubmit={submit} className="!max-w-full">
           <SingleFileField field="file" label="File CSV" accept="text/csv" />
-          <SubmitButton icon={ArrowUpFromLine}>Importa</SubmitButton>
+          <SubmitButton icon={Upload}>Importa</SubmitButton>
         </Form>
       </div>
     </Modal>

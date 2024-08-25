@@ -20,7 +20,7 @@ import {
 } from "@olinfo/react-components";
 import { addMinutes, isEqual as isEqualDate } from "date-fns";
 import { cloneDeep, deburr, isString, lowerFirst, omit, set, sumBy } from "lodash-es";
-import { AlertTriangle, Download, FileCheck, Upload, Users } from "lucide-react";
+import { Download, FileCheck, TriangleAlert, Upload, Users } from "lucide-react";
 
 import {
   type Contest,
@@ -200,7 +200,7 @@ const FinalizeModal = forwardRef(function FinalizeModal(
               <FormButton onClick={close}>Annulla</FormButton>
               <SubmitButton
                 className="btn-error"
-                icon={AlertTriangle}
+                icon={TriangleAlert}
                 disabled={confirm !== correctConfirm}>
                 Conferma
               </SubmitButton>
@@ -444,7 +444,7 @@ function columnDefinition(contest: Contest, variants: Record<string, Variant>): 
             return (
               <span>
                 {value}{" "}
-                <AlertTriangle className="mb-1 inline-block cursor-text text-warning" size={16} />
+                <TriangleAlert className="mb-1 inline-block cursor-text text-warning" size={16} />
               </span>
             );
           }

@@ -7,7 +7,7 @@ import {
   type FirestoreDataConverter,
   getDocs,
 } from "firebase/firestore";
-import { AlertTriangle } from "lucide-react";
+import { TriangleAlert } from "lucide-react";
 
 import { useDb } from "~/web/firebase/common/base-login";
 import query, { type QueryOption } from "~/web/firebase/common/query";
@@ -53,7 +53,7 @@ const ExportModal = forwardRef(function StudentExportModal(
     <Modal ref={ref} title={`Esporta ${label}`}>
       {window.showSaveFilePicker === undefined ? (
         <div className="flex items-center gap-3">
-          <AlertTriangle size={20} className="flex-none text-warning" />
+          <TriangleAlert size={20} className="flex-none text-warning" />
           <span>
             Il tuo browser non supporta l&apos;esportazione dei dati. Usa un browser Chrome o Edge.
           </span>

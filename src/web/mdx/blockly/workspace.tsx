@@ -12,17 +12,16 @@ import type { ToolboxInfo } from "blockly/core/utils/toolbox";
 import clsx from "clsx";
 import { range } from "lodash-es";
 import {
-  AlertTriangle,
-  CheckCircle,
-  CheckCircle2,
-  HelpCircle,
+  CircleCheck,
+  CircleHelp,
+  CircleX,
   MessageSquareOff,
   Pause,
   Play,
   RotateCcw,
   Send,
   SkipForward,
-  XCircle,
+  TriangleAlert,
 } from "lucide-react";
 import { useErrorBoundary } from "react-error-boundary";
 
@@ -246,11 +245,11 @@ export function Blockly({
               )}
               data-tip={msg}>
               {editing ? (
-                <HelpCircle size={24} />
+                <CircleHelp size={24} />
               ) : correct ? (
-                <CheckCircle2 size={24} className="fill-success stroke-success-content" />
+                <CircleCheck size={24} className="fill-success stroke-success-content" />
               ) : (
-                <XCircle size={24} className="fill-error stroke-error-content" />
+                <CircleX size={24} className="fill-error stroke-error-content" />
               )}
             </button>
           ))}
@@ -267,7 +266,7 @@ export function Blockly({
         )}
         <div className={clsx("sticky left-0 bottom-0 z-50 p-4", !alert && "invisible")}>
           <div role="alert" className={clsx("alert", correct ? "alert-success" : "alert-error")}>
-            {correct ? <CheckCircle /> : <AlertTriangle />}
+            {correct ? <CircleCheck /> : <TriangleAlert />}
             <span>{alert}</span>
             <button
               type="button"

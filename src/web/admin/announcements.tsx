@@ -11,7 +11,7 @@ import {
   TextAreaField,
   TextField,
 } from "@olinfo/react-components";
-import { AlertTriangle, Info, XCircle } from "lucide-react";
+import { CircleX, Info, TriangleAlert } from "lucide-react";
 
 import type { Announcement } from "~/models";
 import { randomId } from "~/utils/random";
@@ -40,9 +40,9 @@ export default function Announcements() {
             <h4 className="flex items-center gap-3">
               {announcement.level === "info" && <Info size={20} className="text-info" />}
               {announcement.level === "warning" && (
-                <AlertTriangle size={20} className="text-warning" />
+                <TriangleAlert size={20} className="text-warning" />
               )}
-              {announcement.level === "error" && <XCircle size={20} className="text-error" />}
+              {announcement.level === "error" && <CircleX size={20} className="text-error" />}
               {announcement.title}
             </h4>
             <small>

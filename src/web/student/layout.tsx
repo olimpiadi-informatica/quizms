@@ -15,7 +15,7 @@ import {
   SubmitButton,
 } from "@olinfo/react-components";
 import { sumBy } from "lodash-es";
-import { FileBarChart2, LogOut, RotateCcw } from "lucide-react";
+import { FileChartColumn, LogOut, RotateCcw } from "lucide-react";
 
 import { type Schema, calcProblemScore } from "~/models";
 import { ErrorBoundary, Progress, Prose, Timer } from "~/web/components";
@@ -84,7 +84,7 @@ export function StudentLayout({ children }: { children: ReactNode }) {
                     className="btn-primary btn-sm h-full"
                     onClick={() => completedRef.current?.showModal()}
                     aria-label="Mostra risultati">
-                    <FileBarChart2 />
+                    <FileChartColumn />
                   </Button>
                 </div>
                 <div className="tooltip tooltip-bottom h-full" data-tip="Ricomincia">
