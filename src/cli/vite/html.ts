@@ -1,7 +1,6 @@
 import type { Element, Root } from "hast";
 import { isString } from "lodash-es";
 import { rehype } from "rehype";
-import rehypeFormat from "rehype-format";
 import type { OutputBundle, OutputChunk } from "rollup";
 import type { Plugin } from "unified";
 import { visit } from "unist-util-visit";
@@ -23,11 +22,7 @@ const template = `\
 </html>`;
 
 export function generateHtml(...tags: HtmlTagDescriptor[]) {
-  return rehype()
-    .use(applyTransform, tags)
-    .use(rehypeFormat, { indentInitial: false })
-    .process(template)
-    .then(String);
+  return rehype().use(applyTransform, tags).process(template).then(String);
 }
 
 const applyTransform: Plugin<[HtmlTagDescriptor[]], Root> = (tags) => {
