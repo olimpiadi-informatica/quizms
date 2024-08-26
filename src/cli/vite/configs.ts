@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 
 import type { CompileOptions as MdxOptions } from "@mdx-js/mdx";
 import react from "@vitejs/plugin-react-swc";
+import { sumBy } from "lodash-es";
 import pc from "picocolors";
 import type { InlineConfig } from "vite";
 import inspect from "vite-plugin-inspect";
@@ -93,6 +94,14 @@ export default function configs(
           if (log.url) {
             info(`See ${pc.bold(log.url)} for more information.`);
           }
+        },
+        output: {
+          assetFileNames: "assets/[hash:1]/[hash]-[name][extname]",
+          chunkFileNames: (chunk) => {
+            const dir = sumBy(chunk.name, (c) => c.charCodeAt(0)) % 20;
+            return `assets/${String.fromCharCode(103 + dir)}/[hash]-[name].js`;
+          },
+          hashCharacters: "hex",
         },
       },
       target: "es2022",

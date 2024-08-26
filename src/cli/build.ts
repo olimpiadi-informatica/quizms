@@ -1,6 +1,7 @@
 import path from "node:path";
 
 import glob from "fast-glob";
+import { name as quizmsPackageName } from "package.json";
 import license from "rollup-plugin-license";
 import { type InlineConfig, build, mergeConfig } from "vite";
 
@@ -95,7 +96,12 @@ async function libraryConfigs(root: string, options: ExportOptions): Promise<Inl
         formats: ["es"],
       },
       rollupOptions: {
-        external: /^[^./~]|\/node_modules\//,
+        external: (id) => {
+          if (id.includes("node_modules")) return true;
+          if (id.startsWith("virtual:")) return false;
+          if (id.startsWith(`${quizmsPackageName}/`)) return false;
+          return !/^[./~]/.test(id);
+        },
         output: {
           preserveModules: true,
           preserveModulesRoot: root,
