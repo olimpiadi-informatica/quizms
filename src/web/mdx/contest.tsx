@@ -5,7 +5,6 @@ import { addMinutes } from "date-fns";
 import { noop } from "lodash-es";
 
 import type { Schema } from "~/models";
-import { randomId } from "~/utils/random";
 import { useStudent } from "~/web/student/provider";
 
 type ContestContextProps = {
@@ -36,7 +35,7 @@ export function Contest({ children }: { children: ReactNode }) {
         ...student,
         startedAt: now,
         finishedAt: addMinutes(now, contest.duration ?? 0),
-        variant: import.meta.env.PROD ? randomId() : "",
+        variant: "",
       });
     };
 

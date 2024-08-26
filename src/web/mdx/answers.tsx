@@ -1,17 +1,8 @@
-import {
-  Children,
-  type ReactNode,
-  createContext,
-  useContext,
-  useEffect,
-  useId,
-  useMemo,
-} from "react";
+import { Children, type ReactNode, createContext, useContext, useEffect, useId } from "react";
 
 import clsx from "clsx";
 import { Trash2 } from "lucide-react";
 
-import { Rng } from "~/utils/random";
 import { useStudent } from "~/web/student/provider";
 
 import { useContest } from "./contest";
@@ -30,17 +21,7 @@ type AnswerGroupProps = {
 };
 
 export function AnswerGroup({ children }: AnswerGroupProps) {
-  const { student } = useStudent();
-  const { id } = useProblem();
-
-  const answers = useMemo(() => {
-    const answers = Children.toArray(children);
-    if (import.meta.env.QUIZMS_MODE === "training" && student.variant) {
-      const rng = new Rng(`r#answers#${student.variant}#${id}`);
-      rng.shuffle(answers);
-    }
-    return answers;
-  }, [student.variant, id, children]);
+  const answers = Children.toArray(children);
 
   return (
     <form
