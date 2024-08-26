@@ -15,7 +15,7 @@ import { addDoc, collection, waitForPendingWrites } from "firebase/firestore";
 import { isEqual, mapValues } from "lodash-es";
 
 import type { Contest, Student } from "~/models";
-import { hash } from "~/utils/random";
+import { hash } from "~/utils/hash";
 import { StudentProvider } from "~/web/student/provider";
 import { UserDataField } from "~/web/student/user-data-form";
 

@@ -1,5 +1,6 @@
-import { sha256 } from "@noble/hashes/sha256";
 import { type RandomGenerator, unsafeUniformIntDistribution, xoroshiro128plus } from "pure-rand";
+
+import { hash } from "~/utils/hash";
 
 export class Rng {
   private readonly rng: RandomGenerator;
@@ -33,26 +34,4 @@ export class Rng {
       [array[i], array[j]] = [array[j], array[i]];
     }
   };
-}
-
-export function hash(input: Parameters<typeof sha256>[0]): number {
-  const digest = sha256(input);
-  const view = new DataView(digest.buffer, digest.byteOffset, digest.byteLength);
-  return Number(view.getBigUint64(0, true) & BigInt(Number.MAX_SAFE_INTEGER));
-}
-
-export async function randomToken(): Promise<string> {
-  const { default: wordlist } = await import("./wordlist.txt");
-  const words = wordlist.split("\n");
-
-  const rng = new Rng(randomId());
-  const tokens = [];
-  for (let i = 0; i < 3; i++) {
-    tokens.push(rng.choice(words));
-  }
-  return tokens.join("-");
-}
-
-export function randomId() {
-  return crypto.randomUUID();
 }

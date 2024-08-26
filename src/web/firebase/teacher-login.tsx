@@ -14,7 +14,7 @@ import {
 import { getBytes, getStorage, ref } from "firebase/storage";
 import { chunk } from "lodash-es";
 
-import { type Participation, type StudentRestore, studentHash } from "~/models";
+import type { Participation, StudentRestore } from "~/models";
 import { TeacherProvider } from "~/web/teacher/provider";
 
 import { FirebaseLogin, useDb } from "./common/base-login";
@@ -27,6 +27,7 @@ import {
   studentRestoreConverter,
   variantConverter,
 } from "./common/converters";
+import { studentHash } from "./common/hash";
 import PasswordLogin from "./common/password-login";
 import query from "./common/query";
 import { useAuth, useCollection } from "./hooks";

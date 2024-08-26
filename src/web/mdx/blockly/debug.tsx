@@ -2,7 +2,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import { Button, Code, Modal } from "@olinfo/react-components";
 import clsx from "clsx";
-import { saveAs } from "file-saver";
 import { Copy, Download } from "lucide-react";
 
 type Props = {
@@ -79,7 +78,8 @@ export default function Debug({ blocks, js, svg }: Props) {
               <Button
                 className="btn-error"
                 icon={Download}
-                onClick={() => {
+                onClick={async () => {
+                  const { saveAs } = await import("file-saver");
                   saveAs(new Blob([code], { type: formats[format].mime }), `blocks.${format}`);
                 }}>
                 Salva

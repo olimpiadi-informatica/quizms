@@ -8,7 +8,7 @@ import {
   setDoc,
 } from "firebase/firestore";
 
-import { type Student, type StudentRestore, studentHash } from "~/models";
+import type { Student, StudentRestore } from "~/models";
 import { randomId } from "~/utils/random";
 
 import {
@@ -19,6 +19,7 @@ import {
   studentRestoreConverter,
   variantMappingConverter,
 } from "./common/converters";
+import { studentHash } from "./common/hash";
 
 export class DuplicateStudentError extends Error {
   constructor(

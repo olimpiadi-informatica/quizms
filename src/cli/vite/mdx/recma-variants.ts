@@ -4,7 +4,7 @@ import type { AssignmentProperty, Node, Program, Property, Statement } from "est
 import { builders as b, is, traverse } from "estree-toolkit";
 import type { Plugin } from "unified";
 
-import { hash } from "~/utils/random";
+import { hash } from "~/utils/hash";
 
 const recmaVariants: Plugin<[], Program> = () => {
   return (ast, file) => {
