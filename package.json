@@ -69,7 +69,6 @@
     "lodash-es": "^4.17",
     "lucide-react": ">=0.395, <1",
     "magic-string": "^0.30",
-    "mermaid-isomorphic": "^2.1",
     "mini-svg-data-uri": "^1.4",
     "papaparse": "^5.4",
     "picocolors": "^1.0",

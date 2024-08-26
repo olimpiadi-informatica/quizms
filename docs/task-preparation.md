@@ -20,8 +20,7 @@ Il testo del problema è formattato con Markdown, è possibile usare la maggior 
 
 - [immagini](#immagini);
 - formule matematiche di LaTeX;
-- codice con syntax highlighting (anche per pseudocodice);
-- [diagrammi di Mermaid](https://mermaid.js.org/).
+- codice con syntax highlighting (anche per pseudocodice).
 
 Le risposte possono essere di due tipi.
 

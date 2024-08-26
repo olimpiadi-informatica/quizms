@@ -15,14 +15,12 @@ import rehypeFixWrap from "./rehype-fix-wrap";
 import remarkAnswers from "./remark-answers";
 import remarkHighlight from "./remark-highlight";
 import remarkImages from "./remark-images";
-import remarkMermaid from "./remark-mermaid";
 import remarkProblemIds from "./remark-problem-ids";
 
 const remarkPlugins: PluggableList = [
   remarkAnswers,
   remarkFrontmatter,
   remarkGfm,
-  remarkMermaid,
   remarkHighlight,
   remarkMath,
   remarkMdxFrontmatter,
