@@ -1,11 +1,10 @@
 import { existsSync } from "node:fs";
 import path from "node:path";
 
-import { transform } from "esbuild";
 import glob from "fast-glob";
 import { sortBy } from "lodash-es";
 import type { OutputChunk } from "rollup";
-import type { HtmlTagDescriptor, PluginOption } from "vite";
+import { type HtmlTagDescriptor, type PluginOption, transformWithEsbuild } from "vite";
 
 import { error } from "~/utils/logs";
 
@@ -70,10 +69,7 @@ createRoot(document.getElementById("app")).render(
   </StrictMode>
 );`;
 
-        return transform(entry, {
-          jsx: "automatic",
-          loader: "jsx",
-        });
+        return transformWithEsbuild(entry, "virtual-quizms-routes.jsx", { jsx: "automatic" });
       }
       if (id === "\0react-dom/server") {
         return `\

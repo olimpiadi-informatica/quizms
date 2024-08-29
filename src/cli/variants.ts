@@ -3,12 +3,11 @@ import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 
-import { transform } from "esbuild";
 import { toJs } from "estree-util-to-js";
 import { uniq } from "lodash-es";
 import { name as quizmsImportSource } from "package.json";
 import { temporaryDirectoryTask } from "tempy";
-import { type InlineConfig, build, mergeConfig } from "vite";
+import { type InlineConfig, build, mergeConfig, transformWithEsbuild } from "vite";
 
 import { type ExpressionWrapper, shuffleStatement } from "~/jsx-runtime/parser";
 import { cleanStatement, getSchema } from "~/jsx-runtime/shuffle";
@@ -85,7 +84,7 @@ export async function buildVariants(
       const schema = getSchema(variantAst);
       cleanStatement(variantAst);
 
-      const statement = await transform(toJs(variantAst).value, {
+      const statement = await transformWithEsbuild(toJs(variantAst).value, `statement-${id}.js`, {
         minify: true,
         charset: "utf8",
       });
