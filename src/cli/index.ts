@@ -1,7 +1,6 @@
 import { cwd, exit } from "node:process";
 
 import { InvalidArgumentError, program } from "commander";
-import "dotenv/config";
 import { version } from "package.json";
 
 import staticExport from "./build";
