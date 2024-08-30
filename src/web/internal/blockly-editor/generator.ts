@@ -68,5 +68,5 @@ export function toJS(workspace?: WorkspaceSvg) {
   if (!workspace) return "";
 
   const js = javascriptGenerator.workspaceToCode(workspace);
-  return `${js}\nexit(false, "L'esecuzione è terminata troppo presto");`;
+  return `${js}\nexit(false, "L'esecuzione è terminata prima di finire il livello");`;
 }
