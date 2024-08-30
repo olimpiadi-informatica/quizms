@@ -1,12 +1,25 @@
-import { useEffect } from "react";
+import { Suspense, lazy, useEffect } from "react";
 
 import { Button } from "@olinfo/react-components";
+import type { StackFrameLite } from "error-stack-parser-es/lite";
 import { RotateCw } from "lucide-react";
 import {
   ErrorBoundary as BaseErrorBoundary,
   type ErrorBoundaryPropsWithComponent,
   type FallbackProps,
 } from "react-error-boundary";
+
+const FrameCode = lazy(() => import("./frame"));
+
+export class FrameError extends Error {
+  constructor(
+    message: string,
+    public frame: StackFrameLite,
+    cause?: Error,
+  ) {
+    super(message, { cause });
+  }
+}
 
 export function ErrorBoundary({
   children,
@@ -26,12 +39,17 @@ function ErrorBoundaryContent({ error, resetErrorBoundary }: FallbackProps) {
   }, [resetErrorBoundary]);
 
   return (
-    <div className="flex w-full grow flex-col items-center justify-center gap-4">
-      <p className="break-words text-center text-error">Errore: {error.message}</p>
+    <div className="not-prose text-base flex w-full grow flex-col items-center justify-center p-4 gap-4">
+      <p className="break-words text-center text-error font-bold">Errore: {error.message}</p>
       {resetErrorBoundary && (
         <Button className="btn-error" icon={RotateCw} onClick={() => resetErrorBoundary()}>
           Ricarica
         </Button>
+      )}
+      {import.meta.env.DEV && (
+        <Suspense>
+          <FrameCode error={error} />
+        </Suspense>
       )}
     </div>
   );

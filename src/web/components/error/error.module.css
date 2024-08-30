@@ -1,0 +1,15 @@
+.code {
+    @apply bg-base-200 rounded-lg w-full overflow-hidden;
+    @apply text-sm font-mono;
+}
+
+.codeGrid {
+    @apply grid grid-cols-[auto_1fr] w-full overflow-x-auto pr-4 pb-4;
+    @apply text-xs whitespace-pre relative;
+}
+
+.lineNumber {
+    @apply sticky inline-block left-0 px-4 mr-4;
+    @apply bg-base-200 border-r-2 border-base-content;
+    @apply select-none;
+}

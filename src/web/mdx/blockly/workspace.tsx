@@ -25,7 +25,7 @@ import {
 } from "lucide-react";
 import { useErrorBoundary } from "react-error-boundary";
 
-import { Loading } from "~/web/components";
+import { ErrorBoundary, Loading } from "~/web/components";
 import { useContest } from "~/web/mdx/contest";
 import { useProblem } from "~/web/mdx/problem";
 import { useStudent } from "~/web/student/provider";
@@ -256,14 +256,22 @@ export function Blockly({
         </div>
       </div>
       <div className={style.visualizer}>
-        {Visualizer && globalScope?.state && (
-          <Visualizer
-            variables={variables}
-            state={globalScope.state}
-            testcase={testcaseIndex}
-            message={msg}
-          />
-        )}
+        <ErrorBoundary
+          onError={(err) => {
+            if (import.meta.env.PROD) {
+              err.message = "Visualizzazione del livello fallita";
+            }
+          }}
+          onReset={reset}>
+          {Visualizer && globalScope?.state && (
+            <Visualizer
+              variables={variables}
+              state={globalScope.state}
+              testcase={testcaseIndex}
+              message={msg}
+            />
+          )}
+        </ErrorBoundary>
         <div className={clsx("sticky left-0 bottom-0 z-50 p-4", !alert && "invisible")}>
           <div role="alert" className={clsx("alert", correct ? "alert-success" : "alert-error")}>
             {correct ? <CircleCheck /> : <TriangleAlert />}
