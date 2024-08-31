@@ -18,7 +18,6 @@ import {
 import { initializeFirebase } from "./utils/initialize";
 
 type ExportOptions = {
-  dir: string;
   contests?: true;
   participations?: true;
   students?: true;
@@ -28,10 +27,10 @@ type ExportOptions = {
 };
 
 export default async function exportContests(options: ExportOptions) {
-  const { app, db } = await initializeFirebase(options.dir);
+  const { app, db } = await initializeFirebase();
 
   const timestamp = new Date().toISOString();
-  const outDir = path.join(options.dir, "export", timestamp);
+  const outDir = path.join("export", timestamp);
   await mkdir(outDir, { recursive: true });
 
   if (options.students) {

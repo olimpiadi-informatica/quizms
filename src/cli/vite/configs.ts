@@ -1,5 +1,5 @@
-import { existsSync } from "node:fs";
 import path from "node:path";
+import { cwd } from "node:process";
 import { fileURLToPath } from "node:url";
 
 import type { CompileOptions as MdxOptions } from "@mdx-js/mdx";
@@ -9,7 +9,7 @@ import pc from "picocolors";
 import type { InlineConfig } from "vite";
 import inspect from "vite-plugin-inspect";
 
-import { fatal, info, warning } from "~/utils/logs";
+import { info, warning } from "~/utils/logs";
 
 import asymptote from "./asymptote";
 import blocklyBlocks from "./blockly-blocks";
@@ -27,15 +27,10 @@ type Options = {
 };
 
 export default function configs(
-  root: string,
   mode: "development" | "production",
   options?: Options,
 ): InlineConfig {
-  if (!existsSync(root)) {
-    fatal(
-      `Invalid directory. Make sure you're in the root of a QuizMS project or specify a different directory, use \`--help\` for usage.`,
-    );
-  }
+  const root = path.join(cwd(), "src");
 
   return {
     configFile: false,

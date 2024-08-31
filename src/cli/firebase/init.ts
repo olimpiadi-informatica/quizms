@@ -1,6 +1,7 @@
 import { existsSync } from "node:fs";
 import { cp, mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { cwd } from "node:process";
 import { fileURLToPath } from "node:url";
 
 import type { Bucket } from "@google-cloud/storage";
@@ -16,7 +17,6 @@ import { initializeFirebase } from "./utils/initialize";
 import restApi from "./utils/rest-api";
 
 type InitOptions = {
-  dir: string;
   force?: boolean;
 };
 
@@ -25,7 +25,7 @@ export default async function init(options: InitOptions) {
 
   if (await copyFiles(options)) initialized = false;
 
-  const { app, bucket } = await initializeFirebase(options.dir);
+  const { app, bucket } = await initializeFirebase();
   if (await enableBackups(app)) initialized = false;
   if (await enableCors(bucket)) initialized = false;
 
@@ -39,27 +39,24 @@ export default async function init(options: InitOptions) {
 async function copyFiles(options: InitOptions) {
   info("Copying files...");
 
-  const data = path.join(options.dir, "firebase");
-  await mkdir(data, { recursive: true });
+  await mkdir("firebase", { recursive: true });
 
-  const firestoreRulesPath = path.join(data, "firestore.rules");
+  const firestoreRulesPath = "firebase/firestore.rules";
   if (await overwrite(firestoreRulesPath, options)) {
     const from = fileURLToPath(new URL(firestoreRules, import.meta.url));
     await cp(from, firestoreRulesPath);
   }
 
-  const firestoreIndexesPath = path.join(data, "firestore-indexes.json");
+  const firestoreIndexesPath = "firebase/firestore-indexes.json";
   if (await overwrite(firestoreIndexesPath, options)) {
     await writeFile(firestoreIndexesPath, JSON.stringify(firestoreIndexes, undefined, 2));
   }
 
-  const storageRulesPath = path.join(data, "storage.rules");
+  const storageRulesPath = "firebase/storage.rules";
   if (await overwrite(storageRulesPath, options)) {
     const from = fileURLToPath(new URL(storageRules, import.meta.url));
     await cp(from, storageRulesPath);
   }
-
-  const configPath = path.join(options.dir, "firebase.json");
 
   // See {@link https://github.com/firebase/firebase-tools/blob/09c2641e861f2e31798dfb4aba1a180e8fd08ea5/src/firebaseConfig.ts#L244 here}.
   const configs = {
@@ -90,16 +87,16 @@ async function copyFiles(options: InitOptions) {
       predeploy: "npx quizms build",
     },
     firestore: {
-      rules: path.relative(options.dir, firestoreRulesPath),
-      indexes: path.relative(options.dir, firestoreIndexesPath),
+      rules: path.relative(cwd(), firestoreRulesPath),
+      indexes: path.relative(cwd(), firestoreIndexesPath),
     },
     storage: {
-      rules: path.relative(options.dir, storageRulesPath),
+      rules: path.relative(cwd(), storageRulesPath),
     },
   };
 
-  if (await overwrite(configPath, options)) {
-    await writeFile(configPath, JSON.stringify(configs, undefined, 2));
+  if (await overwrite("firebase.json", options)) {
+    await writeFile("firebase.json", JSON.stringify(configs, undefined, 2));
   }
 
   success("Files copied!");

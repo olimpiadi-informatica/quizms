@@ -16,7 +16,6 @@ import { buildVariants } from "./variants";
 import configs from "./vite/configs";
 
 export type PrintOptions = {
-  dir: string;
   config: string;
   outDir: string;
   entry: string;
@@ -26,10 +25,9 @@ export type PrintOptions = {
 export default async function print(options: PrintOptions) {
   process.env.QUIZMS_MODE = "pdf";
 
-  const generationConfigs = await load(options.dir, "contests", generationConfigSchema);
+  const generationConfigs = await load("contests", generationConfigSchema);
 
-  const root = path.join(options.dir, "src");
-  const entry = path.join(root, options.entry);
+  const entry = path.join("src", options.entry);
   if (!existsSync(entry)) {
     fatal(`\
 Entry file ${pc.bold(pc.red(options.entry))} does not exists. \
@@ -37,13 +35,13 @@ Make sure it exists or specify a different entry file using \`--entry\`.`);
   }
 
   info("Building statements...");
-  const variants = await buildVariants(root, generationConfigs);
+  const variants = await buildVariants(generationConfigs);
   const statements = mapValues(variants, 1);
 
   info("Building website...");
-  const buildDir = path.join(options.dir, options.outDir, ".pdf-build");
-  const buildConfig = mergeConfig(configs(root, "production"), {
-    publicDir: path.join(options.dir, "public"),
+  const buildDir = path.join(options.outDir, ".pdf-build");
+  const buildConfig = mergeConfig(configs("production"), {
+    publicDir: "public",
     build: {
       outDir: buildDir,
       emptyOutDir: true,
@@ -61,7 +59,7 @@ Make sure it exists or specify a different entry file using \`--entry\`.`);
     fatal("Build failed.");
   }
 
-  const serverConfig = mergeConfig(configs(options.dir, "production"), {
+  const serverConfig = mergeConfig(configs("production"), {
     build: {
       outDir: buildDir,
     },

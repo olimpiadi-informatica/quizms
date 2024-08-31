@@ -3,8 +3,8 @@ import { info, success } from "~/utils/logs";
 import { participationConverter } from "./utils/converters-admin";
 import { initializeFirebase } from "./utils/initialize";
 
-export default async function definalize(options: { dir: string }) {
-  const { db } = await initializeFirebase(options.dir);
+export default async function definalize() {
+  const { db } = await initializeFirebase();
 
   info("Definalizing all participations.");
 

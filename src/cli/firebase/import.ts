@@ -35,7 +35,6 @@ import { initializeFirebase } from "./utils/initialize";
 import { importStorage } from "./utils/storage";
 
 type ImportOptions = {
-  dir: string;
   config: string;
   delete?: true;
   force?: true;
@@ -54,10 +53,8 @@ type ImportOptions = {
 export default async function importData(options: ImportOptions) {
   process.env.QUIZMS_MODE = "contest";
 
-  if (!existsSync(path.join(options.dir, "data"))) {
-    fatal(
-      `Cannot find data directory at ${options.dir}. Make sure you're in the root of a QuizMS project or specify a different directory, use \`--help\` for usage.`,
-    );
+  if (!existsSync("data")) {
+    fatal("Cannot find data directory. Make sure you're inside a QuizMS project.");
   }
 
   const collections: (keyof ImportOptions)[] = [
@@ -76,7 +73,7 @@ export default async function importData(options: ImportOptions) {
     return;
   }
 
-  const { app, bucket, db } = await initializeFirebase(options.dir);
+  const { app, bucket, db } = await initializeFirebase();
 
   if (options.admins) {
     await importAdmins(options);
@@ -108,13 +105,13 @@ export default async function importData(options: ImportOptions) {
 }
 
 async function importAdmins(options: ImportOptions) {
-  const admins = await load(options.dir, "admins", userSchema);
+  const admins = await load("admins", userSchema);
   await importUsers(admins, { isAdmin: true }, options);
   success("Admin users imported!");
 }
 
 async function importContests(db: Firestore, options: ImportOptions) {
-  const contests = await load(options.dir, "contests", contestSchema);
+  const contests = await load("contests", contestSchema);
   await importCollection(db, "contests", contests, contestConverter, options);
 }
 
@@ -133,8 +130,8 @@ async function importParticipations(db: Firestore, options: ImportOptions) {
       ...school,
       email: `${school.id}@teacher.edu`,
     }));
-  const schools = await load(options.dir, "schools", schoolSchema);
-  const configs = await load(options.dir, "contests", generationConfigSchema);
+  const schools = await load("schools", schoolSchema);
+  const configs = await load("contests", generationConfigSchema);
 
   if (options.teachers) {
     const teachers = schools.map((school) => pick(school, ["name", "email", "password"]));
@@ -179,7 +176,7 @@ async function importParticipations(db: Firestore, options: ImportOptions) {
 }
 
 async function importStudents(db: Firestore, options: ImportOptions) {
-  const students = await load(options.dir, "students", studentSchema);
+  const students = await load("students", studentSchema);
   const participations = groupBy(students, "participationId");
   await Promise.all(
     Object.entries(participations).map(([participationId, students]) =>
@@ -195,10 +192,10 @@ async function importStudents(db: Firestore, options: ImportOptions) {
 }
 
 async function importPdf(bucket: Bucket, options: ImportOptions) {
-  const generationConfigs = await load(options.dir, "contests", generationConfigSchema);
+  const generationConfigs = await load("contests", generationConfigSchema);
   const pdfs = generationConfigs.flatMap((c) =>
     uniq([...c.variantIds, ...c.pdfVariantIds]).map((id): [string, string] => [
-      path.join(options.dir, "variants", id, "statement.pdf"),
+      path.join("variants", id, "statement.pdf"),
       path.join("statements", id, `statement-${c.statementVersion}.pdf`),
     ]),
   );
@@ -239,12 +236,12 @@ async function importUsers(users: User[], customClaims: object, options: ImportO
 }
 
 async function importVariants(db: Firestore, options: ImportOptions) {
-  const generationConfigs = await load(options.dir, "contests", generationConfigSchema);
+  const generationConfigs = await load("contests", generationConfigSchema);
   const variants = await Promise.all(
     generationConfigs
       .flatMap((c) => uniq([...c.variantIds, ...c.pdfVariantIds]))
       .map(async (id) => {
-        const fileName = path.join(options.dir, "variants", id, "schema.json");
+        const fileName = path.join("variants", id, "schema.json");
         let schema: string;
         try {
           schema = await readFile(fileName, "utf8");
@@ -262,11 +259,11 @@ async function importVariants(db: Firestore, options: ImportOptions) {
 }
 
 async function importStatements(bucket: Bucket, options: ImportOptions) {
-  const generationConfigs = await load(options.dir, "contests", generationConfigSchema);
+  const generationConfigs = await load("contests", generationConfigSchema);
 
   const statements = generationConfigs.flatMap((c) =>
     uniq([...c.variantIds, ...c.pdfVariantIds]).map((id): [string, string] => [
-      path.join(options.dir, "variants", id, "statement.js"),
+      path.join("variants", id, "statement.js"),
       path.join("statements", id, `statement-${c.statementVersion}.js`),
     ]),
   );
@@ -274,7 +271,7 @@ async function importStatements(bucket: Bucket, options: ImportOptions) {
 }
 
 async function importVariantMappings(db: Firestore, options: ImportOptions) {
-  const generationConfigs = await load(options.dir, "contests", generationConfigSchema);
+  const generationConfigs = await load("contests", generationConfigSchema);
   const mappings = generationConfigs.flatMap((config) => {
     const rng = new Rng(`${config.secret}-${config.id}-variantMappings`);
     return range(4096).map((i) => {

@@ -7,10 +7,10 @@ import { type InlineConfig, build, mergeConfig } from "vite";
 
 import { error, fatal } from "~/utils/logs";
 
+import { cwd } from "node:process";
 import configs from "./vite/configs";
 
 export type ExportOptions = {
-  dir: string;
   outDir: string;
   training?: boolean;
   library?: boolean;
@@ -19,10 +19,9 @@ export type ExportOptions = {
 export default async function staticExport(options: ExportOptions): Promise<void> {
   process.env.QUIZMS_MODE = options.training ? "training" : "contest";
 
-  const root = path.join(options.dir, "src");
   const config = mergeConfig(
-    configs(root, "production"),
-    await (options.library ? libraryConfigs : standaloneConfigs)(root, options),
+    configs("production"),
+    await (options.library ? libraryConfigs : standaloneConfigs)(options),
   );
 
   try {
@@ -33,13 +32,11 @@ export default async function staticExport(options: ExportOptions): Promise<void
   }
 }
 
-async function standaloneConfigs(_root: string, options: ExportOptions): Promise<InlineConfig> {
-  const outDir = path.join(options.dir, options.outDir);
-
+async function standaloneConfigs(options: ExportOptions): Promise<InlineConfig> {
   return {
-    publicDir: path.join(options.dir, "public"),
+    publicDir: "public",
     build: {
-      outDir,
+      outDir: options.outDir,
       emptyOutDir: true,
       assetsInlineLimit: 1024,
       rollupOptions: {
@@ -72,7 +69,7 @@ async function standaloneConfigs(_root: string, options: ExportOptions): Promise
       license({
         thirdParty: {
           output: {
-            file: path.join(outDir, "LICENSES.txt"),
+            file: path.join(cwd(), options.outDir, "LICENSES.txt"),
           },
         },
       }),
@@ -81,15 +78,13 @@ async function standaloneConfigs(_root: string, options: ExportOptions): Promise
   } as InlineConfig;
 }
 
-async function libraryConfigs(root: string, options: ExportOptions): Promise<InlineConfig> {
-  const outDir = path.join(options.dir, options.outDir);
-
-  const pages = await glob("**/page.{js,jsx,ts,tsx}", { cwd: root });
+async function libraryConfigs(options: ExportOptions): Promise<InlineConfig> {
+  const pages = await glob("src/**/page.{js,jsx,ts,tsx}");
   const entry = Object.fromEntries(pages.map((page) => [page.replace(/\.\w+$/, ""), page]));
 
   return {
     build: {
-      outDir,
+      outDir: options.outDir,
       emptyOutDir: true,
       lib: {
         entry,
@@ -104,7 +99,7 @@ async function libraryConfigs(root: string, options: ExportOptions): Promise<Inl
         },
         output: {
           preserveModules: true,
-          preserveModulesRoot: root,
+          preserveModulesRoot: "src",
         },
       },
     },

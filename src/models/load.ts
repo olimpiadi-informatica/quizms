@@ -19,12 +19,8 @@ const parsers: { ext: string; parser: (str: string) => any }[] = [
   { ext: ".csv", parser: parseCsv },
 ];
 
-export default async function load<T>(
-  dir: string,
-  collection: string,
-  schema: ZodType<T, any, any>,
-) {
-  const fileName = path.join(dir, "data", collection);
+export default async function load<T>(collection: string, schema: ZodType<T, any, any>) {
+  const fileName = path.join("data", collection);
 
   for (const { ext, parser } of parsers) {
     const relativePath = path.relative(cwd(), collection) + ext;
