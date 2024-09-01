@@ -8,7 +8,7 @@ import {
   parse,
   parseDocument,
 } from "yaml";
-import type { ZodError } from "zod";
+import type { ZodError, ZodFormattedError, ZodIssue } from "zod";
 
 import { type CustomBlock, customBlockSchema } from "~/models/blockly-custom-block";
 
@@ -34,40 +34,49 @@ export default function blocklyBlocks(): PluginOption {
           map: { mappings: "" },
         };
       } catch (err) {
-        getDeepError(this, code, [], (err as ZodError).format());
+        getDeepError(
+          this,
+          code,
+          [],
+          (err as ZodError).format((issue) => issue),
+        );
         this.error("Invalid custom blocks.");
       }
     },
   };
 }
 
-function getDeepError(ctx: TransformPluginContext, source: string, path: string[], errors: any) {
+function getDeepError(
+  ctx: TransformPluginContext,
+  source: string,
+  path: string[],
+  errors: ZodFormattedError<any, ZodIssue>,
+) {
   for (const key in errors) {
     if (key !== "_errors") {
-      getDeepError(ctx, source, [...path, key], errors[key]);
+      getDeepError(ctx, source, [...path, key], (errors as Record<string, any>)[key]);
     }
   }
 
-  let msg = errors._errors[0];
-  if (msg) {
-    if (msg === "Required") {
-      msg = `Missing field \`${path.at(-1)}\` in object`;
+  const issue = errors._errors[0];
+  if (issue) {
+    if (issue.message === "Required") {
+      issue.message = `Missing field \`${path.at(-1)}\` in object`;
       path.splice(-1);
     }
 
     const doc = parseDocument(source);
     let node = doc.getIn(path, true) as YAMLNode | undefined;
 
-    if (node && msg.startsWith("Unrecognized key(s) in object: ")) {
-      const keys = new Set(msg.match(/'(.*)'$/)?.[1].split("', '"));
+    if (node && issue.code === "unrecognized_keys") {
       for (const item of (node as YAMLMap<Scalar>).items) {
-        if (keys.has(item.key?.value?.toString())) {
+        if (issue.keys.includes(item.key?.value?.toString() as string)) {
           node = item.key;
           break;
         }
       }
     }
 
-    ctx.error(msg, node?.range?.[0]);
+    ctx.error(issue.message, node?.range?.[0]);
   }
 }

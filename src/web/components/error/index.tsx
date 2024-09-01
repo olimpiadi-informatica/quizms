@@ -9,7 +9,7 @@ import {
   type FallbackProps,
 } from "react-error-boundary";
 
-const FrameCode = lazy(() => import("./frame"));
+const FrameCode = import.meta.env.DEV && lazy(() => import("./frame"));
 
 export class FrameError extends Error {
   constructor(
@@ -34,19 +34,21 @@ export function ErrorBoundary({
 
 function ErrorBoundaryContent({ error, resetErrorBoundary }: FallbackProps) {
   useEffect(() => {
-    import.meta.hot?.on("vite:afterUpdate", resetErrorBoundary);
-    return () => import.meta.hot?.off("vite:afterUpdate", resetErrorBoundary);
-  }, [resetErrorBoundary]);
+    const reload = () => window.location.reload();
+
+    import.meta.hot?.on("vite:afterUpdate", reload);
+    return () => import.meta.hot?.off("vite:afterUpdate", reload);
+  }, []);
 
   return (
-    <div className="not-prose text-base flex w-full grow flex-col items-center justify-center p-4 gap-4">
+    <div className="not-prose text-base-content text-base flex w-full grow flex-col items-center justify-center p-4 gap-4">
       <p className="break-words text-center text-error font-bold">Errore: {error.message}</p>
       {resetErrorBoundary && (
         <Button className="btn-error" icon={RotateCw} onClick={() => resetErrorBoundary()}>
           Ricarica
         </Button>
       )}
-      {import.meta.env.DEV && (
+      {FrameCode && (
         <Suspense>
           <FrameCode error={error} />
         </Suspense>

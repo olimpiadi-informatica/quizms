@@ -152,10 +152,10 @@ async function setParticipation(
   }
 }
 
-async function getPdfStatements(db: Firestore, statementVersion: number, variantIds: string[]) {
+function getPdfStatements(db: Firestore, statementVersion: number, variantIds: string[]) {
   const storage = getStorage(db.app);
 
-  return await Promise.all(
+  return Promise.all(
     variantIds.map((id) =>
       getBytes(ref(storage, `statements/${id}/statement-${statementVersion}.pdf`)),
     ),

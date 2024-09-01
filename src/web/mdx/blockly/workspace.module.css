@@ -24,7 +24,7 @@
 }
 
 .visualizer {
-    @apply relative rounded-xl overflow-auto bg-white;
+    @apply relative rounded-xl overflow-auto text-zinc-900 bg-white;
     grid-area: visualizer;
     border: 2px solid #c6c6c6;
     color-scheme: light;

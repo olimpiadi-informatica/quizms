@@ -68,19 +68,20 @@ async function fetcher(
   line: number,
   column: number,
 ): Promise<{ source: string; line: number; column: number; code: string }> {
-  let rawSourceMap: any;
   try {
-    const resp = await fetch(`${source}.map`);
-    rawSourceMap = await resp.json();
+    const url = new URL(source);
+    url.pathname += ".map";
+
+    const resp = await fetch(url.href);
+    const rawSourceMap = await resp.json();
+    const sourceMap = new SourceMapConsumer(rawSourceMap);
+
+    const position = sourceMap.originalPositionFor({ line, column });
+    const code = sourceMap.sourceContentFor(position.source);
+    return { ...position, code };
   } catch {
     const resp = await fetch(source);
     const code = await resp.text();
     return { source: new URL(source).pathname, line, column, code };
   }
-
-  const sourceMap = new SourceMapConsumer(rawSourceMap);
-
-  const position = sourceMap.originalPositionFor({ line, column });
-  const code = sourceMap.sourceContentFor(position.source);
-  return { ...position, code };
 }

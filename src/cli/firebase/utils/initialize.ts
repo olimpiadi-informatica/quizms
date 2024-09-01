@@ -14,7 +14,8 @@ export function loadServiceAccountKey() {
 Il file con le credenziali di Firebase non è stato trovato.
 
 Per generare il file:
- • accedi alla console di firebase;
+ • vai a https://console.firebase.google.com/
+ • seleziona il progetto;
  • vai sulle impostazioni del progetto;
  • vai nella sezione "Account di servizio";
  • clicca su "Genera nuova chiave privata";
