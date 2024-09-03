@@ -11,7 +11,7 @@ import type { CustomBlock, CustomBlockArg } from "~/models/blockly-custom-block"
 
 javascriptGenerator.STATEMENT_PREFIX = "highlightBlock(%1);\n";
 javascriptGenerator.INFINITE_LOOP_TRAP = 'if(--loopTrap === 0) exit(false, "Ciclo infinito");\n';
-javascriptGenerator.addReservedWords("exit,highlightBlock,loopTrap,state");
+javascriptGenerator.addReservedWords("exit,highlightBlock,loopTrap,state,tmp");
 console.info("Blockly version:", BlocklyVersion);
 
 function replaceArgs(
@@ -26,8 +26,20 @@ function replaceArgs(
 
     switch (arg.type) {
       case "input_value": {
-        const code = generator.valueToCode(block, arg.name, Order.NONE);
+        let code = generator.valueToCode(block, arg.name, Order.NONE);
         if (!code) return 'exit(false, "il blocco ha bisogno di un parametro")';
+
+        if (arg.integer) {
+          code = `(tmp = ${code}, (tmp | 0) === tmp ? tmp : exit(false, "il parametro deve essere un intero"))`;
+        }
+        if (arg.min !== undefined) {
+          const min = arg.min[0];
+          code = `((tmp = ${code}) >= (${min}) ? tmp : exit(false, "il parametro deve essere maggiore o uguale di " + (${min})))`;
+        }
+        if (arg.max !== undefined) {
+          const max = arg.max[0];
+          code = `((tmp = ${code}) <= (${max}) ? tmp : exit(false, "il parametro deve essere minore o uguale di " + (${max})))`;
+        }
         return code;
       }
       case "field_dropdown": {
