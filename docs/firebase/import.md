@@ -1,20 +1,11 @@
-# Come importare un contest su Firebase
-
-## Creare un account di servizio
-
-1. Accedi alla console di firebase;
-2. Vai sulle impostazioni del progetto;
-3. Vai nella sezione _"Account di servizio"_;
-4. Clicca su _"Genera nuova chiave privata"_;
-5. Salva il file con il nome `serviceAccountKey.json` nella directory del progetto;
-6. NON aggiungere il file a git, aggiungilo nel `.gitignore` qualora non fosse già presente.
-
-## Importare i dati
+# Importare la gara
 
 I dati del contest devono essere salvati dentro la directory `data` del progetto. I file possono essere in formato TOML,
 YAML, CSV, JSON o JSONL.
 
-### Importare le gare
+Se non l'hai già fatto, [crea un account di servizio](./setup#creare-un-account-di-servizio).
+
+## Importare le gare
 
 I contests sono descritti dal file `data/contests.{toml,yaml,csv,json,jsonl}`. Il formato è il seguente:
 
@@ -55,7 +46,8 @@ Le informazioni personali devono avere il seguente formato:
 | `max`    | Valore massimo del campo.                                        | `number` o `date`               | Richiesto per i campi data, opzionale per i campi numerici. |
 | `pinned` | Se appuntare il campo a sinistra nella tabella degli insegnanti. | `boolean`                       | Opzionale.                                                  |
 
-Un esempio di file TOML è il seguente:
+
+::: details Esempio di file TOML
 
 ```toml
 [oii-scolastiche]
@@ -90,25 +82,27 @@ Istruzioni per la gara:
  • queste sono le istruzioni per la gara.
 """
 ```
+:::
 
 Per importare i contests usa il comando:
 
-```shell
-npx quizms firebase import --contests
+```sh
+$ npx quizms firebase import --contests
 ```
 
-### Importare le scuole e gli insegnanti
+## Importare le scuole e gli insegnanti
 
 Le scuole e gli insegnanti sono descritti dal file `data/schools.{toml,yaml,csv,json,jsonl}`. Il formato è il seguente:
 
 | Campo        | Descrizione                              | Tipo                       | Note                                                                                                                                                                |
-| ------------ | ---------------------------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|--------------|------------------------------------------|----------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `id`         | Codice meccanografico della scuola.      | `string`                   |                                                                                                                                                                     |
 | `name`       | Nome della scuola.                       | `string`                   |                                                                                                                                                                     |
 | `contestIds` | ID delle gare a cui la scuola partecipa. | `string` oppure `string[]` | È possibile specificare un [picomatch](https://github.com/micromatch/picomatch#globbing-features), ad esempio `"*"` indica che la scuola partecipa a tutte le gare. |
 | `password`   | Password della scuola.                   | `string`                   |                                                                                                                                                                     |
 
-Un esempio di file CSV è il seguente:
+
+::: details Esempio di file CSV
 
 ```csv
 id,name,contestIds,password
@@ -116,34 +110,36 @@ PNTF01000A,ITST J.F.Kennedy,oii-scolastiche,OKYkIZ6xFHPqyFS8HdUk
 BOIS01400R,ISS Francesco Alberghetti,oii-scolastiche,n6r2yEKwAxJxBUCad7eS
 ```
 
+:::
+
 Per importare le scuole usa il comando:
 
-```shell
-npx quizms firebase import --schools --teachers
+```sh
+$ npx quizms firebase import --schools --teachers
 ```
 
-### Importare le varianti
+## Importare le varianti
 
 Per importare le varianti usa i comandi:
 
-```shell
+```sh
 npx quizms variants
 npx quizms firebase import --variants --variant-mappings --statements
 ```
 
-### Importare le prove cartacee
+## Importare le prove cartacee
 
 Per importare i PDF delle prove cartacee usa i comandi:
 
-```shell
-npx quizms print
-npx quizms firebase import --pdfs
+```sh
+$ npx quizms print
+$ npx quizms firebase import --pdfs
 ```
 
-### Eseguire il deploy del sito
+## Eseguire il deploy del sito
 
 Per eseguire il deploy del sito usa i comandi:
 
-```shell
-firebase deploy --only hosting
+```sh
+$ firebase deploy --only hosting
 ```

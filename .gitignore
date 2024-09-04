@@ -133,6 +133,10 @@ dist
 # SWC
 .swc
 
+# Vitepress
+**/.vitepress/cache/
+**/.vitepress/dist/
+
 # IDEs and editors
 .idea
 .vscode
