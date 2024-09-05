@@ -34,7 +34,7 @@ export default async function staticExport(options: ExportOptions): Promise<void
 
 async function standaloneConfigs(options: ExportOptions): Promise<InlineConfig> {
   return {
-    publicDir: "public",
+    publicDir: path.join(cwd(), "public"),
     build: {
       outDir: path.join(cwd(), options.outDir),
       emptyOutDir: true,
