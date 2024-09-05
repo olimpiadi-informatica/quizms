@@ -1,3 +1,6 @@
+import path from "node:path";
+import { cwd } from "node:process";
+
 import { noop } from "lodash-es";
 import { createServer } from "vite";
 
@@ -12,7 +15,7 @@ export default async function devServer(options: DevOptions) {
 
   const server = await createServer({
     ...configs("development"),
-    publicDir: "public",
+    publicDir: path.join(cwd(), "public"),
   });
   await server.listen(options.port);
 

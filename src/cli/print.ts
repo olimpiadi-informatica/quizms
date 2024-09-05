@@ -1,6 +1,7 @@
 import { existsSync } from "node:fs";
 import { rm } from "node:fs/promises";
 import path from "node:path";
+import { cwd } from "node:process";
 import { promisify } from "node:util";
 
 import { mapValues, noop } from "lodash-es";
@@ -39,9 +40,9 @@ Make sure it exists or specify a different entry file using \`--entry\`.`);
   const statements = mapValues(variants, 1);
 
   info("Building website...");
-  const buildDir = path.join(options.outDir, ".pdf-build");
+  const buildDir = path.join(cwd(), options.outDir, ".pdf-build");
   const buildConfig = mergeConfig(configs("production"), {
-    publicDir: "public",
+    publicDir: path.join(cwd(), "public"),
     build: {
       outDir: buildDir,
       emptyOutDir: true,

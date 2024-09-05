@@ -1,4 +1,5 @@
 import path from "node:path";
+import { cwd } from "node:process";
 
 import glob from "fast-glob";
 import { name as quizmsPackageName } from "package.json";
@@ -7,7 +8,6 @@ import { type InlineConfig, build, mergeConfig } from "vite";
 
 import { error, fatal } from "~/utils/logs";
 
-import { cwd } from "node:process";
 import configs from "./vite/configs";
 
 export type ExportOptions = {
@@ -36,7 +36,7 @@ async function standaloneConfigs(options: ExportOptions): Promise<InlineConfig> 
   return {
     publicDir: "public",
     build: {
-      outDir: options.outDir,
+      outDir: path.join(cwd(), options.outDir),
       emptyOutDir: true,
       assetsInlineLimit: 1024,
       rollupOptions: {
@@ -84,7 +84,7 @@ async function libraryConfigs(options: ExportOptions): Promise<InlineConfig> {
 
   return {
     build: {
-      outDir: options.outDir,
+      outDir: path.join(cwd(), options.outDir),
       emptyOutDir: true,
       lib: {
         entry,
