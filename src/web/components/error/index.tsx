@@ -2,7 +2,7 @@ import { Suspense, lazy, useEffect } from "react";
 
 import { Button } from "@olinfo/react-components";
 import type { StackFrameLite } from "error-stack-parser-es/lite";
-import { RotateCw } from "lucide-react";
+import { RotateCw, TriangleAlert } from "lucide-react";
 import {
   ErrorBoundary as BaseErrorBoundary,
   type ErrorBoundaryPropsWithComponent,
@@ -42,9 +42,16 @@ function ErrorBoundaryContent({ error, resetErrorBoundary }: FallbackProps) {
 
   return (
     <div className="not-prose text-base-content text-base flex w-full grow flex-col items-center justify-center p-4 gap-4">
-      <p className="break-words text-center text-error font-bold">Errore: {error.message}</p>
+      <div className="text-center">
+        <div className="text-lg font-bold">Errore</div>
+        <div className="text-base-content/80">Si è verificato un errore nell'applicazione.</div>
+      </div>
+      <div className="flex items-center gap-2 bg-red-200 dark:bg-error text-red-900 dark:text-error-content text-lg font-medium p-4 rounded-lg">
+        <TriangleAlert size={16} />
+        <div className="break-words">{error.message}</div>
+      </div>
       {resetErrorBoundary && (
-        <Button className="btn-error" icon={RotateCw} onClick={() => resetErrorBoundary()}>
+        <Button className="btn-ghost" icon={RotateCw} onClick={() => resetErrorBoundary()}>
           Ricarica
         </Button>
       )}

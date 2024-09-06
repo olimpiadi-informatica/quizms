@@ -2,6 +2,7 @@ import { Fragment } from "react";
 
 import clsx from "clsx";
 import { type StackFrameLite, parse as parseStack } from "error-stack-parser-es/lite";
+import { FileCode } from "lucide-react";
 import { SourceMapConsumer } from "source-map-js";
 import useSWR from "swr";
 
@@ -33,8 +34,9 @@ export default function FrameCode({ error }: { error: Error }) {
 
   return (
     <div className={style.code}>
-      <div className="font-semibold py-2 pl-4">
-        <a href={frame.file} target="_blank" className="link link-warning" rel="noreferrer">
+      <div className="flex gap-2 text-base-content/60 pb-2 pt-3 pl-4">
+        <FileCode size={16} />
+        <a href={frame.file} target="_blank" rel="noreferrer">
           {source}:{line}:{column}
         </a>
       </div>
