@@ -1,0 +1,30 @@
+name: Deploy Docs
+
+on: push
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout-cone-mode: false
+          sparse-checkout:
+            docs
+
+      - name: Install dependencies
+        working-directory: ./docs
+        run: yarn install --frozen-lockfile
+
+      - name: Build
+        working-directory: ./docs
+        run: yarn build
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          cname: quizms.olinfo.it
+          publish_dir: ./docs/.vitepress/dist
+
