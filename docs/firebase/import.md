@@ -107,7 +107,7 @@ Le scuole e gli insegnanti sono descritti dal file `data/schools.{toml,yaml,csv,
 ```csv
 id,name,contestIds,password
 PNTF01000A,ITST J.F.Kennedy,oii-scolastiche,OKYkIZ6xFHPqyFS8HdUk
-BOIS01400R,ISS Francesco Alberghetti,oii-scolastiche,n6r2yEKwAxJxBUCad7eS
+BOIS01400R,IIS Francesco Alberghetti,oii-scolastiche,n6r2yEKwAxJxBUCad7eS
 ```
 
 :::
@@ -120,10 +120,69 @@ $ npx quizms firebase import --schools --teachers
 
 ## Importare le varianti
 
-Per importare le varianti usa i comandi:
+Per generare le varianti usa il seguente comando, questo comando genererà due file per ogni variante: `variants/$ID/statement.js` e `variants/$ID/schema.json`.
 
 ```sh
 npx quizms variants
+```
+
+Puoi anche generare le varianti manualmente, in tal caso lo schema deve essere un file JSON con il seguente formato:
+
+| Campo       | Descrizione                                   | Tipo     | Note |
+|-------------|-----------------------------------------------|----------|------|
+| `id`        | ID della variante.                            | `string` |      |
+| `contestId` | ID del contest a cui appartiente la variante. | `string` |      |
+| `schema`    | Lo schema delle domande.                      | `object` |      |
+
+Lo schema è un oggetto contente, per ogni domanda, un oggetto con il seguente formato:
+
+| Campo            | Descrizione                         | Tipo                              | Note       |
+|------------------|-------------------------------------|-----------------------------------|------------|
+| `type`           | Tipo di domanda.                    | `"text"`, `"number"` o `"points"` |            |
+| `originalId`     | ID della domanda prima del shuffle. | `string`                          | Opzionale. |
+| `optionsCorrect` | Risposte corrette.                  | `string[]`                        | Opzionale. |
+| `optionsBlank`   | Risposte in bianco.                 | `string[]`                        | Opzionale. |
+| `optionsWrong`   | Risposte non corrette.              | `string[]`                        | Opzionale. |
+| `pointsCorrect`  | Punti per risposta corretta.        | `number`                          | Opzionale. |
+| `pointsBlank`    | Punti per risposta in bianco.       | `number`                          | Opzionale. |
+| `pointsWrong`    | Punti per risposta sbagliata.       | `number`                          | Opzionale. |
+
+Se le opzioni o i punti non sono specificati, il punteggio degli studenti non verrà calcolato.
+
+::: details Esempio di variante
+
+```json
+{
+  "id": "10",
+  "contestId": "oii-scolastiche",
+  "schema": {
+    "1": {
+      "type": "text",
+      "optionsCorrect": ["A"],
+      "optionsBlank": ["-"],
+      "optionsWrong": ["B","C","D","E"],
+      "pointsCorrect": 5,
+      "pointsBlank": 1,
+      "pointsWrong": 0
+    },
+    "2": {
+      "type": "text",
+      "optionsCorrect": ["B"],
+      "optionsBlank": ["-"],
+      "optionsWrong": ["A","C","D","E"],
+      "pointsCorrect": 5,
+      "pointsBlank": 1,
+      "pointsWrong": 0
+    }
+  }
+}
+```
+
+:::
+
+Per importare le varianti usa il comando:
+
+```sh
 npx quizms firebase import --variants --variant-mappings --statements
 ```
 
