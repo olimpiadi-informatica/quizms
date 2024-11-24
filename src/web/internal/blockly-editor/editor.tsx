@@ -12,7 +12,7 @@ import {
 } from "blockly/core";
 import type { ToolboxInfo } from "blockly/core/utils/toolbox";
 import { javascriptGenerator } from "blockly/javascript";
-import * as locale from "blockly/msg/it";
+import locale from "blockly/msg/it";
 
 import type { CustomBlock } from "~/models/blockly-custom-block";
 

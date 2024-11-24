@@ -80,6 +80,8 @@ async function fetcher(
 
     const position = sourceMap.originalPositionFor({ line, column });
     const code = sourceMap.sourceContentFor(position.source);
+    if (!code) throw new Error("No source content");
+
     return { ...position, code };
   } catch {
     const resp = await fetch(source);

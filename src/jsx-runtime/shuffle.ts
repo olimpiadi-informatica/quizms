@@ -1,6 +1,5 @@
-import type { Program, Property } from "estree";
+import type { Node, Program, Property } from "estree";
 import { builders as b, is, traverse } from "estree-toolkit";
-import type { Node } from "estree-toolkit/dist/estree";
 import { countBy, isString, mapKeys } from "lodash-es";
 
 import type { Schema } from "~/models";
