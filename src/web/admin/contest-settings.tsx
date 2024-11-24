@@ -7,7 +7,7 @@ import { useAdmin } from "./provider";
 export default function ContestSettings() {
   const { contest, setContest } = useAdmin();
 
-  const save = async (newContest: Partial<Contest>) => {
+  const save = async (newContest: Pick<Contest, "instructions">) => {
     await setContest({ ...contest, ...newContest });
   };
 

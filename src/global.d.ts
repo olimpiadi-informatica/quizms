@@ -26,7 +26,8 @@ declare module "*.rules" {
 }
 
 declare module "virtual:quizms-contests" {
-  import type { GenerationConfig } from "~/models/generation-config";
+  import type { Contest } from "~/models";
+  import type { VariantsConfig } from "~/models/variants-config";
 
-  export default function contests(): GenerationConfig[];
+  export default function contests(): (Contest & VariantsConfig)[];
 }

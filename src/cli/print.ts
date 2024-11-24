@@ -8,8 +8,9 @@ import { mapValues, noop } from "lodash-es";
 import pc from "picocolors";
 import { type InlineConfig, type PluginOption, build, mergeConfig, preview } from "vite";
 
-import { type GenerationConfig, generationConfigSchema } from "~/models/generation-config";
+import { type Contest, contestSchema } from "~/models";
 import load from "~/models/load";
+import { type VariantsConfig, variantsConfigSchema } from "~/models/variants-config";
 import { fatal, info, success } from "~/utils/logs";
 
 import generatePdfs from "./pdf";
@@ -26,7 +27,8 @@ export type PrintOptions = {
 export default async function print(options: PrintOptions) {
   process.env.QUIZMS_MODE = "pdf";
 
-  const generationConfigs = await load("contests", generationConfigSchema);
+  const contests = await load("contests", contestSchema);
+  const variantConfigs = await load("variants", variantsConfigSchema);
 
   const entry = path.join("src", options.entry);
   if (!existsSync(entry)) {
@@ -36,7 +38,7 @@ Make sure it exists or specify a different entry file using \`--entry\`.`);
   }
 
   info("Building statements...");
-  const variants = await buildVariants(generationConfigs);
+  const variants = await buildVariants(variantConfigs);
   const statements = mapValues(variants, 1);
 
   info("Building website...");
@@ -51,7 +53,7 @@ Make sure it exists or specify a different entry file using \`--entry\`.`);
         input: { print: `virtual:react-entry?src=${encodeURIComponent(options.entry)}` },
       },
     },
-    plugins: [resolveContestsHelperPlugin(generationConfigs)],
+    plugins: [resolveContestsHelperPlugin(contests, variantConfigs)],
     logLevel: "info",
   } as InlineConfig);
   try {
@@ -74,19 +76,28 @@ Make sure it exists or specify a different entry file using \`--entry\`.`);
     await new Promise(noop);
   }
 
-  await generatePdfs(generationConfigs, url, options.outDir);
+  await generatePdfs(contests, variantConfigs, url, options.outDir);
 
   await promisify(server.httpServer.close.bind(server.httpServer))();
   await rm(buildDir, { recursive: true });
 }
 
-function resolveContestsHelperPlugin(generationConfigs: GenerationConfig[]): PluginOption {
+function resolveContestsHelperPlugin(
+  contests: Contest[],
+  variantsConfigs: VariantsConfig[],
+): PluginOption {
   return {
     name: "quizms:resolve-contest-helper",
     apply: "build",
     configResolved(config) {
       const plugin = config.plugins.find((plugin) => plugin.name === "quizms:resolve-contest")!;
-      plugin.api.contests = generationConfigs;
+      plugin.api.contests = contests.map((contest) => {
+        const config = variantsConfigs.find((c) => c.id === contest.id);
+        if (!config) {
+          fatal(`Missing variants configuration for contest ${contest.id}.`);
+        }
+        return { ...contest, ...config };
+      });
     },
   };
 }

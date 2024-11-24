@@ -34,7 +34,7 @@ export function Contest({ children }: { children: ReactNode }) {
       await setStudent({
         ...student,
         startedAt: now,
-        finishedAt: addMinutes(now, contest.duration ?? 0),
+        finishedAt: addMinutes(now, contest.hasOnline ? contest.duration : 0),
         variant: "",
       });
     };

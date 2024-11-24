@@ -266,7 +266,7 @@ function Table() {
   const [currentStudent, setCurrentStudent] = useState("");
 
   const endTime =
-    participation.startingTime && contest.duration
+    participation.startingTime && contest.hasOnline
       ? addMinutes(participation.startingTime, contest.duration)
       : undefined;
   const isContestFinished = useIsAfter(endTime) || !endTime;

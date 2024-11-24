@@ -17,8 +17,8 @@ import {
   studentSchema,
   variantSchema,
 } from "~/models";
-import { generationConfigSchema } from "~/models/generation-config";
 import load from "~/models/load";
+import { variantsConfigSchema } from "~/models/variants-config";
 import { fatal, success, warning } from "~/utils/logs";
 import { Rng } from "~/utils/random";
 import validate from "~/utils/validate";
@@ -131,7 +131,8 @@ async function importParticipations(db: Firestore, options: ImportOptions) {
       email: `${school.id}@teacher.edu`,
     }));
   const schools = await load("schools", schoolSchema);
-  const configs = await load("contests", generationConfigSchema);
+  const contests = await load("contests", contestSchema);
+  const configs = await load("variants", variantsConfigSchema);
 
   if (options.teachers) {
     const teachers = schools.map((school) => pick(school, ["name", "email", "password"]));
@@ -142,7 +143,12 @@ async function importParticipations(db: Firestore, options: ImportOptions) {
     const auth = getAuth();
     const participations: Participation[] = [];
 
-    for (const config of configs) {
+    for (const contest of contests) {
+      const config = configs.find((c) => c.id === contest.id);
+      if (!config) {
+        fatal(`Missing variants configuration for contest ${contest.id}.`);
+      }
+
       const rng = new Rng(`${config.secret}-${config.id}-participations`);
 
       for (const school of schools) {
@@ -192,13 +198,20 @@ async function importStudents(db: Firestore, options: ImportOptions) {
 }
 
 async function importPdf(bucket: Bucket, options: ImportOptions) {
-  const generationConfigs = await load("contests", generationConfigSchema);
-  const pdfs = generationConfigs.flatMap((c) =>
-    uniq([...c.variantIds, ...c.pdfVariantIds]).map((id): [string, string] => [
+  const contests = await load("contests", contestSchema);
+  const variantsConfig = await load("variants", variantsConfigSchema);
+
+  const pdfs = contests.flatMap((contest) => {
+    const config = variantsConfig.find((c) => c.id === contest.id);
+    if (!config) {
+      fatal(`Missing variants configuration for contest ${contest.id}.`);
+    }
+
+    return uniq([...config.variantIds, ...config.pdfVariantIds]).map((id): [string, string] => [
       path.join("variants", id, "statement.pdf"),
-      path.join("statements", id, `statement-${c.statementVersion}.pdf`),
-    ]),
-  );
+      path.join("statements", id, `statement-${contest.statementVersion}.pdf`),
+    ]);
+  });
 
   await importStorage(bucket, "PDFs", pdfs, options);
 }
@@ -236,7 +249,7 @@ async function importUsers(users: User[], customClaims: object, options: ImportO
 }
 
 async function importVariants(db: Firestore, options: ImportOptions) {
-  const generationConfigs = await load("contests", generationConfigSchema);
+  const generationConfigs = await load("contests", variantsConfigSchema);
   const variants = await Promise.all(
     generationConfigs
       .flatMap((c) => uniq([...c.variantIds, ...c.pdfVariantIds]))
@@ -259,19 +272,25 @@ async function importVariants(db: Firestore, options: ImportOptions) {
 }
 
 async function importStatements(bucket: Bucket, options: ImportOptions) {
-  const generationConfigs = await load("contests", generationConfigSchema);
+  const contests = await load("contests", contestSchema);
+  const variantsConfig = await load("variants", variantsConfigSchema);
 
-  const statements = generationConfigs.flatMap((c) =>
-    uniq([...c.variantIds, ...c.pdfVariantIds]).map((id): [string, string] => [
+  const statements = contests.flatMap((contest) => {
+    const config = variantsConfig.find((c) => c.id === contest.id);
+    if (!config) {
+      fatal(`Missing variants configuration for contest ${contest.id}.`);
+    }
+
+    return uniq([...config.variantIds, ...config.pdfVariantIds]).map((id): [string, string] => [
       path.join("variants", id, "statement.js"),
-      path.join("statements", id, `statement-${c.statementVersion}.js`),
-    ]),
-  );
+      path.join("statements", id, `statement-${contest.statementVersion}.js`),
+    ]);
+  });
   await importStorage(bucket, "statements", statements, options);
 }
 
 async function importVariantMappings(db: Firestore, options: ImportOptions) {
-  const generationConfigs = await load("contests", generationConfigSchema);
+  const generationConfigs = await load("contests", variantsConfigSchema);
   const mappings = generationConfigs.flatMap((config) => {
     const rng = new Rng(`${config.secret}-${config.id}-variantMappings`);
     return range(4096).map((i) => {

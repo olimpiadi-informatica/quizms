@@ -12,14 +12,14 @@ import { type InlineConfig, build, mergeConfig, transformWithEsbuild } from "vit
 import { type ExpressionWrapper, shuffleStatement } from "~/jsx-runtime/parser";
 import { cleanStatement, getSchema } from "~/jsx-runtime/shuffle";
 import type { Variant } from "~/models";
-import { type GenerationConfig, generationConfigSchema } from "~/models/generation-config";
 import load from "~/models/load";
+import { type VariantsConfig, variantsConfigSchema } from "~/models/variants-config";
 import { fatal, info, success } from "~/utils/logs";
 
 import configs from "./vite/configs";
 
 function buildBaseStatements(
-  generationConfigs: GenerationConfig[],
+  generationConfigs: VariantsConfig[],
 ): Promise<Record<string, () => ExpressionWrapper>> {
   return temporaryDirectoryTask(async (outDir) => {
     const entry = Object.fromEntries(generationConfigs.map((c) => [c.id, c.entry]));
@@ -69,7 +69,7 @@ function buildBaseStatements(
 }
 
 export async function buildVariants(
-  configs: GenerationConfig[],
+  configs: VariantsConfig[],
 ): Promise<Record<string, [Variant, string]>> {
   const baseStatements = await buildBaseStatements(configs);
 
@@ -105,7 +105,7 @@ export default async function variants(options: ExportVariantsOptions) {
     fatal("Invalid directory. Make sure you're inside a QuizMS project.");
   }
 
-  const generationConfigs = await load("contests", generationConfigSchema);
+  const generationConfigs = await load("contests", variantsConfigSchema);
   const variants = await buildVariants(generationConfigs);
 
   const res = await Promise.all(

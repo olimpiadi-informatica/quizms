@@ -1,7 +1,7 @@
 import type { Expression, Program, Property } from "estree";
 import { builders as b } from "estree-toolkit";
 
-import type { GenerationConfig } from "~/models/generation-config";
+import type { VariantsConfig } from "~/models/variants-config";
 import { hash } from "~/utils/hash";
 
 import { shuffleAnswers, shuffleProblems } from "./shuffle";
@@ -129,7 +129,7 @@ export function parseValue(value: any, options: ParseOptions): Expression {
 export function shuffleStatement(
   entry: () => ExpressionWrapper,
   variant: string,
-  config: GenerationConfig,
+  config: VariantsConfig,
 ): Program {
   let problemId = 1;
   const options = {

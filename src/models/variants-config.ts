@@ -1,8 +1,7 @@
 import z from "zod";
 
-import { contestSchema } from "./contest";
-
-export const generationConfigSchema = contestSchema.extend({
+export const variantsConfigSchema = z.object({
+  id: z.string(),
   secret: z.string(),
   entry: z.string(),
   shuffleProblems: z.boolean(),
@@ -12,4 +11,4 @@ export const generationConfigSchema = contestSchema.extend({
   pdfPerSchool: z.number(),
 });
 
-export type GenerationConfig = z.infer<typeof generationConfigSchema>;
+export type VariantsConfig = z.infer<typeof variantsConfigSchema>;

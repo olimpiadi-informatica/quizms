@@ -5,12 +5,13 @@ import { PDFDocument, type PDFPageDrawTextOptions, StandardFonts } from "@cantoo
 import { map, range, size, uniq } from "lodash-es";
 import { type BrowserContext, chromium } from "playwright";
 
-import type { GenerationConfig } from "~/models/generation-config";
-import { info } from "~/utils/logs";
+import type { Contest } from "~/models";
+import type { VariantsConfig } from "~/models/variants-config";
+import { fatal, info } from "~/utils/logs";
 
 async function generatePdf(
   context: BrowserContext,
-  config: GenerationConfig,
+  contest: Contest,
   baseUrl: string,
   variant: string,
   outDir: string,
@@ -47,7 +48,7 @@ async function generatePdf(
     const page = pages[pageNum];
     const { width } = page.getSize();
 
-    page.drawText(config.hasVariants ? `Variante ${variant}` : config.name, {
+    page.drawText(contest.hasVariants ? `Variante ${variant}` : contest.name, {
       ...fontOptions,
       x: 15,
       y: 13,
@@ -68,7 +69,8 @@ async function generatePdf(
 }
 
 export default async function generatePdfs(
-  configs: GenerationConfig[],
+  contests: Contest[],
+  variantConfigs: VariantsConfig[],
   baseUrl: string,
   outDir: string,
 ) {
@@ -78,14 +80,19 @@ export default async function generatePdfs(
   const poolSize = 16;
   const promises: Record<string, Promise<void>> = {};
 
-  for (const config of configs) {
+  for (const contest of contests) {
+    const config = variantConfigs.find((c) => c.id === contest.id);
+    if (!config) {
+      fatal(`Missing variants configuration for contest ${contest.id}.`);
+    }
+
     const ids = uniq([...config.variantIds, ...config.pdfVariantIds]);
     for (const id of ids) {
       if (size(promises) >= poolSize) {
         const oldId = await Promise.any(map(promises, (promise, id) => promise.then(() => id)));
         delete promises[oldId];
       }
-      promises[id] = generatePdf(context, config, baseUrl, id, outDir);
+      promises[id] = generatePdf(context, contest, baseUrl, id, outDir);
     }
   }
 

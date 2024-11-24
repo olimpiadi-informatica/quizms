@@ -34,7 +34,7 @@ function StartContestButton() {
   const start = async () => {
     const token = await randomToken();
     const startingTime = roundToNearestMinutes(addSeconds(Date.now(), 3.5 * 60));
-    const endingTime = addMinutes(startingTime, contest.duration ?? 0);
+    const endingTime = addMinutes(startingTime, contest.hasOnline ? contest.duration : 0);
     await setParticipation({ ...participation, token, startingTime, endingTime });
     close();
   };
@@ -141,13 +141,6 @@ function ContestData({ startingTime, endingTime }: { startingTime: Date; endingT
 
 export default function TeacherDashboard() {
   const { contest, participation } = useTeacher();
-
-  if (!contest.contestWindowEnd || !contest.contestWindowStart) {
-    throw new Error("Data inizio e fine del contest non specificate");
-  }
-  if (!contest.duration) {
-    throw new Error("Durata del contest non specificata");
-  }
 
   return (
     <div className="flex flex-col gap-4">

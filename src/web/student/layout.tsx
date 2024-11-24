@@ -67,7 +67,7 @@ export function StudentLayout({ children }: { children: ReactNode }) {
               {progress}%
             </Progress>
             <div className="px-3">
-              {terminated || !participation.startingTime || !contest.duration ? (
+              {terminated || !participation.startingTime || !contest.hasOnline ? (
                 <span className="font-mono">00:00</span>
               ) : (
                 <Timer

@@ -24,11 +24,11 @@ const userDataNumber = baseUserData.extend({
 
 const userDataDate = baseUserData.extend({
   type: z.literal("date"),
-  min: z.date(),
-  max: z.date(),
+  min: z.coerce.date(),
+  max: z.coerce.date(),
 });
 
-export const contestSchema = z.object({
+const baseContestSchema = z.object({
   // Identificativo univoco della gara
   id: z.string(),
   // Nome corto della gara
@@ -37,16 +37,6 @@ export const contestSchema = z.object({
   longName: z.string(),
   // ID dei problemi della gara
   problemIds: z.coerce.string().array(),
-
-  // Orario da cui è possibile far partire la gara
-  contestWindowStart: z.date().optional(),
-  // Orario entro cui è possibile far partire la gara
-  contestWindowEnd: z.date().optional(),
-  // Durata della gara in minuti
-  duration: z.coerce.number().positive().optional(),
-
-  // Versione dei testi, deve essere incrementata ogni volta che si modificano i testi
-  statementVersion: z.number(),
 
   // Informazioni personali richieste agli studenti
   userData: z.array(z.discriminatedUnion("type", [userDataText, userDataNumber, userDataDate])),
@@ -57,21 +47,40 @@ export const contestSchema = z.object({
   hasOnline: z.boolean(),
   // Se la gara può essere svolta in modalità cartacea
   hasPdf: z.boolean(),
-  // Se la gara può essere svolta su più turni
-  allowRestart: z.boolean(),
+
+  // Versione dei testi, deve essere incrementata ogni volta che si modificano i testi
+  statementVersion: z.number().default(0),
 
   // Se permette all'insegnante di aggiungere o importare studenti
-  allowStudentImport: z.boolean(),
+  allowStudentImport: z.boolean().default(true),
   // Se permette all'insegnante di modificare i dati personali degli studenti
-  allowStudentEdit: z.boolean(),
+  allowStudentEdit: z.boolean().default(true),
   // Se permette all'insegnante di modificare le risposte degli studenti
-  allowAnswerEdit: z.boolean(),
+  allowAnswerEdit: z.boolean().default(true),
   // Se permette all'insegnante di eliminare gli studenti
-  allowStudentDelete: z.boolean(),
+  allowStudentDelete: z.boolean().default(true),
 
   // Testo delle istruzioni per la gara da mostrare agli insegnanti
   instructions: z.string().optional(),
 });
+
+const onlineContest = baseContestSchema.extend({
+  hasOnline: z.literal(true),
+
+  // Orario da cui è possibile far partire la gara
+  contestWindowStart: z.date(),
+  // Orario entro cui è possibile far partire la gara
+  contestWindowEnd: z.date(),
+  // Durata della gara in minuti
+  duration: z.coerce.number().positive(),
+  // Se la gara può essere svolta su più turni
+  allowRestart: z.boolean(),
+});
+
+export const contestSchema = z.discriminatedUnion("hasOnline", [
+  onlineContest,
+  baseContestSchema.extend({ hasOnline: z.literal(false) }),
+]);
 
 export type Contest = z.infer<typeof contestSchema>;
 
