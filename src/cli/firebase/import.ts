@@ -249,9 +249,9 @@ async function importUsers(users: User[], customClaims: object, options: ImportO
 }
 
 async function importVariants(db: Firestore, options: ImportOptions) {
-  const generationConfigs = await load("contests", variantsConfigSchema);
+  const variantsConfig = await load("variants", variantsConfigSchema);
   const variants = await Promise.all(
-    generationConfigs
+    variantsConfig
       .flatMap((c) => uniq([...c.variantIds, ...c.pdfVariantIds]))
       .map(async (id) => {
         const fileName = path.join("variants", id, "schema.json");
@@ -290,8 +290,8 @@ async function importStatements(bucket: Bucket, options: ImportOptions) {
 }
 
 async function importVariantMappings(db: Firestore, options: ImportOptions) {
-  const generationConfigs = await load("contests", variantsConfigSchema);
-  const mappings = generationConfigs.flatMap((config) => {
+  const variantsConfig = await load("variants", variantsConfigSchema);
+  const mappings = variantsConfig.flatMap((config) => {
     const rng = new Rng(`${config.secret}-${config.id}-variantMappings`);
     return range(4096).map((i) => {
       const suffix = i.toString(16).padStart(3, "0").toUpperCase();

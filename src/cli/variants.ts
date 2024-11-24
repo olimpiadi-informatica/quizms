@@ -105,8 +105,8 @@ export default async function variants(options: ExportVariantsOptions) {
     fatal("Invalid directory. Make sure you're inside a QuizMS project.");
   }
 
-  const generationConfigs = await load("contests", variantsConfigSchema);
-  const variants = await buildVariants(generationConfigs);
+  const variantsConfig = await load("variants", variantsConfigSchema);
+  const variants = await buildVariants(variantsConfig);
 
   const res = await Promise.all(
     Object.values(variants).map(async ([variant, statement]) => {
