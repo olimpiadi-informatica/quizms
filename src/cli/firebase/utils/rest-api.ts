@@ -16,7 +16,7 @@ export default async function restApi(
     fatal("Failed to get access token from credential.");
   }
 
-  const url = `https://${service}.googleapis.com/${version}/projects/${process.env.PROJECT_ID}${endpoint}`;
+  const url = `https://${service}.googleapis.com/${version}/projects/${app.options.projectId}${endpoint}`;
   const resp = await fetch(url, {
     method: body ? "POST" : "GET",
     headers: {

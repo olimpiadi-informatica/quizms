@@ -10,8 +10,8 @@ import { readFile } from "node:fs/promises";
 import restApi from "./rest-api";
 
 export async function initializeFirebase() {
-  await setProjectId();
-  const app = initializeApp();
+  const projectId = await getProjectId();
+  const app = initializeApp({ projectId });
   const db = getFirestore(app);
   db.settings({ ignoreUndefinedProperties: true });
 
@@ -20,7 +20,7 @@ export async function initializeFirebase() {
   return { app, db, bucket };
 }
 
-async function setProjectId() {
+async function getProjectId() {
   if (!existsSync(".firebaserc")) {
     fatal("No project selected. Run `firebase use --add` first.");
   }
@@ -31,7 +31,7 @@ async function setProjectId() {
     fatal("Failed to get project ID from .firebaserc.");
   }
 
-  process.env.PROJECT_ID = projectId;
+  return projectId;
 }
 
 async function getFirebaseBucket(app: App) {
