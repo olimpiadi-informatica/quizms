@@ -1,16 +1,15 @@
 {
   "name": "@olinfo/quizms",
-  "version": "2.0.0-beta.5",
+  "version": "2.0.0",
   "type": "module",
   "author": "Alessandro Bortolin <bortolin.alessandro@outlook.it>",
   "license": "MIT",
   "scripts": {
-    "prebuild": "biome check",
+    "prebuild": "biome check && tsc --noEmit",
     "build": "NODE_ENV=production node scripts/build.js build",
     "watch": "node scripts/build.js watch",
     "lint": "biome check --write && tsc --noEmit",
-    "prepack": "yarn build",
-    "release": "npm publish --access public"
+    "prepack": "yarn build"
   },
   "bin": {
     "quizms": "bin/bin.js"
