@@ -10,17 +10,17 @@ Il modo più semplice di configurarli è usando l'interfaccia web di Firebase.
 
 ## Prerequisiti
 
-Installa [Firebase CLI](https://firebase.google.com/docs/cli):
-- Arch Linux: [firebase-tools](https://aur.archlinux.org/packages/firebase-tools/) o [firebase-tools-bin](https://aur.archlinux.org/packages/firebase-tools-bin/);
+Installa [Firebase CLI](https://firebase.google.com/docs/cli) e [Google Cloud SDK](https://cloud.google.com/cli):
+- Arch Linux:
+  - [firebase-tools](https://aur.archlinux.org/packages/firebase-tools/) o [firebase-tools-bin](https://aur.archlinux.org/packages/firebase-tools-bin/)
+  - [google-cloud-cli](https://aur.archlinux.org/packages/google-cloud-cli)
 - macOS:
     ```sh
-    $ brew install firebase-cli
+    $ brew install firebase-cli google-cloud-sdk
     ```
-- npm:
-    ```sh
-    $ npm install -g firebase-tools
-    ```
-- [installazione manuale](https://firebase.google.com/docs/cli#install_the_firebase_cli).
+- installazione manuale:
+  - [firebase-cli](https://firebase.google.com/docs/cli#install_the_firebase_cli)
+  - [google-cloud-sdk](https://cloud.google.com/sdk/docs/install)
 
 ## Creare un nuovo progetto su Firebase
 
@@ -36,7 +36,7 @@ Installa [Firebase CLI](https://firebase.google.com/docs/cli):
 3. Vai su Could Firestore;
 4. Clicca su _"Crea database"_;
 5. Scegli la località `europe-west6` (Zurigo) e clicca su _"Avanti"_;
-6. Seleziona _"modalità di produzione"_ e clicca su _"Avanti"_;
+6. Seleziona _"modalità di produzione"_ e clicca su _"Crea"_;
 
 ## Configurare Storage
 
@@ -44,8 +44,8 @@ Installa [Firebase CLI](https://firebase.google.com/docs/cli):
 2. Vai su tutti i prodotti;
 3. Vai su Storage;
 4. Clicca su _"Inizia"_;
-5. Seleziona _"modalità di produzione"_ e clicca su _"Avanti"_;
-6. Seleziona `europe-west6` e clicca su _"Fine"_;
+5. Seleziona `europe-west6` e clicca su _"Continua"_;
+6. Seleziona _"modalità di produzione"_ e clicca su _"Crea"_;
 
 ## Configurare Authentication
 
@@ -76,28 +76,19 @@ Installa [Firebase CLI](https://firebase.google.com/docs/cli):
 2. In basso a sinistra accanto alla scritta "Spark", clicca su _"Esegui l'upgrade"_;
 3. Scegli il piano a consumo Blaze e configura il pagamento.
 
-## Creare un account di servizio
-
-1. Accedi alla console di firebase;
-2. Vai sulle impostazioni del progetto;
-3. Vai nella sezione _"Account di servizio"_;
-4. Clicca su _"Genera nuova chiave privata"_;
-5. Salva il file con il nome `serviceAccountKey.json` nella directory del progetto;
-6. NON aggiungere il file a git, aggiungilo nel `.gitignore` qualora non fosse già presente.
-
 ## Completa la configurazione
 
-1. Autenticati con Firebase:
+1. Autenticati con Google Cloud:
    ```sh
-   $ firebase login
+   $ gcloud auth application-default login
    ```
-2. Inizializza il progetto locale:
-   ```sh
-   $ npx quizms firebase init
-   ```
-3. Imposta il progetto di default:
+2. Imposta il progetto di default:
    ```sh
    $ firebase use --add
+   ```
+3. Inizializza il progetto locale:
+   ```sh
+   $ npx quizms firebase init
    ```
 4. Carica le regole di sicurezza e gli indici:
    ```sh

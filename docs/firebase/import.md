@@ -3,7 +3,7 @@
 I dati del contest devono essere salvati dentro la directory `data` del progetto. I file possono essere in formato TOML,
 YAML, CSV, JSON o JSONL.
 
-Se non l'hai già fatto, [crea un account di servizio](./setup#creare-un-account-di-servizio).
+Se non l'hai già fatto, [accedi a Google Cloud](./setup#completa-la-configurazione).
 
 ## Importare le gare
 

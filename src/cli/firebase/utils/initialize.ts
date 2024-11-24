@@ -6,29 +6,11 @@ import { getStorage } from "firebase-admin/storage";
 
 import { fatal } from "~/utils/logs";
 
+import { readFile } from "node:fs/promises";
 import restApi from "./rest-api";
 
-export function loadServiceAccountKey() {
-  if (!existsSync("serviceAccountKey.json")) {
-    fatal(`\
-Il file con le credenziali di Firebase non è stato trovato.
-
-Per generare il file:
- • vai a https://console.firebase.google.com/
- • seleziona il progetto;
- • vai sulle impostazioni del progetto;
- • vai nella sezione "Account di servizio";
- • clicca su "Genera nuova chiave privata";
- • salva il file con il nome "serviceAccountKey.json" nella cartella corrente;
- • NON aggiungere il file a git, aggiungilo nel .gitignore qualora non fosse già presente.\
-`);
-  }
-
-  process.env.GOOGLE_APPLICATION_CREDENTIALS = "serviceAccountKey.json";
-}
-
 export async function initializeFirebase() {
-  loadServiceAccountKey();
+  await setProjectId();
   const app = initializeApp();
   const db = getFirestore(app);
   db.settings({ ignoreUndefinedProperties: true });
@@ -38,11 +20,25 @@ export async function initializeFirebase() {
   return { app, db, bucket };
 }
 
+async function setProjectId() {
+  if (!existsSync(".firebaserc")) {
+    fatal("No project selected. Run `firebase use --add` first.");
+  }
+
+  const data = JSON.parse(await readFile(".firebaserc", "utf-8"));
+  const projectId = Object.values(data.projects)[0] as string;
+  if (!projectId) {
+    fatal("Failed to get project ID from .firebaserc.");
+  }
+
+  process.env.PROJECT_ID = projectId;
+}
+
 async function getFirebaseBucket(app: App) {
   let bucketName: string;
   try {
-    const data = await restApi(app, "firebase", "v1beta1", "");
-    bucketName = data.resources.storageBucket;
+    const data = await restApi(app, "firebasestorage", "v1beta", "/buckets");
+    bucketName = data.buckets[0].name;
   } catch (err) {
     fatal(`Failed to get project information: ${err}`);
   }
@@ -52,5 +48,5 @@ async function getFirebaseBucket(app: App) {
   }
 
   const storage = getStorage(app);
-  return storage.bucket(bucketName);
+  return storage.bucket(bucketName.replace(/.*\//, ""));
 }
