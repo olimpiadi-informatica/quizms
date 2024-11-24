@@ -12,13 +12,13 @@ import {
 } from "blockly/core";
 import type { ToolboxInfo } from "blockly/core/utils/toolbox";
 import { javascriptGenerator } from "blockly/javascript";
-import locale from "blockly/msg/it";
+import * as locale from "blockly/msg/it";
 
 import type { CustomBlock } from "~/models/blockly-custom-block";
 
 import { initGenerator, toJS } from "./generator";
 
-setLocale(locale);
+setLocale(locale as unknown as Record<string, string>);
 
 function send(cmd: string, props?: any) {
   window.parent.postMessage({ cmd, ...props }, "*");
