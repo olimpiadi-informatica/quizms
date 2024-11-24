@@ -152,14 +152,14 @@ async function importParticipations(db: Firestore, options: ImportOptions) {
       const rng = new Rng(`${config.secret}-${config.id}-participations`);
 
       for (const school of schools) {
-        if (!picomatch.isMatch(config.id, school.contestIds)) continue;
+        if (!picomatch.isMatch(contest.id, school.contestIds)) continue;
 
         const pdfVariants = rng.sample(config.pdfVariantIds, config.pdfPerSchool);
 
         const participation: Participation = {
-          id: `${school.id}-${config.id}`,
+          id: `${school.id}-${contest.id}`,
           schoolId: school.id,
-          contestId: config.id,
+          contestId: contest.id,
           name: school.name,
           teacher: "",
           finalized: false,
