@@ -23,7 +23,7 @@ const ImportModal = forwardRef(function ImportModal(_props, ref: Ref<HTMLDialogE
 
   const labels = contest.userData.map((field) => field.label);
   if (contest.hasVariants) {
-    labels.push("Variante");
+    labels.push("Codice prova");
   }
   labels.push(...contest.problemIds);
 
@@ -84,7 +84,7 @@ const ImportModal = forwardRef(function ImportModal(_props, ref: Ref<HTMLDialogE
         <p>
           {contest.hasVariants ? (
             <>
-              La colonna <b>Variante</b> e le
+              La colonna <b>Codice prova</b> e le
             </>
           ) : (
             <>Le</>
@@ -137,7 +137,7 @@ async function importStudents(
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           path: [contest.userData.length],
-          message: "Variante mancante",
+          message: "Codice prova mancante",
         });
         return z.NEVER;
       }

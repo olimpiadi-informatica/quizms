@@ -70,7 +70,7 @@ export default function PasswordLogin({ children }: Props) {
     <>
       <Navbar color="bg-base-300 text-base-content">
         <NavbarBrand>
-          <div className="flex items-center h-full font-bold">Olimpiadi di Informatica</div>
+          <div className="flex items-center h-full font-bold">Olimpiadi di Matematica</div>
         </NavbarBrand>
       </Navbar>
       <Form defaultValue={defaultCredential} onSubmit={signIn} className="p-4 pb-8">

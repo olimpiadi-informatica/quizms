@@ -36,7 +36,7 @@ export function TeacherLayout({ contests, participations, logout, children }: Pr
     <>
       <Navbar color="bg-base-300 text-base-content">
         <NavbarBrand>
-          <div className="flex items-center h-full font-bold">Olimpiadi di Informatica</div>
+          <div className="flex items-center h-full font-bold">Olimpiadi di Matematica</div>
         </NavbarBrand>
         {contest && (
           <NavbarMenu>
@@ -54,10 +54,10 @@ export function TeacherLayout({ contests, participations, logout, children }: Pr
               </NavbarSubmenu>
             )}
             <NavbarMenuItem>
-              <Link href={`/${contest.id}/`}>Gestione gara</Link>
+              <Link href={`/${contest.id}/`}>Informazioni</Link>
             </NavbarMenuItem>
             <NavbarMenuItem>
-              <Link href={`/${contest.id}/students/`}>Gestione studenti</Link>
+              <Link href={`/${contest.id}/students/`}>Studenti</Link>
             </NavbarMenuItem>
           </NavbarMenu>
         )}

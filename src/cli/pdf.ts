@@ -48,7 +48,7 @@ async function generatePdf(
     const page = pages[pageNum];
     const { width } = page.getSize();
 
-    page.drawText(contest.hasVariants ? `Variante ${variant}` : contest.name, {
+    page.drawText(contest.hasVariants ? `Codice prova ${variant}` : contest.name, {
       ...fontOptions,
       x: 15,
       y: 13,

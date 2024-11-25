@@ -178,7 +178,7 @@ export default function TeacherDashboard() {
         </CardBody>
       </Card>
       <Card>
-        <CardBody title="Gestione Gara">
+        <CardBody title="Studenti">
           {/* contest data */}
           {contest.hasOnline &&
             (participation.startingTime && participation.endingTime ? (

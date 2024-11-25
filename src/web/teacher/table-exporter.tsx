@@ -37,7 +37,7 @@ function exportStudents(students: Student[], contest: Contest) {
 
   flatStudents.unshift([
     ...contest.userData.map((field) => field.label),
-    ...(contest.hasVariants ? ["Variante"] : []),
+    ...(contest.hasVariants ? ["Codice prova"] : []),
     ...contest.problemIds,
     "Punteggio",
   ]);

@@ -327,7 +327,7 @@ function Table() {
       value = newValue;
     }
     if (field === "variant" && !variants[value]) {
-      throw new Error(`La variante ${value} non è valida`);
+      throw new Error(`Il codice prova ${value} non è valido`);
     }
     if (field === "answers") {
       if (isString(value)) {
@@ -473,7 +473,7 @@ function columnDefinition(contest: Contest, variants: Record<string, Variant>): 
     ),
     {
       field: "variant",
-      headerName: "Variante",
+      headerName: "Codice prova",
       width: 100,
       editable: true,
       ...defaultOptions,
@@ -607,8 +607,8 @@ function isStudentIncomplete(
   }
 
   if (contest.hasVariants) {
-    if (!student.variant) return "Variante mancante";
-    if (!(student.variant in variants)) return `La variante ${student.variant} non è valida`;
+    if (!student.variant) return "Codice prova mancante";
+    if (!(student.variant in variants)) return `Il codice prova ${student.variant} non è valido`;
   }
   const variant = variants[student.variant!] ?? Object.values(variants)[0];
 

@@ -108,7 +108,7 @@ function StudentLoginInner({ contestFilter, children }: Omit<LoginProps, "config
     <>
       <Navbar color="bg-base-300 text-base-content">
         <NavbarBrand>
-          <div className="flex items-center h-full font-bold">Olimpiadi di Informatica</div>
+          <div className="flex items-center h-full font-bold">Olimpiadi di Matematica</div>
         </NavbarBrand>
       </Navbar>
       <Form defaultValue={defaultValue} onSubmit={submit} className="p-4 pb-8">

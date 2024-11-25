@@ -35,7 +35,7 @@ export function AdminLayout({ name, contests, logout, children }: Props) {
     <>
       <Navbar color="bg-error text-error-content">
         <NavbarBrand>
-          <div className="flex items-center h-full font-bold">Olimpiadi di Informatica</div>
+          <div className="flex items-center h-full font-bold">Olimpiadi di Matematica</div>
         </NavbarBrand>
         {contest && contests.length >= 2 && (
           <NavbarMenu>
