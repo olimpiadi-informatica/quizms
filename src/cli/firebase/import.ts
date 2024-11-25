@@ -225,6 +225,7 @@ async function importUsers(users: User[], customClaims: object, options: ImportO
         let user = await auth.getUserByEmail(record.email).catch(noop);
         if (!user) {
           user = await auth.createUser({
+            uid: record.id,
             email: record.email,
             emailVerified: true,
             password: record.password,
@@ -305,6 +306,7 @@ async function importVariantMappings(db: Firestore, options: ImportOptions) {
 }
 
 const userSchema = z.object({
+  id: z.string().optional(),
   name: z.string(),
   email: z.string().email(),
   password: z.string(),

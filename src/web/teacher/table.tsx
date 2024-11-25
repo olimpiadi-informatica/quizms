@@ -113,13 +113,13 @@ const FinalizeModal = forwardRef(function FinalizeModal(
     // Generate a list of string that can uniquely identify a student. Multiple
     // strings are generated to prevent possible errors during data entry.
     function normalize(student: Student) {
-      const info = student.userData!;
+      const info = student.userData;
       const orderings = [
         ["name", "surname", "classYear", "classSection"],
         ["surname", "name", "classYear", "classSection"],
       ];
       return orderings.map((fields) => {
-        return deburr(fields.map((field) => info[field]).join("\n"))
+        return deburr(fields.map((field) => info?.[field] ?? "").join("\n"))
           .toLowerCase()
           .replaceAll(/[^\w\n]/g, "");
       });
@@ -247,7 +247,7 @@ const DeleteModal = forwardRef(function DeleteModal(
           <i>Seleziona tutti</i>&rdquo; come filtro.
         </p>
         <Form onSubmit={confirm} className="!max-w-full">
-          <CheckboxField field="notAgain" label="Non mostrare più questo pop-up" />
+          <CheckboxField field="notAgain" label="Non mostrare più questo pop-up" optional />
           <div className="flex flex-wrap justify-center gap-2">
             <FormButton onClick={() => close("0")}>Annulla</FormButton>
             <SubmitButton className="btn-warning">Continua</SubmitButton>
@@ -382,7 +382,7 @@ function Table() {
           singleClickEdit={true}
           suppressClickEdit={frozen}
           readOnlyEdit={true}
-          rowSelection="single"
+          rowSelection={{ mode: "singleRow" }}
           onCellEditRequest={onCellEditRequest}
           enableBrowserTooltips={true}
           localeText={AG_GRID_LOCALE_IT}
