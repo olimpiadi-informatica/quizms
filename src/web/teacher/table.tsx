@@ -1,4 +1,13 @@
-import { type Ref, Suspense, forwardRef, lazy, useMemo, useRef, useState } from "react";
+import {
+  type ComponentType,
+  type Ref,
+  Suspense,
+  forwardRef,
+  lazy,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 import type {
   CellEditRequestEvent,
@@ -8,6 +17,7 @@ import type {
   ITooltipParams,
 } from "@ag-grid-community/core";
 import { AG_GRID_LOCALE_IT } from "@ag-grid-community/locale";
+import type { AgGridReactProps } from "@ag-grid-community/react/dist/types/src/shared/interfaces";
 import {
   Button,
   CheckboxField,
@@ -40,7 +50,7 @@ import ImportModal from "./table-importer";
 import "@ag-grid-community/styles/ag-grid.css";
 import "@ag-grid-community/styles/ag-theme-quartz.css";
 
-const AgGridReact = lazy(() => import("~/web/components/ag-grid"));
+const AgGridReact: ComponentType<AgGridReactProps> = lazy(() => import("~/web/components/ag-grid"));
 
 export default function TeacherTable() {
   const { contest, participation } = useTeacher();
@@ -113,13 +123,13 @@ const FinalizeModal = forwardRef(function FinalizeModal(
     // Generate a list of string that can uniquely identify a student. Multiple
     // strings are generated to prevent possible errors during data entry.
     function normalize(student: Student) {
-      const info = student.userData!;
+      const info = student.userData;
       const orderings = [
         ["name", "surname", "classYear", "classSection"],
         ["surname", "name", "classYear", "classSection"],
       ];
       return orderings.map((fields) => {
-        return deburr(fields.map((field) => info[field]).join("\n"))
+        return deburr(fields.map((field) => info?.[field] ?? "").join("\n"))
           .toLowerCase()
           .replaceAll(/[^\w\n]/g, "");
       });
@@ -247,7 +257,7 @@ const DeleteModal = forwardRef(function DeleteModal(
           <i>Seleziona tutti</i>&rdquo; come filtro.
         </p>
         <Form onSubmit={confirm} className="!max-w-full">
-          <CheckboxField field="notAgain" label="Non mostrare più questo pop-up" />
+          <CheckboxField field="notAgain" label="Non mostrare più questo pop-up" optional />
           <div className="flex flex-wrap justify-center gap-2">
             <FormButton onClick={() => close("0")}>Annulla</FormButton>
             <SubmitButton className="btn-warning">Continua</SubmitButton>

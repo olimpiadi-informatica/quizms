@@ -1,4 +1,4 @@
-import { type Ref, forwardRef } from "react";
+import { type Ref, forwardRef, useState } from "react";
 
 import { Form, Modal, SingleFileField, SubmitButton } from "@olinfo/react-components";
 import { Upload } from "lucide-react";
@@ -30,7 +30,10 @@ const ImportModal = forwardRef(function ImportModal(_props, ref: Ref<HTMLDialogE
   const { variants } = useTeacher();
   const [, setStudent] = useTeacherStudents();
 
+  const [uploadCount, setUploadCount] = useState(0);
+
   const submit = async ({ file }: { file: File }) => {
+    setUploadCount((count) => count + 1);
     try {
       const text = await file.text();
       await importStudents(text, contest, variants, participation, setStudent);
@@ -74,7 +77,7 @@ const ImportModal = forwardRef(function ImportModal(_props, ref: Ref<HTMLDialogE
           </p>
         )}
         <Form onSubmit={submit} className="!max-w-full">
-          <SingleFileField field="file" label="File CSV" accept="text/csv" />
+          <SingleFileField key={uploadCount} field="file" label="File CSV" accept="text/csv" />
           <SubmitButton icon={Upload}>Importa</SubmitButton>
         </Form>
       </div>
@@ -104,7 +107,7 @@ async function importStudents(
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
             path: [contest.userData.length],
-            message: `La variante ${variantId} non è valida`,
+            message: `La variante "${variantId}" non è valida`,
           });
           return z.NEVER;
         }
@@ -156,6 +159,6 @@ async function importStudents(
     throw new Error(records.errors[0].message);
   }
 
-  const students: Student[] = validate(schema, records.data);
+  const students: Student[] = validate(schema, records.data, { includePath: false });
   await Promise.all(students.map((student) => addStudent(student)));
 }
