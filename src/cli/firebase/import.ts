@@ -108,7 +108,7 @@ export default async function importData(options: ImportOptions) {
 
 async function importAdmins(options: ImportOptions) {
   const admins = await load("admins", userSchema);
-  await importUsers(admins, { isAdmin: true }, options);
+  await importUsers(admins, { isAdmin2: true }, options);
   success("Admin users imported!");
 }
 
