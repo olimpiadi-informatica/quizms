@@ -180,7 +180,7 @@ service cloud.firestore {
         }
 
         match /{document=**} {
-            allow read, write: if request.auth.token.isAdmin == true;
+            allow read, write: if request.auth.token.isAdmin == true || request.auth.token.isAdmin2 == true;
         }
     }
 }
