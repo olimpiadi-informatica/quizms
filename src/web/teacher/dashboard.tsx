@@ -12,6 +12,7 @@ import {
   SubmitButton,
   WithinTimeRange,
 } from "@olinfo/react-components";
+import { downloadZip } from "client-zip";
 import { addMinutes, addSeconds, isSameDay, roundToNearestMinutes, subMinutes } from "date-fns";
 import { saveAs } from "file-saver";
 import { range } from "lodash-es";
@@ -171,6 +172,7 @@ export default function TeacherDashboard() {
           {contest.hasPdf && (
             <CardActions>
               <DownloadPdfButton />
+              <DownloadZipButton />
             </CardActions>
           )}
         </CardBody>
@@ -234,7 +236,7 @@ function DownloadPdfButton() {
 
     const { PDFDocument } = await import("@cantoo/pdf-lib");
     const pdf = await PDFDocument.create();
-    for (const statement of statements) {
+    for (const statement of Object.values(statements)) {
       const otherPdf = await PDFDocument.load(statement);
       const toCopy = range(otherPdf.getPages().length);
       const pages = await pdf.copyPages(otherPdf, toCopy);
@@ -257,7 +259,28 @@ function DownloadPdfButton() {
 
   return (
     <Button className="btn-warning" onClick={onClick}>
-      Scarica testi in formato PDF
+      Scarica PDF con tutti i testi
+    </Button>
+  );
+}
+
+function DownloadZipButton() {
+  const { participation, getPdfStatements } = useTeacher();
+
+  const onClick = async () => {
+    const statements = await getPdfStatements();
+
+    const files = Object.entries(statements).map(
+      ([name, data]) => new File([data], `${name}.pdf`, { type: "application/pdf" }),
+    );
+    const zip = await downloadZip(files).blob();
+
+    saveAs(zip, `${participation.id}.zip`);
+  };
+
+  return (
+    <Button className="btn-warning" onClick={onClick}>
+      Scarica ZIP con tutti i testi
     </Button>
   );
 }

@@ -26,7 +26,7 @@ type TeacherContextProps = {
   /** Funzione per effettuare il logout */
   logout: () => Promise<void>;
   /** Funzione per ottenere i pdf dei testi */
-  getPdfStatements: () => Promise<(Uint8Array | ArrayBuffer)[]>;
+  getPdfStatements: () => Promise<Record<string, Uint8Array | ArrayBuffer>>;
   /** Hook per ottenere gli studenti di una scuola */
   useStudents: (
     participationId: string,
@@ -54,7 +54,7 @@ type TeacherProviderProps = {
   getPdfStatements: (
     statementVersion: number,
     variantIds: string[],
-  ) => Promise<(Uint8Array | ArrayBuffer)[]>;
+  ) => Promise<Record<string, Uint8Array | ArrayBuffer>>;
   useStudents: (
     participationId: string,
   ) => readonly [Student[], (student: Student) => Promise<void>];

@@ -1860,6 +1860,11 @@ client-only@^0.0.1:
   resolved "https://registry.yarnpkg.com/client-only/-/client-only-0.0.1.tgz#38bba5d403c41ab150bff64a95c85013cf73bca1"
   integrity sha512-IV3Ou0jSMzZrd3pZ48nLkT9DA7Ag1pnPzaiQhpW7c3RbcqqzvzzVu+L8gfqMp/8IM2MQtSiqaCxrrcfu8I8rMA==
 
+client-zip@^2.4:
+  version "2.4.6"
+  resolved "https://registry.yarnpkg.com/client-zip/-/client-zip-2.4.6.tgz#c797c29d9463b17eca4b623339ccf06e620b2794"
+  integrity sha512-e7t1u14h/yT0A12qBwFsaus8UZZ8+MCaNAEn/z53mrukLq/LFcKX7TkbntAppGu8he2p8pz9vc5NEGE/h4ohlw==
+
 cliui@^8.0.1:
   version "8.0.1"
   resolved "https://registry.yarnpkg.com/cliui/-/cliui-8.0.1.tgz#0c04b075db02cbfe60dc8e6cf2f5486b1a3608aa"
