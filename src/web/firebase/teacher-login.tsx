@@ -152,14 +152,23 @@ async function setParticipation(
   }
 }
 
-function getPdfStatements(db: Firestore, statementVersion: number, variantIds: string[]) {
+async function getPdfStatements(
+  db: Firestore,
+  statementVersion: number,
+  variantIds: string[],
+): Promise<Record<string, ArrayBuffer>> {
   const storage = getStorage(db.app);
 
-  return Promise.all(
-    variantIds.map((id) =>
-      getBytes(ref(storage, `statements/${id}/statement-${statementVersion}.pdf`)),
+  const files = await Promise.all(
+    variantIds.map(
+      async (id) =>
+        [
+          id,
+          await getBytes(ref(storage, `statements/${id}/statement-${statementVersion}.pdf`)),
+        ] as const,
     ),
   );
+  return Object.fromEntries(files);
 }
 
 function useStudents(participationId: string) {
