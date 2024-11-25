@@ -10,6 +10,7 @@ import { groupBy, pick, range, uniq } from "lodash-es";
 import picomatch from "picomatch";
 import z from "zod";
 
+import glob from "fast-glob";
 import {
   type Participation,
   contestSchema,
@@ -207,43 +208,34 @@ async function importStudents(db: Firestore, options: ImportOptions) {
 }
 
 async function importPdf(bucket: Bucket, options: ImportOptions) {
-  const contests = await load("contests", contestSchema);
-  const variantsConfig = await load("variants", variantsConfigSchema);
+  const ids = await glob("variants/*/statement.pdf");
 
-  const pdfs = contests.flatMap((contest) => {
-    const config = variantsConfig.find((c) => c.id === contest.id);
-    if (!config) {
-      fatal(`Missing variants configuration for contest ${contest.id}.`);
-    }
-
-    return uniq([...config.variantIds, ...config.pdfVariantIds]).map((id): [string, string] => [
-      path.join("variants", id, "statement.pdf"),
-      path.join("statements", id, `statement-${contest.statementVersion}.pdf`),
-    ]);
+  const pdfs = ids.map((fileName): [string, string] => {
+    const id = path.basename(path.dirname(fileName));
+    return [fileName, path.join("statements", id, "statement-1.pdf")];
   });
 
   await importStorage(bucket, "PDFs", pdfs, options);
 }
 
 async function importVariants(db: Firestore, options: ImportOptions) {
-  const variantsConfig = await load("variants", variantsConfigSchema);
+  const ids = await glob("variants/*/schema.json");
   const variants = await Promise.all(
-    variantsConfig
-      .flatMap((c) => uniq([...c.variantIds, ...c.pdfVariantIds]))
-      .map(async (id) => {
-        const fileName = path.join("variants", id, "schema.json");
-        let schema: string;
-        try {
-          schema = await readFile(fileName, "utf8");
-        } catch {
-          fatal(`Cannot find schema for variant ${id}. Use \`quizms variants\` to generate it.`);
-        }
-        try {
-          return validate(variantSchema, JSON.parse(schema));
-        } catch (err) {
-          fatal(`Invalid schema for variant ${id}: ${err}`);
-        }
-      }),
+    ids.map(async (fileName) => {
+      let schema: string;
+      try {
+        schema = await readFile(fileName, "utf8");
+      } catch {
+        fatal(
+          `Cannot find schema for variant ${fileName}. Use \`quizms variants\` to generate it.`,
+        );
+      }
+      try {
+        return validate(variantSchema, JSON.parse(schema));
+      } catch (err) {
+        fatal(`Invalid schema for variant ${fileName}: ${err}`);
+      }
+    }),
   );
   await importCollection(db, "variants", variants, variantConverter, options);
 }
