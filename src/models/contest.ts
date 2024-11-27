@@ -140,13 +140,13 @@ export function parseUserData(
       if (date < schema?.min) {
         return [
           undefined,
-          `Il campo ${label} deve contenere una data successiva al ${intlFormat(schema.min, { dateStyle: "short" })}.`,
+          `Il campo ${label} deve contenere una data successiva al ${intlFormat(schema.min, { year: "numeric", month: "2-digit", day: "2-digit" })}.`,
         ];
       }
       if (date > schema?.max) {
         return [
           undefined,
-          `Il campo ${label} deve contenere una data precedente al ${intlFormat(schema.max, { dateStyle: "short" })}.`,
+          `Il campo ${label} deve contenere una data precedente al ${intlFormat(schema.max, { year: "numeric", month: "2-digit", day: "2-digit" })}.`,
         ];
       }
       return [date, undefined];
@@ -161,7 +161,7 @@ export function formatUserData(
   const value = student?.userData?.[schema?.name];
   if (value === undefined) return "";
   if (isDate(value) || schema?.type === "date") {
-    return intlFormat(value as Date, { dateStyle: "short" });
+    return intlFormat(value as Date, { year: "numeric", month: "2-digit", day: "2-digit" });
   }
   return value.toString();
 }
