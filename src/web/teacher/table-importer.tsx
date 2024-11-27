@@ -1,4 +1,4 @@
-import { type Ref, forwardRef, useState } from "react";
+import { type CSSProperties, type Ref, forwardRef, useState } from "react";
 
 import { Form, Modal, SingleFileField, SubmitButton } from "@olinfo/react-components";
 import { Upload } from "lucide-react";
@@ -22,6 +22,10 @@ const ImportModal = forwardRef(function ImportModal(_props, ref: Ref<HTMLDialogE
   const { contest, participation } = useTeacher();
 
   const labels = contest.userData.map((field) => field.label);
+  if (contest.hasVariants) {
+    labels.push("Variante");
+  }
+  labels.push(...contest.problemIds);
 
   const dates = contest.userData
     .filter((field) => field.type === "date")
@@ -48,26 +52,44 @@ const ImportModal = forwardRef(function ImportModal(_props, ref: Ref<HTMLDialogE
     <Modal ref={ref} title="Importa studenti">
       <div className="prose">
         <p>
-          Importa gli studenti da un file. Il file deve essere in formato <b>CSV</b> e{" "}
-          <b>non deve</b> avere l&apos;intestazione.
+          Importa gli studenti da un file. Il file deve essere in formato <b>CSV</b>, la prima riga
+          deve contenere l&apos;intestazione. <b>Non</b> lasciare righe vuote prima
+          dell&apos;intestazione o colonne vuote prima dei dati.
         </p>
         <p>
           Se stai usando Excel, puoi creare un file CSV andando su &ldquo;<i>Salva con nome</i>
           &rdquo; e scegliendo come formato di file &ldquo;
           <i>Valori separati da una virgola (.csv)</i>&rdquo;.
         </p>
-        <p>Le colonne devono essere, in ordine:</p>
-        <p className="flex justify-center rounded-box bg-base-200 px-3 py-2">
-          <span>{labels.join(", ")}</span>
-        </p>
+        <p>Le colonne devono essere nel seguente ordine:</p>
+        <div className="overflow-auto bg-base-content">
+          <div
+            className="grid grid-cols-[repeat(var(--cols1),auto)_repeat(var(--cols2),1fr)] grid-rows-2 w-min border-2 border-base-content gap-0.5 *:bg-base-100"
+            style={
+              {
+                "--cols1": labels.length - contest.problemIds.length,
+                "--cols2": contest.problemIds.length,
+              } as CSSProperties
+            }>
+            {labels.map((label) => (
+              <div key={label} className="ps-1 pe-2">
+                {label}
+              </div>
+            ))}
+            {labels.map((label) => (
+              <div key={label} />
+            ))}
+          </div>
+        </div>
         <p>
-          In aggiunta, è possibile aggiungere{" "}
-          {contest.hasVariants && (
+          {contest.hasVariants ? (
             <>
-              una colonna <b>Variante</b>, seguita da{" "}
+              La colonna <b>Variante</b> e le
             </>
-          )}
-          {contest.problemIds.length} colonne per le risposte.
+          ) : (
+            <>Le</>
+          )}{" "}
+          colonne per le risposte possono essere lasciate in bianco.
         </p>
         {dates.length > 0 && (
           <p>
@@ -152,7 +174,7 @@ async function importStudents(
     .pipe(studentSchema)
     .array();
 
-  const records = parseCSV(file, {
+  const records = parseCSV(file.slice(file.indexOf("\n") + 1), {
     skipEmptyLines: "greedy",
   });
   if (records.errors?.length) {
