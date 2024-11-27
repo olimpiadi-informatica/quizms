@@ -30,7 +30,7 @@ import {
 } from "@olinfo/react-components";
 import { addMinutes, isEqual as isEqualDate } from "date-fns";
 import { cloneDeep, deburr, isString, lowerFirst, omit, set, sumBy } from "lodash-es";
-import { Download, FileCheck, TriangleAlert, Upload, Users } from "lucide-react";
+import { Download, FileCheck, Trash2, TriangleAlert, Upload, Users } from "lucide-react";
 
 import {
   type Contest,
@@ -44,6 +44,7 @@ import { randomId } from "~/utils/random";
 import { Loading } from "~/web/components";
 
 import { useTeacher, useTeacherStudents } from "./provider";
+import { DeleteAllModal } from "./table-deleter";
 import Exporter from "./table-exporter";
 import ImportModal from "./table-importer";
 
@@ -57,6 +58,7 @@ export default function TeacherTable() {
   const importRef = useRef<HTMLDialogElement>(null);
   const exportRef = useRef<HTMLButtonElement>(null);
   const finalizeRef = useRef<HTMLDialogElement>(null);
+  const deleterRef = useRef<HTMLDialogElement>(null);
 
   return (
     <>
@@ -91,11 +93,18 @@ export default function TeacherTable() {
           </Button>
         )}
         <FinalizeModal key={contest.id} ref={finalizeRef} />
+        <Button
+          className="btn-primary btn-sm h-10"
+          icon={Trash2}
+          onClick={() => deleterRef.current?.showModal()}>
+          <div className="hidden md:block">Svuota</div>
+        </Button>
       </div>
       <Suspense fallback={<Loading />}>
         <Table key={participation.id} />
         <ImportModal ref={importRef} />
         <Exporter ref={exportRef} />
+        <DeleteAllModal ref={deleterRef} />
       </Suspense>
     </>
   );
