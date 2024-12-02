@@ -1,11 +1,12 @@
-import { type Firestore, type FirestoreDataConverter, GrpcStatus } from "firebase-admin/firestore";
-import { upperFirst } from "lodash-es";
+import type { Firestore, FirestoreDataConverter } from "firebase-admin/firestore";
+import { partition, upperFirst } from "lodash-es";
 import pc from "picocolors";
 
 import { confirm, fatal, info, success } from "~/utils/logs";
 
 type ImportOptions = {
   delete?: true;
+  skipExisting?: true;
   force?: true;
 };
 
@@ -27,19 +28,32 @@ export async function importCollection<T extends { id: string }>(
     info(`${upperFirst(collection)} deleted!`);
   }
 
-  if (options?.force) {
-    await confirm(
-      `You are about to import the ${pc.bold(
-        collection,
-      )}. This will overwrite any existing data, the previous data will be lost. Are you really sure?`,
+  const existingIds = new Set<string>();
+  for (const doc of await db.collection(collection).listDocuments()) {
+    existingIds.add(doc.id);
+  }
+  const [existing, nonExisting] = partition(data, (doc) => existingIds.has(doc.id));
+  if (existing.length > 0 && !options.skipExisting && !options.force) {
+    fatal(
+      `Documents already exist in \`${collection}\`. Use \`--force\` to overwrite or \`--skip-existing\` to ignore.`,
     );
   }
 
-  for (let i = 0; i < data.length; i += 400) {
+  const docsToImport = options.skipExisting ? nonExisting : [...existing, ...nonExisting];
+
+  if (options.force && existing.length > 0) {
+    await confirm(
+      `You are about to import the ${pc.bold(
+        collection,
+      )}. ${existing.length} document will be overwritten, the previous data will be lost. Are you really sure?`,
+    );
+  }
+
+  for (let i = 0; i < docsToImport.length; i += 400) {
     const batch = db.batch();
     for (const record of data.slice(i, i + 400)) {
       const ref = db.doc(`${collection}/${record.id}`).withConverter(converter);
-      if (options?.force) {
+      if (options.force) {
         batch.set(ref, record);
       } else {
         batch.create(ref, record);
@@ -47,16 +61,10 @@ export async function importCollection<T extends { id: string }>(
     }
     try {
       await batch.commit();
-    } catch (err: any) {
-      if (err.code === GrpcStatus.ALREADY_EXISTS) {
-        fatal(
-          `Document already exists in \`${collection}\`. Use \`--force\` to overwrite existing documents.`,
-        );
-      } else {
-        fatal(`Cannot import ${collection}: ${err}`);
-      }
+    } catch (err) {
+      fatal(`Cannot import ${collection}: ${err}`);
     }
   }
 
-  success(`${upperFirst(collection)} imported!`);
+  success(`${docsToImport.length} ${collection} imported!`);
 }

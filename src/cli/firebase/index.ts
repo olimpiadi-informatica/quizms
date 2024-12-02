@@ -1,4 +1,4 @@
-import { Command } from "commander";
+import { Command, Option } from "commander";
 
 import definalize from "./definalize";
 import exportData from "./export";
@@ -41,7 +41,13 @@ export default function firebaseCommand() {
     .option("--variant-mappings", "Import the variant mappings.")
     .option("--variants", "Import the variants.")
     .option("-d, --delete", "Delete existing collections.")
-    .option("-f, --force", "Overwrite existing documents.")
+    .addOption(new Option("-s, --skip-existing", "Skip existing files.").conflicts(["--delete"]))
+    .addOption(
+      new Option("-f, --force", "Overwrite existing documents.").conflicts([
+        "--delete",
+        "--skip-existing",
+      ]),
+    )
     .action(importData);
 
   command.command("definalize").description("Definalize all participations.").action(definalize);

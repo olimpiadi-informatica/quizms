@@ -1,14 +1,12 @@
-import { pbkdf2, randomBytes } from "node:crypto";
 import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
-import { promisify } from "node:util";
 
 import type { Bucket } from "@google-cloud/storage";
 import { deleteApp } from "firebase-admin/app";
-import { type UserImportRecord, getAuth } from "firebase-admin/auth";
+import { getAuth } from "firebase-admin/auth";
 import type { Firestore } from "firebase-admin/firestore";
-import { groupBy, partition, pick, range, truncate, uniq } from "lodash-es";
+import { groupBy, pick, range, uniq } from "lodash-es";
 import picomatch from "picomatch";
 import z from "zod";
 
@@ -35,9 +33,11 @@ import {
 } from "./utils/converters-admin";
 import { initializeFirebase } from "./utils/initialize";
 import { importStorage } from "./utils/storage";
+import { importUsers, userSchema } from "./utils/users";
 
 type ImportOptions = {
   config: string;
+  skipExisting?: true;
   delete?: true;
   force?: true;
 
@@ -225,64 +225,6 @@ async function importPdf(bucket: Bucket, options: ImportOptions) {
   await importStorage(bucket, "PDFs", pdfs, options);
 }
 
-async function importUsers(users: User[], customClaims: object, options: ImportOptions) {
-  const auth = getAuth();
-
-  const userRecords = Object.fromEntries(
-    await Promise.all(
-      users.map(async (user) => {
-        const record = await auth.getUserByEmail(user.email).catch(() => undefined);
-        return [user.email, record?.uid] as const;
-      }),
-    ),
-  );
-
-  const [existing, nonExisting] = partition(users, (user) => userRecords[user.email]);
-  if (existing.length && !options.force) {
-    fatal(`Users ${existing[0].email} already exist. Use \`--force\` to overwrite.`);
-  }
-
-  const rounds = 100_000;
-  const importRecords = await Promise.all(
-    [...existing, ...nonExisting].map(async (user): Promise<UserImportRecord> => {
-      const uid = userRecords[user.email] ?? user.id ?? randomBytes(15).toString("base64");
-      const salt = randomBytes(16);
-      const hash = await promisify(pbkdf2)(user.password, salt, rounds, 64, "sha256");
-      return {
-        uid,
-        email: user.email,
-        emailVerified: true,
-        passwordHash: hash,
-        passwordSalt: salt,
-        displayName: user.name,
-        disabled: false,
-        customClaims,
-      };
-    }),
-  );
-
-  if (importRecords.length === 0) {
-    warning("No users to import. Skipping...");
-    return;
-  }
-
-  const { failureCount, successCount, errors } = await auth.importUsers(importRecords, {
-    hash: {
-      algorithm: "PBKDF2_SHA256",
-      rounds,
-    },
-  });
-
-  if (successCount) {
-    success(`${successCount} users imported!`);
-  }
-  if (failureCount) {
-    fatal(
-      `Failed to import ${failureCount} users: ${truncate(errors.map((err) => err.error.message).join(", "))}`,
-    );
-  }
-}
-
 async function importVariants(db: Firestore, options: ImportOptions) {
   const variantsConfig = await load("variants", variantsConfigSchema);
   const variants = await Promise.all(
@@ -338,12 +280,3 @@ async function importVariantMappings(db: Firestore, options: ImportOptions) {
   });
   await importCollection(db, "variantMappings", mappings, variantMappingConverter, options);
 }
-
-const userSchema = z.object({
-  id: z.string().optional(),
-  name: z.string(),
-  email: z.string().email(),
-  password: z.string(),
-});
-
-type User = z.infer<typeof userSchema>;

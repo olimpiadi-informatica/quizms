@@ -31,7 +31,7 @@ export default async function load<T>(collection: string, schema: ZodType<T, any
     } catch {
       continue;
     }
-    info(`Reading from ${fileName}...`);
+    info(`Reading from ${fileName + ext}`);
 
     let rawData: any;
     try {
