@@ -1,12 +1,14 @@
+import { pbkdf2, randomBytes } from "node:crypto";
 import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
+import { promisify } from "node:util";
 
 import type { Bucket } from "@google-cloud/storage";
 import { deleteApp } from "firebase-admin/app";
-import { getAuth } from "firebase-admin/auth";
+import { type UserImportRecord, getAuth } from "firebase-admin/auth";
 import type { Firestore } from "firebase-admin/firestore";
-import { chunk, groupBy, noop, pick, range, uniq } from "lodash-es";
+import { groupBy, partition, pick, range, truncate, uniq } from "lodash-es";
 import picomatch from "picomatch";
 import z from "zod";
 
@@ -147,13 +149,14 @@ async function importParticipations(db: Firestore, options: ImportOptions) {
       for (const school of schools) {
         if (!picomatch.isMatch(contest.id, school.contestIds)) continue;
 
-        let pdfVariants = school.pdfVariants;
-        if (!school.pdfVariants) {
+        let pdfVariants: string[];
+        if (school.pdfVariants) {
+          pdfVariants = school.pdfVariants.map((id) => `${contest.id}-${id}`);
+        } else {
           if (!configs) {
             configs = await load("variants", variantsConfigSchema);
           }
           const config = configs.find((c) => c.id === contest.id);
-
           if (!config) {
             fatal(`Missing variants configuration for contest ${contest.id}.`);
           }
@@ -224,34 +227,59 @@ async function importPdf(bucket: Bucket, options: ImportOptions) {
 
 async function importUsers(users: User[], customClaims: object, options: ImportOptions) {
   const auth = getAuth();
-  for (const group of chunk(users, 10)) {
-    await Promise.all([
-      new Promise((resolve) => setTimeout(resolve, 1100)), // avoid rate limiting
-      ...group.map(async (record) => {
-        let user = await auth.getUserByEmail(record.email).catch(noop);
-        if (!user) {
-          user = await auth.createUser({
-            uid: record.id,
-            email: record.email,
-            emailVerified: true,
-            password: record.password,
-            displayName: record.name,
-            disabled: false,
-          });
-        } else if (options.force) {
-          await auth.updateUser(user.uid, {
-            email: record.email,
-            emailVerified: true,
-            password: record.password,
-            displayName: record.name,
-            disabled: false,
-          });
-        } else {
-          fatal(`User ${record.email} already exists. Use \`--force\` to overwrite.`);
-        }
-        await auth.setCustomUserClaims(user.uid, customClaims);
+
+  const userRecords = Object.fromEntries(
+    await Promise.all(
+      users.map(async (user) => {
+        const record = await auth.getUserByEmail(user.email).catch(() => undefined);
+        return [user.email, record?.uid] as const;
       }),
-    ]);
+    ),
+  );
+
+  const [existing, nonExisting] = partition(users, (user) => userRecords[user.email]);
+  if (existing.length && !options.force) {
+    fatal(`Users ${existing[0].email} already exist. Use \`--force\` to overwrite.`);
+  }
+
+  const rounds = 100_000;
+  const importRecords = await Promise.all(
+    [...existing, ...nonExisting].map(async (user): Promise<UserImportRecord> => {
+      const uid = userRecords[user.email] ?? user.id ?? randomBytes(15).toString("base64");
+      const salt = randomBytes(16);
+      const hash = await promisify(pbkdf2)(user.password, salt, rounds, 64, "sha256");
+      return {
+        uid,
+        email: user.email,
+        emailVerified: true,
+        passwordHash: hash,
+        passwordSalt: salt,
+        displayName: user.name,
+        disabled: false,
+        customClaims,
+      };
+    }),
+  );
+
+  if (importRecords.length === 0) {
+    warning("No users to import. Skipping...");
+    return;
+  }
+
+  const { failureCount, successCount, errors } = await auth.importUsers(importRecords, {
+    hash: {
+      algorithm: "PBKDF2_SHA256",
+      rounds,
+    },
+  });
+
+  if (successCount) {
+    success(`${successCount} users imported!`);
+  }
+  if (failureCount) {
+    fatal(
+      `Failed to import ${failureCount} users: ${truncate(errors.map((err) => err.error.message).join(", "))}`,
+    );
   }
 }
 
