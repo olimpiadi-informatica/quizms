@@ -18,7 +18,7 @@ import {
   variantSchema,
 } from "~/models";
 import load from "~/models/load";
-import { variantsConfigSchema } from "~/models/variants-config";
+import { type VariantsConfig, variantsConfigSchema } from "~/models/variants-config";
 import { fatal, success, warning } from "~/utils/logs";
 import { Rng } from "~/utils/random";
 import validate from "~/utils/validate";
@@ -132,7 +132,7 @@ async function importParticipations(db: Firestore, options: ImportOptions) {
     }));
   const schools = await load("schools", schoolSchema);
   const contests = await load("contests", contestSchema);
-  const configs = await load("variants", variantsConfigSchema);
+  let configs: VariantsConfig[] | undefined;
 
   if (options.teachers) {
     const teachers = schools.map((school) => pick(school, ["name", "email", "password"]));
@@ -144,17 +144,23 @@ async function importParticipations(db: Firestore, options: ImportOptions) {
     const participations: Participation[] = [];
 
     for (const contest of contests) {
-      const config = configs.find((c) => c.id === contest.id);
-      if (!config) {
-        fatal(`Missing variants configuration for contest ${contest.id}.`);
-      }
-
-      const rng = new Rng(`${config.secret}-${config.id}-participations`);
-
       for (const school of schools) {
         if (!picomatch.isMatch(contest.id, school.contestIds)) continue;
 
-        const pdfVariants = rng.sample(config.pdfVariantIds, config.pdfPerSchool);
+        let pdfVariants = school.pdfVariants;
+        if (!school.pdfVariants) {
+          if (!configs) {
+            configs = await load("variants", variantsConfigSchema);
+          }
+          const config = configs.find((c) => c.id === contest.id);
+
+          if (!config) {
+            fatal(`Missing variants configuration for contest ${contest.id}.`);
+          }
+
+          const rng = new Rng(`${config.secret}-${config.id}-${school.id}-participation`);
+          pdfVariants = rng.sample(config.pdfVariantIds, config.pdfPerSchool);
+        }
 
         const participation: Participation = {
           id: `${school.id}-${contest.id}`,
