@@ -12,7 +12,7 @@ export default function ContestSettings() {
   };
 
   return (
-    <Form defaultValue={contest} onSubmit={save} className="!max-w-full">
+    <Form key={contest.id} defaultValue={contest} onSubmit={save} className="!max-w-full">
       <TextAreaField field="instructions" label="Istruzioni gara" rows={8} />
       <SubmitButton>Salva</SubmitButton>
     </Form>
