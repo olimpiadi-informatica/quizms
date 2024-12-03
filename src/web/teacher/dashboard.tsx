@@ -21,6 +21,7 @@ import { Link } from "wouter";
 import { randomToken } from "~/utils/random";
 import { Timer } from "~/web/components";
 
+import Markdown from "react-markdown";
 import { Announcements } from "./dashboard-announcements";
 import { StudentRestoreList } from "./dashboard-student-restore";
 import { useTeacher } from "./provider";
@@ -152,7 +153,9 @@ export default function TeacherDashboard() {
       </Card>
       <Card>
         <CardBody title="Informazioni Gara">
-          <div className="prose mb-2 max-w-none whitespace-pre-wrap">{contest.instructions}</div>
+          <div className="prose prose-a:link-info max-w-none">
+            <Markdown>{contest.instructions}</Markdown>
+          </div>
           {contest.hasOnline && (
             <div className="font-bold">
               La gara si potrà svolgere dal{" "}
