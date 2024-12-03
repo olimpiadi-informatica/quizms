@@ -76,6 +76,7 @@
     "prop-types": "^15.8",
     "pure-rand": "^6.0",
     "react-error-boundary": "^4.0",
+    "react-markdown": "^9.0",
     "rehype": "^13.0",
     "remark-frontmatter": "^5.0",
     "remark-gfm": "^4.0",
