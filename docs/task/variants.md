@@ -1,13 +1,8 @@
 # Varianti
 
-È possibile creare più varianti del problema, ogni studente riceverà una variante specifica e non potrà vedere le variante degli altri.
+È possibile creare più varianti del problema, ogni utente riceverà una variante specifica e non potrà vedere le variante degli altri.
 
-Una variante è definita da un oggetto che contiene le variabili da sostituire in alcuni punti del testo. Per definire le varianti bisogna dichiarare un array di oggetti, dove ogni oggetto contiene le variabili da sostituire nel problema. Le varianti possono essere definite in diversi modi:
-
-- [Front Matter](#front-matter);
-- [JavaScript](#javascript);
-- [Python](#python).
-
+Una variante è definita da un oggetto che contiene le variabili da sostituire nel testo. Per definire le varianti bisogna dichiarare un array di oggetti, dove ogni elemento contiene le variabili di una variante.
 ::: warning ATTENZIONE
 Il nome delle variabili **deve** iniziare con una lettera minuscola.
 :::
@@ -30,11 +25,16 @@ Per utilizzare le variabili nelle formule di LaTeX bisogna utilizzare il comando
 $x + y = \js{x+y}$
 ```
 
-L'utilizzo delle varianti nei file asymptote è parzialmente supportato. Per usarle bisgona definire le varianti nel formato [python](#python) e specificare il file con le varianti come paramento dell'immagine:
+L'utilizzo delle varianti nei file asymptote è parzialmente supportato. Per usarle bisogna definire le varianti nel formato [python](#python) e specificare il file con le varianti come paramento dell'immagine:
 
 ```md
 ![Immagine](immagine.asy?v=variants.py)
 ```
+ Le varianti possono essere generate in diversi modi:
+
+- [Front Matter](#front-matter);
+- [JavaScript](#javascript);
+- [Python](#python).
 
 ## Front Matter
 
