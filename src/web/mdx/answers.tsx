@@ -151,6 +151,7 @@ export function OpenAnswer({ correct, type }: OpenAnswerProps) {
         onChange={(e) => setAnswer(e.target.value || null)}
         onWheel={(e) => e.currentTarget.blur()}
         placeholder="Inserisci la risposta"
+        maxLength={100}
         type={type}
         value={answer ?? ""}
         disabled={terminated}
