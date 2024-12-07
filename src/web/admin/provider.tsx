@@ -1,10 +1,11 @@
 import { createContext, lazy, useContext } from "react";
 
-import { Link, Redirect, Route, useParams } from "wouter";
+import { Link, Redirect, Route, Switch, useParams } from "wouter";
 
 import type { Contest } from "~/models";
 
 import { AdminLayout } from "./layout";
+import { SchoolTable } from "./school-table";
 
 type AdminContextProps = {
   name: string;
@@ -57,7 +58,14 @@ function ProviderInner({ contests, ...props }: AdminProviderProps) {
 
   return (
     <AdminContext.Provider value={{ ...props, contest, contests }}>
-      <Dashboard />
+      <Switch>
+        <Route path="/">
+          <Dashboard />
+        </Route>
+        <Route path="/schools">
+          <SchoolTable />
+        </Route>
+      </Switch>
     </AdminContext.Provider>
   );
 }
