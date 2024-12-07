@@ -28,6 +28,7 @@ export function AdminProvider({ name, contests, setContest, logout }: AdminProvi
   return (
     <AdminLayout name={name} contests={contests} logout={logout}>
       <Route path="/">
+        {contests.length === 1 && <Redirect to={`/${contests[0].id}`} />}
         <div className="flex w-full grow flex-col items-center justify-center gap-4">
           <p className="text-2xl">Seleziona una gara</p>
           <div className="flex flex-wrap justify-center gap-2">

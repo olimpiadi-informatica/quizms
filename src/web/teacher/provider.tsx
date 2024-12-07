@@ -77,6 +77,7 @@ export function TeacherProvider({
   return (
     <TeacherLayout participations={participations} contests={contests} logout={logout}>
       <Route path="/">
+        {participations.length === 1 && <Redirect to={`/${participations[0].contestId}`} />}
         <div className="flex w-full grow flex-col items-center justify-center gap-4">
           <p className="text-2xl">Seleziona una gara</p>
           <div className="flex flex-wrap justify-center gap-2">
