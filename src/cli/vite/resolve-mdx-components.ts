@@ -31,12 +31,17 @@ export default function resolveMdxComponents(): PluginOption {
             upperFirst(camelCase(path.dirname(file))),
           ]);
         }
+
+        const internalSource =
+          process.env.QUIZMS_MODE === "contest"
+            ? "@olinfo/quizms/jsx-runtime"
+            : "@olinfo/quizms/internal/mdx-components";
         if (questions.length === 0) {
-          return 'export { useMDXComponents } from "@olinfo/quizms/internal/mdx-components";';
+          return `export { useMDXComponents } from "${internalSource}";`;
         }
 
         return `\
-import { useMDXComponents as quizmsComponents } from "@olinfo/quizms/internal/mdx-components";
+import { useMDXComponents as quizmsComponents } from "${internalSource}";
 
 ${questions.map(([file, name]) => `import ${name} from "${file}";`).join("\n")}
 

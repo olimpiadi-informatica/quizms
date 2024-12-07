@@ -88,12 +88,11 @@ function injectLocalVariables(ast: Program, file: string) {
         let variant: Statement;
         if (process.env.QUIZMS_MODE === "contest") {
           const problem = path.dirname(file);
-          console.info(`hash(${problem}) = ${hash(problem) % 524_287}`);
 
           // A prime number smaller than √ MAX_SAFE_INTEGER
           const MODULE = 14_985_317;
 
-          // const _variant = ((QUIZMS_VARIANT % MODULE) * (hash % MODULE) % MODULE) % _allVariants.length;
+          // const _variant = ((props.variant() % MODULE) * (hash % MODULE) % MODULE) % _allVariants.length;
           variant = b.variableDeclaration("const", [
             b.variableDeclarator(
               b.identifier("_variant"),
@@ -105,9 +104,9 @@ function injectLocalVariables(ast: Program, file: string) {
                     "*",
                     b.binaryExpression(
                       "%",
-                      b.memberExpression(
-                        b.memberExpression(b.identifier("process"), b.identifier("env")),
-                        b.identifier("QUIZMS_VARIANT"),
+                      b.callExpression(
+                        b.memberExpression(b.identifier("props"), b.identifier("variant")),
+                        [],
                       ),
                       b.literal(MODULE),
                     ),

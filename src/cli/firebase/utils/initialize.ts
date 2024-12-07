@@ -38,7 +38,7 @@ async function getFirebaseBucket(app: App) {
   let bucketName: string;
   try {
     const data = await restApi(app, "firebasestorage", "v1beta", "/buckets");
-    bucketName = data.buckets[0].name;
+    bucketName = data.buckets?.[0]?.name;
   } catch (err) {
     fatal(`Failed to get project information: ${err}`);
   }

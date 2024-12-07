@@ -27,7 +27,7 @@ function buildBaseStatements(
     const bundleConfig = mergeConfig(
       configs("production", {
         mdx: {
-          providerImportSource: `${quizmsImportSource}/jsx-runtime`,
+          providerImportSource: "virtual:quizms-mdx-components",
           jsxImportSource: quizmsImportSource,
         },
       }),
@@ -100,10 +100,6 @@ export type ExportVariantsOptions = {
 
 export default async function variants(options: ExportVariantsOptions) {
   process.env.QUIZMS_MODE = "contest";
-
-  if (!existsSync("src")) {
-    fatal("Invalid directory. Make sure you're inside a QuizMS project.");
-  }
 
   const variantsConfig = await load("variants", variantsConfigSchema);
   const variants = await buildVariants(variantsConfig);

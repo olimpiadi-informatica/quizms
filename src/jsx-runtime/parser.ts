@@ -131,11 +131,10 @@ export function shuffleStatement(
   variant: string,
   config: VariantsConfig,
 ): Program {
-  let problemId = 1;
   const options = {
     functionArguments: [
       {
-        variant: () => hash(`b#problem#${variant}#${problemId++}`),
+        variant: () => hash(`b#problem#${variant}`),
       },
     ],
   };

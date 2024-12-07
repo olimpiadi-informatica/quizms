@@ -19,7 +19,8 @@
     "./internal/blockly-editor": "./dist/internal/blockly-editor/index.js",
     "./internal/mdx-components": "./dist/mdx/index.js",
     "./student": "./dist/student/index.js",
-    "./firebase": "./dist/firebase/index.js"
+    "./firebase": "./dist/firebase/index.js",
+    "./jsx-runtime": "./dist/jsx-runtime/index.js"
   },
   "typesVersions": {
     "*": {
