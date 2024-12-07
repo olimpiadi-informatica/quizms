@@ -25,8 +25,6 @@ export type PrintOptions = {
 };
 
 export default async function print(options: PrintOptions) {
-  process.env.QUIZMS_MODE = "pdf";
-
   const contests = await load("contests", contestSchema);
   const variantConfigs = await load("variants", variantsConfigSchema);
 
@@ -38,10 +36,12 @@ Make sure it exists or specify a different entry file using \`--entry\`.`);
   }
 
   info("Building statements...");
+  process.env.QUIZMS_MODE = "contest";
   const variants = await buildVariants(variantConfigs);
   const statements = mapValues(variants, 1);
 
   info("Building website...");
+  process.env.QUIZMS_MODE = "print";
   const buildDir = path.join(cwd(), options.outDir, ".pdf-build");
   const buildConfig = mergeConfig(configs("production"), {
     publicDir: path.join(cwd(), "public"),
@@ -50,10 +50,9 @@ Make sure it exists or specify a different entry file using \`--entry\`.`);
       emptyOutDir: true,
       chunkSizeWarningLimit: Number.MAX_SAFE_INTEGER,
       rollupOptions: {
-        input: { print: `virtual:react-entry?src=${encodeURIComponent(options.entry)}` },
+        input: "virtual:quizms-routes",
       },
     },
-    plugins: [resolveContestsHelperPlugin(contests, variantConfigs)],
     logLevel: "info",
   } as InlineConfig);
   try {
@@ -66,10 +65,10 @@ Make sure it exists or specify a different entry file using \`--entry\`.`);
     build: {
       outDir: buildDir,
     },
-    plugins: [printPlugin(statements)],
+    plugins: [printPlugin(contests, variantConfigs, statements)],
   } as InlineConfig);
   const server = await preview(serverConfig);
-  const url = server.resolvedUrls!.local[0] + options.entry.replace(/\.\w+?$/, "");
+  const url = server.resolvedUrls!.local[0] + path.dirname(options.entry);
 
   if (options.server) {
     success(`Server started: ${pc.bold(pc.cyan(url))}`);
@@ -82,34 +81,33 @@ Make sure it exists or specify a different entry file using \`--entry\`.`);
   await rm(buildDir, { recursive: true });
 }
 
-function resolveContestsHelperPlugin(
+function printPlugin(
   contests: Contest[],
-  variantsConfigs: VariantsConfig[],
+  variantConfigs: VariantsConfig[],
+  statements: Record<string, string>,
 ): PluginOption {
   return {
-    name: "quizms:resolve-contest-helper",
-    apply: "build",
-    configResolved(config) {
-      const plugin = config.plugins.find((plugin) => plugin.name === "quizms:resolve-contest")!;
-      plugin.api.contests = contests.map((contest) => {
-        const config = variantsConfigs.find((c) => c.id === contest.id);
-        if (!config) {
-          fatal(`Missing variants configuration for contest ${contest.id}.`);
-        }
-        return { ...contest, ...config };
-      });
-    },
-  };
-}
-
-function printPlugin(statements: Record<string, string>): PluginOption {
-  return {
-    name: "quizms:print",
+    name: "quizms:print-proxy",
     apply: "serve",
     configurePreviewServer(server) {
-      server.middlewares.use((req, res, next) => {
+      server.middlewares.use("/print-proxy", (req, res, next) => {
         const url = new URL(req.url!, `http://${req.headers.host}`);
-        if (url.pathname === "/pdf/statement.js") {
+
+        if (url.pathname === "/contests.json") {
+          const contestConfigs = contests.map((contest) => {
+            const config = variantConfigs.find((c) => c.id === contest.id);
+            if (!config) {
+              fatal(`Missing variants configuration for contest ${contest.id}.`);
+            }
+            return { ...contest, ...config };
+          });
+
+          res.setHeader("content-type", "application/json");
+          res.end(JSON.stringify(contestConfigs));
+          return;
+        }
+
+        if (url.pathname === "/statement.js") {
           const variant = url.searchParams.get("v");
           if (!variant || !(variant in statements)) {
             res.writeHead(400);

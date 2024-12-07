@@ -21,3 +21,15 @@
 [display="none"] {
   @apply !hidden;
 }
+
+input {
+  @apply !text-base-content print:placeholder:!opacity-0;
+}
+
+pre code {
+  @apply !text-xs;
+}
+
+pre code .line {
+  @apply text-wrap before:!hidden;
+}

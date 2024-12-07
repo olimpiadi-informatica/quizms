@@ -1,4 +1,4 @@
-import { type ReactNode, type Ref, forwardRef, useEffect, useRef } from "react";
+import { type ReactNode, type Ref, forwardRef, useRef } from "react";
 
 import {
   Button,
@@ -45,15 +45,6 @@ export function StudentLayout({ children }: { children: ReactNode }) {
       completedRef.current?.showModal();
     }
   };
-
-  useEffect(() => {
-    if (import.meta.env.QUIZMS_MODE === "contest") {
-      console.error(
-        "%cAprire la console è severamente vietato dal regolamento. Questo incidente verrà segnalato agli amministratori del sito e al tuo insegnante. Qualsiasi tentativo di manomettere la piattaforma comporta la squalifica.",
-        "color: #f00",
-      );
-    }
-  }, []);
 
   return (
     <>

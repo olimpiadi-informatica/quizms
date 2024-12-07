@@ -144,7 +144,7 @@ async function transformImage(fileName: string, options: ImageOptions): Promise<
 
 function emitFile(ctx: PluginContext, fileName: string, image: Image, isBuild: boolean) {
   let src: string;
-  if (isBuild && process.env.QUIZMS_MODE !== "contest" && process.env.QUIZMS_MODE !== "pdf") {
+  if (isBuild && process.env.QUIZMS_MODE !== "contest") {
     const id = ctx.emitFile({
       type: "asset",
       name: path.basename(fileName, path.extname(fileName)) + image.format,

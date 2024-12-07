@@ -18,7 +18,7 @@ async function generatePdf(
 ) {
   info(`Printing statement ${variant}.`);
   const page = await context.newPage();
-  await page.goto(`${baseUrl}?v=${variant}`, { waitUntil: "load" });
+  await page.goto(`${baseUrl}/${variant}`, { waitUntil: "load" });
   for (const img of await page.getByRole("img").all()) {
     await img.isVisible();
   }

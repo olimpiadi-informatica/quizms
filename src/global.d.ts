@@ -24,10 +24,3 @@ declare module "*.rules" {
   const path: string;
   export default path;
 }
-
-declare module "virtual:quizms-contests" {
-  import type { Contest } from "~/models";
-  import type { VariantsConfig } from "~/models/variants-config";
-
-  export default function contests(): (Contest & VariantsConfig)[];
-}
