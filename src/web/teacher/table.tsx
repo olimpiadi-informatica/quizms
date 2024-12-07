@@ -93,12 +93,14 @@ export default function TeacherTable() {
           </Button>
         )}
         <FinalizeModal key={contest.id} ref={finalizeRef} />
-        <Button
-          className="btn-primary btn-sm h-10"
-          icon={Trash2}
-          onClick={() => deleterRef.current?.showModal()}>
-          <div className="hidden md:block">Svuota</div>
-        </Button>
+        {!participation.finalized && (
+          <Button
+            className="btn-primary btn-sm h-10"
+            icon={Trash2}
+            onClick={() => deleterRef.current?.showModal()}>
+            <div className="hidden md:block">Svuota</div>
+          </Button>
+        )}
       </div>
       <Suspense fallback={<Loading />}>
         <Table key={participation.id} />
