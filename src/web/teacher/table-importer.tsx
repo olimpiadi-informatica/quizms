@@ -10,6 +10,7 @@ import {
   type Participation,
   type Student,
   type Variant,
+  calcScore,
   parseUserData,
   studentSchema,
 } from "~/models";
@@ -158,7 +159,7 @@ async function importStudents(
         userData[field.name] = validated;
       }
 
-      return {
+      const student: Student = {
         id: randomId(),
         userData,
         contestId: contest.id,
@@ -169,7 +170,9 @@ async function importStudents(
         createdAt: new Date(),
         absent: false,
         disabled: false,
-      } as Student;
+      };
+      student.score = calcScore(student, variants[variantId]?.schema);
+      return student;
     })
     .pipe(studentSchema)
     .array();
