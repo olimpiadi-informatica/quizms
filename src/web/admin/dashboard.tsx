@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 
 import { Card, CardActions, CardBody } from "@olinfo/react-components";
+import { Link } from "wouter";
 
 import type { Participation, Student } from "~/models";
 import { Loading } from "~/web/components";
@@ -29,12 +30,15 @@ export default function Dashboard() {
         </CardBody>
       </Card>
       <Card>
-        <CardBody title="Statistiche">
-          <div className="h-20">
-            <Suspense fallback={<Loading />}>
-              <ContestInformation />
-            </Suspense>
-          </div>
+        <CardBody title="Scuole">
+          <Suspense fallback={<Loading />}>
+            <ContestInformation />
+          </Suspense>
+          <CardActions>
+            <Link href="/schools/" className="btn btn-primary">
+              Gestione scuole
+            </Link>
+          </CardActions>
         </CardBody>
       </Card>
       {contest.hasOnline && (
