@@ -17,7 +17,9 @@ export type ExportOptions = {
 };
 
 export default async function staticExport(options: ExportOptions): Promise<void> {
-  process.env.QUIZMS_MODE = options.training ? "training" : "contest";
+  if (options.training) {
+    process.env.QUIZMS_MODE = "training";
+  }
 
   const config = mergeConfig(
     configs("production"),

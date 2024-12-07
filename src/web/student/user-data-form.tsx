@@ -36,13 +36,7 @@ export function UserDataField({
     label: field.label,
     placeholder: `Inserisci ${field.label.toLowerCase()}`,
   };
-  if (field.type === "date") {
-    return <DateField {...commonProps} min={field.min} max={field.max} />;
-  }
-  if (field.type === "number") {
-    return <NumberField {...commonProps} min={field.min} max={field.max} />;
-  }
-  if (field.type === "text") {
+  if (field.type === "text" || import.meta.env.QUIZMS_MODE === "print") {
     return (
       <TextField
         {...commonProps}
@@ -50,5 +44,11 @@ export function UserDataField({
         validationErrorMap={{ patternMismatch: "Il campo non può contenere numeri o simboli." }}
       />
     );
+  }
+  if (field.type === "date") {
+    return <DateField {...commonProps} min={field.min} max={field.max} />;
+  }
+  if (field.type === "number") {
+    return <NumberField {...commonProps} min={field.min} max={field.max} />;
   }
 }

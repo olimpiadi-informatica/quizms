@@ -18,7 +18,6 @@ import directives from "./directives";
 import images from "./images";
 import mdx from "./mdx";
 import python from "./python";
-import resolveContests from "./resolve-contests";
 import resolveMdxComponents from "./resolve-mdx-components";
 import routes from "./routes";
 
@@ -59,7 +58,6 @@ export default function configs(
       python(),
       react(),
       routes(),
-      resolveContests(),
       resolveMdxComponents(),
     ],
     build: {

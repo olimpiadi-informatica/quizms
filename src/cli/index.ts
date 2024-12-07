@@ -60,7 +60,7 @@ async function main() {
     .description("Create PDFs for the contest.")
     .option("-c, --config <config>", "The contests config file.")
     .option("-d, --outDir <directory>", "The directory to output the PDF.", "variants")
-    .option("-e, --entry <entry>", "The entry point of the PDF.", "print.jsx")
+    .option("-e, --entry <entry>", "The entry point of the PDF.", "print/page.jsx")
     .option("-s, --server", "Only serve the pages, don't generate the PDF.")
     .action(print);
 
