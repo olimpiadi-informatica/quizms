@@ -82,14 +82,14 @@ const ImportModal = forwardRef(function ImportModal(_props, ref: Ref<HTMLDialogE
           </div>
         </div>
         <p>
-          {contest.hasVariants ? (
+          Per consentire l&apos;inserimento dei dati personali prima della gara,{" "}
+          {contest.hasVariants && (
             <>
-              La colonna <b>Variante</b> e le
+              la colonna <b>Variante</b> e
             </>
-          ) : (
-            <>Le</>
           )}{" "}
-          colonne per le risposte possono essere lasciate in bianco.
+          le colonne per le risposte possono essere lasciate in bianco. Per la finalizzazione sarà
+          comunque necessario compilarle.
         </p>
         {dates.length > 0 && (
           <p>
