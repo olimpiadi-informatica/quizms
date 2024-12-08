@@ -1,8 +1,24 @@
 import path from "node:path";
 
+import process from "node:process";
 import { camelCase, upperFirst } from "lodash-es";
 import { glob } from "tinyglobby";
 import type { PluginOption } from "vite";
+
+const components = [
+  "Answer",
+  "AnswerGroup",
+  "Blockly",
+  "Code",
+  "Contest",
+  "Equation",
+  "Explanation",
+  "Image",
+  "OpenAnswer",
+  "Problem",
+  "Section",
+  "SubProblem",
+];
 
 export default function resolveMdxComponents(): PluginOption {
   return {
@@ -15,6 +31,22 @@ export default function resolveMdxComponents(): PluginOption {
     resolveId(id, importer) {
       if (id === "virtual:quizms-mdx-components") {
         return `\0${id}?importer=${encodeURIComponent(importer ?? "")}`;
+      }
+      if (id === "virtual:quizms-mdx-components-client") {
+        return {
+          id: "../_virtual_quizms-mdx-components-client.js",
+          external: true,
+        };
+      }
+    },
+    buildStart() {
+      if (process.env.QUIZMS_MODE === "contest") {
+        this.emitFile({
+          type: "prebuilt-chunk",
+          fileName: "_virtual_quizms-mdx-components-client.js",
+          code: `"use client";\nexport { ${components} } from "@olinfo/quizms/internal/mdx-components";`,
+          exports: components,
+        });
       }
     },
     async load(id) {
@@ -32,23 +64,20 @@ export default function resolveMdxComponents(): PluginOption {
           ]);
         }
 
-        const internalSource =
+        const componentSource =
           process.env.QUIZMS_MODE === "contest"
-            ? "@olinfo/quizms/jsx-runtime"
+            ? "virtual:quizms-mdx-components-client"
             : "@olinfo/quizms/internal/mdx-components";
-        if (questions.length === 0) {
-          return `export { useMDXComponents } from "${internalSource}";`;
-        }
 
         return `\
-import { useMDXComponents as quizmsComponents } from "${internalSource}";
+import { ${components} } from "${componentSource}";
 
 ${questions.map(([file, name]) => `import ${name} from "${file}";`).join("\n")}
 
 export function useMDXComponents() {
   return {
-    ...quizmsComponents(),
-    ${questions.map(([, name]) => name).join(",\n    ")},
+    ${components},
+    ${questions.map(([, name]) => name)}
   };
 }`;
       }
