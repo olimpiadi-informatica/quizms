@@ -1,10 +1,10 @@
 import { existsSync } from "node:fs";
-import { rm } from "node:fs/promises";
+import { readFile, rm } from "node:fs/promises";
 import path from "node:path";
 import { cwd } from "node:process";
 import { promisify } from "node:util";
 
-import { mapValues, noop } from "lodash-es";
+import { noop } from "lodash-es";
 import pc from "picocolors";
 import { type InlineConfig, type PluginOption, build, mergeConfig, preview } from "vite";
 
@@ -14,7 +14,6 @@ import { type VariantsConfig, variantsConfigSchema } from "~/models/variants-con
 import { fatal, info, success } from "~/utils/logs";
 
 import generatePdfs from "./pdf";
-import { buildVariants } from "./variants";
 import configs from "./vite/configs";
 
 export type PrintOptions = {
@@ -35,14 +34,9 @@ Entry file ${pc.bold(pc.red(options.entry))} does not exists. \
 Make sure it exists or specify a different entry file using \`--entry\`.`);
   }
 
-  info("Building statements...");
-  process.env.QUIZMS_MODE = "contest";
-  const variants = await buildVariants(variantConfigs);
-  const statements = mapValues(variants, 1);
-
   info("Building website...");
   process.env.QUIZMS_MODE = "print";
-  const buildDir = path.join(cwd(), options.outDir, ".pdf-build");
+  const buildDir = path.join(cwd(), ".quizms", "pdf-build");
   const buildConfig = mergeConfig(configs("production"), {
     publicDir: path.join(cwd(), "public"),
     build: {
@@ -65,7 +59,7 @@ Make sure it exists or specify a different entry file using \`--entry\`.`);
     build: {
       outDir: buildDir,
     },
-    plugins: [printPlugin(contests, variantConfigs, statements)],
+    plugins: [printPlugin(contests, variantConfigs)],
   } as InlineConfig);
   const server = await preview(serverConfig);
   const url = server.resolvedUrls!.local[0] + path.dirname(options.entry);
@@ -81,42 +75,49 @@ Make sure it exists or specify a different entry file using \`--entry\`.`);
   await rm(buildDir, { recursive: true });
 }
 
-function printPlugin(
-  contests: Contest[],
-  variantConfigs: VariantsConfig[],
-  statements: Record<string, string>,
-): PluginOption {
+function printPlugin(contests: Contest[], variantConfigs: VariantsConfig[]): PluginOption {
+  const contestConfigs = contests.map((contest) => {
+    const config = variantConfigs.find((c) => c.id === contest.id);
+    if (!config) {
+      fatal(`Missing variants configuration for contest ${contest.id}.`);
+    }
+    return { ...contest, ...config };
+  });
+
   return {
     name: "quizms:print-proxy",
     apply: "serve",
     configurePreviewServer(server) {
-      server.middlewares.use("/print-proxy", (req, res, next) => {
+      server.middlewares.use("/print-proxy", async (req, res, next) => {
         const url = new URL(req.url!, `http://${req.headers.host}`);
 
         if (url.pathname === "/contests.json") {
-          const contestConfigs = contests.map((contest) => {
-            const config = variantConfigs.find((c) => c.id === contest.id);
-            if (!config) {
-              fatal(`Missing variants configuration for contest ${contest.id}.`);
-            }
-            return { ...contest, ...config };
-          });
-
           res.setHeader("content-type", "application/json");
           res.end(JSON.stringify(contestConfigs));
           return;
         }
 
-        if (url.pathname === "/statement.js") {
+        if (url.pathname === "/statement.txt") {
           const variant = url.searchParams.get("v");
-          if (!variant || !(variant in statements)) {
+          const contest = url.searchParams.get("c");
+          if (!variant || !contest) {
             res.writeHead(400);
-            res.end("Invalid variant parameter");
+            res.end("Missing variant or contest parameter");
             return;
           }
 
-          res.setHeader("content-type", "text/javascript");
-          res.end(statements[variant]);
+          try {
+            const statement = await readFile(
+              path.join(cwd(), "variants", contest, `${variant}.txt`),
+              "utf-8",
+            );
+            res.setHeader("content-type", "application/octet-stream");
+            res.end(statement);
+          } catch {
+            res.writeHead(404);
+            res.end("Statement not found");
+          }
+
           return;
         }
         next();

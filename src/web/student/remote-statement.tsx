@@ -1,43 +1,23 @@
-import React, { memo } from "react";
+import type { ReactNode } from "react";
 
-import { isFunction } from "lodash-es";
 import useSWR from "swr/immutable";
 
-import { useMDXComponents } from "~/web/mdx";
 import { BaseStatement } from "~/web/student/base-statement";
 
-type Props =
-  | {
-      id?: undefined;
-      url: string;
-    }
-  | {
-      id: string;
-      url: () => string | Promise<string>;
-    };
+type Props = {
+  id: string;
+  fetcher: () => Promise<ReactNode>;
+};
 
-export function RemoteStatement(props: Props) {
+export function RemoteStatement({ id, fetcher }: Props) {
   return (
     <BaseStatement>
-      <InnerStatement {...props} />
+      <InnerStatement id={id} fetcher={fetcher} />
     </BaseStatement>
   );
 }
 
-function InnerStatement({ id, url }: Props) {
-  const { data: Statement } = useSWR(id ?? url, () => fetcher(url), {
-    suspense: true,
-  });
-
-  return <Statement />;
-}
-
-async function fetcher(getUrl: Props["url"]) {
-  const url = isFunction(getUrl) ? await getUrl() : getUrl;
-  const { default: statement } = await import(/* @vite-ignore */ url);
-
-  return memo(function Statement() {
-    const components = useMDXComponents();
-    return statement(React, components);
-  });
+function InnerStatement({ id, fetcher }: Props) {
+  const { data } = useSWR(id, fetcher);
+  return data;
 }

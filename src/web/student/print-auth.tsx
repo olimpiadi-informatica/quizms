@@ -1,4 +1,4 @@
-import { Fragment, type ReactNode } from "react";
+import { Fragment, type ReactNode, useCallback } from "react";
 
 import useSWR from "swr/immutable";
 import { Link, Route, Switch, useParams } from "wouter";
@@ -83,6 +83,7 @@ function VariantProvider({ children }: { children: ReactNode }) {
     id: "",
     userData: {},
     answers: {},
+    contestId: contest.id,
     variant: variantId,
   };
 
@@ -98,10 +99,19 @@ function VariantProvider({ children }: { children: ReactNode }) {
   );
 }
 
-export function PrintStatement() {
+type StatementProps = {
+  createFromFetch: (res: Promise<Response>) => Promise<ReactNode>;
+};
+
+export function PrintStatement({ createFromFetch }: StatementProps) {
   const { student } = useStudent();
 
-  return <RemoteStatement url={`/print-proxy/statement.js?v=${student.variant}`} />;
+  const fetcher = useCallback(() => {
+    const res = fetch(`/print-proxy/statement.txt?c=${student.contestId}&v=${student.variant}`);
+    return createFromFetch(res);
+  }, [student.contestId, student.variant, createFromFetch]);
+
+  return <RemoteStatement id={student.variant!} fetcher={fetcher} />;
 }
 
 function useContests(): (Contest & VariantsConfig)[] {

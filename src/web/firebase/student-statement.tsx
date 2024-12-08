@@ -1,3 +1,5 @@
+import { type ReactNode, useCallback } from "react";
+
 import { getDownloadURL, getStorage, ref } from "firebase/storage";
 
 import { useStudent } from "~/web/student/provider";
@@ -5,7 +7,11 @@ import { RemoteStatement } from "~/web/student/remote-statement";
 
 import { useDb } from "./common/base-login";
 
-export function FirebaseStatement() {
+type Props = {
+  createFromFetch: (res: Promise<Response>) => Promise<ReactNode>;
+};
+
+export function FirebaseStatement({ createFromFetch }: Props) {
   const db = useDb();
   const { contest, student } = useStudent();
 
@@ -16,5 +22,10 @@ export function FirebaseStatement() {
     `statements/${student.variant!}/statement-${contest.statementVersion}.js`,
   );
 
-  return <RemoteStatement id={statementRef.fullPath} url={() => getDownloadURL(statementRef)} />;
+  const fetcher = useCallback(async () => {
+    const url = await getDownloadURL(statementRef);
+    return createFromFetch(fetch(url));
+  }, [statementRef, createFromFetch]);
+
+  return <RemoteStatement id={statementRef.fullPath} fetcher={fetcher} />;
 }

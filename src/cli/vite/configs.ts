@@ -2,7 +2,6 @@ import path from "node:path";
 import { cwd } from "node:process";
 import { fileURLToPath } from "node:url";
 
-import type { CompileOptions as MdxOptions } from "@mdx-js/mdx";
 import react from "@vitejs/plugin-react-swc";
 import { sumBy } from "lodash-es";
 import pc from "picocolors";
@@ -21,14 +20,7 @@ import python from "./python";
 import resolveMdxComponents from "./resolve-mdx-components";
 import routes from "./routes";
 
-type Options = {
-  mdx?: MdxOptions;
-};
-
-export default function configs(
-  mode: "development" | "production",
-  options?: Options,
-): InlineConfig {
+export default function configs(mode: "development" | "production"): InlineConfig {
   const root = path.join(cwd(), "src");
 
   return {
@@ -54,7 +46,7 @@ export default function configs(
       directives(),
       images(),
       inspect(),
-      mdx(options?.mdx),
+      mdx(),
       python(),
       react(),
       routes(),

@@ -19,12 +19,15 @@ const webConfig = {
   platform: "browser",
   minifyWhitespace: false,
   loader: { ".css": "copy" },
+  banner: {
+    js: "\"use client\";",
+  },
 };
 
 /** @type {import("tsup").Options} */
 const cliConfig = {
   ...commonConfig,
-  entry: await glob("src/{cli,jsx-runtime}/index.ts"),
+  entry: { cli: "src/cli/index.ts" },
   target: "esnext",
   platform: "node",
   loader: { ".rules": "file" },
