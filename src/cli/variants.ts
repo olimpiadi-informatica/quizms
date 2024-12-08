@@ -1,97 +1,113 @@
-import { mkdir, writeFile } from "node:fs/promises";
+import { spawn } from "node:child_process";
+import { cp, mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { pathToFileURL } from "node:url";
+import { cwd } from "node:process";
 
-import { toJs } from "estree-util-to-js";
-import { uniq } from "lodash-es";
-import { name as quizmsImportSource } from "package.json";
-import { temporaryDirectoryTask } from "tempy";
-import { type InlineConfig, build, mergeConfig, transformWithEsbuild } from "vite";
+// @ts-ignore
+import WebpackRscPlugin from "react-server-dom-webpack/plugin";
+import { type InlineConfig, build, mergeConfig } from "vite";
+import webpack from "webpack";
 
-import { type ExpressionWrapper, shuffleStatement } from "~/jsx-runtime/parser";
-import { cleanStatement, getSchema } from "~/jsx-runtime/shuffle";
-import type { Variant } from "~/models";
 import load from "~/models/load";
 import { type VariantsConfig, variantsConfigSchema } from "~/models/variants-config";
-import { fatal, info, success } from "~/utils/logs";
+import { fatal, info } from "~/utils/logs";
 
+import { cpus } from "node:os";
+import { AsyncPool } from "~/utils/async-pool";
+import { hash } from "~/utils/hash";
 import configs from "./vite/configs";
 
-function buildBaseStatements(
-  generationConfigs: VariantsConfig[],
-): Promise<Record<string, () => ExpressionWrapper>> {
-  return temporaryDirectoryTask(async (outDir) => {
-    const entry = Object.fromEntries(generationConfigs.map((c) => [c.id, c.entry]));
+async function buildBaseStatements(generationConfigs: VariantsConfig[]): Promise<void> {
+  const entry = Object.fromEntries(generationConfigs.map((c) => [c.id, c.entry]));
 
-    const bundleConfig = mergeConfig(
-      configs("production", {
-        mdx: {
-          providerImportSource: "virtual:quizms-mdx-components",
-          jsxImportSource: quizmsImportSource,
+  const outDir = path.join(cwd(), ".quizms", "variants-build");
+  const bundleConfig = mergeConfig(configs("production"), {
+    build: {
+      copyPublicDir: false,
+      outDir,
+      emptyOutDir: true,
+      lib: {
+        entry,
+        fileName: "base-statement-[name]",
+        formats: ["es"],
+      },
+      rollupOptions: {
+        external: [/^node:/, /^react/, /^@olinfo\/quizms/],
+        output: {
+          preserveModules: true,
         },
-      }),
-      {
-        build: {
-          copyPublicDir: false,
-          outDir,
-          emptyOutDir: true,
-          lib: {
-            entry,
-            fileName: "base-statement-[name]",
-            formats: ["es"],
-          },
-          rollupOptions: {
-            external: /^node:/,
-          },
-        },
-      } as InlineConfig,
-    );
+      },
+    },
+    resolve: {
+      conditions: ["react-server"],
+    },
+  } as InlineConfig);
 
-    try {
-      await build(bundleConfig);
-    } catch {
-      fatal("Build failed.");
-    }
+  try {
+    await build(bundleConfig);
+  } catch (err) {
+    fatal(`Build failed: ${err}`);
+  }
 
-    await writeFile(path.join(outDir, "package.json"), '{"type":"module"}');
+  await Promise.all([
+    writeFile(path.join(outDir, "entry.js"), entryFile()),
+    writeFile(path.join(outDir, "package.json"), '{"type":"module"}'),
+  ]);
 
-    return Object.fromEntries(
-      await Promise.all(
-        generationConfigs.map(async (c) => {
-          const statementUrl = pathToFileURL(path.join(outDir, `base-statement-${c.id}.mjs`));
-          const { default: baseStatement } = await import(statementUrl.href);
-          info(`Statement for \`${c.id}\` built.`);
+  const stats = await new Promise<webpack.Stats | undefined>((resolve, reject) =>
+    webpack(webpackConfig(outDir), (err, stats) => (err ? reject(err) : resolve(stats))),
+  );
+  if (stats) {
+    info(stats.toString({ colors: true, chunks: false }));
+  }
 
-          return [c.id, baseStatement];
-        }),
+  await Promise.all([
+    writeFile(path.join(outDir, "loader.js"), loaderFile()),
+    writeFile(path.join(outDir, "server.js"), serverFile(generationConfigs[0].id)),
+    ...generationConfigs.map((config) =>
+      cp(
+        path.join(outDir, "dist", "main.mjs"),
+        path.join(cwd(), "src", config.entry.replace(/\..*$/, ".mjs")),
       ),
-    );
-  });
+    ),
+  ]);
 }
 
-export async function buildVariants(
-  configs: VariantsConfig[],
-): Promise<Record<string, [Variant, string]>> {
-  const baseStatements = await buildBaseStatements(configs);
+export async function buildVariants(configs: VariantsConfig[]): Promise<void> {
+  await buildBaseStatements(configs);
 
-  const variants: Record<string, [Variant, string]> = {};
+  const pool = new AsyncPool(cpus().length);
+
+  const buildDir = path.join(cwd(), ".quizms", "variants-build");
   for (const config of configs) {
-    const ids = uniq([...config.variantIds, ...config.pdfVariantIds]);
-    for (const id of ids) {
-      const seed = `${config.secret}-${id}`;
-      const variantAst = shuffleStatement(baseStatements[config.id], seed, config);
-      const schema = getSchema(variantAst);
-      cleanStatement(variantAst);
-
-      const statement = await transformWithEsbuild(toJs(variantAst).value, `statement-${id}.js`, {
-        minify: true,
-        charset: "utf8",
+    await mkdir(path.join(cwd(), "variants", config.id), { recursive: true });
+    for (const variant of config.variantIds) {
+      void pool.run(async () => {
+        const variantHash = hash(`${config.id}-${variant}-${config.secret}`);
+        info(`Building variant ${variant} (${variantHash})...`);
+        const child = spawn(process.execPath, ["--conditions=react-server", "server.js"], {
+          cwd: buildDir,
+          stdio: "inherit",
+          env: {
+            ...process.env,
+            NODE_ENV: "production",
+            QUIZMS_CONTEST_ID: config.id,
+            QUIZMS_VARIANT_ID: variant,
+            QUIZMS_VARIANT_HASH: variantHash.toString(),
+          },
+        });
+        const code = await new Promise<number>((resolve, reject) => {
+          child.on("close", resolve);
+          child.on("error", reject);
+        });
+        if (code !== 0) {
+          fatal(`Failed to build variant ${variant}.`);
+        }
       });
-
-      variants[id] = [{ id, schema, contestId: config.id }, statement.code];
     }
   }
-  return variants;
+
+  await pool.wait();
 }
 
 export type ExportVariantsOptions = {
@@ -99,20 +115,90 @@ export type ExportVariantsOptions = {
   outDir: string;
 };
 
-export default async function variants(options: ExportVariantsOptions) {
+export default async function variants(_options: ExportVariantsOptions) {
   process.env.QUIZMS_MODE = "contest";
 
   const variantsConfig = await load("variants", variantsConfigSchema);
-  const variants = await buildVariants(variantsConfig);
+  await buildVariants(variantsConfig);
+}
 
-  const res = await Promise.all(
-    Object.values(variants).map(async ([variant, statement]) => {
-      const dir = path.join(options.outDir, variant.id);
-      await mkdir(dir, { recursive: true });
-      await writeFile(path.join(dir, "schema.json"), JSON.stringify(variant));
-      await writeFile(path.join(dir, "statement.js"), statement);
-    }),
-  );
+function webpackConfig(outDir: string): webpack.Configuration {
+  return {
+    mode: "production",
+    devtool: false,
+    performance: {
+      hints: false,
+    },
+    entry: `${outDir}/entry.js`,
+    output: {
+      path: `${outDir}/dist`,
+      clean: true,
+      asyncChunks: false,
+      library: {
+        type: "module",
+      },
+    },
+    externals: [
+      "react",
+      "react-dom",
+      "react/jsx-runtime",
+      "@olinfo/quizms/internal/mdx-components",
+    ],
+    externalsType: "module",
+    experiments: {
+      outputModule: true,
+    },
+    plugins: [
+      new WebpackRscPlugin({
+        isServer: false,
+        clientReferences: {
+          directory: outDir,
+          recursive: true,
+          include: /\.m?js$/,
+        },
+      }),
+    ],
+  };
+}
 
-  success(`Export of ${res.length} variants completed.`);
+function entryFile() {
+  return `export { createFromFetch } from "react-server-dom-webpack/client";`;
+}
+
+function serverFile(contestId: string) {
+  return `\
+import { createWriteStream } from "node:fs";
+import { mkdir, readFile, rm } from "node:fs/promises";
+import path from "node:path";
+import { register } from "node:module";
+
+import { createElement } from "react";
+import { renderToPipeableStream } from "react-server-dom-webpack/server";
+
+register("./loader.js", import.meta.url);
+register("react-server-dom-webpack/node-loader", import.meta.url);
+
+const { default: Statement } = await import("./base-statement-${contestId}.mjs");
+
+const manifest = JSON.parse(await readFile("./dist/react-client-manifest.json", "utf-8"));
+const { pipe } = renderToPipeableStream(createElement(Statement), manifest);
+
+const statementPath = path.join(
+  "${cwd()}",
+  "variants",
+  process.env.QUIZMS_CONTEST_ID,
+  \`$\{process.env.QUIZMS_VARIANT_ID}.txt\`
+);
+pipe(createWriteStream(statementPath));`;
+}
+
+function loaderFile() {
+  return `\
+export async function load(url, context, nextLoad) {
+  const result = await nextLoad(url, context);
+  if (Buffer.isBuffer(result.source)) {
+    result.source = result.source.toString("utf-8");
+  }
+  return result;
+}`;
 }

@@ -19,8 +19,7 @@
     "./internal/blockly-editor": "./dist/internal/blockly-editor/index.js",
     "./internal/mdx-components": "./dist/mdx/index.js",
     "./student": "./dist/student/index.js",
-    "./firebase": "./dist/firebase/index.js",
-    "./jsx-runtime": "./dist/jsx-runtime/index.js"
+    "./firebase": "./dist/firebase/index.js"
   },
   "typesVersions": {
     "*": {
@@ -101,8 +100,10 @@
     "zod-validation-error": "^3.0"
   },
   "peerDependencies": {
-    "react": "^18",
-    "react-dom": "^18"
+    "react": "^19",
+    "react-dom": "^19",
+    "react-server-dom-webpack": "^19",
+    "webpack": "^5"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.8",
@@ -112,12 +113,13 @@
     "@types/node": "^22",
     "@types/papaparse": "^5.3",
     "@types/picomatch": "^3.0",
-    "@types/react": "^18.0",
-    "@types/react-dom": "^18.2",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
     "@types/wicg-file-system-access": "^2023.10.4",
     "postcss": "^8.4",
     "tsup": "^8.0",
-    "typescript": "^5.1"
+    "typescript": "^5.1",
+    "webpack": "^5.97"
   },
   "postcss": {
     "plugins": {

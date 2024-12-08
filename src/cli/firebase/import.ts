@@ -260,8 +260,8 @@ async function importStatements(bucket: Bucket, options: ImportOptions) {
     }
 
     return uniq([...config.variantIds, ...config.pdfVariantIds]).map((id): [string, string] => [
-      path.join("variants", id, "statement.js"),
-      path.join("statements", id, `statement-${contest.statementVersion}.js`),
+      path.join("variants", id, "statement.txt"),
+      path.join("statements", id, `statement-${contest.statementVersion}.txt`),
     ]);
   });
   await importStorage(bucket, "statements", statements, options);

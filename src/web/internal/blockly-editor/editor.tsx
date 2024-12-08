@@ -26,7 +26,7 @@ function send(cmd: string, props?: any) {
 
 export function BlocklyEditor() {
   const id = useId();
-  const workspace = useRef<WorkspaceSvg>();
+  const workspace = useRef<WorkspaceSvg>(null);
 
   useEffect(() => {
     window.addEventListener("message", onMessage);

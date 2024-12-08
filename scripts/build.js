@@ -2,7 +2,7 @@ import { rm } from "node:fs/promises";
 import { argv, exit } from "node:process";
 
 import { Command } from "commander";
-import glob from "fast-glob";
+import { glob } from "tinyglobby";
 import { build } from "tsup";
 
 /** @type {import("tsup").Options} */
@@ -19,12 +19,15 @@ const webConfig = {
   platform: "browser",
   minifyWhitespace: false,
   loader: { ".css": "copy" },
+  banner: {
+    js: "\"use client\";",
+  },
 };
 
 /** @type {import("tsup").Options} */
 const cliConfig = {
   ...commonConfig,
-  entry: await glob("src/{cli,jsx-runtime}/index.ts"),
+  entry: { cli: "src/cli/index.ts" },
   target: "esnext",
   platform: "node",
   loader: { ".rules": "text" },
