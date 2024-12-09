@@ -53,6 +53,8 @@ function buildBaseStatements(
       fatal("Build failed.");
     }
 
+    await writeFile(path.join(outDir, "package.json"), '{"type":"module"}');
+
     return Object.fromEntries(
       await Promise.all(
         generationConfigs.map(async (c) => {
