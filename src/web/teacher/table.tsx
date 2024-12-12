@@ -332,6 +332,7 @@ function Table() {
       throw new Error(`La variante ${value} non è valida`);
     }
     if (field === "answers") {
+      const [_, subfield] = ev.colDef.field!.split(/[[\]]/);
       if (isString(value)) {
         value = value.trim().toUpperCase();
       }
