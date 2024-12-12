@@ -1,33 +1,19 @@
 import { type ReactNode, Suspense, useMemo } from "react";
 
 import { WithinTimeRange } from "@olinfo/react-components";
-import { addMilliseconds, differenceInMilliseconds } from "date-fns";
+import { addMilliseconds } from "date-fns";
 
-import useSWR from "swr/immutable";
 import { Loading, Timer } from "~/web/components";
 import { useStudent } from "~/web/student/provider";
 
 export function BaseStatement({ children }: { children: ReactNode }) {
   const { participation } = useStudent();
-
-  const { data: timeDelta } = useSWR(
-    "time",
-    async () => {
-      const resp = await fetch("https://time1.olinfo.it/");
-      return differenceInMilliseconds(new Date(await resp.text()), new Date());
-    },
-    { suspense: true },
-  );
-
   const startingTime = useMemo(
     () =>
       import.meta.env.QUIZMS_MODE === "print"
         ? new Date(0)
-        : addMilliseconds(
-            participation.startingTime!,
-            1000 + Math.random() * 1000 + Math.abs(timeDelta),
-          ),
-    [participation.startingTime, timeDelta],
+        : addMilliseconds(participation.startingTime!, 1000 + Math.random() * 1000),
+    [participation.startingTime],
   );
 
   return (
