@@ -4,6 +4,7 @@ import definalize from "./definalize";
 import exportData from "./export";
 import importData from "./import";
 import init from "./init";
+import updateScores from "./update-scores";
 
 export default function firebaseCommand() {
   const command = new Command("firebase");
@@ -51,6 +52,7 @@ export default function firebaseCommand() {
     .action(importData);
 
   command.command("definalize").description("Definalize all participations.").action(definalize);
+  command.command("update-scores").description("Update student scores.").action(updateScores);
 
   return command;
 }

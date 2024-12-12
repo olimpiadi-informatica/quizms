@@ -290,7 +290,7 @@ function Table() {
     participation.startingTime && contest.hasOnline
       ? addMinutes(participation.startingTime, contest.duration)
       : undefined;
-  const isContestFinished = useIsAfter(endTime) || !endTime;
+  const isContestFinished = useIsAfter(endTime) ?? true;
   const frozen = (contest.hasOnline && !isContestFinished) || participation.finalized;
 
   const newStudentId = useRef(randomId());
@@ -313,7 +313,10 @@ function Table() {
     } as Student);
   }
 
-  const colDefs = useMemo(() => columnDefinition(contest, variants), [contest, variants]);
+  const colDefs = useMemo(
+    () => columnDefinition(contest, variants, isContestFinished),
+    [contest, variants, isContestFinished],
+  );
 
   const onCellEditRequest = async (ev: CellEditRequestEvent) => {
     let student = ev.data as Student;
@@ -424,7 +427,11 @@ function Table() {
   );
 }
 
-function columnDefinition(contest: Contest, variants: Record<string, Variant>): ColDef[] {
+function columnDefinition(
+  contest: Contest,
+  variants: Record<string, Variant>,
+  isContestFinished: boolean,
+): ColDef[] {
   const sampleVariant = Object.values(variants)[0];
 
   const widths = {
@@ -525,7 +532,7 @@ function columnDefinition(contest: Contest, variants: Record<string, Variant>): 
       pinned: "right",
       width: 100,
       ...defaultOptions,
-      hide: true,
+      hide: !isContestFinished,
     },
     {
       field: "absent",
