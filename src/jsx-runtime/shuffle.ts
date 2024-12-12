@@ -135,7 +135,7 @@ export function getSchema(program: Program) {
           error(`Problem ${id} solution must be a non-empty string.`);
         } else {
           problemSchema.optionsCorrect = [correct];
-          if (/^\d+$/.test(correct)) {
+          if (/^-{0,1}\d+$/.test(correct)) {
             problemSchema.type = "number";
           }
         }
