@@ -54,9 +54,6 @@ export function StudentLayout({ children }: { children: ReactNode }) {
         </NavbarBrand>
         <NavbarContent>
           <div className="flex items-center gap-2">
-            <Progress className="hidden w-20 sm:block" percentage={progress}>
-              {progress}%
-            </Progress>
             <div className="px-3">
               {terminated || !participation.startingTime || !contest.hasOnline ? (
                 <span className="font-mono">00:00</span>
