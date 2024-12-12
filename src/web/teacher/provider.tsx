@@ -3,6 +3,7 @@ import { createContext, lazy, useContext } from "react";
 import { Link, Redirect, Route, Switch, useParams } from "wouter";
 
 import type { Contest, Participation, Student, StudentRestore, Variant } from "~/models";
+import { FirebaseStatement } from "~/web/firebase";
 import { ImpersonificationAuth } from "~/web/student/impersonification-auth";
 import { UserDataForm } from "~/web/student/user-data-form";
 
@@ -152,7 +153,7 @@ function ProviderInner({
         <Route path="/students/:studentId">
           <ImpersonificationAuth>
             <UserDataForm />
-            {/* TODO: statement */}
+            <FirebaseStatement />
           </ImpersonificationAuth>
         </Route>
         <Route>
