@@ -151,37 +151,6 @@ const CompletedModal = forwardRef(function CompletedModal(
   return (
     <Modal ref={ref} title="Prova terminata">
       <p>La prova è terminata.</p>
-      {student.score !== undefined && (
-        <>
-          <p>
-            Hai ottenuto un punteggio di <b>{student.score}</b> su <b>{maxPoints}</b>.
-          </p>
-          <table className="table table-sm text-center mt-4">
-            <thead>
-              <tr>
-                <th scope="col">Domanda</th>
-                <th scope="col">Risposta</th>
-                <th scope="col">Soluzione</th>
-                <th scope="col">Punteggio</th>
-              </tr>
-            </thead>
-            <tbody>
-              {problems.map((problem) => {
-                const answer = student.answers?.[problem]?.toString()?.trim();
-                const problemSchema = schema[problem];
-                return (
-                  <tr key={problem}>
-                    <td>{problem}</td>
-                    <td>{answer ?? "-"}</td>
-                    <td>{problemSchema.optionsCorrect?.join(", ")}</td>
-                    <td>{calcProblemScore(problemSchema, answer)}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </>
-      )}
     </Modal>
   );
 });
