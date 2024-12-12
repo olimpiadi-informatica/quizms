@@ -22,6 +22,10 @@ async function generatePdf(
   for (const img of await page.getByRole("img").all()) {
     await img.isVisible();
   }
+  await page.getByText("Caricamento in corso...").waitFor({ state: "hidden" });
+  for (const img of await page.getByRole("img").all()) {
+    await img.isVisible();
+  }
   await page.waitForTimeout(1000);
 
   const basePdf = await page.pdf({
