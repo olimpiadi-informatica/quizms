@@ -14,7 +14,7 @@ export function BaseStatement({ children }: { children: ReactNode }) {
     "time",
     async () => {
       const resp = await fetch("https://time1.olinfo.it/");
-      return differenceInMilliseconds(new Date(Number(await resp.text())), new Date());
+      return differenceInMilliseconds(new Date(await resp.text()), new Date());
     },
     { suspense: true },
   );
