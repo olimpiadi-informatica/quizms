@@ -109,7 +109,7 @@ export function getSchema(program: Program) {
           pointsCorrect,
           pointsBlank,
           pointsWrong,
-          optionsBlank: ["-"],
+          optionsBlank: ["-", ""],
           originalId: String(originalId),
         };
       }
