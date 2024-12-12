@@ -497,7 +497,7 @@ function columnDefinition(contest: Contest, variants: Record<string, Variant>): 
         );
       },
       sortable: false,
-      hide: !contest.hasOnline,
+      hide: true,
     },
     ...contest.problemIds.map((id, i): ColDef => {
       const schema = sampleVariant?.schema[id];
