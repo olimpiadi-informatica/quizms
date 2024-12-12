@@ -525,6 +525,7 @@ function columnDefinition(contest: Contest, variants: Record<string, Variant>): 
       pinned: "right",
       width: 100,
       ...defaultOptions,
+      hide: true,
     },
     {
       field: "absent",
