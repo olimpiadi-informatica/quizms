@@ -621,13 +621,13 @@ function isStudentIncomplete(
     if (!student.variant) return "Variante mancante";
     if (!(student.variant in variants)) return `La variante ${student.variant} non è valida`;
   }
-  const variant = variants[student.variant!] ?? Object.values(variants)[0];
+  /* const variant = variants[student.variant!] ?? Object.values(variants)[0];
 
   for (const id of Object.keys(variant.schema)) {
     if (!(id in (student.answers ?? {}))) {
       return `Domanda ${id} mancante`;
     }
-  }
+  } */
 }
 
 function isStudentEmpty(student: Student) {
