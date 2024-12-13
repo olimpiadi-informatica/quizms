@@ -430,7 +430,7 @@ function Table() {
 function columnDefinition(
   contest: Contest,
   variants: Record<string, Variant>,
-  _isContestFinished: boolean,
+  isContestFinished: boolean,
 ): ColDef[] {
   const sampleVariant = Object.values(variants)[0];
 

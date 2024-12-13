@@ -14,10 +14,11 @@ import {
   NavbarContent,
   SubmitButton,
 } from "@olinfo/react-components";
+import { sumBy } from "lodash-es";
 import { FileChartColumn, LogOut, RotateCcw } from "lucide-react";
 
-import type { Schema } from "~/models";
-import { ErrorBoundary, Prose, Timer } from "~/web/components";
+import { type Schema, calcProblemScore } from "~/models";
+import { ErrorBoundary, Progress, Prose, Timer } from "~/web/components";
 
 import { useStudent } from "./provider";
 
@@ -25,11 +26,11 @@ export function StudentLayout({ children }: { children: ReactNode }) {
   const completedRef = useRef<HTMLDialogElement>(null);
   const submitRef = useRef<HTMLDialogElement>(null);
 
-  const { contest, schema, reset, participation, terminated } = useStudent();
+  const { contest, student, schema, reset, participation, terminated } = useStudent();
 
-  // const answered = sumBy(Object.values(student.answers ?? {}), (s) => Number(s === 0 || !!s));
-  // const total = Math.max(Object.keys(schema).length, 1);
-  // const progress = Math.round((answered / total) * 100);
+  const answered = sumBy(Object.values(student.answers ?? {}), (s) => Number(s === 0 || !!s));
+  const total = Math.max(Object.keys(schema).length, 1);
+  const progress = Math.round((answered / total) * 100);
 
   const submit = async () => {
     const modal = submitRef.current;
@@ -137,12 +138,12 @@ const CompletedModal = forwardRef(function CompletedModal(
   { schema }: { schema: Schema },
   ref: Ref<HTMLDialogElement>,
 ) {
-  // const { student } = useStudent();
+  const { student } = useStudent();
 
   const problems = Object.keys(schema);
   problems.sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
 
-  // const maxPoints = sumBy(Object.values(schema), "pointsCorrect");
+  const maxPoints = sumBy(Object.values(schema), "pointsCorrect");
 
   return (
     <Modal ref={ref} title="Prova terminata">
