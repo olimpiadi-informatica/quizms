@@ -45,13 +45,16 @@ function DatePolyfill() {
       const timestamp = await res.text();
       return Number(timestamp) - now;
     },
-    { suspense: true },
+    {
+      revalidateIfStale: false,
+      revalidateOnMount: true,
+      suspense: true,
+    },
   );
 
   class PreciseDate extends globalThis.NativeDate {
-    constructor() {
-      super();
-      this.setTime(this.getTime() + timeDelta);
+    constructor(value?: number | string | Date) {
+      super(value ?? PreciseDate.now());
     }
 
     static now() {
