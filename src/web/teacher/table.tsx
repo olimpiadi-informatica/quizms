@@ -505,7 +505,7 @@ function columnDefinition(
         );
       },
       sortable: false,
-      hide: true,
+      hide: !contest.hasOnline,
     },
     ...contest.problemIds.map((id, i): ColDef => {
       const schema = sampleVariant?.schema[id];
