@@ -53,8 +53,8 @@ function DatePolyfill() {
   );
 
   class PreciseDate extends globalThis.NativeDate {
-    constructor(value?: number | string | Date) {
-      super(value ?? PreciseDate.now());
+    constructor(...args: any[]) {
+      super(...((args.length === 0 ? [PreciseDate.now()] : args) as []));
     }
 
     static now() {
