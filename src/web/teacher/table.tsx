@@ -532,7 +532,7 @@ function columnDefinition(
       pinned: "right",
       width: 100,
       ...defaultOptions,
-      hide: !isContestFinished,
+      hide: true,
     },
     {
       field: "absent",
