@@ -35,8 +35,6 @@ export function calcScore(student: Student, schema?: Schema) {
 
   let points = 0;
   for (const id in schema) {
-    if (!(id in answers)) continue;
-
     const problem = schema[id];
     const answer = answers[id]?.toString()?.trim();
 
