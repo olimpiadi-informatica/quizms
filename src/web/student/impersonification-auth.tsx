@@ -22,7 +22,7 @@ export function ImpersonificationAuth({ children }: { children: ReactNode }) {
       <div className="">
         <StudentProvider
           contest={contest}
-          participation={participation}
+          participation={{ ...participation, startingTime: new Date(0) }}
           student={{ ...student, finishedAt: new Date(0) }}
           setStudent={() => {}}
           reset={() => {}}>
