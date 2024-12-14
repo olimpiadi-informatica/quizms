@@ -1,6 +1,6 @@
 import child_process from "node:child_process";
 import fs, { readFile } from "node:fs/promises";
-import { platform } from "node:os";
+import { cpus, platform } from "node:os";
 import path from "node:path";
 import { promisify } from "node:util";
 
@@ -8,6 +8,8 @@ import { isPlainObject, stubFalse, stubTrue } from "lodash-es";
 import type { PluginContext } from "rollup";
 import { temporaryFile, temporaryWrite } from "tempy";
 import type { PluginOption, TransformResult } from "vite";
+
+import { AsyncPool } from "~/utils/async-pool";
 
 import { executePython } from "./python";
 
@@ -76,6 +78,7 @@ export default function img(variant) {
   };
 }
 
+const pool = new AsyncPool(cpus().length);
 const execFile = promisify(child_process.execFile);
 
 async function transformAsymptote(fileName: string, inject: string | null): Promise<string> {
@@ -92,16 +95,18 @@ async function transformAsymptote(fileName: string, inject: string | null): Prom
   try {
     if (platform() === "darwin") {
       const pdfFile = temporaryFile({ extension: "pdf" });
-      await execFile(
+      await pool.run(
+        execFile,
         "asy",
         [fileName, "-f", "pdf", "-autoimport", injectFile, "-o", pdfFile.replace(/\.pdf$/, "")],
         { cwd: path.dirname(fileName) },
       );
 
-      await execFile("pdf2svg", [pdfFile, svgFile]);
+      await pool.run(execFile, "pdf2svg", [pdfFile, svgFile], {});
       await fs.unlink(pdfFile);
     } else {
-      await execFile(
+      await pool.run(
+        execFile,
         "asy",
         [
           fileName,

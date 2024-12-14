@@ -1,12 +1,14 @@
 import { mkdir, writeFile } from "node:fs/promises";
+import { cpus } from "node:os";
 import path from "node:path";
 
 import { PDFDocument, type PDFPageDrawTextOptions, StandardFonts } from "@cantoo/pdf-lib";
-import { map, range, size, uniq } from "lodash-es";
+import { range, uniq } from "lodash-es";
 import { type BrowserContext, chromium } from "playwright";
 
 import type { Contest } from "~/models";
 import type { VariantsConfig } from "~/models/variants-config";
+import { AsyncPool } from "~/utils/async-pool";
 import { fatal, info } from "~/utils/logs";
 
 async function generatePdf(
@@ -77,8 +79,7 @@ export default async function generatePdfs(
   const browser = await chromium.launch({ headless: true });
   const context = await browser.newContext();
 
-  const poolSize = 16;
-  const promises: Record<string, Promise<void>> = {};
+  const pool = new AsyncPool(cpus().length);
 
   for (const contest of contests) {
     const config = variantConfigs.find((c) => c.id === contest.id);
@@ -88,15 +89,11 @@ export default async function generatePdfs(
 
     const ids = uniq([...config.variantIds, ...config.pdfVariantIds]);
     for (const id of ids) {
-      if (size(promises) >= poolSize) {
-        const oldId = await Promise.any(map(promises, (promise, id) => promise.then(() => id)));
-        delete promises[oldId];
-      }
-      promises[id] = generatePdf(context, contest, baseUrl, id, outDir);
+      void pool.run(() => generatePdf(context, contest, baseUrl, id, outDir));
     }
   }
 
-  await Promise.all(Object.values(promises));
+  await pool.wait();
 
   await context.close();
   await browser.close();
