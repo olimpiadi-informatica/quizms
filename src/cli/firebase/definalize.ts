@@ -1,5 +1,6 @@
 import { info, success } from "~/utils/logs";
 
+import { sumBy } from "lodash-es";
 import { participationConverter } from "./utils/converters-admin";
 import { initializeFirebase } from "./utils/initialize";
 
@@ -8,28 +9,33 @@ export default async function definalize() {
 
   info("Definalizing all participations.");
 
-  const ref = db.collection("participations").withConverter(participationConverter);
+  const ref = db
+    .collection("participations")
+    .where("finalized", "==", false)
+    .withConverter(participationConverter)
+    .limit(1000);
 
-  const chunkSize = 25_000;
-  let snapshot = await ref.limit(chunkSize).get();
+  let snapshot = await ref.get();
 
   let sum = 0;
   while (!snapshot.empty) {
-    await Promise.all(
+    const finalized = await Promise.all(
       snapshot.docs.map(async (doc) => {
         const participation = doc.data();
         if (participation.finalized) {
-          await ref.doc(doc.id).update({ finalized: false });
+          await db.doc(doc.ref.path).update({ finalized: false });
+          return 1;
         }
+        return 0;
       }),
     );
 
-    sum += snapshot.size;
+    sum += sumBy(finalized);
     info(`Definalized ${sum} participations.`);
 
     const last = snapshot.docs.at(-1);
-    snapshot = await ref.startAfter(last).limit(chunkSize).get();
+    snapshot = await ref.startAfter(last).get();
   }
 
-  success("All participations are definalized.");
+  success(`${sum} participations were successfully definalized.`);
 }

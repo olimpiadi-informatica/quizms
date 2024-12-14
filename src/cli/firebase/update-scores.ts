@@ -1,6 +1,7 @@
 import { calcScore } from "~/models";
 import { info, success } from "~/utils/logs";
 
+import { sumBy } from "lodash-es";
 import { studentConverter, variantConverter } from "./utils/converters-admin";
 import { initializeFirebase } from "./utils/initialize";
 
@@ -18,24 +19,26 @@ export default async function updateScores() {
 
   let sum = 0;
   while (!snapshot.empty) {
-    await Promise.all(
+    const updated = await Promise.all(
       snapshot.docs.map((doc) =>
         db.runTransaction(async (t) => {
           const studentSnap = await t.get(doc.ref);
           const student = studentSnap.data();
-          if (!student?.variant) return;
+          if (!student?.variant) return 0;
           const score = calcScore(student, variants[student.variant]?.schema);
+          if (score === student.score) return 0;
           t.update(doc.ref, { score });
+          return 1;
         }),
       ),
     );
 
-    sum += snapshot.size;
+    sum += sumBy(updated);
     info(`${sum} students updated.`);
 
     const last = snapshot.docs.at(-1);
     snapshot = await ref.startAfter(last).get();
   }
 
-  success("All students updated.");
+  success(`${sum} students updated.`);
 }
