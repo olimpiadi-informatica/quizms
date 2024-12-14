@@ -62,7 +62,7 @@ export function calcProblemScore(problem: Schema[string], answer?: string) {
     return;
   }
 
-  if (answer === undefined || problem.optionsBlank?.includes(answer)) {
+  if (!answer || problem.optionsBlank?.includes(answer)) {
     return problem.pointsBlank;
   }
   if (problem.optionsCorrect.includes(answer)) {
