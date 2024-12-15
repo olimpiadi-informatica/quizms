@@ -51,7 +51,7 @@ export async function importCollection<T extends { id: string }>(
 
   for (let i = 0; i < docsToImport.length; i += 400) {
     const batch = db.batch();
-    for (const record of data.slice(i, i + 400)) {
+    for (const record of docsToImport.slice(i, i + 400)) {
       const ref = db.doc(`${collection}/${record.id}`).withConverter(converter);
       if (options.force) {
         batch.set(ref, record);
