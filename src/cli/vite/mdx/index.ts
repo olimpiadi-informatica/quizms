@@ -15,7 +15,7 @@ import rehypeFixWrap from "./rehype-fix-wrap";
 import remarkAnswers from "./remark-answers";
 import remarkHighlight from "./remark-highlight";
 import remarkImages from "./remark-images";
-import remarkProblemIds from "./remark-problem-ids";
+import remarkProblemMetatdata from "./remark-problem-metadata";
 
 const remarkPlugins: PluggableList = [
   remarkAnswers,
@@ -26,7 +26,7 @@ const remarkPlugins: PluggableList = [
   remarkMdxFrontmatter,
   remarkImages,
   [remarkMdxMathEnhancedPlugin, { component: "Equation" }],
-  remarkProblemIds,
+  remarkProblemMetatdata,
   [remarkSmartypants, { dashes: "oldschool" }],
 ];
 

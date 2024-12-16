@@ -9,6 +9,7 @@ export const variantSchema = z.object({
     z.object({
       type: z.enum(["text", "number", "points"]),
       originalId: z.coerce.string().optional(),
+      problemVariant: z.number().optional(),
 
       optionsCorrect: z.string().array().optional(),
       optionsBlank: z.string().array().optional(),

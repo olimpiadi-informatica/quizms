@@ -1,3 +1,4 @@
+import { builders as b } from "estree-toolkit";
 import type { Root, TopLevelContent } from "mdast";
 import type { MdxJsxFlowElement } from "mdast-util-mdx-jsx";
 import type { Plugin } from "unified";
@@ -37,7 +38,10 @@ function parseSubProblems(tree: Root) {
     }
 
     if (contents.at(-1)?.type !== "mdxJsxFlowElement") {
-      const attributes = subProblems > 1 ? [jsxAttribute("subId", id++)] : [];
+      const attributes = [
+        ...(subProblems > 1 ? [jsxAttribute("subId", id++)] : []),
+        jsxAttribute("problemVariant", b.identifier("_variant")),
+      ];
       contents.push({
         type: "mdxJsxFlowElement",
         name: "SubProblem",

@@ -71,6 +71,9 @@ export function cleanStatement(program: Program) {
       if (isQuizmsComponent(comp, "OpenAnswer")) {
         removeProp(props, "correct");
       }
+      if (isQuizmsComponent(comp, "SubProblem")) {
+        removeProp(props, "problemVariant");
+      }
     },
   });
 }
@@ -104,6 +107,7 @@ export function getSchema(program: Program) {
         id[1]++;
         answerId = 0;
         const [pointsCorrect, pointsBlank, pointsWrong] = points;
+        const problemVariant = getPropValue(props, "problemVariant") as number;
         schema[`${id}`] = {
           type: "text",
           pointsCorrect,
@@ -111,6 +115,7 @@ export function getSchema(program: Program) {
           pointsWrong,
           optionsBlank: ["-", ""],
           originalId: String(originalId),
+          problemVariant: problemVariant,
         };
       }
 
