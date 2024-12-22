@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { type ReactNode, useCallback } from "react";
 
 import type { FirebaseOptions } from "firebase/app";
 import { getAuth, signOut } from "firebase/auth";
@@ -31,18 +31,26 @@ import { studentHash } from "./common/hash";
 import PasswordLogin from "./common/password-login";
 import query from "./common/query";
 import { useAuth, useCollection } from "./hooks";
+import { FirebaseStatement } from "./student-statement";
 
-export function FirebaseTeacher({ config }: { config: FirebaseOptions }) {
+type Props = {
+  config: FirebaseOptions;
+  createStatementFromFetch: (res: Promise<Response>) => ReactNode;
+};
+
+export function FirebaseTeacher({ config, createStatementFromFetch }: Props) {
   return (
     <FirebaseLogin config={config}>
       <PasswordLogin>
-        <TeacherInner />
+        <TeacherInner createStatementFromFetch={createStatementFromFetch} />
       </PasswordLogin>
     </FirebaseLogin>
   );
 }
 
-function TeacherInner() {
+function TeacherInner({
+  createStatementFromFetch,
+}: { createStatementFromFetch: Props["createStatementFromFetch"] }) {
   const db = useDb();
   const user = useAuth()!;
 
@@ -67,7 +75,8 @@ function TeacherInner() {
       contests={contests}
       variants={variants}
       logout={logout}
-      getPdfStatements={async (statementVersion, variantIds) =>
+      statementComponent={() => <FirebaseStatement createFromFetch={createStatementFromFetch} />}
+      getPdfStatements={(statementVersion, variantIds) =>
         getPdfStatements(db, statementVersion, variantIds)
       }
       useStudents={useStudents}
