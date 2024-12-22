@@ -324,7 +324,7 @@ function Table() {
     setCurrentStudent(name);
 
     let value = ev.newValue;
-    const [field, subfield] = ev.colDef.field!.split(/[.[\]]/);
+    const [field, subfield] = ev.colDef.field!.split(/[.[\]]/, 2);
     if (field === "userData") {
       const schema = contest.userData.find((f) => f.name === subfield);
       const [newValue, error] = parseUserData(value, schema);
