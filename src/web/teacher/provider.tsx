@@ -1,4 +1,4 @@
-import { createContext, lazy, useContext } from "react";
+import { type ComponentType, createContext, lazy, useContext } from "react";
 
 import { Link, Redirect, Route, Switch, useParams } from "wouter";
 
@@ -51,6 +51,7 @@ type TeacherProviderProps = {
   contests: Contest[];
   variants: Variant[];
   logout: () => Promise<void>;
+  statementComponent: ComponentType<Record<never, never>>;
   getPdfStatements: (
     statementVersion: number,
     variantIds: string[],
@@ -110,6 +111,7 @@ function ProviderInner({
   contests,
   variants,
   logout,
+  statementComponent: Statement,
   getPdfStatements,
   useStudents,
   useStudentRestores,
@@ -152,7 +154,7 @@ function ProviderInner({
         <Route path="/students/:studentId">
           <ImpersonificationAuth>
             <UserDataForm />
-            {/* TODO: statement */}
+            <Statement />
           </ImpersonificationAuth>
         </Route>
         <Route>

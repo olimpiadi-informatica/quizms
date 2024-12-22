@@ -100,7 +100,7 @@ function VariantProvider({ children }: { children: ReactNode }) {
 }
 
 type StatementProps = {
-  createFromFetch: (res: Promise<Response>) => Promise<ReactNode>;
+  createFromFetch: (res: Promise<Response>) => ReactNode;
 };
 
 export function PrintStatement({ createFromFetch }: StatementProps) {
