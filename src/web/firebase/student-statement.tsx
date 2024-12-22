@@ -8,7 +8,7 @@ import { RemoteStatement } from "~/web/student/remote-statement";
 import { useDb } from "./common/base-login";
 
 type Props = {
-  createFromFetch: (res: Promise<Response>) => Promise<ReactNode>;
+  createFromFetch: (res: Promise<Response>) => ReactNode;
 };
 
 export function FirebaseStatement({ createFromFetch }: Props) {

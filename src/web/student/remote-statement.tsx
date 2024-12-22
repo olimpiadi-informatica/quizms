@@ -6,7 +6,7 @@ import { BaseStatement } from "~/web/student/base-statement";
 
 type Props = {
   id: string;
-  fetcher: () => Promise<ReactNode>;
+  fetcher: () => ReactNode | Promise<ReactNode>;
 };
 
 export function RemoteStatement({ id, fetcher }: Props) {
