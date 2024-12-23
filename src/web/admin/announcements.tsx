@@ -1,4 +1,4 @@
-import { Fragment, type Ref, forwardRef, useRef } from "react";
+import { Fragment, type Ref, forwardRef, useReducer, useRef } from "react";
 
 import {
   Button,
@@ -12,6 +12,7 @@ import {
   TextField,
 } from "@olinfo/react-components";
 import { CircleX, Info, TriangleAlert } from "lucide-react";
+import Markdown from "react-markdown";
 
 import type { Announcement } from "~/models";
 import { randomId } from "~/utils/random";
@@ -48,7 +49,7 @@ export default function Announcements() {
             <small>
               <DateTime date={announcement.createdAt} />
             </small>
-            <p>{announcement.body}</p>
+            <Markdown>{announcement.body}</Markdown>
             <hr className="my-5 last:hidden" />
           </Fragment>
         ))}
@@ -68,6 +69,7 @@ const AnnouncementModal = forwardRef(function AnnouncementModal(
   ref: Ref<HTMLDialogElement>,
 ) {
   const { contest } = useAdmin();
+  const [id, nextId] = useReducer((prev) => prev + 1, 0);
 
   const finalize = async ({
     level,
@@ -83,6 +85,7 @@ const AnnouncementModal = forwardRef(function AnnouncementModal(
         title,
         body,
       });
+      nextId();
     } finally {
       if (ref && "current" in ref) {
         ref.current?.close();
@@ -92,11 +95,12 @@ const AnnouncementModal = forwardRef(function AnnouncementModal(
 
   return (
     <Modal ref={ref} title="Aggiungi comunicazione">
-      <Form onSubmit={finalize} className="!max-w-full">
+      <Form key={id} onSubmit={finalize} className="!max-w-full">
         <SelectField
           field="level"
           label="Priorità"
           options={{ info: "Normale", warning: "Alta" }}
+          placeholder="Seleziona la priorità"
         />
         <TextField field="title" label="Titolo" placeholder="Inserisci il titolo" />
         <TextAreaField

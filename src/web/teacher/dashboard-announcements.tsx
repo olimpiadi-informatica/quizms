@@ -2,6 +2,7 @@ import { Fragment } from "react";
 
 import { DateTime } from "@olinfo/react-components";
 import { CircleX, Info, TriangleAlert } from "lucide-react";
+import Markdown from "react-markdown";
 
 import { announcementConverter } from "~/web/firebase/common/converters";
 import { useCollection } from "~/web/firebase/hooks";
@@ -34,7 +35,7 @@ export function Announcements() {
           <small>
             <DateTime date={announcement.createdAt} />
           </small>
-          <p>{announcement.body}</p>
+          <Markdown>{announcement.body}</Markdown>
           <hr className="my-5 last:hidden" />
         </Fragment>
       ))}
