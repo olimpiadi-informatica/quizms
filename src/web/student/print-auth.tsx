@@ -77,6 +77,7 @@ function VariantProvider({ children }: { children: ReactNode }) {
     teacher: "",
     finalized: false,
     contestId: contest.id,
+    disabled: false,
   };
 
   const student: Student = {

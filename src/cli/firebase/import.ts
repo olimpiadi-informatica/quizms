@@ -173,6 +173,7 @@ async function importParticipations(db: Firestore, options: ImportOptions) {
           teacher: "",
           finalized: false,
           pdfVariants,
+          disabled: false,
         };
         try {
           const user = await auth.getUserByEmail(school.email);

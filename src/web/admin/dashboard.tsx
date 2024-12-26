@@ -58,7 +58,7 @@ export default function Dashboard() {
               description="tutte le scuole"
               collection="participations"
               converter={participationConverter}
-              options={{ constraints: { contestId: contest.id } }}
+              options={{ constraints: { contestId: contest.id, disabled: false } }}
             />
             <Export
               label="studenti"
@@ -83,6 +83,7 @@ function ContestInformation() {
   const totalSchools = useCount<Participation>("participations", {
     constraints: {
       contestId: contest.id,
+      disabled: false,
     },
   });
 
@@ -90,6 +91,7 @@ function ContestInformation() {
     constraints: {
       contestId: contest.id,
       finalized: true,
+      disabled: false,
     },
   });
 

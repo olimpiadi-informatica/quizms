@@ -50,6 +50,7 @@ export function NoAuth({ contestName, contestLongName, duration, children }: Aut
     teacher: "",
     startingTime: student.startedAt,
     finalized: false,
+    disabled: false,
   };
 
   const reset = useCallback(async () => {

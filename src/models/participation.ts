@@ -11,6 +11,7 @@ export const participationSchema = z.object({
   endingTime: z.date().optional(),
   finalized: z.boolean().default(false),
   pdfVariants: z.array(z.coerce.string()).optional(),
+  disabled: z.boolean().default(false),
 });
 
 export type Participation = z.infer<typeof participationSchema>;
