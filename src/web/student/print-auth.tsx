@@ -58,6 +58,7 @@ export function PrintAuth({ children }: AuthProps) {
     teacher: "",
     finalized: false,
     contestId: contest.id,
+    disabled: false,
   };
 
   const student: Student = {
