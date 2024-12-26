@@ -26,7 +26,7 @@ export function AnswerGroup({ children }: AnswerGroupProps) {
   return (
     <form
       className={clsx(
-        "my-5 flex-wrap rounded-xl bg-base-200 p-3 prose-p:my-1",
+        "my-5 flex-wrap rounded-xl bg-base-200 p-3 prose-p:my-1 break-inside-avoid",
         "print:flex print:border print:border-[var(--tw-prose-hr)] print:p-1",
       )}>
       {answers.map((answer, i) => (
