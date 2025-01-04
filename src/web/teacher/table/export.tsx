@@ -4,10 +4,9 @@ import { saveAs } from "file-saver";
 import { unparse as stringifyCSV } from "papaparse";
 
 import { type Contest, type Student, formatUserData } from "~/models";
+import { useTeacher, useTeacherStudents } from "~/web/teacher/provider";
 
-import { useTeacher, useTeacherStudents } from "./provider";
-
-const Exporter = forwardRef(function Exporter(_, ref: Ref<HTMLButtonElement> | null) {
+export const ExportModal = forwardRef(function Exporter(_, ref: Ref<HTMLButtonElement> | null) {
   const { contest } = useTeacher();
   const [students] = useTeacherStudents();
 
@@ -20,8 +19,6 @@ const Exporter = forwardRef(function Exporter(_, ref: Ref<HTMLButtonElement> | n
     />
   );
 });
-
-export default Exporter;
 
 function exportStudents(students: Student[], contest: Contest) {
   const flatStudents = students

@@ -1,5 +1,7 @@
 import z from "zod";
 
+import { answerSchema } from "~/models/variant";
+
 export const studentSchema = z
   .object({
     uid: z.string(),
@@ -15,7 +17,7 @@ export const studentSchema = z
     finishedAt: z.date(),
 
     variant: z.string(),
-    answers: z.record(z.union([z.string(), z.number(), z.null()])), // null means blank
+    answers: z.record(answerSchema),
     score: z.number(),
     maxScore: z.number(),
     extraData: z.record(z.any()),

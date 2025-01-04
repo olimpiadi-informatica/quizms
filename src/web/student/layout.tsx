@@ -167,7 +167,7 @@ const CompletedModal = forwardRef(function CompletedModal(
             </thead>
             <tbody>
               {problems.map((problem) => {
-                const answer = student.answers?.[problem]?.toString()?.trim();
+                const answer = student.answers?.[problem];
                 const problemSchema = schema[problem];
                 return (
                   <tr key={problem}>

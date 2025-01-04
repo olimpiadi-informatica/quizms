@@ -1,13 +1,4 @@
-import {
-  type ComponentType,
-  type Ref,
-  Suspense,
-  forwardRef,
-  lazy,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { type ComponentType, Suspense, lazy, useMemo, useRef, useState } from "react";
 
 import type {
   CellEditRequestEvent,
@@ -18,18 +9,9 @@ import type {
 } from "@ag-grid-community/core";
 import { AG_GRID_LOCALE_IT } from "@ag-grid-community/locale";
 import type { AgGridReactProps } from "@ag-grid-community/react/dist/types/src/shared/interfaces";
-import {
-  Button,
-  CheckboxField,
-  Form,
-  FormButton,
-  Modal,
-  SubmitButton,
-  TextField,
-  useIsAfter,
-} from "@olinfo/react-components";
+import { Button, useIsAfter } from "@olinfo/react-components";
 import { addMinutes, isEqual as isEqualDate } from "date-fns";
-import { cloneDeep, deburr, isString, lowerFirst, omit, set, sumBy } from "lodash-es";
+import { cloneDeep, omit, set, sumBy, toPath } from "lodash-es";
 import { Download, FileCheck, Trash2, TriangleAlert, Upload, Users } from "lucide-react";
 
 import {
@@ -38,15 +20,19 @@ import {
   type Variant,
   calcScore,
   formatUserData,
+  parseAnswer,
   parseUserData,
 } from "~/models";
 import { randomId } from "~/utils/random";
 import { Loading } from "~/web/components";
+import { useTeacher, useTeacherStudents } from "~/web/teacher/provider";
 
-import { useTeacher, useTeacherStudents } from "./provider";
-import { DeleteAllModal } from "./table-deleter";
-import Exporter from "./table-exporter";
-import ImportModal from "./table-importer";
+import { DeleteModal } from "./delete";
+import { DeleteAllModal } from "./delete-all";
+import { ExportModal } from "./export";
+import { FinalizeModal } from "./finalize";
+import { ImportModal } from "./importer";
+import { deleteConfirmStorageKey, isStudentIncomplete } from "./utils";
 
 import "@ag-grid-community/styles/ag-grid.css";
 import "@ag-grid-community/styles/ag-theme-quartz.css";
@@ -92,7 +78,7 @@ export default function TeacherTable() {
             <div className="hidden md:block">Finalizza</div>
           </Button>
         )}
-        <FinalizeModal key={contest.id} ref={finalizeRef} />
+        <FinalizeModal key={participation.id} ref={finalizeRef} />
         {!participation.finalized && (
           <Button
             className="btn-primary btn-sm h-10"
@@ -105,7 +91,7 @@ export default function TeacherTable() {
       <Suspense fallback={<Loading />}>
         <Table key={participation.id} />
         <ImportModal ref={importRef} />
-        <Exporter ref={exportRef} />
+        <ExportModal ref={exportRef} />
         <DeleteAllModal ref={deleterRef} />
       </Suspense>
     </>
@@ -117,167 +103,9 @@ function Counter() {
   const [students] = useTeacherStudents();
 
   return sumBy(students, (s) => {
-    return Number(!s.disabled && !isStudentEmpty(s) && !isStudentIncomplete(s, contest, variants));
+    return Number(!s.disabled && !isStudentIncomplete(s, contest, variants));
   });
 }
-
-const FinalizeModal = forwardRef(function FinalizeModal(
-  _props,
-  ref: Ref<HTMLDialogElement> | null,
-) {
-  const { contest, participation, variants, setParticipation } = useTeacher();
-  const [students] = useTeacherStudents();
-
-  const error = useMemo(() => {
-    const prevStudents = new Set<string>();
-
-    // Generate a list of string that can uniquely identify a student. Multiple
-    // strings are generated to prevent possible errors during data entry.
-    function normalize(student: Student) {
-      const info = student.userData;
-      const orderings = [
-        ["name", "surname", "classYear", "classSection"],
-        ["surname", "name", "classYear", "classSection"],
-      ];
-      return orderings.map((fields) => {
-        return deburr(fields.map((field) => info?.[field] ?? "").join("\n"))
-          .toLowerCase()
-          .replaceAll(/[^\w\n]/g, "");
-      });
-    }
-
-    for (const student of students) {
-      if (student.disabled) continue;
-
-      const { name, surname } = student.userData ?? {};
-
-      const reason = isStudentIncomplete(student, contest, variants);
-      if (reason) {
-        if (!name || !surname) return "Almeno uno studente non ha nome o cognome";
-        return `Lo studente ${name} ${surname} non può essere finalizzato: ${lowerFirst(reason)}.`;
-      }
-
-      for (const normalized of normalize(student)) {
-        if (prevStudents.has(normalized)) {
-          return `Lo studente ${name} ${surname} è stato inserito più volte`;
-        }
-        prevStudents.add(normalized);
-      }
-    }
-  }, [students, contest, variants]);
-
-  const correctConfirm = "tutti gli studenti sono stati correttamente inseriti";
-
-  const close = () => {
-    if (ref && "current" in ref) {
-      ref.current?.close();
-    }
-  };
-
-  const finalize = async () => {
-    try {
-      await setParticipation({ ...participation, finalized: true });
-    } finally {
-      close();
-    }
-  };
-
-  return (
-    <Modal ref={ref} title="Finalizza scuola">
-      {error ? (
-        <div className="prose">
-          <p>Non è possibile finalizzare la scuola a causa del seguente errore:</p>
-          <p className="flex justify-center rounded-box bg-base-200 px-3 py-2">{error}</p>
-          {contest.allowStudentDelete && (
-            <p>
-              Se questo studente è stato aggiunto per errore e vuoi rimuoverlo, puoi usare il
-              pulsante <i>Cancella</i> nell&apos;ultima colonna.
-            </p>
-          )}
-        </div>
-      ) : (
-        <Form onSubmit={finalize} className="!max-w-full">
-          <div className="prose">
-            <p>
-              <strong className="text-error">Attenzione:</strong> questa operazione è irreversibile.
-            </p>
-            <p>
-              Finalizzando <b>non</b> sarà più possibile{" "}
-              {contest.allowStudentImport && (
-                <>
-                  <b>aggiungere</b> nuovi studenti o{" "}
-                </>
-              )}
-              <b>modificare</b> i dati degli studenti in questa scuola per la gara{" "}
-              <i>{contest?.name}</i>.
-            </p>
-            <p>
-              Se hai capito e sei d&apos;accordo, scrivi &ldquo;<i>{correctConfirm}</i>&rdquo;.
-            </p>
-          </div>
-          <TextField field="confirm" label="Conferma" placeholder="tutti gli studenti..." />
-          {({ confirm }) => (
-            <div className="flex flex-wrap justify-center gap-2">
-              <FormButton onClick={close}>Annulla</FormButton>
-              <SubmitButton
-                className="btn-error"
-                icon={TriangleAlert}
-                disabled={confirm !== correctConfirm}>
-                Conferma
-              </SubmitButton>
-            </div>
-          )}
-        </Form>
-      )}
-    </Modal>
-  );
-});
-
-const deleteConfirmStorageKey = "delete-confirm";
-
-const DeleteModal = forwardRef(function DeleteModal(
-  { studentName }: { studentName: string },
-  ref: Ref<HTMLDialogElement> | null,
-) {
-  const close = (value: string) => {
-    if (ref && "current" in ref && ref.current) {
-      ref.current.returnValue = value;
-      ref.current.close();
-    }
-  };
-
-  const confirm = ({ notAgain }: { notAgain: boolean }) => {
-    sessionStorage.setItem(deleteConfirmStorageKey, notAgain ? "1" : "0");
-    close("1");
-  };
-
-  return (
-    <Modal ref={ref} title="Cancella studente">
-      <div className="prose break-words">
-        <p>
-          Stai per cancellare{" "}
-          {studentName ? (
-            <>
-              lo studente <b>{studentName}</b>
-            </>
-          ) : (
-            <>uno studente</>
-          )}
-          . Puoi vedere gli studenti cancellati e annullarne la cancellazione cliccando sulla
-          testata della colonna &ldquo;<i>Cancella</i>&rdquo; e scegliendo &ldquo;
-          <i>Seleziona tutti</i>&rdquo; come filtro.
-        </p>
-        <Form onSubmit={confirm} className="!max-w-full">
-          <CheckboxField field="notAgain" label="Non mostrare più questo pop-up" optional />
-          <div className="flex flex-wrap justify-center gap-2">
-            <FormButton onClick={() => close("0")}>Annulla</FormButton>
-            <SubmitButton className="btn-warning">Continua</SubmitButton>
-          </div>
-        </Form>
-      </div>
-    </Modal>
-  );
-});
 
 function Table() {
   const { contest, participation, variants } = useTeacher();
@@ -324,49 +152,20 @@ function Table() {
     setCurrentStudent(name);
 
     let value = ev.newValue;
-    const [field, subfield] = ev.colDef.field!.split(/[.[\]]/, 2);
+    const [field, subfield] = toPath(ev.colDef.field!);
     if (field === "userData") {
       const schema = contest.userData.find((f) => f.name === subfield);
       value = parseUserData(value, schema!);
     }
-    if (field === "variant" && !variants[value]) {
+    if (field === "variant" && value && !variants[value]) {
       throw new Error(`La variante ${value} non è valida`);
     }
     if (field === "answers") {
-      if (isString(value)) {
-        value = value.trim().toUpperCase();
+      const schema = variants[student.variant!]?.schema;
+      if (!schema) {
+        throw new Error("Variante mancante");
       }
-      if (value === "") {
-        value = undefined;
-      }
-
-      const schema = variants[student.variant!]?.schema[subfield];
-      const options = [schema?.optionsCorrect, schema?.optionsBlank, schema?.optionsWrong]
-        .filter(Boolean)
-        .flat();
-
-      if (value !== undefined && schema && !options.includes(value)) {
-        if (schema.type === "text") {
-          throw new Error(`La risposta "${value}" non è valida`);
-        }
-
-        if (schema.type === "number") {
-          value = Number(value);
-          if (!Number.isInteger(value)) {
-            throw new TypeError("La risposta deve essere un numero intero");
-          }
-        }
-
-        if (schema.type === "points") {
-          value = Number(value);
-          if (!Number.isInteger(value)) {
-            throw new TypeError("Il punteggio deve essere un numero intero");
-          }
-          if (schema.pointsCorrect && !(0 <= value && value <= schema.pointsCorrect)) {
-            throw new Error(`Il punteggio deve essere compreso tra 0 e ${schema.pointsCorrect}`);
-          }
-        }
-      }
+      value = parseAnswer(value, schema[subfield]);
     }
     if (field === "disabled" && value) {
       const modal = modalRef.current!;
@@ -382,7 +181,7 @@ function Table() {
       }
     }
 
-    if (value === undefined) {
+    if (value == null) {
       student = omit(student, ev.colDef.field!) as Student;
     } else {
       student = cloneDeep(student);
@@ -464,8 +263,8 @@ function columnDefinition(
           if (
             field.pinned &&
             data?.updatedAt &&
-            !api.getSelectedRows().some((s: Student) => s.id === data?.id) &&
-            isStudentIncomplete(data!, contest, variants)
+            !api.getSelectedRows().some((s: Student) => s.id === data.id) &&
+            isStudentIncomplete(data, contest, variants)
           ) {
             return (
               <span>
@@ -504,15 +303,12 @@ function columnDefinition(
       sortable: false,
       hide: !contest.hasOnline,
     },
-    ...contest.problemIds.map((id, i): ColDef => {
+    ...contest.problemIds.map((id): ColDef => {
       const schema = sampleVariant?.schema[id];
-      let width = schema?.type === "number" ? 100 : 50;
-      if (i % 4 === 3) width += 15;
-
       return {
         field: `answers[${id}]`,
         headerName: id,
-        width,
+        width: 60,
         valueGetter: ({ data }) => {
           if (data.absent || data.disabled) return "";
           if (!(id in (data.answers ?? {}))) return "";
@@ -598,38 +394,4 @@ function columnDefinition(
       },
     },
   ];
-}
-
-function isStudentIncomplete(
-  student: Student,
-  contest: Contest,
-  variants: Record<string, Variant>,
-) {
-  if (isStudentEmpty(student)) return;
-  if (student.absent || student.disabled) return;
-
-  for (const field of contest.userData) {
-    if (!student.userData?.[field.name]) {
-      return `${field.label} mancante`;
-    }
-  }
-
-  if (contest.hasVariants) {
-    if (!student.variant) return "Variante mancante";
-    if (!(student.variant in variants)) return `La variante ${student.variant} non è valida`;
-  }
-  const variant = variants[student.variant!] ?? Object.values(variants)[0];
-
-  for (const id of Object.keys(variant.schema)) {
-    if (!(id in (student.answers ?? {}))) {
-      return `Domanda ${id} mancante`;
-    }
-  }
-}
-
-function isStudentEmpty(student: Student) {
-  return (
-    !Object.values(student.userData ?? {}).some((x) => x !== undefined) &&
-    !Object.values(student.answers ?? {}).some((x) => x !== undefined)
-  );
 }

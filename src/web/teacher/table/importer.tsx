@@ -3,7 +3,6 @@ import { type CSSProperties, type Ref, forwardRef, useState } from "react";
 import { Form, Modal, SingleFileField, SubmitButton } from "@olinfo/react-components";
 import { Upload } from "lucide-react";
 import { parse as parseCSV } from "papaparse";
-import z from "zod";
 
 import {
   type Contest,
@@ -11,15 +10,16 @@ import {
   type Student,
   type Variant,
   calcScore,
+  parseAnswer,
   parseUserData,
-  studentSchema,
 } from "~/models";
 import { randomId } from "~/utils/random";
-import validate from "~/utils/validate";
+import { useTeacher, useTeacherStudents } from "~/web/teacher/provider";
 
-import { useTeacher, useTeacherStudents } from "./provider";
-
-const ImportModal = forwardRef(function ImportModal(_props, ref: Ref<HTMLDialogElement> | null) {
+export const ImportModal = forwardRef(function ImportModal(
+  _props,
+  ref: Ref<HTMLDialogElement> | null,
+) {
   const { contest, participation } = useTeacher();
 
   const labels = contest.userData.map((field) => field.label);
@@ -65,18 +65,24 @@ const ImportModal = forwardRef(function ImportModal(_props, ref: Ref<HTMLDialogE
         <p>Le colonne devono essere nel seguente ordine:</p>
         <div className="overflow-auto bg-base-content">
           <div
-            className="grid grid-cols-[repeat(var(--cols1),auto)_repeat(var(--cols2),1fr)] grid-rows-2 w-min border-2 border-base-content gap-0.5 *:bg-base-100"
+            className="grid grid-cols-[auto_repeat(var(--cols1),auto)_repeat(var(--cols2),1fr)] grid-rows-[auto_1fr_1fr] w-min border-2 border-base-content gap-0.5 *:p-1 *:bg-base-100"
             style={
               {
                 "--cols1": labels.length - contest.problemIds.length,
                 "--cols2": contest.problemIds.length,
               } as CSSProperties
             }>
-            {labels.map((label) => (
-              <div key={label} className="ps-1 pe-2">
-                {label}
+            <div />
+            {labels.map((_, i) => (
+              <div key={i} className="text-center text-sm text-base-content/60">
+                {columnName(i)}
               </div>
             ))}
+            <div className="text-center text-sm text-base-content/60 flex items-center">1</div>
+            {labels.map((label) => (
+              <div key={label}>{label}</div>
+            ))}
+            <div className="text-center text-sm text-base-content/60 flex items-center">2</div>
             {labels.map((label) => (
               <div key={label} />
             ))}
@@ -108,7 +114,13 @@ const ImportModal = forwardRef(function ImportModal(_props, ref: Ref<HTMLDialogE
   );
 });
 
-export default ImportModal;
+function columnName(index: number): string {
+  const name = String.fromCharCode(65 + (index % 26));
+  if (index < 26) {
+    return name;
+  }
+  return columnName(Math.floor(index / 26) - 1) + name;
+}
 
 async function importStudents(
   file: string,
@@ -117,73 +129,63 @@ async function importStudents(
   participation: Participation,
   addStudent: (student: Student) => Promise<void>,
 ) {
-  const schema = z
-    .array(z.string().trim().max(256))
-    .min(contest.userData.length)
-    .transform<Student>((value, ctx) => {
-      const off = contest.userData.length + Number(contest.hasVariants || 0);
-      const variantId = contest.hasVariants ? value[off - 1] : Object.values(variants)[0].id;
-
-      if (variantId) {
-        const variant = variants[variantId];
-        if (!variant) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            path: [contest.userData.length],
-            message: `La variante "${variantId}" non è valida`,
-          });
-          return z.NEVER;
-        }
-      } else if (value.slice(contest.userData.length).some(Boolean)) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: [contest.userData.length],
-          message: "Variante mancante",
-        });
-        return z.NEVER;
-      }
-
-      const userData: Student["userData"] = {};
-      for (const [i, field] of contest.userData.entries()) {
-        try {
-          userData[field.name] = parseUserData(value[i], field, {
-            dateFormat: "dd/MM/yyyy",
-          });
-        } catch (err) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            path: [i],
-            message: (err as Error).message,
-          });
-          return z.NEVER;
-        }
-      }
-
-      const student: Student = {
-        id: randomId(),
-        userData,
-        contestId: contest.id,
-        participationId: participation.id,
-        variant: variantId,
-        answers: Object.fromEntries(contest.problemIds.map((id, i) => [id, value[off + i]])),
-        extraData: { imported: true },
-        createdAt: new Date(),
-        absent: false,
-        disabled: false,
-      };
-      student.score = calcScore(student, variants[variantId]?.schema);
-      return student;
-    })
-    .pipe(studentSchema)
-    .array();
-
-  const records = parseCSV(file.slice(file.indexOf("\n") + 1), {
+  const records = parseCSV<string[]>(file, {
     skipEmptyLines: "greedy",
   });
   if (records.errors?.length) {
     throw new Error(records.errors[0].message);
   }
 
-  const students: Student[] = validate(schema, records.data, { includePath: false });
+  const students: Student[] = [];
+  for (let row = 1; row < records.data.length; row++) {
+    const record = records.data[row];
+    if (record.length < contest.userData.length) {
+      throw new Error(`Errore nella riga ${row + 1}: Troppi pochi campi`);
+    }
+
+    const userData: Student["userData"] = {};
+    for (const [i, field] of contest.userData.entries()) {
+      try {
+        userData[field.name] = parseUserData(record[i], field, {
+          dateFormat: "dd/MM/yyyy",
+        });
+      } catch (err) {
+        throw new Error(`Errore nella riga ${row + 1}: ${(err as Error).message}`, { cause: err });
+      }
+    }
+
+    const off = contest.userData.length + Number(contest.hasVariants || 0);
+    const variantId = contest.hasVariants ? record[off - 1] : Object.values(variants)[0].id;
+    const rawAnswers = record.slice(off);
+    let answers: Student["answers"] = {};
+
+    if (variantId) {
+      const variant = variants[variantId];
+      if (!variant) {
+        throw new Error(`Errore nella riga ${row + 1}: La variante "${variantId}" non è valida`);
+      }
+      answers = Object.fromEntries(
+        contest.problemIds.map((id, i) => [id, parseAnswer(rawAnswers[i], variant.schema[id])]),
+      );
+    } else if (rawAnswers.some(Boolean)) {
+      throw new Error(`Errore nella riga ${row + 1}: Variante mancante`);
+    }
+
+    const student: Student = {
+      id: randomId(),
+      userData,
+      contestId: contest.id,
+      participationId: participation.id,
+      variant: variantId,
+      answers,
+      extraData: { imported: true },
+      createdAt: new Date(),
+      absent: false,
+      disabled: false,
+    };
+    student.score = calcScore(student, variants[variantId]?.schema);
+    console.log(student);
+    students.push(student);
+  }
   await Promise.all(students.map((student) => addStudent(student)));
 }
