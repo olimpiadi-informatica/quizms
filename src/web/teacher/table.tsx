@@ -327,9 +327,7 @@ function Table() {
     const [field, subfield] = ev.colDef.field!.split(/[.[\]]/, 2);
     if (field === "userData") {
       const schema = contest.userData.find((f) => f.name === subfield);
-      const [newValue, error] = parseUserData(value, schema);
-      if (error) throw new Error(error);
-      value = newValue;
+      value = parseUserData(value, schema!);
     }
     if (field === "variant" && !variants[value]) {
       throw new Error(`La variante ${value} non è valida`);

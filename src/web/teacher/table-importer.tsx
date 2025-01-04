@@ -145,18 +145,18 @@ async function importStudents(
 
       const userData: Student["userData"] = {};
       for (const [i, field] of contest.userData.entries()) {
-        const [validated, error] = parseUserData(value[i], field, {
-          dateFormat: "dd/MM/yyyy",
-        });
-        if (error) {
+        try {
+          userData[field.name] = parseUserData(value[i], field, {
+            dateFormat: "dd/MM/yyyy",
+          });
+        } catch (err) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
             path: [i],
-            message: error,
+            message: (err as Error).message,
           });
           return z.NEVER;
         }
-        userData[field.name] = validated;
       }
 
       const student: Student = {

@@ -1,8 +1,5 @@
-import { UTCDateMini } from "@date-fns/utc";
 import { intlFormat, parse as parseDate, subMinutes } from "date-fns";
-import { isDate } from "lodash-es";
 import z from "zod";
-
 import type { Student } from "~/models/student";
 
 const baseUserData = z.object({
@@ -86,12 +83,10 @@ export type Contest = z.infer<typeof contestSchema>;
 
 export function parseUserData(
   value: string | undefined,
-  schema?: Contest["userData"][number],
+  schema: Contest["userData"][number],
   options?: { dateFormat?: string },
-): [string | number | Date | undefined, string | undefined] {
-  if (value === undefined || !schema) {
-    return [value, undefined];
-  }
+): string | number | Date | undefined {
+  if (!value) return undefined;
   const label = `"${schema.label}"`.toLowerCase();
   switch (schema.type) {
     case "text": {
@@ -101,55 +96,44 @@ export function parseUserData(
         .trim();
       if (/[^-'\s\p{Alpha}]/u.test(normalized)) {
         const helpUtf8 = /[^\p{ASCII}]/u.test(normalized) ? " e che la codifica sia UTF-8" : "";
-        return [
-          undefined,
+        throw new Error(
           `Il campo ${label} contiene caratteri non validi. Assicurati che non ci siano numeri o simboli${helpUtf8}.`,
-        ];
+        );
       }
       if (value.length > 256) {
-        return [undefined, `Il campo ${label} non può essere più lungo di 256 caratteri.`];
+        throw new Error(`Il campo ${label} non può essere più lungo di 256 caratteri.`);
       }
-      return [value, undefined];
+      return normalized;
     }
     case "number": {
-      if (!/^-?\d+$/.test(value)) {
-        return [undefined, `Il campo ${label} deve essere un numero intero.`];
-      }
       const num = Number(value);
+      if (!Number.isInteger(num)) {
+        throw new Error(`Il campo ${label} deve essere un numero intero.`);
+      }
       if (schema?.min !== undefined && num < schema.min) {
-        return [undefined, `Il campo ${label} deve essere maggiore o uguale a ${schema.min}.`];
+        throw new Error(`Il campo ${label} deve essere maggiore o uguale a ${schema.min}.`);
       }
       if (schema?.max !== undefined && num > schema.max) {
-        return [undefined, `Il campo ${label} deve essere minore o uguale a ${schema.max}.`];
+        throw new Error(`Il campo ${label} deve essere minore o uguale a ${schema.max}.`);
       }
-      return [num, undefined];
+      return num;
     }
     case "date": {
-      let date: Date;
-      if (value === "") {
-        return [undefined, `Il campo ${label} è obbligatorio.`];
-      }
-      if (isDate(value)) {
-        date = value;
-      } else if (options?.dateFormat) {
-        date = parseDate(value, options.dateFormat, new Date());
-      } else {
-        date = new UTCDateMini(value);
-      }
+      let date = options?.dateFormat
+        ? parseDate(value, options.dateFormat, new Date())
+        : new Date(value);
       date = subMinutes(date, date.getTimezoneOffset());
       if (date < schema?.min) {
-        return [
-          undefined,
+        throw new Error(
           `Il campo ${label} deve contenere una data successiva al ${intlFormat(schema.min, { dateStyle: "short" })}.`,
-        ];
+        );
       }
       if (date > schema?.max) {
-        return [
-          undefined,
+        throw new Error(
           `Il campo ${label} deve contenere una data precedente al ${intlFormat(schema.max, { dateStyle: "short" })}.`,
-        ];
+        );
       }
-      return [date, undefined];
+      return date;
     }
   }
 }
@@ -160,7 +144,7 @@ export function formatUserData(
 ): string {
   const value = student?.userData?.[schema?.name];
   if (value === undefined) return "";
-  if (isDate(value) || schema?.type === "date") {
+  if (schema.type === "date") {
     return intlFormat(value as Date, { dateStyle: "short" });
   }
   return value.toString();
