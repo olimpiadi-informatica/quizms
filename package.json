@@ -54,7 +54,7 @@
     "blockly": "^11.1",
     "client-zip": "^2.4",
     "clsx": "^2.1",
-    "commander": "^12.0",
+    "commander": "^13.0",
     "date-fns": "^3.0",
     "error-stack-parser-es": "^0.1",
     "estree-toolkit": "^1.6",
