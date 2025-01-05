@@ -27,11 +27,23 @@ type Image = (SvgImage | WebpImage) & { width: number; height: number };
 
 export default function images(): PluginOption {
   let isBuild = true;
+  let rootDir: string;
 
   return {
     name: "quizms:images",
-    configResolved({ command }) {
+    configResolved({ command, root }) {
       isBuild = command === "build";
+      rootDir = root;
+    },
+    resolveId(id) {
+      const [pathname, query] = id.split("?");
+      const ext = path.extname(pathname);
+      if (imageExtensions.has(ext) || ext === ".svg" || ext === ".asy") {
+        const resolvedPathname = pathname.startsWith(rootDir)
+          ? pathname
+          : path.join(rootDir, pathname);
+        return `${resolvedPathname}?${query}`;
+      }
     },
     load: {
       order: "pre",
