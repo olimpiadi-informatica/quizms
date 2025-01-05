@@ -1,19 +1,15 @@
 import { type ComponentType, Suspense, lazy, useMemo } from "react";
 
-import type { CellEditRequestEvent, ColDef, ICellRendererParams } from "@ag-grid-community/core";
-import { AG_GRID_LOCALE_IT } from "@ag-grid-community/locale";
-import type { AgGridReactProps } from "@ag-grid-community/react/dist/types/src/shared/interfaces";
+import type { CellEditRequestEvent, ColDef, ICellRendererParams } from "ag-grid-community";
+import type { AgGridReactProps } from "ag-grid-react";
 
 import type { Participation, Student } from "~/models";
 import { Loading } from "~/web/components";
 import { participationConverter } from "~/web/firebase/common/converters";
 import { useCollection } from "~/web/firebase/hooks";
+import { useCount } from "~/web/firebase/hooks/count";
 
 import { useAdmin } from "./provider";
-
-import "@ag-grid-community/styles/ag-grid.css";
-import "@ag-grid-community/styles/ag-theme-quartz.css";
-import { useCount } from "~/web/firebase/hooks/count";
 
 const AgGridReact: ComponentType<AgGridReactProps> = lazy(() => import("~/web/components/ag-grid"));
 
@@ -41,18 +37,13 @@ export function SchoolTable() {
 
   return (
     <Suspense fallback={<Loading />}>
-      <div className="ag-theme-quartz-auto-dark relative grow p-2">
+      <div className="relative grow p-2">
         <div className="absolute inset-0">
           <AgGridReact
             rowData={participations}
             getRowId={(row) => (row.data as Participation).id}
             columnDefs={colDefs}
-            singleClickEdit={true}
-            readOnlyEdit={true}
-            rowSelection="single"
             onCellEditRequest={onCellEditRequest}
-            enableBrowserTooltips={true}
-            localeText={AG_GRID_LOCALE_IT}
           />
         </div>
       </div>

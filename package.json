@@ -37,11 +37,7 @@
     "dist"
   ],
   "dependencies": {
-    "@ag-grid-community/client-side-row-model": "^32.1",
-    "@ag-grid-community/core": "^32.1",
-    "@ag-grid-community/locale": "^32.1",
-    "@ag-grid-community/react": "^32.1",
-    "@ag-grid-community/styles": "^32.1",
+    "@ag-grid-community/locale": "^33.0",
     "@blockly/disable-top-blocks": "^0.5",
     "@cantoo/pdf-lib": "^2.1",
     "@mdx-js/mdx": "^3.0",
@@ -50,6 +46,8 @@
     "@olinfo/react-components": "^0.9",
     "@vitejs/plugin-react-swc": "^3.3",
     "acorn": "^8.10",
+    "ag-grid-community": "^33.0",
+    "ag-grid-react": "^33.0",
     "blockly": "^11.1",
     "client-zip": "^2.4",
     "clsx": "^2.1",

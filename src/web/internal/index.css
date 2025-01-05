@@ -6,13 +6,6 @@
   @apply overflow-auto;
 }
 
-.ag-theme-quartz-auto-dark {
-  --ag-background-color: theme(colors.base-100) !important;
-  --ag-header-background-color: theme(colors.base-100) !important;
-  --ag-control-panel-background-color: theme(colors.base-100) !important;
-  --ag-foreground-color: theme(colors.base-content) !important;
-}
-
 .ag-header-cell,
 .ag-cell {
   --ag-cell-horizontal-padding: 0.5rem;

@@ -1,15 +1,14 @@
 import { type ComponentType, Suspense, lazy, useMemo, useRef, useState } from "react";
 
+import { Button, useIsAfter } from "@olinfo/react-components";
 import type {
   CellEditRequestEvent,
   ColDef,
   ICellRendererParams,
   IFilterOptionDef,
   ITooltipParams,
-} from "@ag-grid-community/core";
-import { AG_GRID_LOCALE_IT } from "@ag-grid-community/locale";
-import type { AgGridReactProps } from "@ag-grid-community/react/dist/types/src/shared/interfaces";
-import { Button, useIsAfter } from "@olinfo/react-components";
+} from "ag-grid-community";
+import type { AgGridReactProps } from "ag-grid-react";
 import { addMinutes, isEqual as isEqualDate } from "date-fns";
 import { cloneDeep, omit, set, sumBy, toPath } from "lodash-es";
 import { Download, FileCheck, Trash2, TriangleAlert, Upload, Users } from "lucide-react";
@@ -33,9 +32,6 @@ import { ExportModal } from "./export";
 import { FinalizeModal } from "./finalize";
 import { ImportModal } from "./importer";
 import { deleteConfirmStorageKey, isStudentIncomplete } from "./utils";
-
-import "@ag-grid-community/styles/ag-grid.css";
-import "@ag-grid-community/styles/ag-theme-quartz.css";
 
 const AgGridReact: ComponentType<AgGridReactProps> = lazy(() => import("~/web/components/ag-grid"));
 
@@ -194,19 +190,14 @@ function Table() {
   };
 
   return (
-    <div className="ag-theme-quartz-auto-dark relative grow p-2">
+    <div className="relative grow p-2">
       <div className="absolute inset-0">
         <AgGridReact
           rowData={allStudents}
           getRowId={(row) => (row.data as Student).id}
           columnDefs={colDefs}
-          singleClickEdit={true}
           suppressClickEdit={frozen}
-          readOnlyEdit={true}
-          rowSelection="single"
           onCellEditRequest={onCellEditRequest}
-          enableBrowserTooltips={true}
-          localeText={AG_GRID_LOCALE_IT}
           onGridReady={(ev) => {
             if (!contest.allowStudentDelete) return;
             ev.api.setFilterModel({
