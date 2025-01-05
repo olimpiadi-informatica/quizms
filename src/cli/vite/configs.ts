@@ -107,6 +107,7 @@ export default function configs(
     },
     json: {
       stringify: true,
+      namedExports: false,
     },
     clearScreen: false,
     server: {

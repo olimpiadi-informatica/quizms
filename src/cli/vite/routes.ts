@@ -1,9 +1,9 @@
 import { existsSync } from "node:fs";
 import path from "node:path";
 
-import glob from "fast-glob";
 import { sortBy } from "lodash-es";
 import type { OutputChunk } from "rollup";
+import { glob } from "tinyglobby";
 import { type HtmlTagDescriptor, type PluginOption, transformWithEsbuild } from "vite";
 
 import { error } from "~/utils/logs";

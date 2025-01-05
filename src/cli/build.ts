@@ -1,9 +1,9 @@
 import path from "node:path";
 import { cwd } from "node:process";
 
-import glob from "fast-glob";
 import { name as quizmsPackageName } from "package.json";
 import license from "rollup-plugin-license";
+import { glob } from "tinyglobby";
 import { type InlineConfig, build, mergeConfig } from "vite";
 
 import { error, fatal } from "~/utils/logs";

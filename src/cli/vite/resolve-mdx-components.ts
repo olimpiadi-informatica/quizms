@@ -1,7 +1,7 @@
 import path from "node:path";
 
-import glob from "fast-glob";
 import { camelCase, upperFirst } from "lodash-es";
+import { glob } from "tinyglobby";
 import type { PluginOption } from "vite";
 
 export default function resolveMdxComponents(): PluginOption {
@@ -25,7 +25,7 @@ export default function resolveMdxComponents(): PluginOption {
         let questions: [string, string][] = [];
         if (importer) {
           const dir = path.dirname(importer);
-          const files = await glob("*/question.(md|mdx)", { cwd: dir });
+          const files = await glob("*/question.{md,mdx}", { cwd: dir });
           questions = files.map((file) => [
             path.join(dir, file),
             upperFirst(camelCase(path.dirname(file))),
