@@ -1,8 +1,6 @@
-import { existsSync } from "node:fs";
-import { cp, mkdir, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { cwd } from "node:process";
-import { fileURLToPath } from "node:url";
 
 import type { Bucket } from "@google-cloud/storage";
 import type { App } from "firebase-admin/app";
@@ -42,56 +40,17 @@ async function copyFiles(options: InitOptions) {
   await mkdir("firebase", { recursive: true });
 
   const firestoreRulesPath = "firebase/firestore.rules";
-  if (await overwrite(firestoreRulesPath, options)) {
-    const from = fileURLToPath(new URL(firestoreRules, import.meta.url));
-    await cp(from, firestoreRulesPath);
-  }
+  await initFile(firestoreRulesPath, firestoreRules, options);
 
   const firestoreIndexesPath = "firebase/firestore-indexes.json";
-  if (await overwrite(firestoreIndexesPath, options)) {
-    await writeFile(firestoreIndexesPath, JSON.stringify(firestoreIndexes, undefined, 2));
-  }
+  await initFile(firestoreIndexesPath, JSON.stringify(firestoreIndexes, undefined, 2), options);
 
   const storageRulesPath = "firebase/storage.rules";
-  if (await overwrite(storageRulesPath, options)) {
-    const from = fileURLToPath(new URL(storageRules, import.meta.url));
-    await cp(from, storageRulesPath);
-  }
+  await initFile(storageRulesPath, storageRules, options);
 
   // See {@link https://github.com/firebase/firebase-tools/blob/09c2641e861f2e31798dfb4aba1a180e8fd08ea5/src/firebaseConfig.ts#L244 here}.
   const configs = {
-    hosting: {
-      public: "dist",
-      ignore: ["firebase.json", "**/.*", "**/node_modules/**"],
-      rewrites: [
-        {
-          source: "**",
-          destination: "/index.html",
-        },
-      ],
-      trailingSlash: false,
-      headers: [
-        {
-          source: "/assets/**",
-          headers: [
-            {
-              key: "Cache-Control",
-              value: "public, max-age=31536000, immutable", // 365 days
-            },
-          ],
-        },
-        {
-          source: "/blockly/**",
-          headers: [
-            {
-              key: "Cache-Control",
-              value: "public, max-age=86400", // 1 day
-            },
-          ],
-        },
-      ],
-      predeploy: "npx quizms build",
-    },
+    hosting: hostingConfigs(),
     firestore: {
       rules: path.relative(cwd(), firestoreRulesPath),
       indexes: path.relative(cwd(), firestoreIndexesPath),
@@ -100,13 +59,45 @@ async function copyFiles(options: InitOptions) {
       rules: path.relative(cwd(), storageRulesPath),
     },
   };
-
-  if (await overwrite("firebase.json", options)) {
-    await writeFile("firebase.json", JSON.stringify(configs, undefined, 2));
-  }
+  await initFile("firebase.json", JSON.stringify(configs, undefined, 2), options);
 
   success("Files copied!");
   return 0;
+}
+
+function hostingConfigs() {
+  return {
+    public: "dist",
+    ignore: ["firebase.json", "**/.*", "**/node_modules/**"],
+    rewrites: [
+      {
+        source: "**",
+        destination: "/index.html",
+      },
+    ],
+    trailingSlash: false,
+    headers: [
+      {
+        source: "/assets/**",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable", // 365 days
+          },
+        ],
+      },
+      {
+        source: "/blockly/**",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=86400", // 1 day
+          },
+        ],
+      },
+    ],
+    predeploy: "npx quizms build",
+  };
 }
 
 async function enableBackups(app: App) {
@@ -150,10 +141,25 @@ async function enableCors(bucket: Bucket) {
   }
 }
 
-async function overwrite(dest: string, options?: InitOptions) {
-  if (options?.force || !existsSync(dest)) return true;
-  return await confirm(
-    `The file ${pc.bold(path.basename(dest))} already exists. Do you want to overwrite it?`,
-    false,
-  );
+async function initFile(fileName: string, content: string, options?: InitOptions) {
+  let write = options?.force ?? false;
+  if (!write) {
+    try {
+      const prevContent = await readFile(fileName, "utf8");
+      if (prevContent === content) return;
+    } catch {
+      write = true;
+    }
+  }
+
+  if (!write) {
+    write = await confirm(
+      `The file ${pc.bold(path.basename(fileName))} already exists. Do you want to overwrite it?`,
+      false,
+    );
+  }
+
+  if (write) {
+    await writeFile(fileName, content);
+  }
 }

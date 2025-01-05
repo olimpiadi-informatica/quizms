@@ -27,7 +27,7 @@ const cliConfig = {
   entry: await glob("src/{cli,jsx-runtime}/index.ts"),
   target: "esnext",
   platform: "node",
-  loader: { ".rules": "file" },
+  loader: { ".rules": "text" },
 };
 
 const command = new Command();
