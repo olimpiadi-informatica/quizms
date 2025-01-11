@@ -211,16 +211,28 @@ async function importPdf(bucket: Bucket, options: ImportOptions) {
   const contests = await load("contests", contestSchema);
   const variantsConfig = await load("variants", variantsConfigSchema);
 
+  const timestamp = new Date().toISOString().replace(/:/g, "-");
+
   const pdfs = contests.flatMap((contest) => {
     const config = variantsConfig.find((c) => c.id === contest.id);
     if (!config) {
       fatal(`Missing variants configuration for contest ${contest.id}.`);
     }
 
-    return uniq([...config.variantIds, ...config.pdfVariantIds]).map((id): [string, string] => [
-      path.join("variants", id, "statement.pdf"),
-      path.join("statements", id, `statement-${contest.statementVersion}.pdf`),
-    ]);
+    return uniq([...config.variantIds, ...config.pdfVariantIds]).flatMap(
+      (id): [string, string][] => {
+        return [
+          [
+            path.join("variants", config.id, id, "statement.pdf"),
+            path.join("statements", config.id, id, `statement-${timestamp}.pdf`),
+          ],
+          [
+            path.join("variants", config.id, id, "statement.pdf"),
+            path.join("statements", config.id, id, "statement.pdf"),
+          ],
+        ];
+      },
+    );
   });
 
   await importStorage(bucket, "PDFs", pdfs, options);
@@ -253,6 +265,8 @@ async function importStatements(bucket: Bucket, options: ImportOptions) {
   const contests = await load("contests", contestSchema);
   const variantsConfig = await load("variants", variantsConfigSchema);
 
+  const statementVersion = await readFile(path.join("variants", "version.txt"), "utf8");
+
   const statements = contests.flatMap((contest) => {
     const config = variantsConfig.find((c) => c.id === contest.id);
     if (!config) {
@@ -261,7 +275,7 @@ async function importStatements(bucket: Bucket, options: ImportOptions) {
 
     return uniq([...config.variantIds, ...config.pdfVariantIds]).map((id): [string, string] => [
       path.join("variants", id, "statement.txt"),
-      path.join("statements", id, `statement-${contest.statementVersion}.txt`),
+      path.join("statements", id, `statement-${statementVersion}.txt`),
     ]);
   });
   await importStorage(bucket, "statements", statements, options);

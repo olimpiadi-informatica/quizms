@@ -9,17 +9,18 @@ import { useDb } from "./common/base-login";
 
 type Props = {
   createFromFetch: (res: Promise<Response>) => ReactNode;
+  statementVersion: string;
 };
 
-export function FirebaseStatement({ createFromFetch }: Props) {
+export function FirebaseStatement({ createFromFetch, statementVersion }: Props) {
   const db = useDb();
-  const { contest, student } = useStudent();
+  const { student } = useStudent();
 
   const storage = getStorage(db.app);
 
   const statementRef = ref(
     storage,
-    `statements/${student.variant!}/statement-${contest.statementVersion}.js`,
+    `statements/${student.contestId}/${student.variant!}/statement-${statementVersion}.js`,
   );
 
   const fetcher = useCallback(async () => {

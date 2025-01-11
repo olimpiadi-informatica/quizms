@@ -45,9 +45,6 @@ const baseContestSchema = z.object({
   // Se la gara può essere svolta in modalità cartacea
   hasPdf: z.boolean(),
 
-  // Versione dei testi, deve essere incrementata ogni volta che si modificano i testi
-  statementVersion: z.number().default(0),
-
   // Se permette all'insegnante di aggiungere o importare studenti
   allowStudentImport: z.boolean().default(true),
   // Se permette all'insegnante di modificare i dati personali degli studenti

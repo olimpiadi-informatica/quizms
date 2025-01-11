@@ -53,7 +53,7 @@ type TeacherProviderProps = {
   logout: () => Promise<void>;
   statementComponent: ComponentType<Record<never, never>>;
   getPdfStatements: (
-    statementVersion: number,
+    contestId: string,
     variantIds: string[],
   ) => Promise<Record<string, Uint8Array | ArrayBuffer>>;
   useStudents: (
@@ -136,8 +136,7 @@ function ProviderInner({
     setParticipation,
     variants: contestVariants,
     logout,
-    getPdfStatements: () =>
-      getPdfStatements(contest.statementVersion, participation.pdfVariants ?? []),
+    getPdfStatements: () => getPdfStatements(contest.id, participation.pdfVariants ?? []),
     useStudentRestores,
     useStudents,
   };

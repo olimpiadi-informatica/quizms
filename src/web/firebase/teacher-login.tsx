@@ -36,21 +36,20 @@ import { FirebaseStatement } from "./student-statement";
 type Props = {
   config: FirebaseOptions;
   createStatementFromFetch: (res: Promise<Response>) => ReactNode;
+  statementVersion: string;
 };
 
-export function FirebaseTeacher({ config, createStatementFromFetch }: Props) {
+export function FirebaseTeacher({ config, ...statementProps }: Props) {
   return (
     <FirebaseLogin config={config}>
       <PasswordLogin>
-        <TeacherInner createStatementFromFetch={createStatementFromFetch} />
+        <TeacherInner {...statementProps} />
       </PasswordLogin>
     </FirebaseLogin>
   );
 }
 
-function TeacherInner({
-  createStatementFromFetch,
-}: { createStatementFromFetch: Props["createStatementFromFetch"] }) {
+function TeacherInner({ createStatementFromFetch, statementVersion }: Omit<Props, "config">) {
   const db = useDb();
   const user = useAuth()!;
 
@@ -75,10 +74,13 @@ function TeacherInner({
       contests={contests}
       variants={variants}
       logout={logout}
-      statementComponent={() => <FirebaseStatement createFromFetch={createStatementFromFetch} />}
-      getPdfStatements={(statementVersion, variantIds) =>
-        getPdfStatements(db, statementVersion, variantIds)
-      }
+      statementComponent={() => (
+        <FirebaseStatement
+          createFromFetch={createStatementFromFetch}
+          statementVersion={statementVersion}
+        />
+      )}
+      getPdfStatements={(contestId, variantIds) => getPdfStatements(db, contestId, variantIds)}
       useStudents={useStudents}
       useStudentRestores={useStudentRestores}
     />
@@ -163,7 +165,7 @@ async function setParticipation(
 
 async function getPdfStatements(
   db: Firestore,
-  statementVersion: number,
+  contestId: string,
   variantIds: string[],
 ): Promise<Record<string, ArrayBuffer>> {
   const storage = getStorage(db.app);
@@ -171,10 +173,7 @@ async function getPdfStatements(
   const files = await Promise.all(
     variantIds.map(
       async (id) =>
-        [
-          id,
-          await getBytes(ref(storage, `statements/${id}/statement-${statementVersion}.pdf`)),
-        ] as const,
+        [id, await getBytes(ref(storage, `statements/${contestId}/${id}/statement.pdf`))] as const,
     ),
   );
   return Object.fromEntries(files);
