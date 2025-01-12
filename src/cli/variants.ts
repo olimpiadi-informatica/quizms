@@ -89,7 +89,7 @@ async function buildBaseStatements(generationConfigs: VariantsConfig[]): Promise
         formats: ["es"],
       },
       rollupOptions: {
-        external: [/^node:/, /^react/, /^@olinfo\/quizms/],
+        external: [/^node:/, /^react/],
         output: {
           preserveModules: true,
         },
@@ -162,12 +162,7 @@ function webpackConfig(outDir: string): webpack.Configuration {
         type: "module",
       },
     },
-    externals: [
-      "react",
-      "react-dom",
-      "react/jsx-runtime",
-      "@olinfo/quizms/internal/mdx-components",
-    ],
+    externals: [/^node:/, /^react/],
     externalsType: "module",
     experiments: {
       outputModule: true,

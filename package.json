@@ -1,13 +1,13 @@
 {
   "name": "@olinfo/quizms",
-  "version": "2.0.3",
+  "version": "3.0.0.beta.0",
   "type": "module",
   "author": "Alessandro Bortolin <bortolin.alessandro@outlook.it>",
   "license": "MIT",
   "scripts": {
     "prebuild": "biome check && tsc --noEmit",
-    "build": "NODE_ENV=production node scripts/build.js build",
-    "watch": "node scripts/build.js watch",
+    "build": "vite build",
+    "watch": "vite build --watch",
     "lint": "biome check --write && tsc --noEmit",
     "prepack": "yarn build"
   },
@@ -15,19 +15,25 @@
     "quizms": "bin/bin.js"
   },
   "exports": {
-    "./internal": "./dist/internal/index.js",
-    "./internal/blockly-editor": "./dist/internal/blockly-editor/index.js",
-    "./internal/mdx-components": "./dist/mdx/index.js",
-    "./student": "./dist/student/index.js",
-    "./firebase": "./dist/firebase/index.js"
+    "./components": "./dist/components.js",
+    "./css": "./dist/quizms.css",
+    "./firebase": "./dist/firebase.js",
+    "./student": "./dist/student.js",
+    "./utils": "./dist/utils.js"
   },
   "typesVersions": {
     "*": {
-      "student": [
-        "./dist/student/index.d.ts"
+      "components": [
+        "./dist/components.d.ts"
       ],
       "firebase": [
-        "./dist/firebase/index.d.ts"
+        "./dist/firebase.d.ts"
+      ],
+      "student": [
+        "./dist/student.d.ts"
+      ],
+      "utils": [
+        "./dist/utils.d.ts"
       ]
     }
   },
@@ -37,30 +43,22 @@
   ],
   "dependencies": {
     "@ag-grid-community/locale": "^33.0",
-    "@blockly/disable-top-blocks": "^0.5",
     "@cantoo/pdf-lib": "^2.1",
-    "@mdx-js/mdx": "^3.0",
-    "@mdx-js/rollup": "^3.0",
     "@noble/hashes": "^1.3",
-    "@olinfo/react-components": "^0.9",
+    "@olinfo/react-components": "^0.10",
     "@vitejs/plugin-react-swc": "^3.3",
     "acorn": "^8.10",
     "ag-grid-community": "^33.0",
     "ag-grid-react": "^33.0",
-    "blockly": "^11.1",
     "client-zip": "^2.4",
     "clsx": "^2.1",
     "commander": "^13.0",
     "date-fns": "^4.0",
-    "error-stack-parser-es": "^0.1",
-    "estree-toolkit": "^1.6",
-    "estree-util-to-js": "^2.0",
+    "error-stack-parser-es": "^1.0",
     "file-saver": "^2.0",
     "firebase": "^11.0",
     "firebase-admin": "^13.0",
     "image-size": "^1.1",
-    "js-interpreter": "^5.0",
-    "katex": "^0.16",
     "lodash-es": "^4.17",
     "lucide-react": ">=0.395, <1",
     "magic-string": "^0.30",
@@ -70,16 +68,10 @@
     "picomatch": "^4.0",
     "playwright": "^1.36",
     "prop-types": "^15.8",
-    "pure-rand": "^6.0",
+    "pure-rand": "^7.0",
     "react-error-boundary": "^5.0",
     "react-markdown": "^9.0",
     "rehype": "^13.0",
-    "remark-frontmatter": "^5.0",
-    "remark-gfm": "^4.0",
-    "remark-math": "^6.0",
-    "remark-mdx-frontmatter": "^5.0",
-    "remark-mdx-math-enhanced": "=0.0.1-beta.3",
-    "remark-smartypants": "^3.0",
     "rollup-plugin-license": "^3.2",
     "rollup-preserve-directives": "^1.1",
     "sharp": "^0.32",
@@ -87,13 +79,11 @@
     "source-map-js": "^1.2",
     "svgo": "^3.0",
     "swr": "^2.2",
-    "tempy": "^3.1",
     "tinyglobby": "^0.2",
     "unified": "^11.0",
     "unist-util-visit": "^5.0",
-    "vite": "^6.0",
-    "vite-plugin-inspect": "^0.10",
-    "vm-browserify": "^1.1",
+    "vite": "^6.1",
+    "vite-plugin-inspect": "^10.1",
     "wouter": "^3.1",
     "yaml": "^2.4",
     "zod": "^3.22",
@@ -117,8 +107,10 @@
     "@types/react-dom": "^19",
     "@types/wicg-file-system-access": "^2023.10.4",
     "postcss": "^8.4",
-    "tsup": "^8.0",
+    "rollup-plugin-node-externals": "^8.0",
     "typescript": "^5.1",
+    "vite-plugin-dts": "^4.5",
+    "vite-tsconfig-paths": "^5.1",
     "webpack": "^5.97"
   },
   "postcss": {

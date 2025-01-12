@@ -5,29 +5,27 @@ import { fileURLToPath } from "node:url";
 import react from "@vitejs/plugin-react-swc";
 import { sumBy } from "lodash-es";
 import pc from "picocolors";
-import type { InlineConfig } from "vite";
+import type { InlineConfig, PluginOption } from "vite";
 import inspect from "vite-plugin-inspect";
 
 import { info, warning } from "~/utils/logs";
 
-import asymptote from "./asymptote";
-import blocklyBlocks from "./blockly-blocks";
-import blocklyMedia from "./blockly-media";
 import directives from "./directives";
 import images from "./images";
-import mdx from "./mdx";
-import python from "./python";
-import resolveMdxComponents from "./resolve-mdx-components";
 import routes from "./routes";
 
 export default function configs(mode: "development" | "production"): InlineConfig {
   const root = path.join(cwd(), "src");
 
+  // @ts-ignore: ignoring to avoid circular dependency
+  const quizmsMdx: Promise<PluginOption[]> = import("@olinfo/quizms-mdx/vite").then(
+    (m) => m.default,
+  );
+
   return {
     configFile: false,
     root,
     mode,
-    envPrefix: "QUIZMS_",
     resolve: {
       alias: {
         "~": root,
@@ -38,20 +36,9 @@ export default function configs(mode: "development" | "production"): InlineConfi
     },
     define: {
       "process.env.NODE_ENV": JSON.stringify(mode),
+      "process.env.QUIZMS_MODE": JSON.stringify(process.env.QUIZMS_MODE),
     },
-    plugins: [
-      asymptote(),
-      blocklyBlocks(),
-      blocklyMedia(),
-      directives(),
-      images(),
-      inspect(),
-      mdx(),
-      python(),
-      react(),
-      routes(),
-      resolveMdxComponents(),
-    ],
+    plugins: [quizmsMdx, directives(), images(), inspect(), react(), routes()],
     build: {
       rollupOptions: {
         onwarn: (log) => {
@@ -104,7 +91,12 @@ export default function configs(mode: "development" | "production"): InlineConfi
     clearScreen: false,
     server: {
       fs: {
-        allow: [path.join(root, ".."), fileURLToPath(new URL("../..", import.meta.url))],
+        allow: [
+          path.join(root, ".."),
+          // include quizms root directory, node_modules directory are already included,
+          // but when using `yarn link` it's may be outside of node_modules
+          fileURLToPath(new URL(/* @vite-ignore */ "../../../..", import.meta.url)),
+        ],
       },
       host: false,
     },

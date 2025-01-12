@@ -1,7 +1,6 @@
 import { Suspense, lazy, useEffect } from "react";
 
 import { Button } from "@olinfo/react-components";
-import type { StackFrameLite } from "error-stack-parser-es/lite";
 import { RotateCw, TriangleAlert } from "lucide-react";
 import {
   ErrorBoundary as BaseErrorBoundary,
@@ -9,17 +8,9 @@ import {
   type FallbackProps,
 } from "react-error-boundary";
 
-const FrameCode = import.meta.env.DEV && lazy(() => import("./frame"));
+export { useErrorBoundary } from "react-error-boundary";
 
-export class FrameError extends Error {
-  constructor(
-    message: string,
-    public frame: StackFrameLite,
-    cause?: Error,
-  ) {
-    super(message, { cause });
-  }
-}
+const FrameCode = process.env.NODE_ENV === "development" && lazy(() => import("./frame"));
 
 export function ErrorBoundary({
   children,

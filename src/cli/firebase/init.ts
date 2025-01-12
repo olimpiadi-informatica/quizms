@@ -9,8 +9,8 @@ import pc from "picocolors";
 import { confirm, error, info, success } from "~/utils/logs";
 
 import firestoreIndexes from "./files/firestore-indexes.json";
-import firestoreRules from "./files/firestore.rules";
-import storageRules from "./files/storage.rules";
+import firestoreRules from "./files/firestore.rules?raw";
+import storageRules from "./files/storage.rules?raw";
 import { initializeFirebase } from "./utils/initialize";
 import restApi from "./utils/rest-api";
 

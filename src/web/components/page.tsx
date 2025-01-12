@@ -9,7 +9,7 @@ type Metadata = {
   description?: string;
 };
 
-export async function page(module: Promise<Module & { metadata?: Metadata }>): Promise<Module> {
+export async function wrapPage(module: Promise<Module & { metadata?: Metadata }>): Promise<Module> {
   const { default: PageComponent, metadata } = await module;
 
   return {

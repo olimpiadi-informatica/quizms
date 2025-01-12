@@ -7,10 +7,9 @@ import { SourceMapConsumer } from "source-map-js";
 import useSWR from "swr";
 
 import style from "./error.module.css";
-import { FrameError } from "./index";
 
 export default function FrameCode({ error }: { error: Error }) {
-  const frame = error instanceof FrameError ? error.frame : parseStack(error)[0];
+  const frame = parseStack(error)[0];
 
   const { data } = useSWR(frameKey(frame), ([file, line, column]) => fetcher(file, line, column), {
     suspense: true,

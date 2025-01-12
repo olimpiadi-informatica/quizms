@@ -10,7 +10,7 @@ export function BaseStatement({ children }: { children: ReactNode }) {
   const { participation } = useStudent();
   const startingTime = useMemo(
     () =>
-      import.meta.env.QUIZMS_MODE === "print"
+      process.env.QUIZMS_MODE === "print"
         ? new Date(0)
         : addMilliseconds(participation.startingTime!, 1000 + Math.random() * 1000),
     [participation.startingTime],

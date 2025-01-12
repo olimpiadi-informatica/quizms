@@ -36,7 +36,7 @@ export function UserDataField({
     label: field.label,
     placeholder: `Inserisci ${field.label.toLowerCase()}`,
   };
-  if (field.type === "text" || import.meta.env.QUIZMS_MODE === "print") {
+  if (field.type === "text" || process.env.QUIZMS_MODE === "print") {
     return (
       <TextField
         {...commonProps}

@@ -1,11 +1,3 @@
-.katex-mathml {
-  @apply select-none;
-}
-
-.katex-display {
-  @apply overflow-auto;
-}
-
 .ag-header-cell,
 .ag-cell {
   --ag-cell-horizontal-padding: 0.5rem;

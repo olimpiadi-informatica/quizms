@@ -90,7 +90,10 @@ export function StudentLayout({ children }: { children: ReactNode }) {
             ) : (
               <Button
                 className="btn-primary btn-sm h-full"
-                disabled={terminated || (import.meta.env.PROD && !participation.startingTime)}
+                disabled={
+                  terminated ||
+                  (process.env.NODE_ENV === "production" && !participation.startingTime)
+                }
                 onClick={submit}>
                 Termina
               </Button>

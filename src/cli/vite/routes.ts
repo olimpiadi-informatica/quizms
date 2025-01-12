@@ -39,7 +39,7 @@ export default function routes(): PluginOption {
         }
 
         const imports = pages.map(
-          (page, i) => `const Page${i} = lazy(() => page(import("~/${page}")));`,
+          (page, i) => `const Page${i} = lazy(() => wrapPage(import("~/${page}")));`,
         );
         const routes = pages.map(
           (page, i) =>
@@ -50,20 +50,17 @@ export default function routes(): PluginOption {
 import { lazy, StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 
-import { page, BaseLayout } from "@olinfo/quizms/internal";
+import { wrapPage, BaseLayout } from "@olinfo/quizms/components";
 import { Route } from "wouter";
 
+import "@olinfo/quizms/css";
 import "~/global.css";
 
-const BlocklyIframe = lazy(() => import("@olinfo/quizms/internal/blockly-editor"));
 ${imports.join("\n")}
 
 createRoot(document.getElementById("app")).render(
   <StrictMode>
     <BaseLayout>
-      <Route path="/__blockly_iframe">
-        <BlocklyIframe />
-      </Route>
       ${sortBy(routes, "length").reverse().join("\n      ")}
     </BaseLayout>
   </StrictMode>
