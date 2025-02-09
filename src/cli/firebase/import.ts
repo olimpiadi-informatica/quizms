@@ -241,10 +241,10 @@ async function importPdf(bucket: Bucket, options: ImportOptions) {
 async function importVariants(db: Firestore, options: ImportOptions) {
   const variantsConfig = await load("variants", variantsConfigSchema);
   const variants = await Promise.all(
-    variantsConfig
-      .flatMap((c) => uniq([...c.variantIds, ...c.pdfVariantIds]))
-      .map(async (id) => {
-        const fileName = path.join("variants", id, "schema.json");
+    variantsConfig.flatMap((config) => {
+      const ids = uniq([...config.variantIds, ...config.pdfVariantIds]);
+      return ids.map(async (id) => {
+        const fileName = path.join("variants", config.id, `${id}.json`);
         let schema: string;
         try {
           schema = await readFile(fileName, "utf8");
@@ -256,7 +256,8 @@ async function importVariants(db: Firestore, options: ImportOptions) {
         } catch (err) {
           fatal(`Invalid schema for variant ${id}: ${err}`);
         }
-      }),
+      });
+    }),
   );
   await importCollection(db, "variants", variants, variantConverter, options);
 }
@@ -274,8 +275,8 @@ async function importStatements(bucket: Bucket, options: ImportOptions) {
     }
 
     return uniq([...config.variantIds, ...config.pdfVariantIds]).map((id): [string, string] => [
-      path.join("variants", id, "statement.txt"),
-      path.join("statements", id, `statement-${statementVersion}.txt`),
+      path.join("variants", config.id, `${id}.txt`),
+      path.join("statements", config.id, `${id}-${statementVersion}.txt`),
     ]);
   });
   await importStorage(bucket, "statements", statements, options);
