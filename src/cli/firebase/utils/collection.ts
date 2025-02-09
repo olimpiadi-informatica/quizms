@@ -1,8 +1,9 @@
+import { confirm } from "@inquirer/prompts";
 import type { Firestore, FirestoreDataConverter } from "firebase-admin/firestore";
 import { partition, upperFirst } from "lodash-es";
 import pc from "picocolors";
 
-import { confirm, fatal, info, success } from "~/utils/logs";
+import { fatal, info, success } from "~/utils/logs";
 
 type ImportOptions = {
   delete?: true;
@@ -18,11 +19,16 @@ export async function importCollection<T extends { id: string }>(
   options: ImportOptions,
 ) {
   if (options.delete) {
-    await confirm(
-      `You are about to delete all ${pc.bold(
+    const confirmed = await confirm({
+      message: `You are about to delete all ${pc.bold(
         collection,
       )}. Any previous data will be lost, this operation cannot be undone. Are you really sure?`,
-    );
+      default: false,
+    });
+    if (!confirmed) {
+      fatal("Command aborted.");
+    }
+
     const ref = db.collection(collection);
     await db.recursiveDelete(ref);
     info(`${upperFirst(collection)} deleted!`);
@@ -42,11 +48,15 @@ export async function importCollection<T extends { id: string }>(
   const docsToImport = options.skipExisting ? nonExisting : [...existing, ...nonExisting];
 
   if (options.force && existing.length > 0) {
-    await confirm(
-      `You are about to import the ${pc.bold(
+    const confirmed = await confirm({
+      message: `You are about to import the ${pc.bold(
         collection,
       )}. ${existing.length} document will be overwritten, the previous data will be lost. Are you really sure?`,
-    );
+      default: false,
+    });
+    if (!confirmed) {
+      fatal("Command aborted.");
+    }
   }
 
   for (let i = 0; i < docsToImport.length; i += 400) {

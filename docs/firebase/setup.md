@@ -82,15 +82,11 @@ Installa [Firebase CLI](https://firebase.google.com/docs/cli) e [Google Cloud SD
    ```sh
    $ gcloud auth application-default login
    ```
-2. Imposta il progetto di default:
-   ```sh
-   $ firebase use --add
-   ```
-3. Inizializza il progetto locale:
+2. Inizializza il progetto locale:
    ```sh
    $ npx quizms firebase init
    ```
-4. Carica le regole di sicurezza e gli indici:
+3. Carica le regole di sicurezza e gli indici:
    ```sh
    $ firebase deploy --only firestore,storage
    ```

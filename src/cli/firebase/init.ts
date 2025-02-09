@@ -3,16 +3,17 @@ import path from "node:path";
 import { cwd } from "node:process";
 
 import type { Bucket } from "@google-cloud/storage";
-import type { App } from "firebase-admin/app";
+import { confirm, select } from "@inquirer/prompts";
+import { type App, deleteApp, initializeApp } from "firebase-admin/app";
 import pc from "picocolors";
 
-import { confirm, error, info, success } from "~/utils/logs";
+import { error, info, success } from "~/utils/logs";
 
 import firestoreIndexes from "./files/firestore-indexes.json";
 import firestoreRules from "./files/firestore.rules?raw";
 import storageRules from "./files/storage.rules?raw";
 import { initializeFirebase } from "./utils/initialize";
-import restApi from "./utils/rest-api";
+import { restApi, restProjectApi } from "./utils/rest-api";
 
 type InitOptions = {
   force?: boolean;
@@ -20,6 +21,8 @@ type InitOptions = {
 
 export default async function init(options: InitOptions) {
   let initialized = true;
+
+  await selectProject();
 
   if (await copyFiles(options)) initialized = false;
 
@@ -32,6 +35,21 @@ export default async function init(options: InitOptions) {
   } else {
     error("The initialization was not completed due to some previous errors.");
   }
+}
+
+async function selectProject() {
+  const app = initializeApp();
+  const data = await restApi(app, "firebase", "v1beta1", "");
+  await deleteApp(app);
+
+  const answer = await select({
+    message: "Seleziona il progetto Firebase",
+    choices: data.results.map((project: any) => ({
+      value: project.projectId,
+      name: project.displayName,
+    })),
+  });
+  await writeFile(".firebaserc", JSON.stringify({ projects: { default: answer } }, null, 2));
 }
 
 async function copyFiles(options: InitOptions) {
@@ -104,11 +122,11 @@ async function enableBackups(app: App) {
   info("Enabling Firestore backups...");
 
   try {
-    await restApi(app, "firestore", "v1", "/databases/(default)/backupSchedules", {
+    await restProjectApi(app, "firestore", "v1", "/databases/(default)/backupSchedules", {
       dailyRecurrence: {},
       retention: "604800s",
     });
-    await restApi(app, "firestore", "v1", "/databases/(default)/backupSchedules", {
+    await restProjectApi(app, "firestore", "v1", "/databases/(default)/backupSchedules", {
       weeklyRecurrence: {
         day: "SUNDAY",
       },
@@ -153,10 +171,9 @@ async function initFile(fileName: string, content: string, options?: InitOptions
   }
 
   if (!write) {
-    write = await confirm(
-      `The file ${pc.bold(path.basename(fileName))} already exists. Do you want to overwrite it?`,
-      false,
-    );
+    write = await confirm({
+      message: `The file ${pc.bold(path.basename(fileName))} already exists. Do you want to overwrite it?`,
+    });
   }
 
   if (write) {

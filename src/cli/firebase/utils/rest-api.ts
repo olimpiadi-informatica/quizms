@@ -3,7 +3,17 @@ import type { ApplicationDefaultCredential } from "firebase-admin/lib/app/creden
 
 import { fatal } from "~/utils/logs";
 
-export default async function restApi(
+export function restProjectApi(
+  app: App,
+  service: string,
+  version: `v${string}`,
+  endpoint: string,
+  body?: object,
+) {
+  return restApi(app, service, version, app.options.projectId + endpoint, body);
+}
+
+export async function restApi(
   app: App,
   service: string,
   version: `v${string}`,
@@ -16,7 +26,7 @@ export default async function restApi(
     fatal("Failed to get access token from credential.");
   }
 
-  const url = `https://${service}.googleapis.com/${version}/projects/${app.options.projectId}${endpoint}`;
+  const url = `https://${service}.googleapis.com/${version}/projects/${endpoint}`;
   const resp = await fetch(url, {
     method: body ? "POST" : "GET",
     headers: {

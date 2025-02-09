@@ -1,4 +1,5 @@
 import { existsSync } from "node:fs";
+import { readFile } from "node:fs/promises";
 
 import { type App, initializeApp } from "firebase-admin/app";
 import { getFirestore } from "firebase-admin/firestore";
@@ -6,8 +7,7 @@ import { getStorage } from "firebase-admin/storage";
 
 import { fatal } from "~/utils/logs";
 
-import { readFile } from "node:fs/promises";
-import restApi from "./rest-api";
+import { restProjectApi } from "./rest-api";
 
 export async function initializeFirebase() {
   const projectId = await getProjectId();
@@ -37,7 +37,7 @@ async function getProjectId() {
 async function getFirebaseBucket(app: App) {
   let bucketName: string;
   try {
-    const data = await restApi(app, "firebasestorage", "v1beta", "/buckets");
+    const data = await restProjectApi(app, "firebasestorage", "v1beta", "/buckets");
     bucketName = data.buckets?.[0]?.name;
   } catch (err) {
     fatal(`Failed to get project information: ${err}`);
