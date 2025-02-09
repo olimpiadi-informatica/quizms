@@ -8,12 +8,24 @@ import z from "zod";
 import { fatal, success, warning } from "~/utils/logs";
 
 type ImportOptions = {
+  delete?: true;
   skipExisting?: true;
   force?: true;
 };
 
 export async function importUsers(users: User[], customClaims: object, options: ImportOptions) {
   const auth = getAuth();
+
+  if (options.delete) {
+    let token: string | undefined = undefined;
+    for (;;) {
+      const { users, pageToken } = await auth.listUsers(1000, token);
+      token = pageToken;
+
+      if (users.length === 0) break;
+      await auth.deleteUsers(users.map((user) => user.uid));
+    }
+  }
 
   const userRecords = Object.fromEntries(
     await Promise.all(
