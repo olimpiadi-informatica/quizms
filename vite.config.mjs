@@ -27,6 +27,7 @@ export default defineConfig({
       external: /^@olinfo\/quizms-mdx\/.*/,
       output: {
         preserveModules: true,
+        hoistTransitiveImports: false,
       },
     },
   },

@@ -5,19 +5,21 @@ import { cpus } from "node:os";
 import path from "node:path";
 import { cwd } from "node:process";
 
+import { sortBy } from "lodash-es";
 // @ts-ignore
 import WebpackRscPlugin from "react-server-dom-webpack/plugin";
 import type { RollupOutput } from "rollup";
+import nodeExternals from "rollup-plugin-node-externals";
 import { type InlineConfig, build, mergeConfig } from "vite";
 import webpack from "webpack";
+import webpackNodeExternals from "webpack-node-externals";
 
+import yaml from "yaml";
 import load from "~/models/load";
 import { type VariantsConfig, variantsConfigSchema } from "~/models/variants-config";
-import { fatal, info, success } from "~/utils/logs";
-
-import { sortBy } from "lodash-es";
 import { AsyncPool } from "~/utils/async-pool";
 import { hash } from "~/utils/hash";
+import { fatal, info, success } from "~/utils/logs";
 import configs from "./vite/configs";
 
 export type ExportVariantsOptions = {
@@ -49,9 +51,11 @@ export async function buildVariants(configs: VariantsConfig[]): Promise<void> {
       void pool.run(async () => {
         const variantHash = hash(`${config.id}-${variant}-${config.secret}`);
         info(`Building variant ${variant} (${variantHash})...`);
+
+        const rawSchema: Buffer[] = [];
         const child = spawn(process.execPath, ["--conditions=react-server", "server.js"], {
           cwd: buildDir,
-          stdio: "inherit",
+          stdio: ["ignore", "pipe", "inherit"],
           env: {
             ...process.env,
             NODE_ENV: "production",
@@ -60,6 +64,7 @@ export async function buildVariants(configs: VariantsConfig[]): Promise<void> {
             QUIZMS_VARIANT_HASH: variantHash.toString(),
           },
         });
+        child.stdout.on("data", (data) => rawSchema.push(data));
         const code = await new Promise<number>((resolve, reject) => {
           child.on("close", resolve);
           child.on("error", reject);
@@ -67,6 +72,12 @@ export async function buildVariants(configs: VariantsConfig[]): Promise<void> {
         if (code !== 0) {
           fatal(`Failed to build variant ${variant}.`);
         }
+
+        const schema = yaml.parse(`{ "problems": ${Buffer.concat(rawSchema).toString("utf-8")} }`);
+        await writeFile(
+          path.join(variantDir, config.id, `${variant}.json`),
+          JSON.stringify(schema, null, 2),
+        );
       });
     }
   }
@@ -89,15 +100,21 @@ async function buildBaseStatements(generationConfigs: VariantsConfig[]): Promise
         formats: ["es"],
       },
       rollupOptions: {
-        external: [/^node:/, /^react/],
         output: {
           preserveModules: true,
+          hoistTransitiveImports: false,
         },
       },
     },
     resolve: {
       conditions: ["react-server"],
     },
+    plugins: [
+      nodeExternals({
+        include: [/^@olinfo\//, "clsx", "katex", /^lodash/, "lucide-react"], // TODO: fix this
+        exclude: "@olinfo/quizms-mdx/components",
+      }),
+    ],
   } as InlineConfig);
 
   let outputs: RollupOutput[];
@@ -153,17 +170,18 @@ function webpackConfig(outDir: string): webpack.Configuration {
     performance: {
       hints: false,
     },
-    entry: `${outDir}/entry.js`,
+    entry: path.join(outDir, "entry.js"),
     output: {
-      path: `${outDir}/dist`,
+      path: path.join(outDir, "dist"),
       clean: true,
       asyncChunks: false,
       library: {
         type: "module",
       },
     },
-    externals: [/^node:/, /^react/],
     externalsType: "module",
+    externalsPresets: { node: true },
+    externals: [webpackNodeExternals({ allowlist: /^react-server-dom-webpack/ })],
     experiments: {
       outputModule: true,
     },

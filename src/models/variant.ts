@@ -3,8 +3,11 @@ import type { Student } from "~/models/student";
 
 export const answerSchema = z.union([z.string(), z.number(), z.null()]);
 
-export type Answer = z.infer<typeof answerSchema>;
-export type AnswerOption = [Answer, number];
+export const answerOptionSchema = z.object({
+  value: answerSchema,
+  points: z.number(),
+  originalId: z.string().optional(),
+});
 
 export const variantSchema = z.object({
   id: z.string(),
@@ -13,30 +16,18 @@ export const variantSchema = z.object({
     z.object({
       type: z.enum(["text", "number", "points"]),
       originalId: z.coerce.string().optional(),
-
-      optionsCorrect: answerSchema.array().optional(),
-      optionsBlank: answerSchema.array().optional(),
-      optionsWrong: answerSchema.array().optional(),
-
-      pointsCorrect: z.number(),
-      pointsBlank: z.number(),
-      pointsWrong: z.number(),
+      options: answerOptionSchema.array().optional(),
+      strictOptions: z.boolean().optional(),
     }),
   ),
 });
 
+export type Answer = z.infer<typeof answerSchema>;
+export type AnswerOption = z.infer<typeof answerSchema>;
 export type Variant = z.infer<typeof variantSchema>;
 export type Schema = Variant["schema"];
 
 export const variantMappingSchema = z.object({ id: z.string(), variant: z.string() });
-
-export function schemaOptions(schema: Schema[string]): AnswerOption[] {
-  return [
-    ...(schema.optionsCorrect?.map((o): AnswerOption => [o, schema.pointsCorrect]) ?? []),
-    ...(schema.optionsBlank?.map((o): AnswerOption => [o, schema.pointsBlank]) ?? []),
-    ...(schema.optionsWrong?.map((o): AnswerOption => [o, schema.pointsWrong]) ?? []),
-  ];
-}
 
 export function parseAnswer(answer: string, schema: Schema[string]): Answer {
   let value: Answer = answer.trim().toUpperCase();
@@ -53,7 +44,7 @@ export function isValidAnswer(answer: Answer, schema: Schema[string]) {
   if (answer == null) return;
   switch (schema.type) {
     case "text": {
-      const options = schemaOptions(schema).map(([o]) => o);
+      const options = schema.options?.map((option) => option.value) ?? [];
       if (!options.includes(answer)) {
         throw new Error(`La risposta "${answer}" non è valida`);
       }
