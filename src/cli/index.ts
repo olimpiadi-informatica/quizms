@@ -50,7 +50,11 @@ async function main() {
   program
     .command("build")
     .description("Create a static export of the website.")
-    .option("-d, --outDir <directory>", "The directory to output the bundle.", "dist")
+    .option(
+      "-d, --outDir <directory>",
+      "The directory to output the bundle.",
+      path.join(".quizms", "hosting-build"),
+    )
     .option("-t, --training", "Embed the questions and the answers in the export.")
     .option("-l, --library", "Build the project as a library.")
     .action(staticExport);

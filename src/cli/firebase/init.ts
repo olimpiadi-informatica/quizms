@@ -85,7 +85,7 @@ async function copyFiles(options: InitOptions) {
 
 function hostingConfigs() {
   return {
-    public: "dist",
+    public: ".quizms/hosting-build",
     ignore: ["firebase.json", "**/.*", "**/node_modules/**"],
     rewrites: [
       {
