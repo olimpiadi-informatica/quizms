@@ -13,13 +13,15 @@ import nodeExternals from "rollup-plugin-node-externals";
 import { type InlineConfig, build, mergeConfig } from "vite";
 import webpack from "webpack";
 import webpackNodeExternals from "webpack-node-externals";
-
 import yaml from "yaml";
+
+import type { Schema } from "~/models";
 import load from "~/models/load";
 import { type VariantsConfig, variantsConfigSchema } from "~/models/variants-config";
 import { AsyncPool } from "~/utils/async-pool";
 import { hash } from "~/utils/hash";
 import { fatal, info, success } from "~/utils/logs";
+
 import configs from "./vite/configs";
 
 export type ExportVariantsOptions = {
@@ -73,10 +75,10 @@ export async function buildVariants(configs: VariantsConfig[]): Promise<void> {
           fatal(`Failed to build variant ${variant}.`);
         }
 
-        const schema = yaml.parse(`{ "problems": ${Buffer.concat(rawSchema).toString("utf-8")} }`);
+        const schema = yaml.parse(`{ "schema": ${Buffer.concat(rawSchema).toString("utf-8")} }`);
         await writeFile(
           path.join(variantDir, config.id, `${variant}.json`),
-          JSON.stringify(schema, null, 2),
+          JSON.stringify({ id: variant, contestId: config.id, schema: parseSchema(schema.schema) }),
         );
       });
     }
@@ -242,3 +244,45 @@ export async function load(url, context, nextLoad) {
   return result;
 }`;
 }
+
+function parseSchema(schema: RawSchema): Schema {
+  return Object.fromEntries(
+    schema.flatMap((problem) =>
+      problem.subProblems.map(
+        (subProblem) =>
+          [
+            subProblem.id == null ? problem.id : `${problem.id}.${subProblem.id}`,
+            {
+              type: subProblem.type,
+              maxPoints: problem.pointsCorrect,
+              options: [
+                ...subProblem.options.map((option) => ({
+                  value: option.value,
+                  points: option.correct ? problem.pointsCorrect : problem.pointsWrong,
+                })),
+                {
+                  value: null,
+                  points: problem.pointsBlank,
+                },
+              ],
+            },
+          ] as const,
+      ),
+    ),
+  );
+}
+
+type RawSchema = {
+  id: string;
+  pointsCorrect: number;
+  pointsBlank: number;
+  pointsWrong: number;
+  subProblems: {
+    id: string;
+    type: "text" | "number";
+    options: {
+      value: string;
+      correct: boolean;
+    }[];
+  }[];
+}[];
