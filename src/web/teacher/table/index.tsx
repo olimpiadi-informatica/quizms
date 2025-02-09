@@ -303,7 +303,7 @@ function columnDefinition(
         valueGetter: ({ data }) => {
           if (data.absent || data.disabled) return "";
           if (!(id in (data.answers ?? {}))) return "";
-          return data.answers[id] ?? schema?.optionsBlank?.[0] ?? "";
+          return data.answers[id] ?? "";
         },
         tooltipValueGetter: ({ data }) => data.answers?.[id],
         editable: ({ data }) => contest.allowAnswerEdit && !data.absent && !data.disabled,

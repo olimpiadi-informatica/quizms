@@ -15,15 +15,14 @@ export const variantSchema = z.object({
   schema: z.record(
     z.object({
       type: z.enum(["text", "number", "points"]),
+      maxPoints: z.number(),
       originalId: z.coerce.string().optional(),
       options: answerOptionSchema.array().optional(),
-      strictOptions: z.boolean().optional(),
     }),
   ),
 });
 
 export type Answer = z.infer<typeof answerSchema>;
-export type AnswerOption = z.infer<typeof answerSchema>;
 export type Variant = z.infer<typeof variantSchema>;
 export type Schema = Variant["schema"];
 
@@ -60,8 +59,8 @@ export function isValidAnswer(answer: Answer, schema: Schema[string]) {
       if (typeof answer !== "number" || !Number.isInteger(answer)) {
         throw new TypeError("Il punteggio deve essere un numero intero");
       }
-      if (!(0 <= answer && answer <= schema.pointsCorrect)) {
-        throw new Error(`Il punteggio deve essere compreso tra 0 e ${schema.pointsCorrect}`);
+      if (!(0 <= answer && answer <= schema.maxPoints)) {
+        throw new Error(`Il punteggio deve essere compreso tra 0 e ${schema.maxPoints}`);
       }
       break;
     }
@@ -95,12 +94,11 @@ export function calcProblemScore(problem: Schema[string], answer?: Answer) {
     return answer as number;
   }
 
-  const options = schemaOptions(problem);
-  for (const [option, points] of options) {
-    if (option === (answer ?? null)) {
-      return points;
+  for (const option of problem.options ?? []) {
+    if (option.value === (answer ?? null)) {
+      return option.points;
     }
   }
 
-  return answer ? problem.pointsWrong : problem.pointsBlank;
+  return 0;
 }

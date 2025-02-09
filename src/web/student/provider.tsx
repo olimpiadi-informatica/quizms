@@ -66,7 +66,7 @@ export function StudentProvider({
     let maxScore = 0;
     const answers = { ...student.answers };
     for (const id in schema) {
-      maxScore += schema[id].pointsCorrect ?? 0;
+      maxScore += schema[id].maxPoints;
       answers[id] ??= null;
     }
     if (maxScore !== student.maxScore || !isEqual(answers, student.answers)) {

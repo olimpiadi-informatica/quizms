@@ -149,7 +149,7 @@ const CompletedModal = forwardRef(function CompletedModal(
   const problems = Object.keys(schema);
   problems.sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
 
-  const maxPoints = sumBy(Object.values(schema), "pointsCorrect");
+  const maxPoints = sumBy(Object.values(schema), "maxPoints");
 
   return (
     <Modal ref={ref} title="Prova terminata">
@@ -172,11 +172,14 @@ const CompletedModal = forwardRef(function CompletedModal(
               {problems.map((problem) => {
                 const answer = student.answers?.[problem];
                 const problemSchema = schema[problem];
+                const correctOptions = problemSchema.options
+                  ?.filter((o) => o.points === problemSchema.maxPoints)
+                  .map((o) => o.value);
                 return (
                   <tr key={problem}>
                     <td>{problem}</td>
                     <td>{answer ?? "-"}</td>
-                    <td>{problemSchema.optionsCorrect?.join(", ")}</td>
+                    <td>{correctOptions?.join(", ")}</td>
                     <td>{calcProblemScore(problemSchema, answer)}</td>
                   </tr>
                 );
