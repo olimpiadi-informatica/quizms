@@ -9,7 +9,6 @@ import { sortBy } from "lodash-es";
 // @ts-ignore
 import WebpackRscPlugin from "react-server-dom-webpack/plugin";
 import type { RollupOutput } from "rollup";
-import nodeExternals from "rollup-plugin-node-externals";
 import { type InlineConfig, build, mergeConfig } from "vite";
 import webpack from "webpack";
 import webpackNodeExternals from "webpack-node-externals";
@@ -23,6 +22,7 @@ import { hash } from "~/utils/hash";
 import { fatal, info, success } from "~/utils/logs";
 
 import configs from "./vite/configs";
+import externals from "./vite/externals";
 
 export type ExportVariantsOptions = {
   config: string;
@@ -111,12 +111,7 @@ async function buildBaseStatements(generationConfigs: VariantsConfig[]): Promise
     resolve: {
       conditions: ["react-server"],
     },
-    plugins: [
-      nodeExternals({
-        include: [/^@olinfo\//, "clsx", "katex", /^lodash/, "lucide-react"], // TODO: fix this
-        exclude: "@olinfo/quizms-mdx/components",
-      }),
-    ],
+    plugins: [externals({ exclude: ["@olinfo/quizms-mdx/components"] })],
   } as InlineConfig);
 
   let outputs: RollupOutput[];
