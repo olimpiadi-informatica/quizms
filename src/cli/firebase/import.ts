@@ -149,20 +149,22 @@ async function importParticipations(db: Firestore, options: ImportOptions) {
       for (const school of schools) {
         if (!picomatch.isMatch(contest.id, school.contestIds)) continue;
 
-        let pdfVariants: string[];
-        if (school.pdfVariants) {
-          pdfVariants = school.pdfVariants.map((id) => `${contest.id}-${id}`);
-        } else {
-          if (!configs) {
-            configs = await load("variants", variantsConfigSchema);
-          }
-          const config = configs.find((c) => c.id === contest.id);
-          if (!config) {
-            fatal(`Missing variants configuration for contest ${contest.id}.`);
-          }
+        let pdfVariants: string[] | undefined = undefined;
+        if (contest.hasVariants) {
+          if (school.pdfVariants) {
+            pdfVariants = school.pdfVariants.map((id) => `${contest.id}-${id}`);
+          } else {
+            if (!configs) {
+              configs = await load("variants", variantsConfigSchema);
+            }
+            const config = configs.find((c) => c.id === contest.id);
+            if (!config) {
+              fatal(`Missing variants configuration for contest ${contest.id}.`);
+            }
 
-          const rng = new Rng(`${config.secret}-${config.id}-${school.id}-participation`);
-          pdfVariants = rng.sample(config.pdfVariantIds, config.pdfPerSchool);
+            const rng = new Rng(`${config.secret}-${config.id}-${school.id}-participation`);
+            pdfVariants = rng.sample(config.pdfVariantIds, config.pdfPerSchool);
+          }
         }
 
         const participation: Participation = {
