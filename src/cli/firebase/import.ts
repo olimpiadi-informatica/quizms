@@ -4,9 +4,9 @@ import path from "node:path";
 
 import type { Bucket } from "@google-cloud/storage";
 import { deleteApp } from "firebase-admin/app";
-import { getAuth } from "firebase-admin/auth";
+import { type EmailIdentifier, getAuth } from "firebase-admin/auth";
 import type { Firestore } from "firebase-admin/firestore";
-import { groupBy, pick, range, uniq } from "lodash-es";
+import { chunk, groupBy, pick, range, uniq } from "lodash-es";
 import picomatch from "picomatch";
 import z from "zod";
 
@@ -130,7 +130,7 @@ async function importParticipations(db: Firestore, options: ImportOptions) {
     })
     .transform((school) => ({
       ...school,
-      email: `${school.id}@teacher.edu`,
+      email: `${school.id.toLowerCase()}@teacher.edu`,
     }));
   const schools = await load("schools", schoolSchema);
   const contests = await load("contests", contestSchema);
@@ -144,6 +144,19 @@ async function importParticipations(db: Firestore, options: ImportOptions) {
   if (options.schools) {
     const auth = getAuth();
     const participations: Participation[] = [];
+
+    const emails = schools.map((school) => ({ email: school.email }));
+    const usersIds: Record<string, string> = {};
+    for (const emailChunk of chunk(emails, 100)) {
+      const users = await auth.getUsers(emailChunk);
+      if (users.notFound.length > 0) {
+        const id = (users.notFound[0] as EmailIdentifier).email.replace("@teacher.edu", "");
+        fatal(`Teacher ${id} does not exist. Make sure to import teachers first.`);
+      }
+      for (const user of users.users) {
+        usersIds[user.email as string] = user.uid;
+      }
+    }
 
     for (const contest of contests) {
       for (const school of schools) {
@@ -167,25 +180,16 @@ async function importParticipations(db: Firestore, options: ImportOptions) {
           }
         }
 
-        const participation: Participation = {
+        participations.push({
           id: `${school.id}-${contest.id}`,
           schoolId: school.id,
           contestId: contest.id,
           name: school.name,
-          teacher: "",
+          teacher: usersIds[school.email],
           finalized: false,
           pdfVariants,
           disabled: false,
-        };
-        try {
-          const user = await auth.getUserByEmail(school.email);
-          participation.teacher = user.uid;
-        } catch {
-          fatal(
-            `Teacher ${participation.teacher} does not exist. Make sure to import teachers first.`,
-          );
-        }
-        participations.push(participation);
+        });
       }
     }
 
