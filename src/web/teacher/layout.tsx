@@ -18,7 +18,7 @@ import { LogOut } from "lucide-react";
 import { Link, useRoute } from "wouter";
 
 import type { Contest, Participation } from "~/models";
-import { ErrorBoundary, Loading } from "~/web/components";
+import { ErrorBoundary, Loading, useMetadata } from "~/web/components";
 
 type Props = {
   contests: Contest[];
@@ -28,6 +28,7 @@ type Props = {
 };
 
 export function TeacherLayout({ contests, participations, logout, children }: Props) {
+  const metadata = useMetadata();
   const [, params] = useRoute("/:contestId/*");
   const contest = contests.find((c) => c.id === params?.contestId);
   const participation = participations.find((p) => p.contestId === params?.contestId);
@@ -36,7 +37,7 @@ export function TeacherLayout({ contests, participations, logout, children }: Pr
     <>
       <Navbar color="bg-base-300 text-base-content">
         <NavbarBrand>
-          <div className="flex items-center h-full font-bold">Olimpiadi di Informatica</div>
+          <div className="flex items-center h-full font-bold">{metadata.title}</div>
         </NavbarBrand>
         {contest && (
           <NavbarMenu>

@@ -12,6 +12,7 @@ import { FirebaseError } from "firebase/app";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { useSearch } from "wouter";
 
+import { useMetadata } from "~/web/components";
 import { useAuth } from "~/web/firebase/hooks";
 
 import { useDb } from "./base-login";
@@ -23,6 +24,7 @@ type Props = {
 export default function PasswordLogin({ children }: Props) {
   const db = useDb();
   const params = new URLSearchParams(useSearch());
+  const metadata = useMetadata();
 
   useEffect(() => {
     const url = new URL(window.location.href);
@@ -70,7 +72,7 @@ export default function PasswordLogin({ children }: Props) {
     <>
       <Navbar color="bg-base-300 text-base-content">
         <NavbarBrand>
-          <div className="flex items-center h-full font-bold">Olimpiadi di Informatica</div>
+          <div className="flex items-center h-full font-bold">{metadata.title}</div>
         </NavbarBrand>
       </Navbar>
       <Form defaultValue={defaultCredential} onSubmit={signIn} className="p-4 pb-8">

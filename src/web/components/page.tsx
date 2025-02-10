@@ -1,4 +1,4 @@
-import { type ComponentType, type ReactNode, useEffect } from "react";
+import { type ComponentType, type ReactNode, createContext, useContext, useEffect } from "react";
 
 type Module = {
   default: ComponentType;
@@ -23,11 +23,18 @@ export async function wrapPage(module: Promise<Module & { metadata?: Metadata }>
   };
 }
 
+const PageContext = createContext<Metadata | undefined>(undefined);
+PageContext.displayName = "PageContext";
+
 function PageWrapper({ metadata, children }: { metadata?: Metadata; children: ReactNode }) {
   useEffect(() => {
     const title = metadata?.title;
     if (title) document.title = title;
   }, [metadata]);
 
-  return children;
+  return <PageContext value={metadata}>{children}</PageContext>;
+}
+
+export function useMetadata() {
+  return useContext(PageContext)!;
 }

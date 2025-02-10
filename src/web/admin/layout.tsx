@@ -18,7 +18,7 @@ import { LogOut } from "lucide-react";
 import { Link, useRoute } from "wouter";
 
 import type { Contest } from "~/models";
-import { ErrorBoundary, Loading } from "~/web/components";
+import { ErrorBoundary, Loading, useMetadata } from "~/web/components";
 
 type Props = {
   name: string;
@@ -28,6 +28,7 @@ type Props = {
 };
 
 export function AdminLayout({ name, contests, logout, children }: Props) {
+  const metadata = useMetadata();
   const [, params] = useRoute("/:contestId/*");
   const contest = contests.find((c) => c.id === params?.contestId);
 
@@ -35,7 +36,7 @@ export function AdminLayout({ name, contests, logout, children }: Props) {
     <>
       <Navbar color="bg-error text-error-content">
         <NavbarBrand>
-          <div className="flex items-center h-full font-bold">Olimpiadi di Informatica</div>
+          <div className="flex items-center h-full font-bold">{metadata.title}</div>
         </NavbarBrand>
         {contest && contests.length >= 2 && (
           <NavbarMenu>
