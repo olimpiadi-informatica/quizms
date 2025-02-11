@@ -176,9 +176,10 @@ function webpackConfig(outDir: string): webpack.Configuration {
         type: "module",
       },
     },
-    externalsType: "module",
     externalsPresets: { node: true },
-    externals: [webpackNodeExternals({ allowlist: /^react-server-dom-webpack/ })],
+    externals: [
+      webpackNodeExternals({ importType: "module", allowlist: /^react-server-dom-webpack/ }),
+    ],
     experiments: {
       outputModule: true,
     },
