@@ -219,8 +219,6 @@ function columnDefinition(
   variants: Record<string, Variant>,
   isContestFinished: boolean,
 ): ColDef[] {
-  const sampleVariant = Object.values(variants)[0];
-
   const widths = {
     xs: 100,
     sm: 125,
@@ -295,7 +293,6 @@ function columnDefinition(
       hide: !contest.hasOnline,
     },
     ...contest.problemIds.map((id): ColDef => {
-      const schema = sampleVariant?.schema[id];
       return {
         field: `answers[${id}]`,
         headerName: id,
