@@ -3,13 +3,13 @@ import {
   type ReactNode,
   type SetStateAction,
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useState,
 } from "react";
 
 import { useIsAfter } from "@olinfo/react-components";
-import { isEqual } from "lodash-es";
 
 import { type Contest, type Participation, type Schema, type Student, calcScore } from "~/models";
 
@@ -53,26 +53,35 @@ export function StudentProvider({
   const [schema, registerSchema] = useState<Schema>({});
   const terminated = useIsAfter(student.finishedAt) ?? false;
 
+  const setStudentAndScore = useCallback(
+    async (student: Student) => {
+      if (process.env.QUIZMS_MODE === "training") {
+        await setStudent({ ...student, score: calcScore(student, schema) });
+      } else {
+        await setStudent(student);
+      }
+    },
+    [setStudent, schema],
+  );
+
   const value: StudentContextProps = {
     ...props,
     student,
-    setStudent: (student) => setStudent({ ...student, score: calcScore(student, schema) }),
+    setStudent: setStudentAndScore,
     terminated,
     schema,
     registerSchema,
   };
 
   useEffect(() => {
-    let maxScore = 0;
-    const answers = { ...student.answers };
-    for (const id in schema) {
-      maxScore += schema[id].maxPoints;
-      answers[id] ??= null;
-    }
-    if (maxScore !== student.maxScore || !isEqual(answers, student.answers)) {
-      const newStudent: Student = { ...student, maxScore, answers };
-      newStudent.score = calcScore(newStudent, schema);
-      setStudent(newStudent);
+    if (process.env.QUIZMS_MODE === "training" && student.maxScore == null) {
+      let maxScore = 0;
+      const answers = { ...student.answers };
+      for (const id in schema) {
+        maxScore += schema[id].maxPoints;
+        answers[id] ??= null;
+      }
+      setStudent({ ...student, maxScore, answers });
     }
   }, [student, setStudent, schema]);
 
