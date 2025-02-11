@@ -20,7 +20,7 @@ export function FirebaseStatement({ createFromFetch, statementVersion }: Props) 
 
   const statementRef = ref(
     storage,
-    `statements/${student.contestId}/${student.variant!}/statement-${statementVersion}.js`,
+    `statements/${student.contestId}/${student.variant!}/statement-${statementVersion}.txt`,
   );
 
   const fetcher = useCallback(async () => {

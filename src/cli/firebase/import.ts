@@ -282,7 +282,7 @@ async function importStatements(bucket: Bucket, options: ImportOptions) {
 
     return uniq([...config.variantIds, ...config.pdfVariantIds]).map((id): [string, string] => [
       path.join("variants", config.id, `${id}.txt`),
-      path.join("statements", config.id, `${id}-${statementVersion}.txt`),
+      path.join("statements", config.id, id, `statement-${statementVersion}.txt`),
     ]);
   });
   await importStorage(bucket, "statements", statements, options);

@@ -14,11 +14,12 @@ service firebase.storage {
             return firestore.get(/databases/(default)/documents/participations/$(data.participationId)/students/$(data.studentId));
         }
 
-        match /statements/{variantId}/{filename} {
+        match /statements/{contestId}/{variantId}/{filename} {
             function canStudentReadVariant() {
                 let student = getStudent(request.auth.uid);
                 return student != null
                     && isAuthenticated(student.data.uid)
+                    && student.data.contestId == contestId
                     && student.data.variant == variantId
                     && student.data.startedAt <= request.time;
             }
