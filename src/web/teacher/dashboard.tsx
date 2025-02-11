@@ -127,9 +127,9 @@ function ContestData({ startingTime, endingTime }: { startingTime: Date; endingT
         <p>
           Tempo rimanente: <Timer endTime={endingTime} />
         </p>
-        <div className="mx-auto flex flex-col items-center justify-center gap-2 text-2xl">
+        <p className="text-center text-2xl">
           Gara iniziata alle ore <DateTime date={startingTime} dateStyle="hidden" />.
-        </div>
+        </p>
       </WithinTimeRange>
       <WithinTimeRange start={endingTime}>
         <p>
