@@ -151,12 +151,14 @@ async function buildBaseStatements(generationConfigs: VariantsConfig[]): Promise
   await Promise.all([
     writeFile(path.join(outDir, "loader.js"), loaderFile()),
     writeFile(path.join(outDir, "server.js"), serverFile(generationConfigs[0].id)),
-    ...generationConfigs.map((config) =>
-      cp(
-        path.join(outDir, "dist", "main.mjs"),
-        path.join(cwd(), "src", config.entry.replace(/\..*$/, ".mjs")),
-      ),
-    ),
+    (async () => {
+      for (const config of generationConfigs) {
+        await cp(
+          path.join(outDir, "dist", "main.mjs"),
+          path.join(cwd(), "src", config.entry.replace(/\..*$/, ".mjs")),
+        );
+      }
+    })(),
   ]);
 }
 
