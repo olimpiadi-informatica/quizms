@@ -15,7 +15,7 @@ import {
   SubmitButton,
 } from "@olinfo/react-components";
 import { sumBy } from "lodash-es";
-import { FileChartColumn, LogOut, RotateCcw } from "lucide-react";
+import { FileChartColumn, LogOut, RotateCcw, ThumbsDown, ThumbsUp } from "lucide-react";
 
 import { type Schema, calcProblemScore } from "~/models";
 import { ErrorBoundary, Progress, Prose, Timer, useMetadata } from "~/web/components";
@@ -153,6 +153,14 @@ const CompletedModal = forwardRef(function CompletedModal(
 
   const maxPoints = sumBy(Object.values(schema), "maxPoints");
 
+  const link = `https://docs.google.com/forms/d/e/1FAIpQLSdeRE1u3LbVD4mv0yEweaSRg1fzNbZjElQ10MXmfSToMmW5oQ/viewform?usp=pp_url\
+&entry.191389305=${student.userData?.surname}\
+&entry.580703203=${student.userData?.name}\
+&entry.1306098865=${student.userData?.classYear}\
+&entry.1848719994=${student.userData?.classSection}\
+&entry.2127391105=${student.variant}\
+&entry.1620368290=${student.participationId?.split("-")[0]}`;
+
   return (
     <Modal ref={ref} title="Prova terminata">
       <p>La prova è terminata.</p>
@@ -190,6 +198,13 @@ const CompletedModal = forwardRef(function CompletedModal(
           </table>
         </>
       )}
+      <div className="mx-auto">
+        <a href={link} className="btn btn-info" target="_blank" rel="noreferrer">
+          <ThumbsUp />
+          <ThumbsDown />
+          Valuta questa gara
+        </a>
+      </div>
     </Modal>
   );
 });
