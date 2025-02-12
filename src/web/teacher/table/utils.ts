@@ -21,13 +21,13 @@ export function isStudentIncomplete(
   }
   const variant = variants[student.variant!] ?? Object.values(variants)[0];
 
+  const answers = student.answers ?? {};
   for (const id of Object.keys(variant.schema)) {
-    const answer = student.answers?.[id];
-    if (answer == null) {
+    if (!(id in answers)) {
       return `Domanda ${id} mancante`;
     }
     try {
-      isValidAnswer(answer, variant.schema[id]);
+      isValidAnswer(answers[id], variant.schema[id]);
     } catch (err) {
       return (err as Error).message;
     }
