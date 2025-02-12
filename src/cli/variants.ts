@@ -55,17 +55,21 @@ export async function buildVariants(configs: VariantsConfig[]): Promise<void> {
         info(`Building variant ${variant} (${variantHash})...`);
 
         const rawSchema: Buffer[] = [];
-        const child = spawn(process.execPath, ["--conditions=react-server", `server-${config.id}.js`], {
-          cwd: buildDir,
-          stdio: ["ignore", "pipe", "inherit"],
-          env: {
-            ...process.env,
-            NODE_ENV: "production",
-            QUIZMS_CONTEST_ID: config.id,
-            QUIZMS_VARIANT_ID: variant,
-            QUIZMS_VARIANT_HASH: variantHash.toString(),
+        const child = spawn(
+          process.execPath,
+          ["--conditions=react-server", `server-${config.id}.js`],
+          {
+            cwd: buildDir,
+            stdio: ["ignore", "pipe", "inherit"],
+            env: {
+              ...process.env,
+              NODE_ENV: "production",
+              QUIZMS_CONTEST_ID: config.id,
+              QUIZMS_VARIANT_ID: variant,
+              QUIZMS_VARIANT_HASH: variantHash.toString(),
+            },
           },
-        });
+        );
         child.stdout.on("data", (data) => rawSchema.push(data));
         const code = await new Promise<number>((resolve, reject) => {
           child.on("close", resolve);
