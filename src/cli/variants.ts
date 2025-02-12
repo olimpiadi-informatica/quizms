@@ -55,7 +55,7 @@ export async function buildVariants(configs: VariantsConfig[]): Promise<void> {
         info(`Building variant ${variant} (${variantHash})...`);
 
         const rawSchema: Buffer[] = [];
-        const child = spawn(process.execPath, ["--conditions=react-server", "server.js"], {
+        const child = spawn(process.execPath, ["--conditions=react-server", `server-${config.id}.js`], {
           cwd: buildDir,
           stdio: ["ignore", "pipe", "inherit"],
           env: {
@@ -148,18 +148,14 @@ async function buildBaseStatements(generationConfigs: VariantsConfig[]): Promise
     info(stats.toString({ colors: true, chunks: false }));
   }
 
-  await Promise.all([
-    writeFile(path.join(outDir, "loader.js"), loaderFile()),
-    writeFile(path.join(outDir, "server.js"), serverFile(generationConfigs[0].id)),
-    (async () => {
-      for (const config of generationConfigs) {
-        await cp(
-          path.join(outDir, "dist", "main.mjs"),
-          path.join(cwd(), "src", config.entry.replace(/\..*$/, ".mjs")),
-        );
-      }
-    })(),
-  ]);
+  await writeFile(path.join(outDir, "loader.js"), loaderFile());
+  for (const config of generationConfigs) {
+    await writeFile(path.join(outDir, `server-${config.id}.js`), serverFile(config.id));
+    await cp(
+      path.join(outDir, "dist", "main.mjs"),
+      path.join(cwd(), "src", config.entry.replace(/\..*$/, ".mjs")),
+    );
+  }
 }
 
 function webpackConfig(outDir: string): webpack.Configuration {
