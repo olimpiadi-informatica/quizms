@@ -137,10 +137,7 @@ function Table() {
     } as Student);
   }
 
-  const colDefs = useMemo(
-    () => columnDefinition(contest, variants, isContestFinished),
-    [contest, variants, isContestFinished],
-  );
+  const colDefs = useMemo(() => columnDefinition(contest, variants), [contest, variants]);
 
   const onCellEditRequest = async (ev: CellEditRequestEvent) => {
     let student = ev.data as Student;
@@ -214,11 +211,7 @@ function Table() {
   );
 }
 
-function columnDefinition(
-  contest: Contest,
-  variants: Record<string, Variant>,
-  isContestFinished: boolean,
-): ColDef[] {
+function columnDefinition(contest: Contest, variants: Record<string, Variant>): ColDef[] {
   const widths = {
     xs: 100,
     sm: 125,
@@ -313,7 +306,7 @@ function columnDefinition(
       pinned: "right",
       width: 100,
       ...defaultOptions,
-      hide: !isContestFinished,
+      hide: true,
     },
     {
       field: "absent",
