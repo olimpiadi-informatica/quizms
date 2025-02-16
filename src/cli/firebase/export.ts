@@ -1,8 +1,12 @@
-import { mkdir, open } from "node:fs/promises";
+import { createWriteStream } from "node:fs";
+import { mkdir } from "node:fs/promises";
 import path from "node:path";
+import { pipeline } from "node:stream/promises";
 
+import { SingleBar } from "cli-progress";
+import { formatDistanceStrict } from "date-fns";
 import { deleteApp } from "firebase-admin/app";
-import type { Query } from "firebase-admin/firestore";
+import type { Query, QueryDocumentSnapshot } from "firebase-admin/firestore";
 import { capitalize } from "lodash-es";
 
 import { info, success } from "~/utils/logs";
@@ -64,24 +68,28 @@ export default async function exportContests(options: ExportOptions) {
 async function exportCollection(ref: Query, collection: string, dir: string) {
   info(`Exporting ${collection}.`);
 
-  const chunkSize = 25_000;
-  let snapshot = await ref.limit(chunkSize).get();
+  const count = await ref.count().get();
+  const bar = new SingleBar({
+    format: "  {bar} {percentage}% | ETA: {eta_formatted} | {value}/{total}",
+    barCompleteChar: "\u2588",
+    barIncompleteChar: "\u2582",
+    etaBuffer: 10000,
+    formatTime: (t) => formatDistanceStrict(0, t * 1000),
+  });
+  bar.start(count.data().count, 0);
 
-  const file = await open(path.format({ dir, name: collection, ext: ".jsonl" }), "w");
-  let sum = 0;
+  await pipeline(
+    ref.stream(),
+    async function* (stream) {
+      for await (const data of stream) {
+        bar.increment();
+        const snapshot = data as unknown as QueryDocumentSnapshot;
+        yield `${JSON.stringify(snapshot.data())}\n`;
+      }
+    },
+    createWriteStream(path.format({ dir, name: collection, ext: ".jsonl" })),
+  );
 
-  while (!snapshot.empty) {
-    for (const doc of snapshot.docs) {
-      await file.write(`${JSON.stringify(doc.data())}\n`);
-    }
-
-    sum += snapshot.size;
-    info(`Found ${sum} ${collection}.`);
-
-    const last = snapshot.docs.at(-1);
-    snapshot = await ref.startAfter(last).limit(chunkSize).get();
-  }
-
+  bar.stop();
   success(`${capitalize(collection)} export completed.`);
-  await file.close();
 }
