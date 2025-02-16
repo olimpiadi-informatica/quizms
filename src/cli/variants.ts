@@ -115,7 +115,7 @@ async function buildBaseStatements(generationConfigs: VariantsConfig[]): Promise
     resolve: {
       conditions: ["react-server"],
     },
-    plugins: [externals({ exclude: ["@olinfo/quizms-mdx/components"] })],
+    plugins: [externals({ exclude: [/^@olinfo\/quizms-/] })],
   } as InlineConfig);
 
   let outputs: RollupOutput[];

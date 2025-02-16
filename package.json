@@ -95,7 +95,6 @@
     "zod-validation-error": "^3.0"
   },
   "peerDependencies": {
-    "@olinfo/quizms-mdx": "^3",
     "react": "^19",
     "react-dom": "^19",
     "react-server-dom-webpack": "^19",

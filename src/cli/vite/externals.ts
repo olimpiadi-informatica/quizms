@@ -1,11 +1,10 @@
 import { readFile } from "node:fs/promises";
 
-import { uniq } from "lodash-es";
 import { glob } from "tinyglobby";
 import type { PluginOption } from "vite";
 
 type Options = {
-  exclude?: string[];
+  exclude?: RegExp[];
 };
 
 export default async function externals(options?: Options): Promise<PluginOption> {
@@ -17,7 +16,11 @@ export default async function externals(options?: Options): Promise<PluginOption
       return Object.keys(manifest.dependencies ?? {});
     }),
   );
-  const allDependencies = uniq(packageDependencies.flat());
+  const externalDependencies = new Set(
+    packageDependencies
+      .flat()
+      .filter((dep) => options?.exclude?.every((re) => !re.test(dep)) ?? true),
+  );
 
   return {
     name: "quizms:externals",
@@ -25,13 +28,10 @@ export default async function externals(options?: Options): Promise<PluginOption
     resolveId(id) {
       if (/^[^a-z@]/.test(id)) return;
 
-      if (match(id, allDependencies) && !match(id, options?.exclude ?? [])) {
+      const module = id.replace(/^((?:@[^/]+\/)?[^/]+).*/, "$1");
+      if (externalDependencies.has(module)) {
         return { id, external: true };
       }
     },
   };
-}
-
-function match(id: string, modules: string[]) {
-  return modules.some((module) => id === module || id.startsWith(`${module}/`));
 }

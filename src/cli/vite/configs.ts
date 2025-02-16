@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import path from "node:path";
 import { cwd } from "node:process";
 import { fileURLToPath } from "node:url";
@@ -17,10 +18,10 @@ import routes from "./routes";
 export default function configs(mode: "development" | "production"): InlineConfig {
   const root = path.join(cwd(), "src");
 
-  // @ts-ignore: ignoring to avoid circular dependency
-  const quizmsMdx: Promise<PluginOption[]> = import("@olinfo/quizms-mdx/vite").then(
-    (m) => m.default,
-  );
+  const packageJson = JSON.parse(readFileSync(path.join(cwd(), "package.json"), "utf8"));
+  const plugins: PluginOption = (Object.keys(packageJson.dependencies) as string[])
+    .filter((key) => key.startsWith("@olinfo/quizms-"))
+    .map((pkg) => import(pkg).then((m): PluginOption => m.default));
 
   return {
     configFile: false,
@@ -38,7 +39,7 @@ export default function configs(mode: "development" | "production"): InlineConfi
       "process.env.NODE_ENV": JSON.stringify(mode),
       "process.env.QUIZMS_MODE": JSON.stringify(process.env.QUIZMS_MODE),
     },
-    plugins: [quizmsMdx, directives(), images(), inspect(), react(), routes()],
+    plugins: [plugins, directives(), images(), inspect(), react(), routes()],
     build: {
       rollupOptions: {
         onwarn: (log) => {

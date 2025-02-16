@@ -24,7 +24,6 @@ export default defineConfig({
     target: "esnext",
     sourcemap: true,
     rollupOptions: {
-      external: /^@olinfo\/quizms-mdx\/.*/,
       output: {
         preserveModules: true,
         hoistTransitiveImports: false,
