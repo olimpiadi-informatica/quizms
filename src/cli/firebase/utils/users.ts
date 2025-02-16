@@ -1,8 +1,9 @@
 import { pbkdf2, randomBytes } from "node:crypto";
 import { promisify } from "node:util";
 
+import { SingleBar } from "cli-progress";
 import { type UserImportRecord, getAuth } from "firebase-admin/auth";
-import { partition, truncate } from "lodash-es";
+import { chunk, partition, truncate } from "lodash-es";
 import z from "zod";
 
 import { fatal, success, warning } from "~/utils/logs";
@@ -14,6 +15,12 @@ type ImportOptions = {
 };
 
 export async function importUsers(users: User[], customClaims: object, options: ImportOptions) {
+  const bar = new SingleBar({
+    format: "  {bar} {percentage}% | {value}/{total}",
+    barCompleteChar: "\u2588",
+    barIncompleteChar: "\u2582",
+  });
+
   const auth = getAuth();
 
   if (options.delete) {
@@ -27,16 +34,20 @@ export async function importUsers(users: User[], customClaims: object, options: 
     }
   }
 
-  const userRecords = Object.fromEntries(
-    await Promise.all(
-      users.map(async (user) => {
-        const record = await auth.getUserByEmail(user.email).catch(() => undefined);
-        return [user.email, record?.uid] as const;
-      }),
-    ),
-  );
+  const emails = users.map((school) => ({ email: school.email }));
+  const usersIds: Record<string, string> = {};
 
-  const [existing, nonExisting] = partition(users, (user) => userRecords[user.email]);
+  bar.start(users.length, 0);
+  for (const emailChunk of chunk(emails, 100)) {
+    const users = await auth.getUsers(emailChunk);
+    for (const user of users.users) {
+      usersIds[user.email as string] = user.uid;
+    }
+    bar.increment(100);
+  }
+  bar.stop();
+
+  const [existing, nonExisting] = partition(users, (user) => usersIds[user.email]);
   if (existing.length > 0 && !options.skipExisting && !options.force) {
     fatal(
       `${existing.length} users already exist. Use \`--force\` to overwrite or \`--skip-existing\` to ignore.`,
@@ -48,7 +59,7 @@ export async function importUsers(users: User[], customClaims: object, options: 
   const rounds = 100_000;
   const importRecords = await Promise.all(
     usersToImport.map(async (user): Promise<UserImportRecord> => {
-      const uid = userRecords[user.email] ?? user.id ?? randomBytes(15).toString("base64");
+      const uid = usersIds[user.email] ?? user.id ?? randomBytes(15).toString("base64");
       const salt = randomBytes(16);
       const hash = await promisify(pbkdf2)(user.password, salt, rounds, 64, "sha256");
       return {

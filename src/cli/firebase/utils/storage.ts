@@ -2,9 +2,9 @@ import { existsSync } from "node:fs";
 
 import type { Bucket } from "@google-cloud/storage";
 import { confirm } from "@inquirer/prompts";
+import { SingleBar } from "cli-progress";
 import { partition } from "lodash-es";
 import pc from "picocolors";
-
 import { fatal, success } from "~/utils/logs";
 
 type ImportOptions = {
@@ -18,7 +18,15 @@ export async function importStorage(
   files: [string, string][],
   options: ImportOptions,
 ) {
+  const bar = new SingleBar({
+    format: "  {bar} {percentage}% | {value}/{total}",
+    barCompleteChar: "\u2588",
+    barIncompleteChar: "\u2582",
+  });
+
   const existingFiles = new Set<string>();
+
+  bar.start(files.length, 0);
   await Promise.all(
     files.map(async ([local, remote]) => {
       if (!existsSync(local)) {
@@ -32,8 +40,10 @@ export async function importStorage(
       if (exists) {
         existingFiles.add(remote);
       }
+      bar.increment();
     }),
   );
+  bar.stop();
 
   const [existing, nonExisting] = partition(files, ([_, remote]) => existingFiles.has(remote));
   if (existing.length > 0 && !options.skipExisting && !options.force) {
@@ -56,9 +66,14 @@ export async function importStorage(
     }
   }
 
+  bar.start(filesToImport.length, 0);
   await Promise.all(
-    filesToImport.map(([local, remote]) => bucket.upload(local, { destination: remote })),
+    filesToImport.map(async ([local, remote]) => {
+      await bucket.upload(local, { destination: remote });
+      bar.increment();
+    }),
   );
+  bar.stop();
 
   success(`${filesToImport.length} ${collection} imported!`);
 }

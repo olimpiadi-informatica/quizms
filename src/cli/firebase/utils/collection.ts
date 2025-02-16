@@ -1,4 +1,5 @@
 import { confirm } from "@inquirer/prompts";
+import { SingleBar } from "cli-progress";
 import type { Firestore, FirestoreDataConverter } from "firebase-admin/firestore";
 import { partition, upperFirst } from "lodash-es";
 import pc from "picocolors";
@@ -59,7 +60,15 @@ export async function importCollection<T extends { id: string }>(
     }
   }
 
+  const bar = new SingleBar({
+    format: "  {bar} {percentage}% | {value}/{total}",
+    barCompleteChar: "\u2588",
+    barIncompleteChar: "\u2582",
+  });
+  bar.start(docsToImport.length, 0);
+
   for (let i = 0; i < docsToImport.length; i += 400) {
+    bar.update(i);
     const batch = db.batch();
     for (const record of docsToImport.slice(i, i + 400)) {
       const ref = db.doc(`${collection}/${record.id}`).withConverter(converter);
@@ -76,5 +85,7 @@ export async function importCollection<T extends { id: string }>(
     }
   }
 
+  bar.update(docsToImport.length);
+  bar.stop();
   success(`${docsToImport.length} ${collection} imported!`);
 }
