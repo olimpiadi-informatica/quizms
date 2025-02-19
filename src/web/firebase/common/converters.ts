@@ -85,7 +85,7 @@ function toFirebaseSchema(schema: ZodTypeAny): ZodTypeAny {
 }
 
 function parse<T>(schema: ZodType<T, any, any>, snapshot: DocumentSnapshot): T {
-  const data = { ...snapshot.data(), id: snapshot.id };
+  const data = { ...snapshot.data({ serverTimestamps: "estimate" }), id: snapshot.id };
   return validate(toFirebaseSchema(schema), data);
 }
 
