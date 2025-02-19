@@ -2,6 +2,7 @@ import { pbkdf2, randomBytes } from "node:crypto";
 import { promisify } from "node:util";
 
 import { SingleBar } from "cli-progress";
+import { formatDistanceStrict } from "date-fns";
 import { type UserImportRecord, getAuth } from "firebase-admin/auth";
 import { chunk, partition, truncate } from "lodash-es";
 import z from "zod";
@@ -16,9 +17,11 @@ type ImportOptions = {
 
 export async function importUsers(users: User[], customClaims: object, options: ImportOptions) {
   const bar = new SingleBar({
-    format: "  {bar} {percentage}% | {value}/{total}",
+    format: "  {bar} {percentage}% | ETA: {eta_formatted} | {value}/{total}",
     barCompleteChar: "\u2588",
     barIncompleteChar: "\u2582",
+    etaBuffer: 10000,
+    formatTime: (t) => formatDistanceStrict(0, t * 1000),
   });
 
   const auth = getAuth();
@@ -37,13 +40,13 @@ export async function importUsers(users: User[], customClaims: object, options: 
   const emails = users.map((school) => ({ email: school.email }));
   const usersIds: Record<string, string> = {};
 
-  bar.start(users.length, 0);
+  bar.start(emails.length, 0);
   for (const emailChunk of chunk(emails, 100)) {
     const users = await auth.getUsers(emailChunk);
     for (const user of users.users) {
       usersIds[user.email as string] = user.uid;
     }
-    bar.increment(100);
+    bar.increment(emailChunk.length);
   }
   bar.stop();
 
@@ -55,13 +58,15 @@ export async function importUsers(users: User[], customClaims: object, options: 
   }
 
   const usersToImport = options.skipExisting ? nonExisting : [...existing, ...nonExisting];
-
   const rounds = 100_000;
+
+  bar.start(usersToImport.length, 0);
   const importRecords = await Promise.all(
     usersToImport.map(async (user): Promise<UserImportRecord> => {
       const uid = usersIds[user.email] ?? user.id ?? randomBytes(15).toString("base64");
       const salt = randomBytes(16);
       const hash = await promisify(pbkdf2)(user.password, salt, rounds, 64, "sha256");
+      bar.increment();
       return {
         uid,
         email: user.email,
@@ -74,6 +79,7 @@ export async function importUsers(users: User[], customClaims: object, options: 
       };
     }),
   );
+  bar.stop();
 
   if (importRecords.length === 0) {
     warning("No users to import. Skipping...");
