@@ -10,7 +10,7 @@ import type {
 } from "ag-grid-community";
 import type { AgGridReactProps } from "ag-grid-react";
 import { addMinutes, isEqual as isEqualDate } from "date-fns";
-import { cloneDeep, omit, set, sumBy, toPath } from "lodash-es";
+import { cloneDeep, omit, setWith, sumBy, toPath } from "lodash-es";
 import { Download, FileCheck, Trash2, TriangleAlert, Upload, Users } from "lucide-react";
 
 import {
@@ -75,7 +75,7 @@ export default function TeacherTable() {
           </Button>
         )}
         <FinalizeModal key={participation.id} ref={finalizeRef} />
-        {!participation.finalized && (
+        {contest.allowStudentDelete && !participation.finalized && (
           <Button
             className="btn-primary btn-sm h-10"
             icon={Trash2}
@@ -181,7 +181,7 @@ function Table() {
       student = omit(student, ev.colDef.field!) as Student;
     } else {
       student = cloneDeep(student);
-      set(student, ev.colDef.field!, value);
+      setWith(student, ev.colDef.field!, value, Object);
     }
     student.score = calcScore(student, variants[student.variant!]?.schema);
     await setStudentAndUpdateId(student);
@@ -324,7 +324,7 @@ function columnDefinition(
       editable: true,
       ...defaultOptions,
       sortable: false,
-      hide: !contest.hasPdf || !contest.allowAnswerEdit,
+      hide: !contest.allowAnswerEdit,
       filterParams: {
         filterOptions: [
           {
