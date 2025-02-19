@@ -18,6 +18,7 @@ export const variantSchema = z.object({
       maxPoints: z.number(),
       originalId: z.coerce.string().optional(),
       options: answerOptionSchema.array().optional(),
+      allowEmpty: z.boolean().default(true),
     }),
   ),
 });
@@ -32,7 +33,8 @@ export function parseAnswer(answer: string, schema: Schema[string]): Answer {
   let value: Answer = answer.trim().toUpperCase();
   if (!value) return null;
 
-  if (schema.type === "number" || schema.type === "points") {
+  const options = schema.options?.map((option) => option.value) ?? [];
+  if (!options.includes(value) && (schema.type === "number" || schema.type === "points")) {
     value = Number(value);
   }
   isValidAnswer(value, schema);
@@ -40,14 +42,10 @@ export function parseAnswer(answer: string, schema: Schema[string]): Answer {
 }
 
 export function isValidAnswer(answer: Answer, schema: Schema[string]) {
-  if (answer == null) return;
+  if (answer == null || schema.options?.some((option) => option.value === answer)) return;
   switch (schema.type) {
     case "text": {
-      const options = schema.options?.map((option) => option.value) ?? [];
-      if (!options.includes(answer)) {
-        throw new Error(`La risposta "${answer}" non è valida`);
-      }
-      break;
+      throw new Error(`La risposta "${answer}" non è valida`);
     }
     case "number": {
       if (!Number.isInteger(answer)) {
@@ -74,30 +72,29 @@ export function calcScore(student: Student, schema?: Schema) {
 
   if (!schema || !answers) return;
 
-  let points = 0;
+  let score = 0;
   for (const id in schema) {
-    if (!(id in answers)) continue;
-
     const problem = schema[id];
-    const answer = answers[id]?.toString()?.trim();
+    const answer = answers[id];
+    if (!problem.allowEmpty && (answer == null || answer === "")) return;
 
-    const problemPoints = calcProblemScore(problem, answer);
-    if (problemPoints === undefined) return;
-    points += problemPoints;
+    const points = calcProblemPoints(problem, answer);
+    if (points == null) return;
+    score += points;
   }
 
-  return points;
+  return score;
 }
 
-export function calcProblemScore(problem: Schema[string], answer?: Answer) {
-  if (problem.type === "points") {
-    return answer as number;
-  }
-
+export function calcProblemPoints(problem: Schema[string], answer?: Answer) {
   for (const option of problem.options ?? []) {
     if (option.value === (answer ?? null)) {
       return option.points;
     }
+  }
+
+  if (problem.type === "points") {
+    return answer as number;
   }
 
   return 0;

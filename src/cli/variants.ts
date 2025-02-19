@@ -263,6 +263,7 @@ function parseSchema(schema: RawSchema): Schema {
                   points: problem.pointsBlank,
                 },
               ],
+              allowEmpty: true,
             },
           ] as const,
       ),

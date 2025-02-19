@@ -17,7 +17,7 @@ import {
 import { sumBy } from "lodash-es";
 import { FileChartColumn, LogOut, RotateCcw } from "lucide-react";
 
-import { type Schema, calcProblemScore } from "~/models";
+import { type Schema, calcProblemPoints } from "~/models";
 import { ErrorBoundary, Progress, Prose, Timer, useMetadata } from "~/web/components";
 
 import { useStudent } from "./provider";
@@ -182,7 +182,7 @@ const CompletedModal = forwardRef(function CompletedModal(
                     <td>{problem}</td>
                     <td>{answer ?? "-"}</td>
                     <td>{correctOptions?.join(", ")}</td>
-                    <td>{calcProblemScore(problemSchema, answer)}</td>
+                    <td>{calcProblemPoints(problemSchema, answer)}</td>
                   </tr>
                 );
               })}
