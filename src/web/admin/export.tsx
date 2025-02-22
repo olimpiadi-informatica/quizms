@@ -88,7 +88,7 @@ async function saveExport<T>(
 
   const writableStream = await handle.createWritable();
 
-  const chunkSize = 10_000;
+  const chunkSize = 100;
 
   let last: DocumentSnapshot<T> | undefined;
   for (;;) {
