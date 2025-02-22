@@ -1,7 +1,12 @@
-import { calcScore } from "~/models";
-import { info, success } from "~/utils/logs";
+import { pipeline } from "node:stream/promises";
 
-import { sumBy } from "lodash-es";
+import { SingleBar } from "cli-progress";
+import { formatDistanceStrict } from "date-fns";
+import type { QueryDocumentSnapshot } from "firebase-admin/lib/firestore";
+
+import { type Student, calcScore } from "~/models";
+import { info } from "~/utils/logs";
+
 import { studentConverter, variantConverter } from "./utils/converters-admin";
 import { initializeFirebase } from "./utils/initialize";
 
@@ -14,31 +19,38 @@ export default async function updateScores() {
   const variantSnap = await variantRef.get();
   const variants = Object.fromEntries(variantSnap.docs.map((doc) => [doc.id, doc.data()]));
 
-  const ref = db.collectionGroup("students").withConverter(studentConverter).limit(1000);
-  let snapshot = await ref.get();
+  const ref = db.collectionGroup("students").withConverter(studentConverter);
 
-  let sum = 0;
-  while (!snapshot.empty) {
-    const updated = await Promise.all(
-      snapshot.docs.map((doc) =>
-        db.runTransaction(async (t) => {
-          const studentSnap = await t.get(doc.ref);
-          const student = studentSnap.data();
-          if (!student?.variant) return 0;
-          const score = calcScore(student, variants[student.variant]?.schema);
-          if (score === student.score) return 0;
-          t.update(doc.ref, { score });
-          return 1;
-        }),
-      ),
-    );
+  const count = await ref.count().get();
+  const bar = new SingleBar({
+    format: "  {bar} {percentage}% | ETA: {eta_formatted} | {value}/{total}",
+    barCompleteChar: "\u2588",
+    barIncompleteChar: "\u2582",
+    etaBuffer: 10000,
+    formatTime: (t) => formatDistanceStrict(0, t * 1000),
+  });
 
-    sum += sumBy(updated);
-    info(`${sum} students updated.`);
-
-    const last = snapshot.docs.at(-1);
-    snapshot = await ref.startAfter(last).get();
-  }
-
-  success(`${sum} students updated.`);
+  bar.start(count.data().count, 0);
+  await pipeline(ref.stream(), async function* (stream) {
+    const promises: Promise<void>[] = [];
+    for await (const data of stream) {
+      const snapshot = data as unknown as QueryDocumentSnapshot<Student>;
+      const ref = snapshot.ref;
+      promises.push(
+        db
+          .runTransaction(async (t) => {
+            const studentSnap = await t.get(ref);
+            const student = studentSnap.data();
+            if (!student?.variant) return;
+            const score = calcScore(student, variants[student.variant]?.schema) ?? null;
+            if (score !== student.score) {
+              t.update(ref, { score });
+            }
+          })
+          .then(() => bar.increment()),
+      );
+    }
+    await Promise.all(promises);
+  });
+  bar.stop();
 }
