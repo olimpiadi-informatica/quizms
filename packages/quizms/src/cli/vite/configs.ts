@@ -21,7 +21,7 @@ export default function configs(mode: "development" | "production"): InlineConfi
   const packageJson = JSON.parse(readFileSync(path.join(cwd(), "package.json"), "utf8"));
   const plugins: PluginOption = (Object.keys(packageJson.dependencies) as string[])
     .filter((key) => key.startsWith("@olinfo/quizms-"))
-    .map((pkg) => import(pkg).then((m): PluginOption => m.default));
+    .map((pkg) => import(`${pkg}/vite`).then((m): PluginOption => m.default));
 
   return {
     configFile: false,

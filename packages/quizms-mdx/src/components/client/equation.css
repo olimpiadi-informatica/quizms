@@ -1,0 +1,7 @@
+.katex-mathml {
+  @apply select-none;
+}
+
+.katex-display {
+  @apply overflow-auto;
+}

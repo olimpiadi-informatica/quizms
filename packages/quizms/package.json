@@ -1,0 +1,126 @@
+{
+  "name": "@olinfo/quizms",
+  "version": "3.0.0-beta.3",
+  "type": "module",
+  "author": "Alessandro Bortolin <bortolin.alessandro@outlook.it>",
+  "license": "MIT",
+  "scripts": {
+    "prebuild": "biome check && tsc --noEmit",
+    "build": "vite build",
+    "watch": "vite build --watch",
+    "lint": "biome check --write && tsc --noEmit",
+    "prepack": "yarn build"
+  },
+  "bin": {
+    "quizms": "bin/bin.js"
+  },
+  "exports": {
+    "./components": "./dist/components.js",
+    "./css": "./dist/quizms.css",
+    "./firebase": "./dist/firebase.js",
+    "./student": "./dist/student.js",
+    "./utils": "./dist/utils.js"
+  },
+  "typesVersions": {
+    "*": {
+      "components": [
+        "./dist/components.d.ts"
+      ],
+      "firebase": [
+        "./dist/firebase.d.ts"
+      ],
+      "student": [
+        "./dist/student.d.ts"
+      ],
+      "utils": [
+        "./dist/utils.d.ts"
+      ]
+    }
+  },
+  "files": [
+    "bin",
+    "dist"
+  ],
+  "dependencies": {
+    "@ag-grid-community/locale": "^33.0",
+    "@cantoo/pdf-lib": "^2.1",
+    "@inquirer/prompts": "^7.3",
+    "@noble/hashes": "^1.3",
+    "@olinfo/react-components": "^0.10",
+    "@types/cli-progress": "^3.11",
+    "@vitejs/plugin-react-swc": "^3.3",
+    "acorn": "^8.10",
+    "ag-grid-community": "^33.0",
+    "ag-grid-react": "^33.0",
+    "cli-progress": "^3.12",
+    "client-zip": "^2.4",
+    "clsx": "^2.1",
+    "commander": "^13.0",
+    "date-fns": "^4.0",
+    "error-stack-parser-es": "^1.0",
+    "file-saver": "^2.0",
+    "firebase": "^11.0",
+    "firebase-admin": "^13.0",
+    "image-size": "^1.1",
+    "lodash-es": "^4.17",
+    "lucide-react": ">=0.395, <1",
+    "magic-string": "^0.30",
+    "mini-svg-data-uri": "^1.4",
+    "papaparse": "^5.4",
+    "picocolors": "^1.0",
+    "picomatch": "^4.0",
+    "playwright": "^1.36",
+    "prop-types": "^15.8",
+    "pure-rand": "^7.0",
+    "react-error-boundary": "^5.0",
+    "react-markdown": "^9.0",
+    "rehype": "^13.0",
+    "rollup-plugin-license": "^3.2",
+    "rollup-plugin-node-externals": "^8.0",
+    "rollup-preserve-directives": "^1.1",
+    "sharp": "^0.32",
+    "smol-toml": "^1.1",
+    "source-map-js": "^1.2",
+    "svgo": "^3.0",
+    "swr": "^2.2",
+    "tinyglobby": "^0.2",
+    "unified": "^11.0",
+    "unist-util-visit": "^5.0",
+    "vite": "^6.1",
+    "vite-plugin-inspect": "10.2",
+    "webpack-node-externals": "^3.0",
+    "wouter": "^3.1",
+    "yaml": "^2.4",
+    "zod": "^3.22",
+    "zod-validation-error": "^3.0"
+  },
+  "peerDependencies": {
+    "react": "^19",
+    "react-dom": "^19",
+    "react-server-dom-webpack": "^19",
+    "webpack": "^5"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.8",
+    "@olinfo/tailwind": "^0.1",
+    "@types/file-saver": "^2.0",
+    "@types/lodash-es": "^4.17",
+    "@types/node": "^22",
+    "@types/papaparse": "^5.3",
+    "@types/picomatch": "^3.0",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@types/webpack-node-externals": "^3.0",
+    "@types/wicg-file-system-access": "^2023.10.4",
+    "postcss": "^8.4",
+    "typescript": "^5.1",
+    "vite-plugin-dts": "^4.5",
+    "vite-tsconfig-paths": "^5.1",
+    "webpack": "^5.97"
+  },
+  "postcss": {
+    "plugins": {
+      "tailwindcss": {}
+    }
+  }
+}
