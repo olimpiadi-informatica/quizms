@@ -49,7 +49,7 @@ export async function buildVariants(configs: VariantsConfig[]): Promise<void> {
 
   for (const config of configs) {
     await mkdir(path.join(variantDir, config.id), { recursive: true });
-    for (const variant of config.variantIds) {
+    for (const variant of [...config.variantIds, ...config.pdfVariantIds]) {
       void pool.run(async () => {
         const variantHash = hash(`${config.id}-${variant}-${config.secret}`);
         info(`Building variant ${variant} (${variantHash})...`);
