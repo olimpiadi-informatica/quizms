@@ -15,14 +15,19 @@ import type { ToolboxInfo } from "blockly/core/utils/toolbox";
 import { javascriptGenerator } from "blockly/javascript";
 import * as locale from "blockly/msg/it";
 
-import type { CustomBlock } from "~/models/blockly-custom-block";
+import type {
+  CustomBlock,
+  CustomBlockProcessed,
+  IframeToWorkspaceMessage,
+  WorkspaceToIframeMessage,
+} from "~/blockly-types";
 
 import { initGenerator, toJS } from "./generator";
 
 setLocale(locale as unknown as Record<string, string>);
 
-function send(cmd: string, props?: any) {
-  window.parent.postMessage({ cmd, ...props }, "*");
+function send(msg: IframeToWorkspaceMessage) {
+  window.parent.postMessage(msg, "*");
 }
 
 export function BlocklyEditor() {
@@ -33,52 +38,51 @@ export function BlocklyEditor() {
     window.addEventListener("message", onMessage);
     return () => window.removeEventListener("message", onMessage);
 
-    function onMessage(event: MessageEvent) {
-      const { cmd, ...props } = event.data;
-      if (cmd === "init") {
+    function onMessage({ data }: MessageEvent<WorkspaceToIframeMessage>) {
+      if (data.cmd === "init") {
         workspace.current?.dispose();
-        workspace.current = init(id, props);
-      } else if (cmd === "highlight") {
-        workspace.current?.highlightBlock(props.highlightedBlock);
+        workspace.current = init(id, data);
+      } else if (data.cmd === "highlight") {
+        workspace.current?.highlightBlock(data.highlightedBlock ?? null);
       }
     }
   }, [id]);
 
-  useEffect(() => send("init"), []);
+  useEffect(() => send({ cmd: "init" }), []);
   useEffect(() => document.documentElement.setAttribute("data-theme", "light"), []);
 
   return <div className="!fixed !inset-0 [all:initial]" id={id} />;
 }
 
 export type InitProps = {
+  readonly: boolean;
   toolbox: ToolboxInfo;
   initialBlocks: object;
-  customBlocks: CustomBlock[];
-  readonly?: boolean;
+  customBlocks: CustomBlock<any>[];
 };
 
 function init(id: string, props: InitProps) {
   const config = createConfig(props);
   const workspace = inject(id, config);
-  initGenerator(workspace, props.customBlocks);
+  initGenerator(workspace, props.customBlocks as CustomBlockProcessed[]);
 
   new DisableTopBlocks().init();
   workspace.addChangeListener(Events.disableOrphans);
 
   workspace.addChangeListener((event) => {
     if (event.type === Events.FINISHED_LOADING) {
-      send("ready");
+      send({ cmd: "ready" });
     }
 
     try {
       onWorkspaceChange(workspace, config);
     } catch (err) {
       console.error(err);
-      send("error", { message: (err as Error).message });
+      send({ cmd: "error", message: (err as Error).message });
     }
   });
 
-  serialization.workspaces.load(props.initialBlocks ?? {}, workspace);
+  serialization.workspaces.load(props.initialBlocks, workspace);
 
   return workspace;
 }
@@ -86,22 +90,22 @@ function init(id: string, props: InitProps) {
 function onWorkspaceChange(workspace: WorkspaceSvg, config: BlocklyOptions) {
   const code = toJS(workspace);
   javascriptGenerator.nameDB_?.setVariableMap(workspace.getVariableMap());
-  send("code", { code });
+  send({ cmd: "code", code });
   workspace.highlightBlock(null);
 
   const blocks = serialization.workspaces.save(workspace);
-  send("blocks", { blocks });
+  send({ cmd: "blocks", blocks });
 
-  const variablesMapping: Record<string, string> = {};
+  const variableMappings: Record<string, string> = {};
   for (const variable of blocks.variables ?? []) {
     const name = variable.name;
     const newName = javascriptGenerator.getVariableName(name);
-    variablesMapping[newName] = name;
+    variableMappings[newName] = name;
   }
-  send("variables", { variablesMapping });
+  send({ cmd: "variables", variableMappings });
 
   if (process.env.NODE_ENV === "development") {
-    send("svg", { svg: exportSvg(workspace, config.renderer!) });
+    send({ cmd: "svg", svg: exportSvg(workspace, config.renderer!) });
   }
 }
 

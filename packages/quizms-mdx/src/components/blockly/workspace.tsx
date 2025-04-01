@@ -10,71 +10,53 @@ import {
   useState,
 } from "react";
 
-import { ErrorBoundary, Loading, useErrorBoundary } from "@olinfo/quizms/components";
+import { ErrorBoundary } from "@olinfo/quizms/components";
 import { useStudent } from "@olinfo/quizms/student";
 import type { ToolboxInfo } from "blockly/core/utils/toolbox";
 import clsx from "clsx";
-import {
-  CircleCheck,
-  CircleHelp,
-  CircleX,
-  MessageSquareOff,
-  Pause,
-  Play,
-  RotateCcw,
-  Send,
-  SkipForward,
-  TriangleAlert,
-} from "lucide-react";
+import { CircleCheck, MessageSquareOff, TriangleAlert } from "lucide-react";
 
+import type { CustomBlock, TestcaseResult, VisualizerProps } from "~/blockly-types";
 import { useContest } from "~/components/client/contest";
 import { useProblem } from "~/components/client/problem";
-
-import Debug from "./debug";
-import { defaultInitialBlocks, defaultToolbox } from "./default-blocks";
-import useExecutor from "./executor";
-import { BlocklyInterpreter } from "./interpreter";
-import useIcp from "./ipc";
+import { defaultInitialBlocks, defaultToolbox } from "./defaults";
+import { Editor } from "./editor";
+import { useExecutor } from "./hooks/executor";
+import { BlocklyInterpreter } from "./hooks/interpreter";
+import { useIframe } from "./hooks/ipc";
+import { Debug } from "./toolbar/debug";
+import { ExecutionButtons } from "./toolbar/execution";
+import { TestcaseSelector } from "./toolbar/testcases";
 import style from "./workspace.module.css";
 
-type VisualizerProps = {
-  variables: Record<string, any>;
-  state: Record<string, any>;
-  testcase: number;
-  message?: string;
-};
-
-export type BlocklyProps = {
+export type BlocklyProps<T> = {
   toolbox?: ToolboxInfo;
   initialBlocks?: object;
-  testcases: object[];
+  testcases?: T[];
   debug?: {
     logBlocks?: boolean;
     logJs?: boolean;
     logVariables?: boolean;
   };
-  customBlocks?: any;
-  visualizer?: ComponentType<VisualizerProps>;
+  customBlocks: CustomBlock<T>[];
+  visualizer?: ComponentType<VisualizerProps<T>>;
 };
 
-type TestcaseStatus = {
-  correct: boolean;
-  index: number;
-  msg?: string;
-};
-
-export function BlocklyClient({
-  toolbox,
-  initialBlocks,
+export function BlocklyClient<State>({
+  toolbox = defaultToolbox,
+  initialBlocks = defaultInitialBlocks,
+  debug = {},
   testcases,
-  debug,
   customBlocks,
   visualizer: Visualizer,
-}: BlocklyProps) {
+}: BlocklyProps<State>) {
+  if (!testcases) throw new Error("No testcases specified");
+  if (!customBlocks) throw new Error("No custom blocks specified");
+  if (!Visualizer) throw new Error("No visualizer specified");
+
   const { student, setStudent, terminated } = useStudent();
   const { registerProblem } = useContest();
   const { id, points } = useProblem();
-  const { showBoundary } = useErrorBoundary();
 
   useEffect(() => {
     for (let i = 0; i < testcases.length; i++) {
@@ -91,172 +73,86 @@ export function BlocklyClient({
     }
   }, [registerProblem, id, testcases, points]);
 
-  const savedBlocks = student.extraData?.[`blockly-${id}`];
-  const blocks = savedBlocks ? JSON.parse(savedBlocks) : (initialBlocks ?? defaultInitialBlocks);
-
-  const setBlocks = async (blocks: object) => {
-    await setStudent({
-      ...student,
-      extraData: {
-        ...student.extraData,
-        [`blockly-${id}`]: JSON.stringify(blocks),
-      },
-    });
-  };
-
   const [iframe, setIframe] = useState<HTMLIFrameElement | null>(null);
-  const [ready, setReady] = useState(false);
+  const [selectedTestcase, setSelectedTestcase] = useState(0);
+  const [alert, setAlert] = useState<string>();
+  const [testcaseResults, setTestcaseResults] = useState<(TestcaseResult | undefined)[]>(
+    testcases.map(() => undefined),
+  );
 
-  const [editing, setEditing] = useState(true);
-  const [playing, setPlaying] = useState(false);
-  const [variableMappings, setVariableMappings] = useState<Record<string, string>>({});
-  const [svg, setSvg] = useState("");
+  const onBlockChanges = useCallback(
+    (blocks: object) =>
+      setStudent({
+        ...student,
+        extraData: {
+          ...student.extraData,
+          [`blockly-${id}`]: JSON.stringify(blocks),
+        },
+      }),
+    [student, setStudent, id],
+  );
+  const onCodeChanges = useCallback(() => {
+    setTestcaseResults(testcases.map(() => undefined));
+  }, [testcases]);
+  const savedBlocks = student.extraData?.[`blockly-${id}`];
+  const { ready, blocks, svg, code, variableMappings, highlightBlock } = useIframe(
+    iframe,
+    terminated,
+    {
+      toolbox: toolbox ?? defaultToolbox,
+      initialBlocks: savedBlocks ? JSON.parse(savedBlocks) : initialBlocks,
+      customBlocks,
+    },
+    { onBlockChanges, onCodeChanges },
+    debug,
+  );
 
-  const [code, setCode] = useState("");
-  const [testcaseIndex, setTestcaseIndex] = useState(0);
-  const [testcaseStatuses, setTestcaseStatuses] = useState<TestcaseStatus[]>(() => {
-    return testcases.map((_, index) => ({ correct: false, index }));
-  });
-
-  const { step, reset, running, highlightedBlock, globalScope, correct, msg } = useExecutor(
+  const {
+    state,
+    result: selectedResult,
+    variables,
+    step,
+    reset: resetSelected,
+  } = useExecutor<State>(
     code,
-    testcases[testcaseIndex],
+    customBlocks,
+    testcases[selectedTestcase],
+    variableMappings,
+    highlightBlock,
   );
 
-  const variables = useMemo(
-    () => Object.fromEntries(Object.entries(variableMappings).map(([k, v]) => [v, globalScope[k]])),
-    [variableMappings, globalScope],
-  );
-
-  const send = useIcp(iframe?.contentWindow, (data: any) => {
-    switch (data.cmd) {
-      case "init": {
-        send({
-          cmd: "init",
-          toolbox: toolbox ?? defaultToolbox,
-          initialBlocks: blocks,
-          customBlocks,
-          readonly: terminated,
-        });
-        break;
-      }
-      case "ready": {
-        setReady(true);
-        break;
-      }
-      case "blocks": {
-        void setBlocks(data.blocks);
-        if (debug?.logBlocks) console.info(JSON.stringify(data.blocks, undefined, 2));
-        break;
-      }
-      case "code": {
-        setCode(data.code);
-        setPlaying(false);
-        setEditing(true);
-        if (debug?.logJs) console.info(data.code);
-        break;
-      }
-      case "variables": {
-        setVariableMappings(data.variablesMapping);
-        if (debug?.logVariables) console.info(data.variablesMapping);
-        break;
-      }
-      case "svg": {
-        setSvg(data.svg);
-        break;
-      }
-      case "error": {
-        showBoundary(new Error(data.message));
-        break;
-      }
-    }
-  });
-
-  useEffect(() => {
-    send({ cmd: "highlight", highlightedBlock });
-  }, [send, highlightedBlock]);
-
-  useEffect(() => {
-    if (!running) setPlaying(false);
-  }, [running]);
-
-  const prevTerminated = useRef(terminated);
-  useEffect(() => {
-    if (prevTerminated.current !== terminated) {
-      prevTerminated.current = terminated;
-      setReady(false);
-      iframe?.contentWindow?.location.reload();
-    }
-  }, [terminated, iframe?.contentWindow]);
-
-  const [speed, setSpeed] = useState(3);
-  useEffect(() => {
-    const intervals = [5000, 2000, 1000, 500, 200, 100, 10];
-    if (playing) {
-      const interval = setInterval(step, intervals[speed]);
-      return () => clearInterval(interval);
-    }
-  }, [step, speed, playing]);
-
-  const runAll = async () => {
-    const statuses = await Promise.all(
-      testcases.map(async (testcase, index) => {
-        const interpreter = new BlocklyInterpreter(code, testcase);
-        for (let i = 0; interpreter.running; i++) {
-          interpreter.step();
-
+  const evaluate = useCallback(async () => {
+    const results = await Promise.all(
+      testcases.map(async (testcase) => {
+        const interpreter = new BlocklyInterpreter<State>(code, customBlocks, testcase);
+        for (let i = 0; await interpreter.step(); i++) {
           if (i % 64 === 0) {
             // wait 5 milliseconds to avoid blocking the main thread for too long
             await new Promise((resolve) => setTimeout(resolve, 5));
           }
         }
-        return { ...interpreter, index };
+        return interpreter.result!;
       }),
     );
 
-    setTestcaseStatuses(statuses);
-    setEditing(false);
+    setTestcaseResults(results);
 
     const answers = { ...student.answers };
     for (let tc = 0; tc < testcases.length; tc++) {
-      answers[`${id}.${tc + 1}`] = statuses[tc].correct ? "✅" : "❌";
+      answers[`${id}.${tc + 1}`] = results[tc].success ? "✅" : "❌";
     }
 
     await setStudent({ ...student, answers });
-  };
-
-  const [alert, setAlert] = useState<string>();
-  useEffect(() => setAlert(msg), [msg]);
+  }, [student, setStudent, code, customBlocks, testcases, id]);
 
   return (
     <div className={clsx(style.workspace, "not-prose")}>
       <div className={style.visualizerButtons}>
-        <div className="pl-2 text-xl font-bold max-sm:hidden lg:max-xl:hidden">Livello</div>
-        <div className="join">
-          {testcaseStatuses.map(({ index, correct, msg }) => (
-            <button
-              key={index}
-              type="button"
-              onClick={() => {
-                setTestcaseIndex(index);
-                setPlaying(false);
-              }}
-              className={clsx(
-                "btn join-item z-10 px-3",
-                !editing && "tooltip",
-                index === testcaseIndex && "btn-info",
-              )}
-              data-tip={msg}>
-              {editing ? (
-                <CircleHelp size={24} />
-              ) : correct ? (
-                <CircleCheck size={24} className="fill-success stroke-success-content" />
-              ) : (
-                <CircleX size={24} className="fill-error stroke-error-content" />
-              )}
-            </button>
-          ))}
-        </div>
+        <TestcaseSelector
+          results={testcaseResults}
+          selectedTestcase={selectedTestcase}
+          setSelectedTestcase={setSelectedTestcase}
+        />
       </div>
       <div className={style.visualizer}>
         <ErrorBoundary
@@ -265,19 +161,21 @@ export function BlocklyClient({
               err.message = "Visualizzazione del livello fallita";
             }
           }}
-          onReset={reset}>
-          {Visualizer && globalScope?.state && (
+          onReset={resetSelected}>
+          {Visualizer && state && (
             <Visualizer
               variables={variables}
-              state={globalScope.state}
-              testcase={testcaseIndex}
-              message={msg}
+              state={state}
+              testcase={selectedTestcase}
+              message={selectedResult?.message}
             />
           )}
         </ErrorBoundary>
         <div className={clsx("sticky left-0 bottom-0 z-50 p-4", !alert && "invisible")}>
-          <div role="alert" className={clsx("alert", correct ? "alert-success" : "alert-error")}>
-            {correct ? <CircleCheck /> : <TriangleAlert />}
+          <div
+            role="alert"
+            className={clsx("alert", selectedResult?.success ? "alert-success" : "alert-error")}>
+            {selectedResult?.success ? <CircleCheck /> : <TriangleAlert />}
             <span>{alert}</span>
             <button
               type="button"
@@ -289,93 +187,18 @@ export function BlocklyClient({
         </div>
       </div>
       <div className={style.editorButtons}>
-        <div className="join join-horizontal">
-          <div className="join-item tooltip" data-tip="Esegui/pausa">
-            <button
-              type="button"
-              className="btn btn-info rounded-[inherit]"
-              disabled={!running || editing}
-              onClick={() => setPlaying(!playing)}
-              aria-label="Esugui un blocco">
-              {playing ? <Pause className="size-6" /> : <Play className="size-6" />}
-            </button>
-          </div>
-          <div className="join-item tooltip" data-tip="Esegui un blocco">
-            <button
-              type="button"
-              className="btn btn-info rounded-[inherit]"
-              disabled={!running || editing}
-              onClick={step}
-              aria-label="Esugui un blocco">
-              <SkipForward className="size-6" />
-            </button>
-          </div>
-          <div className="join-item tooltip" data-tip="Esegui da capo">
-            <button
-              type="button"
-              className="btn btn-info rounded-[inherit]"
-              aria-label="Esegui da capo"
-              disabled={editing}
-              onClick={() => {
-                reset();
-                setPlaying(false);
-              }}>
-              <RotateCcw className="size-6" />
-            </button>
-          </div>
-        </div>
-        <div className="tooltip" data-tip="Correggi la soluzione">
-          <button
-            type="button"
-            className="btn btn-success"
-            aria-label="Correggi la soluzione"
-            disabled={!editing || !ready}
-            onClick={runAll}>
-            <Send className="size-6" />
-          </button>
-        </div>
-        <div>
-          <input
-            className="range"
-            type="range"
-            min="0"
-            max="6"
-            value={speed}
-            onChange={(e) => setSpeed(+e.target.value)}
-            aria-label="Velocità di esecuzione"
-          />
-          <div className="flex w-full justify-between px-2 text-xs">
-            <span>Lento</span>
-            <span>Veloce</span>
-          </div>
-        </div>
+        <ExecutionButtons
+          evaluate={evaluate}
+          evaluated={!!testcaseResults[0]}
+          selectedEvaluated={!!selectedResult}
+          step={step}
+          reset={resetSelected}
+        />
         {process.env.NODE_ENV === "development" && <Debug blocks={blocks} js={code} svg={svg} />}
       </div>
-      <Editor ref={setIframe} ready={ready} />
+      <div className={style.editor}>
+        <Editor ref={setIframe} ready={ready} />
+      </div>
     </div>
   );
 }
-
-const Editor = forwardRef(function Editor(
-  { ready }: { ready: boolean },
-  ref: Ref<HTMLIFrameElement>,
-) {
-  return (
-    <div className={style.editor}>
-      <iframe
-        ref={ref}
-        src="/__blockly_iframe/"
-        className="size-full"
-        title="Area di lavoro di Blockly"
-        loading="lazy"
-      />
-      {!ready && (
-        <div className="absolute inset-0 z-50 bg-white">
-          <div className="flex h-full text-slate-700">
-            <Loading />
-          </div>
-        </div>
-      )}
-    </div>
-  );
-});

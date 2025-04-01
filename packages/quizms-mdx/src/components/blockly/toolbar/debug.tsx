@@ -24,7 +24,7 @@ const formats = {
   },
 };
 
-export default function Debug({ blocks, js, svg }: Props) {
+export function Debug({ blocks, js, svg }: Props) {
   const ref = useRef<HTMLDialogElement>(null);
 
   const [format, setFormat] = useState<keyof typeof formats>("json");

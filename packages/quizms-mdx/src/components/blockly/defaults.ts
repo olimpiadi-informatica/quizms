@@ -174,7 +174,7 @@ export const defaultInitialBlocks = {
     blocks: [
       {
         type: "start",
-        id: "y=zq)Uya2A/{vyOtN[i6",
+        id: "start",
         x: 30,
         y: 30,
       },

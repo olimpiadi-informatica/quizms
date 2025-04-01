@@ -41,6 +41,6 @@ export function JsonArray({ children }: { children: ReactNode }) {
 }
 
 export function Token({ value }: { value: string }) {
-  console.log(value);
+  if (process.env.QUIZMS_MODE === "contest") console.log(value);
   return null;
 }

@@ -7,49 +7,30 @@ import {
 } from "blockly/core";
 import { type JavascriptGenerator, javascriptGenerator, Order } from "blockly/javascript";
 
-import type { CustomBlock, CustomBlockArg } from "~/models/blockly-custom-block";
+import type { CustomBlockArg, CustomBlockProcessed } from "~/blockly-types";
 
 javascriptGenerator.STATEMENT_PREFIX = "highlightBlock(%1);\n";
-javascriptGenerator.INFINITE_LOOP_TRAP = 'if(--loopTrap === 0) exit(false, "Ciclo infinito");\n';
-javascriptGenerator.addReservedWords("exit,highlightBlock,loopTrap,state,tmp");
+javascriptGenerator.INFINITE_LOOP_TRAP = 'if(--loopTrap === 0) error("Ciclo infinito");\n';
+javascriptGenerator.addReservedWords("error,highlightBlock,loopTrap");
 console.info("Blockly version:", BlocklyVersion);
 
-function replaceArgs(
-  block: Block,
-  generator: JavascriptGenerator,
-  js: string,
-  args?: CustomBlockArg[],
-) {
-  return js.replaceAll(/_ARG\d+/g, (name): string => {
-    const arg = args?.find((b) => b.name === name);
-    if (!arg) throw new Error(`Missing argument ${name} for block ${block.type}`);
-
+function replaceArgs(block: Block, generator: JavascriptGenerator, args: CustomBlockArg[]) {
+  const generatedArgs = args.map((arg): string => {
     switch (arg.type) {
-      case "input_value": {
-        let code = generator.valueToCode(block, arg.name, Order.NONE);
-        if (!code) return 'exit(false, "il blocco ha bisogno di un parametro")';
+      case "input_value":
+        return (
+          generator.valueToCode(block, arg.name, Order.NONE) ||
+          'error("Il blocco ha bisogno di un parametro")'
+        );
 
-        if (arg.integer) {
-          code = `(tmp = ${code}, (tmp | 0) === tmp ? tmp : exit(false, "il parametro deve essere un intero"))`;
-        }
-        if (arg.min !== undefined) {
-          const min = arg.min[0];
-          code = `((tmp = ${code}) >= (${min}) ? tmp : exit(false, "il parametro deve essere maggiore o uguale di " + (${min})))`;
-        }
-        if (arg.max !== undefined) {
-          const max = arg.max[0];
-          code = `((tmp = ${code}) <= (${max}) ? tmp : exit(false, "il parametro deve essere minore o uguale di " + (${max})))`;
-        }
-        return code;
-      }
-      case "field_dropdown": {
+      case "field_dropdown":
         return block.getFieldValue(arg.name);
-      }
     }
   });
+  return `${block.type}([${generatedArgs.join(", ")}])`;
 }
 
-export function initGenerator(workspace: Workspace, customBlocks: CustomBlock[]) {
+export function initGenerator(workspace: Workspace, customBlocks: CustomBlockProcessed[]) {
   if (javascriptGenerator.isInitialized) {
     for (const customBlock of customBlocks) {
       if (!(customBlock.type in javascriptGenerator.forBlock)) {
@@ -57,6 +38,7 @@ export function initGenerator(workspace: Workspace, customBlocks: CustomBlock[])
           "javascriptGenerator was initialized multiple times with different custom blocks",
         );
       }
+      javascriptGenerator.addReservedWords(customBlock.type);
     }
     return;
   }
@@ -69,9 +51,9 @@ export function initGenerator(workspace: Workspace, customBlocks: CustomBlock[])
       block: Block,
       generator: JavascriptGenerator,
     ) => {
-      return Array.isArray(customBlock.js)
-        ? [replaceArgs(block, generator, customBlock.js[0], customBlock.args0), customBlock.js[1]]
-        : replaceArgs(block, generator, customBlock.js, customBlock.args0);
+      return "output" in customBlock
+        ? [replaceArgs(block, generator, customBlock.args0), Order.FUNCTION_CALL]
+        : `${replaceArgs(block, generator, customBlock.args0)};\n`;
     };
   }
 }
@@ -79,6 +61,5 @@ export function initGenerator(workspace: Workspace, customBlocks: CustomBlock[])
 export function toJS(workspace?: WorkspaceSvg) {
   if (!workspace) return "";
 
-  const js = javascriptGenerator.workspaceToCode(workspace);
-  return `${js}\nexit(false, "L'esecuzione è terminata prima di finire il livello");`;
+  return javascriptGenerator.workspaceToCode(workspace);
 }

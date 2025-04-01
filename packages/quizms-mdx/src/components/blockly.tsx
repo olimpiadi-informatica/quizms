@@ -3,10 +3,10 @@ import { Fragment } from "react";
 import { BlocklyClient, type BlocklyProps } from "./blockly/workspace";
 import { JsonArray, JsonField, JsonObject, Token } from "./json";
 
-export function Blockly(props: BlocklyProps) {
+export function Blockly<State = any>(props: BlocklyProps<State>) {
   return (
     <>
-      {props.testcases.map((_, i) => (
+      {props.testcases?.map((_, i) => (
         <Fragment key={i}>
           {i !== 0 && <Token value="},{" />}
           <JsonField field="id" value={i + 1} />

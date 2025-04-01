@@ -8,6 +8,8 @@ declare module "js-interpreter" {
 
     createNativeFunction(fn: (...args: any[]) => any): any;
 
+    createAsyncFunction(fn: (...args: [any, ...any[]]) => void): any;
+
     nativeToPseudo(value: any): any;
 
     pseudoToNative(value: any): any;
@@ -16,6 +18,8 @@ declare module "js-interpreter" {
 
     step(): boolean;
 
-    globalScope: { object: { properties: Record<string, any> } };
+    globalScope: { object: { properties: object } };
+
+    paused_: boolean;
   }
 }
