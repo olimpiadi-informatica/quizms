@@ -61,7 +61,7 @@
     "file-saver": "^2.0",
     "firebase": "^11.0",
     "firebase-admin": "^13.0",
-    "image-size": "^1.1",
+    "image-size": "^1.2",
     "lodash-es": "^4.17",
     "lucide-react": ">=0.395, <1",
     "magic-string": "^0.30",
