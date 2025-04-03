@@ -1,4 +1,6 @@
 import type { ReactNode } from "react";
+import { Children } from "react";
+import { Rng } from "@olinfo/quizms/utils";
 
 import {
   AnswerClient,
@@ -16,11 +18,16 @@ export function AnswerGroup({ children }: AnswerGroupProps) {
 }
 
 export function MultipleChoiceAnswer({ children }: { children: ReactNode }) {
+  const childrenArray = Children.toArray(children);
+  if (process.env.SHUFFLE_ANSWERS === "TRUE") {
+    const rng = new Rng(process.env.QUIZMS_VARIANT_HASH!);
+    rng.shuffle(childrenArray);
+  }
   return (
     <>
       <JsonField field="type" value="text" />
       <JsonField field="options">
-        <JsonArray>{children}</JsonArray>
+        <JsonArray>{childrenArray}</JsonArray>
       </JsonField>
     </>
   );

@@ -67,6 +67,8 @@ export async function buildVariants(configs: VariantsConfig[]): Promise<void> {
               QUIZMS_CONTEST_ID: config.id,
               QUIZMS_VARIANT_ID: variant,
               QUIZMS_VARIANT_HASH: variantHash.toString(),
+              SHUFFLE_PROBLEMS: config.shuffleProblems ? "TRUE" : "FALSE",
+              SHUFFLE_ANSWERS: config.shuffleAnswers ? "TRUE" : "FALSE",
             },
           },
         );

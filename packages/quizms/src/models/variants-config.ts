@@ -7,6 +7,8 @@ export const variantsConfigSchema = z.object({
   variantIds: z.coerce.string().array(),
   pdfVariantIds: z.coerce.string().array(),
   pdfPerSchool: z.number(),
+  shuffleProblems: z.boolean(),
+  shuffleAnswers: z.boolean(),
 });
 
 export type VariantsConfig = z.infer<typeof variantsConfigSchema>;
