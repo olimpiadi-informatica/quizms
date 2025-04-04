@@ -34,7 +34,7 @@ export function StudentLoginForm({
     contests.map((contest) => [contest.id, contest]),
   );
   const metadata = useMetadata();
-  <>
+  return <>
     <Navbar color="bg-base-300 text-base-content">
       <NavbarBrand>
         <div className="flex items-center h-full font-bold">
