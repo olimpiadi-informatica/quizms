@@ -1,0 +1,3 @@
+[submodule "packages/quizms/src/web/rest/quizms-backend"]
+	path = packages/quizms/src/web/rest/quizms-backend
+	url = ssh://git@git.olinfo.it:10022/oii/quizms-backend.git
