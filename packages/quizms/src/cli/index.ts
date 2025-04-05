@@ -45,6 +45,7 @@ async function main() {
     .command("dev")
     .description("Start a development server for the contest.")
     .option("-p, --port <port>", "The port to use for the server.", safeParseInt, 1234)
+    .option("-a, --apiurl <string>", "The url to which api requests should be forwarded")
     .action(devServer);
 
   program
