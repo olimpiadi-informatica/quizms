@@ -19,7 +19,8 @@
     "./css": "./dist/quizms.css",
     "./firebase": "./dist/firebase.js",
     "./student": "./dist/student.js",
-    "./utils": "./dist/utils.js"
+    "./utils": "./dist/utils.js",
+    "./rest": "./dist/rest.js"
   },
   "typesVersions": {
     "*": {
@@ -28,6 +29,9 @@
       ],
       "firebase": [
         "./dist/firebase.d.ts"
+      ],
+      "rest": [
+        "./dist/rest.d.ts"
       ],
       "student": [
         "./dist/student.d.ts"
@@ -72,6 +76,7 @@
     "playwright": "^1.36",
     "prop-types": "^15.8",
     "pure-rand": "^7.0",
+    "react-cookie": "^8.0.1",
     "react-error-boundary": "^5.0",
     "react-markdown": "^9.0",
     "rehype": "^13.0",
@@ -86,6 +91,7 @@
     "tinyglobby": "^0.2",
     "unified": "^11.0",
     "unist-util-visit": "^5.0",
+    "universal-cookie": "^8.0.1",
     "vite": "^6.1",
     "vite-plugin-inspect": "10.2",
     "webpack-node-externals": "^3.0",
