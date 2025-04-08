@@ -184,7 +184,6 @@ async function importStudents(
       disabled: false,
     };
     student.score = calcScore(student, variants[variantId]?.schema);
-    console.log(student);
     students.push(student);
   }
   await Promise.all(students.map((student) => addStudent(student)));

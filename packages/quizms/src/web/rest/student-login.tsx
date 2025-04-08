@@ -1,27 +1,29 @@
-import { type ReactNode, createContext, useCallback, useContext } from "react";
+import { type ReactNode, useCallback, useState } from "react";
 import { CookiesProvider, useCookies } from "react-cookie";
-import useSWR from "swr";
 import { StudentTokenLoginForm } from "../components/student-login-form";
+import { type Student } from "~/models/student";
+import { StudentProvider } from "../student/provider";
+import {
+  RestContext,
+  setAnswers,
+  start,
+  useGetContest,
+  useGetParticipation,
+  useGetStatus,
+  useRest,
+} from "./common/api";
+import { Loading } from "../components";
 
 type LoginProps = {
   apiUrl: string;
   children: ReactNode;
 };
 
-type RestContextProps = {
-  apiUrl: string;
-};
-
-const RestContext = createContext<RestContextProps | null>(null);
-
-const useRest = () => {
-  return useContext(RestContext);
-};
-
-export function ApiStudentLogin({ children, apiUrl }: LoginProps) {
+export function RestStudentLogin({ children, apiUrl }: LoginProps) {
+  const url = new URL(apiUrl, window.origin);
   return (
     <CookiesProvider>
-      <RestContext.Provider value={{ apiUrl }}>
+      <RestContext.Provider value={{ apiUrl: url.toString() }}>
         <StudentLoginInner>{children}</StudentLoginInner>
       </RestContext.Provider>
     </CookiesProvider>
@@ -29,47 +31,74 @@ export function ApiStudentLogin({ children, apiUrl }: LoginProps) {
 }
 
 function StudentLoginInner({ children }: { children: ReactNode }) {
-  const [Cookies, setCookie, removeCookie] = useCookies(["token"]);
-  const api = useRest();
+  const [Cookies, setCookie] = useCookies(["token"]);
 
-  const fetcher = useCallback(
-    async ([url, token]: [string, string]) => {
-      if (token) {
-        const res = await fetch(url, {
-          credentials: "include",
-        });
-        if (res.status === 403) {
-          removeCookie("token", { path: "/" });
-          throw new Error("Token errato");
-        }
-        return await res.json();
-      }
-    },
-    [removeCookie],
-  );
-
-  const {
-    data: student,
-    isLoading,
-    mutate,
-  } = useSWR([`${api?.apiUrl}/status`, Cookies.token], fetcher);
+  const { student, isLoading, mutate } = useGetStatus();
 
   const submit = useCallback(
     ({ token }: { token: string }) => {
-      setCookie("token", token, { path: "/" });
+      setCookie("token", token);
       mutate();
     },
     [setCookie, mutate],
   );
 
   if (Cookies.token && !isLoading && student) {
-    return <StudentInner student={student}>{children}</StudentInner>;
+    return (
+      <StudentInner fetchedStudent={student} mutate={mutate}>
+        {children}
+      </StudentInner>
+    );
   }
 
   return <StudentTokenLoginForm onSubmit={submit} />;
 }
 
-function StudentInner({ student, children }: { student: object; children: ReactNode }) {
-  console.log(student);
-  return <>{children}</>;
+function StudentInner({
+  fetchedStudent,
+  mutate,
+  children,
+}: {
+  fetchedStudent: Student;
+  mutate: () => void;
+  children: ReactNode;
+}) {
+  const [student, setStudent] = useState(fetchedStudent);
+  const { contest, isLoading: isContestLoading } = useGetContest();
+  const { participation, isLoading: isParticipationLoading } =
+    useGetParticipation();
+
+  const { apiUrl } = useRest()!;
+
+  const setStudentCallback = useCallback(
+    async (newStudent: Student) => {
+      for (const questionId in newStudent.answers) {
+        if (
+          !student.answers ||
+          newStudent.answers[questionId] !== student.answers[questionId]
+        ) {
+          setAnswers(apiUrl, newStudent.answers).catch(mutate);
+          mutate();
+          break;
+        }
+      }
+      setStudent(newStudent);
+    },
+    [apiUrl, student, mutate],
+  );
+
+  if (isContestLoading || isParticipationLoading) {
+    return <Loading />;
+  }
+
+  return (
+    <StudentProvider
+      student={student}
+      setStudent={setStudentCallback}
+      contest={contest}
+      participation={participation}
+    >
+      {children}
+    </StudentProvider>
+  );
 }

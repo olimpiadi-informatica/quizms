@@ -1,1 +1,2 @@
-export { ApiStudentLogin } from "./student-login";
+export { RestStudentLogin } from "./student-login";
+export { RestStatement } from "./student-statement";
