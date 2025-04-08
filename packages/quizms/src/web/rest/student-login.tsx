@@ -1,18 +1,17 @@
 import { type ReactNode, useCallback, useState } from "react";
 import { CookiesProvider, useCookies } from "react-cookie";
+import type { Student } from "~/models/student";
+import { Loading } from "../components";
 import { StudentTokenLoginForm } from "../components/student-login-form";
-import { type Student } from "~/models/student";
 import { StudentProvider } from "../student/provider";
 import {
   RestContext,
   setAnswers,
-  start,
   useGetContest,
   useGetParticipation,
   useGetStatus,
   useRest,
 } from "./common/api";
-import { Loading } from "../components";
 
 type LoginProps = {
   apiUrl: string;
@@ -65,20 +64,15 @@ function StudentInner({
 }) {
   const [student, setStudent] = useState(fetchedStudent);
   const { contest, isLoading: isContestLoading } = useGetContest();
-  const { participation, isLoading: isParticipationLoading } =
-    useGetParticipation();
+  const { participation, isLoading: isParticipationLoading } = useGetParticipation();
 
   const { apiUrl } = useRest()!;
 
   const setStudentCallback = useCallback(
-    async (newStudent: Student) => {
+    (newStudent: Student) => {
       for (const questionId in newStudent.answers) {
-        if (
-          !student.answers ||
-          newStudent.answers[questionId] !== student.answers[questionId]
-        ) {
+        if (!student.answers || newStudent.answers[questionId] !== student.answers[questionId]) {
           setAnswers(apiUrl, newStudent.answers).catch(mutate);
-          mutate();
           break;
         }
       }
@@ -96,8 +90,7 @@ function StudentInner({
       student={student}
       setStudent={setStudentCallback}
       contest={contest}
-      participation={participation}
-    >
+      participation={participation}>
       {children}
     </StudentProvider>
   );

@@ -1,14 +1,10 @@
 import { createContext, useContext, useEffect } from "react";
 import { useCookies } from "react-cookie";
-import urlJoin from "url-join";
 import useSWR from "swr";
-import {
-  contestConverter,
-  participationConverter,
-  studentConverter,
-} from "./converters";
-import { Answer } from "~/models";
-import { UserAnswer } from "../quizms-backend/bindings/UserAnswer";
+import urlJoin from "url-join";
+import type { Answer } from "~/models";
+import type { UserAnswer } from "../quizms-backend/bindings/UserAnswer";
+import { contestConverter, participationConverter, studentConverter } from "./converters";
 
 type RestContextProps = {
   apiUrl: string;
@@ -20,10 +16,7 @@ export const useRest = () => {
   return useContext(RestContext);
 };
 
-function useCall(
-  keys: [string, ...any[]] | null,
-  converter: (data: any) => any = (data) => data,
-) {
+function useCall(keys: [string, ...any[]] | null, converter: (data: any) => any = (data) => data) {
   const { apiUrl } = useRest()!;
   const res = useSWR(keys, async ([path]) => {
     const res = await fetch(urlJoin(apiUrl, path), {
@@ -46,7 +39,7 @@ export function useGetStatus() {
     if (error) {
       removeCookie("token");
     }
-  }, [error]);
+  }, [error, removeCookie]);
 
   return { student: data, error, ...oth };
 }
@@ -68,22 +61,16 @@ export async function start(apiUrl: string) {
   });
 }
 
-export async function setAnswers(
-  apiUrl: string,
-  answers: { [key in string]: Answer },
-) {
+export async function setAnswers(apiUrl: string, answers: { [key in string]: Answer }) {
   const toUserAnswer = (answer: string | number): UserAnswer => {
-    if (typeof answer === "number") {
-      return { number: answer };
-    } else {
-      return { string: answer };
-    }
+    if (typeof answer === "number") return { number: answer };
+    return { string: answer };
   };
 
   const userAnswers = Object.fromEntries(
     Object.entries(answers)
-      .filter(([k, v], i) => v != null)
-      .map(([k, v], i) => [k, v != null && toUserAnswer(v)]),
+      .filter(([_k, v], _i) => v != null)
+      .map(([k, v], _i) => [k, v != null && toUserAnswer(v)]),
   );
   return await fetch(urlJoin(apiUrl, "/contestant/set_answers"), {
     method: "POST",

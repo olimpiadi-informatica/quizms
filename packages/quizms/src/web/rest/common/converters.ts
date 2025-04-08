@@ -1,16 +1,16 @@
-import { Student } from "~/models/student";
-import { type Student as StudentResponse } from "../quizms-backend/bindings/Student";
-import { Contest as ContestResponse } from "../quizms-backend/bindings/Contest";
-import { Contest, Participation } from "~/models";
-import { Venue } from "../quizms-backend/bindings/Venue";
+import type { Contest, Participation } from "~/models";
+import type { Student } from "~/models/student";
+import type { Contest as ContestResponse } from "../quizms-backend/bindings/Contest";
+import type { Student as StudentResponse } from "../quizms-backend/bindings/Student";
+import type { Venue } from "../quizms-backend/bindings/Venue";
 export function studentConverter(data: StudentResponse): Student {
   const answers = Object.fromEntries(
-    Object.entries(data.answers).map(([k, v], i) => {
+    Object.entries(data.answers).map(([k, v], _i) => {
       let ans = null;
       if (v && "string" in v) {
-        ans = v["string"];
+        ans = v.string;
       } else if (v && "number" in v) {
-        ans = v["number"];
+        ans = v.number;
       }
       return [k, ans];
     }),
@@ -23,9 +23,7 @@ export function studentConverter(data: StudentResponse): Student {
     participationId: data.data.venueId,
     contestId: data.data.contestId,
     token: data.data.token,
-    startedAt: data.contestRange
-      ? new Date(data.contestRange.start)
-      : undefined,
+    startedAt: data.contestRange ? new Date(data.contestRange.start) : undefined,
     finishedAt: data.contestRange ? new Date(data.contestRange.end) : undefined,
     variant: data.data.variantId,
     answers: answers,

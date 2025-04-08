@@ -1,7 +1,7 @@
-import { ReactNode, useCallback } from "react";
+import { type ReactNode, useCallback } from "react";
+import urlJoin from "url-join";
 import { RemoteStatement } from "../student/remote-statement";
 import { useRest } from "./common/api";
-import urlJoin from "url-join";
 
 type Props = {
   createFromFetch: (res: Promise<Response>) => ReactNode;
@@ -10,9 +10,11 @@ type Props = {
 
 export function RestStatement({ createFromFetch, statementVersion }: Props) {
   const { apiUrl } = useRest()!;
-  const fetcher = useCallback(async () => {
-    return createFromFetch(fetch(urlJoin(apiUrl, "/contestant/statement"), { credentials: "include" }));
-  }, [createFromFetch]);
+  const fetcher = useCallback(() => {
+    return createFromFetch(
+      fetch(urlJoin(apiUrl, "/contestant/statement"), { credentials: "include" }),
+    );
+  }, [createFromFetch, apiUrl]);
 
   return <RemoteStatement id={statementVersion} fetcher={fetcher} />;
 }

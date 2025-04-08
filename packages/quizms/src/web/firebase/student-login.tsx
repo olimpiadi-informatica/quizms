@@ -10,10 +10,7 @@ import type { Contest, Student } from "~/models";
 import { hash } from "~/utils/hash";
 import { StudentProvider } from "~/web/student/provider";
 
-import {
-  type FormStudent,
-  StudentDataLoginForm,
-} from "../components/student-login-form";
+import { type FormStudent, StudentDataLoginForm } from "../components/student-login-form";
 import { FirebaseLogin, useDb } from "./common/base-login";
 import {
   contestConverter,
@@ -22,12 +19,7 @@ import {
   studentMappingUidConverter,
   submissionConverter,
 } from "./common/converters";
-import {
-  useAnonymousAuth,
-  useCollection,
-  useDocument,
-  useDocumentOptional,
-} from "./hooks";
+import { useAnonymousAuth, useCollection, useDocument, useDocumentOptional } from "./hooks";
 import { DuplicateStudentError, loginAction } from "./student-login-action";
 
 type LoginProps = {
@@ -36,24 +28,15 @@ type LoginProps = {
   children: ReactNode;
 };
 
-export function FirebaseStudentLogin({
-  config,
-  contestFilter,
-  children,
-}: LoginProps) {
+export function FirebaseStudentLogin({ config, contestFilter, children }: LoginProps) {
   return (
     <FirebaseLogin config={config}>
-      <StudentLoginInner contestFilter={contestFilter}>
-        {children}
-      </StudentLoginInner>
+      <StudentLoginInner contestFilter={contestFilter}>{children}</StudentLoginInner>
     </FirebaseLogin>
   );
 }
 
-function StudentLoginInner({
-  contestFilter,
-  children,
-}: Omit<LoginProps, "config">) {
+function StudentLoginInner({ contestFilter, children }: Omit<LoginProps, "config">) {
   const db = useDb();
   const user = useAnonymousAuth();
 
@@ -78,8 +61,7 @@ function StudentLoginInner({
       <StudentInner
         contests={contests}
         participationId={studentMapping.participationId}
-        studentId={studentMapping.studentId}
-      >
+        studentId={studentMapping.studentId}>
         {children}
       </StudentInner>
     );
@@ -107,9 +89,8 @@ function StudentLoginInner({
       <StudentDataLoginForm contests={filteredContests} onSubmit={submit} />
       <Modal ref={modalRef} title="Attenzione">
         <p>
-          Il tuo account è già presente su un&apos;altro dispositivo. Per
-          trasferire l&apos;accesso al dispositivo corrente comunica al tuo
-          insegnante il codice seguente:
+          Il tuo account è già presente su un&apos;altro dispositivo. Per trasferire l&apos;accesso
+          al dispositivo corrente comunica al tuo insegnante il codice seguente:
         </p>
         <div className="flex justify-center pt-3">
           <span className="pt-1 font-mono text-3xl">
@@ -163,9 +144,7 @@ function StudentInner({
 
     await setStudent({ ...newStudent });
 
-    const submissionRef = collection(db, "submissions").withConverter(
-      submissionConverter,
-    );
+    const submissionRef = collection(db, "submissions").withConverter(submissionConverter);
     await addDoc(submissionRef, {
       id: "",
       uid: newStudent.uid!,
@@ -181,8 +160,7 @@ function StudentInner({
       setStudent={setStudentAndSubmission}
       logout={logout}
       reset={logout}
-      onSubmit={onSubmit}
-    >
+      onSubmit={onSubmit}>
       {children}
     </StudentProvider>
   );
