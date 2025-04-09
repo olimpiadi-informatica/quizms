@@ -1,7 +1,8 @@
 {
   "$schema": "https://biomejs.dev/schemas/1.8.3/schema.json",
   "files": {
-    "include": ["src", "docs", "*.mjs"]
+    "include": ["src", "docs", "*.mjs"],
+    "ignore": ["src/web/rest/quizms-backend"]
   },
   "vcs": {
     "enabled": true,
