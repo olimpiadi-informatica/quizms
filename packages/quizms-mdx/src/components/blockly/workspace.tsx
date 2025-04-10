@@ -261,7 +261,7 @@ export function BlocklyClient({
       </div>
       <div className={style.visualizer}>
         <ErrorBoundary
-          onError={(err) => {
+          onError={(err: any) => {
             if (process.env.NODE_ENV === "production") {
               err.message = "Visualizzazione del livello fallita";
             }
