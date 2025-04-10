@@ -3,8 +3,12 @@ import { useCookies } from "react-cookie";
 import useSWR from "swr";
 import urlJoin from "url-join";
 import type { Answer } from "~/models";
-import type { UserAnswer } from "../quizms-backend/bindings/UserAnswer";
-import { contestConverter, participationConverter, studentConverter } from "./converters";
+import {
+  answersToRest,
+  contestConverter,
+  participationConverter,
+  studentConverter,
+} from "./converters";
 
 type RestContextProps = {
   apiUrl: string;
@@ -30,18 +34,18 @@ function useCall(keys: [string, ...any[]] | null, converter: (data: any) => any 
 export function useGetStatus() {
   const [Cookies, , removeCookie] = useCookies(["token"]);
 
-  const { data, error, ...oth } = useCall(
+  const { data, error, isLoading, ...oth } = useCall(
     Cookies.token ? ["/contestant/status", Cookies.token] : null,
     studentConverter,
   );
 
   useEffect(() => {
-    if (error) {
+    if (!isLoading && error) {
       removeCookie("token");
     }
-  }, [error, removeCookie]);
+  }, [error, isLoading, removeCookie]);
 
-  return { student: data, error, ...oth };
+  return { student: data, isLoading, error, ...oth };
 }
 
 export function useGetContest() {
@@ -61,17 +65,17 @@ export async function start(apiUrl: string) {
   });
 }
 
-export async function setAnswers(apiUrl: string, answers: { [key in string]: Answer }) {
-  const toUserAnswer = (answer: string | number): UserAnswer => {
-    if (typeof answer === "number") return { number: answer };
-    return { string: answer };
-  };
-
-  const userAnswers = Object.fromEntries(
-    Object.entries(answers)
-      .filter(([_k, v], _i) => v != null)
-      .map(([k, v], _i) => [k, v != null && toUserAnswer(v)]),
-  );
+export async function setAnswers(
+  apiUrl: string,
+  {
+    answers = undefined,
+    code = undefined,
+  }: {
+    answers?: { [key: string]: Answer };
+    code?: { [key: string]: string | undefined };
+  },
+) {
+  const userAnswers = answersToRest(answers, code);
   return await fetch(urlJoin(apiUrl, "/contestant/set_answers"), {
     method: "POST",
     credentials: "same-origin",

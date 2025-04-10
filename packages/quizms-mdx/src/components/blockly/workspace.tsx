@@ -91,17 +91,18 @@ export function BlocklyClient({
     }
   }, [registerProblem, id, testcases, points]);
 
-  const savedBlocks = student.extraData?.[`blockly-${id}`];
+  const savedBlocks = id && student.code?.[id];
   const blocks = savedBlocks ? JSON.parse(savedBlocks) : (initialBlocks ?? defaultInitialBlocks);
 
   const setBlocks = async (blocks: object) => {
-    await setStudent({
-      ...student,
-      extraData: {
-        ...student.extraData,
-        [`blockly-${id}`]: JSON.stringify(blocks),
-      },
-    });
+    if (id)
+      await setStudent({
+        ...student,
+        code: {
+          ...student.code,
+          [id]: JSON.stringify(blocks),
+        },
+      });
   };
 
   const [iframe, setIframe] = useState<HTMLIFrameElement | null>(null);

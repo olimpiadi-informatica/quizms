@@ -20,6 +20,7 @@ export const studentSchema = z
     answers: z.record(answerSchema),
     score: z.number(),
     maxScore: z.number(),
+    code: z.record(z.union([z.string(), z.undefined()])),
     extraData: z.record(z.any()),
 
     createdAt: z.coerce.date(),

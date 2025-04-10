@@ -70,9 +70,15 @@ function StudentInner({
 
   const setStudentCallback = useCallback(
     (newStudent: Student) => {
-      for (const questionId in newStudent.answers) {
-        if (!student.answers || newStudent.answers[questionId] !== student.answers[questionId]) {
-          setAnswers(apiUrl, newStudent.answers).catch(mutate);
+      for (const problemId in newStudent.answers) {
+        if (!student.answers || newStudent.answers[problemId] !== student.answers[problemId]) {
+          setAnswers(apiUrl, { answers: newStudent.answers }).catch(() => mutate());
+          break;
+        }
+      }
+      for (const problemId in newStudent.code) {
+        if (!student.code || newStudent.code[problemId] !== student.code[problemId]) {
+          setAnswers(apiUrl, { code: newStudent.code }).catch(() => mutate());
           break;
         }
       }
