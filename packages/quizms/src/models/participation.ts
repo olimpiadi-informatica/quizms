@@ -25,3 +25,20 @@ export const participationMappingSchema = z.object({
 });
 
 export type ParticipationMapping = z.infer<typeof participationMappingSchema>;
+
+export const schoolSchema = participationSchema
+  .omit({
+    schoolId: true,
+    teacher: true,
+    contestId: true,
+  })
+  .extend({
+    contestIds: z.union([z.string(), z.array(z.string())]).default("*"),
+    password: z.string(),
+  })
+  .transform((school) => ({
+    ...school,
+    email: `${school.id.toLowerCase()}@teacher.edu`,
+  }));
+
+export type School = z.infer<typeof schoolSchema>;
