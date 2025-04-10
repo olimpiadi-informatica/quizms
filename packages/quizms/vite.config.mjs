@@ -1,5 +1,6 @@
 import path from "node:path";
 
+import { exec } from "node:child_process";
 import nodeExternals from "rollup-plugin-node-externals";
 import preserveDirectives from "rollup-preserve-directives";
 import { glob } from "tinyglobby";
@@ -30,5 +31,18 @@ export default defineConfig({
       },
     },
   },
-  plugins: [dts({ rollupTypes: true }), nodeExternals(), preserveDirectives(), tsconfigPaths()],
+  plugins: [
+    {
+      name: "postbuild",
+      closeBundle: () => {
+        const { stdout, stderr } = exec("yalc push");
+        stdout.pipe(process.stdout);
+        stderr.pipe(process.stderr);
+      },
+    },
+    dts({ rollupTypes: true }),
+    nodeExternals(),
+    preserveDirectives(),
+    tsconfigPaths(),
+  ],
 });

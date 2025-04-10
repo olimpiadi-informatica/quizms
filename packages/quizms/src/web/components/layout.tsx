@@ -7,6 +7,8 @@ import { type BaseLocationHook, Router, Switch, useLocation } from "wouter";
 import { Loading } from "~/web/components";
 
 import "./index.css";
+import urlJoin from "url-join";
+import { useRest } from "../rest/common/api";
 
 export function BaseLayout({ children }: { children: ReactNode }) {
   const [location, setLocation] = useLocation();
@@ -37,13 +39,15 @@ function LayoutInner({ children }: { children: ReactNode }) {
 function DatePolyfill() {
   globalThis.NativeDate ??= Date;
 
+  const { apiUrl } = useRest()!; // TODO: make this work with firebase
+
   const { data: timeDelta } = useSWR(
-    "https://time1.olinfo.it",
+    urlJoin(apiUrl, "contestant/time"),
     async (url) => {
       const res = await fetch(url);
       const now = globalThis.NativeDate.now();
-      const timestamp = await res.text();
-      return Number(timestamp) - now;
+      const isoDate = await res.text();
+      return new Date(isoDate).getTime() - now;
     },
     {
       revalidateIfStale: false,
