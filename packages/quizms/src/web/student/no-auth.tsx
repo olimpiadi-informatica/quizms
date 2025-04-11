@@ -36,6 +36,8 @@ export function NoAuth({ contestName, contestLongName, duration, children }: Aut
     allowStudentImport: true,
     allowStudentEdit: true,
     allowStudentDelete: true,
+    allowStudentFeedback: true,
+    scoreBestPerGroup: true,
     allowAnswerEdit: true,
     contestWindowEnd: new Date(0),
     contestWindowStart: new Date(Number.MAX_SAFE_INTEGER),

@@ -1,13 +1,12 @@
+import path from "node:path";
+import { uniq } from "lodash-es";
 import picomatch from "picomatch";
 import { Rng } from "~/utils";
 import { fatal } from "~/utils/logs";
-import { contestSchema, type Contest } from "./contest";
-import { uniq } from "lodash-es";
+import type { Contest } from "./contest";
 import load from "./load";
 import type { Participation, School } from "./participation";
 import { type VariantsConfig, variantsConfigSchema } from "./variants-config";
-import { readFile } from "node:fs/promises";
-import path from "node:path";
 
 export async function getParticipations(
   contests: Contest[],
@@ -53,7 +52,7 @@ export async function getParticipations(
   return participations;
 }
 
-export function getStatementsPaths(contests: Contest[], variantsConfig: VariantsConfig[], statementVersion: string) {
+export function getStatementsPaths(contests: Contest[], variantsConfig: VariantsConfig[]) {
   return contests.flatMap((contest) => {
     const config = variantsConfig.find((c) => c.id === contest.id);
     if (!config) {
@@ -62,7 +61,7 @@ export function getStatementsPaths(contests: Contest[], variantsConfig: Variants
 
     return uniq([...config.variantIds, ...config.pdfVariantIds]).map((id): [string, string] => [
       path.join("variants", config.id, `${id}.txt`),
-      path.join("statements", config.id, id, `statement-${statementVersion}.txt`),
+      id,
     ]);
   });
 }

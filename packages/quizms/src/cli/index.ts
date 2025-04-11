@@ -11,6 +11,7 @@ import staticExport from "./build";
 import devServer from "./dev";
 import firebaseCommand from "./firebase";
 import print from "./print";
+import restCommand from "./rest";
 import variants from "./variants";
 
 function safeParseInt(value: string): number {
@@ -77,6 +78,7 @@ async function main() {
     .action(variants);
 
   program.addCommand(firebaseCommand());
+  program.addCommand(restCommand());
 
   findProjectDirectory();
   await program.parseAsync();

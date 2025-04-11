@@ -47,7 +47,7 @@ export function restToAnswers(studentAnswers: StudentAnswers): {
   return { answers, code: studentAnswers.code || undefined };
 }
 
-export function studentConverter(data: StudentResponse & { answers: StudentAnswers }): Student {
+export function studentConverter(data: StudentResponse): Student {
   const { answers, code } = restToAnswers(data.answers);
   return {
     uid: "",
@@ -72,22 +72,15 @@ export function studentConverter(data: StudentResponse & { answers: StudentAnswe
 
 export function contestConverter(data: ContestResponse): Contest {
   return {
-    id: data.id,
-    name: data.name,
-    longName: data.longName,
-    problemIds: data.problemIds,
+    ...data,
     userData: [], // todo: convert properly
-    contestWindowStart: new Date(),
-    contestWindowEnd: new Date(),
-    hasVariants: data.hasVariants,
     hasOnline: data.onlineSettings != null,
+    contestWindowStart: new Date(data.onlineSettings?.windowRange.start || 0),
+    contestWindowEnd: new Date(data.onlineSettings?.windowRange.end || 0),
     hasPdf: data.offlineEnabled,
     allowStudentImport: data.allowStudentAdd,
-    allowStudentEdit: data.allowStudentEdit,
-    allowStudentDelete: data.allowStudentDelete,
-    allowAnswerEdit: data.allowAnswerEdit,
-    duration: 1000, // todo: figure out what to put here
-    allowRestart: false,
+    duration: Number(data.onlineSettings?.duration || 0),
+    allowRestart: data.onlineSettings?.allowRestarts || false,
   };
 }
 

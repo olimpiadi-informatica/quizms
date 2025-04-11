@@ -56,6 +56,9 @@ const baseContestSchema = z.object({
 
   // Testo delle istruzioni per la gara da mostrare agli insegnanti
   instructions: z.string().optional(),
+
+  allowStudentFeedback: z.boolean(),
+  scoreBestPerGroup: z.boolean(),
 });
 
 const onlineContest = baseContestSchema.extend({
