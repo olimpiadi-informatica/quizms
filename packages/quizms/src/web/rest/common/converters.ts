@@ -1,9 +1,65 @@
-import type { Answer, Contest, Participation } from "~/models";
+import type { Answer, Contest, Participation, UserData } from "~/models";
 import type { Student } from "~/models/student";
 import type { Contest as ContestResponse } from "../quizms-backend/bindings/Contest";
 import type { Student as StudentResponse } from "../quizms-backend/bindings/Student";
 import type { StudentAnswers } from "../quizms-backend/bindings/StudentAnswers";
+import type { UserDataField } from "../quizms-backend/bindings/UserDataField";
+import type { UserDataType } from "../quizms-backend/bindings/UserDataType";
 import type { Venue } from "../quizms-backend/bindings/Venue";
+import type { UserData as RestUserData } from "../quizms-backend/bindings/UserData";
+
+export function restToUserdata(restUserData: UserDataField): UserData {
+  let userdatatype:
+    | { type: "text" }
+    | { type: "number"; min?: number; max?: number }
+    | { type: "date"; min: Date; max: Date } = { type: "text" };
+  if (restUserData.type.type === "number") {
+    userdatatype = {
+      type: "number",
+      min: restUserData.type.min || undefined,
+      max: restUserData.type.max || undefined,
+    };
+  }
+  if (restUserData.type.type === "date") {
+    userdatatype = {
+      type: "date",
+      min: new Date(restUserData.type.min),
+      max: new Date(restUserData.type.max),
+    };
+  }
+  return {
+    name: restUserData.name,
+    label: restUserData.label,
+    size: restUserData.size,
+    pinned: restUserData.pinned || false,
+    ...userdatatype,
+  };
+}
+
+export function userdataToRest(userData: UserData): UserDataField {
+  let userDataType: UserDataType = { type: "text" };
+  if (userData.type === "number") {
+    userDataType = {
+      type: "number",
+      min: userData.min || null,
+      max: userData.max || null,
+    };
+  }
+  if (userData.type === "date") {
+    userDataType = {
+      type: "date",
+      min: userData.min?.toISOString(),
+      max: userData.max?.toISOString(),
+    };
+  }
+  return {
+    name: userData.name,
+    label: userData.label,
+    size: userData.size!,
+    pinned: userData.pinned || false,
+    type: userDataType,
+  };
+}
 
 export function answersToRest(
   answers: { [key: string]: Answer } | undefined,
@@ -50,8 +106,10 @@ export function restToAnswers(studentAnswers: StudentAnswers): {
 export function studentConverter(data: StudentResponse): Student {
   const { answers, code } = restToAnswers(data.answers);
   return {
-    uid: "",
-    userData: data.data.data,
+    userData: Object.fromEntries(Object.entries(data.data.data).map(([k,v]: [string, RestUserData | undefined]) => {
+      if (!v) return [k, undefined];
+      return Object.entries(v)[0];
+    })),
     absent: data.data.absent,
     disabled: data.data.disabled,
     participationId: data.data.venueId,
@@ -73,7 +131,7 @@ export function studentConverter(data: StudentResponse): Student {
 export function contestConverter(data: ContestResponse): Contest {
   return {
     ...data,
-    userData: [], // todo: convert properly
+    userData: data.userData.map(restToUserdata),
     hasOnline: data.onlineSettings != null,
     contestWindowStart: new Date(data.onlineSettings?.windowRange.start || 0),
     contestWindowEnd: new Date(data.onlineSettings?.windowRange.end || 0),

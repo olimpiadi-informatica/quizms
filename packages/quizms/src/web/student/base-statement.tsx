@@ -1,7 +1,7 @@
 import { type ReactNode, Suspense, useMemo } from "react";
 
 import { WithinTimeRange } from "@olinfo/react-components";
-import { addMilliseconds } from "date-fns";
+import { addMilliseconds, isPast } from "date-fns";
 
 import { Loading, Timer } from "~/web/components";
 import { useStudent } from "~/web/student/provider";
@@ -15,6 +15,10 @@ export function BaseStatement({ children }: { children: ReactNode }) {
         : addMilliseconds(participation.startingTime!, 1000 + Math.random() * 1000),
     [participation.startingTime],
   );
+  console.log(startingTime);
+  console.log(startingTime.getTime(), Date.now());
+  console.log(startingTime.getTime() < Date.now());
+  console.log(isPast(startingTime))
 
   return (
     <>

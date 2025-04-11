@@ -3,14 +3,17 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { uniq } from "lodash-es";
 import urlJoin from "url-join";
-import { contestSchema, schoolSchema, variantSchema } from "~/models";
+import { z } from "zod";
+import { contestSchema, schoolSchema, studentSchema, variantSchema } from "~/models";
 import load from "~/models/load";
 import { getParticipations } from "~/models/utils";
 import { variantsConfigSchema } from "~/models/variants-config";
-import { fatal, success, warning } from "~/utils/logs";
+import { fatal, info, success, warning } from "~/utils/logs";
 import validate from "~/utils/validate";
+import { userdataToRest } from "~/web/rest/common/converters";
 import type { Contest as RestContest } from "~/web/rest/quizms-backend/bindings/Contest";
 import type { Problem } from "~/web/rest/quizms-backend/bindings/Problem";
+import type { StudentData } from "~/web/rest/quizms-backend/bindings/StudentData";
 import type { Variant } from "~/web/rest/quizms-backend/bindings/Variant";
 import type { Venue } from "~/web/rest/quizms-backend/bindings/Venue";
 
@@ -61,7 +64,7 @@ export default async function importData(options: ImportOptions) {
     await importParticipations(options);
   }
   if (options.students) {
-    importStudents(options);
+    await importStudents(options);
   }
   if (options.pdfs) {
     importPdf(options);
@@ -81,11 +84,12 @@ function importAdmins(_options: ImportOptions) {
 
 async function importContests(options: ImportOptions) {
   const contests = await load("contests", contestSchema);
+  info(`Importing ${contests.length} contests...`);
   await Promise.all(
     contests.map(async (contest) => {
       const restContest: RestContest = {
         ...contest,
-        userData: [],
+        userData: contest.userData.map(userdataToRest),
         onlineSettings: contest.hasOnline
           ? {
               windowRange: {
@@ -105,18 +109,22 @@ async function importContests(options: ImportOptions) {
 }
 
 async function importParticipations(options: ImportOptions) {
-  const schools = await load("venues", schoolSchema);
+  const schools = await load("schools", schoolSchema);
   const contests = await load("contests", contestSchema);
   const participations = await getParticipations(contests, schools, {}); // TODO: add teacherIds
+  info(`Importing ${participations.length} participations...`);
   await Promise.all(
     participations.map(async (participation) => {
       const venue: Venue = {
         token: participation.token || null,
         variantsToPrint: participation.pdfVariants || [],
-        window: {
-          start: participation.startingTime?.toISOString() || "",
-          end: participation.endingTime?.toISOString() || "",
-        },
+        window:
+          (participation.startingTime &&
+            participation.endingTime && {
+              start: participation.startingTime?.toISOString(),
+              end: participation.endingTime?.toISOString(),
+            }) ||
+          null,
         ...participation,
       };
       await cas(options, "venue", { new: venue });
@@ -124,8 +132,63 @@ async function importParticipations(options: ImportOptions) {
   );
 }
 
-function importStudents(_options: ImportOptions) {
-  throw new Error("Function not implemented.");
+async function importStudents(options: ImportOptions) {
+  const schools = await load("schools", schoolSchema);
+  const contests = await load("contests", contestSchema);
+  const participations = await getParticipations(contests, schools, {});
+  const students = await load(
+    "students",
+    studentSchema
+      .pick({
+        contestId: true,
+        token: true,
+        variant: true,
+        userData: true,
+      })
+      .extend({
+        schoolId: z.string(),
+      }),
+  );
+  info(`Importing ${students.length} students...`);
+  await Promise.all(
+    students.map(async (student) => {
+      const participation = participations.find(
+        (p) => p.schoolId === student.schoolId && p.contestId === student.contestId,
+      );
+      if (!participation) {
+        fatal(`Cannot find participation for student ${student.token}`);
+      }
+      const restStudent: StudentData = {
+        ...student,
+        id: student.token!,
+        token: student.token!,
+        contestId: student.contestId!,
+        venueId: participation.id,
+        variantId: student.variant!,
+        absent: false,
+        disabled: false,
+        data: student.userData
+          ? Object.fromEntries(
+              Object.entries(student.userData).map(
+                ([k, v]: [string, string | number | Date | undefined]) => {
+                  if (typeof v === "string") {
+                    return [k, { string: v }];
+                  }
+                  if (typeof v === "number") {
+                    return [k, { number: v }];
+                  }
+                  if (v instanceof Date) {
+                    return [k, { date: v.toISOString() }];
+                  }
+                  return [k, null];
+                },
+              ),
+            )
+          : null,
+      };
+      await cas(options, "student_data", { new: restStudent });
+    }),
+  );
 }
 
 function importPdf(_options: ImportOptions) {
@@ -134,6 +197,7 @@ function importPdf(_options: ImportOptions) {
 
 async function importVariants(options: ImportOptions) {
   const variantsConfig = await load("variants", variantsConfigSchema);
+  info(`Importing ${variantsConfig.length} variants...`);
   const variants = await Promise.all(
     variantsConfig.flatMap((config) => {
       const ids = uniq([...config.variantIds, ...config.pdfVariantIds]);
@@ -233,10 +297,10 @@ async function importStatements(options: ImportOptions) {
         fatal(`Missing variants configuration for contest ${contest.id}.`);
       }
 
+      info(`Importing statements for contest ${contest.id}...`);
       await Promise.all(
         [...config.variantIds, ...config.pdfVariantIds].map(async (id) => {
           const statement = await readFile(path.join("variants", config.id, `${id}.txt`), "utf-8");
-          console.log(id, statement);
           return fetch(urlJoin(options.url, "/admin/update_statement"), {
             method: "POST",
             headers: {
@@ -253,7 +317,6 @@ async function importStatements(options: ImportOptions) {
 
 async function cas(option: ImportOptions, collection: string, body: { new: any; old?: any }) {
   const serializedBody = JSON.stringify(body, (_, v) => (typeof v === "bigint" ? Number(v) : v));
-  console.log(serializedBody);
   await fetch(urlJoin(option.url, `/admin/${collection}/cas`), {
     method: "POST",
     headers: {

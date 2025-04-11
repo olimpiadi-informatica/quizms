@@ -42,10 +42,12 @@ export async function getParticipations(
         schoolId: school.id,
         contestId: contest.id,
         name: school.name,
-        teacher: teacherIds[school.email],
+        teacher: teacherIds[school.email] || "",
         finalized: false,
         pdfVariants,
         disabled: false,
+        startingTime: school.startingTime,
+        endingTime: school.endingTime,
       });
     }
   }

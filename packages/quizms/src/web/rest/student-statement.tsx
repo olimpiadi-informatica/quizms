@@ -11,6 +11,7 @@ type Props = {
 export function RestStatement({ createFromFetch, statementVersion }: Props) {
   const { apiUrl } = useRest()!;
   const fetcher = useCallback(() => {
+    console.log(urlJoin(apiUrl, "/contestant/statement"));
     return createFromFetch(
       fetch(urlJoin(apiUrl, "/contestant/statement"), { credentials: "include" }),
     );

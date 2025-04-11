@@ -7,22 +7,15 @@ import { deleteApp } from "firebase-admin/app";
 import { type EmailIdentifier, getAuth } from "firebase-admin/auth";
 import type { Firestore } from "firebase-admin/firestore";
 import { chunk, groupBy, pick, range, uniq } from "lodash-es";
-import picomatch from "picomatch";
-import z from "zod";
 
-import {
-  type Participation,
-  contestSchema,
-  participationSchema,
-  studentSchema,
-  variantSchema,
-} from "~/models";
+import { contestSchema, schoolSchema, studentSchema, variantSchema } from "~/models";
 import load from "~/models/load";
-import { type VariantsConfig, variantsConfigSchema } from "~/models/variants-config";
+import { variantsConfigSchema } from "~/models/variants-config";
 import { fatal, success, warning } from "~/utils/logs";
 import { Rng } from "~/utils/random";
 import validate from "~/utils/validate";
 
+import { getParticipations } from "~/models/utils";
 import { importCollection } from "./utils/collection";
 import {
   contestConverter,
@@ -118,23 +111,8 @@ async function importContests(db: Firestore, options: ImportOptions) {
 }
 
 async function importParticipations(db: Firestore, options: ImportOptions) {
-  const schoolSchema = participationSchema
-    .omit({
-      schoolId: true,
-      teacher: true,
-      contestId: true,
-    })
-    .extend({
-      contestIds: z.union([z.string(), z.array(z.string())]).default("*"),
-      password: z.string(),
-    })
-    .transform((school) => ({
-      ...school,
-      email: `${school.id.toLowerCase()}@teacher.edu`,
-    }));
   const schools = await load("schools", schoolSchema);
   const contests = await load("contests", contestSchema);
-  let configs: VariantsConfig[] | undefined;
 
   if (options.teachers) {
     const teachers = schools.map((school) => pick(school, ["name", "email", "password"]));
@@ -143,7 +121,6 @@ async function importParticipations(db: Firestore, options: ImportOptions) {
 
   if (options.schools) {
     const auth = getAuth();
-    const participations: Participation[] = [];
 
     const emails = schools.map((school) => ({ email: school.email }));
     const usersIds: Record<string, string> = {};
@@ -158,40 +135,7 @@ async function importParticipations(db: Firestore, options: ImportOptions) {
       }
     }
 
-    for (const contest of contests) {
-      for (const school of schools) {
-        if (!picomatch.isMatch(contest.id, school.contestIds)) continue;
-
-        let pdfVariants: string[] | undefined = undefined;
-        if (contest.hasVariants) {
-          if (school.pdfVariants) {
-            pdfVariants = school.pdfVariants.map((id) => `${contest.id}-${id}`);
-          } else {
-            if (!configs) {
-              configs = await load("variants", variantsConfigSchema);
-            }
-            const config = configs.find((c) => c.id === contest.id);
-            if (!config) {
-              fatal(`Missing variants configuration for contest ${contest.id}.`);
-            }
-
-            const rng = new Rng(`${config.secret}-${config.id}-${school.id}-participation`);
-            pdfVariants = rng.sample(config.pdfVariantIds, config.pdfPerSchool);
-          }
-        }
-
-        participations.push({
-          id: `${school.id}-${contest.id}`,
-          schoolId: school.id,
-          contestId: contest.id,
-          name: school.name,
-          teacher: usersIds[school.email],
-          finalized: false,
-          pdfVariants,
-          disabled: false,
-        });
-      }
-    }
+    const participations = await getParticipations(contests, schools, usersIds);
 
     await importCollection(db, "participations", participations, participationConverter, options);
   }

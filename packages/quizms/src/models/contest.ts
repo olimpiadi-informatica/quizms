@@ -25,6 +25,8 @@ const userDataDate = baseUserData.extend({
   max: z.coerce.date(),
 });
 
+const userData = z.discriminatedUnion("type", [userDataText, userDataNumber, userDataDate]);
+
 const baseContestSchema = z.object({
   // Identificativo univoco della gara
   id: z.string(),
@@ -36,7 +38,7 @@ const baseContestSchema = z.object({
   problemIds: z.coerce.string().array(),
 
   // Informazioni personali richieste agli studenti
-  userData: z.array(z.discriminatedUnion("type", [userDataText, userDataNumber, userDataDate])),
+  userData: z.array(userData),
 
   // Se i testi della gara hanno più varianti
   hasVariants: z.boolean(),
@@ -79,6 +81,7 @@ export const contestSchema = z.discriminatedUnion("hasOnline", [
   baseContestSchema.extend({ hasOnline: z.literal(false) }),
 ]);
 
+export type UserData = z.infer<typeof userData>;
 export type Contest = z.infer<typeof contestSchema>;
 
 export function parseUserData(

@@ -45,7 +45,7 @@ function StudentLoginInner({ children }: { children: ReactNode }) {
   if (Cookies.token && !isLoading && student) {
     return (
       <StudentInner fetchedStudent={student} mutate={mutate}>
-        {children}
+      {children}
       </StudentInner>
     );
   }
