@@ -37,9 +37,8 @@ function StudentLoginInner({ children }: { children: ReactNode }) {
   const submit = useCallback(
     ({ token }: { token: string }) => {
       setCookie("token", token);
-      mutate();
     },
-    [setCookie, mutate],
+    [setCookie],
   );
 
   if (Cookies.token && !isLoading && student) {

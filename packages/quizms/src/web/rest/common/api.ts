@@ -1,6 +1,6 @@
-import { createContext, useContext, useEffect } from "react";
+import { createContext, useContext } from "react";
 import { useCookies } from "react-cookie";
-import useSWR from "swr";
+import useSWR, { type SWRConfiguration } from "swr";
 import urlJoin from "url-join";
 import type { Answer } from "~/models";
 import {
@@ -9,6 +9,15 @@ import {
   participationConverter,
   studentConverter,
 } from "./converters";
+
+class FetchError extends Error {
+  status: number;
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = "FetchError";
+    this.status = status;
+  }
+}
 
 type RestContextProps = {
   apiUrl: string;
@@ -20,32 +29,48 @@ export const useRest = () => {
   return useContext(RestContext);
 };
 
-function useCall(keys: [string, ...any[]] | null, converter: (data: any) => any = (data) => data) {
+function useCall(
+  keys: [string, ...any[]] | null,
+  converter: (data: any) => any = (data) => data,
+  swrConfig: SWRConfiguration | undefined = undefined,
+) {
   const { apiUrl } = useRest()!;
-  const res = useSWR(keys, async ([path]) => {
-    const res = await fetch(urlJoin(apiUrl, path), {
-      credentials: "same-origin",
-    });
-    return converter(await res.json());
-  });
-  return res;
+  return useSWR(
+    keys,
+    async ([path]) => {
+      const res = await fetch(urlJoin(apiUrl, path), {
+        credentials: "same-origin",
+      });
+      if (!res.ok) {
+        throw new FetchError("Network response was not ok", res.status);
+      }
+      return res.json().then((data) => converter(data));
+    },
+    swrConfig,
+  );
 }
 
 export function useGetStatus() {
   const [Cookies, , removeCookie] = useCookies(["token"]);
 
-  const { data, error, isLoading, ...oth } = useCall(
+  const { data, ...oth } = useCall(
     Cookies.token ? ["/contestant/status", Cookies.token] : null,
     studentConverter,
+    {
+      onError: (err) => {
+        if (err instanceof FetchError) {
+          if (err.status === 403) {
+            removeCookie("token");
+            throw new Error("Token errato");
+          }
+        } else {
+          throw err;
+        }
+      },
+    },
   );
 
-  useEffect(() => {
-    if (!isLoading && error) {
-      removeCookie("token");
-    }
-  }, [error, isLoading, removeCookie]);
-
-  return { student: data, isLoading, error, ...oth };
+  return { student: data, ...oth };
 }
 
 export function useGetContest() {
