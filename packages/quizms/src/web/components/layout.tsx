@@ -39,15 +39,16 @@ function LayoutInner({ children }: { children: ReactNode }) {
 function DatePolyfill() {
   globalThis.NativeDate ??= Date;
 
-  const { apiUrl } = useRest() || { apiUrl: undefined }; // TODO: check if this work with firebase
 
   const { data: timeDelta } = useSWR(
-    apiUrl ? urlJoin(apiUrl, "contestant/time") : "https://time1.olinfo.it",
+    "/api/contestant/time", // TODO: do not assume /api path
     async (url) => {
       const res = await fetch(url);
       const now = globalThis.NativeDate.now();
-      const isoDate = await res.text();
-      return new Date(isoDate).getTime() - now;
+      const isoDate = await res.json();
+      const date = new Date(isoDate);
+      console.log(now, date, isoDate, date.getTime());
+      return date.getTime() - now;
     },
     {
       revalidateIfStale: false,
