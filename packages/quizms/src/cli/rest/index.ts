@@ -10,6 +10,7 @@ export default function restCommand() {
     .command("import")
     .description("Import the contests data.")
     .option("-c, --config <config>", "The contests config file.")
+    .option("--force", "Force reimport.")
     .option("--url <url>", "Api url.")
     .option("--token <token>", "Admin token.")
     .option("--admins", "Import the admins.")
