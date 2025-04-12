@@ -15,10 +15,6 @@ export function BaseStatement({ children }: { children: ReactNode }) {
         : addMilliseconds(participation.startingTime!, 1000 + Math.random() * 1000),
     [participation.startingTime],
   );
-  console.log(startingTime);
-  console.log(startingTime.getTime(), Date.now());
-  console.log(startingTime.getTime() < Date.now());
-  console.log(isPast(startingTime))
 
   return (
     <>

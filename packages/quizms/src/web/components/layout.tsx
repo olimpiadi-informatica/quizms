@@ -47,7 +47,6 @@ function DatePolyfill() {
       const now = globalThis.NativeDate.now();
       const isoDate = await res.json();
       const date = new Date(isoDate);
-      console.log(now, date, isoDate, date.getTime());
       return date.getTime() - now;
     },
     {
