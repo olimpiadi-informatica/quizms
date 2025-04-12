@@ -20,6 +20,8 @@ import type { Venue } from "~/web/rest/quizms-backend/bindings/Venue";
 type ImportOptions = {
   config: string;
   force: true;
+  verbose: true;
+  dryRun: true;
 
   url: string;
   token: string;
@@ -254,6 +256,11 @@ async function importVariants(options: ImportOptions) {
           variants: [],
         };
       }
+      const [mainId] = id.split(".")
+      if (restVariant.scoringGroups[mainId] === undefined) {
+        restVariant.scoringGroups[mainId] = [];
+      }
+      restVariant.scoringGroups[mainId].push(id);
       restVariant.problems[id] = [problemId, problems[problemId].variants.length];
       problems[problemId].variants.push({
         answerInfo: {
@@ -291,7 +298,7 @@ async function importVariants(options: ImportOptions) {
       }),
     ]);
     const total = res.reduce<number>((acc, val) => acc + val, 0);
-    info(`Imported ${total} variants and problems.`);
+    info(`Imported ${total} variants.`);
   }
   {
     info(`Importing ${Object.keys(problems).length} problems...`);
@@ -335,6 +342,10 @@ async function importStatements(options: ImportOptions) {
 }
 
 async function cas(option: ImportOptions, collection: string, newVal: any) {
+  if (option.verbose) {
+    info(`Importing ${collection} ${newVal.id}...`);
+    console.log(newVal);
+  }
   let oldVal: any = undefined;
   const old = await fetch(urlJoin(option.url, `/admin/${collection}/get/${newVal.id}`), {
     method: "GET",
@@ -348,9 +359,18 @@ async function cas(option: ImportOptions, collection: string, newVal: any) {
       return 0;
     }
     oldVal = await old.json();
+    if(option.verbose) {
+      warning(`Found ${collection} ${newVal.id},`);
+      console.log(oldVal);
+    }
   }
   const body = { new: newVal, old: oldVal };
   const serializedBody = JSON.stringify(body, (_, v) => (typeof v === "bigint" ? Number(v) : v));
+
+  if (option.dryRun) {
+    info(`Dry run: ${collection} ${newVal.id} would be imported.`);
+    return 1;
+  }
   const res = await fetch(urlJoin(option.url, `/admin/${collection}/cas`), {
     method: "POST",
     headers: {

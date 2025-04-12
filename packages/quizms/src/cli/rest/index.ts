@@ -4,13 +4,15 @@ import importData from "./import";
 export default function restCommand() {
   const command = new Command("rest");
 
-  command.description("Commands to interact with the Firebase database.");
+  command.description("Commands to interact with the rest backend.");
 
   command
     .command("import")
     .description("Import the contests data.")
     .option("-c, --config <config>", "The contests config file.")
     .option("--force", "Force reimport.")
+    .option("--verbose", "Verbose output.")
+    .option("--dryRun", "Dry run.")
     .option("--url <url>", "Api url.")
     .option("--token <token>", "Admin token.")
     .option("--admins", "Import the admins.")
