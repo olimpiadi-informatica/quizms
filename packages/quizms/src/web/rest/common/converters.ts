@@ -3,10 +3,10 @@ import type { Student } from "~/models/student";
 import type { Contest as ContestResponse } from "../quizms-backend/bindings/Contest";
 import type { Student as StudentResponse } from "../quizms-backend/bindings/Student";
 import type { StudentAnswers } from "../quizms-backend/bindings/StudentAnswers";
+import type { UserData as RestUserData } from "../quizms-backend/bindings/UserData";
 import type { UserDataField } from "../quizms-backend/bindings/UserDataField";
 import type { UserDataType } from "../quizms-backend/bindings/UserDataType";
 import type { Venue } from "../quizms-backend/bindings/Venue";
-import type { UserData as RestUserData } from "../quizms-backend/bindings/UserData";
 
 export function restToUserdata(restUserData: UserDataField): UserData {
   let userdatatype:
@@ -106,10 +106,12 @@ export function restToAnswers(studentAnswers: StudentAnswers): {
 export function studentConverter(data: StudentResponse): Student {
   const { answers, code } = restToAnswers(data.answers);
   return {
-    userData: Object.fromEntries(Object.entries(data.data.data).map(([k,v]: [string, RestUserData | undefined]) => {
-      if (!v) return [k, undefined];
-      return Object.entries(v)[0];
-    })),
+    userData: Object.fromEntries(
+      Object.entries(data.data.data).map(([k, v]: [string, RestUserData | undefined]) => {
+        if (!v) return [k, undefined];
+        return Object.entries(v)[0];
+      }),
+    ),
     absent: data.data.absent,
     disabled: data.data.disabled,
     participationId: data.data.venueId,

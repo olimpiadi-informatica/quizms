@@ -1,7 +1,7 @@
 import { type ReactNode, Suspense, useMemo } from "react";
 
 import { WithinTimeRange } from "@olinfo/react-components";
-import { addMilliseconds, isPast } from "date-fns";
+import { addMilliseconds } from "date-fns";
 
 import { Loading, Timer } from "~/web/components";
 import { useStudent } from "~/web/student/provider";

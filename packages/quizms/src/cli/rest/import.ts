@@ -4,12 +4,7 @@ import path from "node:path";
 import { uniq } from "lodash-es";
 import urlJoin from "url-join";
 import { z } from "zod";
-import {
-  contestSchema,
-  schoolSchema,
-  studentSchema,
-  variantSchema,
-} from "~/models";
+import { contestSchema, schoolSchema, studentSchema, variantSchema } from "~/models";
 import load from "~/models/load";
 import { getParticipations } from "~/models/utils";
 import { variantsConfigSchema } from "~/models/variants-config";
@@ -42,9 +37,7 @@ export default async function importData(options: ImportOptions) {
   process.env.QUIZMS_MODE = "contest";
 
   if (!existsSync("data")) {
-    fatal(
-      "Cannot find data directory. Make sure you're inside a QuizMS project.",
-    );
+    fatal("Cannot find data directory. Make sure you're inside a QuizMS project.");
   }
 
   const collections: (keyof ImportOptions)[] = [
@@ -165,8 +158,7 @@ async function importStudents(options: ImportOptions) {
   const res = await Promise.all(
     students.map(async (student) => {
       const participation = participations.find(
-        (p) =>
-          p.schoolId === student.schoolId && p.contestId === student.contestId,
+        (p) => p.schoolId === student.schoolId && p.contestId === student.contestId,
       );
       if (!participation) {
         fatal(`Cannot find participation for student ${student.token}`);
@@ -222,9 +214,7 @@ async function importVariants(options: ImportOptions) {
         try {
           schema = await readFile(fileName, "utf8");
         } catch {
-          fatal(
-            `Cannot find schema for variant ${id}. Use \`quizms variants\` to generate it.`,
-          );
+          fatal(`Cannot find schema for variant ${id}. Use \`quizms variants\` to generate it.`);
         }
         try {
           return validate(variantSchema, JSON.parse(schema));
@@ -264,10 +254,7 @@ async function importVariants(options: ImportOptions) {
           variants: [],
         };
       }
-      restVariant.problems[id] = [
-        problemId,
-        problems[problemId].variants.length,
-      ];
+      restVariant.problems[id] = [problemId, problems[problemId].variants.length];
       problems[problemId].variants.push({
         answerInfo: {
           type: "multiplechoice", // TODO: set correctly
@@ -332,10 +319,7 @@ async function importStatements(options: ImportOptions) {
       info(`Importing statements for contest ${contest.id}...`);
       await Promise.all(
         [...config.variantIds, ...config.pdfVariantIds].map(async (id) => {
-          const statement = await readFile(
-            path.join("variants", config.id, `${id}.txt`),
-            "utf-8",
-          );
+          const statement = await readFile(path.join("variants", config.id, `${id}.txt`), "utf-8");
           return await fetch(urlJoin(options.url, "/admin/update_statement"), {
             method: "POST",
             headers: {
@@ -352,15 +336,12 @@ async function importStatements(options: ImportOptions) {
 
 async function cas(option: ImportOptions, collection: string, newVal: any) {
   let oldVal: any = undefined;
-  const old = await fetch(
-    urlJoin(option.url, `/admin/${collection}/get/${newVal.id}`),
-    {
-      method: "GET",
-      headers: {
-        cookie: `admin_token=${option.token}`,
-      },
+  const old = await fetch(urlJoin(option.url, `/admin/${collection}/get/${newVal.id}`), {
+    method: "GET",
+    headers: {
+      cookie: `admin_token=${option.token}`,
     },
-  );
+  });
   if (old.status !== 404) {
     if (!option.force) {
       error(`${collection} ${newVal.id} already exists. Use --force to overwrite.`);
@@ -369,9 +350,7 @@ async function cas(option: ImportOptions, collection: string, newVal: any) {
     oldVal = await old.json();
   }
   const body = { new: newVal, old: oldVal };
-  const serializedBody = JSON.stringify(body, (_, v) =>
-    typeof v === "bigint" ? Number(v) : v,
-  );
+  const serializedBody = JSON.stringify(body, (_, v) => (typeof v === "bigint" ? Number(v) : v));
   const res = await fetch(urlJoin(option.url, `/admin/${collection}/cas`), {
     method: "POST",
     headers: {

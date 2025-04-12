@@ -7,8 +7,6 @@ import { type BaseLocationHook, Router, Switch, useLocation } from "wouter";
 import { Loading } from "~/web/components";
 
 import "./index.css";
-import urlJoin from "url-join";
-import { useRest } from "../rest/common/api";
 
 export function BaseLayout({ children }: { children: ReactNode }) {
   const [location, setLocation] = useLocation();
@@ -38,7 +36,6 @@ function LayoutInner({ children }: { children: ReactNode }) {
 
 function DatePolyfill() {
   globalThis.NativeDate ??= Date;
-
 
   const { data: timeDelta } = useSWR(
     "/api/contestant/time", // TODO: do not assume /api path
