@@ -60,46 +60,42 @@ export function StudentLayout({ children }: { children: ReactNode }) {
               {progress}%
             </Progress>
             <div className="px-3">
-              {terminated || !participation.startingTime || !contest.hasOnline ? (
+              {terminated || !participation.endingTime || !contest.hasOnline ? (
                 <span className="font-mono">00:00</span>
               ) : (
-                <Timer
-                  startTime={participation.startingTime}
-                  duration={contest.duration}
-                  noAnimation
-                />
+                <Timer endTime={participation.endingTime} noAnimation />
               )}
             </div>
-            {terminated && reset ? (
-              <>
-                <div className="tooltip tooltip-bottom h-full" data-tip="Mostra risultati">
-                  <Button
-                    className="btn-primary btn-sm h-full"
-                    onClick={() => completedRef.current?.showModal()}
-                    aria-label="Mostra risultati">
-                    <FileChartColumn />
-                  </Button>
-                </div>
-                <div className="tooltip tooltip-bottom h-full" data-tip="Ricomincia">
-                  <Button
-                    className="btn-primary btn-sm h-full"
-                    onClick={reset}
-                    aria-label="Ricomincia">
-                    <RotateCcw />
-                  </Button>
-                </div>
-              </>
-            ) : (
-              <Button
-                className="btn-primary btn-sm h-full"
-                disabled={
-                  terminated ||
-                  (process.env.NODE_ENV === "production" && !participation.startingTime)
-                }
-                onClick={submit}>
-                Termina
-              </Button>
-            )}
+            // {terminated && reset ? (
+            //   <>
+            //     <div className="tooltip tooltip-bottom h-full" data-tip="Mostra risultati">
+            //       <Button
+            //         className="btn-primary btn-sm h-full"
+            //         onClick={() => completedRef.current?.showModal()}
+            //         aria-label="Mostra risultati">
+            //         <FileChartColumn />
+            //       </Button>
+            //     </div>
+            //     <div className="tooltip tooltip-bottom h-full" data-tip="Ricomincia">
+            //       <Button
+            //         className="btn-primary btn-sm h-full"
+            //         onClick={reset}
+            //         aria-label="Ricomincia">
+            //         <RotateCcw />
+            //       </Button>
+            //     </div>
+            //   </>
+            // ) : (
+            //   <Button
+            //     className="btn-primary btn-sm h-full"
+            //     disabled={
+            //       terminated ||
+            //       (process.env.NODE_ENV === "production" && !participation.startingTime)
+            //     }
+            //     onClick={submit}>
+            //     Termina
+            //   </Button>
+            // )}
             <UserDropdown />
           </div>
         </NavbarContent>
