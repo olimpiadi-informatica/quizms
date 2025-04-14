@@ -1,7 +1,6 @@
 import { type ReactNode, type Ref, forwardRef, useRef } from "react";
 
 import {
-  Button,
   Dropdown,
   DropdownButton,
   DropdownItem,
@@ -15,7 +14,7 @@ import {
   SubmitButton,
 } from "@olinfo/react-components";
 import { sumBy } from "lodash-es";
-import { FileChartColumn, LogOut, RotateCcw } from "lucide-react";
+import { LogOut } from "lucide-react";
 
 import { type Schema, calcProblemPoints } from "~/models";
 import { ErrorBoundary, Progress, Prose, Timer, useMetadata } from "~/web/components";
@@ -28,13 +27,13 @@ export function StudentLayout({ children }: { children: ReactNode }) {
   const completedRef = useRef<HTMLDialogElement>(null);
   const submitRef = useRef<HTMLDialogElement>(null);
 
-  const { contest, student, schema, reset, participation, terminated } = useStudent();
+  const { contest, student, schema, participation, terminated } = useStudent();
 
   const answered = sumBy(Object.values(student.answers ?? {}), (s) => Number(s === 0 || !!s));
   const total = Math.max(Object.keys(schema).length, 1);
   const progress = Math.round((answered / total) * 100);
 
-  const submit = async () => {
+  const _submit = async () => {
     const modal = submitRef.current;
     if (!modal) return;
 
@@ -66,36 +65,36 @@ export function StudentLayout({ children }: { children: ReactNode }) {
                 <Timer endTime={participation.endingTime} noAnimation />
               )}
             </div>
-            // {terminated && reset ? (
-            //   <>
-            //     <div className="tooltip tooltip-bottom h-full" data-tip="Mostra risultati">
-            //       <Button
-            //         className="btn-primary btn-sm h-full"
-            //         onClick={() => completedRef.current?.showModal()}
-            //         aria-label="Mostra risultati">
-            //         <FileChartColumn />
-            //       </Button>
-            //     </div>
-            //     <div className="tooltip tooltip-bottom h-full" data-tip="Ricomincia">
-            //       <Button
-            //         className="btn-primary btn-sm h-full"
-            //         onClick={reset}
-            //         aria-label="Ricomincia">
-            //         <RotateCcw />
-            //       </Button>
-            //     </div>
-            //   </>
-            // ) : (
-            //   <Button
-            //     className="btn-primary btn-sm h-full"
-            //     disabled={
-            //       terminated ||
-            //       (process.env.NODE_ENV === "production" && !participation.startingTime)
-            //     }
-            //     onClick={submit}>
-            //     Termina
-            //   </Button>
-            // )}
+            {/*            {terminated && reset ? (
+               <>
+                 <div className="tooltip tooltip-bottom h-full" data-tip="Mostra risultati">
+                  <Button
+                    className="btn-primary btn-sm h-full"
+                    onClick={() => completedRef.current?.showModal()}
+                    aria-label="Mostra risultati">
+                    <FileChartColumn />
+                  </Button>
+                </div>
+                <div className="tooltip tooltip-bottom h-full" data-tip="Ricomincia">
+                  <Button
+                    className="btn-primary btn-sm h-full"
+                    onClick={reset}
+                    aria-label="Ricomincia">
+                    <RotateCcw />
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <Button
+                className="btn-primary btn-sm h-full"
+                disabled={
+                  terminated ||
+                  (process.env.NODE_ENV === "production" && !participation.startingTime)
+                }
+                onClick={submit}>
+                Termina
+              </Button>
+            )} */}
             <UserDropdown />
           </div>
         </NavbarContent>
