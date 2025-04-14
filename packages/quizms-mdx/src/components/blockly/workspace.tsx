@@ -10,7 +10,11 @@ import {
   useState,
 } from "react";
 
-import { ErrorBoundary, Loading, useErrorBoundary } from "@olinfo/quizms/components";
+import {
+  ErrorBoundary,
+  Loading,
+  useErrorBoundary,
+} from "@olinfo/quizms/components";
 import { useStudent } from "@olinfo/quizms/student";
 import type { ToolboxInfo } from "blockly/core/utils/toolbox";
 import clsx from "clsx";
@@ -71,7 +75,7 @@ export function BlocklyClient({
   customBlocks,
   visualizer: Visualizer,
 }: BlocklyProps) {
-  const { student, setStudent, terminated } = useStudent();
+  const { student, setStudent, terminated, score: savedScore } = useStudent();
   const { registerProblem } = useContest();
   const { id, points } = useProblem();
   const { showBoundary } = useErrorBoundary();
@@ -92,7 +96,9 @@ export function BlocklyClient({
   }, [registerProblem, id, testcases, points]);
 
   const savedBlocks = id && student.code?.[id];
-  const blocks = savedBlocks ? JSON.parse(savedBlocks) : (initialBlocks ?? defaultInitialBlocks);
+  const blocks = savedBlocks
+    ? JSON.parse(savedBlocks)
+    : (initialBlocks ?? defaultInitialBlocks);
 
   const setBlocks = async (blocks: object) => {
     if (id)
@@ -110,22 +116,38 @@ export function BlocklyClient({
 
   const [editing, setEditing] = useState(true);
   const [playing, setPlaying] = useState(false);
-  const [variableMappings, setVariableMappings] = useState<Record<string, string>>({});
+  const [variableMappings, setVariableMappings] = useState<
+    Record<string, string>
+  >({});
   const [svg, setSvg] = useState("");
 
   const [code, setCode] = useState("");
   const [testcaseIndex, setTestcaseIndex] = useState(0);
-  const [testcaseStatuses, setTestcaseStatuses] = useState<TestcaseStatus[]>(() => {
-    return testcases.map((_, index) => ({ correct: false, index }));
-  });
-
-  const { step, reset, running, highlightedBlock, globalScope, correct, msg } = useExecutor(
-    code,
-    testcases[testcaseIndex],
+  const [testcaseStatuses, setTestcaseStatuses] = useState<TestcaseStatus[]>(
+    () => {
+      return testcases.map((_, index) => ({ correct: false, index }));
+    },
   );
+  const [bestScore, setBestScore] = useState(0);
+  const maxScore = points[0] * testcases.length;
+  const problemScore = Math.max(
+    (savedScore?.isLoading === false && savedScore?.score[id!]) || 0,
+    bestScore,
+  );
+  const badgeClass =
+    problemScore == 0
+      ? "badge-wrong"
+      : problemScore == maxScore ? "badge-success"
+        : "badge-warning";
+
+  const { step, reset, running, highlightedBlock, globalScope, correct, msg } =
+    useExecutor(code, testcases[testcaseIndex]);
 
   const variables = useMemo(
-    () => Object.fromEntries(Object.entries(variableMappings).map(([k, v]) => [v, globalScope[k]])),
+    () =>
+      Object.fromEntries(
+        Object.entries(variableMappings).map(([k, v]) => [v, globalScope[k]]),
+      ),
     [variableMappings, globalScope],
   );
 
@@ -147,7 +169,8 @@ export function BlocklyClient({
       }
       case "blocks": {
         void setBlocks(data.blocks);
-        if (debug?.logBlocks) console.info(JSON.stringify(data.blocks, undefined, 2));
+        if (debug?.logBlocks)
+          console.info(JSON.stringify(data.blocks, undefined, 2));
         break;
       }
       case "code": {
@@ -219,10 +242,12 @@ export function BlocklyClient({
     setEditing(false);
 
     const answers = { ...student.answers };
+    let subScore = 0;
     for (let tc = 0; tc < testcases.length; tc++) {
+      subScore += statuses[tc].correct ? points[0] : points[2];
       answers[`${id}.${tc + 1}`] = statuses[tc].correct ? "✅" : "❌";
     }
-
+    setBestScore((bestScore) => Math.max(bestScore, subScore));
     await setStudent({ ...student, answers });
   };
 
@@ -232,7 +257,9 @@ export function BlocklyClient({
   return (
     <div className={clsx(style.workspace, "not-prose")}>
       <div className={style.visualizerButtons}>
-        <div className="pl-2 text-xl font-bold max-sm:hidden lg:max-xl:hidden">Livello</div>
+        <div className="pl-2 text-xl font-bold max-sm:hidden lg:max-xl:hidden">
+          Livello
+        </div>
         <div className="join">
           {testcaseStatuses.map(({ index, correct, msg }) => (
             <button
@@ -247,16 +274,29 @@ export function BlocklyClient({
                 !editing && "tooltip",
                 index === testcaseIndex && "btn-info",
               )}
-              data-tip={msg}>
+              data-tip={msg}
+            >
               {editing ? (
                 <CircleHelp size={24} />
               ) : correct ? (
-                <CircleCheck size={24} className="fill-success stroke-success-content" />
+                <CircleCheck
+                  size={24}
+                  className="fill-success stroke-success-content"
+                />
               ) : (
-                <CircleX size={24} className="fill-error stroke-error-content" />
+                <CircleX
+                  size={24}
+                  className="fill-error stroke-error-content"
+                />
               )}
             </button>
           ))}
+        </div>
+        <div className="pl-2 text-xl font-bold max-sm:hidden lg:max-xl:hidden">
+          Punteggio:
+        </div>
+        <div className={`badge badge-outline badge-primary ${badgeClass} p-4 text-xl whitespace-nowrap`}>
+          {problemScore}/{maxScore}
         </div>
       </div>
       <div className={style.visualizer}>
@@ -266,7 +306,8 @@ export function BlocklyClient({
               err.message = "Visualizzazione del livello fallita";
             }
           }}
-          onReset={reset}>
+          onReset={reset}
+        >
           {Visualizer && globalScope?.state && (
             <Visualizer
               variables={variables}
@@ -276,14 +317,23 @@ export function BlocklyClient({
             />
           )}
         </ErrorBoundary>
-        <div className={clsx("sticky left-0 bottom-0 z-50 p-4", !alert && "invisible")}>
-          <div role="alert" className={clsx("alert", correct ? "alert-success" : "alert-error")}>
+        <div
+          className={clsx(
+            "sticky left-0 bottom-0 z-50 p-4",
+            !alert && "invisible",
+          )}
+        >
+          <div
+            role="alert"
+            className={clsx("alert", correct ? "alert-success" : "alert-error")}
+          >
             {correct ? <CircleCheck /> : <TriangleAlert />}
             <span>{alert}</span>
             <button
               type="button"
               onClick={() => setAlert(undefined)}
-              aria-label="Nascondi messaggio">
+              aria-label="Nascondi messaggio"
+            >
               <MessageSquareOff />
             </button>
           </div>
@@ -297,8 +347,13 @@ export function BlocklyClient({
               className="btn btn-info rounded-[inherit]"
               disabled={!running || editing}
               onClick={() => setPlaying(!playing)}
-              aria-label="Esugui un blocco">
-              {playing ? <Pause className="size-6" /> : <Play className="size-6" />}
+              aria-label="Esugui un blocco"
+            >
+              {playing ? (
+                <Pause className="size-6" />
+              ) : (
+                <Play className="size-6" />
+              )}
             </button>
           </div>
           <div className="join-item tooltip" data-tip="Esegui un blocco">
@@ -307,7 +362,8 @@ export function BlocklyClient({
               className="btn btn-info rounded-[inherit]"
               disabled={!running || editing}
               onClick={step}
-              aria-label="Esugui un blocco">
+              aria-label="Esugui un blocco"
+            >
               <SkipForward className="size-6" />
             </button>
           </div>
@@ -320,7 +376,8 @@ export function BlocklyClient({
               onClick={() => {
                 reset();
                 setPlaying(false);
-              }}>
+              }}
+            >
               <RotateCcw className="size-6" />
             </button>
           </div>
@@ -331,7 +388,8 @@ export function BlocklyClient({
             className="btn btn-success"
             aria-label="Correggi la soluzione"
             disabled={!editing || !ready}
-            onClick={runAll}>
+            onClick={runAll}
+          >
             <Send className="size-6" />
           </button>
         </div>
@@ -350,7 +408,9 @@ export function BlocklyClient({
             <span>Veloce</span>
           </div>
         </div>
-        {process.env.NODE_ENV === "development" && <Debug blocks={blocks} js={code} svg={svg} />}
+        {process.env.NODE_ENV === "development" && (
+          <Debug blocks={blocks} js={code} svg={svg} />
+        )}
       </div>
       <Editor ref={setIframe} ready={ready} />
     </div>

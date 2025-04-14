@@ -98,7 +98,7 @@ function StudentInner({
       setStudent={setStudentCallback}
       contest={contest}
       participation={participation}
-      score={{ isLoading: isScoreLoading, score: { score } }}>
+      score={{ isLoading: isScoreLoading, score }}>
       {children}
     </StudentProvider>
   );

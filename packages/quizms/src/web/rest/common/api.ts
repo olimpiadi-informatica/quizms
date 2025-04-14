@@ -46,7 +46,10 @@ function useCall(
       }
       return res.json().then((data) => converter(data));
     },
-    swrConfig,
+    {
+      revalidateOnFocus: false,
+      ...swrConfig,
+    },
   );
 }
 

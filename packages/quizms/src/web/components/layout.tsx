@@ -42,9 +42,13 @@ function DatePolyfill() {
     async (url) => {
       const res = await fetch(url);
       const now = globalThis.NativeDate.now();
-      const isoDate = await res.json();
-      const date = new Date(isoDate);
-      return date.getTime() - now;
+      try {
+        const isoDate = await res.json();
+        const date = new Date(isoDate);
+        return date.getTime() - now;
+      } catch {
+        return 0;
+      }
     },
     {
       revalidateIfStale: false,
