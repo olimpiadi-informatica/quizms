@@ -75,9 +75,6 @@ export default async function importData(options: ImportOptions) {
   if (options.variants) {
     await importVariants(options);
   }
-  if (options.statements) {
-    await importStatements(options);
-  }
   success("All done!");
 }
 
@@ -273,13 +270,14 @@ async function importVariants(options: ImportOptions) {
       path.join("variants", variant.contestId, `${variant.id}.txt`),
       "utf-8",
     );
+    const statementVersion = await readFile(path.join("variants", "version.txt"), "utf8");
     const restVariant: Variant = {
       id: variant.id,
       contestId: variant.contestId,
       problems: {},
       pdf: null, // TODO: set correctly
       statement: statement,
-      version: BigInt(0), // TODO: set correctly
+      version: statementVersion,
       scoringGroups: {},
     };
     for (const [id, problem] of Object.entries(variant.schema)) {
@@ -352,35 +350,6 @@ async function importVariants(options: ImportOptions) {
   }
 }
 
-async function importStatements(options: ImportOptions) {
-  const contests = await load("contests", contestSchema);
-  const variantsConfig = await load("variants", variantsConfigSchema);
-
-  await Promise.all(
-    contests.map(async (contest) => {
-      const config = variantsConfig.find((c) => c.id === contest.id);
-      if (!config) {
-        fatal(`Missing variants configuration for contest ${contest.id}.`);
-      }
-
-      info(`Importing statements for contest ${contest.id}...`);
-      await Promise.all(
-        [...config.variantIds, ...config.pdfVariantIds].map(async (id) => {
-          const statement = await readFile(path.join("variants", config.id, `${id}.txt`), "utf-8");
-          return await fetch(urlJoin(options.url, "/admin/update_statement"), {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              cookie: `admin_token=${options.token}`,
-            },
-            body: JSON.stringify([id, statement]),
-          });
-        }),
-      );
-    }),
-  );
-}
-
 async function cas(option: ImportOptions, collection: string, newVal: any) {
   if (option.verbose) {
     info(`Importing ${collection} ${newVal.id}...`);
@@ -427,5 +396,6 @@ async function cas(option: ImportOptions, collection: string, newVal: any) {
     error(`Failed to import ${collection} ${newVal.id}: ${res.statusText}`);
     return 0;
   }
+  success(`Imported ${collection} ${newVal.id}.`);
   return 1;
 }

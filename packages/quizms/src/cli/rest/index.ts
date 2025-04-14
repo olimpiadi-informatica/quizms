@@ -1,5 +1,6 @@
 import { Command } from "commander";
 import importData from "./import";
+import { updateStatements } from "./update-statement";
 
 export default function restCommand() {
   const command = new Command("rest");
@@ -19,11 +20,18 @@ export default function restCommand() {
     .option("--contests", "Import the contests.")
     .option("--pdfs", "Import the pdf files.")
     .option("--schools", "Import the schools.")
-    .option("--statements", "Import the statements.")
     .option("--students", "Import the students.")
     .option("--teachers", "Import the teachers.")
     .option("--variants", "Import the variants.")
     .action(importData);
 
+  command
+    .command("statements")
+    .description("Update the statements")
+    .option("--verbose", "Verbose output.")
+    .option("--dryRun", "Dry run.")
+    .option("--url <url>", "Api url.")
+    .option("--token <token>", "Admin token.")
+    .action(updateStatements);
   return command;
 }
