@@ -22,9 +22,9 @@ type ImportOptions = {
   force: true;
   verbose: true;
   dryRun: true;
-
-  url: string;
   token: string;
+  url: string;
+
   admins: true;
   contests: true;
   pdfs?: true;
@@ -166,7 +166,6 @@ async function importStudents(options: ImportOptions) {
         fatal(`Cannot find participation for student ${student.token}`);
       }
       const restStudent: StudentData = {
-        ...student,
         id: student.token!,
         token: student.token!,
         contestId: student.contestId!,
@@ -193,11 +192,52 @@ async function importStudents(options: ImportOptions) {
             )
           : null,
       };
-      return await cas(options, "student_data", restStudent);
+      const added = await cas(options, "student_data", restStudent);
+      await casRange(options, student.token!, {
+        start: participation.startingTime!.toISOString(),
+        end: participation.endingTime!.toISOString(),
+      });
+      return added;
     }),
   );
   const total = res.reduce<number>((acc, val) => acc + val, 0);
   info(`Imported ${total} students.`);
+}
+
+async function casRange(
+  options: ImportOptions,
+  token: string,
+  range: { start: string; end: string },
+) {
+  if (options.verbose) {
+    info(`Updating contest range for ${token}...`);
+    console.log(range);
+  }
+  let res: Response;
+  if (options.force) {
+    res = await fetch(urlJoin(options.url, `/admin/student_data/set_range/${token}`), {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        cookie: `admin_token=${options.token}`,
+      },
+      body: JSON.stringify(range),
+    });
+  } else {
+    res = await fetch(urlJoin(options.url, `/admin/student_data/cas_range/${token}`), {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        cookie: `admin_token=${options.token}`,
+      },
+      body: JSON.stringify({ new: range }),
+    });
+  }
+  if (res.status !== 200) {
+    error(`Failed to import contest range for ${token}: ${res.statusText}`);
+  } else {
+    success(`Updated contest range for ${token}.`);
+  }
 }
 
 function importPdf(_options: ImportOptions) {
@@ -353,15 +393,19 @@ async function cas(option: ImportOptions, collection: string, newVal: any) {
       cookie: `admin_token=${option.token}`,
     },
   });
-  if (old.status !== 404) {
-    if (!option.force) {
-      error(`${collection} ${newVal.id} already exists. Use --force to overwrite.`);
-      return 0;
-    }
+  try {
     oldVal = await old.json();
+  } catch {
+    oldVal = null;
+  }
+  if (old.status !== 404 && oldVal != null) {
     if (option.verbose) {
       warning(`Found ${collection} ${newVal.id},`);
       console.log(oldVal);
+    }
+    if (!option.force) {
+      error(`${collection} ${newVal.id} already exists. Use --force to overwrite.`);
+      return 0;
     }
   }
   const body = { new: newVal, old: oldVal };
