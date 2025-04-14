@@ -9,6 +9,7 @@ import {
   setAnswers,
   useGetContest,
   useGetParticipation,
+  useGetScore,
   useGetStatus,
   useRest,
 } from "./common/api";
@@ -63,6 +64,7 @@ function StudentInner({
 }) {
   const [student, setStudent] = useState(fetchedStudent);
   const { contest, isLoading: isContestLoading } = useGetContest();
+  const { score, isLoading: isScoreLoading } = useGetScore();
   const { participation, isLoading: isParticipationLoading } = useGetParticipation();
 
   const { apiUrl } = useRest()!;
@@ -95,7 +97,8 @@ function StudentInner({
       student={student}
       setStudent={setStudentCallback}
       contest={contest}
-      participation={participation}>
+      participation={participation}
+      score={{ isLoading: isScoreLoading, score: { score } }}>
       {children}
     </StudentProvider>
   );

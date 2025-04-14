@@ -74,6 +74,11 @@ export function useGetStatus() {
   return { student: data, ...oth };
 }
 
+export function useGetScore() {
+  const { data, ...oth } = useCall(["/contestant/score"], (data) => data);
+  return { score: data, ...oth };
+}
+
 export function useGetContest() {
   const { data, ...oth } = useCall(["/contestant/contest"], contestConverter);
   return { contest: data, ...oth };

@@ -32,6 +32,8 @@ type StudentProviderProps = {
   logout?: () => Promise<void> | void;
   /** Flag che indica se la prova è terminata */
   terminated: boolean;
+  /** Punteggi ottenuti sui gruppi di problemi */
+  score?: { isLoading: boolean; score: { [key: string]: number } };
 };
 
 type StudentContextProps = StudentProviderProps & {
