@@ -57,6 +57,7 @@ export function useGetStatus() {
     Cookies.token ? ["/contestant/status", Cookies.token] : null,
     studentConverter,
     {
+      suspense: true,
       onError: (err) => {
         if (err instanceof FetchError) {
           if (err.status === 403) {

@@ -256,7 +256,7 @@ async function importVariants(options: ImportOptions) {
           variants: [],
         };
       }
-      const [mainId] = id.split(".")
+      const [mainId] = id.split(".");
       if (restVariant.scoringGroups[mainId] === undefined) {
         restVariant.scoringGroups[mainId] = [];
       }
@@ -359,7 +359,7 @@ async function cas(option: ImportOptions, collection: string, newVal: any) {
       return 0;
     }
     oldVal = await old.json();
-    if(option.verbose) {
+    if (option.verbose) {
       warning(`Found ${collection} ${newVal.id},`);
       console.log(oldVal);
     }
