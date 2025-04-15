@@ -74,7 +74,6 @@ export function BaseStatement({ outdated, children }: { outdated?: boolean; chil
       </WithinTimeRange>
       <WithinTimeRange start={endingTime}>
         <div role="alert" className="alert alert-success alert-horiziontal">
-          <TriangleAlert />
           <span>La gara è terminata.</span>
         </div>
       </WithinTimeRange>
