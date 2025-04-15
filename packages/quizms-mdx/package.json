@@ -56,7 +56,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^1.8",
-    "@olinfo/quizms": "^3.0.0-beta.0",
+    "@olinfo/quizms": "^0.0.0-final.0",
     "@olinfo/tailwind": "^0.1",
     "@types/file-saver": "^2.0",
     "@types/katex": "^0.16",
