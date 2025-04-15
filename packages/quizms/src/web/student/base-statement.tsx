@@ -1,6 +1,6 @@
-import { type ReactNode, Suspense, useMemo } from "react";
+import { type ReactNode, Suspense, useEffect, useMemo } from "react";
 
-import { WithinTimeRange } from "@olinfo/react-components";
+import { WithinTimeRange, useNotifications } from "@olinfo/react-components";
 import { addMilliseconds } from "date-fns";
 
 import { TriangleAlert } from "lucide-react";
@@ -9,6 +9,7 @@ import { useStudent } from "~/web/student/provider";
 
 export function BaseStatement({ outdated, children }: { outdated?: boolean; children: ReactNode }) {
   const { participation } = useStudent();
+  const { notifyWarning } = useNotifications();
   const startingTime = useMemo(
     () =>
       process.env.QUIZMS_MODE === "print"
@@ -16,6 +17,20 @@ export function BaseStatement({ outdated, children }: { outdated?: boolean; chil
         : addMilliseconds(participation.startingTime!, 1000 + Math.random() * 1000),
     [participation.startingTime],
   );
+
+  useEffect(() => {
+    let interval: ReturnType<typeof setInterval> | undefined;
+    if (outdated) {
+      const message = "Ricarica la pagina per scaricare una nuova versione del testo";
+      notifyWarning(message);
+      interval = setInterval(() => {
+        notifyWarning(message);
+      }, 30000);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [outdated, notifyWarning]);
 
   return (
     <>
