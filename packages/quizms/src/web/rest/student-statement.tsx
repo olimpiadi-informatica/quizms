@@ -30,8 +30,12 @@ export function RestStatement({ createFromFetch, statementVersion }: Props) {
       onSuccess: () => {
         setOutdated(true);
       },
-      shouldRetryOnError: true,
-      errorRetryInterval: 30000,
+      onError: (err) => {
+        console.log(err);
+      },
+      onErrorRetry: (_error, _key, _config, revalidate, { retryCount }) => {
+        setTimeout(() => revalidate({ retryCount }), 30000 + Math.floor(Math.random() * 5000));
+      },
     },
   );
 
