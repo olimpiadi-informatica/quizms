@@ -32,18 +32,9 @@ export function RestStudentLogin({ children, apiUrl, redirectUrl }: LoginProps) 
 }
 
 function StudentLoginInner({ children }: { children: ReactNode }) {
-  const [Cookies, setCookie] = useCookies(["token"]);
-
   const { student, isLoading, mutate } = useGetStatus();
 
-  const submit = useCallback(
-    ({ token }: { token: string }) => {
-      setCookie("token", token);
-    },
-    [setCookie],
-  );
-
-  if (Cookies.token && !isLoading && student) {
+  if (!isLoading && student) {
     return (
       <StudentInner fetchedStudent={student} mutate={mutate}>
         {children}
@@ -51,7 +42,7 @@ function StudentLoginInner({ children }: { children: ReactNode }) {
     );
   }
 
-  return <StudentTokenLoginForm onSubmit={submit} />;
+  return <></>;
 }
 
 function StudentInner({
