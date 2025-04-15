@@ -1,6 +1,6 @@
 import { Command } from "commander";
 import importData from "./import";
-import { updateStatements } from "./update-statement";
+import { addStatement, updateCurrentVersion } from "./update-statement";
 
 export default function restCommand() {
   const command = new Command("rest");
@@ -25,13 +25,23 @@ export default function restCommand() {
     .option("--variants", "Import the variants.")
     .action(importData);
 
-  command
-    .command("statements")
-    .description("Update the statements")
+  const statementCommand = command.command("statement");
+  statementCommand
+    .command("add")
+    .description("Add a statement version")
     .option("--verbose", "Verbose output.")
     .option("--dryRun", "Dry run.")
     .option("--url <url>", "Api url.")
     .option("--token <token>", "Admin token.")
-    .action(updateStatements);
+    .action(addStatement);
+
+  statementCommand
+    .command("update")
+    .description("Update the current version")
+    .option("--verbose", "Verbose output.")
+    .option("--dryRun", "Dry run.")
+    .option("--url <url>", "Api url.")
+    .option("--token <token>", "Admin token.")
+    .action(updateCurrentVersion);
   return command;
 }

@@ -276,8 +276,9 @@ async function importVariants(options: ImportOptions) {
       contestId: variant.contestId,
       problems: {},
       pdf: null, // TODO: set correctly
-      statement: statement,
-      version: statementVersion,
+      statement: { [statementVersion]: statement },
+      allVersions: { [statementVersion]: 0 },
+      currentVersion: statementVersion,
       scoringGroups: {},
     };
     for (const [id, problem] of Object.entries(variant.schema)) {
