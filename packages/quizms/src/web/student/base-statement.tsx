@@ -17,6 +17,7 @@ export function BaseStatement({ outdated, children }: { outdated?: boolean; chil
         : addMilliseconds(participation.startingTime!, 1000 + Math.random() * 1000),
     [participation.startingTime],
   );
+  const endingTime = participation.endingTime;
 
   useEffect(() => {
     let interval: ReturnType<typeof setInterval> | undefined;
@@ -42,7 +43,7 @@ export function BaseStatement({ outdated, children }: { outdated?: boolean; chil
           </span>
         </div>
       </WithinTimeRange>
-      <WithinTimeRange start={startingTime}>
+      <WithinTimeRange start={startingTime} end={endingTime}>
         {outdated && (
           <div role="alert" className="alert alert-warning alert-horiziontal">
             <TriangleAlert />
@@ -70,6 +71,12 @@ export function BaseStatement({ outdated, children }: { outdated?: boolean; chil
           }>
           {children}
         </Suspense>
+      </WithinTimeRange>
+      <WithinTimeRange start={endingTime}>
+        <div role="alert" className="alert alert-success alert-horiziontal">
+          <TriangleAlert />
+          <span>La gara è terminata.</span>
+        </div>
       </WithinTimeRange>
     </>
   );
