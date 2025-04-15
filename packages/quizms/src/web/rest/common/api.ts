@@ -16,6 +16,7 @@ class FetchError extends Error {
 
 type RestContextProps = {
   apiUrl: string;
+  redirectUrl?: string;
 };
 
 export const RestContext = createContext<RestContextProps | null>(null);
@@ -49,25 +50,21 @@ function useCall(
 }
 
 export function useGetStatus() {
-  const [Cookies, , removeCookie] = useCookies(["token"]);
+  const [Cookies] = useCookies(["token"]);
+  const { redirectUrl } = useRest()!;
 
-  const { data, ...oth } = useCall(
-    Cookies.token ? ["/contestant/status", Cookies.token] : null,
-    restToStudent,
-    {
-      suspense: true,
-      onError: (err) => {
-        if (err instanceof FetchError) {
-          if (err.status === 403) {
-            removeCookie("token");
-            throw new Error("Token errato");
-          }
-        } else {
-          throw err;
+  const { data, ...oth } = useCall(["/contestant/status", Cookies.token], restToStudent, {
+    shouldRetryOnError: false,
+    onError: (err) => {
+      if (err instanceof FetchError) {
+        if (err.status === 403 && redirectUrl) {
+          window.location.href = redirectUrl;
         }
-      },
+      } else {
+        throw err;
+      }
     },
-  );
+  });
 
   return { student: data, ...oth };
 }

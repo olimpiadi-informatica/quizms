@@ -17,13 +17,14 @@ import {
 type LoginProps = {
   apiUrl: string;
   children: ReactNode;
+  redirectUrl?: string;
 };
 
-export function RestStudentLogin({ children, apiUrl }: LoginProps) {
+export function RestStudentLogin({ children, apiUrl, redirectUrl }: LoginProps) {
   const url = new URL(apiUrl, window.origin);
   return (
     <CookiesProvider>
-      <RestContext.Provider value={{ apiUrl: url.toString() }}>
+      <RestContext.Provider value={{ apiUrl: url.toString(), redirectUrl }}>
         <StudentLoginInner>{children}</StudentLoginInner>
       </RestContext.Provider>
     </CookiesProvider>
