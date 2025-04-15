@@ -9,9 +9,9 @@ type Props = {
   fetcher: () => ReactNode | Promise<ReactNode>;
 };
 
-export function RemoteStatement({ id, fetcher }: Props) {
+export function RemoteStatement({ id, fetcher, outdated }: Props & { outdated?: boolean }) {
   return (
-    <BaseStatement>
+    <BaseStatement outdated={outdated}>
       <InnerStatement id={id} fetcher={fetcher} />
     </BaseStatement>
   );

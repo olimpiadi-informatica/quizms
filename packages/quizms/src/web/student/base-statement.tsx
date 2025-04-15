@@ -3,10 +3,11 @@ import { type ReactNode, Suspense, useMemo } from "react";
 import { WithinTimeRange } from "@olinfo/react-components";
 import { addMilliseconds } from "date-fns";
 
+import { TriangleAlert } from "lucide-react";
 import { Loading, Timer } from "~/web/components";
 import { useStudent } from "~/web/student/provider";
 
-export function BaseStatement({ children }: { children: ReactNode }) {
+export function BaseStatement({ outdated, children }: { outdated?: boolean; children: ReactNode }) {
   const { participation } = useStudent();
   const startingTime = useMemo(
     () =>
@@ -27,6 +28,25 @@ export function BaseStatement({ children }: { children: ReactNode }) {
         </div>
       </WithinTimeRange>
       <WithinTimeRange start={startingTime}>
+        {outdated && (
+          <div role="alert" className="alert alert-warning alert-horiziontal">
+            <TriangleAlert />
+            <span>
+              Il testo della prova è stato recentemente aggiornato, ricarica la pagina per scaricare
+              le modifiche.
+            </span>
+            <div>
+              <button
+                type="button"
+                className="btn btn-sm"
+                onClick={() => {
+                  window.location.reload();
+                }}>
+                Ricarica
+              </button>
+            </div>
+          </div>
+        )}
         <Suspense
           fallback={
             <div className="h-[50vh]">
