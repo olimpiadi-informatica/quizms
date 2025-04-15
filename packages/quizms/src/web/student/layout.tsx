@@ -14,7 +14,7 @@ import {
 import { sumBy } from "lodash-es";
 
 import { type Schema, calcProblemPoints } from "~/models";
-import { ErrorBoundary, Progress, Prose, Timer, useMetadata } from "~/web/components";
+import { ErrorBoundary, Prose, Timer, useMetadata } from "~/web/components";
 
 import { useStudent } from "./provider";
 
@@ -28,7 +28,7 @@ export function StudentLayout({ children }: { children: ReactNode }) {
 
   const answered = sumBy(Object.values(student.answers ?? {}), (s) => Number(s === 0 || !!s));
   const total = Math.max(Object.keys(schema).length, 1);
-  const progress = Math.round((answered / total) * 100);
+  const _progress = Math.round((answered / total) * 100);
 
   const _submit = async () => {
     const modal = submitRef.current;
@@ -52,9 +52,6 @@ export function StudentLayout({ children }: { children: ReactNode }) {
         </NavbarBrand>
         <NavbarContent>
           <div className="flex items-center gap-2">
-            <Progress className="hidden w-20 sm:block" percentage={progress}>
-              {progress}%
-            </Progress>
             <div className="px-3">
               {terminated || !participation.endingTime || !contest.hasOnline ? (
                 <span className="font-mono">00:00</span>
