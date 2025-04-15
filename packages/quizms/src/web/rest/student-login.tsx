@@ -34,7 +34,6 @@ function StudentLoginInner({ children }: { children: ReactNode }) {
   const [Cookies, setCookie] = useCookies(["token"]);
 
   const { student, isLoading, mutate } = useGetStatus();
-  console.log(student);
 
   const submit = useCallback(
     ({ token }: { token: string }) => {
@@ -80,28 +79,34 @@ function StudentInner({
 
   const setStudentCallback = useCallback(
     (newStudent: Student) => {
-      let ok = true;
+      let answersUpdated = false;
+      let codeUpdated = false;
       for (const problemId in newStudent.answers) {
         if (
           !localStudent.answers ||
           newStudent.answers[problemId] !== localStudent.answers[problemId]
         ) {
-          setAnswers(apiUrl, { answers: newStudent.answers }).catch(() => {
-            ok = false;
-          });
+          answersUpdated = true;
           break;
         }
       }
       for (const problemId in newStudent.code) {
         if (!localStudent.code || newStudent.code[problemId] !== localStudent.code[problemId]) {
-          setAnswers(apiUrl, { code: newStudent.code }).catch(() => {
-            ok = false;
-          });
+          codeUpdated = true;
           break;
         }
       }
-      if (!ok) {
-        mutate();
+      if (answersUpdated || codeUpdated) {
+        setAnswers(apiUrl, {
+          code: newStudent.code,
+          answers: answersUpdated ? newStudent.answers : undefined,
+        })
+          .then((res) => {
+            if (res.status !== 200) {
+              throw new Error("Failed to update answers");
+            }
+          })
+          .catch(() => mutate());
       }
       setLocalStudent({
         ...localStudent,
