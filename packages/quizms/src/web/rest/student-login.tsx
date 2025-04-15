@@ -1,4 +1,4 @@
-import { type ReactNode, useCallback, useState } from "react";
+import { type ReactNode, useCallback, useEffect, useState } from "react";
 import { CookiesProvider, useCookies } from "react-cookie";
 import type { Student } from "~/models/student";
 import { Loading } from "../components";
@@ -34,6 +34,7 @@ function StudentLoginInner({ children }: { children: ReactNode }) {
   const [Cookies, setCookie] = useCookies(["token"]);
 
   const { student, isLoading, mutate } = useGetStatus();
+  console.log(student);
 
   const submit = useCallback(
     ({ token }: { token: string }) => {
@@ -62,30 +63,53 @@ function StudentInner({
   mutate: () => void;
   children: ReactNode;
 }) {
-  const [student, setStudent] = useState(fetchedStudent);
+  const [localStudent, setLocalStudent] = useState(fetchedStudent);
+  const [, , removeCookie] = useCookies(["token"]);
+  useEffect(() => {
+    setLocalStudent(fetchedStudent);
+  }, [fetchedStudent]);
   const { contest, isLoading: isContestLoading } = useGetContest();
   const { score, isLoading: isScoreLoading } = useGetScore();
   const { participation, isLoading: isParticipationLoading } = useGetParticipation();
 
   const { apiUrl } = useRest()!;
 
+  const logoutCallback = useCallback(() => {
+    removeCookie("token");
+  }, [removeCookie]);
+
   const setStudentCallback = useCallback(
     (newStudent: Student) => {
+      let ok = true;
       for (const problemId in newStudent.answers) {
-        if (!student.answers || newStudent.answers[problemId] !== student.answers[problemId]) {
-          setAnswers(apiUrl, { answers: newStudent.answers }).catch(() => mutate());
+        if (
+          !localStudent.answers ||
+          newStudent.answers[problemId] !== localStudent.answers[problemId]
+        ) {
+          setAnswers(apiUrl, { answers: newStudent.answers }).catch(() => {
+            ok = false;
+          });
           break;
         }
       }
       for (const problemId in newStudent.code) {
-        if (!student.code || newStudent.code[problemId] !== student.code[problemId]) {
-          setAnswers(apiUrl, { code: newStudent.code }).catch(() => mutate());
+        if (!localStudent.code || newStudent.code[problemId] !== localStudent.code[problemId]) {
+          setAnswers(apiUrl, { code: newStudent.code }).catch(() => {
+            ok = false;
+          });
           break;
         }
       }
-      setStudent(newStudent);
+      if (!ok) {
+        mutate();
+      }
+      setLocalStudent({
+        ...localStudent,
+        answers: newStudent.answers,
+        code: newStudent.code,
+      });
     },
-    [apiUrl, student, mutate],
+    [apiUrl, localStudent, mutate],
   );
 
   if (isContestLoading || isParticipationLoading) {
@@ -94,11 +118,12 @@ function StudentInner({
 
   return (
     <StudentProvider
-      student={student}
+      student={localStudent}
       setStudent={setStudentCallback}
       contest={contest}
       participation={participation}
-      score={{ isLoading: isScoreLoading, score }}>
+      score={{ isLoading: isScoreLoading, score }}
+      logout={logoutCallback}>
       {children}
     </StudentProvider>
   );

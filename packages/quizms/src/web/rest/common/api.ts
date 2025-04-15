@@ -3,12 +3,7 @@ import { useCookies } from "react-cookie";
 import useSWR, { type SWRConfiguration } from "swr";
 import urlJoin from "url-join";
 import type { Answer } from "~/models";
-import {
-  answersToRest,
-  contestConverter,
-  participationConverter,
-  studentConverter,
-} from "./converters";
+import { answersToRest, restToContest, restToParticipation, restToStudent } from "./converters";
 
 class FetchError extends Error {
   status: number;
@@ -58,7 +53,7 @@ export function useGetStatus() {
 
   const { data, ...oth } = useCall(
     Cookies.token ? ["/contestant/status", Cookies.token] : null,
-    studentConverter,
+    restToStudent,
     {
       suspense: true,
       onError: (err) => {
@@ -83,12 +78,12 @@ export function useGetScore() {
 }
 
 export function useGetContest() {
-  const { data, ...oth } = useCall(["/contestant/contest"], contestConverter);
+  const { data, ...oth } = useCall(["/contestant/contest"], restToContest);
   return { contest: data, ...oth };
 }
 
 export function useGetParticipation() {
-  const { data, ...oth } = useCall(["/contestant/venue"], participationConverter);
+  const { data, ...oth } = useCall(["/contestant/venue"], restToParticipation);
   return { participation: data, ...oth };
 }
 
@@ -100,6 +95,7 @@ export async function start(apiUrl: string) {
 }
 
 export async function setAnswers(
+  // TODO: use SWR
   apiUrl: string,
   {
     answers = undefined,
@@ -110,7 +106,7 @@ export async function setAnswers(
   },
 ) {
   const userAnswers = answersToRest(answers, code);
-  return await fetch(urlJoin(apiUrl, "/contestant/set_answers"), {
+  const res = await fetch(urlJoin(apiUrl, "/contestant/set_answers"), {
     method: "POST",
     credentials: "same-origin",
     headers: {
@@ -118,4 +114,8 @@ export async function setAnswers(
     },
     body: JSON.stringify(userAnswers),
   });
+  if (res.status !== 200) {
+    throw new Error("Network response was not ok");
+  }
+  return res;
 }

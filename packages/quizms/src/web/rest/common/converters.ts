@@ -55,7 +55,7 @@ export function userdataToRest(userData: UserData): UserDataField {
   return {
     name: userData.name,
     label: userData.label,
-    size: userData.size!,
+    size: userData.size || "xl", //TODO: properly set
     pinned: userData.pinned || false,
     type: userDataType,
   };
@@ -103,13 +103,13 @@ export function restToAnswers(studentAnswers: StudentAnswers): {
   return { answers, code: studentAnswers.code || undefined };
 }
 
-export function studentConverter(data: StudentResponse): Student {
+export function restToStudent(data: StudentResponse): Student {
   const { answers, code } = restToAnswers(data.answers);
   return {
     userData: Object.fromEntries(
       Object.entries(data.data.data).map(([k, v]: [string, RestUserData | undefined]) => {
         if (!v) return [k, undefined];
-        return Object.entries(v)[0];
+        return [k, Object.entries(v)[0][1]];
       }),
     ),
     absent: data.data.absent,
@@ -130,7 +130,7 @@ export function studentConverter(data: StudentResponse): Student {
   };
 }
 
-export function contestConverter(data: ContestResponse): Contest {
+export function restToContest(data: ContestResponse): Contest {
   return {
     ...data,
     userData: data.userData.map(restToUserdata),
@@ -144,7 +144,7 @@ export function contestConverter(data: ContestResponse): Contest {
   };
 }
 
-export function participationConverter(data: Venue): Participation {
+export function restToParticipation(data: Venue): Participation {
   return {
     id: data.id,
     contestId: data.contestId,
