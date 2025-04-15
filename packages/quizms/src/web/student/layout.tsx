@@ -3,8 +3,6 @@ import { type ReactNode, type Ref, forwardRef, useRef } from "react";
 import {
   Dropdown,
   DropdownButton,
-  DropdownItem,
-  DropdownMenu,
   Form,
   FormButton,
   Modal,
@@ -14,7 +12,6 @@ import {
   SubmitButton,
 } from "@olinfo/react-components";
 import { sumBy } from "lodash-es";
-import { LogOut } from "lucide-react";
 
 import { type Schema, calcProblemPoints } from "~/models";
 import { ErrorBoundary, Progress, Prose, Timer, useMetadata } from "~/web/components";
@@ -114,7 +111,7 @@ export function StudentLayout({ children }: { children: ReactNode }) {
 }
 
 function UserDropdown() {
-  const { student, logout } = useStudent();
+  const { student, logout: _logout } = useStudent();
 
   const name = student.userData?.name as string;
   const surname = student.userData?.surname as string;
@@ -126,13 +123,13 @@ function UserDropdown() {
           {name} {surname}
         </div>
       </DropdownButton>
-      <DropdownMenu>
+      {/*<DropdownMenu>
         <DropdownItem>
           <button type="button" className="flex justify-between gap-4" onClick={logout}>
             Esci <LogOut size={20} />
           </button>
         </DropdownItem>
-      </DropdownMenu>
+      </DropdownMenu>*/}
     </Dropdown>
   );
 }
