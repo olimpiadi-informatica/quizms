@@ -56,7 +56,7 @@ export function StudentLayout({ children }: { children: ReactNode }) {
               {terminated || !participation.endingTime || !contest.hasOnline ? (
                 <span className="font-mono">00:00</span>
               ) : (
-                <Timer endTime={participation.endingTime} noAnimation />
+                <Timer endTime={student.finishedAt!} noAnimation />
               )}
             </div>
             {/*            {terminated && reset ? (

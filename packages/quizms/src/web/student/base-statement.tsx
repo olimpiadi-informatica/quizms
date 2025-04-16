@@ -8,16 +8,16 @@ import { Loading, Timer } from "~/web/components";
 import { useStudent } from "~/web/student/provider";
 
 export function BaseStatement({ outdated, children }: { outdated?: boolean; children: ReactNode }) {
-  const { participation } = useStudent();
+  const { student } = useStudent();
   const { notifyWarning } = useNotifications();
   const startingTime = useMemo(
     () =>
       process.env.QUIZMS_MODE === "print"
         ? new Date(0)
-        : addMilliseconds(participation.startingTime!, 1000 + Math.random() * 1000),
-    [participation.startingTime],
+        : addMilliseconds(student.startedAt!, 1000 + Math.random() * 1000),
+    [student.startedAt],
   );
-  const endingTime = participation.endingTime;
+  const endingTime = student.finishedAt!;
 
   useEffect(() => {
     let interval: ReturnType<typeof setInterval> | undefined;
@@ -39,7 +39,7 @@ export function BaseStatement({ outdated, children }: { outdated?: boolean; chil
         <div className="flex h-[50vh] items-center justify-center text-2xl">
           La gara inizierà tra
           <span className="px-2">
-            <Timer endTime={participation.startingTime!} />
+            <Timer endTime={student.startedAt!} />
           </span>
         </div>
       </WithinTimeRange>
