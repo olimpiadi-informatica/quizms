@@ -6,8 +6,9 @@ import load from "~/models/load";
 import { variantsConfigSchema } from "~/models/variants-config";
 import { error, fatal, info, success } from "~/utils/logs";
 type UpdateStatementOptions = {
-  verbose: true;
-  dryRun: true;
+  verbose?: true;
+  dryRun?: true;
+  authorization?: string;
   token: string;
   url: string;
 };
@@ -37,6 +38,7 @@ export async function updateCurrentVersion(options: UpdateStatementOptions) {
             {
               method: "POST",
               headers: {
+                Authorization: options.authorization!,
                 "Content-Type": "application/json",
                 cookie: `admin_token=${options.token}`,
               },
