@@ -44,8 +44,12 @@ export async function casRange(
   range: { start: string; end: string },
 ) {
   if (options.verbose) {
-    info(`Updating contest range for ${token}...`);
+    info(`Updating contest range for ${token} to ${range.start} - ${range.end} ...`);
     console.log(range);
+  }
+  if (options.dryRun) {
+    info(`Dry run: ${token} range would be updated.`);
+    return 1;
   }
   let res: Response;
   if (options.force) {

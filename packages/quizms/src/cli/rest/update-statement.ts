@@ -21,7 +21,8 @@ export async function updateCurrentVersion(options: UpdateStatementOptions) {
     contests.map(async (contest) => {
       const config = variantsConfig.find((c) => c.id === contest.id);
       if (!config) {
-        fatal(`Missing variants configuration for contest ${contest.id}.`);
+        return 0;
+        // fatal(`Missing variants configuration for contest ${contest.id}.`);
       }
 
       const statementVersion = await readFile(path.join("variants", "version.txt"), "utf8");
@@ -64,7 +65,8 @@ export async function addStatement(options: UpdateStatementOptions) {
     contests.map(async (contest) => {
       const config = variantsConfig.find((c) => c.id === contest.id);
       if (!config) {
-        fatal(`Missing variants configuration for contest ${contest.id}.`);
+        return 0;
+        // fatal(`Missing variants configuration for contest ${contest.id}.`);
       }
 
       const statementVersion = await readFile(path.join("variants", "version.txt"), "utf8");

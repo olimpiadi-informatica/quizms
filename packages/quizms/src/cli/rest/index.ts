@@ -61,6 +61,7 @@ export default function restCommand() {
     .requiredOption("--token <token>", "Admin token.")
     .option("--venue <venue>", "Update window for all stuents in the venue <venue>")
     .option("--student <student>", "Update window for a single student with token <student>.")
+    .option("--file <file>", "Update for all students in the file <file>.")
     .requiredOption("--startingTime <startingTime>", "Starting time of the contest.")
     .option("--duration <duration>", "Duration of the contest in minutes.")
     .option("--endingTime <endingTime>", "Ending time of the contest.")

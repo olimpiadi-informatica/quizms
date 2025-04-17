@@ -1,3 +1,4 @@
+import { readFile } from "node:fs/promises";
 import { z } from "zod";
 import { studentSchema } from "~/models";
 import load from "~/models/load";
@@ -12,6 +13,7 @@ type UpdateWindowOption = {
   url: string;
   venue?: string;
   student?: string;
+  file?: string;
   startingTime: string;
   duration?: number;
   endingTime?: string;
@@ -45,6 +47,15 @@ export async function updateWindow(options: UpdateWindowOption) {
   if (options.venue) {
     console.log(`Updating window for venue ${options.venue}`);
     students = students.filter((student) => student.schoolId === options.venue);
+  } else if (options.file) {
+    // read file with one token per line
+    const file = await readFile(options.file, "utf8");
+    const tokens = file.split("\n").map((line) => line.trim());
+    console.log(`Updating window for ${tokens.length} students from file`);
+    students = students.filter((student) => tokens.includes(student.token || "lol"));
+    if (options.verbose) {
+      console.log(students);
+    }
   } else if (options.student) {
     console.log(`Updating window for student ${options.student}`);
     students = students.filter((student) => student.token === options.student);
