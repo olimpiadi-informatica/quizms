@@ -131,10 +131,11 @@ function transformSvg(id: string, content: string, options: ImageOptions): Image
 }
 
 async function transformImage(fileName: string, options: ImageOptions): Promise<Image> {
-  let process = sharp(fileName).webp();
+  const image = await readFile(fileName);
+  let process = sharp(image).webp();
 
   if (options.scale) {
-    const size = sizeOf(fileName);
+    const size = sizeOf(image);
     options.width = Math.round(size.width! * options.scale);
     options.height = Math.round(size.height! * options.scale);
   }
