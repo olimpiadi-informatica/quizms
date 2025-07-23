@@ -1,8 +1,8 @@
 import {
+  createContext,
   type Dispatch,
   type ReactNode,
   type SetStateAction,
-  createContext,
   useCallback,
   useContext,
   useEffect,
@@ -11,7 +11,7 @@ import {
 
 import { useIsAfter } from "@olinfo/react-components";
 
-import { type Contest, type Participation, type Schema, type Student, calcScore } from "~/models";
+import { type Contest, calcScore, type Participation, type Schema, type Student } from "~/models";
 
 import { StudentLayout } from "./layout";
 

@@ -52,7 +52,7 @@ export function NoAuth({ contestName, contestLongName, duration, children }: Aut
     disabled: false,
   };
 
-  const reset = useCallback(async () => {
+  const reset = useCallback(() => {
     setStudent(
       (student): Student => ({
         ...student,

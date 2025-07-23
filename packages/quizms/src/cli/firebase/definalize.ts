@@ -1,6 +1,7 @@
+import { sumBy } from "lodash-es";
+
 import { info, success } from "~/utils/logs";
 
-import { sumBy } from "lodash-es";
 import { participationConverter } from "./utils/converters-admin";
 import { initializeFirebase } from "./utils/initialize";
 

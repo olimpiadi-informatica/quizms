@@ -2,8 +2,8 @@
 
 import {
   type ComponentType,
-  type Ref,
   forwardRef,
+  type Ref,
   useEffect,
   useMemo,
   useRef,

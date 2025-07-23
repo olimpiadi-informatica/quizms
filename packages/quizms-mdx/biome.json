@@ -1,12 +1,7 @@
 {
-  "$schema": "https://biomejs.dev/schemas/1.8.3/schema.json",
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
   "files": {
-    "include": ["src", "docs", "*.mjs"]
-  },
-  "vcs": {
-    "enabled": true,
-    "clientKind": "git",
-    "useIgnoreFile": true
+    "includes": ["src/**", "*.mjs"]
   },
   "formatter": {
     "indentStyle": "space",
@@ -16,6 +11,10 @@
     "enabled": true,
     "rules": {
       "recommended": true,
+      "a11y": {
+        "useKeyWithClickEvents": "off",
+        "useSemanticElements": "off"
+      },
       "correctness": {
         "noConstantMathMinMaxClamp": "error",
         "noUndeclaredVariables": "error",
@@ -24,9 +23,31 @@
         "noUnusedVariables": "error",
         "useHookAtTopLevel": "error"
       },
+      "nursery": {
+        "noFloatingPromises": "error",
+        "noImportCycles": "error",
+        "useUniqueElementIds": "off"
+      },
+      "performance": {
+        "noImgElement": "off"
+      },
+      "security": {
+        "noDangerouslySetInnerHtml": "off"
+      },
       "style": {
+        "noHeadElement": "off",
+        "noInferrableTypes": "error",
         "noNegationElse": "error",
         "noNonNullAssertion": "off",
+        "noParameterAssign": "error",
+        "noUnusedTemplateLiteral": "error",
+        "noUselessElse": "error",
+        "useAsConstAssertion": "error",
+        "useConsistentArrayType": {
+          "level": "error",
+          "options": { "syntax": "shorthand" }
+        },
+        "useDefaultParameterLast": "error",
         "useFilenamingConvention": {
           "level": "error",
           "options": {
@@ -35,8 +56,10 @@
           }
         },
         "useFragmentSyntax": "error",
-        "useShorthandArrayType": "error",
-        "useShorthandAssign": "error"
+        "useNumberNamespace": "error",
+        "useSelfClosingElements": "error",
+        "useShorthandAssign": "error",
+        "useSingleVarDeclarator": "error"
       },
       "suspicious": {
         "noArrayIndexKey": "off",
@@ -51,11 +74,36 @@
     }
   },
   "css": {
+    "assist": {
+      "enabled": false
+    },
     "formatter": {
       "enabled": false
     },
     "linter": {
       "enabled": false
+    }
+  },
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": {
+          "level": "on",
+          "options": {
+            "groups": [
+              ":NODE:",
+              ":BLANK_LINE:",
+              ["next", "next/**", "react", "react/**", "react-dom", "react-dom/**"],
+              ":BLANK_LINE:",
+              ":PACKAGE:",
+              ":BLANK_LINE:",
+              ":ALIAS:",
+              ":BLANK_LINE:",
+              ":PATH:"
+            ]
+          }
+        }
+      }
     }
   }
 }

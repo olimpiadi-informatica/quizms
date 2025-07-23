@@ -1,4 +1,4 @@
-import { type Contest, type Student, type Variant, isValidAnswer } from "~/models";
+import { type Contest, isValidAnswer, type Student, type Variant } from "~/models";
 
 export const deleteConfirmStorageKey = "delete-confirm";
 

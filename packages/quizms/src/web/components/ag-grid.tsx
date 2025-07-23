@@ -1,5 +1,4 @@
 import { AG_GRID_LOCALE_IT } from "@ag-grid-community/locale";
-import { themeQuartz } from "ag-grid-community";
 import {
   CheckboxEditorModule,
   ClientSideRowModelModule,
@@ -13,6 +12,7 @@ import {
   RowSelectionModule,
   TextEditorModule,
   TextFilterModule,
+  themeQuartz,
 } from "ag-grid-community";
 import { type AgGridReactProps, AgGridReact as UnStyledAgGrid } from "ag-grid-react";
 

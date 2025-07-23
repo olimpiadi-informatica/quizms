@@ -3,8 +3,8 @@ import { type ReactNode, useCallback } from "react";
 import type { FirebaseOptions } from "firebase/app";
 import { getAuth, signOut } from "firebase/auth";
 import {
-  type Firestore,
   doc,
+  type Firestore,
   getDocs,
   runTransaction,
   serverTimestamp,

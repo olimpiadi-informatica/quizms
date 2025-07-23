@@ -4,7 +4,7 @@ import { cwd } from "node:process";
 import { name as quizmsPackageName } from "package.json";
 import license from "rollup-plugin-license";
 import { glob } from "tinyglobby";
-import { type InlineConfig, build, mergeConfig } from "vite";
+import { build, type InlineConfig, mergeConfig } from "vite";
 
 import { error, fatal } from "~/utils/logs";
 
@@ -34,7 +34,7 @@ export default async function staticExport(options: ExportOptions): Promise<void
   }
 }
 
-async function standaloneConfigs(options: ExportOptions): Promise<InlineConfig> {
+function standaloneConfigs(options: ExportOptions): InlineConfig {
   return {
     publicDir: path.join(cwd(), "public"),
     build: {

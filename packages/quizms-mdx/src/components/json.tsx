@@ -6,7 +6,11 @@ export function JsonField({
   field,
   value,
   children,
-}: { field: string; value?: Primitive; children?: ReactNode }) {
+}: {
+  field: string;
+  value?: Primitive;
+  children?: ReactNode;
+}) {
   return (
     <>
       <Token value={`${JSON.stringify(field)}:`} />

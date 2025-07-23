@@ -9,7 +9,7 @@ import { sortBy } from "lodash-es";
 // @ts-ignore
 import WebpackRscPlugin from "react-server-dom-webpack/plugin";
 import type { RollupOutput } from "rollup";
-import { type InlineConfig, build, mergeConfig } from "vite";
+import { build, type InlineConfig, mergeConfig } from "vite";
 import webpack from "webpack";
 import webpackNodeExternals from "webpack-node-externals";
 import yaml from "yaml";

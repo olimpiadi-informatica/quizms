@@ -1,4 +1,4 @@
-import { type ComponentType, Suspense, lazy, useMemo } from "react";
+import { type ComponentType, lazy, Suspense, useMemo } from "react";
 
 import type { CellEditRequestEvent, ColDef, ICellRendererParams } from "ag-grid-community";
 import type { AgGridReactProps } from "ag-grid-react";

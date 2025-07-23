@@ -5,6 +5,7 @@ import { confirm } from "@inquirer/prompts";
 import { SingleBar } from "cli-progress";
 import { partition } from "lodash-es";
 import pc from "picocolors";
+
 import { fatal, success } from "~/utils/logs";
 
 type ImportOptions = {

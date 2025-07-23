@@ -14,7 +14,8 @@ export class AsyncPool {
     const task = this.pending.shift();
     if (!task) return;
 
-    const taskId = this.nextId++;
+    const taskId = this.nextId;
+    this.nextId++;
     this.running[taskId] = task().finally(() => {
       delete this.running[taskId];
       this.runNext();

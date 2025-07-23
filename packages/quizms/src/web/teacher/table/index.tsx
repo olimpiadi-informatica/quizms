@@ -1,4 +1,4 @@
-import { type ComponentType, Suspense, lazy, useMemo, useRef, useState } from "react";
+import { type ComponentType, lazy, Suspense, useMemo, useRef, useState } from "react";
 
 import { Button, useIsAfter } from "@olinfo/react-components";
 import type {
@@ -15,12 +15,12 @@ import { Download, FileCheck, Trash2, TriangleAlert, Upload, Users } from "lucid
 
 import {
   type Contest,
-  type Student,
-  type Variant,
   calcScore,
   formatUserData,
   parseAnswer,
   parseUserData,
+  type Student,
+  type Variant,
 } from "~/models";
 import { randomId } from "~/utils/random";
 import { Loading } from "~/web/components";

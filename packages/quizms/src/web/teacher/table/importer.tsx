@@ -1,4 +1,4 @@
-import { type CSSProperties, type Ref, forwardRef, useState } from "react";
+import { type CSSProperties, forwardRef, type Ref, useState } from "react";
 
 import { Form, Modal, SingleFileField, SubmitButton } from "@olinfo/react-components";
 import { Upload } from "lucide-react";
@@ -6,12 +6,12 @@ import { parse as parseCSV } from "papaparse";
 
 import {
   type Contest,
-  type Participation,
-  type Student,
-  type Variant,
   calcScore,
+  type Participation,
   parseAnswer,
   parseUserData,
+  type Student,
+  type Variant,
 } from "~/models";
 import { randomId } from "~/utils/random";
 import { useTeacher, useTeacherStudents } from "~/web/teacher/provider";

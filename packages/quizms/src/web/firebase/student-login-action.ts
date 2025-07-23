@@ -1,8 +1,8 @@
 import { getAuth } from "firebase/auth";
 import {
+  doc,
   type Firestore,
   type FirestoreError,
-  doc,
   getDoc,
   runTransaction,
   setDoc,

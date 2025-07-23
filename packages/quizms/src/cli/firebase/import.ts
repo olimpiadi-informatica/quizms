@@ -11,8 +11,8 @@ import picomatch from "picomatch";
 import z from "zod";
 
 import {
-  type Participation,
   contestSchema,
+  type Participation,
   participationSchema,
   studentSchema,
   variantSchema,
@@ -162,7 +162,7 @@ async function importParticipations(db: Firestore, options: ImportOptions) {
       for (const school of schools) {
         if (!picomatch.isMatch(contest.id, school.contestIds)) continue;
 
-        let pdfVariants: string[] | undefined = undefined;
+        let pdfVariants: string[] | undefined;
         if (contest.hasVariants) {
           if (school.pdfVariants) {
             pdfVariants = school.pdfVariants.map((id) => `${contest.id}-${id}`);

@@ -1,12 +1,13 @@
+import { existsSync } from "node:fs";
+import { homedir } from "node:os";
+import path from "node:path";
 import { chdir, cwd, exit } from "node:process";
 
 import { InvalidArgumentError, program } from "commander";
 import { version } from "package.json";
 
-import { existsSync } from "node:fs";
-import { homedir } from "node:os";
-import path from "node:path";
 import { fatal } from "~/utils/logs";
+
 import staticExport from "./build";
 import devServer from "./dev";
 import firebaseCommand from "./firebase";

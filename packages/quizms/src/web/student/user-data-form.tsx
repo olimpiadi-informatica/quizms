@@ -26,11 +26,7 @@ export function UserDataForm() {
   );
 }
 
-export function UserDataField({
-  field,
-}: {
-  field: Contest["userData"][number];
-}) {
+export function UserDataField({ field }: { field: Contest["userData"][number] }) {
   const commonProps = {
     field: field.name,
     label: field.label,

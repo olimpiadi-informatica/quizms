@@ -3,7 +3,7 @@ import { promisify } from "node:util";
 
 import { SingleBar } from "cli-progress";
 import { formatDistanceStrict } from "date-fns";
-import { type UserImportRecord, getAuth } from "firebase-admin/auth";
+import { getAuth, type UserImportRecord } from "firebase-admin/auth";
 import { chunk, partition, truncate } from "lodash-es";
 import z from "zod";
 
@@ -27,7 +27,7 @@ export async function importUsers(users: User[], customClaims: object, options: 
   const auth = getAuth();
 
   if (options.delete) {
-    let token: string | undefined = undefined;
+    let token: string | undefined;
     for (;;) {
       const { users, pageToken } = await auth.listUsers(1000, token);
       token = pageToken;

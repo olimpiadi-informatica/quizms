@@ -1,11 +1,11 @@
 import {
   type Block,
   VERSION as BlocklyVersion,
+  defineBlocksWithJsonArray,
   type Workspace,
   type WorkspaceSvg,
-  defineBlocksWithJsonArray,
 } from "blockly/core";
-import { type JavascriptGenerator, Order, javascriptGenerator } from "blockly/javascript";
+import { type JavascriptGenerator, javascriptGenerator, Order } from "blockly/javascript";
 
 import type { CustomBlock, CustomBlockArg } from "~/models/blockly-custom-block";
 

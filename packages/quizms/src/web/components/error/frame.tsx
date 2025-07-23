@@ -1,7 +1,7 @@
 import { Fragment } from "react";
 
 import clsx from "clsx";
-import { type StackFrameLite, parse as parseStack } from "error-stack-parser-es/lite";
+import { parse as parseStack, type StackFrameLite } from "error-stack-parser-es/lite";
 import { FileCode } from "lucide-react";
 import { SourceMapConsumer } from "source-map-js";
 import useSWR from "swr";
