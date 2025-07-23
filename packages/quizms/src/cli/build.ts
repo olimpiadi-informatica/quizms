@@ -1,9 +1,7 @@
 import path from "node:path";
 import { cwd } from "node:process";
 
-import { name as quizmsPackageName } from "package.json";
 import license from "rollup-plugin-license";
-import { glob } from "tinyglobby";
 import { build, type InlineConfig, mergeConfig } from "vite";
 
 import { error, fatal } from "~/utils/logs";
@@ -21,28 +19,14 @@ export default async function staticExport(options: ExportOptions): Promise<void
     process.env.QUIZMS_MODE = "training";
   }
 
-  const config = mergeConfig(
-    configs("production"),
-    await (options.library ? libraryConfigs : standaloneConfigs)(options),
-  );
-
-  try {
-    await build(config);
-  } catch (err) {
-    error((err as Error).message);
-    fatal("Build failed.");
-  }
-}
-
-function standaloneConfigs(options: ExportOptions): InlineConfig {
-  return {
+  const config = mergeConfig(configs("production"), {
     publicDir: path.join(cwd(), "public"),
     build: {
       outDir: path.join(cwd(), options.outDir),
       emptyOutDir: true,
       assetsInlineLimit: 1024,
       rollupOptions: {
-        input: "virtual:quizms-routes",
+        input: "virtual:quizms-entry",
         output: {
           hoistTransitiveImports: false,
           manualChunks: (id) => {
@@ -77,33 +61,12 @@ function standaloneConfigs(options: ExportOptions): InlineConfig {
       }),
     ],
     logLevel: "info",
-  } as InlineConfig;
-}
+  } as InlineConfig);
 
-async function libraryConfigs(options: ExportOptions): Promise<InlineConfig> {
-  const pages = await glob("src/**/page.{js,jsx,ts,tsx}");
-  const entry = Object.fromEntries(pages.map((page) => [page.replace(/\.\w+$/, ""), page]));
-
-  return {
-    build: {
-      outDir: path.join(cwd(), options.outDir),
-      emptyOutDir: true,
-      lib: {
-        entry,
-        formats: ["es"],
-      },
-      rollupOptions: {
-        external: (id) => {
-          if (id.includes("node_modules")) return true;
-          if (id.startsWith("virtual:")) return false;
-          if (id.startsWith(`${quizmsPackageName}/`)) return false;
-          return !/^[./~]/.test(id);
-        },
-        output: {
-          preserveModules: true,
-          preserveModulesRoot: "src",
-        },
-      },
-    },
-  };
+  try {
+    await build(config);
+  } catch (err) {
+    error((err as Error).message);
+    fatal("Build failed.");
+  }
 }

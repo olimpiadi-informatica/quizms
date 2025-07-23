@@ -15,11 +15,7 @@ export type CustomBlock<State> = {
   colour: number;
   tooltip: string;
   maxInstances?: number;
-  fn: (
-    ctx: Context,
-    state: State,
-    ...args: any[]
-  ) => Promise<BlocklyType> | BlocklyType | undefined;
+  fn: (ctx: Context, state: State, ...args: any[]) => Promise<BlocklyType> | BlocklyType | void;
 };
 
 export type BlocklyTypeLiteral = "Number" | "String" | "Array" | "Boolean";

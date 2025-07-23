@@ -8,13 +8,15 @@ import type { HtmlTagDescriptor } from "vite";
 
 import { warning } from "~/utils/logs";
 
+import { getImportMap } from "./statement-externals";
+
 const template = `\
 <!DOCTYPE html>
 <html lang="it">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Caricamento...</title>
+    <title>Quizms</title>
   </head>
   <body>
     <div id="app"></div>
@@ -82,6 +84,17 @@ export function generateHtmlFromBundle(
   }
 
   const tags: HtmlTagDescriptor[] = [
+    {
+      tag: "script",
+      attrs: { type: "importmap" },
+      children: JSON.stringify(getImportMap()),
+      injectTo: "head",
+    },
+    {
+      tag: "script",
+      children: "globalThis.__webpack_require__ = {};",
+      injectTo: "head",
+    },
     {
       tag: "script",
       attrs: { type: "module", src: `/${entry.fileName}` },

@@ -212,7 +212,7 @@ export default function TeacherDashboard() {
                 <StopContestButton />
               </WithinTimeRange>
             )}
-            <Link className="btn btn-primary" href="/students/">
+            <Link className="btn btn-primary" href="/students">
               Gestisci studenti e risposte
             </Link>
           </CardActions>

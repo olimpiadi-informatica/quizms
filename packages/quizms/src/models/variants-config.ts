@@ -4,6 +4,7 @@ export const variantsConfigSchema = z.object({
   id: z.string(),
   secret: z.string(),
   entry: z.string(),
+  header: z.string().optional(),
   variantIds: z.coerce.string().array(),
   pdfVariantIds: z.coerce.string().array(),
   pdfPerSchool: z.number(),

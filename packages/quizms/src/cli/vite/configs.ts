@@ -11,8 +11,9 @@ import inspect from "vite-plugin-inspect";
 import { info, warning } from "~/utils/logs";
 
 import directives from "./directives";
+import entry from "./entry";
 import images from "./images";
-import routes from "./routes";
+import { statementExternals } from "./statement-externals";
 
 export default function configs(mode: "development" | "production"): InlineConfig {
   const root = path.join(cwd(), "src");
@@ -38,7 +39,7 @@ export default function configs(mode: "development" | "production"): InlineConfi
       "process.env.NODE_ENV": JSON.stringify(mode),
       "process.env.QUIZMS_MODE": JSON.stringify(process.env.QUIZMS_MODE),
     },
-    plugins: [plugins, directives(), images(), inspect(), react(), routes()],
+    plugins: [plugins, directives(), images(), inspect(), react(), statementExternals(), entry()],
     build: {
       rollupOptions: {
         onwarn: (log) => {

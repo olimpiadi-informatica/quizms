@@ -35,7 +35,7 @@ export default function Dashboard() {
             <ContestInformation />
           </Suspense>
           <CardActions>
-            <Link href="/schools/" className="btn btn-primary">
+            <Link href="/schools" className="btn btn-primary">
               Gestione scuole
             </Link>
           </CardActions>

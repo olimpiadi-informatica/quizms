@@ -55,10 +55,10 @@ export function TeacherLayout({ contests, participations, logout, children }: Pr
               </NavbarSubmenu>
             )}
             <NavbarMenuItem>
-              <Link href={`/${contest.id}/`}>Gestione gara</Link>
+              <Link href={`/${contest.id}`}>Gestione gara</Link>
             </NavbarMenuItem>
             <NavbarMenuItem>
-              <Link href={`/${contest.id}/students/`}>Gestione studenti</Link>
+              <Link href={`/${contest.id}/students`}>Gestione studenti</Link>
             </NavbarMenuItem>
           </NavbarMenu>
         )}

@@ -1,6 +1,6 @@
 import path from "node:path";
 
-import { camelCase, upperFirst } from "lodash-es";
+import { reactComponentCase } from "@olinfo/quizms/utils";
 import { glob } from "tinyglobby";
 import type { PluginOption } from "vite";
 
@@ -28,7 +28,7 @@ export default function resolveMdxComponents(): PluginOption {
           const files = await glob("*/question.{md,mdx}", { cwd: dir });
           questions = files.map((file) => [
             path.join(dir, file),
-            upperFirst(camelCase(path.dirname(file))),
+            reactComponentCase(path.dirname(file)),
           ]);
         }
 

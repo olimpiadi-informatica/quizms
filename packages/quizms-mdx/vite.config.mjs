@@ -8,7 +8,7 @@ export default defineConfig({
   build: {
     lib: {
       entry: {
-        "blockly-editor": "src/blockly-editor/index.ts",
+        "blockly-editor": "src/blockly-editor/index.tsx",
         "blockly-types": "src/blockly-types/index.ts",
         components: "src/components/index.ts",
         vite: "src/vite/index.ts",
@@ -25,5 +25,10 @@ export default defineConfig({
       },
     },
   },
-  plugins: [dts({ rollupTypes: true }), nodeExternals(), preserveDirectives(), tsconfigPaths()],
+  plugins: [
+    dts({ rollupTypes: true }),
+    nodeExternals({ exclude: /\.css$/ }),
+    preserveDirectives(),
+    tsconfigPaths(),
+  ],
 });

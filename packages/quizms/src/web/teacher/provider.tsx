@@ -47,7 +47,7 @@ export function TeacherProvider({
           <p className="text-2xl">Seleziona una gara</p>
           <div className="flex flex-wrap justify-center gap-2">
             {participations.map((p) => (
-              <Link key={p.id} className="btn btn-primary" href={`/${p.contestId}/`}>
+              <Link key={p.id} className="btn btn-primary" href={`/${p.contestId}`}>
                 {contests.find((c) => c.id === p.contestId)?.name}
               </Link>
             ))}

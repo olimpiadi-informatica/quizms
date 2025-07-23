@@ -1,75 +1,73 @@
 import { spawn } from "node:child_process";
-import { createHash } from "node:crypto";
-import { cp, mkdir, rm, writeFile } from "node:fs/promises";
+import { cp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { cpus } from "node:os";
 import path from "node:path";
 import { cwd } from "node:process";
+import { pathToFileURL } from "node:url";
 
-import { sortBy } from "lodash-es";
-// @ts-expect-error
-import WebpackRscPlugin from "react-server-dom-webpack/plugin";
-import type { RollupOutput } from "rollup";
-import { build, type InlineConfig, mergeConfig } from "vite";
-import webpack from "webpack";
-import webpackNodeExternals from "webpack-node-externals";
+import type { OutputAsset, RollupOutput } from "rollup";
+import { build, type InlineConfig, mergeConfig, transformWithEsbuild } from "vite";
 import yaml from "yaml";
 
 import type { Schema } from "~/models";
 import load from "~/models/load";
 import { type VariantsConfig, variantsConfigSchema } from "~/models/variants-config";
-import { AsyncPool } from "~/utils/async-pool";
-import { hash } from "~/utils/hash";
+import { AsyncPool, hash } from "~/utils";
 import { fatal, info, success } from "~/utils/logs";
 
 import configs from "./vite/configs";
-import externals from "./vite/externals";
+import { externalLibs } from "./vite/statement-externals";
 
 export type ExportVariantsOptions = {
-  config: string;
   outDir: string;
 };
 
-export default async function variants(_options: ExportVariantsOptions) {
+export default async function variants(options: ExportVariantsOptions) {
   process.env.QUIZMS_MODE = "contest";
 
-  const variantsConfig = await load("variants", variantsConfigSchema);
-  await buildVariants(variantsConfig);
-}
+  const configs = await load("variants", variantsConfigSchema);
 
-export async function buildVariants(configs: VariantsConfig[]): Promise<void> {
-  await buildBaseStatements(configs);
-
-  const pool = new AsyncPool(cpus().length);
+  const baseStatement = await buildBaseStatements(configs);
 
   const buildDir = path.join(cwd(), ".quizms", "variants-build");
-  const variantDir = path.join(cwd(), "variants");
+  const variantsDir = options?.outDir || path.join(cwd(), "variants");
 
-  await rm(variantDir, { recursive: true, force: true });
-  await cp(path.join(buildDir, "version.txt"), path.join(variantDir, "version.txt"));
+  await rm(variantsDir, { recursive: true, force: true });
 
+  const rawCode = await readFile(baseStatement.clientModule.file, "utf-8");
+  const { code: clientModuleCode } = await transformWithEsbuild(
+    rawCode,
+    baseStatement.clientModule.file,
+    { minify: true, legalComments: "none" },
+  );
+
+  const pool = new AsyncPool(cpus().length);
   for (const config of configs) {
-    await mkdir(path.join(variantDir, config.id), { recursive: true });
     for (const variant of [...config.variantIds, ...config.pdfVariantIds]) {
       void pool.run(async () => {
+        const variantDir = path.join(variantsDir, config.id, variant);
+        await mkdir(variantDir, { recursive: true });
+
+        await writeFile(path.join(variantDir, baseStatement.clientModule.id), clientModuleCode);
+        if (baseStatement.cssModule) {
+          await cp(baseStatement.cssModule, path.join(variantDir, "statement.css"));
+        }
+
         const variantHash = hash(`${config.id}-${variant}-${config.secret}`);
         info(`Building variant ${variant} (${variantHash})...`);
 
         const rawSchema: Buffer[] = [];
-        const child = spawn(
-          process.execPath,
-          ["--conditions=react-server", `server-${config.id}.js`],
-          {
-            cwd: buildDir,
-            stdio: ["ignore", "pipe", "inherit"],
-            env: {
-              ...process.env,
-              NODE_ENV: "production",
-              QUIZMS_CONTEST_ID: config.id,
-              QUIZMS_VARIANT_ID: variant,
-              QUIZMS_VARIANT_HASH: variantHash.toString(),
-            },
+        const child = spawn(process.execPath, ["--conditions=react-server", "server.js"], {
+          cwd: buildDir,
+          stdio: ["ignore", "pipe", "inherit"],
+          env: {
+            ...process.env,
+            NODE_ENV: "production",
+            QUIZMS_CONTEST_ID: config.id,
+            QUIZMS_VARIANT_ID: variant,
+            QUIZMS_VARIANT_HASH: variantHash.toString(),
           },
-        );
+        });
         child.stdout.on("data", (data) => rawSchema.push(data));
         const code = await new Promise<number>((resolve, reject) => {
           child.on("close", resolve);
@@ -81,7 +79,7 @@ export async function buildVariants(configs: VariantsConfig[]): Promise<void> {
 
         const schema = yaml.parse(`{ "schema": ${Buffer.concat(rawSchema).toString("utf-8")} }`);
         await writeFile(
-          path.join(variantDir, config.id, `${variant}.json`),
+          path.join(variantDir, "answers.json"),
           JSON.stringify({ id: variant, contestId: config.id, schema: parseSchema(schema.schema) }),
         );
       });
@@ -91,7 +89,25 @@ export async function buildVariants(configs: VariantsConfig[]): Promise<void> {
   await pool.wait();
 }
 
-async function buildBaseStatements(generationConfigs: VariantsConfig[]): Promise<void> {
+type Manifest = Record<
+  string,
+  {
+    id: string;
+    chunks: string[];
+    name: string;
+    async?: boolean;
+  }
+>;
+
+type BaseStatement = {
+  clientModule: {
+    id: string;
+    file: string;
+  };
+  cssModule?: string;
+};
+
+async function buildBaseStatements(generationConfigs: VariantsConfig[]): Promise<BaseStatement> {
   const entry = Object.fromEntries(generationConfigs.map((c) => [c.id, c.entry]));
 
   const outDir = path.join(cwd(), ".quizms", "variants-build");
@@ -107,108 +123,86 @@ async function buildBaseStatements(generationConfigs: VariantsConfig[]): Promise
       },
       rollupOptions: {
         output: {
-          preserveModules: true,
+          assetFileNames: "[name][extname]",
+          chunkFileNames: "[name].js",
           hoistTransitiveImports: false,
+          manualChunks: (id, meta) => {
+            const info = meta.getModuleInfo(id);
+            const directives: string[] | undefined = info?.meta?.preserveDirectives?.directives;
+            const isClient = directives?.includes("use client");
+            if (isClient) {
+              return "client-modules";
+            }
+          },
         },
+        external: externalLibs,
       },
     },
     resolve: {
       conditions: ["react-server"],
     },
-    plugins: [externals({ exclude: [/^@olinfo\/quizms-/] })],
   } as InlineConfig);
 
   let outputs: RollupOutput[];
   try {
-    // TODO: deterministic builds
     outputs = (await build(bundleConfig)) as RollupOutput[];
   } catch (err) {
     fatal(`Build failed: ${err}`);
   }
 
-  const hash = createHash("sha256");
-  const chunks = outputs.flatMap((output) => output.output);
-  for (const chunk of sortBy(chunks, "fileName")) {
-    hash.update(chunk.fileName);
-    hash.update(Buffer.from([0]));
-    if ("code" in chunk) {
-      hash.update(chunk.code);
-    }
-    hash.update(Buffer.from([0]));
+  const chunks = outputs
+    .flatMap((output) => output.output)
+    .filter((chunk) => chunk.type === "chunk")
+    .filter((chunk) => chunk.code.startsWith('"use client"'));
+
+  if (chunks.length === 0) {
+    fatal("No client chunks found");
+  } else if (chunks.length !== 1) {
+    fatal("Multiple client chunks found");
   }
-  const digest = hash.digest("hex");
-  success(`Build succeeded (${digest})`);
+  const clientChunk = chunks[0];
+
+  const manifest: Manifest = {};
+  const clientChunkFile = path.join(outDir, clientChunk.fileName);
+  const clientModuleId = `${crypto.randomUUID()}.mjs`;
+  manifest[pathToFileURL(clientChunkFile).href] = {
+    id: clientModuleId,
+    chunks: [],
+    name: "*",
+    async: true,
+  };
+
+  const cssChunks = outputs
+    .flatMap((output) => output.output)
+    .filter((chunk) => chunk.type === "asset")
+    .filter((chunk) => chunk.fileName.endsWith(".css"));
+  if (cssChunks.length > 1) {
+    fatal("Multiple CSS chunks found");
+  }
+  const cssChunk: OutputAsset | undefined = cssChunks[0];
 
   await Promise.all([
-    writeFile(path.join(outDir, "version.txt"), digest),
-    writeFile(path.join(outDir, "entry.js"), entryFile(digest)),
+    writeFile(path.join(outDir, "manifest.json"), JSON.stringify(manifest)),
+    writeFile(path.join(outDir, "loader.js"), loaderFile()),
     writeFile(path.join(outDir, "package.json"), '{"type":"module"}'),
+    writeFile(path.join(outDir, "server.js"), serverFile()),
   ]);
 
-  const stats = await new Promise<webpack.Stats | undefined>((resolve, reject) =>
-    webpack(webpackConfig(outDir), (err, stats) => (err ? reject(err) : resolve(stats))),
-  );
-  if (stats) {
-    info(stats.toString({ colors: true, chunks: false }));
-  }
+  success("Build succeeded");
 
-  await writeFile(path.join(outDir, "loader.js"), loaderFile());
-  for (const config of generationConfigs) {
-    await writeFile(path.join(outDir, `server-${config.id}.js`), serverFile(config.id));
-    await cp(
-      path.join(outDir, "dist", "main.mjs"),
-      path.join(cwd(), "src", config.entry.replace(/\..*$/, ".mjs")),
-    );
-  }
-}
-
-function webpackConfig(outDir: string): webpack.Configuration {
   return {
-    mode: "production",
-    devtool: false,
-    performance: {
-      hints: false,
+    clientModule: {
+      id: clientModuleId,
+      file: clientChunkFile,
     },
-    entry: path.join(outDir, "entry.js"),
-    output: {
-      path: path.join(outDir, "dist"),
-      clean: true,
-      asyncChunks: false,
-      library: {
-        type: "module",
-      },
-    },
-    externalsPresets: { node: true },
-    externals: [
-      webpackNodeExternals({ importType: "module", allowlist: /^react-server-dom-webpack/ }),
-    ],
-    experiments: {
-      outputModule: true,
-    },
-    plugins: [
-      new WebpackRscPlugin({
-        isServer: false,
-        clientReferences: {
-          directory: outDir,
-          recursive: true,
-          include: /\.m?js$/,
-        },
-      }),
-    ],
+    cssModule: cssChunk && path.join(outDir, cssChunk.fileName),
   };
 }
 
-function entryFile(version: string) {
-  return `\
-export { createFromFetch } from "react-server-dom-webpack/client";
-export const statementVersion = "${version}";
-`;
-}
-
-function serverFile(contestId: string) {
+function serverFile() {
   return `\
 import { createWriteStream } from "node:fs";
-import { mkdir, readFile, rm } from "node:fs/promises";
+import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { register } from "node:module";
 
@@ -218,16 +212,17 @@ import { renderToPipeableStream } from "react-server-dom-webpack/server";
 register("./loader.js", import.meta.url);
 register("react-server-dom-webpack/node-loader", import.meta.url);
 
-const { default: Statement } = await import("./base-statement-${contestId}.mjs");
+const { default: Statement } = await import(\`./base-statement-\${process.env.QUIZMS_CONTEST_ID}.mjs\`);
 
-const manifest = JSON.parse(await readFile("./dist/react-client-manifest.json", "utf-8"));
+const manifest = JSON.parse(await readFile("manifest.json", "utf-8"));
 const { pipe } = renderToPipeableStream(createElement(Statement), manifest);
 
 const statementPath = path.join(
   "${cwd()}",
   "variants",
   process.env.QUIZMS_CONTEST_ID,
-  \`\${process.env.QUIZMS_VARIANT_ID}.txt\`
+  process.env.QUIZMS_VARIANT_ID,
+  "statement.txt",
 );
 pipe(createWriteStream(statementPath));`;
 }

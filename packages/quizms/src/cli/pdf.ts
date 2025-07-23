@@ -20,7 +20,7 @@ async function generatePdf(
 ) {
   info(`Printing statement ${variant}.`);
   const page = await context.newPage();
-  await page.goto(`${baseUrl}/${variant}`, { waitUntil: "load" });
+  await page.goto(`${baseUrl}/${contest.id}/${variant}`, { waitUntil: "load" });
   for (const img of await page.getByRole("img").all()) {
     await img.isVisible();
   }
@@ -66,8 +66,8 @@ async function generatePdf(
 
   const pdf = await doc.save();
 
-  await mkdir(path.join(outDir, variant), { recursive: true });
-  await writeFile(path.join(outDir, variant, "statement.pdf"), pdf);
+  await mkdir(path.join(outDir, contest.id, variant), { recursive: true });
+  await writeFile(path.join(outDir, contest.id, variant, "statement.pdf"), pdf);
 }
 
 export default async function generatePdfs(

@@ -1,17 +1,40 @@
 import { type ReactNode, useCallback, useEffect, useState } from "react";
 
+import { Link, Route, Switch } from "wouter";
+
 import type { Contest, Participation, Student } from "~/models";
+import { StudentProvider } from "~/web/student/provider";
 
-import { StudentProvider } from "./provider";
+export function DevRoutes({ contests, children }: { contests: Contest[]; children: ReactNode }) {
+  return (
+    <Switch>
+      <Route path="/">
+        <ContestList contests={contests} />
+      </Route>
+      {children}
+    </Switch>
+  );
+}
+DevRoutes.displayName = "DevRoutes";
 
-type AuthProps = {
-  contestName: string;
-  contestLongName: string;
-  duration: number;
-  children: ReactNode;
-};
+function ContestList({ contests }: { contests: Contest[] }) {
+  return (
+    <div className="h-dvh overflow-auto">
+      <div className="prose mx-auto p-4 lg:max-w-4xl">
+        <ul>
+          {contests.map((c) => (
+            <li key={c.id}>
+              <Link href={`/${c.id}`}>{c.name}</Link>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+}
+ContestList.displayName = "ContestList";
 
-export function NoAuth({ contestName, contestLongName, duration, children }: AuthProps) {
+export function DevProvider({ contest, children }: { contest: Contest; children: ReactNode }) {
   const [student, setStudent] = useLocalStorage<Student>({
     id: "",
     userData: {
@@ -19,32 +42,14 @@ export function NoAuth({ contestName, contestLongName, duration, children }: Aut
       surname: "anonimo",
     },
     answers: {},
+    contestId: contest.id,
     variant: "0",
   });
-
-  const mockContest: Contest = {
-    id: "",
-    name: contestName,
-    longName: contestLongName,
-    problemIds: [],
-    duration,
-    userData: [],
-    hasVariants: true,
-    hasOnline: true,
-    hasPdf: true,
-    allowRestart: true,
-    allowStudentImport: true,
-    allowStudentEdit: true,
-    allowStudentDelete: true,
-    allowAnswerEdit: true,
-    contestWindowEnd: new Date(0),
-    contestWindowStart: new Date(Number.MAX_SAFE_INTEGER),
-  };
 
   const mockParticipation: Participation = {
     id: "",
     schoolId: "",
-    contestId: "",
+    contestId: contest.id,
     name: "",
     teacher: "",
     startingTime: student.startedAt,
@@ -66,7 +71,7 @@ export function NoAuth({ contestName, contestLongName, duration, children }: Aut
 
   return (
     <StudentProvider
-      contest={mockContest}
+      contest={contest}
       participation={mockParticipation}
       student={student}
       setStudent={setStudent}
@@ -75,6 +80,7 @@ export function NoAuth({ contestName, contestLongName, duration, children }: Aut
     </StudentProvider>
   );
 }
+DevProvider.displayName = "DevProvider";
 
 function useLocalStorage<T>(defaultValue: T) {
   const key = window.location.pathname;

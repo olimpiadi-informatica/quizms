@@ -24,7 +24,7 @@ export function AdminProvider({ name, contests, setContest, logout }: AdminProvi
           <p className="text-2xl">Seleziona una gara</p>
           <div className="flex flex-wrap justify-center gap-2">
             {contests.map((c) => (
-              <Link key={c.id} className="btn btn-primary" href={`/${c.id}/`}>
+              <Link key={c.id} className="btn btn-primary" href={`/${c.id}`}>
                 {c.name}
               </Link>
             ))}

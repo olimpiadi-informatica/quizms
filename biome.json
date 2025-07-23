@@ -61,6 +61,7 @@
       "suspicious": {
         "noArrayIndexKey": "off",
         "noExplicitAny": "off",
+        "noConfusingVoidType": "off",
         "useAwait": "error"
       }
     }

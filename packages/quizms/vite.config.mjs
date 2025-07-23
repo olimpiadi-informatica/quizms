@@ -8,7 +8,7 @@ import dts from "vite-plugin-dts";
 import tsconfigPaths from "vite-tsconfig-paths";
 
 const webEntries = [
-  ...(await glob("src/web/*/index.ts")),
+  ...(await glob("src/web/*/index.ts*")),
   "src/cli/index.ts",
   "src/utils/index.ts",
 ];

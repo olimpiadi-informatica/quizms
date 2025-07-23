@@ -20,9 +20,21 @@
       "default": "./dist/components.js"
     },
     "./css": "./dist/quizms.css",
+    "./dev": {
+      "types": "./dist/dev.d.ts",
+      "default": "./dist/dev.js"
+    },
+    "./entry": {
+      "types": "./dist/entry.d.ts",
+      "default": "./dist/entry.js"
+    },
     "./firebase": {
       "types": "./dist/firebase.d.ts",
       "default": "./dist/firebase.js"
+    },
+    "./print": {
+      "types": "./dist/print.d.ts",
+      "default": "./dist/print.js"
     },
     "./student": {
       "types": "./dist/student.d.ts",
@@ -39,7 +51,8 @@
   ],
   "dependencies": {
     "@ag-grid-community/locale": "^33.3.2",
-    "@cantoo/pdf-lib": "^2.4.3",
+    "@cantoo/pdf-lib": "^2.5.0",
+    "@fastify/static": "^8.2.0",
     "@inquirer/prompts": "^7.8.4",
     "@noble/hashes": "^1.8.0",
     "@olinfo/react-components": "^0.12.0",
@@ -52,14 +65,16 @@
     "clsx": "^2.1.1",
     "commander": "^14.0.0",
     "date-fns": "^4.1.0",
+    "detect-port": "^2.1.0",
     "error-stack-parser-es": "^1.0.5",
+    "fastify": "^5.6.0",
     "file-saver": "^2.0.5",
     "firebase": "^12.2.1",
     "firebase-admin": "^13.5.0",
     "image-size": "^2.0.2",
     "lodash-es": "^4.17.21",
     "lucide-react": "^0.542.0",
-    "magic-string": "^0.30.18",
+    "magic-string": "^0.30.19",
     "mini-svg-data-uri": "^1.4.4",
     "papaparse": "^5.5.3",
     "picocolors": "^1.1.1",
@@ -78,10 +93,10 @@
     "source-map-js": "^1.2.1",
     "svgo": "^4.0.0",
     "swr": "^2.3.6",
-    "tinyglobby": "^0.2.14",
+    "tinyglobby": "^0.2.15",
     "unified": "^11.0.5",
     "unist-util-visit": "^5.0.0",
-    "vite": "^7.1.4",
+    "vite": "^7.1.5",
     "vite-plugin-inspect": "^11.3.3",
     "webpack-node-externals": "^3.0.0",
     "wouter": "^3.7.1",
@@ -111,8 +126,9 @@
     "@types/webpack-node-externals": "^3.0.4",
     "@types/wicg-file-system-access": "^2023.10.6",
     "postcss": "^8.5.6",
-    "rollup": "^4.50.0",
-    "typescript": "~5.8",
+    "react-server-dom-webpack": "^19.1.1",
+    "rollup": "^4.50.1",
+    "typescript": "=5.8.2",
     "vite-plugin-dts": "^4.5.4",
     "vite-tsconfig-paths": "^5.1.4",
     "webpack": "^5.101.3"

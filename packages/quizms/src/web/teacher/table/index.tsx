@@ -280,11 +280,7 @@ function columnDefinition(
       cellRenderer: ({ data }: ICellRendererParams<Student>) => {
         if (data?.absent || data?.disabled || !data?.variant) return;
         return (
-          <a
-            className="link link-info"
-            href={`${window.location.pathname}${data.id}/`}
-            target="_blank"
-            rel="noreferrer">
+          <a className="link link-info" href={`./${data.id}`} target="_blank" rel="noreferrer">
             apri
           </a>
         );

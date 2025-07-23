@@ -14,6 +14,23 @@ import { Image } from "./image";
 import { Problem, SubProblem } from "./problem";
 import { Section } from "./section";
 
+export {
+  AnyCorrectAnswer,
+  AllCorrectAnswer,
+  AnswerGroup,
+  Blockly,
+  Code,
+  Contest,
+  Equation,
+  Explanation,
+  Image,
+  MultipleChoiceAnswer,
+  OpenAnswer,
+  Problem,
+  Section,
+  SubProblem,
+};
+
 export function useMDXComponents() {
   return {
     AnyCorrectAnswer,

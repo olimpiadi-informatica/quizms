@@ -8,7 +8,6 @@ import { version } from "package.json";
 
 import { fatal } from "~/utils/logs";
 
-import staticExport from "./build";
 import devServer from "./dev";
 import firebaseCommand from "./firebase";
 import print from "./print";
@@ -48,31 +47,28 @@ async function main() {
     .option("-p, --port <port>", "The port to use for the server.", safeParseInt, 1234)
     .action(devServer);
 
-  program
-    .command("build")
-    .description("Create a static export of the website.")
-    .option(
-      "-d, --outDir <directory>",
-      "The directory to output the bundle.",
-      path.join(".quizms", "hosting-build"),
-    )
-    .option("-t, --training", "Embed the questions and the answers in the export.")
-    .option("-l, --library", "Build the project as a library.")
-    .action(staticExport);
+  // program
+  //   .command("build")
+  //   .description("Create a static export of the website.")
+  //   .option(
+  //     "-d, --outDir <directory>",
+  //     "The directory to output the bundle.",
+  //     path.join(".quizms", "hosting-build"),
+  //   )
+  //   .option("-t, --training", "Embed the questions and the answers in the export.")
+  //   .action(staticExport);
 
   program
     .command("print")
     .description("Create PDFs for the contest.")
-    .option("-c, --config <config>", "The contests config file.")
+    .option("-p, --port <port>", "The port to use for the server.", safeParseInt, 1234)
     .option("-d, --outDir <directory>", "The directory to output the PDF.", "variants")
-    .option("-e, --entry <entry>", "The entry point of the PDF.", "print/page.jsx")
     .option("-s, --server", "Only serve the pages, don't generate the PDF.")
     .action(print);
 
   program
     .command("variants")
     .description("Generate variants for the contest.")
-    .option("-c, --config <config>", "The contests config file.")
     .option("-d, --outDir <directory>", "The directory to output the variants.", "variants")
     .action(variants);
 

@@ -1,25 +1,31 @@
-import { existsSync } from "node:fs";
-import { readFile, rm } from "node:fs/promises";
 import path from "node:path";
 import { cwd } from "node:process";
-import { promisify } from "node:util";
 
+import fastifyStatic, { type FastifyStaticOptions } from "@fastify/static";
+import { detect } from "detect-port";
+import Fastify, { type RegisterOptions } from "fastify";
 import { noop } from "lodash-es";
 import pc from "picocolors";
-import { build, type InlineConfig, mergeConfig, type PluginOption, preview } from "vite";
+import {
+  build,
+  type InlineConfig,
+  mergeConfig,
+  type PluginOption,
+  transformWithEsbuild,
+} from "vite";
 
 import { type Contest, contestSchema } from "~/models";
 import load from "~/models/load";
 import { type VariantsConfig, variantsConfigSchema } from "~/models/variants-config";
-import { fatal, info, success } from "~/utils/logs";
+import { fatal, info, success, warning } from "~/utils/logs";
+import { reactComponentCase } from "~/utils/strings";
 
 import generatePdfs from "./pdf";
 import configs from "./vite/configs";
 
 export type PrintOptions = {
-  config: string;
+  port: number;
   outDir: string;
-  entry: string;
   server: boolean;
 };
 
@@ -27,15 +33,11 @@ export default async function print(options: PrintOptions) {
   const contests = await load("contests", contestSchema);
   const variantConfigs = await load("variants", variantsConfigSchema);
 
-  const entry = path.join("src", options.entry);
-  if (!existsSync(entry)) {
-    fatal(`\
-Entry file ${pc.bold(pc.red(options.entry))} does not exists. \
-Make sure it exists or specify a different entry file using \`--entry\`.`);
-  }
-
   info("Building website...");
   process.env.QUIZMS_MODE = "print";
+
+  const pages = ["index", ...contests.map((contest) => contest.id)];
+
   const buildDir = path.join(cwd(), ".quizms", "pdf-build");
   const buildConfig = mergeConfig(configs("production"), {
     publicDir: path.join(cwd(), "public"),
@@ -44,38 +46,57 @@ Make sure it exists or specify a different entry file using \`--entry\`.`);
       emptyOutDir: true,
       chunkSizeWarningLimit: Number.MAX_SAFE_INTEGER,
       rollupOptions: {
-        input: "virtual:quizms-routes",
+        input: Object.fromEntries(
+          pages.map((page) => [page, "virtual:quizms-entry?virtual:quizms-print-entry"]),
+        ),
       },
     },
+    plugins: [printEntry(contests, variantConfigs)],
     logLevel: "info",
   } as InlineConfig);
   try {
     await build(buildConfig);
-  } catch {
+  } catch (e) {
+    console.error(e);
     fatal("Build failed.");
   }
 
-  const serverConfig = mergeConfig(configs("production"), {
-    build: {
-      outDir: buildDir,
-    },
-    plugins: [printPlugin(contests, variantConfigs)],
-  } as InlineConfig);
-  const server = await preview(serverConfig);
-  const url = server.resolvedUrls!.local[0] + path.dirname(options.entry);
+  const fastify = createPrintServer(buildDir);
+
+  const port = await detect(options.port);
+  if (options.server && port !== options.port) {
+    warning(`Port ${options.port} is in use, trying another one...`);
+  }
+
+  await fastify.listen({ port });
 
   if (options.server) {
-    success(`Server started: ${pc.bold(pc.cyan(url))}`);
+    const addresses = fastify
+      .addresses()
+      .map((info) => {
+        const address =
+          info.family === "IPv6"
+            ? `[${info.address}]`
+            : info.address.replace("127.0.0.1", "localhost");
+        return `  ${pc.green("→")}  ${pc.bold(`${info.family}:`.padEnd(8))} ${pc.cyan(`http://${address}:${pc.bold(info.port)}/`)}`;
+      })
+      .join("\n");
+    success(`Server started:\n${addresses}`);
     await new Promise(noop);
   }
 
-  await generatePdfs(contests, variantConfigs, url, options.outDir);
+  const address = fastify.addresses()[0];
+  await generatePdfs(
+    contests,
+    variantConfigs,
+    `http://${address.address}:${address.port}`,
+    options.outDir,
+  );
 
-  await promisify(server.httpServer.close.bind(server.httpServer))();
-  await rm(buildDir, { recursive: true });
+  await fastify.close();
 }
 
-function printPlugin(contests: Contest[], variantConfigs: VariantsConfig[]): PluginOption {
+function printEntry(contests: Contest[], variantConfigs: VariantsConfig[]): PluginOption {
   const contestConfigs = contests.map((contest) => {
     const config = variantConfigs.find((c) => c.id === contest.id);
     if (!config) {
@@ -85,43 +106,64 @@ function printPlugin(contests: Contest[], variantConfigs: VariantsConfig[]): Plu
   });
 
   return {
-    name: "quizms:print-proxy",
-    apply: "serve",
-    configurePreviewServer(server) {
-      server.middlewares.use("/print-proxy", async (req, res, next) => {
-        const url = new URL(req.url!, `http://${req.headers.host}`);
+    name: "quizms:print-entry",
+    resolveId(id) {
+      if (id === "virtual:quizms-print-entry") {
+        return `\0${id}`;
+      }
+    },
+    load(id) {
+      if (id === "\0virtual:quizms-print-entry") {
+        const entry = `
+import { createApp } from "@olinfo/quizms/entry";
+import { PrintProvider, PrintRoutes } from "@olinfo/quizms/print";
+import { Route } from "wouter";
 
-        if (url.pathname === "/contests.json") {
-          res.setHeader("content-type", "application/json");
-          res.end(JSON.stringify(contestConfigs));
-          return;
-        }
+${contestConfigs
+  .flatMap((contest) => {
+    const imports = [`import ${reactComponentCase(contest.id)} from "/${contest.entry}";`];
+    if (contest.header) {
+      imports.push(`import ${reactComponentCase(contest.id)}Header from "/${contest.header}";`);
+    }
+    return imports;
+  })
+  .join("\n")}
 
-        if (url.pathname === "/statement.txt") {
-          const variant = url.searchParams.get("v");
-          const contest = url.searchParams.get("c");
-          if (!variant || !contest) {
-            res.writeHead(400);
-            res.end("Missing variant or contest parameter");
-            return;
-          }
-
-          try {
-            const statement = await readFile(
-              path.join(cwd(), "variants", contest, `${variant}.txt`),
-              "utf-8",
-            );
-            res.setHeader("content-type", "application/octet-stream");
-            res.end(statement);
-          } catch {
-            res.writeHead(404);
-            res.end("Statement not found");
-          }
-
-          return;
-        }
-        next();
-      });
+export default function createPrintEntry() {
+  return createApp(
+    <PrintRoutes contests={${JSON.stringify(contestConfigs)}}>
+      ${contestConfigs
+        .map(
+          (contest) => `
+            <Route path="/${contest.id}">
+              <PrintProvider contest={${JSON.stringify(contest)}}>
+                ${contest.header && `<${reactComponentCase(contest.id)}Header />`}
+                <${reactComponentCase(contest.id)} />
+              </PrintProvider>
+            </Route>`,
+        )
+        .join("\n")}
+    </PrintRoutes>
+  );
+}`;
+        return transformWithEsbuild(entry, "virtual-quizms-print-entry.jsx", { jsx: "automatic" });
+      }
     },
   };
+}
+
+function createPrintServer(buildDir: string) {
+  const fastify = Fastify();
+
+  fastify.register(fastifyStatic, {
+    root: buildDir,
+  } as RegisterOptions & FastifyStaticOptions);
+
+  fastify.register(fastifyStatic, {
+    prefix: "/print-proxy/files/",
+    root: path.join(cwd(), "variants"),
+    decorateReply: false,
+  } as RegisterOptions & FastifyStaticOptions);
+
+  return fastify;
 }

@@ -1,4 +1,4 @@
-import { sha256 } from "@noble/hashes/sha256";
+import { sha256 } from "@noble/hashes/sha2";
 
 export function hash(input: Parameters<typeof sha256>[0]): number {
   const digest = sha256(input);

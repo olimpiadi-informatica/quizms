@@ -272,8 +272,6 @@ async function importStatements(bucket: Bucket, options: ImportOptions) {
   const contests = await load("contests", contestSchema);
   const variantsConfig = await load("variants", variantsConfigSchema);
 
-  const statementVersion = await readFile(path.join("variants", "version.txt"), "utf8");
-
   const statements = contests.flatMap((contest) => {
     const config = variantsConfig.find((c) => c.id === contest.id);
     if (!config) {
@@ -282,7 +280,7 @@ async function importStatements(bucket: Bucket, options: ImportOptions) {
 
     return uniq([...config.variantIds, ...config.pdfVariantIds]).map((id): [string, string] => [
       path.join("variants", config.id, `${id}.txt`),
-      path.join("statements", config.id, id, `statement-${statementVersion}.txt`),
+      path.join("statements", config.id, id, "statement.txt"),
     ]);
   });
   await importStorage(bucket, "statements", statements, options);
