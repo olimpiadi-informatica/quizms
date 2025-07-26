@@ -12,7 +12,7 @@ import { TriangleAlert } from "lucide-react";
 import { useDb } from "~/web/firebase/common/base-login";
 import query, { type QueryOption } from "~/web/firebase/common/query";
 
-import { useAdmin } from "./provider";
+import { useAdmin } from "./context";
 
 type Props<T> = {
   label: string;

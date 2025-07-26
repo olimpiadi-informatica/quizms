@@ -2,7 +2,7 @@ import { Form, SubmitButton, TextAreaField } from "@olinfo/react-components";
 
 import type { Contest } from "~/models";
 
-import { useAdmin } from "./provider";
+import { useAdmin } from "./context";
 
 export default function ContestSettings() {
   const { contest, setContest } = useAdmin();

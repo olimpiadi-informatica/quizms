@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 
 import { Redirect, useParams } from "wouter";
 
-import { useTeacher, useTeacherStudents } from "~/web/teacher/provider";
+import { useTeacher, useTeacherStudents } from "~/web/teacher/context";
 
 import { StudentProvider } from "./provider";
 

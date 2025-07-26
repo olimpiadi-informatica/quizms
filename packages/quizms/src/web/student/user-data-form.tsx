@@ -1,7 +1,7 @@
 import { DateField, Form, NumberField, TextField } from "@olinfo/react-components";
 
 import type { Contest } from "~/models";
-import { useStudent } from "~/web/student/provider";
+import { useStudent } from "~/web/student/context";
 
 export function UserDataForm() {
   const { contest, student } = useStudent();

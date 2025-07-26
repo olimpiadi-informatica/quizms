@@ -6,7 +6,8 @@ import { Link, Route, Switch, useParams } from "wouter";
 import type { Contest, Participation, Student } from "~/models";
 import type { VariantsConfig } from "~/models/variants-config";
 
-import { StudentProvider, useStudent } from "./provider";
+import { useStudent } from "./context";
+import { StudentProvider } from "./provider";
 import { RemoteStatement } from "./remote-statement";
 import { UserDataForm } from "./user-data-form";
 

@@ -2,7 +2,7 @@ import { forwardRef, type Ref } from "react";
 
 import { Form, FormButton, Modal, SubmitButton } from "@olinfo/react-components";
 
-import { useTeacherStudents } from "~/web/teacher/provider";
+import { useTeacherStudents } from "~/web/teacher/context";
 
 export const DeleteAllModal = forwardRef(function DeleteModal(
   _,

@@ -4,7 +4,7 @@ import { WithinTimeRange } from "@olinfo/react-components";
 import { addMilliseconds } from "date-fns";
 
 import { Loading, Timer } from "~/web/components";
-import { useStudent } from "~/web/student/provider";
+import { useStudent } from "~/web/student/context";
 
 export function BaseStatement({ children }: { children: ReactNode }) {
   const { participation } = useStudent();

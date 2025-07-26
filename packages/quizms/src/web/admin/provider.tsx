@@ -1,21 +1,12 @@
-import { createContext, lazy, useContext } from "react";
+import { lazy } from "react";
 
 import { Link, Redirect, Route, Switch, useParams } from "wouter";
 
 import type { Contest } from "~/models";
 
+import { AdminContext } from "./context";
 import { AdminLayout } from "./layout";
 import { SchoolTable } from "./school-table";
-
-type AdminContextProps = {
-  name: string;
-  contest: Contest;
-  contests: Contest[];
-  setContest: (contest: Contest) => Promise<void>;
-};
-
-const AdminContext = createContext<AdminContextProps>({} as AdminContextProps);
-AdminContext.displayName = "AdminContext";
 
 type AdminProviderProps = {
   name: string;
@@ -69,8 +60,4 @@ function ProviderInner({ contests, ...props }: AdminProviderProps) {
       </Switch>
     </AdminContext.Provider>
   );
-}
-
-export function useAdmin() {
-  return useContext(AdminContext);
 }

@@ -10,8 +10,8 @@ import { useCount } from "~/web/firebase/hooks/count";
 
 import Announcements from "./announcements";
 import ContestSettings from "./contest-settings";
+import { useAdmin } from "./context";
 import Export from "./export";
-import { useAdmin } from "./provider";
 import TokenList from "./token-list";
 
 export default function Dashboard() {

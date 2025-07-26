@@ -7,7 +7,7 @@ import Markdown from "react-markdown";
 import { announcementConverter } from "~/web/firebase/common/converters";
 import { useCollection } from "~/web/firebase/hooks";
 
-import { useTeacher } from "./provider";
+import { useTeacher } from "./context";
 
 export function Announcements() {
   const { contest } = useTeacher();

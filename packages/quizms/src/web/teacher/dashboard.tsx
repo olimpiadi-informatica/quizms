@@ -22,9 +22,9 @@ import { Link } from "wouter";
 import { randomToken } from "~/utils/random";
 import { Timer } from "~/web/components";
 
+import { useTeacher } from "./context";
 import { Announcements } from "./dashboard-announcements";
 import { StudentRestoreList } from "./dashboard-student-restore";
-import { useTeacher } from "./provider";
 
 function StartContestButton() {
   const { contest, participation, setParticipation } = useTeacher();

@@ -1,5 +1,5 @@
 {
-  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "$schema": "../../node_modules/@biomejs/biome/configuration_schema.json",
   "files": {
     "includes": ["src/**", "*.mjs"]
   },
@@ -25,6 +25,7 @@
       },
       "nursery": {
         "noFloatingPromises": "error",
+        "noImportCycles": "error",
         "useUniqueElementIds": "off"
       },
       "performance": {

@@ -24,7 +24,7 @@ import {
 } from "~/models";
 import { randomId } from "~/utils/random";
 import { Loading } from "~/web/components";
-import { useTeacher, useTeacherStudents } from "~/web/teacher/provider";
+import { useTeacher, useTeacherStudents } from "~/web/teacher/context";
 
 import { DeleteModal } from "./delete";
 import { DeleteAllModal } from "./delete-all";

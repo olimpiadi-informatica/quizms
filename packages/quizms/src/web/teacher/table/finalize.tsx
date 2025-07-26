@@ -5,7 +5,7 @@ import { deburr, lowerFirst } from "lodash-es";
 import { TriangleAlert } from "lucide-react";
 
 import type { Student } from "~/models";
-import { useTeacher, useTeacherStudents } from "~/web/teacher/provider";
+import { useTeacher, useTeacherStudents } from "~/web/teacher/context";
 
 import { isStudentIncomplete } from "./utils";
 

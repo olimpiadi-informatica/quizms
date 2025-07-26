@@ -2,7 +2,7 @@ import { type ReactNode, useCallback } from "react";
 
 import { getDownloadURL, getStorage, ref } from "firebase/storage";
 
-import { useStudent } from "~/web/student/provider";
+import { useStudent } from "~/web/student/context";
 import { RemoteStatement } from "~/web/student/remote-statement";
 
 import { useDb } from "./common/base-login";

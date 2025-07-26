@@ -20,7 +20,7 @@ import { FileChartColumn, LogOut, RotateCcw } from "lucide-react";
 import { calcProblemPoints, type Schema } from "~/models";
 import { ErrorBoundary, Progress, Prose, Timer, useMetadata } from "~/web/components";
 
-import { useStudent } from "./provider";
+import { useStudent } from "./context";
 
 export function StudentLayout({ children }: { children: ReactNode }) {
   const metadata = useMetadata();
