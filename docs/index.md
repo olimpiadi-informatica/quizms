@@ -3,16 +3,16 @@ layout: home
 
 hero:
   name: QuizMS
-  text: Il framework per preparare le gare scolastiche
+  text: The framework for computer science quizzes
   actions:
     - theme: alt
-      text: Introduzione
+      text: Introduction
       link: /intro/intro
     - theme: alt
-      text: Preparare i problemi
+      text: Preparing problems
       link: /task/format
     - theme: alt
-      text: Configurare Firebase
+      text: Configuring Firebase
       link: /firebase/setup
 ---
 
