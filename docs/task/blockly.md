@@ -1,6 +1,6 @@
-# Codice a blocchi
+# Block Code
 
-È possibile usare [blockly](https://developers.google.com/blockly) per creare problemi in cui bisogna rispondere con del codice a blocchi. Il testo del problema dovrà contenere un componente `Blockly`:
+You can use [Blockly](https://developers.google.com/blockly) to create problems that require a block code answer. The problem text should contain a `Blockly` component:
 
 ```jsx
 import customBlocks from "./custom.blocks.yaml";
@@ -8,7 +8,7 @@ import initialBlocks from "./initial-blocks.json";
 import testcases from "./testcases.py";
 import visualizer from "./visualizer";
 
-Testo del problema...
+Problem text...
 
 <Blockly
   customBlocks={customBlocks}
@@ -18,10 +18,10 @@ Testo del problema...
 />
 ```
 
-Il componente `Blockly` deve avere le seguenti proprietà:
+The `Blockly` component must have the following properties:
 
-- `customBlocks`: i [blocchi personalizzati](#blocchi-personalizzati) del problema.
-- `initialBlocks`: un JSON contenente i blocchi e le variabili presenti inizialmente nell'editor a blocchi del problema:
+  - `customBlocks`: the [custom blocks](#custom-blocks) for the problem.
+  - `initialBlocks`: a JSON file containing the blocks and variables initially present in the problem's block editor:
     ```json
     {
       "blocks": {
@@ -31,8 +31,8 @@ Il componente `Blockly` deve avere le seguenti proprietà:
       "variables": [...]
     }
     ```
-  Può essere generato a mano ma è più conveniente generarlo usando il pulsante "Debug" durante lo sviluppo del problema.
-- `testcases`: un array di oggetti contenenti le variabili del testcase. Può essere importato da un file Python o JSON o essere definito direttamente in JavaScript nel file del problema.
+    This can be generated manually, but it's more convenient to generate it using the "Debug" button during problem development.
+  - `testcases`: an array of objects containing the test case variables. It can be imported from a Python or JSON file or defined directly in JavaScript within the problem file.
     ```json
     [
       { "N": 4, "A": [1, 2, 3, 4] },
@@ -40,68 +40,68 @@ Il componente `Blockly` deve avere le seguenti proprietà:
       ...
     ]
     ```
-- `visualizer`: un componente di React che visualizza lo stato del testcase:
+  - `visualizer`: a React component that visualizes the test case state:
     ```jsx
     function Visualizer({ variables, state }) {
       ...
     }
     ```
-  La funzione riceve come parametri le variabili definite dall'utente e lo stato del testcase. Inizialmente lo stato corrisponde alle variabili del testcase e viene aggiornato durante l'esecuzione del codice a blocchi.
+    The function receives user-defined variables and the test case state as parameters. Initially, the state corresponds to the test case variables and is updated during block code execution.
 
-## Blocchi personalizzati
+## Custom Blocks
 
-Ci sono due tipi di blocchi: i blocchi _statement_ e i blocchi _output_.
+There are two types of blocks: *statement* blocks and *output* blocks.
 
-- gli _statement_ sono blocchi che eseguono un'azione senza restituire un valore. Possono essere connessi a un altro blocco sopra o sotto:
+  - *statements* are blocks that perform an action without returning a value. They can be connected to another block above or below:
 
   ![Blocco statement](./statement.png)
 
-- gli _output_ sono blocchi che restituiscono un valore e possono essere usati come parametri di altri blocchi:
+  - *outputs* are blocks that return a value and can be used as parameters for other blocks:
 
   ![Blocco output](./output.png)
 
-::: warning ATTENZIONE
-I blocchi vanno definiti all'interno di un file YAML con estensione `.blocks.yaml`.
+::: warning ATTENTION
+Blocks must be defined within a YAML file with a `.blocks.yaml` extension.
 :::
 
-Ogni blocco ha i seguenti campi:
-- `type`: id del blocco.
-- `message0`: testo mostrato nel blocco. Deve contenere i placeholder `%1`, `%2`, ... per gli argomenti del blocco.
-- `args0`: lista degli [argomenti del blocco](#argomenti-del-blocco).
-- `colour`: [colore del blocco](https://developers.google.com/blockly/guides/create-custom-blocks/block-colour#colour_formats). Può essere un numero tra 0 e 360 o una stringa RGB.
-- `tooltip`: testo che appare quando si passa con il mouse sopra il blocco.
-- `maxInstances`: numero massimo di blocchi consentiti di questo tipo. Se non specificato, il numero di blocchi è illimitato.
-- `js`: una stringa contenente il codice JavaScript da eseguire quando il blocco viene eseguito. Il codice può contenere dei placeholder `%1`, `%2`, ... per gli argomenti che verranno sostituiti con il codice degli argomenti. Nei blocchi output, il codice deve essere un'unica espressione che restituisce un valore.
-  ::: warning ATTENZIONE
-  Il codice deve essere conforme alle specifiche JavaScript ES5, perciò la maggior parte delle funzionalità moderne di non sono supportate.
-  :::
+Each block has the following fields:
+  - `type`: block ID.
+  - `message0`: text shown in the block. It must contain `%1`, `%2`, ... placeholders for block arguments.
+  - `args0`: list of [block arguments](#block-arguments).
+  - `colour`: [block color](https://developers.google.com/blockly/guides/create-custom-blocks/block-colour#colour_formats). It can be a number between 0 and 360 or an RGB string.
+  - `tooltip`: text that appears when hovering over the block with the mouse.
+  - `maxInstances`: maximum number of allowed blocks of this type. If not specified, the number of blocks is unlimited.
+  - `js`: a string containing the JavaScript code to execute when the block is run. The code can contain `%1`, `%2`, ... placeholders for arguments which will be replaced with the argument code. In output blocks, the code must be a single expression that returns a value.
+    ::: warning ATTENTION
+    The code must conform to ES5 JavaScript specifications, so most modern functionalities are not supported.
+    :::
 
-Gli _statement_ possono avere i seguenti campi aggiuntivi:
-- `previousStatement`: `null` se il blocco può essere collegato a un altro blocco sopra.
-- `nextStatement`: `null` se il blocco può essere collegato a un altro blocco sotto.
+*Statements* can have the following additional fields:
+  - `previousStatement`: `null` if the block can be connected to another block above.
+  - `nextStatement`: `null` if the block can be connected to another block below.
 
-Gli _output_ devono avere il seguenti campo aggiuntivo:
-- `output`: tipo di output del blocco: `Number`, `String`, `Array` o `Boolean`.
+*Outputs* must have the following additional field:
+  - `output`: type of block output: `Number`, `String`, `Array`, or `Boolean`.
 
-::: details Esempio di un blocco statement
+::: details Example of a statement block
 
 ```yaml
-- type: gira_ruota
-  message0: gira la ruota
+- type: turn_wheel
+  message0: turn the wheel
   previousStatement: null
   nextStatement: null
   colour: 20
-  tooltip: Gira la ruota di uno spicchio
+  tooltip: Turn the wheel by one section
   js: state.angle = (state.angle + 45) % 360;
 ```
 
-::: 
+:::
 
-::: details Esempio di un blocco output
+::: details Example of an output block
 
 ```yaml
-- type: minimo
-  message0: minimo tra %1 e %2
+- type: minimum
+  message0: minimum between %1 and %2
   args0:
     - type: input_value
       check: Number
@@ -109,31 +109,36 @@ Gli _output_ devono avere il seguenti campo aggiuntivo:
       check: Number
   output: Number
   colour: 20
-  tooltip: il valore minimo tra x e y
+  tooltip: the minimum value between x and y
   js: Math.min(%1, %2)
 ```
+
 :::
 
-### Argomenti del blocco
+### Block Arguments
 
-Un argomento è rappresentato da un oggetto con il campo `type` che specifica il tipo dell'argomento, e ulteriori campi che dipendono dal tipo dell'argomento.
+An argument is represented by an object with a `type` field specifying the argument type, and additional fields depending on the argument type.
 
-QuizMS supporta due tipi di argomenti:
-- `field_dropdown`: un menu a tendina con valori predefiniti. Il campo `options` deve contenere la lista di opzioni del menu a tendina, ogni opzione è rappresentata da un array di due elementi: il testo mostrato e il codice JavaScript generato.
+QuizMS supports two types of arguments:
+
+  - `field_dropdown`: a dropdown menu with predefined values. The `options` field must contain the list of dropdown menu options, each option is represented by an array of two elements: the displayed text and the generated JavaScript code.
+
     ```yaml
     args0:
       - type: field_dropdown
         options:
-          - [somma, SUM]
-          - [differenza, DIFF]
-          - [prodotto, PROD]
-          - [divisione, DIV]
+          - [addition, SUM]
+          - [difference, DIFF]
+          - [product, PROD]
+          - [division, DIV]
     ```
-- `input_value`: un blocco output che può essere collegato a questo blocco.
 
-  Il campo `check` specifica il tipo di blocco che può essere usato: `Number`, `String`, `Array` o `Boolean`. QuizMS aggiunge inoltre il tipo `Integer` che estende il tipo `Number` validando durante l'esecuzione che il valore sia un intero.
+  - `input_value`: an output block that can be connected to this block.
 
-  È possibile anche specificare i campi `min` e `max` per validare durante l'esecuzione che il valore sia compreso tra i due estremi, i campi devono contenere del codice JavaScript. 
+    The `check` field specifies the type of block that can be used: `Number`, `String`, `Array`, or `Boolean`. QuizMS also adds the `Integer` type which extends the `Number` type by validating during execution that the value is an integer.
+
+    You can also specify `min` and `max` fields to validate during execution that the value is within the two extremes; the fields must contain JavaScript code.
+
     ```yaml
     args0:
       - type: input_value

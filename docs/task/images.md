@@ -1,29 +1,29 @@
-# Immagine
+# Image
 
-Per aggiungere un'immagine è sufficiente usare la classica sintassi di Markdown:
-
-```md
-![descrizione](immagine.jpg)
-```
-
-È possibile anche generare delle immagini con [asymptote](https://asymptote.sourceforge.io/), il codice viene compilato automaticamente e convertito in un'immagine vettoriale:
+To add an image, simply use the classic Markdown syntax:
 
 ```md
-![descrizione](immagine.asy)
+![description](image.jpg)
 ```
 
-Le immagini possono essere ridimensionate aggiungendo dei parametri dopo il nome del file:
+You can also generate images using [asymptote](https://asymptote.sourceforge.io/); the code is automatically compiled and converted into a vector image:
 
 ```md
-![descrizione](immagine.jpg?s=2)
+![description](image.asy)
 ```
 
-I parametri che possono essere usati sono:
+Images can be resized by adding parameters after the filename:
 
-- `w`: cambia la larghezza dell'immagine mantenendo le proporzioni;
-- `h`: cambia l'altezza dell'immagine mantenendo le proporzioni;
-- `s`: moltiplica la larghezza e l'altezza dell'immagine per il valore specificato.
+```md
+![description](image.jpg?s=2)
+```
+
+The parameters that can be used are:
+
+- `w`: changes the width of the image while maintaining aspect ratio;
+- `h`: changes the height of the image while maintaining aspect ratio;
+- `s`: multiplies the width and height of the image by the specified value.
 
 ::: tip
-`w` e `h` possono essere usati insieme, in questo caso l'immagine viene ridimensionata senza mantenere le proporzioni.
+`w` and `h` can be used together; in this case, the image is resized without maintaining aspect ratio.
 :::

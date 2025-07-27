@@ -1,36 +1,37 @@
-# Varianti
+# Variants
 
-È possibile creare più varianti del problema, ogni utente riceverà una variante specifica e non potrà vedere le variante degli altri.
+It is possible to create multiple variants of a problem; each user will receive a specific variant and will not be able to see the variants of others.
 
-Una variante è definita da un oggetto che contiene le variabili da sostituire nel testo. Per definire le varianti bisogna dichiarare un array di oggetti, dove ogni elemento contiene le variabili di una variante.
-::: warning ATTENZIONE
-Il nome delle variabili **deve** iniziare con una lettera minuscola.
+A variant is defined by an object that contains the variables to substitute in the text. To define the variants, you must declare an array of objects, where each element contains the variables for one variant.
+::: warning WARNING
+Variable names **must** start with a lowercase letter.
 :::
 
-Per sostituire le variabili nel testo bisogna specificare il nome della variabile tra parentesi graffe:
+To substitute variables in the text, use curly braces around the variable name:
 
 ```md
-Il valore di `x` è {x}.
+The value of `x` is {x}.
 ```
 
-È possibile inoltre usare delle espressioni più complesse:
+You can also use more complex expressions:
 
 ```md
-Il valore di `x+y` è {x+y}.
+The value of `x+y` is {x+y}.
 ```
 
-Per utilizzare le variabili nelle formule di LaTeX bisogna utilizzare il comando `\js`:
+To use variables inside LaTeX formulas, use the `\js` command:
 
 ```LaTeX
 $x + y = \js{x+y}$
 ```
 
-L'utilizzo delle varianti nei file asymptote è parzialmente supportato. Per usarle bisogna definire le varianti nel formato [python](#python) e specificare il file con le varianti come paramento dell'immagine:
+The use of variants in asymptote files is partially supported. To use them, define the variants in [Python](#python) format and specify the file with the variants as a parameter of the image:
 
 ```md
-![Immagine](immagine.asy?v=variants.py)
+![Image](image.asy?v=variants.py)
 ```
- Le varianti possono essere generate in diversi modi:
+
+Variants can be generated in different ways:
 
 - [Front Matter](#front-matter);
 - [JavaScript](#javascript);
@@ -38,7 +39,7 @@ L'utilizzo delle varianti nei file asymptote è parzialmente supportato. Per usa
 
 ## Front Matter
 
-È possibile dichiarare le varianti usando Front Matter, definendo un blocco YAML all'inizio del file, delimitato da tre trattini `---`.
+You can declare variants using Front Matter by defining a YAML block at the beginning of the file, delimited by three dashes `---`.
 
 ```md
 ---
@@ -48,14 +49,14 @@ variants:
   - x: 4
 ---
 
-Testo del problema...
+Problem text...
 ```
 
-L'array con le varianti deve chiamarsi `variants`.
+The array containing the variants must be named `variants`.
 
 ## JavaScript
 
-È possibile dichiarare le varianti esportando la variabile `variants` all'inizio del file, ciò permette di usare funzioni più complesse per generare le varianti.
+You can declare variants by exporting the `variants` variable at the beginning of the file. This allows the use of more complex functions to generate the variants.
 
 ```js
 export function buildVariant(x, y) {
@@ -64,12 +65,12 @@ export function buildVariant(x, y) {
 
 export const variants = [buildVariant(4, 5), buildVariant(2, 6), buildVariant(3, 7)];
 
-Testo del problema...
+Problem text...
 ```
 
 ## Python
 
-È possibile dichiarare le varianti in un file python, il file deve stampare un JSON con l'array delle varianti su standard output.
+You can declare variants in a Python file. The file must print a JSON array of variants to standard output.
 
 ```py
 import json
@@ -83,10 +84,10 @@ variants = [
 print(json.dumps(variants))
 ```
 
-Successivamente bisogna importare il file python nel problema:
+Then you need to import the Python file into the problem:
 
 ```js
 import variants from "./variants.py";
 
-Testo del problema...
+Problem text...
 ```

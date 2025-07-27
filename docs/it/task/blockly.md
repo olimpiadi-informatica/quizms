@@ -73,7 +73,7 @@ Ogni blocco ha i seguenti campi:
 - `maxInstances`: numero massimo di blocchi consentiti di questo tipo. Se non specificato, il numero di blocchi è illimitato.
 - `js`: una stringa contenente il codice JavaScript da eseguire quando il blocco viene eseguito. Il codice può contenere dei placeholder `%1`, `%2`, ... per gli argomenti che verranno sostituiti con il codice degli argomenti. Nei blocchi output, il codice deve essere un'unica espressione che restituisce un valore.
   ::: warning ATTENZIONE
-  Il codice deve essere conforme alle specifiche JavaScript ES5, perciò la maggior parte delle funzionalità moderne di non sono supportate.
+  Il codice deve essere conforme alle specifiche JavaScript ES5, perciò la maggior parte delle funzionalità moderne di JavaScript non sono supportate.
   :::
 
 Gli _statement_ possono avere i seguenti campi aggiuntivi:

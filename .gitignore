@@ -140,3 +140,6 @@ dist
 # IDEs and editors
 .idea
 .vscode
+
+# MacOS hidden files
+.DS_Store

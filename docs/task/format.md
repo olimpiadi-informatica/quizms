@@ -1,102 +1,102 @@
-# Formato dei problemi
+# Problem Format
 
-Ogni problema è rappresentato da un file **Markdown**:
+Each problem is represented by a **Markdown** file:
 
 ```md
-Quanto fa 2 + 2?
+What is 2 + 2?
 
 - [ ] 2
 - [ ] 3
 - [x] 4
 - [ ] 5
 
-> La soluzione è 4.
+> The solution is 4.
 ```
 
-Il file è composto da quattro parti:
+The file is composed of four parts:
 
-- **l'intestazione**: viene generata automaticamente con il numero del problema, ad esempio `Domanda 1`, `Domanda 2`, ecc.;
-- **il testo**: la descrizione di cosa chiede il problema;
-- **le risposte**: la parte in cui l'utente sceglie la risposta corretta;
-- **la soluzione**: la spiegazione di come si risolve il problema, mostrata dopo che la prova è finita.
+- **the header**: automatically generated with the problem number, e.g. `Question 1`, `Question 2`, etc.;
+- **the statement**: the description of what the problem is asking;
+- **the answers**: the part where the user chooses the correct answer;
+- **the solution**: the explanation of how to solve the problem, shown after the test is completed.
 
 ::: tip
-Le risposte e la soluzione possono essere definite in qualsiasi parte del testo, ma è consigliato metterle alla fine del problema.
+Answers and the solution can be placed anywhere in the text, but it is recommended to put them at the end of the problem.
 :::
 
-È anche possibile definire i problemi usando [MDX](https://mdxjs.com/) (Markdown con l'aggiunta di JavaScript) che permette di definire, attraverso JavaScript, parti interattive del problema, ad esempio l'editor di [codice a blocchi](./blockly).
+It is also possible to define problems using [MDX](https://mdxjs.com/) (Markdown with JavaScript), which allows for interactive parts of the problem using JavaScript, such as a [block-based code editor](./blockly).
 
-## Testo del problema
+## Problem statement
 
-Il testo è la parte principale del problema. Si può formattare in Markdown, la maggior parte delle [funzionalità di Markdown](https://www.markdownguide.org/basic-syntax/) sono supportate e alcune estensioni, tra cui:
+The statement is the main part of the problem. It can be formatted using Markdown. Most [Markdown features](https://www.markdownguide.org/basic-syntax/) are supported, as well as some extensions, including:
 
-- [codice con syntax highlighting](https://www.markdownguide.org/extended-syntax/#syntax-highlighting) (anche per pseudocodice);
-- [immagini](./images);
-- [tabelle](https://www.markdownguide.org/extended-syntax/#tables);
-- [formule matematiche di LaTeX](https://en.wikibooks.org/wiki/LaTeX/Mathematics) (`$...$`).
+- [syntax-highlighted code](https://www.markdownguide.org/extended-syntax/#syntax-highlighting) (also for [pseudocode](./pseudocode.svg));
+- [images](./images);
+- [tables](https://www.markdownguide.org/extended-syntax/#tables);
+- [LaTeX math formulas](https://en.wikibooks.org/wiki/LaTeX/Mathematics) (`$...$`).
 
-::: warning ATTENZIONE
-Le seguenti funzionalità **non** sono supportate:
+::: warning WARNING
+The following features are **not** supported:
 
-- citazioni (blockquotes): questa sintassi è usata per indicare la soluzione;
-- separatore orizzontale (`---`): questa sintassi è usata per separare i sottoproblemi;
-- TODO list: questa sintassi è usata per definire le risposte.
+- blockquotes: this syntax is used to indicate the solution;
+- horizontal rule (`---`): this syntax is used to separate subproblems;
+- TODO lists: this syntax is used to define the answers.
 :::
 
-## Risposte
+## Answers
 
-Le risposte possono essere di tre tipi:
+Answers can be of three types:
 
-- **risposta chiusa**, definite tramite una [TODO list](https://www.markdownguide.org/extended-syntax/#task-lists) in cui la risposta corretta è contrassegnata con una `x`:
+- **multiple-choice answers**, defined using a [TODO list](https://www.markdownguide.org/extended-syntax/#task-lists) where the correct answer is marked with an `x`:
   ```md
-  - [ ] risposta 1
-  - [x] risposta 2
-  - [ ] risposta 3
-  - [ ] risposta 4
+  - [ ] answer 1
+  - [x] answer 2
+  - [ ] answer 3
+  - [ ] answer 4
   ```
   ::: tip
-  È possibile indicare più risposte corrette, ad esempio nel caso di refusi nei testi, tuttavia l'utente può selezionare solo una risposta.
+  It is possible to indicate multiple correct answers (e.g., in case of typos), but the user can select only one answer.
   :::
 
-- **risposta aperta**, definite con la sintassi `?>`:
+- **open-ended answer**, defined with the `?>` syntax:
   ```md
-  ?> risposta
+  ?> answer
   ```
   ::: warning
-  Una risposta aperta può essere lunga al massimo 100 caratteri.
+  An open-ended answer can be at most 100 characters long.
   :::
-  
-- [codice a blocchi](./blockly): l'utente può usare un editor integrato per implementare una soluzione usando la programmazione a blocchi.
 
-## Soluzione
+- [block-based code](./blockly): the user can use an integrated editor to implement a solution using block-based programming.
 
-La soluzione è definita da una [citazione](https://www.markdownguide.org/basic-syntax/#blockquotes-1) e può essere formattata a sua volta con Markdown:
+## Solution
+
+The solution is defined using a [blockquote](https://www.markdownguide.org/basic-syntax/#blockquotes-1) and can itself be formatted with Markdown:
 
 ```md
-> la
-> **soluzione**
-> al
-> _problema_
+> the
+> **solution**
+> to the
+> _problem_
 ```
 
-Durante la gara la soluzione non è visibile all'utente. È possibile vedere la soluzione solo dopo aver finito la prova in modalità training.
+During the competition, the solution is not visible to the user. It is only available after the test is finished in training mode.
 
-## Sottoproblemi
+## Subproblems
 
-È possibile specificare più sottoproblemi nello stesso file separandoli attraverso tre trattini `---`:
+It is possible to define multiple subproblems in the same file by separating them with three dashes `---`:
 
 ```md
-Sottoproblema 1 ...
+Subproblem 1 ...
 
-- [x] Sì
+- [x] Yes
 - [ ] No
 
 ---
 
-Sottoproblema 2 ...
+Subproblem 2 ...
 
-- [ ] Sì
+- [ ] Yes
 - [x] No
 ```
 
-Ogni sottoproblema ha il suo testo, le sue risposte, la sua soluzione e un'intestazione generata automaticamente con il numero del problema e del sottoproblema, ad esempio `Domanda 1.1`, `Domanda 1.2`, ecc.
+Each subproblem has its own text, answers, solution, and a header automatically generated with the problem and subproblem number, e.g., `Question 1.1`, `Question 1.2`, etc.
