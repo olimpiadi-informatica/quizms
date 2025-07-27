@@ -1,26 +1,27 @@
-# Sviluppare QuizMS
+# Develop QuizMS
 
-1. Scarica e compila `quizms`:
+1.  Download and compile `quizms`:
 
-   ```sh
-   $ git clone git@github.com:olimpiadi-informatica/quizms.git
-   $ pushd quizms
-   $ yarn           # installa le dipendenze
-   $ yarn build     # compila il progetto, puoi usare `yarn watch` per ricompilare automaticamente
-   $ yarn link      # crea un symlink a quizms
-   $ popd
-   ```
+    ```sh
+    $ git clone git@github.com:olimpiadi-informatica/quizms.git
+    $ pushd quizms
+    $ yarn           # install dependencies
+    $ yarn build     # compile the project, you can use `yarn watch` to automatically recompile
+    $ yarn link      # create a symlink to quizms
+    $ popd
+    ```
 
-1. Scarica un progetto su cui testare `quizms`:
+2.  Download a project to test `quizms` on:
 
-   ```sh
-   $ git clone ...
-   $ pushd ...
-   $ yarn           # installa le dipendenze
-   $ yarn link @olinfo/quizms   # installa la versione locale di quizms
-   ```
+    ```sh
+    $ git clone ...
+    $ pushd ...
+    $ yarn           # install dependencies
+    $ yarn link @olinfo/quizms   # install the local version of quizms
+    ```
 
-1. Avvia il server di sviluppo:
-   ```sh
-   $ yarn dev
-   ```
+3.  Start the development server:
+
+    ```sh
+    $ yarn dev
+    ```

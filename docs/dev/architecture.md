@@ -1,45 +1,48 @@
-# Architettura
+# Architecture
 
-QuizMS è un framework che permette la generazione di siti web statici che possono essere hostati su servizi come Github Pages, Firebase Hosting, ecc. QuizMS non ha un server e non supporta il server-side rendering, tutta la logica avviene o lato client, o durante la compilazione.
+QuizMS is a framework that allows the generation of static websites that can be hosted on services like Github Pages, Firebase Hosting, etc. QuizMS does not have a server and does not support server-side rendering; all logic occurs either client-side or during compilation.
 
-Ciò rende un po' più complicata la gestione del database e dell'autenticazione. Al momento queste parti vengono gestite attraverso Firestore e Firebase Authentication, che possono essere utilizzate direttamente lato client senza bisogno di un server. Sebbene QuizMS sia stato progettato per essere indipendente dal backend utilizzato, al momento l'unico backend supportato è Firebase e la logica interna è ottimizzata per funzionare con il modello di dati di Firestore.
+This makes database and authentication management a bit more complicated. Currently, these parts are handled through Firestore and Firebase Authentication, which can be used directly client-side without the need for a server. Although QuizMS was designed to be independent of the backend used, currently the only supported backend is Firebase, and the internal logic is optimized to work with Firestore's data model.
 
-## Librerie utilizzate
+## Used Libraries
 
-QuizMS è basato principalmente su [Vite](https://vitejs.dev/): un bundler che permette di personalizzare a fondo il processo di build.
+QuizMS is mainly based on [Vite](https://vitejs.dev/): a bundler that allows deep customization of the build process.
 
-Le altre principali librarie usate sono:
-- [React](https://react.dev/): UI.
-- [Tailwind CSS](https://tailwindcss.com/): CSS.
-- [MDX](https://mdxjs.com/) con i plugin [remark/rehype/recma](https://unifiedjs.com/learn/guide/introduction-to-unified/): parsing dei problemi in Markdown.
-- [Blockly](https://developers.google.com/blockly): codice a blocchi.
-- [Lodash](https://lodash.com/): utility generiche.
-- [Lucide](https://lucide.dev/): icone.
-- [Wouter](https://github.com/molefrog/wouter): routing.
-- [Zod](https://zod.dev/): validazione dei dati.
+The other main libraries used are:
 
-## Testi
+  - [React](https://react.dev/): UI.
+  - [Tailwind CSS](https://tailwindcss.com/): CSS.
+  - [MDX](https://mdxjs.com/) with [remark/rehype/recma](https://unifiedjs.com/learn/guide/introduction-to-unified/) plugins: Markdown problem parsing.
+  - [Blockly](https://developers.google.com/blockly): Block code.
+  - [Lodash](https://lodash.com/): Generic utilities.
+  - [Lucide](https://lucide.dev/): Icons.
+  - [Wouter](https://github.com/molefrog/wouter): Routing.
+  - [Zod](https://zod.dev/): Data validation.
 
-I testi sono scritti in Markdown o MDX e vengono trasformati in JavaScript attraverso `@mdx-js/mdx`, la trasformazione avviene in più fasi:
-- il file parsato in [MDAST](https://github.com/syntax-tree/mdast) (Markdown Abstract Syntax Tree);
-- vengono applicati i plugin [remark](https://github.com/remarkjs/remark);
-- il MDAST viene trasformato in [HAST](https://github.com/syntax-tree/hast) (HTML Abstract Syntax Tree);
-- vengono applicati i plugin [rehype](https://github.com/rehypejs/rehype);
-- il HAST viene trasformato in [ESTREE](https://github.com/estree/estree) (ECMAScript Abstract Syntax Tree);
-- vengono applicati i plugin [recma](https://mdxjs.com/docs/extending-mdx/#list-of-plugins);
-- l'ESTREE viene trasformato in JavaScript;
-- il codice JavaScript di ogni problema viene unito in un unico file JavaScript.
+## Statements
 
-Durante lo sviluppo, il codice non subisce ulteriori trasformazioni e viene eseguito nel browser. 
+Statements are written in Markdown or MDX and are transformed into JavaScript via `@mdx-js/mdx`. The transformation occurs in multiple phases:
 
-Durante le gare, invece, il codice effettua dei passaggi in più:
-- il codice **viene eseguito** utilizzando il runtime JSX di QuizMS che produce nuovamente un ESTREE del codice stesso;
-- vengono rimosse le parti sensibili del codice (es. le soluzioni);
-- l'ordine delle domande e delle risposte viene cambiato in base alla variante scelta;
-- l'ESTREE viene trasformato in JavaScript e viene minimizzato;
-- il codice viene salvato nel database.
+  - the file is parsed into [MDAST](https://github.com/syntax-tree/mdast) (Markdown Abstract Syntax Tree);
+  - [remark](https://github.com/remarkjs/remark) plugins are applied;
+  - the MDAST is transformed into [HAST](https://github.com/syntax-tree/hast) (HTML Abstract Syntax Tree);
+  - [rehype](https://github.com/rehypejs/rehype) plugins are applied;
+  - the HAST is transformed into [ESTREE](https://github.com/estree/estree) (ECMAScript Abstract Syntax Tree);
+  - [recma](https://mdxjs.com/docs/extending-mdx/#list-of-plugins) plugins are applied;
+  - the ESTREE is transformed into JavaScript;
+  - the JavaScript code of each problem is combined into a single JavaScript file.
 
-Il codice viene eseguito in modo da rimuovere tutto il codice JavaScript superfluo e produce del codice completamente statico senza variabili, cicli e selezioni. Sebbene questa parte sia essenziale per rimuovere tutte le informazioni sensibili dal codice, non permette di avere del codice interattivo, ad esempio con Blockly.
+During development, the code undergoes no further transformations and is executed in the browser.
+
+During contests, however, the code undergoes additional steps:
+
+  - the code **is executed** using QuizMS's JSX runtime, which again produces an ESTREE of the code itself;
+  - sensitive parts of the code are removed (e.g., solutions);
+  - the order of questions and answers is changed based on the chosen variant;
+  - the ESTREE is transformed into JavaScript and minimized;
+  - the code is saved to the database.
+
+The code is executed to remove all superfluous JavaScript code and produces completely static code without variables, loops, and selections. Although this part is essential for removing all sensitive information from the code, it does not allow for interactive code, for example with Blockly.
 
 ```mermaid
 flowchart LR

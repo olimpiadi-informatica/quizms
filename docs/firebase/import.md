@@ -1,53 +1,51 @@
-# Importare la gara
+# Import the Contest
 
-I dati del contest devono essere salvati dentro la directory `data` del progetto. I file possono essere in formato TOML,
-YAML, CSV, JSON o JSONL.
+Contest data must be saved in the `data` directory of the project. Files can be in TOML, YAML, CSV, JSON, or JSONL format.
 
-Se non l'hai già fatto, [accedi a Google Cloud](./setup#completa-la-configurazione).
+If you haven't already, [log in to Google Cloud](./setup#complete-the-configuration).
 
-## Importare le gare
+## Import Contests
 
-I contests sono descritti dal file `data/contests.{toml,yaml,csv,json,jsonl}`. Il formato è il seguente, i campi possono essere sia in formato camelCase che snake_case:
+Contests are described by the `data/contests.{toml,yaml,csv,json,jsonl}` file. The format is as follows; fields can be in either camelCase or snake\_case:
 
-| Campo                  | Descrizione                                                                          | Tipo       | Note                                                                 |
-|------------------------|--------------------------------------------------------------------------------------|------------|----------------------------------------------------------------------|
-| `id`                   | ID della gara.                                                                       | `string`   |                                                                      |
-| `name`                 | Nome della gara.                                                                     | `string`   |                                                                      |
-| `long_name`            | Nome esteso della gara.                                                              | `string`   | Opzionale.                                                           |
-| `problem_ids`          | ID dei problemi.                                                                     | `string[]` |                                                                      |
-| `user_data`            | Informazioni personali richieste agli studenti durante la registrazione.             | `object[]` |                                                                      |
-| `has_variants`         | Se ci sono più varianti dei testi.                                                   | `boolean`  |                                                                      |
-| `has_online`           | Se la gara può essere svolta online.                                                 | `boolean`  |                                                                      |
-| `has_pdf`              | Se la gara può essere svolta in modalità cartacea.                                   | `boolean`  |                                                                      |
-| `statement_version`    | Versione dei testi.                                                                  | `number`   | Deve essere incrementato ogni volta che i testi vengono reimportati. |
-| `allow_student_import` | Se gli insegnanti possono possono importare gli studenti da un CSV.                  | `boolean`  | Opzionale.                                                           |
-| `allow_student_edit`   |                                                                                      | `boolean`  | Opzionale.                                                           |
-| `allow_answer_edit`    |                                                                                      | `boolean`  | Opzionale.                                                           |
-| `instructions`         | Informazioni generali in Markdown che vengono mostrare nella pagina dell'insegnante. | `string`   | Opzionale.                                                           |
+| Field                  | Description                                                                    | Type       | Notes                                                                  |
+|------------------------|--------------------------------------------------------------------------------|------------|------------------------------------------------------------------------|
+| `id`                   | Contest ID.                                                          | `string`   |                                                                        |
+| `name`                 | Contest Name.                                                        | `string`   |                                                                        |
+| `long_name`            | Extended contest name.                                               | `string`   | Optional.                                                    |
+| `problem_ids`          | Problem IDs.                                                         | `string[]` |                                                                        |
+| `user_data`            | Personal information requested from students during registration.    | `object[]` |                                                                        |
+| `has_variants`         | If there are multiple text variants.                                 | `boolean`  |                                                                        |
+| `has_online`           | If the contest can be taken online.                                  | `boolean`  |                                                                        |
+| `has_pdf`              | If the contest can be taken in paper mode.                           | `boolean`  |                                                                        |
+| `statement_version`    | Text version.                                                        | `number`   | Must be incremented every time the texts are re-imported.    |
+| `allow_student_import` | If teachers can import students from a CSV.                          | `boolean`  | Optional.                                                    |
+| `allow_student_edit`   |                                                                      | `boolean`  | Optional.                                                    |
+| `allow_answer_edit`    |                                                                      | `boolean`  | Optional.                                                    |
+| `instructions`         | General Markdown information displayed on the teacher's page.        | `string`   | Optional.                                                    |
 
-Se `has_online` è `true`, i seguenti campi sono richiesti:
+If `has_online` is `true`, the following fields are required:
 
-| Campo                  | Descrizione                                              | Tipo       | Note |
-|------------------------|----------------------------------------------------------|------------|------|
-| `contest_window_start` | Data di inizio della finestra di svolgimento della gara. | `date`     |      |
-| `contest_window_end`   | Data di fine della finestra di svolgimento della gara.   | `date`     |      |
-| `duration`             | Durata della gara in minuti.                             | `number`   |      |
-| `allow_restart`        | Se gli insegnanti possono far partire la gara più volte. | `boolean`  |      |
+| Field                  | Description                                            | Type       | Notes |
+|------------------------|--------------------------------------------------------|------------|-------|
+| `contest_window_start` | Contest start date.                          | `date`     |       |
+| `contest_window_end`   | Contest end date.                            | `date`     |       |
+| `duration`             | Contest duration in minutes.                 | `number`   |       |
+| `allow_restart`        | If teachers can start the contest multiple times. | `boolean`  |       |
 
-Le informazioni personali nel campo `user_data` devono avere il seguente formato:
+Personal information in the `user_data` field must have the following format:
 
-| Campo    | Descrizione                                                      | Tipo                            | Note                                                        |
-|----------|------------------------------------------------------------------|---------------------------------|-------------------------------------------------------------|
-| `name`   | Nome del campo.                                                  | `string`                        |                                                             |
-| `label`  | Nome leggibile del campo.                                        | `string`                        |                                                             |
-| `type`   | Tipo del campo.                                                  | `"text"`, `"number"` o `"date"` |                                                             |
-| `size`   | Larghezza del campo nella tabella degli insegnanti.              | `"xs"`, `"sm"`, `"md"` o `"lg"` | Opzionale.                                                  |
-| `min`    | Valore minimo del campo.                                         | `number` o `date`               | Richiesto per i campi data, opzionale per i campi numerici. |
-| `max`    | Valore massimo del campo.                                        | `number` o `date`               | Richiesto per i campi data, opzionale per i campi numerici. |
-| `pinned` | Se appuntare il campo a sinistra nella tabella degli insegnanti. | `boolean`                       | Opzionale.                                                  |
+| Field    | Description                                                      | Type                            | Notes                                                        |
+|----------|------------------------------------------------------------------|---------------------------------|--------------------------------------------------------------|
+| `name`   | Field name.                                            | `string`                        |                                                              |
+| `label`  | Readable field name.                                   | `string`                        |                                                              |
+| `type`   | Field type.                                            | `"text"`, `"number"` or `"date"` |                                                              |
+| `size`   | Field width in the teacher's table.                    | `"xs"`, `"sm"`, `"md"` or `"lg"` | Optional.                                          |
+| `min`    | Minimum field value.                                   | `number` or `date`              | Required for date fields, optional for numeric fields. |
+| `max`    | Maximum field value.                                   | `number` or `date`              | Required for date fields, optional for numeric fields. |
+| `pinned` | If the field should be pinned to the left in the teacher's table. | `boolean`                       | Optional.                                          |
 
-
-::: details Esempio di file
+::: details Example file
 
 ::: code-group
 
@@ -182,25 +180,25 @@ oii-scolastiche:
 
 :::
 
-Per importare i contests usa il comando:
+To import contests, use the command:
 
 ```sh
 $ npx quizms firebase import --contests
 ```
 
-## Importare le scuole e gli insegnanti
+## Import Schools and Teachers
 
-Le scuole e gli insegnanti sono descritti dal file `data/schools.{toml,yaml,csv,json,jsonl}`. Il formato è il seguente:
+Schools and teachers are described by the `data/schools.{toml,yaml,csv,json,jsonl}` file. The format is as follows:
 
-| Campo          | Descrizione                              | Tipo                       | Note                                                                                                                                                                |
-|----------------|------------------------------------------|----------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `id`           | Codice meccanografico della scuola.      | `string`                   |                                                                                                                                                                     |
-| `name`         | Nome della scuola.                       | `string`                   |                                                                                                                                                                     |
-| `contest_ids`  | ID delle gare a cui la scuola partecipa. | `string` oppure `string[]` | È possibile specificare un [picomatch](https://github.com/micromatch/picomatch#globbing-features), ad esempio `"*"` indica che la scuola partecipa a tutte le gare. |
-| `password`     | Password della scuola.                   | `string`                   |                                                                                                                                                                     |
-| `pdf_variants` | Varianti cartacee assegnate alla scuola. | `string[]`                 | Opzionale.                                                                                                                                                          |
+| Field          | Description                              | Type                       | Notes                                                                                                                                                                 |
+|----------------|------------------------------------------|----------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `id`           | School's mechanical code.      | `string`                   |                                                                                                                                                                       |
+| `name`         | School name.                   | `string`                   |                                                                                                                                                                       |
+| `contest_ids`  | IDs of contests the school participates in. | `string` or `string[]` | You can specify a [picomatch](https://github.com/micromatch/picomatch#globbing-features), for example `"*"` indicates that the school participates in all contests. |
+| `password`     | School password.               | `string`                   |                                                                                                                                                                       |
+| `pdf_variants` | Paper variants assigned to the school. | `string[]`                 | Optional.                                                                                                                                                   |
 
-::: details Esempio di file
+::: details Example file
 
 ::: code-group
 
@@ -224,7 +222,7 @@ BOIS01400R:
 ```json [JSON]
 {
   "PNTF01000A": {
-    "id":,
+    "id": "",
     "name": "ITST J.F.Kennedy",
     "contest_ids": ["oii-scolastiche"],
     "password": "OKYkIZ6xFHPqyFS8HdUk"
@@ -240,31 +238,31 @@ BOIS01400R:
 
 :::
 
-Per importare le scuole usa il comando:
+To import schools, use the command:
 
 ```sh
 $ npx quizms firebase import --schools --teachers
 ```
 
-## Importare le varianti
+## Import Variants
 
-Le configurazioni per generare le varianti devono essere salvate in un file `data/variants.{toml,yaml,csv,json,jsonl}` con il seguente formato:
+Configurations for generating variants must be saved in a `data/variants.{toml,yaml,csv,json,jsonl}` file with the following format:
 
-| Campo                  | Descrizione                                                              | Tipo       | Note                                                                 |
-|------------------------|--------------------------------------------------------------------------|------------|----------------------------------------------------------------------|
-| `id`                   | ID della gara.                                                           | `string`   |                                                                      |
-| `secret`               | Segreto usato per generare le varianti. Non deve essere reso pubblico.   | `string`   |                                                                      |
-| `entry`                | File MDX principale contenente i testi dei problemi.                     | `string`   | Tipicamente `contest/contest.mdx`.                                   |
-| `shuffle_problems`     | Se i problemi dentro una sezioni vengono mescolati.                      | `boolean`  |                                                                      |
-| `shuffle_answers`      | Se le risposte vengono mescolate.                                        | `boolean`  |                                                                      |
-| `variant_ids`          | ID delle varianti online.                                                | `string[]` |                                                                      |
-| `pdf_variant_ids`      | ID delle varianti cartacee.                                              | `string[]` |                                                                      |
-| `pdf_per_school`       | Numero di varianti cartacee da assegnare ad ogni scuola.                 | `number`   |                                                                      |
+| Field                  | Description                                                              | Type       | Notes                                                                 |
+|------------------------|--------------------------------------------------------------------------|------------|-----------------------------------------------------------------------|
+| `id`                   | Contest ID.                                                    | `string`   |                                                                       |
+| `secret`               | Secret used to generate variants. Must not be made public.     | `string`   |                                                                       |
+| `entry`                | Main MDX file containing problem texts.                        | `string`   | Typically `contest/contest.mdx`.                            |
+| `shuffle_problems`     | If problems within a section are shuffled.                     | `boolean`  |                                                                       |
+| `shuffle_answers`      | If answers are shuffled.                                       | `boolean`  |                                                                       |
+| `variant_ids`          | IDs of online variants.                                        | `string[]` |                                                                       |
+| `pdf_variant_ids`      | IDs of paper variants.                                         | `string[]` |                                                                       |
+| `pdf_per_school`       | Number of paper variants to assign to each school.             | `number`   |                                                                       |
 
-::: details Esempio di file
+::: details Example file
 
 ::: code-group
-    
+
 ```toml [TOML]
 [oii-scolastiche]
 secret = "FbpU9ertN5WlCngQNqOK"
@@ -286,7 +284,7 @@ oii-scolastiche:
   pdf_variant_ids: [20, 21, 22, 23, 24, 25, 26, 27, 28, 29]
   pdf_per_school: 3
 ```
-    
+
 ```json [JSON]
 {
   "oii-scolastiche": {
@@ -303,7 +301,7 @@ oii-scolastiche:
 
 :::
 
-Per generare le varianti usa il seguente comando:
+To generate the variants, use the following command:
 
 ```sh
 $ npx quizms variants
@@ -311,30 +309,30 @@ $ npx quizms variants
 
 ::: tip
 
-Puoi anche generare le varianti manualmente, in tal caso ogni variante deve essere definita in un file JSON chiamato `variants/$ID/schema.json` con il seguente formato:
+You can also generate variants manually; in that case, each variant must be defined in a JSON file named `variants/$ID/schema.json` with the following format:
 
-| Campo       | Descrizione                                  | Tipo     | Note |
-|-------------|----------------------------------------------|----------|------|
-| `id`        | ID della variante.                           | `string` |      |
-| `contestId` | ID del contest a cui appartiene la variante. | `string` |      |
-| `schema`    | Lo schema delle domande.                     | `object` |      |
+| Field       | Description                                  | Type     | Notes |
+|-------------|----------------------------------------------|----------|-------|
+| `id`        | Variant ID.                        | `string` |       |
+| `contestId` | ID of the contest the variant belongs to. | `string` |       |
+| `schema`    | The question schema.               | `object` |       |
 
-Lo schema è un oggetto contente, per ogni domanda, un oggetto con il seguente formato:
+The schema is an object containing, for each question, an object with the following format:
 
-| Campo            | Descrizione                         | Tipo                              | Note       |
-|------------------|-------------------------------------|-----------------------------------|------------|
-| `type`           | Tipo di domanda.                    | `"text"`, `"number"` o `"points"` |            |
-| `originalId`     | ID della domanda prima del shuffle. | `string`                          | Opzionale. |
-| `optionsCorrect` | Risposte corrette.                  | `string[]`                        | Opzionale. |
-| `optionsBlank`   | Risposte in bianco.                 | `string[]`                        | Opzionale. |
-| `optionsWrong`   | Risposte non corrette.              | `string[]`                        | Opzionale. |
-| `pointsCorrect`  | Punti per risposta corretta.        | `number`                          | Opzionale. |
-| `pointsBlank`    | Punti per risposta in bianco.       | `number`                          | Opzionale. |
-| `pointsWrong`    | Punti per risposta sbagliata.       | `number`                          | Opzionale. |
+| Field            | Description                         | Type                              | Notes        |
+|------------------|-------------------------------------|-----------------------------------|--------------|
+| `type`           | Question type.            | `"text"`, `"number"` or `"points"` |              |
+| `originalId`     | Question ID before shuffling. | `string`                          | Optional. |
+| `optionsCorrect` | Correct answers.          | `string[]`                        | Optional. |
+| `optionsBlank`   | Blank answers.            | `string[]`                        | Optional. |
+| `optionsWrong`   | Incorrect answers.        | `string[]`                        | Optional. |
+| `pointsCorrect`  | Points for correct answer. | `number`                          | Optional. |
+| `pointsBlank`    | Points for blank answer.  | `number`                          | Optional. |
+| `pointsWrong`    | Points for wrong answer.  | `number`                          | Optional. |
 
-Se le opzioni o i punti non sono specificati, il punteggio degli studenti non verrà calcolato.
+If options or points are not specified, student scores will not be calculated.
 
-::: details Esempio di variante
+::: details Example variant
 
 ```json
 {
@@ -365,24 +363,24 @@ Se le opzioni o i punti non sono specificati, il punteggio degli studenti non ve
 
 :::
 
-Per importare le varianti usa il comando:
+To import variants, use the command:
 
 ```sh
 $ npx quizms firebase import --variants --variant-mappings --statements
 ```
 
-## Importare le prove cartacee
+## Import Paper Tests
 
-Per importare i PDF delle prove cartacee usa i comandi:
+To import the PDFs of paper tests, use the commands:
 
 ```sh
 $ npx quizms print
 $ npx quizms firebase import --pdfs
 ```
 
-## Eseguire il deploy del sito
+## Deploy the Website
 
-Per eseguire il deploy del sito usa i comandi:
+To deploy the website, use the commands:
 
 ```sh
 $ firebase deploy --only hosting
