@@ -1,5 +1,8 @@
 import { forwardRef, type Ref } from "react";
 
+import type { I18n } from "@lingui/core";
+import { msg } from "@lingui/core/macro";
+import { useLingui } from "@lingui/react/macro";
 import { saveAs } from "file-saver";
 import { unparse as stringifyCSV } from "papaparse";
 
@@ -9,23 +12,24 @@ import { useTeacher, useTeacherStudents } from "~/web/teacher/context";
 export const ExportModal = forwardRef(function Exporter(_, ref: Ref<HTMLButtonElement> | null) {
   const { contest } = useTeacher();
   const [students] = useTeacherStudents();
+  const { i18n } = useLingui();
 
   return (
     <button
       ref={ref}
       type="button"
       className="hidden"
-      onClick={() => exportStudents(students, contest)}
+      onClick={() => exportStudents(students, contest, i18n)}
     />
   );
 });
 
-function exportStudents(students: Student[], contest: Contest) {
+function exportStudents(students: Student[], contest: Contest, i18n: I18n) {
   const flatStudents = students
     .filter((student) => !student.disabled)
     .map((student) => {
       return [
-        ...contest.userData.map((field) => formatUserData(student, field)),
+        ...contest.userData.map((field) => formatUserData(student, field, i18n.locale)),
         ...(contest.hasVariants ? [student.variant] : []),
         ...contest.problemIds.map((id) => student.answers?.[id]),
         student.score ?? "",
@@ -34,9 +38,9 @@ function exportStudents(students: Student[], contest: Contest) {
 
   flatStudents.unshift([
     ...contest.userData.map((field) => field.label),
-    ...(contest.hasVariants ? ["Variante"] : []),
+    ...(contest.hasVariants ? [i18n._(msg`Variant`)] : []),
     ...contest.problemIds,
-    "Punteggio",
+    i18n._(msg`Score`),
   ]);
 
   const csv = stringifyCSV(flatStudents, {

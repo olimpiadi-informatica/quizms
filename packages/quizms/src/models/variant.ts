@@ -1,3 +1,5 @@
+import type { MessageDescriptor } from "@lingui/core";
+import { msg } from "@lingui/core/macro";
 import z from "zod";
 
 import type { Student } from "~/models/student";
@@ -30,7 +32,11 @@ export type Schema = Variant["schema"];
 
 export const variantMappingSchema = z.object({ id: z.string(), variant: z.string() });
 
-export function parseAnswer(answer: string, schema: Schema[string]): Answer {
+export function parseAnswer(
+  answer: string,
+  schema: Schema[string],
+  t: (descriptor: MessageDescriptor) => string,
+): Answer {
   let value: Answer = answer.trim().toUpperCase();
   if (!value) return null;
 
@@ -38,28 +44,32 @@ export function parseAnswer(answer: string, schema: Schema[string]): Answer {
   if (!options.includes(value) && (schema.type === "number" || schema.type === "points")) {
     value = Number(value);
   }
-  isValidAnswer(value, schema);
+  isValidAnswer(value, schema, t);
   return value;
 }
 
-export function isValidAnswer(answer: Answer, schema: Schema[string]) {
+export function isValidAnswer(
+  answer: Answer,
+  schema: Schema[string],
+  t: (descriptor: MessageDescriptor) => string,
+) {
   if (answer == null || schema.options?.some((option) => option.value === answer)) return;
   switch (schema.type) {
     case "text": {
-      throw new Error(`La risposta "${answer}" non è valida`);
+      throw new Error(t(msg`The answer "${answer}" is not valid`));
     }
     case "number": {
       if (!Number.isInteger(answer)) {
-        throw new TypeError("La risposta deve essere un numero intero");
+        throw new TypeError(t(msg`The answer must be an integer`));
       }
       break;
     }
     case "points": {
       if (typeof answer !== "number" || !Number.isInteger(answer)) {
-        throw new TypeError("Il punteggio deve essere un numero intero");
+        throw new TypeError(t(msg`The score must be an integer`));
       }
       if (!(0 <= answer && answer <= schema.maxPoints)) {
-        throw new Error(`Il punteggio deve essere compreso tra 0 e ${schema.maxPoints}`);
+        throw new Error(t(msg`The score must be between 0 and ${schema.maxPoints}`));
       }
       break;
     }

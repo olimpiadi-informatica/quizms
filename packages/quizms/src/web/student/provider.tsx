@@ -8,21 +8,21 @@ import { StudentContext, type StudentContextProps } from "./context";
 import { StudentLayout } from "./layout";
 
 type StudentProviderProps = {
-  /** Dati dello studente */
+  /** Student data */
   student: Student;
-  /** Funzione per aggiornare i dati dello studente */
+  /** Function to update student data */
   setStudent: (value: Student) => Promise<void> | void;
-  /** Contest dello studente */
+  /** Student's contest */
   contest: Contest;
-  /** Scuola dello studente */
+  /** Student's school */
   participation: Participation;
-  /** Funzione per resettare le risposte e ricominciare la prova (opzionale) */
+  /** Function to reset answers and restart the test (optional) */
   reset?: () => Promise<void> | void;
-  /** Funzione eseguita quando lo studente ha terminato la prova (opzionale) */
+  /** Function executed when the student has completed the test (optional) */
   onSubmit?: () => Promise<void> | void;
-  /** Funzione per cambiare utente */
+  /** Function to change user */
   logout?: () => Promise<void> | void;
-  /** Flag che indica se la prova è terminata */
+  /** Flag indicating if the test is completed */
   terminated: boolean;
 };
 

@@ -1,5 +1,6 @@
 import { Fragment, forwardRef, type Ref, useReducer, useRef } from "react";
 
+import { Trans, useLingui } from "@lingui/react/macro";
 import {
   Button,
   CardActions,
@@ -56,7 +57,7 @@ export default function Announcements() {
       </div>
       <CardActions>
         <Button className="btn-primary" onClick={() => ref.current?.showModal()}>
-          Aggiungi comunicazione
+          <Trans>Add announcement</Trans>
         </Button>
       </CardActions>
       <AnnouncementModal ref={ref} addAnnouncement={addAnnouncement} />
@@ -69,6 +70,7 @@ const AnnouncementModal = forwardRef(function AnnouncementModal(
   ref: Ref<HTMLDialogElement>,
 ) {
   const { contest } = useAdmin();
+  const { t } = useLingui();
   const [id, nextId] = useReducer((prev) => prev + 1, 0);
 
   const finalize = async ({
@@ -94,22 +96,19 @@ const AnnouncementModal = forwardRef(function AnnouncementModal(
   };
 
   return (
-    <Modal ref={ref} title="Aggiungi comunicazione">
+    <Modal ref={ref} title={t`Add announcement`}>
       <Form key={id} onSubmit={finalize} className="!max-w-full">
         <SelectField
           field="level"
-          label="Priorità"
-          options={{ info: "Normale", warning: "Alta" }}
-          placeholder="Seleziona la priorità"
+          label={t`Priority`}
+          options={{ info: t`Normal`, warning: t`High` }}
+          placeholder={t`Select priority`}
         />
-        <TextField field="title" label="Titolo" placeholder="Inserisci il titolo" />
-        <TextAreaField
-          field="body"
-          label="Messaggio"
-          placeholder="Inserisci il messaggio"
-          rows={5}
-        />
-        <SubmitButton>Aggiungi</SubmitButton>
+        <TextField field="title" label={t`Title`} placeholder={t`Enter title`} />
+        <TextAreaField field="body" label={t`Message`} placeholder={t`Enter message`} rows={5} />
+        <SubmitButton>
+          <Trans>Add</Trans>
+        </SubmitButton>
       </Form>
     </Modal>
   );

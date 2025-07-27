@@ -1,5 +1,6 @@
 import { type ReactNode, useRef } from "react";
 
+import { Trans, useLingui } from "@lingui/react/macro";
 import {
   Form,
   Modal,
@@ -49,6 +50,7 @@ function StudentLoginInner({ contestFilter, children }: Omit<LoginProps, "config
   const db = useDb();
   const user = useAnonymousAuth();
   const metadata = useMetadata();
+  const { t } = useLingui();
 
   const [contests] = useCollection("contests", contestConverter, {
     subscribe: true,
@@ -91,12 +93,16 @@ function StudentLoginInner({ contestFilter, children }: Omit<LoginProps, "config
 
   const submit = async ({ contestId, token, ...userData }: FormStudent) => {
     try {
-      await loginAction(db, {
-        contestId,
-        token,
-        userData,
-        answers: {},
-      });
+      await loginAction(
+        db,
+        {
+          contestId,
+          token,
+          userData,
+          answers: {},
+        },
+        t,
+      );
     } catch (err) {
       if (err instanceof DuplicateStudentError) {
         modalRef.current?.showModal();
@@ -114,12 +120,14 @@ function StudentLoginInner({ contestFilter, children }: Omit<LoginProps, "config
         </NavbarBrand>
       </Navbar>
       <Form defaultValue={defaultValue} onSubmit={submit} className="p-4 pb-8">
-        <h1 className="mb-2 text-xl font-bold">Accedi alla gara</h1>
+        <h1 className="mb-2 text-xl font-bold">
+          <Trans>Access the contest</Trans>
+        </h1>
         <SelectField
           field="contestId"
-          label="Gara"
+          label={t`Contest`}
           options={mapValues(filteredContests, "name")}
-          placeholder="Seleziona una gara"
+          placeholder={t`Select a contest`}
         />
         {({ contestId }) => {
           const contest = filteredContests[contestId ?? ""];
@@ -129,16 +137,20 @@ function StudentLoginInner({ contestFilter, children }: Omit<LoginProps, "config
               {contest.userData.map((field) => (
                 <UserDataField key={field.name} field={field} />
               ))}
-              <TextField field="token" label="Codice prova" placeholder="aaaaa-bbbbb-ccccc" />
-              <SubmitButton>Inizia la prova</SubmitButton>
+              <TextField field="token" label={t`Contest code`} placeholder="aaaaa-bbbbb-ccccc" />
+              <SubmitButton>
+                <Trans>Start the contest</Trans>
+              </SubmitButton>
             </>
           );
         }}
       </Form>
-      <Modal ref={modalRef} title="Attenzione">
+      <Modal ref={modalRef} title={t`Warning`}>
         <p>
-          Il tuo account è già presente su un&apos;altro dispositivo. Per trasferire l&apos;accesso
-          al dispositivo corrente comunica al tuo insegnante il codice seguente:
+          <Trans>
+            Your account is already present on another device. To transfer access to the current
+            device, communicate the following code to your teacher:
+          </Trans>
         </p>
         <div className="flex justify-center pt-3">
           <span className="pt-1 font-mono text-3xl">

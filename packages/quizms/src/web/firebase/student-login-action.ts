@@ -1,3 +1,5 @@
+import { msg } from "@lingui/core/macro";
+import type { _t } from "@lingui/react/macro";
 import { getAuth } from "firebase/auth";
 import {
   doc,
@@ -23,14 +25,15 @@ import { studentHash } from "./common/hash";
 
 export class DuplicateStudentError extends Error {
   constructor(
+    message: string,
     public studentId: string,
     public participationId: string,
   ) {
-    super("Studente già registrato");
+    super(message);
   }
 }
 
-export async function loginAction(db: Firestore, baseStudent: Partial<Student>) {
+export async function loginAction(db: Firestore, baseStudent: Partial<Student>, t: typeof _t) {
   const auth = getAuth(db.app);
 
   const student: Student = {
@@ -52,20 +55,24 @@ export async function loginAction(db: Firestore, baseStudent: Partial<Student>) 
   };
 
   try {
-    await createStudent(db, student);
+    await createStudent(db, student, t);
   } catch (err) {
     if (err instanceof DuplicateStudentError) {
-      await createStudentRestore(db, {
-        ...student,
-        id: err.studentId,
-        participationId: err.participationId,
-      });
+      await createStudentRestore(
+        db,
+        {
+          ...student,
+          id: err.studentId,
+          participationId: err.participationId,
+        },
+        t,
+      );
     }
     throw err;
   }
 }
 
-async function createStudentRestore(db: Firestore, student: Student) {
+async function createStudentRestore(db: Firestore, student: Student, t: typeof _t) {
   // In this case the users want to log in as an already existing student
   // If it fails, it means that the token is too old
 
@@ -87,11 +94,11 @@ async function createStudentRestore(db: Firestore, student: Student) {
       restore,
     );
   } catch {
-    throw new Error("Codice scaduto");
+    throw new Error(t(msg`Code expired`));
   }
 }
 
-async function createStudent(db: Firestore, student: Student) {
+async function createStudent(db: Firestore, student: Student, t: typeof _t) {
   // to create the student we first need to find
   // - the variant assigned to the student
   // - the school of the student
@@ -106,7 +113,7 @@ async function createStudent(db: Firestore, student: Student) {
   const variantRef = doc(db, "variantMappings", variant).withConverter(variantMappingConverter);
   const variantMapping = await getDoc(variantRef);
   if (!variantMapping.exists()) {
-    throw new Error("Variante non trovata, contattare gli amministratori della piattaforma.");
+    throw new Error(t(msg`Variant not found, please contact the platform administrators.`));
   }
   student.variant = variantMapping.data().variant;
 
@@ -117,11 +124,11 @@ async function createStudent(db: Firestore, student: Student) {
   );
   const participationMapping = await getDoc(participationMappingRef);
   if (!participationMapping.exists()) {
-    throw new Error("Codice non valido.");
+    throw new Error(t(msg`Invalid code.`));
   }
   const participationMappingData = participationMapping.data();
   if (participationMappingData.contestId !== student.contestId) {
-    throw new Error("Il codice inserito non corrisponde alla gara selezionata.");
+    throw new Error(t(msg`The entered code does not match the selected contest.`));
   }
   student.participationId = participationMappingData.participationId;
   student.startedAt = participationMappingData.startingTime;
@@ -146,7 +153,11 @@ async function createStudent(db: Firestore, student: Student) {
     await runTransaction(db, async (trans) => {
       const mapping = await trans.get(hashMappingRef);
       if (mapping.exists()) {
-        throw new DuplicateStudentError(mapping.data().studentId, student.participationId!);
+        throw new DuplicateStudentError(
+          t(msg`Student already registered`),
+          mapping.data().studentId,
+          student.participationId!,
+        );
       }
 
       trans.set(studentRef, student);
@@ -159,7 +170,7 @@ async function createStudent(db: Firestore, student: Student) {
     });
   } catch (err) {
     if ((err as FirestoreError).code === "permission-denied") {
-      throw new Error("Codice scaduto.");
+      throw new Error(t(msg`Code expired.`));
     }
     throw err;
   }

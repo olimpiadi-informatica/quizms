@@ -1,5 +1,6 @@
 import { Fragment } from "react";
 
+import { Trans } from "@lingui/react/macro";
 import { DateTime } from "@olinfo/react-components";
 import { CircleX, Info, TriangleAlert } from "lucide-react";
 import Markdown from "react-markdown";
@@ -39,7 +40,11 @@ export function Announcements() {
           <hr className="my-5 last:hidden" />
         </Fragment>
       ))}
-      {announcements.length === 0 && <div>Nessuna comunicazione.</div>}
+      {announcements.length === 0 && (
+        <div>
+          <Trans>No announcements.</Trans>
+        </div>
+      )}
     </div>
   );
 }

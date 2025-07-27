@@ -1,5 +1,6 @@
 import { lazy } from "react";
 
+import { Trans } from "@lingui/react/macro";
 import { Link, Redirect, Route, Switch, useParams } from "wouter";
 
 import type { Contest } from "~/models";
@@ -21,7 +22,9 @@ export function AdminProvider({ name, contests, setContest, logout }: AdminProvi
       <Route path="/">
         {contests.length === 1 && <Redirect to={`/${contests[0].id}`} />}
         <div className="flex w-full grow flex-col items-center justify-center gap-4">
-          <p className="text-2xl">Seleziona una gara</p>
+          <p className="text-2xl">
+            <Trans>Select a contest</Trans>
+          </p>
           <div className="flex flex-wrap justify-center gap-2">
             {contests.map((c) => (
               <Link key={c.id} className="btn btn-primary" href={`/${c.id}/`}>

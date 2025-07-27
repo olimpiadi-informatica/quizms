@@ -1,5 +1,7 @@
 import { type ComponentType, lazy, Suspense, useMemo } from "react";
 
+import { msg } from "@lingui/core/macro";
+import { type _t, useLingui } from "@lingui/react/macro";
 import type { CellEditRequestEvent, ColDef, ICellRendererParams } from "ag-grid-community";
 import type { AgGridReactProps } from "ag-grid-react";
 
@@ -15,6 +17,7 @@ const AgGridReact: ComponentType<AgGridReactProps> = lazy(() => import("~/web/co
 
 export function SchoolTable() {
   const { contest } = useAdmin();
+  const { t } = useLingui();
 
   const [participations, setParticipation] = useCollection(
     "participations",
@@ -25,7 +28,7 @@ export function SchoolTable() {
     },
   );
 
-  const colDefs = useMemo(() => columnDefinition(), []);
+  const colDefs = useMemo(() => columnDefinition(t), [t]);
 
   const onCellEditRequest = async (ev: CellEditRequestEvent) => {
     const participation = ev.data as Participation;
@@ -51,24 +54,24 @@ export function SchoolTable() {
   );
 }
 
-function columnDefinition(): ColDef[] {
+function columnDefinition(t: typeof _t): ColDef[] {
   return [
     {
       field: "schoolId",
-      headerName: "ID",
+      headerName: t(msg`ID`),
       width: 150,
       filter: true,
     },
     {
       field: "name",
-      headerName: "Nome",
+      headerName: t(msg`Name`),
       minWidth: 200,
       flex: 1,
       filter: true,
     },
     {
       field: "count",
-      headerName: "Studenti",
+      headerName: t(msg`Students`),
       width: 100,
       sortable: false,
       cellRenderer: ({ data }: ICellRendererParams<Participation>) => {
@@ -82,7 +85,7 @@ function columnDefinition(): ColDef[] {
     },
     {
       field: "finalized",
-      headerName: "Finalizzato",
+      headerName: t(msg`Finalized`),
       width: 100,
       filter: true,
       cellDataType: "boolean",

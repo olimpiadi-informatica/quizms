@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 
+import { Trans, useLingui } from "@lingui/react/macro";
 import { Card, CardActions, CardBody } from "@olinfo/react-components";
 import { Link } from "wouter";
 
@@ -16,34 +17,35 @@ import TokenList from "./token-list";
 
 export default function Dashboard() {
   const { contest } = useAdmin();
+  const { t } = useLingui();
 
   return (
     <div className="flex flex-col gap-4">
       <Card>
-        <CardBody title="Impostazioni gara">
+        <CardBody title={t`Contest settings`}>
           <ContestSettings />
         </CardBody>
       </Card>
       <Card>
-        <CardBody title="Comunicazioni">
+        <CardBody title={t`Announcements`}>
           <Announcements />
         </CardBody>
       </Card>
       <Card>
-        <CardBody title="Scuole">
+        <CardBody title={t`Schools`}>
           <Suspense fallback={<Loading />}>
             <ContestInformation />
           </Suspense>
           <CardActions>
             <Link href="/schools/" className="btn btn-primary">
-              Gestione scuole
+              <Trans>Manage schools</Trans>
             </Link>
           </CardActions>
         </CardBody>
       </Card>
       {contest.hasOnline && (
         <Card>
-          <CardBody title="Ultimi token">
+          <CardBody title={t`Latest tokens`}>
             <div className="h-64 max-h-screen">
               <TokenList />
             </div>
@@ -51,18 +53,18 @@ export default function Dashboard() {
         </Card>
       )}
       <Card>
-        <CardBody title="Esportazione">
+        <CardBody title={t`Export`}>
           <CardActions>
             <Export
-              label="scuole"
-              description="tutte le scuole"
+              label={t`schools`}
+              description={t`all schools`}
               collection="participations"
               converter={participationConverter}
               options={{ constraints: { contestId: contest.id, disabled: false } }}
             />
             <Export
-              label="studenti"
-              description="tutti gli studenti"
+              label={t`students`}
+              description={t`all students`}
               collection="students"
               converter={studentConverter}
               options={{
@@ -105,9 +107,15 @@ function ContestInformation() {
 
   return (
     <div>
-      <div>Scuole totali: {totalSchools}</div>
-      <div>Scuole finalizzate: {finalizedSchools}</div>
-      <div>Studenti totali: {totalStudents}</div>
+      <div>
+        <Trans>Total schools: {totalSchools}</Trans>
+      </div>
+      <div>
+        <Trans>Finalized schools: {finalizedSchools}</Trans>
+      </div>
+      <div>
+        <Trans>Total students: {totalStudents}</Trans>
+      </div>
     </div>
   );
 }

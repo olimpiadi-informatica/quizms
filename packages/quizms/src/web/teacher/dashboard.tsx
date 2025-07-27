@@ -1,5 +1,6 @@
 import { useRef } from "react";
 
+import { Trans, useLingui } from "@lingui/react/macro";
 import {
   Button,
   Card,
@@ -28,13 +29,14 @@ import { StudentRestoreList } from "./dashboard-student-restore";
 
 function StartContestButton() {
   const { contest, participation, setParticipation } = useTeacher();
+  const { t, i18n } = useLingui();
 
   const modalRef = useRef<HTMLDialogElement>(null);
 
   const close = () => modalRef.current?.close();
 
   const start = async () => {
-    const token = await randomToken();
+    const token = await randomToken(i18n.locale);
     const startingTime = roundToNearestMinutes(addSeconds(Date.now(), 3.5 * 60));
     const endingTime = addMinutes(startingTime, contest.hasOnline ? contest.duration : 0);
     await setParticipation({ ...participation, token, startingTime, endingTime });
@@ -44,14 +46,20 @@ function StartContestButton() {
   return (
     <>
       <Button className="btn-success" onClick={() => modalRef.current?.showModal()}>
-        Inizia prova online
+        <Trans>Start online contest</Trans>
       </Button>
-      <Modal ref={modalRef} title="Conferma">
-        <p>Sei sicuro di voler iniziare la gara?</p>
+      <Modal ref={modalRef} title={t`Confirm`}>
+        <p>
+          <Trans>Are you sure you want to start the contest?</Trans>
+        </p>
         <Form onSubmit={start} className="!max-w-full">
           <div className="flex flex-wrap justify-center gap-2">
-            <FormButton onClick={close}>Annulla</FormButton>
-            <SubmitButton className="btn-warning">Conferma</SubmitButton>
+            <FormButton onClick={close}>
+              <Trans>Cancel</Trans>
+            </FormButton>
+            <SubmitButton className="btn-warning">
+              <Trans>Confirm</Trans>
+            </SubmitButton>
           </div>
         </Form>
       </Modal>
@@ -61,6 +69,7 @@ function StartContestButton() {
 
 function StopContestButton() {
   const { participation, setParticipation } = useTeacher();
+  const { t } = useLingui();
   const modalRef = useRef<HTMLDialogElement>(null);
 
   const close = () => modalRef.current?.close();
@@ -78,14 +87,20 @@ function StopContestButton() {
   return (
     <>
       <Button className="btn-error" onClick={() => modalRef.current?.showModal()}>
-        Annulla inizio gara
+        <Trans>Cancel contest start</Trans>
       </Button>
-      <Modal ref={modalRef} title="Conferma">
-        <p>Sei sicuro di voler annullare l&apos;inizio della gara?</p>
+      <Modal ref={modalRef} title={t`Confirm`}>
+        <p>
+          <Trans>Are you sure you want to cancel the start of the contest?</Trans>
+        </p>
         <Form onSubmit={undoContestStart} className="!max-w-full">
           <div className="flex flex-wrap justify-center gap-2">
-            <FormButton onClick={close}>Indietro</FormButton>
-            <SubmitButton className="btn-warning">Conferma</SubmitButton>
+            <FormButton onClick={close}>
+              <Trans>Back</Trans>
+            </FormButton>
+            <SubmitButton className="btn-warning">
+              <Trans>Confirm</Trans>
+            </SubmitButton>
           </div>
         </Form>
       </Modal>
@@ -102,40 +117,62 @@ function ContestData({ startingTime, endingTime }: { startingTime: Date; endingT
     <div className="flex flex-col gap-2">
       <WithinTimeRange end={startingTime}>
         <p className="my-2 text-lg">
-          <b>Codice:</b> <span className="font-mono">{participation.token}</span>
+          <b>
+            <Trans>Code:</Trans>
+          </b>{" "}
+          <span className="font-mono">{participation.token}</span>
         </p>
         <p>
-          La gara inizierà alle ore <DateTime date={startingTime} dateStyle="hidden" />.
+          <Trans>
+            The contest will start at <DateTime date={startingTime} dateStyle="hidden" />.
+          </Trans>
         </p>
         <p>
-          Tempo rimanente all&apos;inizio: <Timer endTime={startingTime} />
+          <Trans>
+            Time remaining until start: <Timer endTime={startingTime} />
+          </Trans>
         </p>
         <WithinTimeRange end={undoEnd}>
           <p>
-            Se ti sei sbagliato, puoi ancora annullare la gara fino a un minuto prima
-            dell&apos;inizio.
+            <Trans>
+              If you started the contest by mistake, you can still cancel the contest up to one
+              minute before it starts.
+            </Trans>
           </p>
         </WithinTimeRange>
       </WithinTimeRange>
       <WithinTimeRange start={startingTime} end={endingTime}>
         <p>
-          <b>Codice:</b> <span className="font-mono">{participation.token}</span>
+          <b>
+            <Trans>Code:</Trans>
+          </b>{" "}
+          <span className="font-mono">{participation.token}</span>
         </p>
         <p>
-          La gara terminerà alle <DateTime date={endingTime} dateStyle="hidden" />.
+          <Trans>
+            The contest will end at <DateTime date={endingTime} dateStyle="hidden" />.
+          </Trans>
         </p>
         <p>
-          Tempo rimanente: <Timer endTime={endingTime} />
+          <Trans>
+            Time remaining: <Timer endTime={endingTime} />
+          </Trans>
         </p>
         <p className="text-center text-2xl">
-          Gara iniziata alle ore <DateTime date={startingTime} dateStyle="hidden" />.
+          <Trans>
+            Contest started at <DateTime date={startingTime} dateStyle="hidden" />.
+          </Trans>
         </p>
       </WithinTimeRange>
       <WithinTimeRange start={endingTime}>
         <p>
-          Gara iniziata alle ore <DateTime date={startingTime} dateStyle="hidden" />.
+          <Trans>
+            Contest started at <DateTime date={startingTime} dateStyle="hidden" />.
+          </Trans>
         </p>
-        <p>La gara è terminata.</p>
+        <p>
+          <Trans>The contest has ended.</Trans>
+        </p>
       </WithinTimeRange>
     </div>
   );
@@ -143,33 +180,35 @@ function ContestData({ startingTime, endingTime }: { startingTime: Date; endingT
 
 export default function TeacherDashboard() {
   const { contest, participation } = useTeacher();
+  const { t } = useLingui();
 
   return (
     <div className="flex flex-col gap-4">
       <Card>
-        <CardBody title="Comunicazioni">
+        <CardBody title={t`Announcements`}>
           <Announcements />
         </CardBody>
       </Card>
       <Card>
-        <CardBody title="Informazioni Gara">
+        <CardBody title={t`Contest Information`}>
           <div className="prose prose-a:link-info max-w-none">
             <Markdown>{contest.instructions}</Markdown>
           </div>
           {contest.hasOnline && (
             <div className="font-bold">
-              La gara si potrà svolgere dal{" "}
-              <DateTime date={contest.contestWindowStart} dateStyle="long" />{" "}
               {isSameDay(contest.contestWindowStart, contest.contestWindowEnd) ? (
-                <>
-                  alle <DateTime date={contest.contestWindowEnd} dateStyle="hidden" />
-                </>
+                <Trans>
+                  The contest can be taken from{" "}
+                  <DateTime date={contest.contestWindowStart} dateStyle="long" /> until{" "}
+                  <DateTime date={contest.contestWindowEnd} dateStyle="hidden" />.
+                </Trans>
               ) : (
-                <>
-                  al <DateTime date={contest.contestWindowEnd} dateStyle="long" />
-                </>
+                <Trans>
+                  The contest can be taken from{" "}
+                  <DateTime date={contest.contestWindowStart} dateStyle="long" /> until{" "}
+                  <DateTime date={contest.contestWindowEnd} dateStyle="long" />.
+                </Trans>
               )}
-              .
             </div>
           )}
           {contest.hasPdf && (
@@ -181,7 +220,7 @@ export default function TeacherDashboard() {
         </CardBody>
       </Card>
       <Card>
-        <CardBody title="Gestione Gara">
+        <CardBody title={t`Contest Management`}>
           {/* contest data */}
           {contest.hasOnline &&
             (participation.startingTime && participation.endingTime ? (
@@ -190,7 +229,9 @@ export default function TeacherDashboard() {
                 endingTime={participation.endingTime}
               />
             ) : (
-              <p>La gara non è ancora iniziata!</p>
+              <p>
+                <Trans>The contest has not started yet!</Trans>
+              </p>
             ))}
           <CardActions>
             {contest.hasOnline && (
@@ -213,14 +254,14 @@ export default function TeacherDashboard() {
               </WithinTimeRange>
             )}
             <Link className="btn btn-primary" href="/students/">
-              Gestisci studenti e risposte
+              <Trans>Manage students and answers</Trans>
             </Link>
           </CardActions>
         </CardBody>
       </Card>
       {contest.hasOnline && (
         <Card>
-          <CardBody title="Richieste di accesso">
+          <CardBody title={t`Access Requests`}>
             <div className="h-96 max-h-screen">
               <StudentRestoreList />
             </div>
@@ -233,6 +274,7 @@ export default function TeacherDashboard() {
 
 function DownloadPdfButton() {
   const { participation, getPdfStatements } = useTeacher();
+  const { t } = useLingui();
 
   const onClick = async () => {
     const statements = await getPdfStatements();
@@ -248,7 +290,7 @@ function DownloadPdfButton() {
       }
       if (pages.length % 2) {
         const page = pdf.addPage();
-        page.drawText("Pagina lasciata volontariamente vuota", {
+        page.drawText(t`This page is intentionally left blank`, {
           x: 10,
           y: 10,
           size: 17,
@@ -262,7 +304,7 @@ function DownloadPdfButton() {
 
   return (
     <Button className="btn-warning" onClick={onClick}>
-      Scarica PDF con tutti i testi
+      <Trans>Download PDF with all variants</Trans>
     </Button>
   );
 }
@@ -283,7 +325,7 @@ function DownloadZipButton() {
 
   return (
     <Button className="btn-warning" onClick={onClick}>
-      Scarica ZIP con tutti i testi
+      <Trans>Download ZIP with all variants</Trans>
     </Button>
   );
 }

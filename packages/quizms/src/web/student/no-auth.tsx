@@ -1,5 +1,7 @@
 import { type ReactNode, useCallback, useEffect, useState } from "react";
 
+import { useLingui } from "@lingui/react/macro";
+
 import type { Contest, Participation, Student } from "~/models";
 
 import { StudentProvider } from "./provider";
@@ -12,11 +14,13 @@ type AuthProps = {
 };
 
 export function NoAuth({ contestName, contestLongName, duration, children }: AuthProps) {
+  const { t } = useLingui();
+
   const [student, setStudent] = useLocalStorage<Student>({
     id: "",
     userData: {
-      name: "Utente",
-      surname: "anonimo",
+      name: t`Anonymous user`,
+      surname: "",
     },
     answers: {},
     variant: "0",

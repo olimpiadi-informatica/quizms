@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 
+import { Trans } from "@lingui/react/macro";
 import { DateTime } from "@olinfo/react-components";
 
 import { participationMappingConverter } from "~/web/firebase/common/converters";
@@ -13,16 +14,24 @@ export default function TokenList() {
       <table className="table table-pin-rows">
         <thead>
           <tr>
-            <th>Scuola</th>
-            <th>Token</th>
-            <th>Inizio gara</th>
+            <th>
+              <Trans>School</Trans>
+            </th>
+            <th>
+              <Trans>Token</Trans>
+            </th>
+            <th>
+              <Trans>Start time</Trans>
+            </th>
           </tr>
         </thead>
         <tbody>
           <Suspense
             fallback={
               <tr>
-                <td>Nessuna token generato.</td>
+                <td>
+                  <Trans>No tokens generated.</Trans>
+                </td>
               </tr>
             }>
             <TokenListInner />

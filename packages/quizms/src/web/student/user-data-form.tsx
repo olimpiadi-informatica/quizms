@@ -1,3 +1,4 @@
+import { useLingui } from "@lingui/react/macro";
 import { DateField, Form, NumberField, TextField } from "@olinfo/react-components";
 
 import type { Contest } from "~/models";
@@ -5,6 +6,7 @@ import { useStudent } from "~/web/student/context";
 
 export function UserDataForm() {
   const { contest, student } = useStudent();
+  const { t } = useLingui();
 
   return (
     <Form
@@ -19,7 +21,7 @@ export function UserDataForm() {
       ))}
       {contest.hasVariants && (
         <div>
-          <TextField field="variant" label="Codice prova" placeholder="" />
+          <TextField field="variant" label={t`Variant code`} placeholder={t`Enter variant code`} />
         </div>
       )}
     </Form>
@@ -27,17 +29,20 @@ export function UserDataForm() {
 }
 
 export function UserDataField({ field }: { field: Contest["userData"][number] }) {
+  const { t } = useLingui();
   const commonProps = {
     field: field.name,
     label: field.label,
-    placeholder: `Inserisci ${field.label.toLowerCase()}`,
+    placeholder: t`Enter ${field.label.toLowerCase()}`,
   };
   if (field.type === "text" || process.env.QUIZMS_MODE === "print") {
     return (
       <TextField
         {...commonProps}
         pattern="[\-'\s\p{Alpha}]+"
-        validationErrorMap={{ patternMismatch: "Il campo non può contenere numeri o simboli." }}
+        validationErrorMap={{
+          patternMismatch: t`This field cannot contain numbers or symbols.`,
+        }}
       />
     );
   }

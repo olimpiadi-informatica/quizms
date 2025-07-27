@@ -1,5 +1,7 @@
-import { type ReactNode, Suspense, useDeferredValue } from "react";
+import { type ReactNode, Suspense, useDeferredValue, useMemo } from "react";
 
+import { type Messages, setupI18n } from "@lingui/core";
+import { I18nProvider } from "@lingui/react";
 import { Layout, useNotifications } from "@olinfo/react-components";
 import useSWR, { SWRConfig } from "swr";
 import { type BaseLocationHook, Router, Switch, useLocation } from "wouter";
@@ -8,23 +10,41 @@ import { Loading } from "~/web/components";
 
 import "./index.css";
 
+import { mapKeys } from "lodash-es";
+
+const messages = import.meta.glob<Messages>("../../locales/*.po", {
+  eager: true,
+  import: "messages",
+});
+
 export function BaseLayout({ children }: { children: ReactNode }) {
   const [location, setLocation] = useLocation();
   const deferredLocation = useDeferredValue(location);
 
   const hook: BaseLocationHook = () => [deferredLocation, setLocation];
 
+  const i18n = useMemo(() => {
+    return setupI18n({
+      locale: "en",
+      messages: mapKeys(messages, (_, path) => {
+        return path.replace(/^.*\/(\w+)\.po$/, "$1");
+      }),
+    });
+  }, []);
+
   return (
-    <Layout>
-      <LayoutInner>
-        <Suspense fallback={<Loading />}>
-          <Router hook={hook}>
-            <Switch>{children}</Switch>
-          </Router>
-          <DatePolyfill />
-        </Suspense>
-      </LayoutInner>
-    </Layout>
+    <I18nProvider i18n={i18n}>
+      <Layout>
+        <LayoutInner>
+          <Suspense fallback={<Loading />}>
+            <Router hook={hook}>
+              <Switch>{children}</Switch>
+            </Router>
+            <DatePolyfill />
+          </Suspense>
+        </LayoutInner>
+      </Layout>
+    </I18nProvider>
   );
 }
 

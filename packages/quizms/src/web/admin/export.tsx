@@ -1,5 +1,6 @@
 import { forwardRef, type Ref, useRef } from "react";
 
+import { Trans, useLingui } from "@lingui/react/macro";
 import { Button, Modal } from "@olinfo/react-components";
 import {
   type DocumentSnapshot,
@@ -28,7 +29,7 @@ export default function Export<T>(props: Props<T>) {
   return (
     <>
       <Button className="btn-primary" onClick={() => ref.current?.showModal()}>
-        Esporta {props.label}
+        <Trans>Export {props.label}</Trans>
       </Button>
       <ExportModal ref={ref} {...props} />
     </>
@@ -41,6 +42,7 @@ const ExportModal = forwardRef(function StudentExportModal(
 ) {
   const { contest } = useAdmin();
   const db = useDb();
+  const { t } = useLingui();
 
   const onExport = async () => {
     await saveExport(db, collection, converter, options);
@@ -50,24 +52,26 @@ const ExportModal = forwardRef(function StudentExportModal(
   };
 
   return (
-    <Modal ref={ref} title={`Esporta ${label}`}>
+    <Modal ref={ref} title={t`Export ${label}`}>
       {window.showSaveFilePicker === undefined ? (
         <div className="flex items-center gap-3">
           <TriangleAlert size={20} className="flex-none text-warning" />
           <span>
-            Il tuo browser non supporta l&apos;esportazione dei dati. Usa un browser Chrome o Edge.
+            <Trans>Your browser does not support data export. Please use Chrome or Edge.</Trans>
           </span>
         </div>
       ) : (
         <>
           <div>
-            Stai per esportare i dati di {description} della gara <b>{contest.name}</b>. Questa
-            operazione esegue un grande numero di query al database che richiederà del tempo e potrà
-            incidere sulla fatturazione del progetto.
+            <Trans>
+              You are about to export {description} data from the contest <b>{contest.name}</b>.
+              This operation executes a large number of database queries that will take time and may
+              affect project billing.
+            </Trans>
           </div>
           <div className="mt-4 flex flex-wrap justify-center gap-2">
             <Button className="btn-primary" onClick={onExport}>
-              Esporta
+              <Trans>Export</Trans>
             </Button>
           </div>
         </>

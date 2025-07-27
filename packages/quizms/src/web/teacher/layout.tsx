@@ -1,5 +1,6 @@
 import { type ReactNode, Suspense } from "react";
 
+import { Trans } from "@lingui/react/macro";
 import {
   Button,
   Dropdown,
@@ -55,10 +56,14 @@ export function TeacherLayout({ contests, participations, logout, children }: Pr
               </NavbarSubmenu>
             )}
             <NavbarMenuItem>
-              <Link href={`/${contest.id}/`}>Gestione gara</Link>
+              <Link href={`/${contest.id}/`}>
+                <Trans>Contest Management</Trans>
+              </Link>
             </NavbarMenuItem>
             <NavbarMenuItem>
-              <Link href={`/${contest.id}/students/`}>Gestione studenti</Link>
+              <Link href={`/${contest.id}/students/`}>
+                <Trans>Manage students</Trans>
+              </Link>
             </NavbarMenuItem>
           </NavbarMenu>
         )}
@@ -94,7 +99,7 @@ function UserDropdown({ participation, participations, logout }: DropdownProps) 
       <DropdownMenu>
         <DropdownItem>
           <Button className="flex justify-between gap-4" onClick={logout}>
-            Esci <LogOut size={20} />
+            <Trans>Logout</Trans> <LogOut size={20} />
           </Button>
         </DropdownItem>
       </DropdownMenu>

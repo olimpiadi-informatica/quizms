@@ -1,5 +1,6 @@
 import { useCallback } from "react";
 
+import { useLingui } from "@lingui/react/macro";
 import type { FirebaseOptions } from "firebase/app";
 import { getAuth, signOut } from "firebase/auth";
 
@@ -36,7 +37,8 @@ export function FirebaseAdmin({ ssoUrl, ssoLogo, config }: Props) {
 function AdminInner() {
   const db = useDb();
   const auth = getAuth(db.app);
-  const name = auth.currentUser?.displayName ?? "Utente anonimo";
+  const { t } = useLingui();
+  const name = auth.currentUser?.displayName ?? t`Anonymous user`;
 
   const [contests, setContest] = useCollection("contests", contestConverter, {
     subscribe: true,

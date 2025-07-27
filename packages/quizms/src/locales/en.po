@@ -1,0 +1,773 @@
+msgid ""
+msgstr ""
+"POT-Creation-Date: 2025-07-27 17:23-0400\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: @lingui/cli\n"
+"Language: en\n"
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Plural-Forms: \n"
+
+#. placeholder {0}: studentRestore[0].name
+#. placeholder {1}: studentRestore[0].surname
+#: src/web/teacher/dashboard-student-restore.tsx
+msgid "{0} {1} is trying to access the competition. To approve them, enter the confirmation code that was shown to them."
+msgstr "{0} {1} is trying to access the competition. To approve them, enter the confirmation code that was shown to them."
+
+#. placeholder {0}: field.label
+#: src/web/teacher/table/utils.ts
+msgid "{0} missing"
+msgstr "{0} missing"
+
+#: src/web/teacher/table/finalize.tsx
+msgid "<0>Warning:</0> this operation is irreversible."
+msgstr "<0>Warning:</0> this operation is irreversible."
+
+#: src/web/teacher/table/index.tsx
+#: src/web/teacher/table/index.tsx
+msgid "Absent"
+msgstr "Absent"
+
+#: src/web/teacher/dashboard.tsx
+msgid "Access Requests"
+msgstr "Access Requests"
+
+#: src/web/firebase/student-login.tsx
+msgid "Access the contest"
+msgstr "Access the contest"
+
+#: src/web/admin/announcements.tsx
+msgid "Add"
+msgstr "Add"
+
+#: src/web/admin/announcements.tsx
+#: src/web/admin/announcements.tsx
+msgid "Add announcement"
+msgstr "Add announcement"
+
+#. placeholder {0}: contest?.name
+#: src/web/teacher/table/finalize.tsx
+msgid "After finalizing, it will <0>no longer</0> be possible to <1>add</1> new students or <2>modify</2> student data in this school for the competition <3>{0}</3>."
+msgstr "After finalizing, it will <0>no longer</0> be possible to <1>add</1> new students or <2>modify</2> student data in this school for the competition <3>{0}</3>."
+
+#. placeholder {0}: contest?.name
+#: src/web/teacher/table/finalize.tsx
+msgid "After finalizing, it will <0>no longer</0> be possible to <1>modify</1> student data in this school for the competition <2>{0}</2>."
+msgstr "After finalizing, it will <0>no longer</0> be possible to <1>modify</1> student data in this school for the competition <2>{0}</2>."
+
+#: src/web/admin/dashboard.tsx
+msgid "all schools"
+msgstr "all schools"
+
+#: src/web/admin/dashboard.tsx
+msgid "all students"
+msgstr "all students"
+
+#: src/web/teacher/table/finalize.tsx
+msgid "all students have been correctly entered"
+msgstr "all students have been correctly entered"
+
+#: src/web/components/error/index.tsx
+msgid "An error occurred in the application."
+msgstr "An error occurred in the application."
+
+#: src/web/teacher/dashboard.tsx
+#: src/web/admin/dashboard.tsx
+msgid "Announcements"
+msgstr "Announcements"
+
+#: src/web/student/no-auth.tsx
+#: src/web/firebase/admin-login.tsx
+msgid "Anonymous user"
+msgstr "Anonymous user"
+
+#: src/web/student/layout.tsx
+msgid "Answer"
+msgstr "Answer"
+
+#: src/web/teacher/dashboard-student-restore.tsx
+#: src/web/teacher/dashboard-student-restore.tsx
+msgid "Approve"
+msgstr "Approve"
+
+#: src/web/teacher/dashboard.tsx
+msgid "Are you sure you want to cancel the start of the contest?"
+msgstr "Are you sure you want to cancel the start of the contest?"
+
+#: src/web/student/layout.tsx
+msgid "Are you sure you want to finish?"
+msgstr "Are you sure you want to finish?"
+
+#: src/web/teacher/dashboard.tsx
+msgid "Are you sure you want to start the contest?"
+msgstr "Are you sure you want to start the contest?"
+
+#: src/web/teacher/table/finalize.tsx
+msgid "At least one student doesn't have a name or surname"
+msgstr "At least one student doesn't have a name or surname"
+
+#: src/web/teacher/dashboard.tsx
+msgid "Back"
+msgstr "Back"
+
+#: src/web/teacher/dashboard.tsx
+#: src/web/teacher/table/finalize.tsx
+#: src/web/teacher/table/delete.tsx
+#: src/web/teacher/table/delete-all.tsx
+#: src/web/student/layout.tsx
+msgid "Cancel"
+msgstr "Cancel"
+
+#: src/web/teacher/dashboard.tsx
+msgid "Cancel contest start"
+msgstr "Cancel contest start"
+
+#: src/web/firebase/student-login-action.ts
+msgid "Code expired"
+msgstr "Code expired"
+
+#: src/web/firebase/student-login-action.ts
+msgid "Code expired."
+msgstr "Code expired."
+
+#: src/web/teacher/dashboard.tsx
+#: src/web/teacher/dashboard.tsx
+msgid "Code:"
+msgstr "Code:"
+
+#: src/web/teacher/dashboard.tsx
+#: src/web/teacher/dashboard.tsx
+#: src/web/teacher/dashboard.tsx
+#: src/web/teacher/dashboard.tsx
+#: src/web/teacher/dashboard-student-restore.tsx
+#: src/web/teacher/table/finalize.tsx
+#: src/web/teacher/table/finalize.tsx
+#: src/web/student/layout.tsx
+msgid "Confirm"
+msgstr "Confirm"
+
+#: src/web/teacher/dashboard-student-restore.tsx
+msgid "Confirmation code"
+msgstr "Confirmation code"
+
+#: src/web/firebase/student-login.tsx
+msgid "Contest"
+msgstr "Contest"
+
+#: src/web/firebase/student-login.tsx
+msgid "Contest code"
+msgstr "Contest code"
+
+#: src/web/student/layout.tsx
+msgid "Contest completed"
+msgstr "Contest completed"
+
+#: src/web/teacher/dashboard.tsx
+msgid "Contest Information"
+msgstr "Contest Information"
+
+#: src/web/admin/contest-settings.tsx
+msgid "Contest instructions"
+msgstr "Contest instructions"
+
+#: src/web/teacher/layout.tsx
+#: src/web/teacher/dashboard.tsx
+#: src/web/firebase/common/password-login.tsx
+msgid "Contest Management"
+msgstr "Contest Management"
+
+#: src/web/admin/dashboard.tsx
+msgid "Contest settings"
+msgstr "Contest settings"
+
+#: src/web/teacher/dashboard.tsx
+#: src/web/teacher/dashboard.tsx
+msgid "Contest started at <0/>."
+msgstr "Contest started at <0/>."
+
+#: src/web/student/base-statement.tsx
+msgid "Contest will start in:<0><1/></0>"
+msgstr "Contest will start in:<0><1/></0>"
+
+#: src/web/teacher/table/delete.tsx
+#: src/web/teacher/table/delete-all.tsx
+msgid "Continue"
+msgstr "Continue"
+
+#: src/web/teacher/table/importer.tsx
+msgid "CSV File"
+msgstr "CSV File"
+
+#: src/web/teacher/table/index.tsx
+msgid "Delete"
+msgstr "Delete"
+
+#: src/web/teacher/table/delete.tsx
+#: src/web/teacher/table/delete-all.tsx
+msgid "Delete student"
+msgstr "Delete student"
+
+#: src/web/teacher/table/index.tsx
+msgid "Deleted"
+msgstr "Deleted"
+
+#: src/web/teacher/table/delete.tsx
+msgid "Don't show this pop-up again"
+msgstr "Don't show this pop-up again"
+
+#: src/web/teacher/dashboard.tsx
+msgid "Download PDF with all variants"
+msgstr "Download PDF with all variants"
+
+#: src/web/teacher/dashboard.tsx
+msgid "Download ZIP with all variants"
+msgstr "Download ZIP with all variants"
+
+#: src/web/teacher/table/index.tsx
+msgid "Empty"
+msgstr "Empty"
+
+#. placeholder {0}: field.label.toLowerCase()
+#: src/web/student/user-data-form.tsx
+msgid "Enter {0}"
+msgstr "Enter {0}"
+
+#: src/web/teacher/dashboard-student-restore.tsx
+msgid "Enter code"
+msgstr "Enter code"
+
+#: src/web/admin/announcements.tsx
+msgid "Enter message"
+msgstr "Enter message"
+
+#: src/web/admin/announcements.tsx
+msgid "Enter title"
+msgstr "Enter title"
+
+#: src/web/student/user-data-form.tsx
+msgid "Enter variant code"
+msgstr "Enter variant code"
+
+#: src/web/components/error/index.tsx
+msgid "Error"
+msgstr "Error"
+
+#. placeholder {0}: row + 1
+#. placeholder {1}: (err as Error).message
+#: src/web/teacher/table/importer.tsx
+msgid "Error in row {0}: {1}"
+msgstr "Error in row {0}: {1}"
+
+#. placeholder {0}: row + 1
+#: src/web/teacher/table/importer.tsx
+msgid "Error in row {0}: Missing variant"
+msgstr "Error in row {0}: Missing variant"
+
+#. placeholder {0}: row + 1
+#: src/web/teacher/table/importer.tsx
+msgid "Error in row {0}: The variant \"{variantId}\" is not valid"
+msgstr "Error in row {0}: The variant \"{variantId}\" is not valid"
+
+#. placeholder {0}: row + 1
+#: src/web/teacher/table/importer.tsx
+msgid "Error in row {0}: Too few fields"
+msgstr "Error in row {0}: Too few fields"
+
+#: src/web/teacher/table/index.tsx
+#: src/web/admin/export.tsx
+#: src/web/admin/dashboard.tsx
+msgid "Export"
+msgstr "Export"
+
+#. placeholder {0}: props.label
+#: src/web/admin/export.tsx
+msgid "Export {0}"
+msgstr "Export {0}"
+
+#: src/web/admin/export.tsx
+msgid "Export {label}"
+msgstr "Export {label}"
+
+#: src/web/teacher/table/index.tsx
+msgid "Finalize"
+msgstr "Finalize"
+
+#: src/web/teacher/table/finalize.tsx
+msgid "Finalize School"
+msgstr "Finalize School"
+
+#: src/web/admin/school-table.tsx
+msgid "Finalized"
+msgstr "Finalized"
+
+#: src/web/admin/dashboard.tsx
+msgid "Finalized schools: {finalizedSchools}"
+msgstr "Finalized schools: {finalizedSchools}"
+
+#: src/web/student/layout.tsx
+msgid "Terminate"
+msgstr "Terminate"
+
+#: src/web/admin/announcements.tsx
+msgid "High"
+msgstr "High"
+
+#: src/web/admin/school-table.tsx
+msgid "ID"
+msgstr "ID"
+
+#: src/web/teacher/table/finalize.tsx
+msgid "If this student was added by mistake and you want to remove them, you can use the<0> Delete</0> button in the last column."
+msgstr "If this student was added by mistake and you want to remove them, you can use the<0> Delete</0> button in the last column."
+
+#: src/web/teacher/table/importer.tsx
+msgid "If you are using Excel, you can create a CSV file by going to “<0>Save as</0>” and choosing “<1>Comma separated values (.csv)</1>” as the file format."
+msgstr "If you are using Excel, you can create a CSV file by going to “<0>Save as</0>” and choosing “<1>Comma separated values (.csv)</1>” as the file format."
+
+#: src/web/teacher/dashboard.tsx
+msgid "If you started the contest by mistake, you can still cancel the contest up to one minute before it starts."
+msgstr "If you started the contest by mistake, you can still cancel the contest up to one minute before it starts."
+
+#: src/web/teacher/table/finalize.tsx
+msgid "If you understand and agree, write “<0>{correctConfirm}</0>”."
+msgstr "If you understand and agree, write “<0>{correctConfirm}</0>”."
+
+#: src/web/teacher/table/importer.tsx
+msgid "Import"
+msgstr "Import"
+
+#: src/web/teacher/table/index.tsx
+#: src/web/teacher/table/importer.tsx
+msgid "Import students"
+msgstr "Import students"
+
+#: src/web/teacher/table/importer.tsx
+msgid "Import students from a file. The file must be in <0>CSV</0> format, the first row must contain the header. <1>Do not</1> leave empty rows before the header or empty columns before the data."
+msgstr "Import students from a file. The file must be in <0>CSV</0> format, the first row must contain the header. <1>Do not</1> leave empty rows before the header or empty columns before the data."
+
+#: src/web/firebase/common/password-login.tsx
+msgid "Incorrect password"
+msgstr "Incorrect password"
+
+#: src/web/firebase/common/password-login.tsx
+msgid "Incorrect username"
+msgstr "Incorrect username"
+
+#: src/web/firebase/student-login-action.ts
+msgid "Invalid code."
+msgstr "Invalid code."
+
+#: src/web/teacher/table/finalize.tsx
+msgid "It is not possible to finalize the school due to the following error:"
+msgstr "It is not possible to finalize the school due to the following error:"
+
+#: src/web/admin/dashboard.tsx
+msgid "Latest tokens"
+msgstr "Latest tokens"
+
+#: src/web/components/loading.tsx
+msgid "Loading..."
+msgstr "Loading..."
+
+#: src/web/firebase/common/sso-login.tsx
+#: src/web/firebase/common/password-login.tsx
+msgid "Login"
+msgstr "Login"
+
+#. placeholder {0}: redirect.host
+#: src/web/firebase/common/sso-login.tsx
+msgid "Login using your {0} credentials"
+msgstr "Login using your {0} credentials"
+
+#: src/web/teacher/layout.tsx
+#: src/web/student/layout.tsx
+#: src/web/admin/layout.tsx
+msgid "Logout"
+msgstr "Logout"
+
+#: src/web/admin/dashboard.tsx
+msgid "Manage schools"
+msgstr "Manage schools"
+
+#: src/web/teacher/layout.tsx
+msgid "Manage students"
+msgstr "Manage students"
+
+#: src/web/teacher/dashboard.tsx
+msgid "Manage students and answers"
+msgstr "Manage students and answers"
+
+#: src/web/admin/announcements.tsx
+msgid "Message"
+msgstr "Message"
+
+#: src/web/teacher/table/utils.ts
+#: src/web/teacher/table/index.tsx
+msgid "Missing variant"
+msgstr "Missing variant"
+
+#: src/web/teacher/dashboard-student-restore.tsx
+#: src/web/admin/school-table.tsx
+msgid "Name"
+msgstr "Name"
+
+#: src/web/teacher/dashboard-announcements.tsx
+msgid "No announcements."
+msgstr "No announcements."
+
+#: src/web/teacher/dashboard-student-restore.tsx
+#: src/web/teacher/dashboard-student-restore.tsx
+msgid "No requests."
+msgstr "No requests."
+
+#: src/web/admin/token-list.tsx
+msgid "No tokens generated."
+msgstr "No tokens generated."
+
+#: src/web/admin/announcements.tsx
+msgid "Normal"
+msgstr "Normal"
+
+#: src/web/teacher/table/index.tsx
+msgid "Not deleted"
+msgstr "Not deleted"
+
+#: src/web/student/layout.tsx
+msgid "Once confirmed, you will not be able to modify your answers."
+msgstr "Once confirmed, you will not be able to modify your answers."
+
+#: src/web/student/print-auth.tsx
+msgid "Online variants"
+msgstr "Online variants"
+
+#: src/web/teacher/table/index.tsx
+msgid "open"
+msgstr "open"
+
+#: src/web/teacher/table/index.tsx
+msgid "Present"
+msgstr "Present"
+
+#: src/web/student/print-auth.tsx
+msgid "Printed variants"
+msgstr "Printed variants"
+
+#: src/web/admin/announcements.tsx
+msgid "Priority"
+msgstr "Priority"
+
+#: src/web/student/layout.tsx
+msgid "Question"
+msgstr "Question"
+
+#: src/web/teacher/dashboard-student-restore.tsx
+msgid "Reject"
+msgstr "Reject"
+
+#: src/web/components/error/index.tsx
+msgid "Reload"
+msgstr "Reload"
+
+#: src/web/student/layout.tsx
+#: src/web/student/layout.tsx
+msgid "Restart"
+msgstr "Restart"
+
+#: src/web/admin/contest-settings.tsx
+msgid "Save"
+msgstr "Save"
+
+#: src/web/admin/token-list.tsx
+msgid "School"
+msgstr "School"
+
+#: src/web/admin/dashboard.tsx
+msgid "schools"
+msgstr "schools"
+
+#: src/web/admin/dashboard.tsx
+msgid "Schools"
+msgstr "Schools"
+
+#: src/web/teacher/table/index.tsx
+#: src/web/teacher/table/export.tsx
+#: src/web/student/layout.tsx
+msgid "Score"
+msgstr "Score"
+
+#: src/web/teacher/provider.tsx
+#: src/web/firebase/student-login.tsx
+#: src/web/admin/provider.tsx
+msgid "Select a contest"
+msgstr "Select a contest"
+
+#: src/web/teacher/table/index.tsx
+#: src/web/teacher/table/index.tsx
+msgid "Select all"
+msgstr "Select all"
+
+#: src/web/admin/announcements.tsx
+msgid "Select priority"
+msgstr "Select priority"
+
+#: src/web/student/layout.tsx
+#: src/web/student/layout.tsx
+msgid "Show results"
+msgstr "Show results"
+
+#: src/web/student/layout.tsx
+msgid "Solution"
+msgstr "Solution"
+
+#: src/web/teacher/dashboard.tsx
+msgid "Start online contest"
+msgstr "Start online contest"
+
+#: src/web/firebase/student-login.tsx
+msgid "Start the contest"
+msgstr "Start the contest"
+
+#: src/web/admin/token-list.tsx
+msgid "Start time"
+msgstr "Start time"
+
+#: src/web/firebase/student-login-action.ts
+msgid "Student already registered"
+msgstr "Student already registered"
+
+#: src/web/teacher/table/index.tsx
+#: src/web/admin/dashboard.tsx
+msgid "students"
+msgstr "students"
+
+#: src/web/admin/school-table.tsx
+msgid "Students"
+msgstr "Students"
+
+#: src/web/teacher/dashboard-student-restore.tsx
+msgid "Surname"
+msgstr "Surname"
+
+#: src/models/contest.ts
+msgid "The {label} field cannot be longer than 256 characters."
+msgstr "The {label} field cannot be longer than 256 characters."
+
+#: src/models/contest.ts
+msgid "The {label} field must be an integer."
+msgstr "The {label} field must be an integer."
+
+#: src/models/variant.ts
+msgid "The answer \"{answer}\" is not valid"
+msgstr "The answer \"{answer}\" is not valid"
+
+#: src/models/variant.ts
+msgid "The answer must be an integer"
+msgstr "The answer must be an integer"
+
+#: src/web/teacher/table/importer.tsx
+msgid "The columns must be in the following order:"
+msgstr "The columns must be in the following order:"
+
+#: src/web/teacher/dashboard.tsx
+#: src/web/teacher/dashboard.tsx
+msgid "The contest can be taken from <0/> until <1/>."
+msgstr "The contest can be taken from <0/> until <1/>."
+
+#: src/web/student/layout.tsx
+msgid "The contest has been completed."
+msgstr "The contest has been completed."
+
+#: src/web/teacher/dashboard.tsx
+msgid "The contest has ended."
+msgstr "The contest has ended."
+
+#: src/web/teacher/dashboard.tsx
+msgid "The contest has not started yet!"
+msgstr "The contest has not started yet!"
+
+#: src/web/teacher/dashboard.tsx
+msgid "The contest will end at <0/>."
+msgstr "The contest will end at <0/>."
+
+#: src/web/teacher/dashboard.tsx
+msgid "The contest will start at <0/>."
+msgstr "The contest will start at <0/>."
+
+#: src/web/firebase/student-login-action.ts
+msgid "The entered code does not match the selected contest."
+msgstr "The entered code does not match the selected contest."
+
+#: src/models/contest.ts
+msgid "The field {label} contains invalid characters. Make sure there are no numbers or symbols and that the encoding is UTF-8."
+msgstr "The field {label} contains invalid characters. Make sure there are no numbers or symbols and that the encoding is UTF-8."
+
+#: src/models/contest.ts
+msgid "The field {label} contains invalid characters. Make sure there are no numbers or symbols."
+msgstr "The field {label} contains invalid characters. Make sure there are no numbers or symbols."
+
+#. placeholder {0}: schema.min
+#: src/models/contest.ts
+msgid "The field {label} must be greater than or equal to {0}."
+msgstr "The field {label} must be greater than or equal to {0}."
+
+#. placeholder {0}: schema.max
+#: src/models/contest.ts
+msgid "The field {label} must be less than or equal to {0}."
+msgstr "The field {label} must be less than or equal to {0}."
+
+#. placeholder {0}: intlFormat(schema.min, { dateStyle: "short" }, { locale: i18n.locale })
+#: src/models/contest.ts
+msgid "The field {label} must contain a date after {0}."
+msgstr "The field {label} must contain a date after {0}."
+
+#. placeholder {0}: intlFormat(schema.max, { dateStyle: "short" }, { locale: i18n.locale })
+#: src/models/contest.ts
+msgid "The field {label} must contain a date prior to {0}."
+msgstr "The field {label} must contain a date prior to {0}."
+
+#. placeholder {0}: dates.join(", ")
+#. placeholder {1}: dateFormat[i18n.locale].toLowerCase()
+#. placeholder {2}: format(new Date(), dateFormat[i18n.locale])
+#: src/web/teacher/table/importer.tsx
+msgid "The fields <0>{0}</0> must be in the format <1>{1}</1>, for example <2>{2}</2>."
+msgstr "The fields <0>{0}</0> must be in the format <1>{1}</1>, for example <2>{2}</2>."
+
+#: src/models/variant.ts
+msgid "The score must be an integer"
+msgstr "The score must be an integer"
+
+#. placeholder {0}: schema.maxPoints
+#: src/models/variant.ts
+msgid "The score must be between 0 and {0}"
+msgstr "The score must be between 0 and {0}"
+
+#. placeholder {0}: lowerFirst(reason)
+#: src/web/teacher/table/finalize.tsx
+msgid "The student {name} {surname} cannot be finalized: {0}."
+msgstr "The student {name} {surname} cannot be finalized: {0}."
+
+#: src/web/teacher/table/finalize.tsx
+msgid "The student {name} {surname} has been entered multiple times"
+msgstr "The student {name} {surname} has been entered multiple times"
+
+#. placeholder {0}: student.variant
+#: src/web/teacher/table/utils.ts
+msgid "The variant {0} is not valid"
+msgstr "The variant {0} is not valid"
+
+#: src/web/student/user-data-form.tsx
+msgid "This field cannot contain numbers or symbols."
+msgstr "This field cannot contain numbers or symbols."
+
+#: src/web/teacher/dashboard.tsx
+msgid "This page is intentionally left blank"
+msgstr "This page is intentionally left blank"
+
+#: src/web/teacher/dashboard.tsx
+msgid "Time remaining until start: <0/>"
+msgstr "Time remaining until start: <0/>"
+
+#: src/web/teacher/dashboard.tsx
+msgid "Time remaining: <0/>"
+msgstr "Time remaining: <0/>"
+
+#: src/web/admin/announcements.tsx
+msgid "Title"
+msgstr "Title"
+
+#: src/web/teacher/table/importer.tsx
+msgid "To allow personal data entry before the contest, the <0>Variant</0> column and the columns for answers can be left blank. For finalization, it will still be necessary to fill them in."
+msgstr "To allow personal data entry before the contest, the <0>Variant</0> column and the columns for answers can be left blank. For finalization, it will still be necessary to fill them in."
+
+#: src/web/teacher/table/importer.tsx
+msgid "To allow personal data entry before the contest, the columns for answers can be left blank. For finalization, it will still be necessary to fill them in."
+msgstr "To allow personal data entry before the contest, the columns for answers can be left blank. For finalization, it will still be necessary to fill them in."
+
+#: src/web/admin/token-list.tsx
+msgid "Token"
+msgstr "Token"
+
+#: src/web/firebase/teacher-login.tsx
+msgid "Token already exists, please try again."
+msgstr "Token already exists, please try again."
+
+#: src/web/firebase/common/password-login.tsx
+msgid "Too many attempts, please wait 5 minutes and try again"
+msgstr "Too many attempts, please wait 5 minutes and try again"
+
+#: src/web/admin/dashboard.tsx
+msgid "Total schools: {totalSchools}"
+msgstr "Total schools: {totalSchools}"
+
+#: src/web/admin/dashboard.tsx
+msgid "Total students: {totalStudents}"
+msgstr "Total students: {totalStudents}"
+
+#: src/web/teacher/table/index.tsx
+#: src/web/teacher/table/importer.tsx
+#: src/web/teacher/table/export.tsx
+msgid "Variant"
+msgstr "Variant"
+
+#: src/web/teacher/table/index.tsx
+msgid "Variant {value} is not valid"
+msgstr "Variant {value} is not valid"
+
+#: src/web/student/user-data-form.tsx
+msgid "Variant code"
+msgstr "Variant code"
+
+#: src/web/student/print-auth.tsx
+msgid "Variant not found"
+msgstr "Variant not found"
+
+#: src/web/firebase/student-login-action.ts
+msgid "Variant not found, please contact the platform administrators."
+msgstr "Variant not found, please contact the platform administrators."
+
+#: src/web/teacher/table/index.tsx
+msgid "View Test"
+msgstr "View Test"
+
+#: src/web/firebase/student-login.tsx
+msgid "Warning"
+msgstr "Warning"
+
+#: src/web/teacher/table/delete.tsx
+msgid "You are about to delete <0>{studentName}</0>."
+msgstr "You are about to delete <0>{studentName}</0>."
+
+#: src/web/teacher/table/delete-all.tsx
+msgid "You are about to delete <0>all</0> entered students. You can view deleted students and cancel their deletion by clicking on the header of the column “<1>Delete</1>” and choosing “<2>Select all</2>” as a filter."
+msgstr "You are about to delete <0>all</0> entered students. You can view deleted students and cancel their deletion by clicking on the header of the column “<1>Delete</1>” and choosing “<2>Select all</2>” as a filter."
+
+#: src/web/teacher/table/delete.tsx
+msgid "You are about to delete a student."
+msgstr "You are about to delete a student."
+
+#. placeholder {0}: contest.name
+#: src/web/admin/export.tsx
+msgid "You are about to export {description} data from the contest <0>{0}</0>. This operation executes a large number of database queries that will take time and may affect project billing."
+msgstr "You are about to export {description} data from the contest <0>{0}</0>. This operation executes a large number of database queries that will take time and may affect project billing."
+
+#: src/web/teacher/table/delete.tsx
+msgid "You can view deleted students and cancel the deletion by clicking on the header of the column “<0>Delete</0>” and choosing “<1>Select all</1>” as a filter."
+msgstr "You can view deleted students and cancel the deletion by clicking on the header of the column “<0>Delete</0>” and choosing “<1>Select all</1>” as a filter."
+
+#. placeholder {0}: student.score
+#: src/web/student/layout.tsx
+msgid "You scored <0>{0}</0> out of <1>{maxPoints}</1>."
+msgstr "You scored <0>{0}</0> out of <1>{maxPoints}</1>."
+
+#: src/web/firebase/student-login.tsx
+msgid "Your account is already present on another device. To transfer access to the current device, communicate the following code to your teacher:"
+msgstr "Your account is already present on another device. To transfer access to the current device, communicate the following code to your teacher:"
+
+#: src/web/admin/export.tsx
+msgid "Your browser does not support data export. Please use Chrome or Edge."
+msgstr "Your browser does not support data export. Please use Chrome or Edge."

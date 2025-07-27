@@ -1,5 +1,6 @@
 import { type ReactNode, useEffect } from "react";
 
+import { Trans, useLingui } from "@lingui/react/macro";
 import {
   CurrentPasswordField,
   Form,
@@ -25,6 +26,7 @@ export default function PasswordLogin({ children }: Props) {
   const db = useDb();
   const params = new URLSearchParams(useSearch());
   const metadata = useMetadata();
+  const { t } = useLingui();
 
   useEffect(() => {
     const url = new URL(window.location.href);
@@ -51,11 +53,11 @@ export default function PasswordLogin({ children }: Props) {
       switch (err.code) {
         case "auth/invalid-email":
         case "auth/user-not-found":
-          throw new Error("Username non corretto.");
+          throw new Error(t`Incorrect username`);
         case "auth/wrong-password":
-          throw new Error("Password non corretta.");
+          throw new Error(t`Incorrect password`);
         case "auth/too-many-requests":
-          throw new Error("Troppi tentativi, aspetta 5 minuti e poi riprova.");
+          throw new Error(t`Too many attempts, please wait 5 minutes and try again`);
         default:
           throw new Error(err.message.replace(/^Firebase: /, "").replace(/ \([/a-z-]+\)\.$/, ""));
       }
@@ -76,10 +78,14 @@ export default function PasswordLogin({ children }: Props) {
         </NavbarBrand>
       </Navbar>
       <Form defaultValue={defaultCredential} onSubmit={signIn} className="p-4 pb-8">
-        <h1 className="mb-2 text-xl font-bold">Accedi alla gestione gara</h1>
+        <h1 className="mb-2 text-xl font-bold">
+          <Trans>Contest Management</Trans>
+        </h1>
         <UsernameField field="username" />
         <CurrentPasswordField field="password" />
-        <SubmitButton>Accedi</SubmitButton>
+        <SubmitButton>
+          <Trans>Login</Trans>
+        </SubmitButton>
       </Form>
     </>
   );

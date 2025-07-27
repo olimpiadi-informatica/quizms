@@ -48,11 +48,11 @@ export const studentMappingUidSchema = z.object({
 export type StudentMappingUid = z.infer<typeof studentMappingUidSchema>;
 
 export const studentRestoreSchema = z.object({
-  id: z.string(), // uid identificativo della sessione
-  studentId: z.string(), // identificativo dello studente a cui ci si vuole loggare
-  participationId: z.string(), // identificativo della partecipazione
+  id: z.string(), // uid of the session
+  studentId: z.string(), // id of the student to log in
+  participationId: z.string(), // id of the participation
   token: z.string(),
-  name: z.string(), // nome dello studente
-  surname: z.string(), // cognome dello studente
+  name: z.string(), // name of the student
+  surname: z.string(), // surname of the student
 });
 export type StudentRestore = z.infer<typeof studentRestoreSchema>;

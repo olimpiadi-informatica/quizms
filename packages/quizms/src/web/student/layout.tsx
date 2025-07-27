@@ -1,5 +1,6 @@
 import { forwardRef, type ReactNode, type Ref, useRef } from "react";
 
+import { Trans, useLingui } from "@lingui/react/macro";
 import {
   Button,
   Dropdown,
@@ -24,6 +25,7 @@ import { useStudent } from "./context";
 
 export function StudentLayout({ children }: { children: ReactNode }) {
   const metadata = useMetadata();
+  const { t } = useLingui();
 
   const completedRef = useRef<HTMLDialogElement>(null);
   const submitRef = useRef<HTMLDialogElement>(null);
@@ -72,19 +74,19 @@ export function StudentLayout({ children }: { children: ReactNode }) {
             </div>
             {terminated && reset ? (
               <>
-                <div className="tooltip tooltip-bottom h-full" data-tip="Mostra risultati">
+                <div className="tooltip tooltip-bottom h-full" data-tip={t`Show results`}>
                   <Button
                     className="btn-primary btn-sm h-full"
                     onClick={() => completedRef.current?.showModal()}
-                    aria-label="Mostra risultati">
+                    aria-label={t`Show results`}>
                     <FileChartColumn />
                   </Button>
                 </div>
-                <div className="tooltip tooltip-bottom h-full" data-tip="Ricomincia">
+                <div className="tooltip tooltip-bottom h-full" data-tip={t`Restart`}>
                   <Button
                     className="btn-primary btn-sm h-full"
                     onClick={reset}
-                    aria-label="Ricomincia">
+                    aria-label={t`Restart`}>
                     <RotateCcw />
                   </Button>
                 </div>
@@ -97,7 +99,7 @@ export function StudentLayout({ children }: { children: ReactNode }) {
                   (process.env.NODE_ENV === "production" && !participation.startingTime)
                 }
                 onClick={submit}>
-                Termina
+                <Trans>Terminate</Trans>
               </Button>
             )}
             <UserDropdown />
@@ -134,7 +136,7 @@ function UserDropdown() {
       <DropdownMenu>
         <DropdownItem>
           <button type="button" className="flex justify-between gap-4" onClick={logout}>
-            Esci <LogOut size={20} />
+            <Trans>Logout</Trans> <LogOut size={20} />
           </button>
         </DropdownItem>
       </DropdownMenu>
@@ -146,6 +148,7 @@ const CompletedModal = forwardRef(function CompletedModal(
   { schema }: { schema: Schema },
   ref: Ref<HTMLDialogElement>,
 ) {
+  const { t } = useLingui();
   const { student } = useStudent();
 
   const problems = Object.keys(schema);
@@ -154,20 +157,32 @@ const CompletedModal = forwardRef(function CompletedModal(
   const maxPoints = sumBy(Object.values(schema), "maxPoints");
 
   return (
-    <Modal ref={ref} title="Prova terminata">
-      <p>La prova è terminata.</p>
+    <Modal ref={ref} title={t`Contest completed`}>
+      <p>
+        <Trans>The contest has been completed.</Trans>
+      </p>
       {student.score !== undefined && (
         <>
           <p>
-            Hai ottenuto un punteggio di <b>{student.score}</b> su <b>{maxPoints}</b>.
+            <Trans>
+              You scored <b>{student.score}</b> out of <b>{maxPoints}</b>.
+            </Trans>
           </p>
           <table className="table table-sm text-center mt-4">
             <thead>
               <tr>
-                <th scope="col">Domanda</th>
-                <th scope="col">Risposta</th>
-                <th scope="col">Soluzione</th>
-                <th scope="col">Punteggio</th>
+                <th scope="col">
+                  <Trans>Question</Trans>
+                </th>
+                <th scope="col">
+                  <Trans>Answer</Trans>
+                </th>
+                <th scope="col">
+                  <Trans>Solution</Trans>
+                </th>
+                <th scope="col">
+                  <Trans>Score</Trans>
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -195,6 +210,7 @@ const CompletedModal = forwardRef(function CompletedModal(
 });
 
 const SubmitModal = forwardRef(function SubmitModal(_, ref: Ref<HTMLDialogElement>) {
+  const { t } = useLingui();
   const { student, setStudent, onSubmit } = useStudent();
 
   const close = () => {
@@ -219,12 +235,18 @@ const SubmitModal = forwardRef(function SubmitModal(_, ref: Ref<HTMLDialogElemen
   };
 
   return (
-    <Modal ref={ref} title="Confermi di voler terminare?">
-      <p>Confermando non potrai più modificare le tue risposte.</p>
+    <Modal ref={ref} title={t`Are you sure you want to finish?`}>
+      <p>
+        <Trans>Once confirmed, you will not be able to modify your answers.</Trans>
+      </p>
       <Form onSubmit={confirm} className="!max-w-full">
         <div className="flex flex-wrap justify-center gap-2">
-          <FormButton onClick={close}>Annulla</FormButton>
-          <SubmitButton className="btn-error">Conferma</SubmitButton>
+          <FormButton onClick={close}>
+            <Trans>Cancel</Trans>
+          </FormButton>
+          <SubmitButton className="btn-error">
+            <Trans>Confirm</Trans>
+          </SubmitButton>
         </div>
       </Form>
     </Modal>

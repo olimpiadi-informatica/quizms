@@ -1,5 +1,7 @@
 import path from "node:path";
 
+import { lingui } from "@lingui/vite-plugin";
+import react from "@vitejs/plugin-react-swc";
 import nodeExternals from "rollup-plugin-node-externals";
 import preserveDirectives from "rollup-preserve-directives";
 import { glob } from "tinyglobby";
@@ -30,5 +32,14 @@ export default defineConfig({
       },
     },
   },
-  plugins: [dts({ rollupTypes: true }), nodeExternals(), preserveDirectives(), tsconfigPaths()],
+  plugins: [
+    dts({ rollupTypes: true }),
+    lingui(),
+    nodeExternals(),
+    preserveDirectives(),
+    react({
+      plugins: [["@lingui/swc-plugin", {}]],
+    }),
+    tsconfigPaths(),
+  ],
 });

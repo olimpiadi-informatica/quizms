@@ -1,5 +1,7 @@
 import { type ReactNode, useCallback } from "react";
 
+import { msg } from "@lingui/core/macro";
+import { type _t, useLingui } from "@lingui/react/macro";
 import type { FirebaseOptions } from "firebase/app";
 import { getAuth, signOut } from "firebase/auth";
 import {
@@ -52,6 +54,7 @@ export function FirebaseTeacher({ config, ...statementProps }: Props) {
 function TeacherInner({ createStatementFromFetch, statementVersion }: Omit<Props, "config">) {
   const db = useDb();
   const user = useAuth()!;
+  const { t } = useLingui();
 
   const [participations] = useCollection("participations", participationConverter, {
     constraints: { teacher: user.uid },
@@ -70,7 +73,7 @@ function TeacherInner({ createStatementFromFetch, statementVersion }: Omit<Props
   return (
     <TeacherProvider
       participations={participations}
-      setParticipation={(p) => setParticipation(db, participations, p)}
+      setParticipation={(p) => setParticipation(db, participations, p, t)}
       contests={contests}
       variants={variants}
       logout={logout}
@@ -91,6 +94,7 @@ async function setParticipation(
   db: Firestore,
   participations: Participation[],
   participation: Participation,
+  t: typeof _t,
 ) {
   const prevParticipation = participations.find((s) => s.id === participation.id)!;
 
@@ -117,7 +121,7 @@ async function setParticipation(
     await runTransaction(db, async (trans) => {
       const mapping = await trans.get(participationMappingsRef);
       if (mapping.exists()) {
-        throw new Error("Token già esistente, riprova.");
+        throw new Error(t(msg`Token already exists, please try again.`));
       }
 
       trans.set(participationRef, participation);

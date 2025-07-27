@@ -1,5 +1,6 @@
 import { Suspense, useMemo, useRef } from "react";
 
+import { Trans, useLingui } from "@lingui/react/macro";
 import { Form, Modal, NumberField, SubmitButton } from "@olinfo/react-components";
 import { groupBy, sortBy } from "lodash-es";
 import { Check, X } from "lucide-react";
@@ -36,6 +37,8 @@ function StudentRestoreEntry({
     await reject(studentRestore[0].studentId);
   };
 
+  const { t } = useLingui();
+
   return (
     <tr>
       <td>{studentRestore[0].surname}</td>
@@ -52,19 +55,23 @@ function StudentRestoreEntry({
           onClick={() => modalRef.current?.showModal()}>
           <Check />
         </button>
-        <Modal ref={modalRef} title="Conferma">
+        <Modal ref={modalRef} title={t`Confirm`}>
           <p>
-            {studentRestore[0].name} {studentRestore[0].surname} sta cercando di accedere alla gara.
-            Per approvarlo, inserisci il codice di conferma che gli è stato mostrato.
+            <Trans>
+              {studentRestore[0].name} {studentRestore[0].surname} is trying to access the
+              competition. To approve them, enter the confirmation code that was shown to them.
+            </Trans>
           </p>
           <Form onSubmit={approveRequest} className="!max-w-full">
             <NumberField
               field="restoreCode"
-              label="Codice di conferma"
-              placeholder="Inserisci codice"
+              label={t`Confirmation code`}
+              placeholder={t`Enter code`}
             />
             {({ restoreCode }) => (
-              <SubmitButton disabled={!targetCodes.has(restoreCode ?? -1)}>Approva</SubmitButton>
+              <SubmitButton disabled={!targetCodes.has(restoreCode ?? -1)}>
+                <Trans>Approve</Trans>
+              </SubmitButton>
             )}
           </Form>
         </Modal>
@@ -79,7 +86,9 @@ function StudentRestoreListInner() {
   if (!studentRestores?.length) {
     return (
       <tr>
-        <td>Nessuna richiesta.</td>
+        <td>
+          <Trans>No requests.</Trans>
+        </td>
       </tr>
     );
   }
@@ -101,17 +110,27 @@ export function StudentRestoreList() {
       <table className="table table-pin-rows">
         <thead>
           <tr>
-            <th>Cognome</th>
-            <th>Nome</th>
-            <th className="w-12">Rifiuta</th>
-            <th className="w-12">Approva</th>
+            <th>
+              <Trans>Surname</Trans>
+            </th>
+            <th>
+              <Trans>Name</Trans>
+            </th>
+            <th className="w-12">
+              <Trans>Reject</Trans>
+            </th>
+            <th className="w-12">
+              <Trans>Approve</Trans>
+            </th>
           </tr>
         </thead>
         <tbody>
           <Suspense
             fallback={
               <tr>
-                <td>Nessuna richiesta.</td>
+                <td>
+                  <Trans>No requests.</Trans>
+                </td>
               </tr>
             }>
             <StudentRestoreListInner />

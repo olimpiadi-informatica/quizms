@@ -1,5 +1,6 @@
 import { Fragment, type ReactNode, useCallback } from "react";
 
+import { Trans } from "@lingui/react/macro";
 import useSWR from "swr/immutable";
 import { Link, Route, Switch, useParams } from "wouter";
 
@@ -37,7 +38,9 @@ function VariantList() {
         {contests.map((c) => (
           <Fragment key={c.id}>
             <h3>{c.name}</h3>
-            <h4>Varianti su carta</h4>
+            <h4>
+              <Trans>Printed variants</Trans>
+            </h4>
             <ul className="columns-3 first:*:mt-0 lg:columns-4">
               {c.variantIds.map((v) => (
                 <li key={v}>
@@ -45,7 +48,9 @@ function VariantList() {
                 </li>
               ))}
             </ul>
-            <h4>Varianti online</h4>
+            <h4>
+              <Trans>Online variants</Trans>
+            </h4>
             <ul className="columns-3 first:*:mt-0 lg:columns-4">
               {c.pdfVariantIds.map((v) => (
                 <li key={v}>
@@ -68,7 +73,11 @@ function VariantProvider({ children }: { children: ReactNode }) {
     (c) => c.variantIds.includes(variantId!) || c.pdfVariantIds.includes(variantId!),
   );
   if (!contest) {
-    return <div>Variante non trovata</div>;
+    return (
+      <div>
+        <Trans>Variant not found</Trans>
+      </div>
+    );
   }
 
   const mockParticipation: Participation = {

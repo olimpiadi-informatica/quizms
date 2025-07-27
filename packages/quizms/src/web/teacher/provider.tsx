@@ -1,5 +1,6 @@
 import { type ComponentType, lazy } from "react";
 
+import { Trans } from "@lingui/react/macro";
 import { Link, Redirect, Route, Switch, useParams } from "wouter";
 
 import type { Contest, Participation, Student, StudentRestore, Variant } from "~/models";
@@ -44,7 +45,9 @@ export function TeacherProvider({
       <Route path="/">
         {participations.length === 1 && <Redirect to={`/${participations[0].contestId}`} />}
         <div className="flex w-full grow flex-col items-center justify-center gap-4">
-          <p className="text-2xl">Seleziona una gara</p>
+          <p className="text-2xl">
+            <Trans>Select a contest</Trans>
+          </p>
           <div className="flex flex-wrap justify-center gap-2">
             {participations.map((p) => (
               <Link key={p.id} className="btn btn-primary" href={`/${p.contestId}/`}>

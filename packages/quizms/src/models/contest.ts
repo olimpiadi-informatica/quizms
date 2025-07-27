@@ -1,3 +1,5 @@
+import type { I18n } from "@lingui/core";
+import { msg } from "@lingui/core/macro";
 import { intlFormat, parse as parseDate, subMinutes } from "date-fns";
 import z from "zod";
 
@@ -82,6 +84,7 @@ export type Contest = z.infer<typeof contestSchema>;
 export function parseUserData(
   value: string | undefined,
   schema: Contest["userData"][number],
+  i18n: I18n,
   options?: { dateFormat?: string },
 ): string | number | Date | undefined {
   if (!value) return undefined;
@@ -93,26 +96,36 @@ export function parseUserData(
         .replaceAll(/[`´‘’]/g, "'")
         .trim();
       if (/[^-'\s\p{Alpha}]/u.test(normalized)) {
-        const helpUtf8 = /[^\p{ASCII}]/u.test(normalized) ? " e che la codifica sia UTF-8" : "";
+        const hasUnicode = /[^\p{ASCII}]/u.test(normalized);
         throw new Error(
-          `Il campo ${label} contiene caratteri non validi. Assicurati che non ci siano numeri o simboli${helpUtf8}.`,
+          hasUnicode
+            ? i18n._(
+                msg`The field ${label} contains invalid characters. Make sure there are no numbers or symbols.`,
+              )
+            : i18n._(
+                msg`The field ${label} contains invalid characters. Make sure there are no numbers or symbols and that the encoding is UTF-8.`,
+              ),
         );
       }
       if (value.length > 256) {
-        throw new Error(`Il campo ${label} non può essere più lungo di 256 caratteri.`);
+        throw new Error(i18n._(msg`The {label} field cannot be longer than 256 characters.`));
       }
       return normalized;
     }
     case "number": {
       const num = Number(value);
       if (!Number.isInteger(num)) {
-        throw new Error(`Il campo ${label} deve essere un numero intero.`);
+        throw new Error(i18n._(msg`The {label} field must be an integer.`));
       }
       if (schema?.min !== undefined && num < schema.min) {
-        throw new Error(`Il campo ${label} deve essere maggiore o uguale a ${schema.min}.`);
+        throw new Error(
+          i18n._(msg`The field ${label} must be greater than or equal to ${schema.min}.`),
+        );
       }
       if (schema?.max !== undefined && num > schema.max) {
-        throw new Error(`Il campo ${label} deve essere minore o uguale a ${schema.max}.`);
+        throw new Error(
+          i18n._(msg`The field ${label} must be less than or equal to ${schema.max}.`),
+        );
       }
       return num;
     }
@@ -123,12 +136,16 @@ export function parseUserData(
       date = subMinutes(date, date.getTimezoneOffset());
       if (date < schema?.min) {
         throw new Error(
-          `Il campo ${label} deve contenere una data successiva al ${intlFormat(schema.min, { dateStyle: "short" })}.`,
+          i18n._(
+            msg`The field ${label} must contain a date after ${intlFormat(schema.min, { dateStyle: "short" }, { locale: i18n.locale })}.`,
+          ),
         );
       }
       if (date > schema?.max) {
         throw new Error(
-          `Il campo ${label} deve contenere una data precedente al ${intlFormat(schema.max, { dateStyle: "short" })}.`,
+          i18n._(
+            msg`The field ${label} must contain a date prior to ${intlFormat(schema.max, { dateStyle: "short" }, { locale: i18n.locale })}.`,
+          ),
         );
       }
       return date;
@@ -139,11 +156,12 @@ export function parseUserData(
 export function formatUserData(
   student: Student | undefined,
   schema: Contest["userData"][number],
+  locale: string,
 ): string {
   const value = student?.userData?.[schema?.name];
   if (value === undefined) return "";
   if (schema.type === "date") {
-    return intlFormat(value as Date, { dateStyle: "short" });
+    return intlFormat(value as Date, { dateStyle: "short" }, { locale });
   }
   return value.toString();
 }

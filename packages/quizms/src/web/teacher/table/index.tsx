@@ -1,5 +1,8 @@
 import { type ComponentType, lazy, Suspense, useMemo, useRef, useState } from "react";
 
+import { i18n } from "@lingui/core";
+import { msg } from "@lingui/core/macro";
+import { type _t, Trans, useLingui } from "@lingui/react/macro";
 import { Button, useIsAfter } from "@olinfo/react-components";
 import type {
   CellEditRequestEvent,
@@ -49,7 +52,9 @@ export default function TeacherTable() {
           <div className="flex h-10 items-center gap-2 rounded-btn bg-primary px-3 text-primary-content">
             <Users />
             <Counter />
-            <div className="hidden md:block"> studenti</div>
+            <div className="hidden md:block">
+              <Trans>students</Trans>
+            </div>
           </div>
         </Suspense>
         {contest.allowStudentImport && !participation.finalized && (
@@ -57,21 +62,27 @@ export default function TeacherTable() {
             className="btn-primary btn-sm h-10"
             icon={Upload}
             onClick={() => importRef.current?.showModal()}>
-            <div className="hidden md:block">Importa studenti</div>
+            <div className="hidden md:block">
+              <Trans>Import students</Trans>
+            </div>
           </Button>
         )}
         <Button
           className="btn-primary btn-sm h-10"
           icon={Download}
           onClick={() => exportRef.current?.click()}>
-          <div className="hidden md:block">Esporta</div>
+          <div className="hidden md:block">
+            <Trans>Export</Trans>
+          </div>
         </Button>
         {!participation.finalized && (
           <Button
             className="btn-primary btn-sm h-10"
             icon={FileCheck}
             onClick={() => finalizeRef.current?.showModal()}>
-            <div className="hidden md:block">Finalizza</div>
+            <div className="hidden md:block">
+              <Trans>Finalize</Trans>
+            </div>
           </Button>
         )}
         <FinalizeModal key={participation.id} ref={finalizeRef} />
@@ -80,7 +91,9 @@ export default function TeacherTable() {
             className="btn-primary btn-sm h-10"
             icon={Trash2}
             onClick={() => deleterRef.current?.showModal()}>
-            <div className="hidden md:block">Svuota</div>
+            <div className="hidden md:block">
+              <Trans>Empty</Trans>
+            </div>
           </Button>
         )}
       </div>
@@ -97,15 +110,17 @@ export default function TeacherTable() {
 function Counter() {
   const { contest, variants } = useTeacher();
   const [students] = useTeacherStudents();
+  const { t } = useLingui();
 
   return sumBy(students, (s) => {
-    return Number(!s.disabled && !isStudentIncomplete(s, contest, variants));
+    return Number(!s.disabled && !isStudentIncomplete(s, contest, variants, t));
   });
 }
 
 function Table() {
   const { contest, participation, variants } = useTeacher();
   const [students, setStudent] = useTeacherStudents();
+  const { t, i18n } = useLingui();
 
   const modalRef = useRef<HTMLDialogElement>(null);
   const [currentStudent, setCurrentStudent] = useState("");
@@ -138,8 +153,8 @@ function Table() {
   }
 
   const colDefs = useMemo(
-    () => columnDefinition(contest, variants, isContestFinished),
-    [contest, variants, isContestFinished],
+    () => columnDefinition(contest, variants, isContestFinished, t),
+    [contest, variants, isContestFinished, t],
   );
 
   const onCellEditRequest = async (ev: CellEditRequestEvent) => {
@@ -151,17 +166,17 @@ function Table() {
     const [field, subfield] = toPath(ev.colDef.field!);
     if (field === "userData") {
       const schema = contest.userData.find((f) => f.name === subfield);
-      value = parseUserData(value, schema!);
+      value = parseUserData(value, schema!, i18n);
     }
     if (field === "variant" && value && !variants[value]) {
-      throw new Error(`La variante ${value} non è valida`);
+      throw new Error(t`Variant ${value} is not valid`);
     }
     if (field === "answers") {
       const schema = variants[student.variant!]?.schema;
       if (!schema) {
-        throw new Error("Variante mancante");
+        throw new Error(t`Missing variant`);
       }
-      value = parseAnswer(value, schema[subfield]);
+      value = parseAnswer(value, schema[subfield], t);
     }
     if (field === "disabled" && value) {
       const modal = modalRef.current!;
@@ -218,6 +233,7 @@ function columnDefinition(
   contest: Contest,
   variants: Record<string, Variant>,
   isContestFinished: boolean,
+  t: typeof _t,
 ): ColDef[] {
   const widths = {
     xs: 100,
@@ -245,15 +261,15 @@ function columnDefinition(
         editable: contest.allowStudentEdit,
         ...defaultOptions,
         tooltipValueGetter: ({ data }: ITooltipParams<Student>) => {
-          return isStudentIncomplete(data!, contest, variants);
+          return isStudentIncomplete(data!, contest, variants, t);
         },
         cellRenderer: ({ api, data, value }: ICellRendererParams<Student>) => {
-          value = formatUserData(data, field);
+          value = formatUserData(data, field, i18n.locale);
           if (
             field.pinned &&
             data?.updatedAt &&
             !api.getSelectedRows().some((s: Student) => s.id === data.id) &&
-            isStudentIncomplete(data, contest, variants)
+            isStudentIncomplete(data, contest, variants, t)
           ) {
             return (
               <span>
@@ -268,14 +284,14 @@ function columnDefinition(
     ),
     {
       field: "variant",
-      headerName: "Variante",
+      headerName: t(msg`Variant`),
       width: 100,
       editable: true,
       ...defaultOptions,
       hide: !contest.hasVariants,
     },
     {
-      headerName: "Vedi Prova",
+      headerName: t(msg`View Test`),
       width: 100,
       cellRenderer: ({ data }: ICellRendererParams<Student>) => {
         if (data?.absent || data?.disabled || !data?.variant) return;
@@ -285,7 +301,7 @@ function columnDefinition(
             href={`${window.location.pathname}${data.id}/`}
             target="_blank"
             rel="noreferrer">
-            apri
+            <Trans>open</Trans>
           </a>
         );
       },
@@ -309,7 +325,7 @@ function columnDefinition(
     }),
     {
       field: "score",
-      headerName: "Punti",
+      headerName: t(msg`Score`),
       pinned: "right",
       width: 100,
       ...defaultOptions,
@@ -317,7 +333,7 @@ function columnDefinition(
     },
     {
       field: "absent",
-      headerName: "Assente",
+      headerName: t(msg`Absent`),
       cellDataType: "boolean",
       width: 120,
       valueGetter: ({ data }) => data.absent ?? false,
@@ -329,19 +345,19 @@ function columnDefinition(
         filterOptions: [
           {
             displayKey: "all",
-            displayName: "Seleziona tutti",
+            displayName: t(msg`Select all`),
             predicate: () => true,
             numberOfInputs: 0,
           },
           {
             displayKey: "absent",
-            displayName: "Assenti",
+            displayName: t(msg`Absent`),
             predicate: (_filter: any[], absent: boolean) => absent,
             numberOfInputs: 0,
           },
           {
             displayKey: "present",
-            displayName: "Presenti",
+            displayName: t(msg`Present`),
             predicate: (_filter: any[], absent: boolean) => !absent,
             numberOfInputs: 0,
           },
@@ -350,7 +366,7 @@ function columnDefinition(
     },
     {
       field: "disabled",
-      headerName: "Cancella",
+      headerName: t(msg`Delete`),
       cellDataType: "boolean",
       width: 120,
       valueGetter: ({ data }) => data.disabled ?? false,
@@ -362,19 +378,19 @@ function columnDefinition(
         filterOptions: [
           {
             displayKey: "all",
-            displayName: "Seleziona tutti",
+            displayName: t(msg`Select all`),
             predicate: () => true,
             numberOfInputs: 0,
           },
           {
             displayKey: "disabled",
-            displayName: "Cancellati",
+            displayName: t(msg`Deleted`),
             predicate: (_filter: any[], disabled: boolean) => disabled,
             numberOfInputs: 0,
           },
           {
             displayKey: "enabled",
-            displayName: "Non cancellati",
+            displayName: t(msg`Not deleted`),
             predicate: (_filter: any[], disabled: boolean) => !disabled,
             numberOfInputs: 0,
           },

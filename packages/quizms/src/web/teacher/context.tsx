@@ -3,29 +3,29 @@ import { createContext, useContext } from "react";
 import type { Contest, Participation, Student, StudentRestore, Variant } from "~/models";
 
 export type TeacherContextProps = {
-  /** Tutte le partecipazioni */
+  /** All participations */
   participations: Participation[];
-  /** Partecipazione selezionata */
+  /** The selected participation */
   participation: Participation;
-  /** Funzione per modificare i dati della scuola */
+  /** Function to edit the school's data */
   setParticipation: (participation: Participation) => Promise<void>;
 
-  /** Tutte le gare */
+  /** All contests */
   contests: Contest[];
-  /** Gara selezionata */
+  /** The selected contest */
   contest: Contest;
 
-  /** Varianti dei testi */
+  /** The variants of the statements */
   variants: Record<string, Variant>;
-  /** Funzione per effettuare il logout */
+  /** Function to log out */
   logout: () => Promise<void>;
-  /** Funzione per ottenere i pdf dei testi */
+  /** Function to get the pdf of the statements */
   getPdfStatements: () => Promise<Record<string, Uint8Array | ArrayBuffer>>;
-  /** Hook per ottenere gli studenti di una scuola */
+  /** Hook to get the students of a school */
   useStudents: (
     participationId: string,
   ) => readonly [Student[], (student: Student) => Promise<void>];
-  /** Hook per ottenere le richieste di accesso degli studenti */
+  /** Hook to get the student access requests */
   useStudentRestores: (
     participationId: string,
     token: string,

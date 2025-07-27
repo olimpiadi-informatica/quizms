@@ -1,5 +1,6 @@
 import { type ReactNode, useEffect, useMemo, useState } from "react";
 
+import { Trans } from "@lingui/react/macro";
 import { Navbar, NavbarBrand } from "@olinfo/react-components";
 import clsx from "clsx";
 import { getAuth, signInWithCustomToken } from "firebase/auth";
@@ -57,14 +58,16 @@ export default function SsoLogin({ url, logo, children }: Props) {
         </NavbarBrand>
       </Navbar>
       <div className="flex grow flex-col items-center justify-center gap-4 p-4 pb-8">
-        <h1 className="text-xl font-bold">Accedi usando le tue credenziali di {redirect.host}</h1>
+        <h1 className="text-xl font-bold">
+          <Trans>Login using your {redirect.host} credentials</Trans>
+        </h1>
         <a className={clsx("btn btn-info", loading && "btn-disabled")} href={redirect.href}>
           {loading ? (
             <span className="loading loading-spinner" />
           ) : (
             <img {...logo} className="h-6 w-min" alt="" />
           )}
-          Accedi
+          <Trans>Login</Trans>
         </a>
       </div>
     </>

@@ -1,5 +1,6 @@
 import { type ReactNode, Suspense } from "react";
 
+import { Trans } from "@lingui/react/macro";
 import {
   Button,
   Dropdown,
@@ -75,7 +76,7 @@ function UserDropdown({ name, logout }: { name: string; logout: () => Promise<vo
       <DropdownMenu>
         <DropdownItem>
           <Button className="flex justify-between gap-4" onClick={logout}>
-            Esci <LogOut size={20} />
+            <Trans>Logout</Trans> <LogOut size={20} />
           </Button>
         </DropdownItem>
       </DropdownMenu>
