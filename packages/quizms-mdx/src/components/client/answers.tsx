@@ -1,6 +1,15 @@
 "use client";
 
-import { type ReactNode, useEffect, useId } from "react";
+import {
+  type ReactNode,
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useId,
+  useMemo,
+  useState,
+} from "react";
 
 import { useStudent } from "@olinfo/quizms/student";
 import clsx from "clsx";
@@ -25,16 +34,124 @@ export function AnswerGroupClient({ children }: AnswerGroupProps) {
   );
 }
 
+export type MultipleChoiceAnswerProps = {
+  children: ReactNode;
+  kind: "allCorrect" | "anyCorrect";
+};
+
+type MultipleChoiceContextProps = {
+  registerCorrectOption: (value: string) => void;
+};
+
+const MultipleChoiceContext = createContext<MultipleChoiceContextProps>({
+  registerCorrectOption: () => {},
+});
+
+export function MultipleChoiceAnswerClient({ children, kind }: MultipleChoiceAnswerProps) {
+  const { registerProblem } = useContest();
+  const { id: problemId, points } = useProblem();
+  const [correctOptions, setCorrectOptions] = useState<string[]>([]);
+
+  const registerCorrectOption = useCallback((value: string) => {
+    setCorrectOptions((correctOptions) => [...new Set([...correctOptions, value])]);
+  }, []);
+
+  useEffect(() => {
+    const toRegister = kind === "allCorrect" ? [correctOptions.join("")] : correctOptions;
+    registerProblem(`${problemId}`, {
+      type: "text",
+      allowEmpty: true,
+      maxPoints: points[0],
+      options: [
+        ...toRegister.map((option) => {
+          return {
+            value: option,
+            points: points[0],
+          };
+        }),
+        { value: null, points: points[1] },
+        { value: "", points: points[1] },
+      ],
+    });
+  }, [kind, registerProblem, points, correctOptions, problemId]);
+
+  return (
+    <MultipleChoiceContext.Provider value={{ registerCorrectOption }}>
+      {children}
+    </MultipleChoiceContext.Provider>
+  );
+}
+
 export type AnswerProps = {
   id: string;
   correct?: boolean;
   children: ReactNode;
 };
 
-export function AnswerClient({ id, correct, children }: AnswerProps) {
-  const { registerProblem } = useContest();
-  const { id: problemId, points } = useProblem();
+export function AllCorrectAnswerClient({ id, correct, children }: AnswerProps) {
+  const { id: problemId } = useProblem();
   const { student, setStudent, terminated } = useStudent();
+  const { registerCorrectOption } = useContext(MultipleChoiceContext);
+
+  const answer = student.answers?.[problemId!];
+  const currentlyChecked = useMemo(
+    () => typeof answer === "string" && answer.indexOf(id) !== -1,
+    [answer, id],
+  );
+  const setAnswer = async (value: string, checked: boolean) => {
+    const currentAnswer = typeof answer !== "string" ? "" : answer;
+    let newAnswer = currentAnswer;
+    if (checked && !currentlyChecked) {
+      newAnswer = currentAnswer.split("").concat(value).sort().join("");
+    } else if (!checked && currentlyChecked) {
+      newAnswer = currentAnswer.replace(value, "");
+    }
+    await setStudent({ ...student, answers: { ...student.answers, [problemId!]: newAnswer } });
+  };
+
+  const answerId = useId();
+
+  useEffect(() => {
+    if (!correct) return;
+    registerCorrectOption(id);
+  }, [registerCorrectOption, id, correct]);
+
+  return (
+    <div
+      className={clsx(
+        "relative my-1 flex rounded-lg pl-2 pr-1 hover:bg-base-300 print:mr-4",
+        terminated && {
+          "border-2 border-success": correct === true,
+          "border-2 border-error": currentlyChecked && correct === false,
+        },
+      )}>
+      <input
+        id={answerId}
+        checked={currentlyChecked}
+        className={clsx(
+          "checkbox checkbox-sm my-auto mr-4 bg-base-100 [print-color-adjust:exact] disabled:opacity-90 print:mr-2",
+          terminated &&
+            currentlyChecked && {
+              "checkbox-success": correct === true,
+              "checkbox-error": correct === false,
+            },
+        )}
+        onChange={(e) => setAnswer(id, e.target.checked)}
+        type="checkbox"
+        disabled={terminated}
+      />
+      <div className="my-auto w-6 screen:hidden">{id})</div>
+      <label htmlFor={answerId} className="grow [&_pre]:!p-3">
+        {children}
+      </label>
+    </div>
+  );
+}
+
+export function AnyCorrectAnswerClient({ id, correct, children }: AnswerProps) {
+  const { id: problemId } = useProblem();
+  const { student, setStudent, terminated } = useStudent();
+  const { registerCorrectOption } = useContext(MultipleChoiceContext);
 
   const answer = student.answers?.[problemId!];
   const setAnswer = async (value: string | null) => {
@@ -45,16 +162,8 @@ export function AnswerClient({ id, correct, children }: AnswerProps) {
 
   useEffect(() => {
     if (!correct) return;
-    registerProblem(`${problemId}`, {
-      type: "text",
-      allowEmpty: true,
-      maxPoints: points[0],
-      options: [
-        { value: id, points: points[0] },
-        { value: null, points: points[1] },
-      ],
-    });
-  }, [registerProblem, id, problemId, correct, points]);
+    registerCorrectOption(id);
+  }, [registerCorrectOption, id, correct]);
 
   return (
     <div

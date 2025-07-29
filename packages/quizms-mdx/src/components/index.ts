@@ -1,4 +1,11 @@
-import { Answer, AnswerGroup, Explanation, MultipleChoiceAnswer, OpenAnswer } from "./answers";
+import {
+  AllCorrectAnswer,
+  AnswerGroup,
+  AnyCorrectAnswer,
+  Explanation,
+  MultipleChoiceAnswer,
+  OpenAnswer,
+} from "./answers";
 import { Blockly } from "./blockly";
 import { Code } from "./client/code";
 import { Equation } from "./client/equation";
@@ -9,7 +16,8 @@ import { Section } from "./section";
 
 export function useMDXComponents() {
   return {
-    Answer,
+    AnyCorrectAnswer,
+    AllCorrectAnswer,
     AnswerGroup,
     Blockly,
     Code,

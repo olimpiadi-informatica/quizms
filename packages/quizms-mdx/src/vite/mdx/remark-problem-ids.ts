@@ -16,8 +16,10 @@ export default remarkProblemIds;
 
 function assignProblemIds(tree: Root) {
   let problemIndex = 1;
-  visit(tree, { type: "mdxJsxFlowElement", name: "Problem" }, (node: MdxJsxFlowElement) => {
-    node.attributes.push(jsxAttribute("id", problemIndex++));
+  visit(tree, "mdxJsxFlowElement", (node: MdxJsxFlowElement) => {
+    if (node.name === "Problem") {
+      node.attributes.push(jsxAttribute("id", problemIndex++));
+    }
   });
 }
 
