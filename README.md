@@ -4,6 +4,10 @@ QuizMS is a JavaScript framework designed to create and manage competitions base
 
 It has been used in the School Selections of the Italian Olympiad in Informatics and in the Fibonacci Games since 2023, and in 2025 it has been endorsed by the call for projects of the International Olympiad in Informatics.
 
+Check out a sample project at:
+
+> [https://github.com/olimpiadi-informatica/quizms-demo](https://github.com/olimpiadi-informatica/quizms-demo)
+
 Access the full documentation at:
 
 > [https://quizms.olinfo.it](https://quizms.olinfo.it)
