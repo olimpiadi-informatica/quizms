@@ -1,11 +1,13 @@
 import type { ReactNode } from "react";
 
 import {
-  AnswerClient,
+  AllCorrectAnswerClient,
   AnswerGroupClient,
   type AnswerGroupProps,
   type AnswerProps,
+  AnyCorrectAnswerClient,
   ExplanationClient,
+  MultipleChoiceAnswerClient,
   OpenAnswerClient,
   type OpenAnswerProps,
 } from "./client/answers";
@@ -15,12 +17,17 @@ export function AnswerGroup({ children }: AnswerGroupProps) {
   return <AnswerGroupClient>{children}</AnswerGroupClient>;
 }
 
-export function MultipleChoiceAnswer({ children }: { children: ReactNode }) {
+export function MultipleChoiceAnswer({
+  children,
+  kind,
+}: { children: ReactNode; kind: "allCorrect" | "anyCorrect" }) {
   return (
     <>
       <JsonField field="type" value="text" />
       <JsonField field="options">
-        <JsonArray>{children}</JsonArray>
+        <JsonArray>
+          <MultipleChoiceAnswerClient kind={kind}>{children}</MultipleChoiceAnswerClient>
+        </JsonArray>
       </JsonField>
     </>
   );
@@ -44,14 +51,30 @@ export function OpenAnswer({ correct }: OpenAnswerProps) {
   );
 }
 
-export function Answer({ id, correct, children }: AnswerProps) {
+export function AnyCorrectAnswer({ id, correct, children }: AnswerProps) {
   return (
     <JsonObject>
       <JsonField field="value" value={id} />
       <JsonField field="correct" value={!!correct} />
-      <AnswerClient id={id} correct={process.env.QUIZMS_MODE === "contest" ? undefined : correct}>
+      <AnyCorrectAnswerClient
+        id={id}
+        correct={process.env.QUIZMS_MODE === "contest" ? undefined : correct}>
         {children}
-      </AnswerClient>
+      </AnyCorrectAnswerClient>
+    </JsonObject>
+  );
+}
+
+export function AllCorrectAnswer({ id, correct, children }: AnswerProps) {
+  return (
+    <JsonObject>
+      <JsonField field="value" value={id} />
+      <JsonField field="correct" value={!!correct} />
+      <AllCorrectAnswerClient
+        id={id}
+        correct={process.env.QUIZMS_MODE === "contest" ? undefined : correct}>
+        {children}
+      </AllCorrectAnswerClient>
     </JsonObject>
   );
 }

@@ -9,6 +9,7 @@ import remarkSmartypants from "remark-smartypants";
 import type { PluggableList } from "unified";
 import type { PluginOption } from "vite";
 
+import remarkDirective from "remark-directive";
 import recmaRemoveExports from "./recma-remove-exports";
 import recmaVariants from "./recma-variants";
 import rehypeFixWrap from "./rehype-fix-wrap";
@@ -18,6 +19,7 @@ import remarkImages from "./remark-images";
 import remarkProblemIds from "./remark-problem-ids";
 
 const remarkPlugins: PluggableList = [
+  remarkDirective,
   remarkAnswers,
   remarkFrontmatter,
   remarkGfm,
