@@ -100,7 +100,7 @@
     "webpack": "^5"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.1",
+    "@biomejs/biome": "2.1.2",
     "@olinfo/tailwind": "^0.1",
     "@types/cli-progress": "^3.11",
     "@types/file-saver": "^2.0",

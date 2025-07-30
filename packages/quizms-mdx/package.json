@@ -9,7 +9,7 @@
     "build": "vite build",
     "watch": "vite build --watch",
     "lint": "biome check --write && tsc --noEmit",
-    "prepack": "yarn build"
+    "prepack": "yarn lint && yarn build"
   },
   "exports": {
     "./blockly-editor": "./dist/blockly-editor.js",
@@ -55,7 +55,7 @@
     "react-dom": "^19"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.1",
+    "@biomejs/biome": "2.1.2",
     "@olinfo/quizms": "^3.0.0-beta.0",
     "@olinfo/tailwind": "^0.1",
     "@types/file-saver": "^2.0",

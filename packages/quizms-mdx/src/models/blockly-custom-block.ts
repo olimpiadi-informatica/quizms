@@ -3,9 +3,9 @@ import {
   type Expression,
   type LogicalOperator,
   type Program,
+  parse,
   type UnaryOperator,
   type UpdateOperator,
-  parse,
 } from "acorn";
 import { Order } from "blockly/javascript";
 import { type ZodError, z } from "zod";
