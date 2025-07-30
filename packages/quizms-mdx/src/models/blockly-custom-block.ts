@@ -3,9 +3,9 @@ import {
   type Expression,
   type LogicalOperator,
   type Program,
+  parse,
   type UnaryOperator,
   type UpdateOperator,
-  parse,
 } from "acorn";
 import { Order } from "blockly/javascript";
 import { type ZodError, z } from "zod";
@@ -192,7 +192,14 @@ function order(expression: Expression): number {
       return unaryOperatorOrder(expression.operator);
     case "YieldExpression":
       return Order.YIELD;
-    default:
+    case "ArrowFunctionExpression":
+    case "TemplateLiteral":
+    case "TaggedTemplateExpression":
+    case "ClassExpression":
+    case "MetaProperty":
+    case "AwaitExpression":
+    case "ChainExpression":
+    case "ImportExpression":
       throw new Error(`Unsupported expression: ${expression.type}`);
   }
 }
@@ -217,8 +224,6 @@ function unaryOperatorOrder(operator: UnaryOperator | UpdateOperator): number {
       return Order.INCREMENT;
     case "--":
       return Order.DECREMENT;
-    default:
-      throw new Error(`Unsupported operator: ${operator}`);
   }
 }
 
@@ -227,6 +232,7 @@ function binaryOperatorOrder(operator: BinaryOperator | LogicalOperator): number
     case "&&":
       return Order.LOGICAL_AND;
     case "||":
+    case "??":
       return Order.LOGICAL_OR;
     case "==":
     case "!=":
@@ -264,7 +270,5 @@ function binaryOperatorOrder(operator: BinaryOperator | LogicalOperator): number
       return Order.IN;
     case "instanceof":
       return Order.INSTANCEOF;
-    default:
-      throw new Error(`Unsupported operator: ${operator}`);
   }
 }

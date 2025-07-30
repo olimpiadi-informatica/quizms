@@ -2,13 +2,14 @@ import { useEffect, useId, useRef } from "react";
 
 import { DisableTopBlocks } from "@blockly/disable-top-blocks";
 import "blockly/blocks";
+
 import {
   type BlocklyOptions,
   Events,
-  type WorkspaceSvg,
   inject,
   serialization,
   setLocale,
+  type WorkspaceSvg,
 } from "blockly/core";
 import type { ToolboxInfo } from "blockly/core/utils/toolbox";
 import { javascriptGenerator } from "blockly/javascript";

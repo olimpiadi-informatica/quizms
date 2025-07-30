@@ -1,4 +1,4 @@
-import { Fragment, type Ref, forwardRef, useReducer, useRef } from "react";
+import { Fragment, forwardRef, type Ref, useReducer, useRef } from "react";
 
 import {
   Button,
@@ -19,7 +19,7 @@ import { randomId } from "~/utils/random";
 import { announcementConverter } from "~/web/firebase/common/converters";
 import { useCollection } from "~/web/firebase/hooks";
 
-import { useAdmin } from "./provider";
+import { useAdmin } from "./context";
 
 export default function Announcements() {
   const { contest } = useAdmin();

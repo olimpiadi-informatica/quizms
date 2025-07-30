@@ -2,12 +2,12 @@ import { useCallback } from "react";
 
 import {
   type CollectionReference,
-  type FirestoreDataConverter,
-  type Query,
   collection,
   doc,
+  type FirestoreDataConverter,
   getDocs,
   onSnapshot,
+  type Query,
   setDoc,
 } from "firebase/firestore";
 import { sortBy } from "lodash-es";
@@ -62,7 +62,7 @@ export function useCollection<T extends { id: string }>(
       if (!options?.subscribe) return;
       const unsubscribe = onSnapshot(
         q,
-        async (snap) => {
+        (snap) => {
           try {
             setData(snap.docs.map((doc) => doc.data()));
           } catch (err) {

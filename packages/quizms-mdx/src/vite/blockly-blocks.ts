@@ -1,12 +1,12 @@
 import type { TransformPluginContext } from "rollup";
 import type { PluginOption } from "vite";
 import {
+  parse,
+  parseDocument,
   type Scalar,
   type YAMLError,
   type YAMLMap,
   type Node as YAMLNode,
-  parse,
-  parseDocument,
 } from "yaml";
 import type { ZodError, ZodFormattedError, ZodIssue } from "zod";
 

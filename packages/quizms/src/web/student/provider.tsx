@@ -1,18 +1,10 @@
-import {
-  type Dispatch,
-  type ReactNode,
-  type SetStateAction,
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
+import { type ReactNode, useCallback, useEffect, useState } from "react";
 
 import { useIsAfter } from "@olinfo/react-components";
 
-import { type Contest, type Participation, type Schema, type Student, calcScore } from "~/models";
+import { type Contest, calcScore, type Participation, type Schema, type Student } from "~/models";
 
+import { StudentContext, type StudentContextProps } from "./context";
 import { StudentLayout } from "./layout";
 
 type StudentProviderProps = {
@@ -33,14 +25,6 @@ type StudentProviderProps = {
   /** Flag che indica se la prova è terminata */
   terminated: boolean;
 };
-
-type StudentContextProps = StudentProviderProps & {
-  schema: Schema;
-  registerSchema: Dispatch<SetStateAction<Schema>>;
-};
-
-const StudentContext = createContext<StudentContextProps>({} as StudentContextProps);
-StudentContext.displayName = "StudentContext";
 
 export function StudentProvider({
   setStudent,
@@ -90,8 +74,4 @@ export function StudentProvider({
       <StudentLayout>{children}</StudentLayout>
     </StudentContext.Provider>
   );
-}
-
-export function useStudent() {
-  return useContext(StudentContext);
 }

@@ -16,15 +16,15 @@ import { downloadZip } from "client-zip";
 import { addMinutes, addSeconds, isSameDay, roundToNearestMinutes, subMinutes } from "date-fns";
 import { saveAs } from "file-saver";
 import { range } from "lodash-es";
+import Markdown from "react-markdown";
 import { Link } from "wouter";
 
 import { randomToken } from "~/utils/random";
 import { Timer } from "~/web/components";
 
-import Markdown from "react-markdown";
+import { useTeacher } from "./context";
 import { Announcements } from "./dashboard-announcements";
 import { StudentRestoreList } from "./dashboard-student-restore";
-import { useTeacher } from "./provider";
 
 function StartContestButton() {
   const { contest, participation, setParticipation } = useTeacher();

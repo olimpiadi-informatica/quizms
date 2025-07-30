@@ -1,10 +1,10 @@
-import { type Ref, forwardRef } from "react";
+import { forwardRef, type Ref } from "react";
 
 import { saveAs } from "file-saver";
 import { unparse as stringifyCSV } from "papaparse";
 
-import { type Contest, type Student, formatUserData } from "~/models";
-import { useTeacher, useTeacherStudents } from "~/web/teacher/provider";
+import { type Contest, formatUserData, type Student } from "~/models";
+import { useTeacher, useTeacherStudents } from "~/web/teacher/context";
 
 export const ExportModal = forwardRef(function Exporter(_, ref: Ref<HTMLButtonElement> | null) {
   const { contest } = useTeacher();

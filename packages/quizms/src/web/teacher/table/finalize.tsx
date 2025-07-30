@@ -1,11 +1,11 @@
-import { type Ref, forwardRef, useMemo } from "react";
+import { forwardRef, type Ref, useMemo } from "react";
 
 import { Form, FormButton, Modal, SubmitButton, TextField } from "@olinfo/react-components";
 import { deburr, lowerFirst } from "lodash-es";
 import { TriangleAlert } from "lucide-react";
 
 import type { Student } from "~/models";
-import { useTeacher, useTeacherStudents } from "~/web/teacher/provider";
+import { useTeacher, useTeacherStudents } from "~/web/teacher/context";
 
 import { isStudentIncomplete } from "./utils";
 

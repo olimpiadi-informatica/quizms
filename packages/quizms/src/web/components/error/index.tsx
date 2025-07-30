@@ -1,4 +1,4 @@
-import { Suspense, lazy, useEffect } from "react";
+import { lazy, Suspense, useEffect } from "react";
 
 import { Button } from "@olinfo/react-components";
 import { RotateCw, TriangleAlert } from "lucide-react";

@@ -1,8 +1,8 @@
 import {
   type DocumentSnapshot,
   type FirestoreDataConverter,
-  Timestamp,
   serverTimestamp,
+  Timestamp,
 } from "firebase/firestore";
 import { cloneDeepWith, isDate, isString, mapValues, omit } from "lodash-es";
 import z, {
@@ -20,12 +20,12 @@ import z, {
 
 import {
   type Announcement,
-  type Student,
-  type Submission,
   announcementSchema,
   contestSchema,
   participationMappingSchema,
   participationSchema,
+  type Student,
+  type Submission,
   studentMappingHashSchema,
   studentMappingUidSchema,
   studentRestoreSchema,

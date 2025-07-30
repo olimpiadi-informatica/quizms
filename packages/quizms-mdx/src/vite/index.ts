@@ -1,6 +1,7 @@
+import { fileURLToPath } from "node:url";
+
 import type { PluginOption } from "vite";
 
-import { fileURLToPath } from "node:url";
 import asymptote from "./asymptote";
 import blocklyBlocks from "./blockly-blocks";
 import blocklyMedia from "./blockly-media";

@@ -1,4 +1,4 @@
-import { type Ref, forwardRef } from "react";
+import { forwardRef, type Ref } from "react";
 
 import { CheckboxField, Form, FormButton, Modal, SubmitButton } from "@olinfo/react-components";
 
@@ -30,7 +30,7 @@ export const DeleteModal = forwardRef(function DeleteModal(
               lo studente <b>{studentName}</b>
             </>
           ) : (
-            <>uno studente</>
+            "uno studente"
           )}
           . Puoi vedere gli studenti cancellati e annullarne la cancellazione cliccando sulla
           testata della colonna &ldquo;<i>Cancella</i>&rdquo; e scegliendo &ldquo;

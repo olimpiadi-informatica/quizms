@@ -6,7 +6,7 @@ import { promisify } from "node:util";
 
 import { noop } from "lodash-es";
 import pc from "picocolors";
-import { type InlineConfig, type PluginOption, build, mergeConfig, preview } from "vite";
+import { build, type InlineConfig, mergeConfig, type PluginOption, preview } from "vite";
 
 import { type Contest, contestSchema } from "~/models";
 import load from "~/models/load";

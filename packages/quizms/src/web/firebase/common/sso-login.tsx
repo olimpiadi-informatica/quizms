@@ -35,7 +35,7 @@ export default function SsoLogin({ url, logo, children }: Props) {
   useEffect(() => {
     if (token) {
       setLoading(true);
-      signInWithCustomToken(auth, token)
+      void signInWithCustomToken(auth, token)
         .then(() => navigate(location, { replace: true }))
         .finally(() => setLoading(false));
     }

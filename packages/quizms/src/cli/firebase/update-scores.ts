@@ -4,7 +4,7 @@ import { SingleBar } from "cli-progress";
 import { formatDistanceStrict } from "date-fns";
 import type { QueryDocumentSnapshot } from "firebase-admin/lib/firestore";
 
-import { type Student, calcScore } from "~/models";
+import { calcScore, type Student } from "~/models";
 import { info } from "~/utils/logs";
 
 import { studentConverter, variantConverter } from "./utils/converters-admin";

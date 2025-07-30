@@ -7,7 +7,7 @@ import { Check, X } from "lucide-react";
 import type { StudentRestore } from "~/models";
 import { hash } from "~/utils/hash";
 
-import { useTeacherStudentRestores } from "./provider";
+import { useTeacherStudentRestores } from "./context";
 
 function StudentRestoreEntry({
   studentRestore,

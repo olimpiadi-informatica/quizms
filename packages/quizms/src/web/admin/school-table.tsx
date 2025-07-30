@@ -1,4 +1,4 @@
-import { type ComponentType, Suspense, lazy, useMemo } from "react";
+import { type ComponentType, lazy, Suspense, useMemo } from "react";
 
 import type { CellEditRequestEvent, ColDef, ICellRendererParams } from "ag-grid-community";
 import type { AgGridReactProps } from "ag-grid-react";
@@ -9,7 +9,7 @@ import { participationConverter } from "~/web/firebase/common/converters";
 import { useCollection } from "~/web/firebase/hooks";
 import { useCount } from "~/web/firebase/hooks/count";
 
-import { useAdmin } from "./provider";
+import { useAdmin } from "./context";
 
 const AgGridReact: ComponentType<AgGridReactProps> = lazy(() => import("~/web/components/ag-grid"));
 

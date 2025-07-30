@@ -100,7 +100,6 @@ function transformSvg(id: string, content: string, options: ImageOptions): Image
         name: "preset-default",
         params: {
           overrides: {
-            removeViewBox: false, // https://github.com/svg/svgo/issues/1128
             cleanupIds: {
               minify: false,
               remove: false,

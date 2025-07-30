@@ -1,4 +1,4 @@
-import { type FirestoreDataConverter, type Query, getCountFromServer } from "firebase/firestore";
+import { type FirestoreDataConverter, getCountFromServer, type Query } from "firebase/firestore";
 import useSWR, { type SWRConfiguration } from "swr";
 
 import { useDb } from "~/web/firebase/common/base-login";

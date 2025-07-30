@@ -1,4 +1,4 @@
-import { type ReactNode, type Ref, forwardRef, useRef } from "react";
+import { forwardRef, type ReactNode, type Ref, useRef } from "react";
 
 import {
   Button,
@@ -17,10 +17,10 @@ import {
 import { sumBy } from "lodash-es";
 import { FileChartColumn, LogOut, RotateCcw } from "lucide-react";
 
-import { type Schema, calcProblemPoints } from "~/models";
+import { calcProblemPoints, type Schema } from "~/models";
 import { ErrorBoundary, Progress, Prose, Timer, useMetadata } from "~/web/components";
 
-import { useStudent } from "./provider";
+import { useStudent } from "./context";
 
 export function StudentLayout({ children }: { children: ReactNode }) {
   const metadata = useMetadata();

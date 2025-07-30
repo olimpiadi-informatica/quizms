@@ -5,7 +5,7 @@ import { DateTime } from "@olinfo/react-components";
 import { participationMappingConverter } from "~/web/firebase/common/converters";
 import { useCollection } from "~/web/firebase/hooks";
 
-import { useAdmin } from "./provider";
+import { useAdmin } from "./context";
 
 export default function TokenList() {
   return (
