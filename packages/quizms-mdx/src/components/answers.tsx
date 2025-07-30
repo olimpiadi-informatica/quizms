@@ -20,7 +20,10 @@ export function AnswerGroup({ children }: AnswerGroupProps) {
 export function MultipleChoiceAnswer({
   children,
   kind,
-}: { children: ReactNode; kind: "allCorrect" | "anyCorrect" }) {
+}: {
+  children: ReactNode;
+  kind: "allCorrect" | "anyCorrect";
+}) {
   return (
     <>
       <JsonField field="type" value="text" />

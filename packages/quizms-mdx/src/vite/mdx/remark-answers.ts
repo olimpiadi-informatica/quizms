@@ -1,11 +1,11 @@
 import { Parser } from "acorn";
 import type { Directive } from "estree";
 import type { Blockquote, Root } from "mdast";
+import type { ContainerDirective } from "mdast-util-directive";
 import type { MdxJsxFlowElement } from "mdast-util-mdx-jsx";
 import type { Plugin } from "unified";
 import { visit } from "unist-util-visit";
 
-import type { ContainerDirective } from "mdast-util-directive";
 import { jsxAttribute } from "./utils";
 
 const remarkAnswers: Plugin<[], Root> = () => {

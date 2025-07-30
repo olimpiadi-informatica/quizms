@@ -1,5 +1,6 @@
 import type { CompileOptions } from "@mdx-js/mdx";
 import mdxPlugin from "@mdx-js/rollup";
+import remarkDirective from "remark-directive";
 import remarkFrontmatter from "remark-frontmatter";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
@@ -9,7 +10,6 @@ import remarkSmartypants from "remark-smartypants";
 import type { PluggableList } from "unified";
 import type { PluginOption } from "vite";
 
-import remarkDirective from "remark-directive";
 import recmaRemoveExports from "./recma-remove-exports";
 import recmaVariants from "./recma-variants";
 import rehypeFixWrap from "./rehype-fix-wrap";
