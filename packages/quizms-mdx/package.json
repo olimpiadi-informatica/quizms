@@ -36,6 +36,7 @@
     "katex": "^0.16",
     "lodash-es": "^4.17",
     "lucide-react": ">=0.395 <1",
+    "remark-directive": "^4.0.0",
     "remark-frontmatter": "^5.0",
     "remark-gfm": "^4.0",
     "remark-math": "^6.0",
