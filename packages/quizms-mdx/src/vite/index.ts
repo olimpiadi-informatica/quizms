@@ -9,7 +9,7 @@ import mdx from "./mdx";
 import python from "./python";
 import resolveMdxComponents from "./resolve-mdx-components";
 
-function config(): PluginOption {
+function config(): any {
   return {
     name: "quizms:quizms-mdx",
     config(config) {
@@ -17,7 +17,7 @@ function config(): PluginOption {
         fileURLToPath(new URL(/* @vite-ignore */ "..", import.meta.url)),
       );
     },
-  };
+  } as PluginOption;
 }
 
 export default [
