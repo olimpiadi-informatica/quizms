@@ -3,25 +3,30 @@
 Each problem is represented by a **Markdown** file:
 
 ```md
-What is 2 + 2?
+How much is 2 + 2?
+
+:::answers{.anyCorrect}
 
 - [ ] 2
 - [ ] 3
 - [x] 4
 - [ ] 5
 
+:::
+
 > The solution is 4.
 ```
 
-The file is composed of four parts:
+The file is composed of three parts:
 
-- **the header**: automatically generated with the problem number, e.g. `Question 1`, `Question 2`, etc.;
 - **the statement**: the description of what the problem is asking;
 - **the answers**: the part where the user chooses the correct answer;
-- **the solution**: the explanation of how to solve the problem, shown after the test is completed.
+- **the solution**: the explanation on how to solve the problem, shown after the test is completed.
+
+An header for the question is automatically generated with the problem number (e.g. `Question 1`, `Question 2`, etc.) and doesn't have to be included in the Markdown file.
 
 ::: tip
-Answers and the solution can be placed anywhere in the text, but it is recommended to put them at the end of the problem.
+Answers and solution can be placed anywhere in the text, but it is recommended to put them in this suggested order.
 :::
 
 It is also possible to define problems using [MDX](https://mdxjs.com/) (Markdown with JavaScript), which allows for interactive parts of the problem using JavaScript, such as a [block-based code editor](./blockly).
@@ -45,23 +50,53 @@ The following features are **not** supported:
 
 ## Answers
 
-Answers can be of three types:
+Answers are written within a [generic directive for a styled block](https://github.com/remarkjs/remark-directive?tab=readme-ov-file#example-styled-blocks), of the form:
 
-- **multiple-choice answers**, defined using a [TODO list](https://www.markdownguide.org/extended-syntax/#task-lists) where the correct answer is marked with an `x`:
   ```md
+  :::answers{.TYPE}
+
+  DESCRIPTION
+
+  :::
+  ```
+
+There are currently four supported types of answers:
+
+- **single-choice answers (anyCorrect)**, defined using a [TODO list](https://www.markdownguide.org/extended-syntax/#task-lists) where the correct answers are marked with an `x`:
+  ```md
+  :::answers{.anyCorrect}
+
   - [ ] answer 1
   - [x] answer 2
   - [ ] answer 3
   - [ ] answer 4
-  ```
-  ::: tip
-  It is possible to indicate multiple correct answers (e.g., in case of typos), but the user can select only one answer.
-  :::
 
-- **open-ended answer**, defined with the `?>` syntax:
-  ```md
-  ?> answer
+  :::
   ```
+  It is possible to indicate multiple correct answers, but the user can select only one answer. The answer will be considered correct if the user selects any of the answers that are marked as correct.
+
+- **multiple-choice answers (allCorrect)**, also defined using a [TODO list](https://www.markdownguide.org/extended-syntax/#task-lists) where the correct answers are marked with an `x`:
+  ```md
+  :::answers{.allCorrect}
+
+  - [ ] answer 1
+  - [x] answer 2
+  - [x] answer 3
+  - [ ] answer 4
+
+  :::
+  ```
+  In this case, the user can select any number of options (from zero to all). The answer will be considered correct if the user selects exactly **all** of the answers that are marked as correct. The answer will be considered missing if the user does not select any answer.
+
+- **open-ended answer (open)**, defined with a special `?>` syntax:
+  ```md
+  :::answers{.open}
+
+  ?> answer
+
+  :::
+  ```
+  If the answer is a number, it will be rendered as a numeric input; otherwise, it will be rendered as a short textual input. The answer will be considered correct if it matches exactly the given answer.
   ::: warning
   An open-ended answer can be at most 100 characters long.
   :::
@@ -88,15 +123,26 @@ It is possible to define multiple subproblems in the same file by separating the
 ```md
 Subproblem 1 ...
 
+:::answers{.anyCorrect}
+
 - [x] Yes
 - [ ] No
+
+:::
+
+> Solution 1 ...
 
 ---
 
 Subproblem 2 ...
 
-- [ ] Yes
-- [x] No
+:::answers{.open}
+
+?> BDC
+
+:::
+
+> Solution 2 ...
 ```
 
-Each subproblem has its own text, answers, solution, and a header automatically generated with the problem and subproblem number, e.g., `Question 1.1`, `Question 1.2`, etc.
+Each subproblem has its own text, answers, solution, and a header automatically generated with the problem and subproblem number (e.g., `Question 1.1`, `Question 1.2`, etc).
