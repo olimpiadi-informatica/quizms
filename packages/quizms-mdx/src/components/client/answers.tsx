@@ -201,7 +201,7 @@ export function AnyCorrectAnswerClient({ id, correct, children }: AnswerProps) {
           )}
           type="button"
           onClick={() => setAnswer(null)}
-          aria-label="Cancella risposta">
+          aria-label="Clear answer">
           <Trash2 size={20} />
         </button>
       </div>
@@ -250,12 +250,12 @@ export function OpenAnswerClient({ correct, type }: OpenAnswerProps) {
         )}
         onChange={(e) => setAnswer(e.target.value || null)}
         onWheel={(e) => e.currentTarget.blur()}
-        placeholder="Inserisci la risposta"
+        placeholder="Enter your answer"
         maxLength={100}
         type={type}
         value={answer ?? ""}
         disabled={terminated}
-        aria-label="Risposta"
+        aria-label="Answer"
       />
     </div>
   );
@@ -269,7 +269,7 @@ export function ExplanationClient({ children }: { children: ReactNode }) {
     <div className="my-5 rounded-xl bg-base-200 print:hidden">
       <div className="collapse">
         <input type="checkbox" name={`show-solution-${id}`} />
-        <div className="collapse-title text-xl font-medium">Mostra soluzione</div>
+        <div className="collapse-title text-xl font-medium">Show solution</div>
         <div className="collapse-content">{children}</div>
       </div>
     </div>

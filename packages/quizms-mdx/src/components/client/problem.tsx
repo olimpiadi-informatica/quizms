@@ -40,7 +40,7 @@ export function SubProblemClient({ subId, children }: SubProblemProps) {
   return (
     <ProblemContext.Provider value={{ id: newId, points }}>
       <div className="break-inside-avoid">
-        <h3>Domanda {newId}</h3>
+        <h3>Question {newId}</h3>
         {children}
       </div>
     </ProblemContext.Provider>

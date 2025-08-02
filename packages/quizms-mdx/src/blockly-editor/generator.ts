@@ -10,7 +10,7 @@ import { type JavascriptGenerator, javascriptGenerator, Order } from "blockly/ja
 import type { CustomBlock, CustomBlockArg } from "~/models/blockly-custom-block";
 
 javascriptGenerator.STATEMENT_PREFIX = "highlightBlock(%1);\n";
-javascriptGenerator.INFINITE_LOOP_TRAP = 'if(--loopTrap === 0) exit(false, "Ciclo infinito");\n';
+javascriptGenerator.INFINITE_LOOP_TRAP = 'if(--loopTrap === 0) exit(false, "Infinite loop");\n';
 javascriptGenerator.addReservedWords("exit,highlightBlock,loopTrap,state,tmp");
 console.info("Blockly version:", BlocklyVersion);
 
@@ -27,18 +27,18 @@ function replaceArgs(
     switch (arg.type) {
       case "input_value": {
         let code = generator.valueToCode(block, arg.name, Order.NONE);
-        if (!code) return 'exit(false, "il blocco ha bisogno di un parametro")';
+        if (!code) return 'exit(false, "The block needs a parameter")';
 
         if (arg.integer) {
-          code = `(tmp = ${code}, (tmp | 0) === tmp ? tmp : exit(false, "il parametro deve essere un intero"))`;
+          code = `(tmp = ${code}, (tmp | 0) === tmp ? tmp : exit(false, "The parameter must be an integer"))`;
         }
         if (arg.min !== undefined) {
           const min = arg.min[0];
-          code = `((tmp = ${code}) >= (${min}) ? tmp : exit(false, "il parametro deve essere maggiore o uguale di " + (${min})))`;
+          code = `((tmp = ${code}) >= (${min}) ? tmp : exit(false, "The parameter must be greater than or equal to " + (${min})))`;
         }
         if (arg.max !== undefined) {
           const max = arg.max[0];
-          code = `((tmp = ${code}) <= (${max}) ? tmp : exit(false, "il parametro deve essere minore o uguale di " + (${max})))`;
+          code = `((tmp = ${code}) <= (${max}) ? tmp : exit(false, "The parameter must be less than or equal to " + (${max})))`;
         }
         return code;
       }
@@ -80,5 +80,6 @@ export function toJS(workspace?: WorkspaceSvg) {
   if (!workspace) return "";
 
   const js = javascriptGenerator.workspaceToCode(workspace);
-  return `${js}\nexit(false, "L'esecuzione è terminata prima di finire il livello");`;
+  return `${js}
+exit(false, "Execution terminated before finishing the level");`;
 }

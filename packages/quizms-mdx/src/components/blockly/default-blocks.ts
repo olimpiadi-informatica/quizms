@@ -5,13 +5,13 @@ export const defaultToolbox: ToolboxInfo = {
   contents: [
     {
       kind: "category",
-      name: "Variabili",
+      name: "Variables",
       categorystyle: "variable_category",
       custom: "VARIABLE",
     },
     {
       kind: "category",
-      name: "Matematica",
+      name: "Math",
       categorystyle: "math_category",
       contents: [
         {
@@ -40,7 +40,7 @@ export const defaultToolbox: ToolboxInfo = {
     },
     {
       kind: "category",
-      name: "Logica",
+      name: "Logic",
       categorystyle: "logic_category",
       contents: [
         {
@@ -70,7 +70,7 @@ export const defaultToolbox: ToolboxInfo = {
     },
     {
       kind: "category",
-      name: "Cicli",
+      name: "Loops",
       categorystyle: "loop_category",
       contents: [
         {
@@ -124,7 +124,7 @@ export const defaultToolbox: ToolboxInfo = {
     },
     {
       kind: "category",
-      name: "Liste",
+      name: "Lists",
       categorystyle: "list_category",
       contents: [
         {

@@ -231,7 +231,7 @@ export function BlocklyClient({
   return (
     <div className={clsx(style.workspace, "not-prose")}>
       <div className={style.visualizerButtons}>
-        <div className="pl-2 text-xl font-bold max-sm:hidden lg:max-xl:hidden">Livello</div>
+        <div className="pl-2 text-xl font-bold max-sm:hidden lg:max-xl:hidden">Level</div>
         <div className="join">
           {testcaseStatuses.map(({ index, correct, msg }) => (
             <button
@@ -262,7 +262,7 @@ export function BlocklyClient({
         <ErrorBoundary
           onError={(err) => {
             if (process.env.NODE_ENV === "production") {
-              err.message = "Visualizzazione del livello fallita";
+              err.message = "Level visualization failed";
             }
           }}
           onReset={reset}>
@@ -279,10 +279,7 @@ export function BlocklyClient({
           <div role="alert" className={clsx("alert", correct ? "alert-success" : "alert-error")}>
             {correct ? <CircleCheck /> : <TriangleAlert />}
             <span>{alert}</span>
-            <button
-              type="button"
-              onClick={() => setAlert(undefined)}
-              aria-label="Nascondi messaggio">
+            <button type="button" onClick={() => setAlert(undefined)} aria-label="Hide message">
               <MessageSquareOff />
             </button>
           </div>
@@ -290,31 +287,31 @@ export function BlocklyClient({
       </div>
       <div className={style.editorButtons}>
         <div className="join join-horizontal">
-          <div className="join-item tooltip" data-tip="Esegui/pausa">
+          <div className="join-item tooltip" data-tip="Run/pause">
             <button
               type="button"
               className="btn btn-info rounded-[inherit]"
               disabled={!running || editing}
               onClick={() => setPlaying(!playing)}
-              aria-label="Esugui un blocco">
+              aria-label="Execute a block">
               {playing ? <Pause className="size-6" /> : <Play className="size-6" />}
             </button>
           </div>
-          <div className="join-item tooltip" data-tip="Esegui un blocco">
+          <div className="join-item tooltip" data-tip="Execute a block">
             <button
               type="button"
               className="btn btn-info rounded-[inherit]"
               disabled={!running || editing}
               onClick={step}
-              aria-label="Esugui un blocco">
+              aria-label="Execute a block">
               <SkipForward className="size-6" />
             </button>
           </div>
-          <div className="join-item tooltip" data-tip="Esegui da capo">
+          <div className="join-item tooltip" data-tip="Run from start">
             <button
               type="button"
               className="btn btn-info rounded-[inherit]"
-              aria-label="Esegui da capo"
+              aria-label="Run from start"
               disabled={editing}
               onClick={() => {
                 reset();
@@ -324,11 +321,11 @@ export function BlocklyClient({
             </button>
           </div>
         </div>
-        <div className="tooltip" data-tip="Correggi la soluzione">
+        <div className="tooltip" data-tip="Correct solution">
           <button
             type="button"
             className="btn btn-success"
-            aria-label="Correggi la soluzione"
+            aria-label="Correct solution"
             disabled={!editing || !ready}
             onClick={runAll}>
             <Send className="size-6" />
@@ -342,11 +339,11 @@ export function BlocklyClient({
             max="6"
             value={speed}
             onChange={(e) => setSpeed(+e.target.value)}
-            aria-label="Velocità di esecuzione"
+            aria-label="Execution speed"
           />
           <div className="flex w-full justify-between px-2 text-xs">
-            <span>Lento</span>
-            <span>Veloce</span>
+            <span>Slow</span>
+            <span>Fast</span>
           </div>
         </div>
         {process.env.NODE_ENV === "development" && <Debug blocks={blocks} js={code} svg={svg} />}
@@ -366,7 +363,7 @@ const Editor = forwardRef(function Editor(
         ref={ref}
         src="/__blockly_iframe/"
         className="size-full"
-        title="Area di lavoro di Blockly"
+        title="Blockly workspace"
         loading="lazy"
       />
       {!ready && (

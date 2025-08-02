@@ -249,7 +249,7 @@ function injectVariantSelect(ret?: Node) {
       onChange={(e) => setVariant(+e.target.value)}>
       {Array.from({ length: _allVariants.length }, (_, i) => (
         <option key={i} value={i}>
-          Variante {i + 1}
+          Variant {i + 1}
         </option>
       ))}
     </select>
@@ -303,7 +303,7 @@ function injectVariantSelect(ret?: Node) {
                     b.identifier("children"),
                     b.binaryExpression(
                       "+",
-                      b.literal("Variante "),
+                      b.literal("Variant "),
                       b.binaryExpression("+", b.identifier("i"), b.literal(1)),
                     ),
                   ),

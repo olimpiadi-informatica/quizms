@@ -13,7 +13,7 @@ import {
 } from "blockly/core";
 import type { ToolboxInfo } from "blockly/core/utils/toolbox";
 import { javascriptGenerator } from "blockly/javascript";
-import * as locale from "blockly/msg/it";
+import * as locale from "blockly/msg/en";
 
 import type { CustomBlock } from "~/models/blockly-custom-block";
 
@@ -109,7 +109,7 @@ function createConfig({ toolbox, customBlocks, readonly }: InitProps): BlocklyOp
   if (customBlocks && toolbox.kind === "categoryToolbox") {
     toolbox.contents.unshift({
       kind: "category",
-      name: "Esecuzione",
+      name: "Execution",
       colour: "40",
       contents: customBlocks.map((block) => ({
         kind: "block",

@@ -12,7 +12,7 @@ type Props = {
 
 const formats = {
   json: {
-    label: "Blocchi",
+    label: "Blocks",
     mime: "application/json;charset=utf-8",
   },
   js: {
@@ -20,7 +20,7 @@ const formats = {
     mime: "text/javascript;charset=utf-8",
   },
   svg: {
-    label: "Immagine",
+    label: "Image",
   },
 };
 
@@ -54,7 +54,7 @@ export default function Debug({ blocks, js, svg }: Props) {
       <Button className="btn-error" onClick={() => ref.current?.showModal()}>
         Debug
       </Button>
-      <Modal ref={ref} title="Opzioni di debug" className="max-w-3xl">
+      <Modal ref={ref} title="Debug options" className="max-w-3xl">
         <div className="not-prose flex items-stretch justify-between gap-4 h-12">
           <div role="tablist" className="tabs-boxed tabs">
             {Object.entries(formats).map(([f, { label }]) => (
@@ -70,9 +70,9 @@ export default function Debug({ blocks, js, svg }: Props) {
           </div>
           {format !== "svg" && (
             <div className="flex gap-2">
-              <div className={clsx("tooltip-open", copyTooltip && "tooltip")} data-tip="Copiato!">
+              <div className={clsx("tooltip-open", copyTooltip && "tooltip")} data-tip="Copied!">
                 <Button className="btn-error" icon={Copy} onClick={copy}>
-                  Copia
+                  Copy
                 </Button>
               </div>
               <Button
@@ -82,7 +82,7 @@ export default function Debug({ blocks, js, svg }: Props) {
                   const { saveAs } = await import("file-saver");
                   saveAs(new Blob([code], { type: formats[format].mime }), `blocks.${format}`);
                 }}>
-                Salva
+                Save
               </Button>
             </div>
           )}
