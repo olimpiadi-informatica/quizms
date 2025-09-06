@@ -1,5 +1,4 @@
 import type { App } from "firebase-admin/app";
-import type { ApplicationDefaultCredential } from "firebase-admin/lib/app/credential-internal";
 
 import { fatal } from "~/utils/logs";
 
@@ -20,9 +19,9 @@ export async function restApi(
   endpoint: string,
   body?: object,
 ) {
-  const credential = app.options.credential as ApplicationDefaultCredential;
+  const credential = app.options.credential;
   const token = await credential?.getAccessToken();
-  if (!token) {
+  if (!token?.access_token) {
     fatal("Failed to get access token from credential.");
   }
 

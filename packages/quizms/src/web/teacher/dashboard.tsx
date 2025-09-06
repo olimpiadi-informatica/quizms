@@ -256,7 +256,8 @@ function DownloadPdfButton() {
       }
     }
 
-    const blob = new Blob([await pdf.save()], { type: "application/pdf" });
+    const data = await pdf.save();
+    const blob = new Blob([data as Uint8Array<ArrayBuffer>], { type: "application/pdf" });
     saveAs(blob, `${participation.id}.pdf`);
   };
 
@@ -274,7 +275,10 @@ function DownloadZipButton() {
     const statements = await getPdfStatements();
 
     const files = Object.entries(statements).map(
-      ([name, data]) => new File([data], `${name}.pdf`, { type: "application/pdf" }),
+      ([name, data]) =>
+        new File([data], `${name}.pdf`, {
+          type: "application/pdf",
+        }),
     );
     const zip = await downloadZip(files).blob();
 

@@ -25,6 +25,9 @@ function replaceArgs(block: Block, generator: JavascriptGenerator, args: CustomB
 
       case "field_dropdown":
         return block.getFieldValue(arg.name);
+
+      default:
+        throw new Error("Unknown block type");
     }
   });
   return `${block.type}([${generatedArgs.join(", ")}])`;

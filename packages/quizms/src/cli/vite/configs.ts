@@ -1,7 +1,6 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { cwd } from "node:process";
-import { fileURLToPath } from "node:url";
 
 import react from "@vitejs/plugin-react-swc";
 import { sumBy } from "lodash-es";
@@ -91,14 +90,6 @@ export default function configs(mode: "development" | "production"): InlineConfi
     },
     clearScreen: false,
     server: {
-      fs: {
-        allow: [
-          path.join(root, ".."),
-          // include quizms root directory, node_modules directory are already included,
-          // but when using `yarn link` it's may be outside of node_modules
-          fileURLToPath(new URL(/* @vite-ignore */ "../../../..", import.meta.url)),
-        ],
-      },
       host: false,
     },
   };

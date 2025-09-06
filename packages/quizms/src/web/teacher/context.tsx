@@ -20,7 +20,7 @@ export type TeacherContextProps = {
   /** Funzione per effettuare il logout */
   logout: () => Promise<void>;
   /** Funzione per ottenere i pdf dei testi */
-  getPdfStatements: () => Promise<Record<string, Uint8Array | ArrayBuffer>>;
+  getPdfStatements: () => Promise<Record<string, ArrayBuffer>>;
   /** Hook per ottenere gli studenti di una scuola */
   useStudents: (
     participationId: string,

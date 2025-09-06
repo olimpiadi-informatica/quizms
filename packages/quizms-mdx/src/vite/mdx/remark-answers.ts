@@ -76,7 +76,7 @@ function parseAnswers(tree: Root) {
           if (child.type === "text") {
             templateLiteral += child.value;
           } else if (child.type === "mdxTextExpression") {
-            templateLiteral += `$\{${child.value}}`;
+            templateLiteral += `\${${child.value}}`;
           } else {
             throw new Error("Open answer solution must be in plain text");
           }

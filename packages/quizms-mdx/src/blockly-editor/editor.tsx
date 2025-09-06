@@ -9,9 +9,9 @@ import {
   inject,
   serialization,
   setLocale,
+  type utils,
   type WorkspaceSvg,
 } from "blockly/core";
-import type { ToolboxInfo } from "blockly/core/utils/toolbox";
 import { javascriptGenerator } from "blockly/javascript";
 import * as locale from "blockly/msg/it";
 
@@ -56,7 +56,7 @@ export function BlocklyEditor() {
 
 export type InitProps = {
   readonly: boolean;
-  toolbox: ToolboxInfo;
+  toolbox: utils.toolbox.ToolboxInfo;
   initialBlocks: object;
   customBlocks: CustomBlock<any>[];
 };

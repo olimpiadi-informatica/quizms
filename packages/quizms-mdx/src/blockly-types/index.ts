@@ -1,4 +1,4 @@
-import type { ToolboxInfo } from "blockly/core/utils/toolbox";
+import type { utils } from "blockly/core";
 
 export type BlocklyType = number | string | boolean | undefined;
 
@@ -15,7 +15,11 @@ export type CustomBlock<State> = {
   colour: number;
   tooltip: string;
   maxInstances?: number;
-  fn: (ctx: Context, state: State, ...args: any[]) => Promise<BlocklyType> | BlocklyType | void;
+  fn: (
+    ctx: Context,
+    state: State,
+    ...args: any[]
+  ) => Promise<BlocklyType> | BlocklyType | undefined;
 };
 
 export type BlocklyTypeLiteral = "Number" | "String" | "Array" | "Boolean";
@@ -60,7 +64,7 @@ export type WorkspaceToIframeMessage =
   | {
       cmd: "init";
       readonly: boolean;
-      toolbox: ToolboxInfo;
+      toolbox: utils.toolbox.ToolboxInfo;
       initialBlocks: object;
       customBlocks: CustomBlock<any>[];
     }

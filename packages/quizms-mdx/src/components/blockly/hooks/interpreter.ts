@@ -1,4 +1,5 @@
 import Interpreter from "js-interpreter";
+
 import type { Context, CustomBlock, TestcaseResult } from "~/blockly-types";
 
 const MAX_LOOP_ITERATIONS = 1000;

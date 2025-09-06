@@ -21,12 +21,12 @@
         "noUnusedImports": "error",
         "noUnusedPrivateClassMembers": "error",
         "noUnusedVariables": "error",
-        "useHookAtTopLevel": "error"
+        "useHookAtTopLevel": "error",
+        "useUniqueElementIds": "off"
       },
       "nursery": {
         "noFloatingPromises": "error",
-        "noImportCycles": "error",
-        "useUniqueElementIds": "off"
+        "noImportCycles": "error"
       },
       "performance": {
         "noImgElement": "off"
@@ -43,10 +43,7 @@
         "noUnusedTemplateLiteral": "error",
         "noUselessElse": "error",
         "useAsConstAssertion": "error",
-        "useConsistentArrayType": {
-          "level": "error",
-          "options": { "syntax": "shorthand" }
-        },
+        "useConsistentArrayType": { "level": "error", "options": { "syntax": "shorthand" } },
         "useDefaultParameterLast": "error",
         "useFilenamingConvention": {
           "level": "error",

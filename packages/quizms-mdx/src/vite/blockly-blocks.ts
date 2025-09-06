@@ -10,12 +10,7 @@ export default function blocklyBlocks(): PluginOption {
       const [pathname] = id.split("?");
       if (!pathname.endsWith(".blocks.ts")) return;
 
-      const sourceFile = ts.createSourceFile(
-        id,
-        code,
-        ts.ScriptTarget.ESNext,
-        true,
-      );
+      const sourceFile = ts.createSourceFile(id, code, ts.ScriptTarget.ESNext, true);
 
       const res = ts.transform(sourceFile, [
         () => (sourceFile: ts.SourceFile) => visitSourceFile(this, sourceFile),
@@ -163,9 +158,6 @@ function toBlocklyType(ctx: TransformPluginContext, sf: ts.SourceFile, ty: ts.Ty
     case ts.SyntaxKind.BooleanKeyword:
       return "Boolean";
     default:
-     return ctx.error(
-        `Unsupported type '${ts.SyntaxKind[ty.kind]}'`,
-        ty.getStart(sf),
-      );
+      return ctx.error(`Unsupported type '${ts.SyntaxKind[ty.kind]}'`, ty.getStart(sf));
   }
 }

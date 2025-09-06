@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { useErrorBoundary } from "@olinfo/quizms/components";
-import type { ToolboxInfo } from "blockly/core/utils/toolbox";
-
+import type { utils } from "blockly/core";
 import { cloneDeepWith } from "lodash-es";
+
 import type {
   CustomBlock,
   IframeToWorkspaceMessage,
@@ -14,7 +14,7 @@ export function useIframe(
   iframe: HTMLIFrameElement | null,
   readonly: boolean,
   init: {
-    toolbox: ToolboxInfo;
+    toolbox: utils.toolbox.ToolboxInfo;
     initialBlocks: object;
     customBlocks: CustomBlock<any>[];
   },

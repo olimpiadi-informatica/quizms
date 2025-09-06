@@ -19,7 +19,7 @@ type TeacherProviderProps = {
   getPdfStatements: (
     contestId: string,
     variantIds: string[],
-  ) => Promise<Record<string, Uint8Array | ArrayBuffer>>;
+  ) => Promise<Record<string, ArrayBuffer>>;
   useStudents: (
     participationId: string,
   ) => readonly [Student[], (student: Student) => Promise<void>];

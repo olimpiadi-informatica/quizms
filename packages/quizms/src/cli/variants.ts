@@ -6,7 +6,7 @@ import path from "node:path";
 import { cwd } from "node:process";
 
 import { sortBy } from "lodash-es";
-// @ts-ignore
+// @ts-expect-error
 import WebpackRscPlugin from "react-server-dom-webpack/plugin";
 import type { RollupOutput } from "rollup";
 import { build, type InlineConfig, mergeConfig } from "vite";
@@ -227,7 +227,7 @@ const statementPath = path.join(
   "${cwd()}",
   "variants",
   process.env.QUIZMS_CONTEST_ID,
-  \`$\{process.env.QUIZMS_VARIANT_ID}.txt\`
+  \`\${process.env.QUIZMS_VARIANT_ID}.txt\`
 );
 pipe(createWriteStream(statementPath));`;
 }

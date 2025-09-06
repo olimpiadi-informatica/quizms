@@ -1,24 +1,17 @@
 "use client";
 
-import {
-  type ComponentType,
-  forwardRef,
-  type Ref,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { type ComponentType, useCallback, useEffect, useState } from "react";
 
 import { ErrorBoundary } from "@olinfo/quizms/components";
 import { useStudent } from "@olinfo/quizms/student";
-import type { ToolboxInfo } from "blockly/core/utils/toolbox";
+import type { utils } from "blockly/core";
 import clsx from "clsx";
 import { CircleCheck, MessageSquareOff, TriangleAlert } from "lucide-react";
 
 import type { CustomBlock, TestcaseResult, VisualizerProps } from "~/blockly-types";
 import { useContest } from "~/components/client/contest";
 import { useProblem } from "~/components/client/problem";
+
 import { defaultInitialBlocks, defaultToolbox } from "./defaults";
 import { Editor } from "./editor";
 import { useExecutor } from "./hooks/executor";
@@ -30,7 +23,7 @@ import { TestcaseSelector } from "./toolbar/testcases";
 import style from "./workspace.module.css";
 
 export type BlocklyProps<T> = {
-  toolbox?: ToolboxInfo;
+  toolbox?: utils.toolbox.ToolboxInfo;
   initialBlocks?: object;
   testcases?: T[];
   debug?: {

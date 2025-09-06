@@ -1,5 +1,3 @@
-import {} from "react";
-
 import clsx from "clsx";
 import { CircleCheck, CircleHelp, CircleX } from "lucide-react";
 
