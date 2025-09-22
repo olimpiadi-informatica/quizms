@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  Children,
   createContext,
   type ReactNode,
   useCallback,
@@ -56,6 +57,12 @@ export function MultipleChoiceAnswerClient({ children, kind }: MultipleChoiceAns
     setCorrectOptions((correctOptions) => [...new Set([...correctOptions, value])]);
   }, []);
 
+  const [shuffledChildren, setShuffledChildren] = useState<ReactNode[]>([]);
+  useEffect(() => {
+    const array = Children.toArray(children);
+    setShuffledChildren(array.sort(() => Math.random() - 0.5));
+  }, [children]);
+
   useEffect(() => {
     const toRegister = kind === "allCorrect" ? [correctOptions.join("")] : correctOptions;
     registerProblem(`${problemId}`, {
@@ -63,12 +70,7 @@ export function MultipleChoiceAnswerClient({ children, kind }: MultipleChoiceAns
       allowEmpty: true,
       maxPoints: points[0],
       options: [
-        ...toRegister.map((option) => {
-          return {
-            value: option,
-            points: points[0],
-          };
-        }),
+        ...toRegister.map((option) => ({ value: option, points: points[0] })),
         { value: null, points: points[1] },
         { value: "", points: points[1] },
       ],
@@ -77,7 +79,7 @@ export function MultipleChoiceAnswerClient({ children, kind }: MultipleChoiceAns
 
   return (
     <MultipleChoiceContext.Provider value={{ registerCorrectOption }}>
-      {children}
+      {shuffledChildren}
     </MultipleChoiceContext.Provider>
   );
 }
