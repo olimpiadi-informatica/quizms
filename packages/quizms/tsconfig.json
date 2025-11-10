@@ -6,7 +6,7 @@
     "declaration": true,
     "declarationDir": "dist",
     "jsx": "react-jsx",
-    "types": ["vite/client", "@types/wicg-file-system-access"],
+    "types": ["vite/client"],
     "strict": true,
     "noImplicitAny": true,
     "allowJs": true,
@@ -20,7 +20,9 @@
     "baseUrl": "./",
     "paths": {
       "~/*": ["./src/*"]
-    }
+    },
+    "rootDir": "src",
+    "outDir": "dist"
   },
   "include": ["src/"]
 }

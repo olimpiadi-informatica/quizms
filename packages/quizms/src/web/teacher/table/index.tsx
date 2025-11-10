@@ -1,4 +1,4 @@
-import { type ComponentType, lazy, Suspense, useMemo, useRef, useState } from "react";
+import { Suspense, useMemo, useRef, useState } from "react";
 
 import { Button, useIsAfter } from "@olinfo/react-components";
 import type {
@@ -8,7 +8,6 @@ import type {
   IFilterOptionDef,
   ITooltipParams,
 } from "ag-grid-community";
-import type { AgGridReactProps } from "ag-grid-react";
 import { addMinutes, isEqual as isEqualDate } from "date-fns";
 import { cloneDeep, omit, setWith, sumBy, toPath } from "lodash-es";
 import { Download, FileCheck, Trash2, TriangleAlert, Upload, Users } from "lucide-react";
@@ -22,8 +21,8 @@ import {
   type Student,
   type Variant,
 } from "~/models";
-import { randomId } from "~/utils/random";
-import { Loading } from "~/web/components";
+import { randomId } from "~/utils";
+import { AgGrid, Loading } from "~/web/components";
 import { useTeacher, useTeacherStudents } from "~/web/teacher/context";
 
 import { DeleteModal } from "./delete";
@@ -32,8 +31,6 @@ import { ExportModal } from "./export";
 import { FinalizeModal } from "./finalize";
 import { ImportModal } from "./importer";
 import { deleteConfirmStorageKey, isStudentIncomplete } from "./utils";
-
-const AgGridReact: ComponentType<AgGridReactProps> = lazy(() => import("~/web/components/ag-grid"));
 
 export default function TeacherTable() {
   const { contest, participation } = useTeacher();
@@ -192,7 +189,7 @@ function Table() {
   return (
     <div className="relative grow p-2">
       <div className="absolute inset-0">
-        <AgGridReact
+        <AgGrid
           rowData={allStudents}
           getRowId={(row) => (row.data as Student).id}
           columnDefs={colDefs}

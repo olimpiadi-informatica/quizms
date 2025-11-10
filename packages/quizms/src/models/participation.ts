@@ -15,13 +15,3 @@ export const participationSchema = z.object({
 });
 
 export type Participation = z.infer<typeof participationSchema>;
-
-export const participationMappingSchema = z.object({
-  id: z.string(),
-  participationId: z.string(),
-  contestId: z.string(),
-  startingTime: z.date(),
-  endingTime: z.date(),
-});
-
-export type ParticipationMapping = z.infer<typeof participationMappingSchema>;

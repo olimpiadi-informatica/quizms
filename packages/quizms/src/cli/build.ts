@@ -2,31 +2,27 @@ import path from "node:path";
 import { cwd } from "node:process";
 
 import license from "rollup-plugin-license";
-import { build, type InlineConfig, mergeConfig } from "vite";
+import { createBuilder, type InlineConfig, mergeConfig } from "vite";
 
-import { error, fatal } from "~/utils/logs";
+import { error, fatal } from "~/utils-node";
 
 import configs from "./vite/configs";
 
 export type ExportOptions = {
   outDir: string;
-  training?: boolean;
-  library?: boolean;
+  preset: string;
 };
 
 export default async function staticExport(options: ExportOptions): Promise<void> {
-  if (options.training) {
-    process.env.QUIZMS_MODE = "training";
-  }
+  process.env.QUIZMS_MODE = "contest";
 
-  const config = mergeConfig(configs("production"), {
+  const config: InlineConfig = mergeConfig(configs("production"), {
     publicDir: path.join(cwd(), "public"),
     build: {
       outDir: path.join(cwd(), options.outDir),
       emptyOutDir: true,
       assetsInlineLimit: 1024,
       rollupOptions: {
-        input: "virtual:quizms-entry",
         output: {
           hoistTransitiveImports: false,
           manualChunks: (id) => {
@@ -45,7 +41,6 @@ export default async function staticExport(options: ExportOptions): Promise<void
           },
         },
       },
-      sourcemap: options.training,
     },
     esbuild: {
       legalComments: "external",
@@ -63,8 +58,17 @@ export default async function staticExport(options: ExportOptions): Promise<void
     logLevel: "info",
   } as InlineConfig);
 
+  const builder = await createBuilder(config);
+  const environment = builder.environments[options.preset];
+  if (!environment) {
+    const availablePresets = Object.keys(builder.environments)
+      .filter((preset) => preset !== "client")
+      .join(", ");
+    fatal(`Invalid preset "${options.preset}". Available presets: ${availablePresets}`);
+  }
+
   try {
-    await build(config);
+    await builder.build(environment);
   } catch (err) {
     error((err as Error).message);
     fatal("Build failed.");

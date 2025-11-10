@@ -5,7 +5,7 @@ import { groupBy, sortBy } from "lodash-es";
 import { Check, X } from "lucide-react";
 
 import type { StudentRestore } from "~/models";
-import { hash } from "~/utils/hash";
+import { hash } from "~/utils";
 
 import { useTeacherStudentRestores } from "./context";
 

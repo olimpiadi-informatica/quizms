@@ -36,6 +36,9 @@ const baseContestSchema = z.object({
   // ID dei problemi della gara
   problemIds: z.coerce.string().array(),
 
+  // Domini da cui è possibile svolgere la gara
+  allowedOrigins: z.string().array().optional(),
+
   // Informazioni personali richieste agli studenti
   userData: z.array(z.discriminatedUnion("type", [userDataText, userDataNumber, userDataDate])),
 

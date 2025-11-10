@@ -27,3 +27,4 @@ export function Image({ src, alt, title }: Props) {
     />
   );
 }
+Image.displayName = "Image";

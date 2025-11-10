@@ -4,21 +4,10 @@ import { DateTime } from "@olinfo/react-components";
 import { CircleX, Info, TriangleAlert } from "lucide-react";
 import Markdown from "react-markdown";
 
-import { announcementConverter } from "~/web/firebase/common/converters";
-import { useCollection } from "~/web/firebase/hooks";
-
-import { useTeacher } from "./context";
+import { useTeacherAnnouncements } from "./context";
 
 export function Announcements() {
-  const { contest } = useTeacher();
-
-  const [announcements] = useCollection("announcements", announcementConverter, {
-    arrayConstraints: {
-      contestIds: contest.id,
-    },
-    orderBy: ["createdAt", "desc"],
-    subscribe: true,
-  });
+  const announcements = useTeacherAnnouncements();
 
   return (
     <div className="prose max-w-none">

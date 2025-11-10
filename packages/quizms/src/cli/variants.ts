@@ -10,10 +10,9 @@ import { build, type InlineConfig, mergeConfig, transformWithEsbuild } from "vit
 import yaml from "yaml";
 
 import type { Schema } from "~/models";
-import load from "~/models/load";
 import { type VariantsConfig, variantsConfigSchema } from "~/models/variants-config";
 import { AsyncPool, hash } from "~/utils";
-import { fatal, info, success } from "~/utils/logs";
+import { fatal, info, load, success } from "~/utils-node";
 
 import configs from "./vite/configs";
 import { externalLibs } from "./vite/statement-externals";

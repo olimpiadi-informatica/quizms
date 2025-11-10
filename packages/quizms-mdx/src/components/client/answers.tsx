@@ -3,8 +3,8 @@
 import {
   createContext,
   type ReactNode,
+  use,
   useCallback,
-  useContext,
   useEffect,
   useId,
   useMemo,
@@ -91,7 +91,7 @@ export type AnswerProps = {
 export function AllCorrectAnswerClient({ id, correct, children }: AnswerProps) {
   const { id: problemId } = useProblem();
   const { student, setStudent, terminated } = useStudent();
-  const { registerCorrectOption } = useContext(MultipleChoiceContext);
+  const { registerCorrectOption } = use(MultipleChoiceContext);
 
   const answer = student.answers?.[problemId!];
   const currentlyChecked = useMemo(
@@ -151,7 +151,7 @@ export function AllCorrectAnswerClient({ id, correct, children }: AnswerProps) {
 export function AnyCorrectAnswerClient({ id, correct, children }: AnswerProps) {
   const { id: problemId } = useProblem();
   const { student, setStudent, terminated } = useStudent();
-  const { registerCorrectOption } = useContext(MultipleChoiceContext);
+  const { registerCorrectOption } = use(MultipleChoiceContext);
 
   const answer = student.answers?.[problemId!];
   const setAnswer = async (value: string | null) => {

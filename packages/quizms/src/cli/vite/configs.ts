@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { cwd } from "node:process";
+import { pathToFileURL } from "node:url";
 
 import react from "@vitejs/plugin-react-swc";
 import { sumBy } from "lodash-es";
@@ -8,7 +9,8 @@ import pc from "picocolors";
 import type { InlineConfig, PluginOption } from "vite";
 import inspect from "vite-plugin-inspect";
 
-import { info, warning } from "~/utils/logs";
+import training from "~/cli/vite/training";
+import { info, warning } from "~/utils-node";
 
 import directives from "./directives";
 import entry from "./entry";
@@ -21,7 +23,12 @@ export default function configs(mode: "development" | "production"): InlineConfi
   const packageJson = JSON.parse(readFileSync(path.join(cwd(), "package.json"), "utf8"));
   const plugins: PluginOption = (Object.keys(packageJson.dependencies) as string[])
     .filter((key) => key.startsWith("@olinfo/quizms-"))
-    .map((pkg) => import(`${pkg}/vite`).then((m): PluginOption => m.default));
+    .map(async (pkg) => {
+      console.log(`Importing ${pkg}/vite from ${root}...`);
+      const path = import.meta.resolve(`${pkg}/vite`, pathToFileURL(root));
+      const module = await import(path);
+      return module.default as PluginOption;
+    });
 
   return {
     configFile: false,
@@ -39,7 +46,16 @@ export default function configs(mode: "development" | "production"): InlineConfi
       "process.env.NODE_ENV": JSON.stringify(mode),
       "process.env.QUIZMS_MODE": JSON.stringify(process.env.QUIZMS_MODE),
     },
-    plugins: [plugins, directives(), images(), inspect(), react(), statementExternals(), entry()],
+    plugins: [
+      plugins,
+      directives(),
+      images(),
+      inspect(),
+      react(),
+      statementExternals(),
+      entry(),
+      training(),
+    ],
     build: {
       rollupOptions: {
         onwarn: (log) => {

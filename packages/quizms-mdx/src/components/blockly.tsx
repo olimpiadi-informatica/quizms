@@ -29,3 +29,4 @@ export function Blockly<State = any>(props: BlocklyProps<State>) {
     </>
   );
 }
+Blockly.displayName = "Blockly";

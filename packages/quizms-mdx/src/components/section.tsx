@@ -7,3 +7,4 @@ type SectionProps = {
 export function Section({ children }: SectionProps) {
   return children;
 }
+Section.displayName = "Section";

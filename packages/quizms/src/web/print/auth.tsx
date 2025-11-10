@@ -4,8 +4,8 @@ import { Link, Route, Switch } from "wouter";
 
 import type { Contest, Participation, Student } from "~/models";
 import type { VariantsConfig } from "~/models/variants-config";
+import { StudentForm } from "~/web/components/student-form";
 import { StudentProvider } from "~/web/student/provider";
-import { UserDataForm } from "~/web/student/user-data-form";
 
 import { PrintStatement } from "./statement";
 
@@ -94,7 +94,7 @@ export function PrintProvider({ contest, children }: { contest: Contest; childre
       participation={mockParticipation}
       student={student}
       setStudent={() => {}}>
-      <UserDataForm />
+      <StudentForm />
       {children}
       <PrintStatement />
     </StudentProvider>

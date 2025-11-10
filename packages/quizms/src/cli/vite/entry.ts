@@ -3,7 +3,7 @@ import path from "node:path";
 
 import type { PluginOption } from "vite";
 
-import { error } from "~/utils/logs";
+import { error } from "~/utils-node";
 
 import { generateHtmlFromBundle } from "./html";
 

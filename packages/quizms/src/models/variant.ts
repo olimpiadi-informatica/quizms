@@ -28,8 +28,6 @@ export type Answer = z.infer<typeof answerSchema>;
 export type Variant = z.infer<typeof variantSchema>;
 export type Schema = Variant["schema"];
 
-export const variantMappingSchema = z.object({ id: z.string(), variant: z.string() });
-
 export function parseAnswer(answer: string, schema: Schema[string]): Answer {
   let value: Answer = answer.trim().toUpperCase();
   if (!value) return null;

@@ -8,8 +8,8 @@ import { type BrowserContext, chromium } from "playwright";
 
 import type { Contest } from "~/models";
 import type { VariantsConfig } from "~/models/variants-config";
-import { AsyncPool } from "~/utils/async-pool";
-import { fatal, info } from "~/utils/logs";
+import { AsyncPool } from "~/utils";
+import { fatal, info } from "~/utils-node";
 
 async function generatePdf(
   context: BrowserContext,

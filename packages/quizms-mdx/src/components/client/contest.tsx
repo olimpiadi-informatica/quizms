@@ -1,8 +1,9 @@
 "use client";
 
-import { createContext, type ReactNode, useCallback, useContext } from "react";
+import { createContext, type ReactNode, use, useCallback } from "react";
 
-import { type Schema, useStudent } from "@olinfo/quizms/student";
+import type { Schema } from "@olinfo/quizms/models";
+import { useStudent } from "@olinfo/quizms/student";
 import { Button } from "@olinfo/react-components";
 import { addMinutes } from "date-fns";
 
@@ -59,5 +60,5 @@ export function ContestClient({ children }: { children: ReactNode }) {
 }
 
 export function useContest() {
-  return useContext(ContestContext);
+  return use(ContestContext);
 }

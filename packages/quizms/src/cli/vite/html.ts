@@ -6,7 +6,7 @@ import type { Plugin } from "unified";
 import { visit } from "unist-util-visit";
 import type { HtmlTagDescriptor } from "vite";
 
-import { warning } from "~/utils/logs";
+import { warning } from "~/utils-node";
 
 import { getImportMap } from "./statement-externals";
 

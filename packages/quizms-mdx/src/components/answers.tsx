@@ -16,6 +16,7 @@ import { JsonArray, JsonField, JsonObject } from "./json";
 export function AnswerGroup({ children }: AnswerGroupProps) {
   return <AnswerGroupClient>{children}</AnswerGroupClient>;
 }
+AnswerGroup.displayName = "AnswerGroup";
 
 export function MultipleChoiceAnswer({
   children,
@@ -35,6 +36,7 @@ export function MultipleChoiceAnswer({
     </>
   );
 }
+MultipleChoiceAnswer.displayName = "MultipleChoiceAnswer";
 
 export function OpenAnswer({ correct }: OpenAnswerProps) {
   const type = Number.isFinite(Number(correct)) ? "number" : "text";
@@ -53,6 +55,7 @@ export function OpenAnswer({ correct }: OpenAnswerProps) {
     </>
   );
 }
+OpenAnswer.displayName = "OpenAnswer";
 
 export function AnyCorrectAnswer({ id, correct, children }: AnswerProps) {
   return (
@@ -67,6 +70,7 @@ export function AnyCorrectAnswer({ id, correct, children }: AnswerProps) {
     </JsonObject>
   );
 }
+AnyCorrectAnswer.displayName = "AnyCorrectAnswer";
 
 export function AllCorrectAnswer({ id, correct, children }: AnswerProps) {
   return (
@@ -81,8 +85,10 @@ export function AllCorrectAnswer({ id, correct, children }: AnswerProps) {
     </JsonObject>
   );
 }
+AllCorrectAnswer.displayName = "AllCorrectAnswer";
 
 export function Explanation({ children }: { children: ReactNode }) {
   if (process.env.QUIZMS_MODE === "contest") return;
   return <ExplanationClient>{children}</ExplanationClient>;
 }
+Explanation.displayName = "Explanation";

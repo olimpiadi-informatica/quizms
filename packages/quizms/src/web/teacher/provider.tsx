@@ -2,17 +2,25 @@ import { type ComponentType, lazy } from "react";
 
 import { Link, Redirect, Route, Switch, useParams } from "wouter";
 
-import type { Contest, Participation, Student, StudentRestore, Variant } from "~/models";
-import { ImpersonificationAuth } from "~/web/student/impersonification-auth";
-import { UserDataForm } from "~/web/student/user-data-form";
+import type {
+  Announcement,
+  Contest,
+  Participation,
+  Student,
+  StudentRestore,
+  Variant,
+} from "~/models";
+import { StudentForm } from "~/web/components/student-form";
+import { ImpersonationAuth } from "~/web/student/impersonation-auth";
 
 import { TeacherContext, type TeacherContextProps } from "./context";
 import { TeacherLayout } from "./layout";
 
 type TeacherProviderProps = {
   participations: Participation[];
-  setParticipation: (participation: Participation) => Promise<void>;
   contests: Contest[];
+  startParticipation: (participationId: string, startingTime: Date | null) => Promise<any>;
+  finalizeParticipation: (participationId: string) => Promise<any>;
   variants: Variant[];
   logout: () => Promise<void>;
   statementComponent: ComponentType<Record<never, never>>;
@@ -20,12 +28,12 @@ type TeacherProviderProps = {
     contestId: string,
     variantIds: string[],
   ) => Promise<Record<string, ArrayBuffer>>;
+  useAnnouncements: (participationId: string) => Announcement[];
   useStudents: (
     participationId: string,
   ) => readonly [Student[], (student: Student) => Promise<void>];
   useStudentRestores: (
     participationId: string,
-    token: string,
   ) => readonly [
     StudentRestore[],
     (request: StudentRestore) => Promise<void>,
@@ -71,12 +79,14 @@ const TeacherTable = lazy(() => import("./table"));
 
 function ProviderInner({
   participations,
-  setParticipation,
   contests,
+  startParticipation,
+  finalizeParticipation,
   variants,
   logout,
   statementComponent: Statement,
   getPdfStatements,
+  useAnnouncements,
   useStudents,
   useStudentRestores,
 }: TeacherProviderProps) {
@@ -97,10 +107,12 @@ function ProviderInner({
     contest,
     participations,
     participation,
-    setParticipation,
+    startParticipation,
+    finalizeParticipation,
     variants: contestVariants,
     logout,
     getPdfStatements: () => getPdfStatements(contest.id, participation.pdfVariants ?? []),
+    useAnnouncements,
     useStudentRestores,
     useStudents,
   };
@@ -115,10 +127,10 @@ function ProviderInner({
           <TeacherTable />
         </Route>
         <Route path="/students/:studentId">
-          <ImpersonificationAuth>
-            <UserDataForm />
+          <ImpersonationAuth>
+            <StudentForm />
             <Statement />
-          </ImpersonificationAuth>
+          </ImpersonationAuth>
         </Route>
         <Route>
           <Redirect to="/" />

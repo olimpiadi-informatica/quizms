@@ -19,7 +19,6 @@ import { range } from "lodash-es";
 import Markdown from "react-markdown";
 import { Link } from "wouter";
 
-import { randomToken } from "~/utils/random";
 import { Timer } from "~/web/components";
 
 import { useTeacher } from "./context";
@@ -27,17 +26,15 @@ import { Announcements } from "./dashboard-announcements";
 import { StudentRestoreList } from "./dashboard-student-restore";
 
 function StartContestButton() {
-  const { contest, participation, setParticipation } = useTeacher();
+  const { startParticipation } = useTeacher();
 
   const modalRef = useRef<HTMLDialogElement>(null);
 
   const close = () => modalRef.current?.close();
 
   const start = async () => {
-    const token = await randomToken();
     const startingTime = roundToNearestMinutes(addSeconds(Date.now(), 3.5 * 60));
-    const endingTime = addMinutes(startingTime, contest.hasOnline ? contest.duration : 0);
-    await setParticipation({ ...participation, token, startingTime, endingTime });
+    await startParticipation(startingTime);
     close();
   };
 
@@ -60,18 +57,13 @@ function StartContestButton() {
 }
 
 function StopContestButton() {
-  const { participation, setParticipation } = useTeacher();
+  const { startParticipation } = useTeacher();
   const modalRef = useRef<HTMLDialogElement>(null);
 
   const close = () => modalRef.current?.close();
 
   const undoContestStart = async () => {
-    await setParticipation({
-      ...participation,
-      token: undefined,
-      startingTime: undefined,
-      endingTime: undefined,
-    });
+    await startParticipation(null);
     close();
   };
 

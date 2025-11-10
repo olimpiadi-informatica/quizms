@@ -10,3 +10,4 @@ export function Contest({ children }: { children: ReactNode }) {
     </JsonArray>
   );
 }
+Contest.displayName = "Contest";

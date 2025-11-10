@@ -23,6 +23,7 @@ export function Problem({ id, points, children }: ProblemProps) {
     </JsonObject>
   );
 }
+Problem.displayName = "Problem";
 
 export function SubProblem({ subId, children }: SubProblemProps) {
   return (
@@ -32,3 +33,4 @@ export function SubProblem({ subId, children }: SubProblemProps) {
     </JsonObject>
   );
 }
+SubProblem.displayName = "SubProblem";

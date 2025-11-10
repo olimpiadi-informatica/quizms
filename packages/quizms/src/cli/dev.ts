@@ -1,7 +1,7 @@
 import path from "node:path";
 import { cwd } from "node:process";
 
-import { noop } from "lodash-es";
+import { isString, noop } from "lodash-es";
 import {
   createServer,
   type HtmlTagDescriptor,
@@ -12,10 +12,9 @@ import {
 } from "vite";
 
 import { type Contest, contestSchema } from "~/models";
-import load from "~/models/load";
 import { type VariantsConfig, variantsConfigSchema } from "~/models/variants-config";
-import { fatal } from "~/utils/logs";
-import { reactComponentCase } from "~/utils/strings";
+import { reactComponentCase } from "~/utils";
+import { fatal, load } from "~/utils-node";
 
 import configs from "./vite/configs";
 import { generateHtml } from "./vite/html";
@@ -105,13 +104,25 @@ export default function createDevEntry() {
     },
     configureServer(server) {
       server.middlewares.use(async (req, res, next) => {
-        const routes: { pathname: string; module: string }[] = server.config.plugins.flatMap(
-          (plugin) => plugin.api?.quizmsDevRoutes ?? [],
-        );
+        if (!req.url) {
+          next();
+          return;
+        }
+
+        const routes: { pathname: string | RegExp; module: string }[] =
+          server.config.plugins.flatMap((plugin) => plugin.api?.quizmsDevRoutes ?? []);
 
         for (const route of routes) {
-          if (req.url === route.pathname) {
+          const match = isString(route.pathname)
+            ? route.pathname === req.url
+            : route.pathname.test(req.url);
+          if (match) {
             const tags: HtmlTagDescriptor[] = [
+              {
+                tag: "script",
+                children: "globalThis.__webpack_require__ = {};",
+                injectTo: "head",
+              },
               {
                 tag: "script",
                 attrs: { type: "module" },

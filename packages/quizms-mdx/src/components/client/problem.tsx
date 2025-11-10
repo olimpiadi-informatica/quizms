@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, type ReactNode, useContext } from "react";
+import { createContext, type ReactNode, use } from "react";
 
 export type ProblemProps = {
   id: number;
@@ -34,7 +34,7 @@ export type SubProblemProps = {
 };
 
 export function SubProblemClient({ subId, children }: SubProblemProps) {
-  const { id, points } = useContext(ProblemContext);
+  const { id, points } = use(ProblemContext);
   const newId = subId ? `${id}.${subId}` : `${id}`;
 
   return (
@@ -48,5 +48,5 @@ export function SubProblemClient({ subId, children }: SubProblemProps) {
 }
 
 export function useProblem() {
-  return useContext(ProblemContext);
+  return use(ProblemContext);
 }

@@ -13,7 +13,7 @@ export const FinalizeModal = forwardRef(function FinalizeModal(
   _props,
   ref: Ref<HTMLDialogElement> | null,
 ) {
-  const { contest, participation, variants, setParticipation } = useTeacher();
+  const { contest, variants, finalizeParticipation } = useTeacher();
   const [students] = useTeacherStudents();
 
   const error = useMemo(() => {
@@ -64,7 +64,7 @@ export const FinalizeModal = forwardRef(function FinalizeModal(
 
   const finalize = async () => {
     try {
-      await setParticipation({ ...participation, finalized: true });
+      await finalizeParticipation();
     } finally {
       close();
     }

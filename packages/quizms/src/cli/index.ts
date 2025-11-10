@@ -6,10 +6,10 @@ import { chdir, cwd, exit } from "node:process";
 import { InvalidArgumentError, program } from "commander";
 import { version } from "package.json";
 
-import { fatal } from "~/utils/logs";
+import { fatal } from "~/utils-node";
 
+import staticExport from "./build";
 import devServer from "./dev";
-import firebaseCommand from "./firebase";
 import print from "./print";
 import variants from "./variants";
 
@@ -47,16 +47,16 @@ async function main() {
     .option("-p, --port <port>", "The port to use for the server.", safeParseInt, 1234)
     .action(devServer);
 
-  // program
-  //   .command("build")
-  //   .description("Create a static export of the website.")
-  //   .option(
-  //     "-d, --outDir <directory>",
-  //     "The directory to output the bundle.",
-  //     path.join(".quizms", "hosting-build"),
-  //   )
-  //   .option("-t, --training", "Embed the questions and the answers in the export.")
-  //   .action(staticExport);
+  program
+    .command("build")
+    .description("Create a static export of the website.")
+    .option(
+      "-d, --outDir <directory>",
+      "The directory to output the bundle.",
+      path.join(".quizms", "hosting-build"),
+    )
+    .argument("<preset>", "The preset to use.")
+    .action((preset, options) => staticExport({ ...options, preset }));
 
   program
     .command("print")
@@ -71,8 +71,6 @@ async function main() {
     .description("Generate variants for the contest.")
     .option("-d, --outDir <directory>", "The directory to output the variants.", "variants")
     .action(variants);
-
-  program.addCommand(firebaseCommand());
 
   findProjectDirectory();
   await program.parseAsync();

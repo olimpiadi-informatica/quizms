@@ -13,7 +13,7 @@ import {
   type Student,
   type Variant,
 } from "~/models";
-import { randomId } from "~/utils/random";
+import { randomId } from "~/utils";
 import { useTeacher, useTeacherStudents } from "~/web/teacher/context";
 
 export const ImportModal = forwardRef(function ImportModal(

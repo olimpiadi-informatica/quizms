@@ -10,7 +10,9 @@ import tsconfigPaths from "vite-tsconfig-paths";
 const webEntries = [
   ...(await glob("src/web/*/index.ts*")),
   "src/cli/index.ts",
+  "src/models/index.ts",
   "src/utils/index.ts",
+  "src/utils-node/index.ts",
 ];
 
 export default defineConfig({

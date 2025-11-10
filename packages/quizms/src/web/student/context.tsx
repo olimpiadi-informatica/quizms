@@ -1,4 +1,4 @@
-import { createContext, type Dispatch, type SetStateAction, useContext } from "react";
+import { createContext, type Dispatch, type SetStateAction, use } from "react";
 
 import type { Contest, Participation, Schema, Student } from "~/models";
 
@@ -19,5 +19,5 @@ export const StudentContext = createContext<StudentContextProps>({} as StudentCo
 StudentContext.displayName = "StudentContext";
 
 export function useStudent() {
-  return useContext(StudentContext);
+  return use(StudentContext);
 }

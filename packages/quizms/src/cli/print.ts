@@ -15,10 +15,9 @@ import {
 } from "vite";
 
 import { type Contest, contestSchema } from "~/models";
-import load from "~/models/load";
 import { type VariantsConfig, variantsConfigSchema } from "~/models/variants-config";
-import { fatal, info, success, warning } from "~/utils/logs";
-import { reactComponentCase } from "~/utils/strings";
+import { reactComponentCase } from "~/utils";
+import { fatal, info, load, success, warning } from "~/utils-node";
 
 import generatePdfs from "./pdf";
 import configs from "./vite/configs";
