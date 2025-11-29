@@ -5,7 +5,6 @@ import { groupBy, sortBy } from "lodash-es";
 import { Check, X } from "lucide-react";
 
 import type { StudentRestore } from "~/models";
-import { hash } from "~/utils";
 
 import { useTeacherStudentRestores } from "./context";
 
@@ -21,12 +20,12 @@ function StudentRestoreEntry({
   const modalRef = useRef<HTMLDialogElement>(null);
 
   const targetCodes = useMemo(
-    () => new Set(studentRestore.map((request) => hash(request.id) % 1000)),
+    () => new Set(studentRestore.map((request) => request.approvalCode)),
     [studentRestore],
   );
 
-  const approveRequest = async ({ restoreCode }: { restoreCode: number }) => {
-    const request = studentRestore.find((request) => hash(request.id) % 1000 === restoreCode);
+  const approveRequest = async ({ approvalCode }: { approvalCode: number }) => {
+    const request = studentRestore.find((request) => request.approvalCode === approvalCode);
     if (request) {
       await approve(request);
     }
@@ -59,12 +58,12 @@ function StudentRestoreEntry({
           </p>
           <Form onSubmit={approveRequest} className="!max-w-full">
             <NumberField
-              field="restoreCode"
+              field="approvalCode"
               label="Codice di conferma"
               placeholder="Inserisci codice"
             />
-            {({ restoreCode }) => (
-              <SubmitButton disabled={!targetCodes.has(restoreCode ?? -1)}>Approva</SubmitButton>
+            {({ approvalCode }) => (
+              <SubmitButton disabled={!targetCodes.has(approvalCode ?? -1)}>Approva</SubmitButton>
             )}
           </Form>
         </Modal>

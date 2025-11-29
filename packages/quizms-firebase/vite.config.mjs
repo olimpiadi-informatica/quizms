@@ -8,7 +8,9 @@ export default defineConfig({
   build: {
     lib: {
       entry: {
+        cli: "src/cli/index.ts",
         entry: "src/web/entry/index.tsx",
+        functions: "src/functions/index.ts",
         vite: "src/vite/index.ts",
       },
       formats: ["es"],

@@ -2,7 +2,7 @@ import { createContext, type ReactNode, Suspense, use, useCallback, useMemo } fr
 
 import { ErrorBoundary, Loading } from "@olinfo/quizms/components";
 import { initializeApp } from "firebase/app";
-import { debugErrorMap, getAuth, initializeAuth } from "firebase/auth";
+import { browserSessionPersistence, debugErrorMap, getAuth, initializeAuth } from "firebase/auth";
 import { type Firestore, getFirestore } from "firebase/firestore";
 
 // @ts-expect-error
@@ -15,7 +15,7 @@ type Props = {
 export function FirebaseLogin({ children }: Props) {
   const db = useMemo(() => {
     const app = initializeApp(config);
-    initializeAuth(app, { errorMap: debugErrorMap });
+    initializeAuth(app, { persistence: browserSessionPersistence, errorMap: debugErrorMap });
     return getFirestore(app);
   }, []);
 

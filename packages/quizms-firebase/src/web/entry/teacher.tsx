@@ -2,32 +2,37 @@ import { useCallback } from "react";
 
 import type { StudentRestore } from "@olinfo/quizms/models";
 import { TeacherProvider } from "@olinfo/quizms/teacher";
-import { getAuth, signOut, type User } from "firebase/auth";
-import type { Firestore } from "firebase/firestore";
+import { getAuth, signOut } from "firebase/auth";
+import { doc, type Firestore, serverTimestamp, writeBatch } from "firebase/firestore";
 import { getBytes, getStorage, ref } from "firebase/storage";
 
-import { finalizeParticipation, startParticipation } from "~/web/common/api";
+import { finalizeParticipation, startParticipation, stopParticipation } from "~/web/common/api";
 import { useDb } from "~/web/common/base-login";
 import {
   contestConverter,
   participationConverter,
   studentConverter,
+  studentRestoreConvert,
   variantConverter,
 } from "~/web/common/converters";
 import TokenLogin from "~/web/common/token-login";
-import { useCollection } from "~/web/hooks";
+import { useCollection, useDocument } from "~/web/hooks";
 
 import { FirebaseStatement } from "./student-statement";
 
 export default function TeacherEntry() {
-  return <TokenLogin allowedRole="teacher">{(user) => <TeacherInner user={user} />}</TokenLogin>;
+  return (
+    <TokenLogin allowedRole="teacher">
+      {({ claims }) => <TeacherInner schoolId={claims.schoolId} />}
+    </TokenLogin>
+  );
 }
 
-function TeacherInner({ user }: { user: User }) {
+function TeacherInner({ schoolId }: { schoolId: string }) {
   const db = useDb();
 
   const [participations] = useCollection("participations", participationConverter, {
-    constraints: { teacher: user.uid },
+    constraints: { schoolId: schoolId },
     subscribe: true,
   });
   const [contests] = useCollection("contests", contestConverter, {
@@ -44,8 +49,9 @@ function TeacherInner({ user }: { user: User }) {
     <TeacherProvider
       participations={participations}
       contests={contests}
-      startParticipation={startParticipation}
-      finalizeParticipation={finalizeParticipation}
+      startParticipation={(...args) => startParticipation(db, ...args)}
+      stopParticipation={(...args) => stopParticipation(db, ...args)}
+      finalizeParticipation={(...args) => finalizeParticipation(db, ...args)}
       variants={variants}
       logout={logout}
       statementComponent={() => <FirebaseStatement />}
@@ -85,17 +91,47 @@ function useStudents(participationId: string) {
 }
 
 function useStudentRestores(
-  _participationId: string,
+  participationId: string,
 ): readonly [
   StudentRestore[],
   (request: StudentRestore) => Promise<void>,
   (studentId: string) => Promise<void>,
 ] {
-  const studentRestores: StudentRestore[] = [];
+  const db = useDb();
 
-  const reject = async (_studentId: string) => {};
+  const [participation] = useDocument("participations", participationId, participationConverter, {
+    subscribe: true,
+  });
 
-  const approve = async (_request: StudentRestore) => {};
+  const [studentRestores] = useCollection("studentRestore", studentRestoreConvert, {
+    constraints: { participationId, token: participation.token, status: "pending" },
+    orderBy: "createdAt",
+    subscribe: true,
+  });
+
+  const reject = async (studentId: string) => {
+    const batch = writeBatch(db);
+
+    for (const studentRestore of studentRestores) {
+      if (studentRestore.studentId === studentId) {
+        batch.update(doc(db, "studentRestore", studentRestore.id), { status: "revoked" });
+      }
+    }
+
+    await batch.commit();
+  };
+
+  const approve = async (request: StudentRestore) => {
+    const batch = writeBatch(db);
+    batch.update(doc(db, `/participations/${participationId}/students`, request.studentId), {
+      uid: request.id,
+      updatedAt: serverTimestamp(),
+    });
+    batch.delete(doc(db, "studentRestore", request.id));
+    await batch.commit();
+
+    await reject(request.studentId);
+  };
 
   return [studentRestores, approve, reject];
 }

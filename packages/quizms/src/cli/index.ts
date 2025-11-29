@@ -39,6 +39,7 @@ function findProjectDirectory() {
 
 async function main() {
   program.addHelpText("beforeAll", `QuizMS cli v${version}\n`);
+  program.name("quizms");
   program.version(version);
 
   program

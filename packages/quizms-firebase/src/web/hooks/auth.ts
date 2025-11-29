@@ -25,22 +25,13 @@ export function useAuth(expectedRole: string) {
     suspense: true,
   });
 
-  if (!claims || expectedRole !== claims.userRole) return null;
-
-  return {
-    user,
-    claims,
-  };
+  if (!user || !claims || expectedRole !== claims.role) return null;
+  return { user, claims };
 }
 
-export async function getClaims(user: User | null) {
+async function getClaims(user: User | null) {
   if (!user) return;
 
   const idToken = await user.getIdTokenResult();
   return idToken.claims as Record<string, string>;
-}
-
-export async function getUserRole(user: User | null) {
-  const claims = await getClaims(user);
-  return claims?.role;
 }

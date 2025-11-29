@@ -1,11 +1,10 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import { type ReactNode, useCallback, useEffect, useMemo } from "react";
 
-import { StudentFormField, useMetadata } from "@olinfo/quizms/components";
+import { Loading, StudentFormField, useMetadata } from "@olinfo/quizms/components";
 import type { Contest, Student } from "@olinfo/quizms/models";
 import { StudentProvider } from "@olinfo/quizms/student";
 import {
   Form,
-  Modal,
   Navbar,
   NavbarBrand,
   SelectField,
@@ -14,16 +13,17 @@ import {
 } from "@olinfo/react-components";
 import { getAuth, signInWithCustomToken, signOut } from "firebase/auth";
 import { waitForPendingWrites } from "firebase/firestore";
-import { isEqual, mapValues } from "lodash-es";
+import { isEqual } from "lodash-es";
 
-import { login } from "~/web/common/api";
+import { studentLogin } from "~/web/common/api";
 import { useDb } from "~/web/common/base-login";
 import {
   contestConverter,
   participationConverter,
   studentConverter,
+  studentRestoreConvert,
 } from "~/web/common/converters";
-import { useAuth, useCollection, useDocument } from "~/web/hooks";
+import { useAuth, useCollection, useDocument, useDocumentOptional } from "~/web/hooks";
 
 import { FirebaseStatement } from "./student-statement";
 
@@ -45,13 +45,15 @@ export default function StudentEntry() {
     [contests],
   );
 
-  if (auth && auth.claims.approvalId == null) {
+  if (auth) {
     return (
-      <StudentInner
-        contests={filteredContests}
-        participationId={auth.claims.participationId}
-        studentId={auth.claims.studentId}
-      />
+      <StudentRestoring uid={auth.user.uid}>
+        <StudentInner
+          contests={filteredContests}
+          participationId={auth.claims.participationId}
+          studentId={auth.claims.studentId}
+        />
+      </StudentRestoring>
     );
   }
 
@@ -67,21 +69,19 @@ function StudentForm({ contests }: { contests: Contest[] }) {
   const db = useDb();
   const metadata = useMetadata();
 
-  const modalRef = useRef<HTMLDialogElement>(null);
-  const [approvalId, setApprovalId] = useState<number | null>(null);
-
   const submit = useCallback(
-    async (formData: FormStudent) => {
-      const data = await login("/api/student/login", formData);
+    async ({ contestId, token, ...userData }: FormStudent) => {
+      const data = await studentLogin(db, {
+        contestId,
+        token,
+        userData: {
+          ...userData,
+          birthDate: userData.birthDate ? new Date(userData.birthDate) : undefined,
+        },
+      });
 
       const auth = getAuth(db.app);
       await signInWithCustomToken(auth, data.token);
-
-      if (data.approvalId != null) {
-        setApprovalId(data.approvalId);
-        modalRef.current?.showModal();
-        return;
-      }
     },
     [db],
   );
@@ -105,7 +105,7 @@ function StudentForm({ contests }: { contests: Contest[] }) {
         <SelectField
           field="contestId"
           label="Gara"
-          options={mapValues(contests, "name")}
+          options={Object.fromEntries(contests.map((c) => [c.id, c.name]))}
           placeholder="Seleziona una gara"
         />
         {({ contestId }) => {
@@ -122,16 +122,43 @@ function StudentForm({ contests }: { contests: Contest[] }) {
           );
         }}
       </Form>
-      <Modal ref={modalRef} title="Attenzione">
-        <p>
-          Il tuo account è già presente su un&apos;altro dispositivo. Per trasferire l&apos;accesso
-          al dispositivo corrente comunica al tuo insegnante il codice seguente:
-        </p>
-        <div className="flex justify-center pt-3">
-          <span className="pt-1 font-mono text-3xl">{String(approvalId).padStart(3, "0")}</span>
-        </div>
-      </Modal>
     </>
+  );
+}
+
+function StudentRestoring({ uid, children }: { uid: string; children: ReactNode }) {
+  const db = useDb();
+
+  const [studentRestore] = useDocumentOptional("studentRestore", uid, studentRestoreConvert, {
+    subscribe: true,
+  });
+
+  useEffect(() => {
+    if (studentRestore?.status === "revoked") {
+      void signOut(getAuth(db.app)).then(() => window.location.reload());
+    }
+  }, [db, studentRestore]);
+
+  if (!studentRestore || studentRestore.status === "approved") {
+    return children;
+  }
+
+  if (studentRestore.status === "revoked") {
+    return <Loading />;
+  }
+
+  return (
+    <div className="flex flex-col justify-center items-center grow text-center m-4">
+      <p>
+        Il tuo account è già presente su un&apos;altro dispositivo. Per trasferire l&apos;accesso al
+        dispositivo corrente comunica al tuo insegnante il codice seguente:
+      </p>
+      <div className="flex justify-center pt-3">
+        <span className="pt-1 font-mono text-3xl">
+          {String(studentRestore?.approvalCode).padStart(3, "0")}
+        </span>
+      </div>
+    </div>
   );
 }
 
@@ -150,6 +177,7 @@ function StudentInner({
     `participations/${participationId}/students`,
     studentId,
     studentConverter,
+    { subscribe: true },
   );
   const [participation] = useDocument("participations", participationId, participationConverter, {
     subscribe: true,

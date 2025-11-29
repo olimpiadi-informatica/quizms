@@ -25,7 +25,8 @@ export function FirebaseStatement() {
   return (
     <RemoteStatement
       statementUrl={() => getFileUrl("statement.txt")}
-      stylesheetUrl={() => getFileUrl("statement.css")}
+      // TODO
+      // stylesheetUrl={() => getFileUrl("statement.css")}
       moduleUrl={getFileUrl}
     />
   );

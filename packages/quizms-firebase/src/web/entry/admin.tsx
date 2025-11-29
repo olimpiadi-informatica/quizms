@@ -9,7 +9,7 @@ import TokenLogin from "~/web/common/token-login";
 import { useCollection } from "~/web/hooks";
 
 export default function AdminEntry() {
-  return <TokenLogin allowedRole="admin">{(user) => <AdminInner user={user} />}</TokenLogin>;
+  return <TokenLogin allowedRole="admin">{(auth) => <AdminInner user={auth.user} />}</TokenLogin>;
 }
 
 function AdminInner({ user }: { user: User }) {

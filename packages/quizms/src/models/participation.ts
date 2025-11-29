@@ -5,7 +5,6 @@ export const participationSchema = z.object({
   schoolId: z.string(),
   contestId: z.string(),
   name: z.string(),
-  teacher: z.string(),
   token: z.string().optional(),
   startingTime: z.date().optional(),
   endingTime: z.date().optional(),

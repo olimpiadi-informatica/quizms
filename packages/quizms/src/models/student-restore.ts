@@ -1,12 +1,15 @@
 import z from "zod";
 
 export const studentRestoreSchema = z.object({
-  id: z.string(), // uid identificativo della sessione
-  studentId: z.string(), // identificativo dello studente a cui ci si vuole loggare
-  participationId: z.string(), // identificativo della partecipazione
+  id: z.string(),
+  studentId: z.string(),
+  participationId: z.string(),
   token: z.string(),
-  name: z.string(), // nome dello studente
-  surname: z.string(), // cognome dello studente
+  name: z.string(),
+  surname: z.string(),
+  approvalCode: z.number(),
+  status: z.enum(["pending", "approved", "revoked"]),
+  createdAt: z.date(),
 });
 
 export type StudentRestore = z.infer<typeof studentRestoreSchema>;

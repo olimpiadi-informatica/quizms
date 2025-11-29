@@ -75,6 +75,14 @@ async function copyFiles(options: InitOptions) {
     storage: {
       rules: path.relative(cwd(), storageRulesPath),
     },
+    functions: [
+      {
+        codebase: "default",
+        disallowLegacyRuntimeConfig: true,
+        ignore: ["node_modules", "*.log"],
+        source: "firebase/functions",
+      },
+    ],
   };
   await initFile("firebase.json", JSON.stringify(configs, undefined, 2), options);
 

@@ -70,8 +70,8 @@ export function PrintProvider({ contest, children }: { contest: Contest; childre
   const student: Student = {
     id: "",
     userData: {
-      name: "Utente",
-      surname: "anonimo",
+      name: "",
+      surname: "",
     },
     answers: {},
     contestId: contest.id,
@@ -83,7 +83,6 @@ export function PrintProvider({ contest, children }: { contest: Contest; childre
     schoolId: "",
     contestId: contest.id,
     name: "",
-    teacher: "",
     finalized: false,
     disabled: false,
   };

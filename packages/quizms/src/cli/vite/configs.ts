@@ -24,7 +24,6 @@ export default function configs(mode: "development" | "production"): InlineConfi
   const plugins: PluginOption = (Object.keys(packageJson.dependencies) as string[])
     .filter((key) => key.startsWith("@olinfo/quizms-"))
     .map(async (pkg) => {
-      console.log(`Importing ${pkg}/vite from ${root}...`);
       const path = import.meta.resolve(`${pkg}/vite`, pathToFileURL(root));
       const module = await import(path);
       return module.default as PluginOption;

@@ -1,15 +1,18 @@
 import type { PluginOption } from "vite";
 
 export default function training(): PluginOption {
-  const trainingEnvName = "training";
-
   return {
     name: "quizms:training-preset",
     apply: "build",
     config() {
       return {
         environments: {
-          [trainingEnvName]: {
+          training: {
+            ssr: false,
+            resolve: {
+              conditions: ["module", "browser", "import", "production"],
+              noExternal: true,
+            },
             build: {
               rollupOptions: {
                 input: { index: "virtual:quizms-entry" },
@@ -21,7 +24,7 @@ export default function training(): PluginOption {
       };
     },
     buildStart() {
-      if (this.environment.name === trainingEnvName) {
+      if (this.environment.name === "training") {
         process.env.QUIZMS_MODE = "training";
         throw new Error("training output is not implemented yet");
       }

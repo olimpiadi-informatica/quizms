@@ -21,7 +21,9 @@ export type TeacherContextProps = {
   contest: Contest;
 
   /** Funzione per iniziare la gara */
-  startParticipation: (participationId: string, startingTime: Date | null) => Promise<void>;
+  startParticipation: (participationId: string) => Promise<void>;
+  /** Funzione per annullare la gara */
+  stopParticipation: (participationId: string) => Promise<void>;
   /** Funzione per finalizzare i risultati della gara */
   finalizeParticipation: (participationId: string) => Promise<void>;
 
@@ -58,13 +60,14 @@ export type OmitContestParam<T> = {
 };
 
 export function useTeacher(): Omit<OmitContestParam<TeacherContextProps>, `use${string}`> {
-  const { startParticipation, finalizeParticipation, ...ctx } = use(TeacherContext);
+  const { startParticipation, stopParticipation, finalizeParticipation, ...ctx } =
+    use(TeacherContext);
   const participationId = ctx.participation.id;
 
   return {
     ...ctx,
-    startParticipation: (startingTime: Date | null) =>
-      startParticipation(participationId, startingTime),
+    startParticipation: () => startParticipation(participationId),
+    stopParticipation: () => stopParticipation(participationId),
     finalizeParticipation: () => finalizeParticipation(participationId),
   };
 }

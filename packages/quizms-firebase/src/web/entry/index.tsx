@@ -11,8 +11,8 @@ const StudentEntry = lazy(() => import("./student"));
 
 export default function createFirebaseEntry() {
   return createApp(
-    <FirebaseLogin>
-      <Router base={process.env.QUIZMS_FIREBASE_BASEPATH}>
+    <Router base={process.env.NODE_ENV === "development" ? "/firebase" : ""}>
+      <FirebaseLogin>
         <Switch>
           <Route path="/admin" nest>
             <AdminEntry />
@@ -24,7 +24,7 @@ export default function createFirebaseEntry() {
             <StudentEntry />
           </Route>
         </Switch>
-      </Router>
-    </FirebaseLogin>,
+      </FirebaseLogin>
+    </Router>,
   );
 }

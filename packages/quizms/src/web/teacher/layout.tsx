@@ -29,7 +29,7 @@ type Props = {
 
 export function TeacherLayout({ contests, participations, logout, children }: Props) {
   const metadata = useMetadata();
-  const [, params] = useRoute("/:contestId/*");
+  const [, params] = useRoute("/:contestId/*?");
   const contest = contests.find((c) => c.id === params?.contestId);
   const participation = participations.find((p) => p.contestId === params?.contestId);
 
@@ -57,9 +57,10 @@ export function TeacherLayout({ contests, participations, logout, children }: Pr
             <NavbarMenuItem>
               <Link href={`/${contest.id}`}>Gestione gara</Link>
             </NavbarMenuItem>
-            <NavbarMenuItem>
-              <Link href={`/${contest.id}/students`}>Gestione studenti</Link>
-            </NavbarMenuItem>
+            <li className="disabled">
+              {/* biome-ignore lint/a11y/useValidAnchor: temporarily disabled */}
+              <a href="#">Gestione studenti</a>
+            </li>
           </NavbarMenu>
         )}
         <NavbarContent>
@@ -78,6 +79,7 @@ export function TeacherLayout({ contests, participations, logout, children }: Pr
     </>
   );
 }
+TeacherLayout.displayName = "TeacherLayout";
 
 type DropdownProps = {
   participations: Participation[];

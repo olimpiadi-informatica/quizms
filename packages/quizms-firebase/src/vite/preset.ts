@@ -6,7 +6,22 @@ export default function firebasePreset(): PluginOption {
     apply: "build",
     config() {
       return {
-        environments: { firebase: {} },
+        environments: {
+          firebase: {
+            ssr: false,
+            resolve: {
+              conditions: ["module", "browser", "import", "production"],
+              noExternal: true,
+            },
+            build: {
+              rollupOptions: {
+                input: {
+                  index: "virtual:quizms-entry?@olinfo/quizms-firebase/entry",
+                },
+              },
+            },
+          },
+        },
       };
     },
   } satisfies PluginOption;

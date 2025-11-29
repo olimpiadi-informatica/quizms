@@ -9,17 +9,23 @@ export const externalLibs = [
 ];
 
 export function statementExternals(): PluginOption {
+  let isBuild = false;
+
   return {
     name: "quizms:statement-externals",
-    apply: "build",
+    configResolved(config) {
+      isBuild = config.command === "build";
+    },
     buildStart() {
-      for (const lib of externalLibs) {
-        this.emitFile({
-          type: "chunk",
-          id: `virtual:quizms-assets-${lib}`,
-          fileName: outputFile(lib),
-          preserveSignature: "strict",
-        });
+      if (isBuild) {
+        for (const lib of externalLibs) {
+          this.emitFile({
+            type: "chunk",
+            id: `virtual:quizms-assets-${lib}`,
+            fileName: outputFile(lib),
+            preserveSignature: "strict",
+          });
+        }
       }
     },
     resolveId(id) {
@@ -39,6 +45,26 @@ export function statementExternals(): PluginOption {
             return `export * from "${lib}";`;
         }
       }
+    },
+    configureServer(server) {
+      server.middlewares.use(async (req, res, next) => {
+        if (!req.url) {
+          next();
+          return;
+        }
+
+        for (const lib of externalLibs) {
+          if (req.url === `/${outputFile(lib)}`) {
+            const module = await server.transformRequest(`virtual:quizms-assets-${lib}`);
+
+            res.setHeader("Content-Type", "application/javascript");
+            res.end(module?.code);
+            return;
+          }
+        }
+
+        next();
+      });
     },
   };
 }

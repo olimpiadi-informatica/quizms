@@ -51,7 +51,6 @@ export function DevProvider({ contest, children }: { contest: Contest; children:
     schoolId: "",
     contestId: contest.id,
     name: "",
-    teacher: "",
     startingTime: student.startedAt,
     finalized: false,
     disabled: false,

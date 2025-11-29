@@ -1,6 +1,6 @@
 {
   "name": "@olinfo/quizms",
-  "version": "4.0.0-canary.20251126",
+  "version": "4.0.0-canary.20251130",
   "type": "module",
   "author": "Alessandro Bortolin <bortolin.alessandro@outlook.it>",
   "license": "MIT",
@@ -96,7 +96,7 @@
     "smol-toml": "^1.5.2",
     "source-map-js": "^1.2.1",
     "svgo": "^4.0.0",
-    "swr": "^2.3.6",
+    "swr": "^2.3.7",
     "tinyglobby": "^0.2.15",
     "unified": "^11.0.5",
     "unist-util-visit": "^5.0.0",
@@ -114,7 +114,7 @@
     "react-server-dom-webpack": "^19"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.3.7",
+    "@biomejs/biome": "^2.3.8",
     "@olinfo/tailwind": "^0.1.0",
     "@types/file-saver": "^2.0.7",
     "@types/hast": "^3.0.4",

@@ -13,7 +13,7 @@ import {
   WithinTimeRange,
 } from "@olinfo/react-components";
 import { downloadZip } from "client-zip";
-import { addMinutes, addSeconds, isSameDay, roundToNearestMinutes, subMinutes } from "date-fns";
+import { addMinutes, isSameDay, subMinutes } from "date-fns";
 import { saveAs } from "file-saver";
 import { range } from "lodash-es";
 import Markdown from "react-markdown";
@@ -33,8 +33,7 @@ function StartContestButton() {
   const close = () => modalRef.current?.close();
 
   const start = async () => {
-    const startingTime = roundToNearestMinutes(addSeconds(Date.now(), 3.5 * 60));
-    await startParticipation(startingTime);
+    await startParticipation();
     close();
   };
 
@@ -57,13 +56,13 @@ function StartContestButton() {
 }
 
 function StopContestButton() {
-  const { startParticipation } = useTeacher();
+  const { stopParticipation } = useTeacher();
   const modalRef = useRef<HTMLDialogElement>(null);
 
   const close = () => modalRef.current?.close();
 
   const undoContestStart = async () => {
-    await startParticipation(null);
+    await stopParticipation();
     close();
   };
 
@@ -204,7 +203,7 @@ export default function TeacherDashboard() {
                 <StopContestButton />
               </WithinTimeRange>
             )}
-            <Link className="btn btn-primary" href="/students">
+            <Link className="btn btn-primary btn-disabled" href="/students">
               Gestisci studenti e risposte
             </Link>
           </CardActions>

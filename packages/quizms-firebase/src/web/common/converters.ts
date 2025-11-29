@@ -4,6 +4,7 @@ import {
   contestSchema,
   participationSchema,
   type Student,
+  studentRestoreSchema,
   studentSchema,
   variantSchema,
 } from "@olinfo/quizms/models";
@@ -90,6 +91,7 @@ function converter<T extends object>(schema: ZodType<T, any, any>): FirestoreDat
 
 export const contestConverter = converter(contestSchema);
 export const participationConverter = converter(participationSchema);
+export const studentRestoreConvert = converter(studentRestoreSchema);
 export const variantConverter = converter(variantSchema);
 
 export const announcementConverter: FirestoreDataConverter<Announcement> = {

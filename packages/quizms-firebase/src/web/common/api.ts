@@ -1,4 +1,7 @@
+import type { Student } from "@olinfo/quizms/models";
 import { validate } from "@olinfo/quizms/utils";
+import type { Firestore } from "firebase/firestore";
+import { getFunctions, type HttpsCallableResult, httpsCallable } from "firebase/functions";
 import z, { type ZodObject, type ZodRawShape } from "zod";
 
 const responseSchema = z.discriminatedUnion("success", [
@@ -7,37 +10,52 @@ const responseSchema = z.discriminatedUnion("success", [
 ]);
 
 async function api<Shape extends ZodRawShape>(
-  endpoint: `/api/${string}`,
+  db: Firestore,
+  action: string,
   body: any,
   shape: Shape,
 ): Promise<z.infer<ZodObject<Shape>>> {
-  let json: any;
+  const region = "europe-west6"; // TODO
+  const functions = getFunctions(db.app, region);
+  const apiCallable = httpsCallable(functions, "api");
+
+  let resp: HttpsCallableResult;
   try {
-    const resp = await fetch(endpoint, {
-      method: "POST",
-      body: JSON.stringify(body),
-      signal: AbortSignal.timeout(10_000),
-    });
-    json = await resp.json();
+    resp = await apiCallable({ action, ...body });
   } catch (err: any) {
     throw new Error("Server non raggiungibile", { cause: err });
   }
 
-  const data = validate(responseSchema, json);
+  const data = validate(responseSchema, resp.data);
   if (!data.success) {
     throw new Error(data.error);
   }
-  return validate(data.data, z.object(shape));
+  return validate(z.object(shape), data.data);
 }
 
-export function login(role: string, body: { token: string }) {
-  return api(`/api/${role}/login`, body, { token: z.string(), approvalId: z.number().optional() });
+export function login(db: Firestore, role: string, body: { username: string; password: string }) {
+  return api(db, `${role}Login`, body, { token: z.string() });
 }
 
-export function startParticipation(participationId: string, startingTime: Date | null) {
-  return api("/api/teacher/participation", { participationId, startingTime }, {});
+export function studentLogin(
+  db: Firestore,
+  body: {
+    contestId: string;
+    token: string;
+    userData: Student["userData"];
+  },
+) {
+  return api(db, "studentLogin", body, { token: z.string() });
 }
 
-export function finalizeParticipation(participationId: string) {
-  return api("/api/teacher/participation/finalize", { participationId }, {});
+export async function startParticipation(db: Firestore, participationId: string) {
+  await api(db, "teacherStartParticipation", { participationId }, {});
+}
+
+export async function stopParticipation(db: Firestore, participationId: string) {
+  await api(db, "teacherStopParticipation", { participationId }, {});
+}
+
+export async function finalizeParticipation(db: Firestore, participationId: string) {
+  await api(db, "teacherFinalizeParticipation", { participationId }, {});
 }

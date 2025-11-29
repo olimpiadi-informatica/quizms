@@ -24,6 +24,8 @@ import z, {
   ZodUnion,
 } from "zod";
 
+import { userSchema } from "~/models/user";
+
 function convertToFirestore(data: Record<string, any>) {
   return cloneDeepWith(omit(data, "id"), (value) => {
     if (isDate(value)) {
@@ -87,4 +89,5 @@ function converter<T extends object>(schema: ZodType<T, any, any>): FirestoreDat
 export const contestConverter = converter(contestSchema);
 export const participationConverter = converter(participationSchema);
 export const studentConverter = converter(studentSchema);
+export const userConverter = converter(userSchema);
 export const variantConverter = converter(variantSchema);

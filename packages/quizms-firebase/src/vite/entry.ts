@@ -29,14 +29,5 @@ export default function firebaseEntry(): PluginOption {
         return `export { default } from "~/firebase-config";`;
       }
     },
-    config(config) {
-      return {
-        define: {
-          "process.env.QUIZMS_FIREBASE_BASEPATH": JSON.stringify(
-            config.mode === "development" ? "/firebase" : "/",
-          ),
-        },
-      };
-    },
   } satisfies PluginOption;
 }

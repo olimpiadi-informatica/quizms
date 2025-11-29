@@ -18,6 +18,7 @@ import { fatal, load } from "~/utils-node";
 
 import configs from "./vite/configs";
 import { generateHtml } from "./vite/html";
+import { getImportMap } from "./vite/statement-externals";
 
 export type DevOptions = {
   port: number;
@@ -118,6 +119,12 @@ export default function createDevEntry() {
             : route.pathname.test(req.url);
           if (match) {
             const tags: HtmlTagDescriptor[] = [
+              {
+                tag: "script",
+                attrs: { type: "importmap" },
+                children: JSON.stringify(getImportMap()),
+                injectTo: "head",
+              },
               {
                 tag: "script",
                 children: "globalThis.__webpack_require__ = {};",

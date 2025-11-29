@@ -1,4 +1,11 @@
-import { Command, Option } from "commander";
+import { existsSync } from "node:fs";
+import { homedir } from "node:os";
+import path from "node:path";
+import { chdir, cwd, exit } from "node:process";
+
+import { fatal } from "@olinfo/quizms/utils-node";
+import { Option, program } from "commander";
+import { version } from "package.json";
 
 import definalize from "./definalize";
 import exportData from "./export";
@@ -6,18 +13,34 @@ import importData from "./import";
 import init from "./init";
 import updateScores from "./update-scores";
 
-export default function firebaseCommand() {
-  const command = new Command("firebase");
+function findProjectDirectory() {
+  const home = homedir();
+  let root = cwd();
+  for (;;) {
+    if (existsSync(path.join(root, "package.json")) && existsSync(path.join(root, "src"))) {
+      chdir(root);
+      return;
+    }
+    const parent = path.dirname(root);
+    if (parent === root || parent === home) {
+      fatal("Invalid directory. Make sure you're inside a QuizMS project.");
+    }
+    root = parent;
+  }
+}
 
-  command.description("Commands to interact with the Firebase database.");
+async function main() {
+  program.addHelpText("beforeAll", `QuizMS-firebase cli v${version}\n`);
+  program.name("quizms-firebase");
+  program.version(version);
 
-  command
+  program
     .command("init")
     .description("Initialize the Firebase project.")
     .option("--force", "Overwrite existing files.")
     .action(init);
 
-  command
+  program
     .command("export")
     .description("Export the contests data.")
     .option("--contests", "Export the contests.")
@@ -26,13 +49,12 @@ export default function firebaseCommand() {
     .option("--variants", "Export the variants.")
     .action(exportData);
 
-  command
+  program
     .command("import")
     .description("Import the contests data.")
     .option("-c, --config <config>", "The contests config file.")
     .option("--admins", "Import the admins.")
     .option("--contests", "Import the contests.")
-    .option("--pdfs", "Import the pdf files.")
     .option("--schools", "Import the schools.")
     .option("--statements", "Import the statements.")
     .option("--students", "Import the students.")
@@ -48,8 +70,12 @@ export default function firebaseCommand() {
     )
     .action(importData);
 
-  command.command("definalize").description("Definalize all participations.").action(definalize);
-  command.command("update-scores").description("Update student scores.").action(updateScores);
+  program.command("definalize").description("Definalize all participations.").action(definalize);
+  program.command("update-scores").description("Update student scores.").action(updateScores);
 
-  return command;
+  findProjectDirectory();
+  await program.parseAsync();
 }
+
+await main();
+exit(0);

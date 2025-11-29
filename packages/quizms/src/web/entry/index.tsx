@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { createRoot } from "react-dom/client";
 
 import { BaseLayout } from "./layout";
+import "./index.css";
 
 export function createApp(entry: ReactNode) {
   const container = document.getElementById("app");

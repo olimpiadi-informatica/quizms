@@ -15,10 +15,10 @@ import {
 import { Rng, validate } from "@olinfo/quizms/utils";
 import { fatal, load, success, warning } from "@olinfo/quizms/utils-node";
 import { deleteApp } from "firebase-admin/app";
-import { type EmailIdentifier, getAuth } from "firebase-admin/auth";
 import type { Firestore } from "firebase-admin/firestore";
-import { chunk, groupBy, pick, uniq } from "lodash-es";
+import { groupBy, uniq } from "lodash-es";
 import picomatch from "picomatch";
+import { glob } from "tinyglobby";
 import z from "zod";
 
 import { importCollection } from "./utils/collection";
@@ -30,7 +30,7 @@ import {
 } from "./utils/converters-admin";
 import { initializeFirebase } from "./utils/initialize";
 import { importStorage } from "./utils/storage";
-import { importUsers, userSchema } from "./utils/users";
+import { importUsers } from "./utils/users";
 
 type ImportOptions = {
   config: string;
@@ -40,7 +40,6 @@ type ImportOptions = {
 
   admins?: true;
   contests?: true;
-  pdfs?: true;
   schools?: true;
   statements?: true;
   students?: true;
@@ -58,7 +57,6 @@ export default async function importData(options: ImportOptions) {
   const collections: (keyof ImportOptions)[] = [
     "admins",
     "contests",
-    "pdfs",
     "schools",
     "statements",
     "students",
@@ -73,7 +71,7 @@ export default async function importData(options: ImportOptions) {
   const { app, bucket, db } = await initializeFirebase();
 
   if (options.admins) {
-    await importAdmins(options);
+    // await importAdmins(db, options);
   }
   if (options.contests) {
     await importContests(db, options);
@@ -83,9 +81,6 @@ export default async function importData(options: ImportOptions) {
   }
   if (options.students) {
     await importStudents(db, options);
-  }
-  if (options.pdfs) {
-    await importPdf(bucket, options);
   }
   if (options.variants) {
     await importVariants(db, options);
@@ -98,12 +93,6 @@ export default async function importData(options: ImportOptions) {
   await deleteApp(app);
 }
 
-async function importAdmins(options: ImportOptions) {
-  const admins = await load("admins", userSchema);
-  await importUsers(admins, { isAdmin: true }, options);
-  success("Admin users imported!");
-}
-
 async function importContests(db: Firestore, options: ImportOptions) {
   const contests = await load("contests", contestSchema);
   await importCollection(db, "contests", contests, contestConverter, options);
@@ -113,42 +102,27 @@ async function importParticipations(db: Firestore, options: ImportOptions) {
   const schoolSchema = participationSchema
     .omit({
       schoolId: true,
-      teacher: true,
       contestId: true,
     })
     .extend({
       contestIds: z.union([z.string(), z.array(z.string())]).default("*"),
       password: z.string(),
-    })
-    .transform((school) => ({
-      ...school,
-      email: `${school.id.toLowerCase()}@teacher.edu`,
-    }));
+    });
   const schools = await load("schools", schoolSchema);
   const contests = await load("contests", contestSchema);
   let configs: VariantsConfig[] | undefined;
 
   if (options.teachers) {
-    const teachers = schools.map((school) => pick(school, ["name", "email", "password"]));
-    await importUsers(teachers, { isTeacher: true }, options);
+    const teachers = schools.map((school) => ({
+      name: school.name,
+      username: school.id,
+      password: school.password,
+    }));
+    await importUsers(db, "teacher", teachers, options);
   }
 
   if (options.schools) {
-    const auth = getAuth();
     const participations: Participation[] = [];
-
-    const emails = schools.map((school) => ({ email: school.email }));
-    const usersIds: Record<string, string> = {};
-    for (const emailChunk of chunk(emails, 100)) {
-      const users = await auth.getUsers(emailChunk);
-      if (users.notFound.length > 0) {
-        const id = (users.notFound[0] as EmailIdentifier).email.replace("@teacher.edu", "");
-        fatal(`Teacher ${id} does not exist. Make sure to import teachers first.`);
-      }
-      for (const user of users.users) {
-        usersIds[user.email as string] = user.uid;
-      }
-    }
 
     for (const contest of contests) {
       for (const school of schools) {
@@ -177,7 +151,6 @@ async function importParticipations(db: Firestore, options: ImportOptions) {
           schoolId: school.id,
           contestId: contest.id,
           name: school.name,
-          teacher: usersIds[school.email],
           finalized: false,
           pdfVariants,
           disabled: false,
@@ -203,37 +176,6 @@ async function importStudents(db: Firestore, options: ImportOptions) {
       ),
     ),
   );
-}
-
-async function importPdf(bucket: Bucket, options: ImportOptions) {
-  const contests = await load("contests", contestSchema);
-  const variantsConfig = await load("variants", variantsConfigSchema);
-
-  const timestamp = new Date().toISOString().replace(/:/g, "-");
-
-  const pdfs = contests.flatMap((contest) => {
-    const config = variantsConfig.find((c) => c.id === contest.id);
-    if (!config) {
-      fatal(`Missing variants configuration for contest ${contest.id}.`);
-    }
-
-    return uniq([...config.variantIds, ...config.pdfVariantIds]).flatMap(
-      (id): [string, string][] => {
-        return [
-          [
-            path.join("variants", config.id, id, "statement.pdf"),
-            path.join("statements", config.id, id, `statement-${timestamp}.pdf`),
-          ],
-          [
-            path.join("variants", config.id, id, "statement.pdf"),
-            path.join("statements", config.id, id, "statement.pdf"),
-          ],
-        ];
-      },
-    );
-  });
-
-  await importStorage(bucket, "PDFs", pdfs, options);
 }
 
 async function importVariants(db: Firestore, options: ImportOptions) {
@@ -264,16 +206,33 @@ async function importStatements(bucket: Bucket, options: ImportOptions) {
   const contests = await load("contests", contestSchema);
   const variantsConfig = await load("variants", variantsConfigSchema);
 
-  const statements = contests.flatMap((contest) => {
+  const timestamp = new Date().toISOString().replace(/:/g, "-");
+
+  const statements = contests.map(async (contest) => {
     const config = variantsConfig.find((c) => c.id === contest.id);
     if (!config) {
       fatal(`Missing variants configuration for contest ${contest.id}.`);
     }
 
-    return uniq([...config.variantIds, ...config.pdfVariantIds]).map((id): [string, string] => [
-      path.join("variants", config.id, `${id}.txt`),
-      path.join("statements", config.id, id, "statement.txt"),
-    ]);
+    const files = uniq([...config.variantIds, ...config.pdfVariantIds]).map(
+      async (id): Promise<[string, string][]> => {
+        const localDir = path.join("variants", config.id, id);
+        const remoteDir = path.join("statements", config.id, id);
+        const files = await glob("*", { cwd: localDir });
+
+        return files.flatMap((file) => {
+          const ext = path.extname(file);
+          return [
+            [
+              path.join(localDir, file),
+              path.join(remoteDir, `${path.basename(file, ext)}-${timestamp}${ext}`),
+            ],
+            [path.join(localDir, file), path.join(remoteDir, file)],
+          ];
+        });
+      },
+    );
+    return (await Promise.all(files)).flat();
   });
-  await importStorage(bucket, "statements", statements, options);
+  await importStorage(bucket, "statements", (await Promise.all(statements)).flat(), options);
 }

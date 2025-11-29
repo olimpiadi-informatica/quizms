@@ -7,18 +7,19 @@ import {
   Navbar,
   NavbarBrand,
   SubmitButton,
+  UsernameField,
 } from "@olinfo/react-components";
 import { getAuth, signInWithCustomToken, type User } from "firebase/auth";
 import { useSearch } from "wouter";
 
-import { getUserRole, useAuth } from "~/web/hooks";
+import { useAuth } from "~/web/hooks";
 
 import { login } from "./api";
 import { useDb } from "./base-login";
 
 type Props = {
   allowedRole: "teacher" | "admin";
-  children: (user: User) => ReactNode;
+  children: (auth: { user: User; claims: Record<string, string> }) => ReactNode;
 };
 
 export default function TokenLogin({ allowedRole, children }: Props) {
@@ -28,26 +29,26 @@ export default function TokenLogin({ allowedRole, children }: Props) {
 
   useEffect(() => {
     const url = new URL(window.location.href);
-    url.searchParams.delete("token");
+    url.searchParams.delete("username");
+    url.searchParams.delete("password");
     window.history.replaceState(undefined, "", url.href);
   }, []);
 
-  const defaultToken = params.get("token") ?? "";
+  const defaultCredential = {
+    username: params.get("username") ?? "",
+    password: params.get("password") ?? "",
+  };
 
-  const signIn = async (credential: { token: string }) => {
-    const { token } = await login("teacher", credential);
+  const signIn = async (credential: { username: string; password: string }) => {
+    const { token } = await login(db, allowedRole, credential);
 
     const auth = getAuth(db.app);
-    const newUser = await signInWithCustomToken(auth, token);
-    const newUserRole = await getUserRole(newUser.user);
-    if (newUserRole !== allowedRole) {
-      throw new Error("Permessi insufficienti");
-    }
+    await signInWithCustomToken(auth, token);
   };
 
   const auth = useAuth(allowedRole);
-  if (auth?.user) {
-    return children(auth.user);
+  if (auth) {
+    return children(auth);
   }
 
   return (
@@ -57,9 +58,10 @@ export default function TokenLogin({ allowedRole, children }: Props) {
           <div className="flex items-center h-full font-bold">{metadata.title}</div>
         </NavbarBrand>
       </Navbar>
-      <Form defaultValue={{ token: defaultToken }} onSubmit={signIn} className="p-4 pb-8">
+      <Form defaultValue={defaultCredential} onSubmit={signIn} className="p-4 pb-8">
         <h1 className="mb-2 text-xl font-bold">Accedi alla gestione gara</h1>
-        <CurrentPasswordField field="token" />
+        <UsernameField field="username" />
+        <CurrentPasswordField field="password" />
         <SubmitButton>Accedi</SubmitButton>
       </Form>
     </>

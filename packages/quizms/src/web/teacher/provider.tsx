@@ -19,8 +19,9 @@ import { TeacherLayout } from "./layout";
 type TeacherProviderProps = {
   participations: Participation[];
   contests: Contest[];
-  startParticipation: (participationId: string, startingTime: Date | null) => Promise<any>;
-  finalizeParticipation: (participationId: string) => Promise<any>;
+  startParticipation: (participationId: string) => Promise<void>;
+  stopParticipation: (participationId: string) => Promise<void>;
+  finalizeParticipation: (participationId: string) => Promise<void>;
   variants: Variant[];
   logout: () => Promise<void>;
   statementComponent: ComponentType<Record<never, never>>;
@@ -81,6 +82,7 @@ function ProviderInner({
   participations,
   contests,
   startParticipation,
+  stopParticipation,
   finalizeParticipation,
   variants,
   logout,
@@ -108,6 +110,7 @@ function ProviderInner({
     participations,
     participation,
     startParticipation,
+    stopParticipation,
     finalizeParticipation,
     variants: contestVariants,
     logout,

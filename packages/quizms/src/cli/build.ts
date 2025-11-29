@@ -22,6 +22,8 @@ export default async function staticExport(options: ExportOptions): Promise<void
       outDir: path.join(cwd(), options.outDir),
       emptyOutDir: true,
       assetsInlineLimit: 1024,
+      minify: true,
+      emitAssets: true,
       rollupOptions: {
         output: {
           hoistTransitiveImports: false,
