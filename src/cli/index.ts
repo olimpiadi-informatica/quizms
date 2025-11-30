@@ -61,6 +61,7 @@ async function main() {
     .option("-c, --config <config>", "The contests config file.")
     .option("-d, --outDir <directory>", "The directory to output the PDF.", "variants")
     .option("-e, --entry <entry>", "The entry point of the PDF.", "print/page.jsx")
+    .option("-f, --filter <contest>", "Filter contests to print", "*")
     .option("-s, --server", "Only serve the pages, don't generate the PDF.")
     .action(print);
 

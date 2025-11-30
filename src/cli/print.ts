@@ -16,16 +16,21 @@ import { fatal, info, success } from "~/utils/logs";
 import generatePdfs from "./pdf";
 import { buildVariants } from "./variants";
 import configs from "./vite/configs";
+import picomatch from "picomatch";
 
 export type PrintOptions = {
   config: string;
   outDir: string;
   entry: string;
   server: boolean;
+  filter: string;
 };
 
 export default async function print(options: PrintOptions) {
-  const contests = await load("contests", contestSchema);
+  const contests = (await load("contests", contestSchema)).filter(
+    (c) => picomatch.isMatch(c.id, options.filter)
+  );
+  console.log(contests);
   const variantConfigs = await load("variants", variantsConfigSchema);
 
   const entry = path.join("src", options.entry);
