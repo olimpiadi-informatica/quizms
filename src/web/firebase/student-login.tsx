@@ -16,6 +16,7 @@ import { isEqual, mapValues } from "lodash-es";
 
 import type { Contest, Student } from "~/models";
 import { hash } from "~/utils/hash";
+import getTitle from "~/utils/title";
 import { StudentProvider } from "~/web/student/provider";
 import { UserDataField } from "~/web/student/user-data-form";
 
@@ -108,7 +109,7 @@ function StudentLoginInner({ contestFilter, children }: Omit<LoginProps, "config
     <>
       <Navbar color="bg-base-300 text-base-content">
         <NavbarBrand>
-          <div className="flex items-center h-full font-bold">Olimpiadi di Informatica</div>
+          <div className="flex items-center h-full font-bold">{getTitle()}</div>
         </NavbarBrand>
       </Navbar>
       <Form defaultValue={defaultValue} onSubmit={submit} className="p-4 pb-8">

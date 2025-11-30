@@ -7,6 +7,7 @@ import { useLocation, useSearch } from "wouter";
 
 import { useAuth } from "~/web/firebase/hooks";
 
+import getTitle from "~/utils/title";
 import { useDb } from "./base-login";
 
 type Props = {
@@ -51,7 +52,7 @@ export default function SsoLogin({ url, logo, children }: Props) {
     <>
       <Navbar color="bg-base-300 text-base-content">
         <NavbarBrand>
-          <div className="flex items-center h-full font-bold">Olimpiadi di Informatica</div>
+          <div className="flex items-center h-full font-bold">{getTitle()}</div>
         </NavbarBrand>
       </Navbar>
       <div className="flex grow flex-col items-center justify-center gap-4 p-4 pb-8">

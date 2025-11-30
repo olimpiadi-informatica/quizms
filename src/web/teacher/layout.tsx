@@ -18,6 +18,7 @@ import { LogOut } from "lucide-react";
 import { Link, useRoute } from "wouter";
 
 import type { Contest, Participation } from "~/models";
+import getTitle from "~/utils/title";
 import { ErrorBoundary, Loading } from "~/web/components";
 
 type Props = {
@@ -36,7 +37,7 @@ export function TeacherLayout({ contests, participations, logout, children }: Pr
     <>
       <Navbar color="bg-base-300 text-base-content">
         <NavbarBrand>
-          <div className="flex items-center h-full font-bold">Olimpiadi di Informatica</div>
+          <div className="flex items-center h-full font-bold">{getTitle()}</div>
         </NavbarBrand>
         {contest && (
           <NavbarMenu>
