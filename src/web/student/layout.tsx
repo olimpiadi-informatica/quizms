@@ -1,4 +1,4 @@
-import { type ReactNode, type Ref, forwardRef, useRef } from "react";
+import { type ReactNode, type Ref, forwardRef, useCallback, useRef } from "react";
 
 import {
   Button,
@@ -15,6 +15,7 @@ import {
   SubmitButton,
 } from "@olinfo/react-components";
 import { FileChartColumn, LogOut, RotateCcw } from "lucide-react";
+import { PageVisibilityListener } from "~/web/components/page-visibility-listener";
 
 import type { Schema } from "~/models";
 import { ErrorBoundary, Prose, Timer } from "~/web/components";
@@ -45,8 +46,16 @@ export function StudentLayout({ children }: { children: ReactNode }) {
     }
   };
 
+  const sendWarning = useCallback(() => {
+    //Call to firebase to log the violation
+    // IMPORTANTE: in alcuni dispositivi mobile non è possibile mettere a schermo intero. Per cui eventuali segnalazioni dovrebbero essere forse solo fatte nel caso l'utente esca dalla pagina
+    console.log("Sent warning (TODO)");
+  }, []);
+
   return (
+    // IMPORTANTE: in alcuni dispositivi mobile non è possibile mettere a schermo intero. Per cui eventuali segnalazioni dovrebbero essere forse solo fatte nel caso l'utente esca dalla pagina
     <>
+      <PageVisibilityListener onWarning={sendWarning} />
       <Navbar color="bg-base-300 text-base-content">
         <NavbarBrand>
           <div className="flex items-center h-full font-bold">{contest.name}</div>
