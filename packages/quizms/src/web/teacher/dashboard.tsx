@@ -203,7 +203,7 @@ export default function TeacherDashboard() {
                 <StopContestButton />
               </WithinTimeRange>
             )}
-            <Link className="btn btn-primary btn-disabled" href="/students">
+            <Link className="btn btn-primary" href="/students">
               Gestisci studenti e risposte
             </Link>
           </CardActions>
@@ -213,7 +213,7 @@ export default function TeacherDashboard() {
         <Card>
           <CardBody title="Richieste di accesso">
             <div className="h-96 max-h-screen">
-              <StudentRestoreList />
+              <StudentRestoreList isStarted={!!participation.token} />
             </div>
           </CardBody>
         </Card>

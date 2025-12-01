@@ -121,7 +121,7 @@ function hostingConfigs() {
         ],
       },
     ],
-    predeploy: "npx quizms build",
+    predeploy: "npx quizms build firebase",
   };
 }
 

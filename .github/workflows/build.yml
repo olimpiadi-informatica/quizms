@@ -24,3 +24,7 @@ jobs:
       - name: Build @olinfo/quizms-mdx
         run: pnpm build
         working-directory: packages/quizms-mdx
+
+      - name: Build @olinfo/quizms-firebase
+        run: pnpm build
+        working-directory: packages/quizms-firebase

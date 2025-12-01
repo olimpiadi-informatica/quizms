@@ -6,17 +6,16 @@ service firebase.storage {
         }
 
         function isTeacher() {
-            return request.auth != null && request.auth.token.isTeacher == true;
+            return request.auth != null && request.auth.token.role == 'teacher';
         }
 
-        function getStudent(uid) {
-            let data = firestore.get(/databases/(default)/documents/studentMappingUid/$(uid)).data;
-            return firestore.get(/databases/(default)/documents/participations/$(data.participationId)/students/$(data.studentId));
+        function getStudent() {
+            return firestore.get(/databases/(default)/documents/participations/$(request.auth.token.participationId)/students/$(request.auth.token.studentId));
         }
 
         match /statements/{contestId}/{variantId}/{filename} {
             function canStudentReadVariant() {
-                let student = getStudent(request.auth.uid);
+                let student = getStudent();
                 return student != null
                     && isAuthenticated(student.data.uid)
                     && student.data.contestId == contestId

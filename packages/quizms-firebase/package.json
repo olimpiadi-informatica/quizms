@@ -1,6 +1,6 @@
 {
   "name": "@olinfo/quizms-firebase",
-  "version": "4.0.0-canary.20251130",
+  "version": "4.0.0-canary.20251201",
   "type": "module",
   "author": "Alessandro Bortolin <bortolin.alessandro@outlook.it>",
   "license": "MIT",
@@ -66,7 +66,7 @@
     "zod": "^3.25.76"
   },
   "peerDependencies": {
-    "react": "^19"
+    "react": "~19.1"
   },
   "postcss": {
     "plugins": {

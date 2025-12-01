@@ -103,7 +103,7 @@ function useStudentRestores(
     subscribe: true,
   });
 
-  const [studentRestores] = useCollection("studentRestore", studentRestoreConvert, {
+  const [studentRestores] = useCollection("studentRestores", studentRestoreConvert, {
     constraints: { participationId, token: participation.token, status: "pending" },
     orderBy: "createdAt",
     subscribe: true,
@@ -114,7 +114,7 @@ function useStudentRestores(
 
     for (const studentRestore of studentRestores) {
       if (studentRestore.studentId === studentId) {
-        batch.update(doc(db, "studentRestore", studentRestore.id), { status: "revoked" });
+        batch.update(doc(db, "studentRestores", studentRestore.id), { status: "revoked" });
       }
     }
 
@@ -127,7 +127,7 @@ function useStudentRestores(
       uid: request.id,
       updatedAt: serverTimestamp(),
     });
-    batch.delete(doc(db, "studentRestore", request.id));
+    batch.delete(doc(db, "studentRestores", request.id));
     await batch.commit();
 
     await reject(request.studentId);

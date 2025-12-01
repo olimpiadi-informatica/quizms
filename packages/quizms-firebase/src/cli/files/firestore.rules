@@ -14,16 +14,7 @@ service cloud.firestore {
         }
 
         function isTeacher() {
-            return request.auth != null && request.auth.token.isTeacher == true;
-        }
-
-        function getStudentById(participationId, studentId) {
-            return getAfter(/databases/$(database)/documents/participations/$(participationId)/students/$(studentId));
-        }
-
-        function getStudent(uid) {
-            let data = get(/databases/$(database)/documents/studentMappingUid/$(uid)).data;
-            return get(/databases/$(database)/documents/participations/$(data.participationId)/students/$(data.studentId));
+            return request.auth != null && request.auth.token.role == 'teacher';
         }
 
         function getParticipation(id) {
@@ -32,7 +23,7 @@ service cloud.firestore {
 
         function isTeacherParticipation(participationId) {
             let participation = getParticipation(participationId);
-            return participation != null && isAuthenticated(participation.data.teacher);
+            return participation != null && participation.data.schoolId == request.auth.token.schoolId;
         }
 
         match /announcements/{announcement} {
@@ -40,40 +31,11 @@ service cloud.firestore {
         }
 
         match /contests/{contest} {
-            allow read: if request.auth != null;
+            allow read: if true;
         }
 
         match /participations/{participationId} {
-            function isStudentParticipation() {
-                let student = getStudent(request.auth.uid);
-                return student != null
-                    && isAuthenticated(student.data.uid)
-                    && student.data.participationId == participationId
-                    && student.data.token == resource.data.token;
-            }
-
-            allow read: if isAuthenticated(resource.data.teacher) || isStudentParticipation();
-            allow update: if isAuthenticated(resource.data.teacher) && affectedKeys().hasOnly(['token', 'startingTime', 'endingTime', 'finalized']);
-        }
-
-        match /participationMapping/{token} {
-            function checkToken(participationId) {
-                let participation = getAfter(/databases/$(database)/documents/participations/$(participationId));
-                return participation != null
-                    && participation.data.token == token
-                    && participation.data.startingTime == request.resource.data.startingTime
-                    && participation.data.endingTime == request.resource.data.endingTime
-                    && participation.data.contestId == request.resource.data.contestId;
-            }
-
-            allow get: if request.auth != null;
-            allow create: if isTeacherParticipation(request.resource.data.participationId) && checkToken(request.resource.data.participationId);
-        }
-
-        function studentHash(student) {
-            let data = student.userData;
-            let joined = [data.name, data.surname, data.classYear, data.classSection, student.token].join('$').lower();
-            return hashing.sha256(joined).toHexString()[0: 24];
+            allow read: if participationId == request.auth.token.participationId || resource.data.schoolId == request.auth.token.schoolId;
         }
 
         match /participations/{participationId}/students/{student} {
@@ -86,21 +48,6 @@ service cloud.firestore {
                     && participation.data.endingTime >= request.resource.data.finishedAt
                     && participation.data.contestId == request.resource.data.contestId
                     && request.time <= resource.data.finishedAt + duration.value(10, 's');
-            }
-
-            function checkVariant(data) {
-                let hash = data.contestId + '-' + studentHash(data)[0: 3];
-                let mapping = get(/databases/$(database)/documents/variantMappings/$(hash));
-                return mapping != null
-                    && mapping.data.variant == data.variant;
-            }
-
-            function canStudentCreate() {
-                return isAuthenticated(request.resource.data.uid)
-                    && request.resource.data.userData != null
-                    && request.resource.data.contestId != null
-                    && checkToken()
-                    && checkVariant(request.resource.data);
             }
 
             function canStudentUpdate() {
@@ -119,68 +66,23 @@ service cloud.firestore {
             }
 
             allow read: if isAuthenticated(resource.data.uid) || isTeacherParticipation(participationId);
-            allow create: if (canStudentCreate() || isTeacherParticipation(participationId)) && request.resource.data.participationId == participationId /* TODO && hasTimestamp('createdAt') */;
+            allow create: if isTeacherParticipation(participationId) && request.resource.data.participationId == participationId;
             allow update: if canStudentUpdate() || canTeacherUpdate();
             allow delete: if isTeacherParticipation(participationId);
         }
 
-        match /participations/{participationId}/studentMappingHash/{id} {
-            function canCreateStudent() {
-                let student = getStudentById(participationId, request.resource.data.studentId);
-                return student != null
-                    && isAuthenticated(student.data.uid)
-                    && student.data.userData != null
-                    && studentHash(student.data) == id;
-            }
-
-            allow get: if request.auth != null;
-            allow create, update: if canCreateStudent() || isTeacherParticipation(participationId);
-            allow delete: if isTeacherParticipation(participationId);
-        }
-
-        match /participations/{participationId}/studentRestore/{uid} {
-            function canStudentCreate() {
-                let participation = getParticipation(participationId);
-                return isAuthenticated(uid)
-                    && participationId == request.resource.data.participationId
-                    && participation != null
-                    && participation.data.token == request.resource.data.token;
-            }
-
-            allow read: if isTeacherParticipation(participationId);
-            allow create, update: if canStudentCreate();
-            allow delete: if isTeacherParticipation(participationId);
-        }
-
-        match /studentMappingUid/{id} {
-            function canCreateStudent() {
-                let student = getStudentById(request.resource.data.participationId, request.resource.data.studentId);
-                return student != null
-                    && isAuthenticated(student.data.uid)
-                    && isAuthenticated(id);
-            }
-
-            allow get: if request.auth != null;
-            allow list: if isTeacherParticipation(resource.data.participationId);
-            allow create, update: if canCreateStudent() || isTeacherParticipation(request.resource.data.participationId);
+        match /studentRestores/{uid} {
+            allow read: if isAuthenticated(uid) || isTeacherParticipation(resource.data.participationId);
+            allow update: if isTeacherParticipation(resource.data.participationId);
             allow delete: if isTeacherParticipation(resource.data.participationId);
-        }
-
-        match /submissions/{submission} {
-            allow get: if isAuthenticated(resource.data.uid);
-            allow create: if isAuthenticated(request.resource.data.uid) && hasTimestamp('submittedAt');
         }
 
         match /variants/{variant} {
             allow read: if isTeacher();
         }
 
-        match /variantMappings/{hash} {
-            allow read: if request.auth != null;
-        }
-
         match /{document=**} {
-            allow read, write: if request.auth.token.isAdmin == true;
+            allow read, write: if request.auth.token.role == "admin";
         }
     }
 }

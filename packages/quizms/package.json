@@ -1,6 +1,6 @@
 {
   "name": "@olinfo/quizms",
-  "version": "4.0.0-canary.20251130",
+  "version": "4.0.0-canary.20251201",
   "type": "module",
   "author": "Alessandro Bortolin <bortolin.alessandro@outlook.it>",
   "license": "MIT",
@@ -109,9 +109,9 @@
     "zod-validation-error": "^3.5.4"
   },
   "peerDependencies": {
-    "react": "^19",
-    "react-dom": "^19",
-    "react-server-dom-webpack": "^19"
+    "react": "~19.1",
+    "react-dom": "~19.1",
+    "react-server-dom-webpack": "~19.1"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.3.8",
@@ -125,7 +125,7 @@
     "@types/react-dom": "^19.2.3",
     "@types/webpack-node-externals": "^3.0.4",
     "postcss": "^8.5.6",
-    "react-server-dom-webpack": "^19.2.0",
+    "react-server-dom-webpack": "~19.1.1",
     "rollup": "^4.53.3",
     "typescript": "5.8.2",
     "vite-plugin-dts": "^4.5.4",

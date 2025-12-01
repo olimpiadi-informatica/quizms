@@ -6,11 +6,11 @@ export default function firebaseEntry(): PluginOption {
     api: {
       quizmsDevRoutes: [
         {
-          pathname: /^\/firebase\/admin(\/\w+(\/schools)?)?$/,
+          pathname: /^\/firebase\/admin(\/[^/]+(\/schools)?)?$/,
           module: "@olinfo/quizms-firebase/entry",
         },
         {
-          pathname: /^\/firebase\/teacher(\/\w+(\/students(\/\w+)?)?)?$/,
+          pathname: /^\/firebase\/teacher(\/[^/]+(\/students(\/[^/]+)?)?)?$/,
           module: "@olinfo/quizms-firebase/entry",
         },
         {

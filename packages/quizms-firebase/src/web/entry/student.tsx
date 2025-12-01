@@ -129,7 +129,7 @@ function StudentForm({ contests }: { contests: Contest[] }) {
 function StudentRestoring({ uid, children }: { uid: string; children: ReactNode }) {
   const db = useDb();
 
-  const [studentRestore] = useDocumentOptional("studentRestore", uid, studentRestoreConvert, {
+  const [studentRestore] = useDocumentOptional("studentRestores", uid, studentRestoreConvert, {
     subscribe: true,
   });
 

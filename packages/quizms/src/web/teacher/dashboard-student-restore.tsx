@@ -94,7 +94,7 @@ function StudentRestoreListInner() {
   ));
 }
 
-export function StudentRestoreList() {
+export function StudentRestoreList({ isStarted }: { isStarted: boolean }) {
   return (
     <div className="h-full overflow-auto rounded-lg border border-base-content/15">
       <table className="table table-pin-rows">
@@ -113,7 +113,13 @@ export function StudentRestoreList() {
                 <td>Nessuna richiesta.</td>
               </tr>
             }>
-            <StudentRestoreListInner />
+            {isStarted ? (
+              <StudentRestoreListInner />
+            ) : (
+              <tr>
+                <td>Nessuna richiesta.</td>
+              </tr>
+            )}
           </Suspense>
         </tbody>
       </table>

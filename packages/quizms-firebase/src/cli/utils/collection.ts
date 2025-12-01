@@ -18,6 +18,14 @@ export async function importCollection<T extends { id: string }>(
   converter: FirestoreDataConverter<T>,
   options: ImportOptions,
 ) {
+  const newIds = new Set<string>();
+  for (const doc of data) {
+    if (newIds.has(doc.id)) {
+      fatal(`Cannot import multiple ${collection} with the same id: ${doc.id}`);
+    }
+    newIds.add(doc.id);
+  }
+
   if (options.delete) {
     const confirmed = await confirm({
       message: `You are about to delete all ${pc.bold(

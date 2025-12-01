@@ -1,4 +1,4 @@
-import type { PluginOption } from "vite";
+import { defaultClientConditions, defaultClientMainFields, type PluginOption } from "vite";
 
 export default function firebasePreset(): PluginOption {
   return {
@@ -10,7 +10,8 @@ export default function firebasePreset(): PluginOption {
           firebase: {
             ssr: false,
             resolve: {
-              conditions: ["module", "browser", "import", "production"],
+              conditions: [...defaultClientConditions],
+              mainFields: [...defaultClientMainFields],
               noExternal: true,
             },
             build: {

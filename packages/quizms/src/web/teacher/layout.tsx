@@ -57,10 +57,9 @@ export function TeacherLayout({ contests, participations, logout, children }: Pr
             <NavbarMenuItem>
               <Link href={`/${contest.id}`}>Gestione gara</Link>
             </NavbarMenuItem>
-            <li className="disabled">
-              {/* biome-ignore lint/a11y/useValidAnchor: temporarily disabled */}
-              <a href="#">Gestione studenti</a>
-            </li>
+            <NavbarMenuItem>
+              <Link href={`/${contest.id}/students`}>Gestione studenti</Link>
+            </NavbarMenuItem>
           </NavbarMenu>
         )}
         <NavbarContent>
