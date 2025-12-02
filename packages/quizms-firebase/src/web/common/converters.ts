@@ -29,6 +29,8 @@ import z, {
   ZodUnion,
 } from "zod";
 
+import { websiteSchema } from "~/models/website";
+
 function convertToFirestore(data: Record<string, any>) {
   return cloneDeepWith(omit(data, "id"), (value) => {
     if (isDate(value)) {
@@ -93,6 +95,7 @@ export const contestConverter = converter(contestSchema);
 export const participationConverter = converter(participationSchema);
 export const studentRestoreConvert = converter(studentRestoreSchema);
 export const variantConverter = converter(variantSchema);
+export const websiteConverter = converter(websiteSchema);
 
 export const announcementConverter: FirestoreDataConverter<Announcement> = {
   toFirestore(data) {

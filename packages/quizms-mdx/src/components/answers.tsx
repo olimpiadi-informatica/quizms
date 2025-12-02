@@ -46,7 +46,10 @@ export function OpenAnswer({ correct }: OpenAnswerProps) {
       <JsonField field="options">
         <JsonArray>
           <JsonObject>
-            <JsonField field="value" value={correct ?? null} />
+            <JsonField
+              field="value"
+              value={type === "number" ? Number(correct) : (correct ?? null)}
+            />
             <JsonField field="correct" value={true} />
           </JsonObject>
         </JsonArray>

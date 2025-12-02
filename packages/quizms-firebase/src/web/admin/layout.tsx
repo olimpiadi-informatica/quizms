@@ -1,6 +1,6 @@
 import { type ReactNode, Suspense } from "react";
 
-import { ErrorBoundary, Loading, useMetadata } from "@olinfo/quizms/components";
+import { ErrorBoundary, Loading, Title } from "@olinfo/quizms/components";
 import type { Contest } from "@olinfo/quizms/models";
 import {
   Button,
@@ -27,7 +27,6 @@ type Props = {
 };
 
 export function AdminLayout({ name, contests, logout, children }: Props) {
-  const metadata = useMetadata();
   const [, params] = useRoute("/:contestId/*");
   const contest = contests.find((c) => c.id === params?.contestId);
 
@@ -35,7 +34,9 @@ export function AdminLayout({ name, contests, logout, children }: Props) {
     <>
       <Navbar color="bg-error text-error-content">
         <NavbarBrand>
-          <div className="flex items-center h-full font-bold">{metadata.title}</div>
+          <div className="flex items-center h-full font-bold">
+            <Title />
+          </div>
         </NavbarBrand>
         {contest && contests.length >= 2 && (
           <NavbarMenu>

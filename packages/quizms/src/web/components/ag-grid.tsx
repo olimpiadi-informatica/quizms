@@ -12,6 +12,7 @@ import {
   RowSelectionModule,
   TextEditorModule,
   TextFilterModule,
+  TooltipModule,
   themeQuartz,
 } from "ag-grid-community";
 import { type AgGridReactProps, AgGridReact as UnStyledAgGrid } from "ag-grid-react";
@@ -28,6 +29,7 @@ ModuleRegistry.registerModules([
   RowSelectionModule,
   TextEditorModule,
   TextFilterModule,
+  TooltipModule,
 ]);
 
 const theme = themeQuartz.withParams({

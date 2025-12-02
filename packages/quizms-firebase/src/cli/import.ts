@@ -21,12 +21,15 @@ import picomatch from "picomatch";
 import { glob } from "tinyglobby";
 import z from "zod";
 
+import { websiteSchema } from "~/models/website";
+
 import { importCollection } from "./utils/collection";
 import {
   contestConverter,
   participationConverter,
   studentConverter,
   variantConverter,
+  websiteConverter,
 } from "./utils/converters-admin";
 import { initializeFirebase } from "./utils/initialize";
 import { importStorage } from "./utils/storage";
@@ -45,6 +48,7 @@ type ImportOptions = {
   students?: true;
   teachers?: true;
   variants?: true;
+  websites?: true;
 };
 
 export default async function importData(options: ImportOptions) {
@@ -62,6 +66,7 @@ export default async function importData(options: ImportOptions) {
     "students",
     "teachers",
     "variants",
+    "websites",
   ];
   if (collections.every((key) => !options[key])) {
     warning("`Nothing to import. Use `--help` for usage.`");
@@ -84,6 +89,9 @@ export default async function importData(options: ImportOptions) {
   }
   if (options.variants) {
     await importVariants(db, options);
+  }
+  if (options.websites) {
+    await importWebsites(db, options);
   }
   if (options.statements) {
     await importStatements(bucket, options);
@@ -184,7 +192,7 @@ async function importVariants(db: Firestore, options: ImportOptions) {
     variantsConfig.flatMap((config) => {
       const ids = uniq([...config.variantIds, ...config.pdfVariantIds]);
       return ids.map(async (id) => {
-        const fileName = path.join("variants", config.id, `${id}.json`);
+        const fileName = path.join("variants", config.id, id, "answers.json");
         let schema: string;
         try {
           schema = await readFile(fileName, "utf8");
@@ -200,6 +208,11 @@ async function importVariants(db: Firestore, options: ImportOptions) {
     }),
   );
   await importCollection(db, "variants", variants, variantConverter, options);
+}
+
+async function importWebsites(db: Firestore, options: ImportOptions) {
+  const websites = await load("websites", websiteSchema);
+  await importCollection(db, "websites", websites, websiteConverter, options);
 }
 
 async function importStatements(bucket: Bucket, options: ImportOptions) {

@@ -18,13 +18,11 @@ import { sumBy } from "lodash-es";
 import { FileChartColumn, LogOut, RotateCcw } from "lucide-react";
 
 import { calcProblemPoints, type Schema } from "~/models";
-import { ErrorBoundary, Progress, Prose, Timer, useMetadata } from "~/web/components";
+import { ErrorBoundary, Progress, Prose, Timer, Title } from "~/web/components";
 
 import { useStudent } from "./context";
 
 export function StudentLayout({ children }: { children: ReactNode }) {
-  const metadata = useMetadata();
-
   const completedRef = useRef<HTMLDialogElement>(null);
   const submitRef = useRef<HTMLDialogElement>(null);
 
@@ -52,7 +50,9 @@ export function StudentLayout({ children }: { children: ReactNode }) {
     <>
       <Navbar color="bg-base-300 text-base-content">
         <NavbarBrand>
-          <div className="flex items-center h-full font-bold">{metadata.title}</div>
+          <div className="flex items-center h-full font-bold">
+            <Title />
+          </div>
         </NavbarBrand>
         <NavbarContent>
           <div className="flex items-center gap-2">

@@ -16,6 +16,7 @@ import {
   variantConverter,
 } from "~/web/common/converters";
 import TokenLogin from "~/web/common/token-login";
+import { useWebsite } from "~/web/common/website";
 import { useCollection, useDocument } from "~/web/hooks";
 
 import { FirebaseStatement } from "./student-statement";
@@ -31,11 +32,13 @@ export default function TeacherEntry() {
 function TeacherInner({ schoolId }: { schoolId: string }) {
   const db = useDb();
 
-  const [participations] = useCollection("participations", participationConverter, {
-    constraints: { schoolId: schoolId },
+  const website = useWebsite();
+  const [contests] = useCollection("contests", contestConverter, {
+    constraints: { id: website.contests },
     subscribe: true,
   });
-  const [contests] = useCollection("contests", contestConverter, {
+  const [participations] = useCollection("participations", participationConverter, {
+    constraints: { contestId: website.contests, schoolId: schoolId },
     subscribe: true,
   });
   const [variants] = useCollection("variants", variantConverter);

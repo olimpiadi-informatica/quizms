@@ -1,6 +1,6 @@
 import { type ReactNode, useCallback, useEffect, useMemo } from "react";
 
-import { Loading, StudentFormField, useMetadata } from "@olinfo/quizms/components";
+import { Loading, StudentFormField, Title } from "@olinfo/quizms/components";
 import type { Contest, Student } from "@olinfo/quizms/models";
 import { StudentProvider } from "@olinfo/quizms/student";
 import {
@@ -23,6 +23,7 @@ import {
   studentConverter,
   studentRestoreConvert,
 } from "~/web/common/converters";
+import { useWebsite } from "~/web/common/website";
 import { useAuth, useCollection, useDocument, useDocumentOptional } from "~/web/hooks";
 
 import { FirebaseStatement } from "./student-statement";
@@ -30,26 +31,17 @@ import { FirebaseStatement } from "./student-statement";
 export default function StudentEntry() {
   const auth = useAuth("student");
 
+  const website = useWebsite();
   const [contests] = useCollection("contests", contestConverter, {
+    constraints: { id: website.contests },
     subscribe: true,
   });
-
-  const filteredContests = useMemo(
-    () =>
-      contests.filter(
-        (contest) =>
-          window.location.hostname === "localhost" ||
-          !contest.allowedOrigins ||
-          contest.allowedOrigins.includes(window.location.host),
-      ),
-    [contests],
-  );
 
   if (auth) {
     return (
       <StudentRestoring uid={auth.user.uid}>
         <StudentInner
-          contests={filteredContests}
+          contests={contests}
           participationId={auth.claims.participationId}
           studentId={auth.claims.studentId}
         />
@@ -57,7 +49,7 @@ export default function StudentEntry() {
     );
   }
 
-  return <StudentForm contests={filteredContests} />;
+  return <StudentForm contests={contests} />;
 }
 
 type FormStudent = {
@@ -67,7 +59,6 @@ type FormStudent = {
 
 function StudentForm({ contests }: { contests: Contest[] }) {
   const db = useDb();
-  const metadata = useMetadata();
 
   const submit = useCallback(
     async ({ contestId, token, ...userData }: FormStudent) => {
@@ -77,6 +68,15 @@ function StudentForm({ contests }: { contests: Contest[] }) {
         userData: {
           ...userData,
           birthDate: userData.birthDate ? new Date(userData.birthDate) : undefined,
+        },
+        extraData: {
+          userAgent: navigator.userAgent,
+          windowWidth: window.innerWidth,
+          windowHeight: window.innerHeight,
+          screenWidth: window.screen.availWidth,
+          screenHeight: window.screen.availHeight,
+          pixelRatio: window.devicePixelRatio,
+          darkMode: window.matchMedia("(prefers-color-scheme: dark)").matches,
         },
       });
 
@@ -97,7 +97,9 @@ function StudentForm({ contests }: { contests: Contest[] }) {
     <>
       <Navbar color="bg-base-300 text-base-content">
         <NavbarBrand>
-          <div className="flex items-center h-full font-bold">{metadata.title}</div>
+          <div className="flex items-center h-full font-bold">
+            <Title />
+          </div>
         </NavbarBrand>
       </Navbar>
       <Form defaultValue={defaultValue} onSubmit={submit} className="p-4 pb-8">

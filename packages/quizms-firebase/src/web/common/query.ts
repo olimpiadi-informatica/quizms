@@ -5,6 +5,7 @@ import {
   collectionGroup,
   type DocumentReference,
   type DocumentSnapshot,
+  documentId,
   type Firestore,
   type FirestoreDataConverter,
   limit,
@@ -39,10 +40,17 @@ export default function query<T>(
     path,
   ).withConverter(converter);
   for (const [k, v] of Object.entries(options?.constraints ?? {})) {
-    q = _query(q, where(k, Array.isArray(v) ? "in" : "==", v));
+    q = _query(q, where(k === "id" ? documentId() : k, Array.isArray(v) ? "in" : "==", v));
   }
   for (const [k, v] of Object.entries(options?.arrayConstraints ?? {})) {
-    q = _query(q, where(k, Array.isArray(v) ? "array-contains-any" : "array-contains", v));
+    q = _query(
+      q,
+      where(
+        k === "id" ? documentId() : k,
+        Array.isArray(v) ? "array-contains-any" : "array-contains",
+        v,
+      ),
+    );
   }
 
   if (options?.orderBy) {

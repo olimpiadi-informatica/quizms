@@ -4,11 +4,12 @@ import { cpus, platform } from "node:os";
 import path from "node:path";
 import { promisify } from "node:util";
 
-import { AsyncPool } from "@olinfo/quizms/utils";
-import { isPlainObject, stubFalse, stubTrue } from "lodash-es";
+import { AsyncPool, validate } from "@olinfo/quizms/utils";
+import { stubFalse, stubTrue } from "lodash-es";
 import type { PluginContext } from "rollup";
 import { temporaryFile, temporaryWrite } from "tempy";
 import type { PluginOption, TransformResult } from "vite";
+import { z } from "zod";
 
 import { executePython } from "./python";
 
@@ -42,10 +43,12 @@ async function transformAsymptoteVariants(
   params: URLSearchParams,
 ): Promise<TransformResult> {
   const variantFile = path.join(path.dirname(fileName), params.get("v")!);
-  const variants = await executePython(variantFile);
 
-  if (!Array.isArray(variants) || !isPlainObject(variants[0])) {
-    throw new TypeError("Variant file must export an array of objects");
+  let variants: z.infer<typeof pyVariantsSchema>;
+  try {
+    variants = validate(pyVariantsSchema, await executePython(variantFile));
+  } catch (err) {
+    throw new TypeError(`Invalid variants: ${(err as Error).message}`, { cause: err });
   }
 
   params.delete("v");
@@ -159,20 +162,22 @@ async function findAsymptoteDependencies(ctx: PluginContext, asyPath: string) {
   }
 }
 
-function jsToAsy(name: string, val: any): string {
-  if (
-    typeof val === "number" ||
-    typeof val === "boolean" ||
-    typeof val === "string" ||
-    Array.isArray(val)
-  ) {
-    return `${getAsyTypeName(val)} ${name} = ${getAsyValue(val)};`;
-  }
+type PyVariable = number | boolean | string | PyVariable[];
 
-  throw new TypeError("Unknown type");
+const pyVariabileSchema: z.ZodType<PyVariable> = z.union([
+  z.number().finite(),
+  z.boolean(),
+  z.string(),
+  z.lazy(() => pyVariabileSchema.array().nonempty()),
+]);
+
+const pyVariantsSchema = z.array(z.record(z.string(), pyVariabileSchema));
+
+function jsToAsy(name: string, val: PyVariable): string {
+  return `${getAsyTypeName(val)} ${name} = ${getAsyValue(val)};`;
 }
 
-function getAsyTypeName(val: any): string {
+function getAsyTypeName(val: PyVariable): string {
   if (typeof val === "number") {
     return Number.isInteger(val) ? "int" : "real";
   }
@@ -182,14 +187,10 @@ function getAsyTypeName(val: any): string {
   if (typeof val === "string") {
     return "string";
   }
-  if (Array.isArray(val)) {
-    return `${getAsyTypeName(val[0])}[]`;
-  }
-
-  throw new TypeError("Unknown type");
+  return `${getAsyTypeName(val[0])}[]`;
 }
 
-function getAsyValue(val: any): string {
+function getAsyValue(val: PyVariable): string {
   if (Array.isArray(val)) {
     return `{ ${val.map((v) => getAsyValue(v)).join(", ")} }`;
   }

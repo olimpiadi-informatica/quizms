@@ -25,6 +25,7 @@ import z, {
 } from "zod";
 
 import { userSchema } from "~/models/user";
+import { websiteSchema } from "~/models/website";
 
 function convertToFirestore(data: Record<string, any>) {
   return cloneDeepWith(omit(data, "id"), (value) => {
@@ -91,3 +92,4 @@ export const participationConverter = converter(participationSchema);
 export const studentConverter = converter(studentSchema);
 export const userConverter = converter(userSchema);
 export const variantConverter = converter(variantSchema);
+export const websiteConverter = converter(websiteSchema);

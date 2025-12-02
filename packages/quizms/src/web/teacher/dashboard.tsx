@@ -103,7 +103,7 @@ function ContestData({ startingTime, endingTime }: { startingTime: Date; endingT
         </p>
         <WithinTimeRange end={undoEnd}>
           <p>
-            Se ti sei sbagliato, puoi ancora annullare la gara fino a un minuto prima
+            Se hai iniziato per sbaglio, puoi ancora annullare la gara fino a un minuto prima
             dell&apos;inizio.
           </p>
         </WithinTimeRange>

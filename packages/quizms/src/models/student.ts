@@ -6,6 +6,7 @@ export const studentSchema = z
   .object({
     uid: z.string(),
     userData: z.record(z.union([z.string(), z.number(), z.date()]).optional()),
+    userDataHash: z.string(),
 
     absent: z.boolean(),
     disabled: z.boolean(),

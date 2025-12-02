@@ -60,6 +60,7 @@ async function main() {
     .option("--students", "Import the students.")
     .option("--teachers", "Import the teachers.")
     .option("--variants", "Import the variants.")
+    .option("--websites", "Import the websites.")
     .option("-d, --delete", "Delete existing collections.")
     .addOption(new Option("-s, --skip-existing", "Skip existing files.").conflicts(["--delete"]))
     .addOption(

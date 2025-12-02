@@ -1,6 +1,6 @@
 import { type ReactNode, useEffect } from "react";
 
-import { useMetadata } from "@olinfo/quizms/components";
+import { Title } from "@olinfo/quizms/components";
 import {
   CurrentPasswordField,
   Form,
@@ -25,7 +25,6 @@ type Props = {
 export default function TokenLogin({ allowedRole, children }: Props) {
   const db = useDb();
   const params = new URLSearchParams(useSearch());
-  const metadata = useMetadata();
 
   useEffect(() => {
     const url = new URL(window.location.href);
@@ -55,7 +54,9 @@ export default function TokenLogin({ allowedRole, children }: Props) {
     <>
       <Navbar color="bg-base-300 text-base-content">
         <NavbarBrand>
-          <div className="flex items-center h-full font-bold">{metadata.title}</div>
+          <div className="flex items-center h-full font-bold">
+            <Title />
+          </div>
         </NavbarBrand>
       </Navbar>
       <Form defaultValue={defaultCredential} onSubmit={signIn} className="p-4 pb-8">

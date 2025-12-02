@@ -1,4 +1,5 @@
 import { intlFormat, parse as parseDate, subMinutes } from "date-fns";
+import { deburr } from "lodash-es";
 import z from "zod";
 
 import type { Student } from "~/models/student";
@@ -8,6 +9,7 @@ const baseUserData = z.object({
   label: z.string(),
   size: z.enum(["xs", "sm", "md", "lg", "xl"]).optional(),
   pinned: z.boolean().optional(),
+  excludeFromUniqueCheck: z.boolean().optional(),
 });
 
 const userDataText = baseUserData.extend({
@@ -35,9 +37,6 @@ const baseContestSchema = z.object({
   longName: z.string(),
   // ID dei problemi della gara
   problemIds: z.coerce.string().array(),
-
-  // Domini da cui è possibile svolgere la gara
-  allowedOrigins: z.string().array().optional(),
 
   // Informazioni personali richieste agli studenti
   userData: z.array(z.discriminatedUnion("type", [userDataText, userDataNumber, userDataDate])),
@@ -126,12 +125,12 @@ export function parseUserData(
       date = subMinutes(date, date.getTimezoneOffset());
       if (date < schema?.min) {
         throw new Error(
-          `Il campo ${label} deve contenere una data successiva al ${intlFormat(schema.min, { dateStyle: "short" })}.`,
+          `Il campo ${label} deve contenere una data successiva al ${formatDate(schema.min)}.`,
         );
       }
       if (date > schema?.max) {
         throw new Error(
-          `Il campo ${label} deve contenere una data precedente al ${intlFormat(schema.max, { dateStyle: "short" })}.`,
+          `Il campo ${label} deve contenere una data precedente al ${formatDate(schema.max)}.`,
         );
       }
       return date;
@@ -140,13 +139,30 @@ export function parseUserData(
 }
 
 export function formatUserData(
-  student: Student | undefined,
+  student: { userData?: Student["userData"] } | undefined,
   schema: Contest["userData"][number],
 ): string {
   const value = student?.userData?.[schema?.name];
-  if (value === undefined) return "";
-  if (schema.type === "date") {
-    return intlFormat(value as Date, { dateStyle: "short" });
-  }
+  if (value == null) return "";
+  if (schema.type === "date") return formatDate(value as Date);
   return value.toString();
+}
+
+function formatDate(value: Date) {
+  return intlFormat(value, {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+}
+
+export function getNormalizedUserData(
+  contest: Contest,
+  student: { userData?: Student["userData"]; token?: string },
+) {
+  const fields = contest.userData
+    .filter((filer) => !filer.excludeFromUniqueCheck)
+    .map((field) => formatUserData(student, field));
+
+  return deburr(fields.join("\n").toLowerCase()).replaceAll(/[^\w\n]/g, "");
 }

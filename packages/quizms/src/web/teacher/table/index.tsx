@@ -10,7 +10,7 @@ import type {
 } from "ag-grid-community";
 import { addMinutes, isEqual as isEqualDate } from "date-fns";
 import { cloneDeep, omit, setWith, sumBy, toPath } from "lodash-es";
-import { Download, FileCheck, Trash2, TriangleAlert, Upload, Users } from "lucide-react";
+import { Download, FileCheck, Trash2, TriangleAlert, Upload, UserCheck } from "lucide-react";
 
 import {
   type Contest,
@@ -44,7 +44,7 @@ export default function TeacherTable() {
       <div className="mb-3 flex flex-none justify-start gap-2">
         <Suspense>
           <div className="flex h-10 items-center gap-2 rounded-btn bg-primary px-3 text-primary-content">
-            <Users />
+            <UserCheck />
             <Counter />
             <div className="hidden md:block"> studenti</div>
           </div>
@@ -277,7 +277,11 @@ function columnDefinition(
       cellRenderer: ({ data }: ICellRendererParams<Student>) => {
         if (data?.absent || data?.disabled || !data?.variant) return;
         return (
-          <a className="link link-info" href={`./${data.id}`} target="_blank" rel="noreferrer">
+          <a
+            className="link link-info"
+            href={`./students/${data.id}`}
+            target="_blank"
+            rel="noreferrer">
             apri
           </a>
         );

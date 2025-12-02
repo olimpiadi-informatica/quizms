@@ -43,6 +43,7 @@ export function studentLogin(
     contestId: string;
     token: string;
     userData: Student["userData"];
+    extraData: Record<string, any>;
   },
 ) {
   return api(db, "studentLogin", body, { token: z.string() });

@@ -1,10 +1,10 @@
 import { forwardRef, type Ref, useMemo } from "react";
 
 import { Form, FormButton, Modal, SubmitButton, TextField } from "@olinfo/react-components";
-import { deburr, lowerFirst } from "lodash-es";
+import { lowerFirst } from "lodash-es";
 import { TriangleAlert } from "lucide-react";
 
-import type { Student } from "~/models";
+import { getNormalizedUserData } from "~/models";
 import { useTeacher, useTeacherStudents } from "~/web/teacher/context";
 
 import { isStudentIncomplete } from "./utils";
@@ -19,21 +19,6 @@ export const FinalizeModal = forwardRef(function FinalizeModal(
   const error = useMemo(() => {
     const prevStudents = new Set<string>();
 
-    // Generate a list of string that can uniquely identify a student. Multiple
-    // strings are generated to prevent possible errors during data entry.
-    function normalize(student: Student) {
-      const info = student.userData;
-      const orderings = [
-        ["name", "surname", "classYear", "classSection"],
-        ["surname", "name", "classYear", "classSection"],
-      ];
-      return orderings.map((fields) => {
-        return deburr(fields.map((field) => info?.[field] ?? "").join("\n"))
-          .toLowerCase()
-          .replaceAll(/[^\w\n]/g, "");
-      });
-    }
-
     for (const student of students) {
       if (student.disabled) continue;
 
@@ -45,12 +30,11 @@ export const FinalizeModal = forwardRef(function FinalizeModal(
         return `Lo studente ${name} ${surname} non può essere finalizzato: ${lowerFirst(reason)}.`;
       }
 
-      for (const normalized of normalize(student)) {
-        if (prevStudents.has(normalized)) {
-          return `Lo studente ${name} ${surname} è stato inserito più volte`;
-        }
-        prevStudents.add(normalized);
+      const normalized = getNormalizedUserData(contest, student);
+      if (prevStudents.has(normalized)) {
+        return `Lo studente ${name} ${surname} è stato inserito più volte`;
       }
+      prevStudents.add(normalized);
     }
   }, [students, contest, variants]);
 
