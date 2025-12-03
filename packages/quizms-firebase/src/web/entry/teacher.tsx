@@ -112,11 +112,11 @@ function useStudentRestores(
     subscribe: true,
   });
 
-  const reject = async (studentId: string) => {
+  const reject = async (studentId: string, excludeRestoreId?: string) => {
     const batch = writeBatch(db);
 
     for (const studentRestore of studentRestores) {
-      if (studentRestore.studentId === studentId) {
+      if (studentRestore.studentId === studentId && studentRestore.id !== excludeRestoreId) {
         batch.update(doc(db, "studentRestores", studentRestore.id), { status: "revoked" });
       }
     }
@@ -133,7 +133,7 @@ function useStudentRestores(
     batch.delete(doc(db, "studentRestores", request.id));
     await batch.commit();
 
-    await reject(request.studentId);
+    await reject(request.studentId, request.id);
   };
 
   return [studentRestores, approve, reject];

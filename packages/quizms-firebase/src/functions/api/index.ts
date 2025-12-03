@@ -13,12 +13,20 @@ import {
 
 export async function apiHandler(request: CallableRequest) {
   logger.info(`Received request for action: ${request.data.action}`);
+  const result = await dispatch(request);
+  if (!result.success) {
+    logger.error("Request failed", { request, result });
+  }
+  return result;
+}
 
+async function dispatch(request: CallableRequest) {
   let data: ApiRequest;
   try {
     data = validate(apiRequestSchema, request.data);
-  } catch {
-    return { success: false, errorCode: "INVALID_REQUEST", error: "Invalid request" };
+  } catch (error) {
+    logger.error("Invalid request", { error });
+    return { success: false, errorCode: "INVALID_REQUEST", error: "Richiesta non valida" };
   }
 
   try {
@@ -33,11 +41,9 @@ export async function apiHandler(request: CallableRequest) {
         return await teacherStopParticipation(request, data);
       case "teacherFinalizeParticipation":
         return await teacherFinalizeParticipation(request, data);
-      default:
-        return { success: false, errorCode: "UNKNOWN_ACTION", error: "Unknown action" };
     }
   } catch (error) {
-    logger.error("Error processing request", error);
-    return { success: false, errorCode: "INTERNAL_ERROR", error: "An internal error occurred" };
+    logger.error("Error processing request", { error });
+    return { success: false, errorCode: "INTERNAL_ERROR", error: "Errore del server" };
   }
 }

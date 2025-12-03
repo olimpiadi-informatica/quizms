@@ -4,8 +4,8 @@ export const studentLoginSchema = z.object({
   action: z.literal("studentLogin"),
   contestId: z.string(),
   token: z.string(),
-  userData: z.record(z.string(), z.coerce.string()),
-  extraData: z.record(z.string()),
+  userData: z.record(z.coerce.string()),
+  extraData: z.record(z.any()),
 });
 export type StudentLogin = z.infer<typeof studentLoginSchema>;
 

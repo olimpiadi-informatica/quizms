@@ -24,7 +24,7 @@ export const studentLogin: Endpoint<StudentLogin> = async (_request, data) => {
 
   const participation = await getParticipationByToken(data.token);
   if (!participation) {
-    return { success: false, errorCode: "INVALID_TOKEN", error: "Invalid token" };
+    return { success: false, errorCode: "INVALID_TOKEN", error: "Codice prova non valido" };
   }
   if (participation.contestId !== data.contestId) {
     return {
@@ -45,11 +45,12 @@ export const studentLogin: Endpoint<StudentLogin> = async (_request, data) => {
         return [field.name, value];
       }),
     );
-  } catch {
+  } catch (error) {
+    logger.error("Invalid user data", { error });
     return {
       success: false,
       errorCode: "INVALID_USER_DATA",
-      error: "Invalid user data.",
+      error: "Dati non validi",
     };
   }
 
@@ -61,8 +62,8 @@ export const studentLogin: Endpoint<StudentLogin> = async (_request, data) => {
     if (duplicated.token !== data.token) {
       return {
         success: false,
-        errorCode: "DUPLICATED_PARTICIPATION",
-        error: "Already participated in this contest.",
+        errorCode: "MULTIPLE_PARTICIPATION",
+        error: "Hai già partecipato a questa gara",
       };
     }
 
@@ -99,13 +100,14 @@ export const studentLogin: Endpoint<StudentLogin> = async (_request, data) => {
     token: data.token,
     startedAt: participation.startingTime,
     finishedAt: participation.endingTime,
-    variant: variant,
+    variant: variant.id,
     answers: {},
     extraData: data.extraData,
     createdAt: Timestamp.now(),
     updatedAt: Timestamp.now(),
   });
 
+  await auth.createUser({ uid, displayName: `${userData.name} ${userData.surname}` });
   const token = await auth.createCustomToken(uid, {
     role: "student",
     studentId: studentRef.id,

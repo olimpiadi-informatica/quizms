@@ -44,15 +44,17 @@ export function TeacherLayout({ contests, participations, logout, children }: Pr
           <NavbarMenu>
             {participations.length >= 2 && (
               <NavbarSubmenu title={contest.name}>
-                {participations.map((p) => (
-                  <NavbarMenuItem key={p.id}>
-                    <Link
-                      className={clsx(contest.id === p.contestId && "active")}
-                      href={`/${p.contestId}/${params!["*"]}`}>
-                      {contests.find((c) => c.id === p.contestId)?.name}
-                    </Link>
-                  </NavbarMenuItem>
-                ))}
+                {participations.map((p) => {
+                  const path = params?.["*"];
+                  const href = path ? `/${p.contestId}/${path}` : `/${p.contestId}`;
+                  return (
+                    <NavbarMenuItem key={p.id}>
+                      <Link className={clsx(contest.id === p.contestId && "active")} href={href}>
+                        {contests.find((c) => c.id === p.contestId)?.name}
+                      </Link>
+                    </NavbarMenuItem>
+                  );
+                })}
               </NavbarSubmenu>
             )}
             <NavbarMenuItem>

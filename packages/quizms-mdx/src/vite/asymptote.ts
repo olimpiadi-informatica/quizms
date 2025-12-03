@@ -171,7 +171,7 @@ const pyVariabileSchema: z.ZodType<PyVariable> = z.union([
   z.lazy(() => pyVariabileSchema.array().nonempty()),
 ]);
 
-const pyVariantsSchema = z.array(z.record(z.string(), pyVariabileSchema));
+const pyVariantsSchema = z.array(z.record(pyVariabileSchema));
 
 function jsToAsy(name: string, val: PyVariable): string {
   return `${getAsyTypeName(val)} ${name} = ${getAsyValue(val)};`;

@@ -1,6 +1,6 @@
-import { type ReactNode, useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 
-import { Loading, StudentFormField, Title } from "@olinfo/quizms/components";
+import { StudentFormField, Title } from "@olinfo/quizms/components";
 import type { Contest, Student } from "@olinfo/quizms/models";
 import { StudentProvider } from "@olinfo/quizms/student";
 import {
@@ -21,11 +21,11 @@ import {
   contestConverter,
   participationConverter,
   studentConverter,
-  studentRestoreConvert,
 } from "~/web/common/converters";
 import { useWebsite } from "~/web/common/website";
-import { useAuth, useCollection, useDocument, useDocumentOptional } from "~/web/hooks";
+import { useAuth, useCollection, useDocument } from "~/web/hooks";
 
+import { StudentRestoring } from "./student-restoring";
 import { FirebaseStatement } from "./student-statement";
 
 export default function StudentEntry() {
@@ -39,7 +39,7 @@ export default function StudentEntry() {
 
   if (auth) {
     return (
-      <StudentRestoring uid={auth.user.uid}>
+      <StudentRestoring user={auth.user}>
         <StudentInner
           contests={contests}
           participationId={auth.claims.participationId}
@@ -128,42 +128,6 @@ function StudentForm({ contests }: { contests: Contest[] }) {
   );
 }
 
-function StudentRestoring({ uid, children }: { uid: string; children: ReactNode }) {
-  const db = useDb();
-
-  const [studentRestore] = useDocumentOptional("studentRestores", uid, studentRestoreConvert, {
-    subscribe: true,
-  });
-
-  useEffect(() => {
-    if (studentRestore?.status === "revoked") {
-      void signOut(getAuth(db.app)).then(() => window.location.reload());
-    }
-  }, [db, studentRestore]);
-
-  if (!studentRestore || studentRestore.status === "approved") {
-    return children;
-  }
-
-  if (studentRestore.status === "revoked") {
-    return <Loading />;
-  }
-
-  return (
-    <div className="flex flex-col justify-center items-center grow text-center m-4">
-      <p>
-        Il tuo account è già presente su un&apos;altro dispositivo. Per trasferire l&apos;accesso al
-        dispositivo corrente comunica al tuo insegnante il codice seguente:
-      </p>
-      <div className="flex justify-center pt-3">
-        <span className="pt-1 font-mono text-3xl">
-          {String(studentRestore?.approvalCode).padStart(3, "0")}
-        </span>
-      </div>
-    </div>
-  );
-}
-
 function StudentInner({
   contests,
   participationId,
@@ -185,17 +149,26 @@ function StudentInner({
     subscribe: true,
   });
 
-  const contest = contests.find((c) => c.id === student.contestId)!;
+  const contest = useMemo(
+    () => contests.find((c) => c.id === student.contestId)!,
+    [contests, student.contestId],
+  );
 
-  const onSubmit = async () => {
+  const onSubmit = useCallback(async () => {
     await waitForPendingWrites(db);
-  };
+  }, [db]);
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     await waitForPendingWrites(db);
     await signOut(getAuth(db.app));
     window.location.reload();
-  };
+  }, [db]);
+
+  useEffect(() => {
+    if (participation.token !== student.token) {
+      void logout();
+    }
+  }, [participation.token, student.token, logout]);
 
   const setStudentAndSubmission = async (newStudent: Student) => {
     if (!isEqual(student, newStudent)) {
@@ -210,7 +183,6 @@ function StudentInner({
       student={student}
       setStudent={setStudentAndSubmission}
       logout={logout}
-      reset={logout}
       onSubmit={onSubmit}>
       <FirebaseStatement />
     </StudentProvider>

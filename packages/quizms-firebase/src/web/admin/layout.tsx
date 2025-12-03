@@ -27,7 +27,7 @@ type Props = {
 };
 
 export function AdminLayout({ name, contests, logout, children }: Props) {
-  const [, params] = useRoute("/:contestId/*");
+  const [, params] = useRoute("/:contestId/*?");
   const contest = contests.find((c) => c.id === params?.contestId);
 
   return (
@@ -41,15 +41,17 @@ export function AdminLayout({ name, contests, logout, children }: Props) {
         {contest && contests.length >= 2 && (
           <NavbarMenu>
             <NavbarSubmenu title={contest.name}>
-              {contests.map((c) => (
-                <NavbarMenuItem key={c.id}>
-                  <Link
-                    className={clsx(contest.id === c.id && "active")}
-                    href={`/${c.id}/${params!["*"]}`}>
-                    {c.name}
-                  </Link>
-                </NavbarMenuItem>
-              ))}
+              {contests.map((c) => {
+                const path = params?.["*"];
+                const href = path ? `/${c.id}/${path}` : `/${c.id}`;
+                return (
+                  <NavbarMenuItem key={c.id}>
+                    <Link className={clsx(contest.id === c.id && "active")} href={href}>
+                      {c.name}
+                    </Link>
+                  </NavbarMenuItem>
+                );
+              })}
             </NavbarSubmenu>
           </NavbarMenu>
         )}

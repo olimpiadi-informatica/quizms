@@ -15,11 +15,47 @@
       ]
     },
     {
+      "collectionGroup": "studentRestores",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "participationId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "token",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
       "collectionGroup": "students",
       "queryScope": "COLLECTION_GROUP",
       "fields": [
         {
           "fieldPath": "contestId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "disabled",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "students",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "userDataHash",
           "order": "ASCENDING"
         },
         {
@@ -37,12 +73,12 @@
     },
     {
       "collectionGroup": "students",
-      "fieldPath": "updatedAt",
+      "fieldPath": "extraData",
       "indexes": []
     },
     {
       "collectionGroup": "students",
-      "fieldPath": "extraData",
+      "fieldPath": "updatedAt",
       "indexes": []
     },
     {

@@ -80,14 +80,16 @@ export function StudentLayout({ children }: { children: ReactNode }) {
                     <FileChartColumn />
                   </Button>
                 </div>
-                <div className="tooltip tooltip-bottom h-full" data-tip="Ricomincia">
-                  <Button
-                    className="btn-primary btn-sm h-full"
-                    onClick={reset}
-                    aria-label="Ricomincia">
-                    <RotateCcw />
-                  </Button>
-                </div>
+                {reset && (
+                  <div className="tooltip tooltip-bottom h-full" data-tip="Ricomincia">
+                    <Button
+                      className="btn-primary btn-sm h-full"
+                      onClick={reset}
+                      aria-label="Ricomincia">
+                      <RotateCcw />
+                    </Button>
+                  </div>
+                )}
               </>
             ) : (
               <Button
