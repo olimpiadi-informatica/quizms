@@ -4,6 +4,7 @@ import {
   Suspense,
   forwardRef,
   lazy,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -290,7 +291,7 @@ function Table() {
     participation.startingTime && contest.hasOnline
       ? addMinutes(participation.startingTime, contest.duration)
       : undefined;
-  const isContestFinished = useIsAfter(endTime) ?? true;
+  const isContestFinished = (useIsAfter(endTime) ?? true) || true;
   const frozen = (contest.hasOnline && !isContestFinished) || participation.finalized;
 
   const newStudentId = useRef(randomId());
@@ -312,6 +313,18 @@ function Table() {
       disabled: false,
     } as Student);
   }
+
+  useEffect(() => {
+    for (const student of students) {
+      if (student.score === undefined) {
+        const score = calcScore(student, variants[student.variant!]?.schema);
+        if (score !== undefined) {
+          student.score = score;
+          setStudent(student);
+        }
+      }
+    }
+  }, [students, variants, setStudent]);
 
   const colDefs = useMemo(
     () => columnDefinition(contest, variants, isContestFinished),
