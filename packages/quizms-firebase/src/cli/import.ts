@@ -21,6 +21,7 @@ import picomatch from "picomatch";
 import { glob } from "tinyglobby";
 import z from "zod";
 
+import { userSchema } from "~/models/user";
 import { websiteSchema } from "~/models/website";
 
 import { importCollection } from "./utils/collection";
@@ -76,7 +77,7 @@ export default async function importData(options: ImportOptions) {
   const { app, bucket, db } = await initializeFirebase();
 
   if (options.admins) {
-    // await importAdmins(db, options);
+    await importAdmins(db, options);
   }
   if (options.contests) {
     await importContests(db, options);
@@ -99,6 +100,11 @@ export default async function importData(options: ImportOptions) {
 
   success("All done!");
   await deleteApp(app);
+}
+
+async function importAdmins(db: Firestore, options: ImportOptions) {
+  const users = await load("admins", userSchema.omit({ role: true }));
+  await importUsers(db, "admin", users, options);
 }
 
 async function importContests(db: Firestore, options: ImportOptions) {

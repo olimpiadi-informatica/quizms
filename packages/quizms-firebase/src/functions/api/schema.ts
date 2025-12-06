@@ -9,6 +9,13 @@ export const studentLoginSchema = z.object({
 });
 export type StudentLogin = z.infer<typeof studentLoginSchema>;
 
+export const adminLoginSchema = z.object({
+  action: z.literal("adminLogin"),
+  username: z.string(),
+  password: z.string(),
+});
+export type AdminLogin = z.infer<typeof adminLoginSchema>;
+
 export const teacherLoginSchema = z.object({
   action: z.literal("teacherLogin"),
   username: z.string(),
