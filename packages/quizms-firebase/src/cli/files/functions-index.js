@@ -6,11 +6,9 @@ import {
 import { setGlobalOptions } from "firebase-functions";
 import { onDocumentWrittenWithAuthContext } from "firebase-functions/firestore";
 import { onCall } from "firebase-functions/https";
-import { defineString } from "firebase-functions/params";
 import { onTaskDispatched } from "firebase-functions/tasks";
 
-const region = defineString("QUIZMS_REGION");
-setGlobalOptions({ region: region.value() });
+setGlobalOptions({ region: "QUIZMS_REGION" });
 
 export const api = onCall({ cors: ["http://localhost:1234"] }, apiHandler);
 

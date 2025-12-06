@@ -80,7 +80,11 @@ async function copyFiles(options: InitOptions, region: string) {
   await initFile(storageRulesPath, storageRules, options);
 
   await initFile("firebase/functions/.env", `QUIZMS_REGION=${region}`, options);
-  await initFile("firebase/functions/index.js", functionsIndex, options);
+  await initFile(
+    "firebase/functions/index.js",
+    functionsIndex.replace("QUIZMS_REGION", region),
+    options,
+  );
   await initFile(
     "firebase/functions/package.json",
     JSON.stringify(functionsPackage, undefined, 2),

@@ -1,6 +1,6 @@
 import crypto from "node:crypto";
 
-import type { Contest, Participation } from "@olinfo/quizms/models";
+import type { Contest, Participation, Student } from "@olinfo/quizms/models";
 import { randomToken } from "@olinfo/quizms/utils";
 import { addMinutes, addSeconds, isFuture, isPast, roundToNearestMinutes } from "date-fns";
 import { getFunctions } from "firebase-admin/functions";
@@ -122,7 +122,7 @@ export const teacherStartParticipation: Endpoint<TeacherStartParticipation> = as
 
   if (participation.token) {
     const students = await getParticipationStudents(participation.id, participation.token);
-    await Promise.all(students.map((student) => auth.revokeRefreshTokens(student.uid!)));
+    await revokeTokens(students);
   }
 
   const startingTime = roundToNearestMinutes(addSeconds(Date.now(), 3.5 * 60));
@@ -179,7 +179,7 @@ export const teacherStopParticipation: Endpoint<TeacherStopParticipation> = asyn
   }
 
   const students = await getParticipationStudents(participation.id, participation.token!);
-  await Promise.all(students.map((student) => auth.revokeRefreshTokens(student.uid!)));
+  await revokeTokens(students);
 
   for (const studentChunk of chunk(students, 300)) {
     const batch = db.batch();
@@ -197,6 +197,16 @@ export const teacherStopParticipation: Endpoint<TeacherStopParticipation> = asyn
 
   return { success: true, data: {} };
 };
+
+async function revokeTokens(students: Student[]) {
+  await Promise.all(
+    students.map(async (student) => {
+      if (student.uid) {
+        await auth.revokeRefreshTokens(student.uid).catch(() => {});
+      }
+    }),
+  );
+}
 
 export const teacherFinalizeParticipation: Endpoint<TeacherFinalizeParticipation> = async (
   request,

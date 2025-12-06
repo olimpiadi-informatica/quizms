@@ -27,6 +27,8 @@ import { useAuth, useCollection, useDocument } from "~/web/hooks";
 
 import { StudentRestoring } from "./student-restoring";
 import { FirebaseStatement } from "./student-statement";
+// @ts-expect-error
+import Header from "virtual:quizms-firebase-header.jsx";
 
 export default function StudentEntry() {
   const auth = useAuth("student");
@@ -184,6 +186,7 @@ function StudentInner({
       setStudent={setStudentAndSubmission}
       logout={logout}
       onSubmit={onSubmit}>
+      <Header contestId={contest.id} />
       <FirebaseStatement />
     </StudentProvider>
   );

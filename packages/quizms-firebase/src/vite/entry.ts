@@ -1,3 +1,6 @@
+import { variantsConfigSchema } from "@olinfo/quizms/models";
+import { reactComponentCase } from "@olinfo/quizms/utils";
+import { load } from "@olinfo/quizms/utils-node";
 import type { PluginOption } from "vite";
 
 export default function firebaseEntry(): PluginOption {
@@ -23,10 +26,27 @@ export default function firebaseEntry(): PluginOption {
       if (id === "virtual:quizms-firebase-config") {
         return `\0${id}`;
       }
+      if (id === "virtual:quizms-firebase-header.jsx") {
+        return `\0${id}`;
+      }
     },
-    load(id) {
+    async load(id) {
       if (id === "\0virtual:quizms-firebase-config") {
         return `export { default } from "~/firebase-config";`;
+      }
+      if (id === "\0virtual:quizms-firebase-header.jsx") {
+        const configs = await load("variants", variantsConfigSchema);
+        return `
+import { lazy } from "react";
+
+${configs.map((c) => `const Header${reactComponentCase(c.id)} = lazy(() => import("~/${c.header}"));`).join("\n")}
+
+export default function FirebaseHeader({ contestId }) {
+  switch (contestId) {
+  ${configs.map((c) => `case "${c.id}": return <Header${reactComponentCase(c.id)} />;`).join("\n")}
+  }
+}
+`;
       }
     },
   } satisfies PluginOption;
