@@ -28,7 +28,7 @@ import { useAuth, useCollection, useDocument } from "~/web/hooks";
 import { StudentRestoring } from "./student-restoring";
 import { FirebaseStatement } from "./student-statement";
 // @ts-expect-error
-import Header from "virtual:quizms-firebase-header.jsx";
+import Header from "virtual:quizms-firebase-header";
 
 export default function StudentEntry() {
   const auth = useAuth("student");
