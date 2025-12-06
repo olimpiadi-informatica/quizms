@@ -24,7 +24,9 @@ export function ImpersonationAuth({ children }: { children: ReactNode }) {
           contest={contest}
           participation={{ ...participation, startingTime: new Date(0) }}
           student={{ ...student, finishedAt: new Date(0) }}
-          setStudent={() => {}}>
+          setStudent={() => {}}
+          reset={() => {}}
+          disableFullscreen={true}>
           {children}
         </StudentProvider>
       </div>
