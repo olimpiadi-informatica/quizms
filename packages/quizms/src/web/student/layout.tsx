@@ -59,14 +59,14 @@ export function StudentLayout({
   }, []);
 
   useEffect(() => {
-    if (disableFullscreen) return;
+    if (disableFullscreen || terminated) return;
 
     const interval = setInterval(() => {
       const isFullscreen = !!document.fullscreenElement;
       const isFocused = document.hasFocus();
       const key = `quizms_last_active_${student.id}`;
 
-      if (isFullscreen && isFocused) {
+      if ((isFullscreen && isFocused) || terminated) {
         localStorage.setItem(key, Date.now().toString());
         setShowFocusWarning(false);
         setWarningDeadline(undefined);
@@ -89,10 +89,10 @@ export function StudentLayout({
     }, timeBetweenChecks);
 
     return () => clearInterval(interval);
-  }, [disableFullscreen, sendWarning, student.id]);
+  }, [disableFullscreen, sendWarning, student.id, terminated]);
 
   useEffect(() => {
-    if (disableFullscreen) return;
+    if (disableFullscreen || terminated) return;
 
     const handleFullscreenChange = () => {
       //Entered fullscreen
@@ -110,7 +110,7 @@ export function StudentLayout({
 
     //Remove event listener
     return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
-  }, [disableFullscreen]);
+  }, [disableFullscreen, terminated]);
 
   const submit = async () => {
     const modal = submitRef.current;
@@ -128,7 +128,7 @@ export function StudentLayout({
 
   return (
     <>
-      {showFocusWarning && !disableFullscreen && (
+      {showFocusWarning && !disableFullscreen && !terminated && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-base-100 p-4 text-center">
           <div className="flex max-w-lg flex-col items-center gap-6">
             <h2 className="text-3xl font-bold">Attenzione!</h2>
@@ -150,7 +150,7 @@ export function StudentLayout({
           </div>
         </div>
       )}
-      {(!showFocusWarning || disableFullscreen) && (
+      {(!showFocusWarning || disableFullscreen || terminated) && (
         <>
           <Navbar color="bg-base-300 text-base-content">
             <NavbarBrand>
