@@ -21,7 +21,7 @@ export async function initializeFirebase() {
 
 async function getProjectId() {
   if (!existsSync(".firebaserc")) {
-    fatal("No project selected. Run `firebase use --add` first.");
+    fatal("No project selected. Run `quizms-firebase init` first.");
   }
 
   const data = JSON.parse(await readFile(".firebaserc", "utf-8"));

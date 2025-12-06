@@ -1,6 +1,6 @@
 {
   "name": "@olinfo/quizms-mdx",
-  "version": "4.0.0-canary.20251203",
+  "version": "4.0.0-canary.20251206",
   "type": "module",
   "author": "Alessandro Bortolin <bortolin.alessandro@outlook.it>",
   "license": "MIT",
@@ -56,12 +56,13 @@
     "remark-mdx-math-enhanced": "0.0.1-beta.3",
     "remark-smartypants": "^3.0.2",
     "tempy": "^3.1.0",
+    "tailwindcss": "^3.4.18",
     "tinyglobby": "^0.2.15",
     "typescript": "5.8.2",
     "unified": "^11.0.5",
     "unist-util-visit": "^5.0.0",
     "vm-browserify": "^1.1.2",
-    "yaml": "^2.8.1",
+    "yaml": "^2.8.2",
     "zod": "^3.25.76"
   },
   "peerDependencies": {
@@ -87,7 +88,7 @@
     "rollup": "^4.53.3",
     "rollup-plugin-node-externals": "^8.1.2",
     "rollup-preserve-directives": "^1.1.3",
-    "vite": "^7.2.4",
+    "vite": "^7.2.6",
     "vite-plugin-dts": "^4.5.4",
     "vite-tsconfig-paths": "^5.1.4"
   },

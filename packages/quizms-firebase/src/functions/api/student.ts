@@ -30,7 +30,7 @@ export const studentLogin: Endpoint<StudentLogin> = async (_request, data) => {
     return {
       success: false,
       errorCode: "TOKEN_CONTEST_MISMATCH",
-      error: "Token does not belong to this contest",
+      error: "Il token proviene da una gara diversa",
     };
   }
 

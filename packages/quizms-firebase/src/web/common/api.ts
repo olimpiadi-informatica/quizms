@@ -15,8 +15,7 @@ async function api<Shape extends ZodRawShape>(
   body: any,
   shape: Shape,
 ): Promise<z.infer<ZodObject<Shape>>> {
-  const region = "europe-west6"; // TODO
-  const functions = getFunctions(db.app, region);
+  const functions = getFunctions(db.app, window.location.origin);
   const apiCallable = httpsCallable(functions, "api");
 
   let resp: HttpsCallableResult;

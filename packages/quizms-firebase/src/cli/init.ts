@@ -5,11 +5,15 @@ import { cwd } from "node:process";
 import type { Bucket } from "@google-cloud/storage";
 import { confirm, select } from "@inquirer/prompts";
 import { error, info, success } from "@olinfo/quizms/utils-node";
-import { type App, deleteApp, initializeApp } from "firebase-admin/app";
+import { type App, applicationDefault } from "firebase-admin/app";
 import pc from "picocolors";
+
+import { getGcpRegions } from "~/cli/utils/region-finder";
 
 import firestoreRules from "./files/firestore.rules?raw";
 import firestoreIndexes from "./files/firestore-indexes.json";
+import functionsIndex from "./files/functions-index.js?raw";
+import functionsPackage from "./files/functions-package";
 import storageRules from "./files/storage.rules?raw";
 import { initializeFirebase } from "./utils/initialize";
 import { restApi, restProjectApi } from "./utils/rest-api";
@@ -22,8 +26,9 @@ export default async function init(options: InitOptions) {
   let initialized = true;
 
   await selectProject();
+  const region = await getRegion();
 
-  if (await copyFiles(options)) initialized = false;
+  if (await copyFiles(options, region)) initialized = false;
 
   const { app, bucket } = await initializeFirebase();
   if (await enableBackups(app)) initialized = false;
@@ -37,11 +42,9 @@ export default async function init(options: InitOptions) {
 }
 
 async function selectProject() {
-  const app = initializeApp();
-  const data = await restApi(app, "firebase", "v1beta1", "");
-  await deleteApp(app);
+  const data = await restApi(applicationDefault(), "firebase", "v1beta1", "");
 
-  const answer = await select({
+  const answer = await select<string>({
     message: "Seleziona il progetto Firebase",
     choices: data.results.map((project: any) => ({
       value: project.projectId,
@@ -51,10 +54,21 @@ async function selectProject() {
   await writeFile(".firebaserc", JSON.stringify({ projects: { default: answer } }, null, 2));
 }
 
-async function copyFiles(options: InitOptions) {
+async function getRegion() {
+  const regions = await getGcpRegions();
+  return select<string>({
+    message: "Seleziona la regione",
+    choices: regions.map((region) => ({
+      value: region.region,
+      name: `${region.region} (${region.name})`,
+    })),
+  });
+}
+
+async function copyFiles(options: InitOptions, region: string) {
   info("Copying files...");
 
-  await mkdir("firebase", { recursive: true });
+  await mkdir("firebase/functions", { recursive: true });
 
   const firestoreRulesPath = "firebase/firestore.rules";
   await initFile(firestoreRulesPath, firestoreRules, options);
@@ -65,9 +79,17 @@ async function copyFiles(options: InitOptions) {
   const storageRulesPath = "firebase/storage.rules";
   await initFile(storageRulesPath, storageRules, options);
 
-  // See {@link https://github.com/firebase/firebase-tools/blob/09c2641e861f2e31798dfb4aba1a180e8fd08ea5/src/firebaseConfig.ts#L244 here}.
+  await initFile("firebase/functions/.env", `QUIZMS_REGION=${region}`, options);
+  await initFile("firebase/functions/index.js", functionsIndex, options);
+  await initFile(
+    "firebase/functions/package.json",
+    JSON.stringify(functionsPackage, undefined, 2),
+    options,
+  );
+
   const configs = {
-    hosting: hostingConfigs(),
+    $schema: "./node_modules/firebase-tools/schema/firebase-config.json",
+    hosting: hostingConfigs(region),
     firestore: {
       rules: path.relative(cwd(), firestoreRulesPath),
       indexes: path.relative(cwd(), firestoreIndexesPath),
@@ -81,6 +103,7 @@ async function copyFiles(options: InitOptions) {
         disallowLegacyRuntimeConfig: true,
         ignore: ["node_modules", "*.log"],
         source: "firebase/functions",
+        runtime: "nodejs24",
       },
     ],
   };
@@ -90,11 +113,18 @@ async function copyFiles(options: InitOptions) {
   return 0;
 }
 
-function hostingConfigs() {
+function hostingConfigs(region: string) {
   return {
     public: ".quizms/hosting-build",
     ignore: ["firebase.json", "**/.*", "**/node_modules/**"],
     rewrites: [
+      {
+        source: "/api",
+        function: {
+          functionId: "api",
+          region,
+        },
+      },
       {
         source: "**",
         destination: "/index.html",
@@ -129,16 +159,34 @@ async function enableBackups(app: App) {
   info("Enabling Firestore backups...");
 
   try {
-    await restProjectApi(app, "firestore", "v1", "/databases/(default)/backupSchedules", {
-      dailyRecurrence: {},
-      retention: "604800s",
-    });
-    await restProjectApi(app, "firestore", "v1", "/databases/(default)/backupSchedules", {
-      weeklyRecurrence: {
-        day: "SUNDAY",
-      },
-      retention: "8467200s",
-    });
+    const existingsBackups = await restProjectApi(
+      app,
+      "firestore",
+      "v1",
+      "/databases/(default)/backupSchedules",
+    );
+    const hasDaily = existingsBackups.backupSchedules.some((s: any) => s.dailyRecurrence);
+    if (hasDaily) {
+      info("Daily backup schedule already exists.");
+    } else {
+      await restProjectApi(app, "firestore", "v1", "/databases/(default)/backupSchedules", {
+        dailyRecurrence: {},
+        retention: "604800s",
+      });
+    }
+
+    const hasWeekly = existingsBackups.backupSchedules.some((s: any) => s.weeklyRecurrence);
+    if (hasWeekly) {
+      info("Weekly backup schedule already exists.");
+    } else {
+      await restProjectApi(app, "firestore", "v1", "/databases/(default)/backupSchedules", {
+        weeklyRecurrence: {
+          day: "SUNDAY",
+        },
+        retention: "8467200s",
+      });
+    }
+
     success("Backups enabled!");
     return 0;
   } catch (err) {

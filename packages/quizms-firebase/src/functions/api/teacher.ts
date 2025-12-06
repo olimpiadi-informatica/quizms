@@ -6,6 +6,7 @@ import { addMinutes, addSeconds, isFuture, isPast, roundToNearestMinutes } from 
 import { getFunctions } from "firebase-admin/functions";
 import type { CallableRequest } from "firebase-functions/https";
 import * as logger from "firebase-functions/logger";
+import { defineString } from "firebase-functions/params";
 import { chunk } from "lodash-es";
 
 import { auth, db, type Endpoint, type EndpointError } from "../common";
@@ -22,6 +23,8 @@ import type {
   TeacherStartParticipation,
   TeacherStopParticipation,
 } from "./schema";
+
+const region = defineString("QUIZMS_REGION");
 
 export const teacherLogin: Endpoint<TeacherLogin> = async (_request, data) => {
   logger.info("Teacher login request received", { data });
@@ -134,8 +137,9 @@ export const teacherStartParticipation: Endpoint<TeacherStartParticipation> = as
   });
 
   try {
-    const region = "europe-west6"; // TODO
-    const taskQueue = getFunctions().taskQueue(`locations/${region}/functions/updateScores`);
+    const taskQueue = getFunctions().taskQueue(
+      `locations/${region.value()}/functions/updateScores`,
+    );
     await taskQueue.enqueue(
       { participationId: participation.id, token },
       { scheduleTime: addSeconds(endingTime, 5) },

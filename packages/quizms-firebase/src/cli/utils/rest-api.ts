@@ -1,5 +1,5 @@
 import { fatal } from "@olinfo/quizms/utils-node";
-import type { App } from "firebase-admin/app";
+import type { App, Credential } from "firebase-admin/app";
 
 export function restProjectApi(
   app: App,
@@ -8,17 +8,16 @@ export function restProjectApi(
   endpoint: string,
   body?: object,
 ) {
-  return restApi(app, service, version, app.options.projectId + endpoint, body);
+  return restApi(app.options.credential, service, version, app.options.projectId + endpoint, body);
 }
 
 export async function restApi(
-  app: App,
+  credential: Credential | undefined,
   service: string,
   version: `v${string}`,
   endpoint: string,
   body?: object,
 ) {
-  const credential = app.options.credential;
   const token = await credential?.getAccessToken();
   if (!token?.access_token) {
     fatal("Failed to get access token from credential.");

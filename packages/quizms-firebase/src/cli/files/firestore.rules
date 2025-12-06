@@ -86,7 +86,7 @@ service cloud.firestore {
         }
 
         match /{document=**} {
-            allow read, write: if request.auth.token.role == "admin";
+            allow read, write: if request.auth.token.role == 'admin';
         }
     }
 }
