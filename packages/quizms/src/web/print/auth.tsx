@@ -92,7 +92,8 @@ export function PrintProvider({ contest, children }: { contest: Contest; childre
       contest={contest}
       participation={mockParticipation}
       student={student}
-      setStudent={() => {}}>
+      setStudent={() => {}}
+      enforceFullscreen={false}>
       <StudentForm />
       {children}
       <PrintStatement />
