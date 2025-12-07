@@ -84,6 +84,7 @@ function StudentForm({ contests }: { contests: Contest[] }) {
 
       const auth = getAuth(db.app);
       await signInWithCustomToken(auth, data.token);
+      await document.documentElement.requestFullscreen();
     },
     [db],
   );
@@ -185,7 +186,8 @@ function StudentInner({
       student={student}
       setStudent={setStudentAndSubmission}
       logout={logout}
-      onSubmit={onSubmit}>
+      onSubmit={onSubmit}
+      enforceFullscreen={true}>
       <Header contestId={contest.id} />
       <FirebaseStatement />
     </StudentProvider>

@@ -1,12 +1,4 @@
-import {
-  forwardRef,
-  type ReactNode,
-  type Ref,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { forwardRef, type ReactNode, type Ref, useEffect, useRef, useState } from "react";
 
 import {
   Button,
@@ -22,7 +14,7 @@ import {
   NavbarContent,
   SubmitButton,
 } from "@olinfo/react-components";
-import { addMilliseconds } from "date-fns";
+import { addMilliseconds, isPast } from "date-fns";
 import { sumBy } from "lodash-es";
 import { FileChartColumn, LogOut, RotateCcw } from "lucide-react";
 
@@ -31,16 +23,12 @@ import { ErrorBoundary, Progress, Prose, Timer, Title } from "~/web/components";
 
 import { useStudent } from "./context";
 
-const timeBetweenChecks = 500; //ms
-
-const warningTime = 8000; //ms
-
 export function StudentLayout({
   children,
-  disableFullscreen,
+  enforceFullscreen,
 }: {
   children: ReactNode;
-  disableFullscreen?: boolean;
+  enforceFullscreen?: boolean;
 }) {
   const completedRef = useRef<HTMLDialogElement>(null);
   const submitRef = useRef<HTMLDialogElement>(null);
@@ -51,75 +39,36 @@ export function StudentLayout({
   const total = Math.max(Object.keys(schema).length, 1);
   const progress = Math.round((answered / total) * 100);
 
-  const [isShowingFullscreenButton, setFullscreenButtonVisibility] = useState(true);
-  const [showFocusWarning, setShowFocusWarning] = useState(false);
   const [warningDeadline, setWarningDeadline] = useState<Date | undefined>();
 
-  const sendWarning = useCallback(() => {
-    //Logout from firebase
-    logout?.();
-    console.log("Logged out student.");
-  }, [logout]);
-
   useEffect(() => {
-    if (disableFullscreen || terminated) return;
+    if (!enforceFullscreen || terminated) return;
 
     const interval = setInterval(() => {
       const isFullscreen = !!document.fullscreenElement;
       const isFocused = document.hasFocus();
 
-      const key = `quizms_last_active_${student.id}`;
+      const key = `quizms_last_active_${student.uid}`;
       const now = new Date();
 
-      if ((isFullscreen && isFocused) || terminated) {
+      if (isFullscreen && isFocused) {
         localStorage.setItem(key, now.toISOString());
-        setShowFocusWarning(false);
         setWarningDeadline(undefined);
       } else {
-        setShowFocusWarning(true);
-
         const lastActive = localStorage.getItem(key);
+        const lastActiveTime = lastActive ? new Date(lastActive) : now;
 
-        if (lastActive) {
-          const lastActiveTime = new Date(lastActive);
-          const deadlineDate = addMilliseconds(lastActiveTime, warningTime);
+        const deadlineDate = addMilliseconds(lastActiveTime, 15_500);
+        setWarningDeadline(deadlineDate);
 
-          setWarningDeadline((prev) =>
-            prev?.getTime() === deadlineDate.getTime() ? prev : deadlineDate,
-          );
-
-          if (now.getTime() - lastActiveTime.getTime() > warningTime || lastActiveTime > now) {
-            sendWarning();
-          }
-        } else {
-          localStorage.setItem(key, now.toISOString());
+        if (isPast(deadlineDate)) {
+          logout?.();
         }
       }
-    }, timeBetweenChecks);
+    }, 200);
 
     return () => clearInterval(interval);
-  }, [disableFullscreen, sendWarning, student.id, terminated]);
-
-  useEffect(() => {
-    if (disableFullscreen || terminated) return;
-
-    const handleFullscreenChange = () => {
-      //Entered fullscreen
-      if (document.fullscreenElement) {
-        setFullscreenButtonVisibility(false);
-      } else {
-        //Exited fullscreen
-        setFullscreenButtonVisibility(true);
-      }
-    };
-
-    //Request fullscreen on load
-    document.documentElement.requestFullscreen().catch((e) => console.error(e));
-    document.addEventListener("fullscreenchange", handleFullscreenChange);
-
-    //Remove event listener
-    return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
-  }, [disableFullscreen, terminated]);
+  }, [enforceFullscreen, logout, student.uid, terminated]);
 
   const submit = async () => {
     const modal = submitRef.current;
@@ -135,32 +84,26 @@ export function StudentLayout({
     }
   };
 
-  if (showFocusWarning && !disableFullscreen && !terminated) {
+  if (warningDeadline && !terminated) {
     return (
-      <>
-        {showFocusWarning && !disableFullscreen && !terminated && (
-          <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-base-100 p-4 text-center">
-            <div className="flex max-w-lg flex-col items-center gap-6">
-              <h2 className="text-3xl font-bold">Attenzione!</h2>
-              <p className="text-xl">
-                Non puoi perdere il focus o uscire dalla modalità a schermo intero.
-              </p>
-              {warningDeadline && (
-                <div className="text-7xl font-black font-mono p-4">
-                  <Timer endTime={warningDeadline} displaySecondsOnly />
-                </div>
-              )}
-              {isShowingFullscreenButton && (
-                <Button
-                  className="btn-secondary btn-lg font-bold"
-                  onClick={() => document.documentElement.requestFullscreen().catch(console.error)}>
-                  Torna a schermo intero
-                </Button>
-              )}
-            </div>
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-base-100 p-4 text-center">
+        <div className="flex max-w-lg flex-col items-center gap-6">
+          <h2 className="text-3xl font-bold">Attenzione!</h2>
+          <p className="text-xl">
+            Non puoi perdere il focus o uscire dalla modalità a schermo intero.
+          </p>
+          <div className="text-7xl font-black font-mono p-4">
+            <Timer endTime={warningDeadline} hideMinutes />
           </div>
-        )}
-      </>
+          {!document.fullscreenElement && (
+            <Button
+              className="btn-warning btn-lg font-bold"
+              onClick={() => document.documentElement.requestFullscreen()}>
+              Torna a schermo intero
+            </Button>
+          )}
+        </div>
+      </div>
     );
   }
 

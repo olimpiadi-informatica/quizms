@@ -9,14 +9,14 @@ type TimerProps =
       duration?: undefined;
       endTime: Date;
       noAnimation?: boolean;
-      displaySecondsOnly?: boolean;
+      hideMinutes?: boolean;
     }
   | {
       startTime: Date;
       duration: number;
       endTime?: undefined;
       noAnimation?: boolean;
-      displaySecondsOnly?: boolean;
+      hideMinutes?: boolean;
     };
 
 export function Timer(props: TimerProps) {
@@ -45,18 +45,6 @@ export function Timer(props: TimerProps) {
   const minutes = Math.floor(timeLeft / 60) % 60;
   const seconds = timeLeft % 60;
 
-  if (props.displaySecondsOnly) {
-    return (
-      <span
-        className={clsx(
-          "countdown font-mono",
-          props.noAnimation && "[&_*:before]:transition-none",
-        )}>
-        <span style={{ "--value": seconds } as any} />s
-      </span>
-    );
-  }
-
   return hours > 0 ? (
     <span
       className={clsx("countdown font-mono", props.noAnimation && "[&_*:before]:transition-none")}>
@@ -66,7 +54,7 @@ export function Timer(props: TimerProps) {
   ) : (
     <span
       className={clsx("countdown font-mono", props.noAnimation && "[&_*:before]:transition-none")}>
-      <span style={{ "--value": minutes } as any} />m
+      {!props.hideMinutes && <span style={{ "--value": minutes } as any} />}
       <span style={{ "--value": seconds } as any} />s
     </span>
   );

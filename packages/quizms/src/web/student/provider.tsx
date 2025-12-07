@@ -30,11 +30,11 @@ export function StudentProvider({
   setStudent,
   children,
   student,
-  disableFullscreen,
+  enforceFullscreen,
   ...props
 }: Omit<StudentProviderProps, "terminated"> & {
   children: ReactNode;
-  disableFullscreen?: boolean;
+  enforceFullscreen: boolean;
 }) {
   const [schema, registerSchema] = useState<Schema>({});
   const terminated = useIsAfter(student.finishedAt) ?? false;
@@ -73,7 +73,7 @@ export function StudentProvider({
 
   return (
     <StudentContext.Provider value={value}>
-      <StudentLayout disableFullscreen={disableFullscreen}>{children}</StudentLayout>
+      <StudentLayout enforceFullscreen={enforceFullscreen}>{children}</StudentLayout>
     </StudentContext.Provider>
   );
 }
