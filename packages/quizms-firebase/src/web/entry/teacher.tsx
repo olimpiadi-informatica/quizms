@@ -2,7 +2,7 @@ import { useCallback } from "react";
 
 import type { StudentRestore } from "@olinfo/quizms/models";
 import { TeacherProvider } from "@olinfo/quizms/teacher";
-import { getAuth, signOut } from "firebase/auth";
+import { getAuth, signOut, type User } from "firebase/auth";
 import { doc, type Firestore, serverTimestamp, writeBatch } from "firebase/firestore";
 import { getBytes, getStorage, ref } from "firebase/storage";
 
@@ -25,12 +25,12 @@ import { FirebaseStatement } from "./student-statement";
 export default function TeacherEntry() {
   return (
     <TokenLogin allowedRole="teacher">
-      {({ claims }) => <TeacherInner schoolId={claims.schoolId} />}
+      {({ user, claims }) => <TeacherInner user={user} schoolId={claims.schoolId} />}
     </TokenLogin>
   );
 }
 
-function TeacherInner({ schoolId }: { schoolId: string }) {
+function TeacherInner({ user, schoolId }: { user: User; schoolId: string }) {
   const db = useDb();
 
   const website = useWebsite();
@@ -53,9 +53,9 @@ function TeacherInner({ schoolId }: { schoolId: string }) {
     <TeacherProvider
       participations={participations}
       contests={contests}
-      startParticipation={(...args) => startParticipation(db, ...args)}
-      stopParticipation={(...args) => stopParticipation(db, ...args)}
-      finalizeParticipation={(...args) => finalizeParticipation(db, ...args)}
+      startParticipation={(...args) => startParticipation(user, ...args)}
+      stopParticipation={(...args) => stopParticipation(user, ...args)}
+      finalizeParticipation={(...args) => finalizeParticipation(user, ...args)}
       variants={variants}
       logout={logout}
       statementComponent={() => <FirebaseStatement />}

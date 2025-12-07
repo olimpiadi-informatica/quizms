@@ -1,26 +1,34 @@
 import crypto from "node:crypto";
 
+import { TRPCError } from "@trpc/server";
 import * as logger from "firebase-functions/logger";
+import z from "zod";
 
-import { auth, type Endpoint } from "~/functions/common";
-
+import { auth } from "../common";
 import { getUser } from "./queries";
-import type { AdminLogin } from "./schema";
+import { publicProcedure } from "./trpc";
 
-export const adminLogin: Endpoint<AdminLogin> = async (_request, data) => {
-  logger.info("Admin login request received", { data });
+export const adminLogin = publicProcedure
+  .input(
+    z.object({
+      username: z.string(),
+      password: z.string(),
+    }),
+  )
+  .mutation(async (opts) => {
+    const { input: data } = opts;
+    logger.info("Admin login request received", { data });
 
-  const user = await getUser(data.username);
-  if (!user) {
-    return { success: false, errorCode: "USER_NOT_FOUND", error: "Username non esistente" };
-  }
+    const user = await getUser(data.username);
+    if (!user) {
+      throw new TRPCError({ code: "BAD_REQUEST", message: "Username non esistente" });
+    }
 
-  if (user.role !== "admin") {
-    return { success: false, errorCode: "INVALID_ROLE", error: "Utenza non abilitata" };
-  }
-  if (user.password !== data.password) {
-    return { success: false, errorCode: "INVALID_PASSWORD", error: "Password non corretta" };
-  }
-  const token = await auth.createCustomToken(crypto.randomUUID(), { role: "admin" });
-  return { success: true, data: { token } };
-};
+    if (user.password !== data.password) {
+      throw new TRPCError({ code: "BAD_REQUEST", message: "Password non corretta" });
+    }
+    if (user.role !== "admin") {
+      throw new TRPCError({ code: "FORBIDDEN", message: "Utenza non abilitata" });
+    }
+    return auth.createCustomToken(crypto.randomUUID(), { role: "admin" });
+  });

@@ -14,7 +14,7 @@ import { useSearch } from "wouter";
 
 import { useAuth } from "~/web/hooks";
 
-import { login } from "./api";
+import { teacherLogin } from "./api";
 import { useDb } from "./base-login";
 
 type Props = {
@@ -39,7 +39,7 @@ export default function TokenLogin({ allowedRole, children }: Props) {
   };
 
   const signIn = async (credential: { username: string; password: string }) => {
-    const { token } = await login(db, allowedRole, credential);
+    const token = await teacherLogin(credential);
 
     const auth = getAuth(db.app);
     await signInWithCustomToken(auth, token);

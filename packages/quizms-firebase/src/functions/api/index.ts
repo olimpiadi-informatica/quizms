@@ -1,9 +1,8 @@
-import { validate } from "@olinfo/quizms/utils";
-import type { CallableRequest } from "firebase-functions/https";
-import * as logger from "firebase-functions/logger";
+import * as trpcExpress from "@trpc/server/adapters/express";
+import express from "express";
+import { logger } from "firebase-functions/logger";
 
 import { adminLogin } from "./admin";
-import { type ApiRequest, apiRequestSchema } from "./schema";
 import { studentLogin } from "./student";
 import {
   teacherFinalizeParticipation,
@@ -11,42 +10,30 @@ import {
   teacherStartParticipation,
   teacherStopParticipation,
 } from "./teacher";
+import { createContext, router } from "./trpc";
 
-export async function apiHandler(request: CallableRequest) {
-  logger.info(`Received request for action: ${request.data.action}`);
-  const result = await dispatch(request);
-  if (!result.success) {
-    logger.error("Request failed", { request, result });
-  }
-  return result;
-}
+const appRouter = router({
+  adminLogin,
+  studentLogin,
+  teacherLogin,
+  teacherStartParticipation,
+  teacherStopParticipation,
+  teacherFinalizeParticipation,
+});
 
-async function dispatch(request: CallableRequest) {
-  let data: ApiRequest;
-  try {
-    data = validate(apiRequestSchema, request.data);
-  } catch (error) {
-    logger.error("Invalid request", { error });
-    return { success: false, errorCode: "INVALID_REQUEST", error: "Richiesta non valida" };
-  }
+export type AppRouter = typeof appRouter;
 
-  try {
-    switch (data.action) {
-      case "adminLogin":
-        return await adminLogin(request, data);
-      case "studentLogin":
-        return await studentLogin(request, data);
-      case "teacherLogin":
-        return await teacherLogin(request, data);
-      case "teacherStartParticipation":
-        return await teacherStartParticipation(request, data);
-      case "teacherStopParticipation":
-        return await teacherStopParticipation(request, data);
-      case "teacherFinalizeParticipation":
-        return await teacherFinalizeParticipation(request, data);
-    }
-  } catch (error) {
-    logger.error("Error processing request", { error });
-    return { success: false, errorCode: "INTERNAL_ERROR", error: "Errore del server" };
-  }
-}
+const app = express();
+app.use(
+  "/",
+  trpcExpress.createExpressMiddleware({
+    router: appRouter,
+    createContext,
+    onError(opts) {
+      const { error, path, input, ctx } = opts;
+      logger.error(error.message, { error, path, input, ctx });
+    },
+  }),
+);
+
+export default app;

@@ -64,13 +64,10 @@ function StudentForm({ contests }: { contests: Contest[] }) {
 
   const submit = useCallback(
     async ({ contestId, token, ...userData }: FormStudent) => {
-      const data = await studentLogin(db, {
+      const authToken = await studentLogin({
         contestId,
         token,
-        userData: {
-          ...userData,
-          birthDate: userData.birthDate ? new Date(userData.birthDate) : undefined,
-        },
+        userData,
         extraData: {
           userAgent: navigator.userAgent,
           windowWidth: window.innerWidth,
@@ -83,7 +80,7 @@ function StudentForm({ contests }: { contests: Contest[] }) {
       });
 
       const auth = getAuth(db.app);
-      await signInWithCustomToken(auth, data.token);
+      await signInWithCustomToken(auth, authToken);
     },
     [db],
   );
