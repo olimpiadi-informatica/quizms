@@ -54,7 +54,11 @@ export function Timer(props: TimerProps) {
   ) : (
     <span
       className={clsx("countdown font-mono", props.noAnimation && "[&_*:before]:transition-none")}>
-      {!props.hideMinutes && <span style={{ "--value": minutes } as any} />}
+      {!props.hideMinutes && (
+        <>
+          <span style={{ "--value": minutes } as any} />m
+        </>
+      )}
       <span style={{ "--value": seconds } as any} />s
     </span>
   );
