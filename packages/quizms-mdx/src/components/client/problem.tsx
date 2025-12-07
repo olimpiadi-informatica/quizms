@@ -5,10 +5,11 @@ import { createContext, type ReactNode, use } from "react";
 export type ProblemProps = {
   points: [number, number, number];
   children: ReactNode;
+  originalId?: string;
 };
 
 type ProblemContextProps = {
-  id?: string | number;
+  id?: string;
   points: [number, number, number];
 };
 

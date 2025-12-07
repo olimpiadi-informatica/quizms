@@ -78,10 +78,11 @@ export function OpenAnswer({ correct }: OpenAnswerProps) {
 }
 OpenAnswer.displayName = "OpenAnswer";
 
-export function AnyCorrectAnswer({ correct, children }: AnswerProps) {
+export function AnyCorrectAnswer({ correct, children, originalId }: AnswerProps) {
   return (
     <>
       <JsonField field="correct" value={!!correct} />
+      {originalId !== undefined && <JsonField field="originalId" value={originalId} />}
       <AnyCorrectAnswerClient correct={process.env.QUIZMS_MODE === "contest" ? undefined : correct}>
         {children}
       </AnyCorrectAnswerClient>
@@ -90,10 +91,11 @@ export function AnyCorrectAnswer({ correct, children }: AnswerProps) {
 }
 AnyCorrectAnswer.displayName = "AnyCorrectAnswer";
 
-export function AllCorrectAnswer({ correct, children }: AnswerProps) {
+export function AllCorrectAnswer({ correct, children, originalId }: AnswerProps) {
   return (
     <>
       <JsonField field="correct" value={!!correct} />
+      {originalId !== undefined && <JsonField field="originalId" value={originalId} />}
       <AllCorrectAnswerClient correct={process.env.QUIZMS_MODE === "contest" ? undefined : correct}>
         {children}
       </AllCorrectAnswerClient>

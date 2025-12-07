@@ -42,9 +42,7 @@ function parseAnswers(tree: Root, file: VFile) {
           throw new Error("Missing or invalid answers");
         }
 
-        const answerIds = b.arrayExpression(
-          list.children.map((_, i) => b.literal(String.fromCharCode(65 + i))),
-        );
+        const ids = list.children.map((_, i) => String.fromCharCode(65 + i));
 
         const groupHash = `${directory}-${subId++}`;
 
@@ -58,14 +56,17 @@ function parseAnswers(tree: Root, file: VFile) {
               name: "MultipleChoiceAnswer",
               attributes: [
                 jsxAttribute("kind", kind),
-                jsxAttribute("answerIds", answerIds),
+                jsxAttribute("answerIds", b.arrayExpression(ids.map((id) => b.literal(id)))),
                 jsxAttribute("groupHash", groupHash),
               ],
-              children: list.children.map((child): MdxJsxFlowElement => {
+              children: list.children.map((child, i): MdxJsxFlowElement => {
                 return {
                   type: "mdxJsxFlowElement",
                   name: AnswerComponent,
-                  attributes: [jsxAttribute("correct", child.checked)],
+                  attributes: [
+                    jsxAttribute("correct", child.checked),
+                    jsxAttribute("originalId", ids[i]),
+                  ],
                   children: child.children,
                 } as MdxJsxFlowElement;
               }),

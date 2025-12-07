@@ -19,12 +19,20 @@ function assignProblemIds(tree: Root) {
   let problemIndex = 1;
   visit(tree, "mdxJsxFlowElement", (node: MdxJsxFlowElement) => {
     if (node.name === "Section") {
-      const problems = node.children.filter(
-        (candidate) => candidate.type === "mdxJsxFlowElement" && candidate.name === "Problem",
-      );
-      const ids = b.arrayExpression(problems.map((_, i) => b.literal(problemIndex + i)));
+      const problems: MdxJsxFlowElement[] = node.children
+        .filter((candidate) => candidate.type === "mdxJsxFlowElement")
+        .filter((candidate) => candidate.name === "Problem");
+
+      const ids = problems.map((_, i) => `${problemIndex + i}`);
       problemIndex += problems.length;
-      node.attributes.push(jsxAttribute("problemIds", ids));
+
+      problems.forEach((problem, i) => {
+        problem.attributes.push(jsxAttribute("originalId", ids[i]));
+      });
+
+      node.attributes.push(
+        jsxAttribute("problemIds", b.arrayExpression(ids.map((id) => b.literal(id)))),
+      );
     }
   });
 }

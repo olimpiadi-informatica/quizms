@@ -7,7 +7,7 @@ import { JsonField, JsonObject } from "./json";
 
 export type SectionProps = {
   children: ReactNode;
-  problemIds: number[];
+  problemIds: string[];
 };
 
 export function Section({ children, problemIds }: SectionProps) {

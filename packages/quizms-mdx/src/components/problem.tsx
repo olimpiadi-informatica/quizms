@@ -6,12 +6,13 @@ import {
 } from "./client/problem";
 import { JsonArray, JsonField, JsonObject } from "./json";
 
-export function Problem({ points, children }: ProblemProps) {
+export function Problem({ points, children, originalId }: ProblemProps) {
   return (
     <>
       <JsonField field="pointsCorrect" value={points[0]} />
       <JsonField field="pointsBlank" value={points[1]} />
       <JsonField field="pointsWrong" value={points[2]} />
+      {originalId !== undefined && <JsonField field="originalId" value={originalId} />}
       <JsonField field="subProblems">
         <JsonArray>
           <ProblemClient points={points}>{children}</ProblemClient>

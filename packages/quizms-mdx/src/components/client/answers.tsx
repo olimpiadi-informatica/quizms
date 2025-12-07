@@ -109,6 +109,7 @@ export function MultipleChoiceAnswerClient({
 export type AnswerProps = {
   correct?: boolean;
   children: ReactNode;
+  originalId?: string;
 };
 
 export function AllCorrectAnswerClient({ correct, children }: AnswerProps) {
