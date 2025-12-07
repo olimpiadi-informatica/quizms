@@ -9,7 +9,7 @@ import type { OutputAsset, RollupOutput } from "rollup";
 import { build, type InlineConfig, mergeConfig, transformWithEsbuild } from "vite";
 import yaml from "yaml";
 
-import type { Schema } from "~/models";
+import type { Schema, Variant } from "~/models";
 import { type VariantsConfig, variantsConfigSchema } from "~/models/variants-config";
 import { AsyncPool, hash } from "~/utils";
 import { fatal, info, load, success } from "~/utils-node";
@@ -79,7 +79,13 @@ export default async function variants(options: ExportVariantsOptions) {
         const schema = yaml.parse(`{ "schema": ${Buffer.concat(rawSchema).toString("utf-8")} }`);
         await writeFile(
           path.join(variantDir, "answers.json"),
-          JSON.stringify({ id: variant, contestId: config.id, schema: parseSchema(schema.schema) }),
+          JSON.stringify({
+            id: variant,
+            isOnline: config.variantIds.includes(variant),
+            isPdf: config.pdfVariantIds.includes(variant),
+            contestId: config.id,
+            schema: parseSchema(schema.schema),
+          } satisfies Variant),
         );
       });
     }

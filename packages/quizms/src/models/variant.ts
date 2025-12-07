@@ -12,6 +12,8 @@ export const answerOptionSchema = z.object({
 
 export const variantSchema = z.object({
   id: z.string(),
+  isOnline: z.boolean(),
+  isPdf: z.boolean(),
   contestId: z.string(),
   schema: z.record(
     z.object({
