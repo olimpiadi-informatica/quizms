@@ -11,9 +11,11 @@ export type SectionProps = {
 };
 
 export function Section({ children, problemIds }: SectionProps) {
-  const rng = new Rng(`${process.env.QUIZMS_VARIANT_HASH}-${problemIds}`);
   const childrenArray = Children.toArray(children);
-  rng.shuffle(childrenArray);
+  if (process.env.QUIZMS_SHUFFLE_PROBLEMS) {
+    const rng = new Rng(`${process.env.QUIZMS_VARIANT_HASH}-${problemIds}`);
+    rng.shuffle(childrenArray);
+  }
   return (
     <SectionClient problemIds={problemIds}>
       {childrenArray.map((child, i) => {

@@ -65,6 +65,8 @@ export default async function variants(options: ExportVariantsOptions) {
             QUIZMS_CONTEST_ID: config.id,
             QUIZMS_VARIANT_ID: variant,
             QUIZMS_VARIANT_HASH: variantHash.toString(),
+            QUIZMS_SHUFFLE_PROBLEMS: config.shuffleProblems ? "true" : undefined,
+            QUIZMS_SHUFFLE_ANSWERS: config.shuffleAnswers ? "true" : undefined,
           },
         });
         child.stdout.on("data", (data) => rawSchema.push(data));

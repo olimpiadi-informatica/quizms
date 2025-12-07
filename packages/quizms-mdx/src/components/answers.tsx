@@ -31,9 +31,11 @@ export function MultipleChoiceAnswer({
   answerIds: string[];
   groupHash: string;
 }) {
-  const rng = new Rng(`${process.env.QUIZMS_VARIANT_HASH}-${groupHash}`); // TODO: seed
   const childrenArray = Children.toArray(children);
-  rng.shuffle(childrenArray);
+  if (process.env.QUIZMS_SHUFFLE_ANSWERS) {
+    const rng = new Rng(`${process.env.QUIZMS_VARIANT_HASH}-${groupHash}`);
+    rng.shuffle(childrenArray);
+  }
   return (
     <>
       <JsonField field="type" value="text" />
