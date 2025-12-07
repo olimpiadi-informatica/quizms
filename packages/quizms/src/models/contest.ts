@@ -59,6 +59,9 @@ const baseContestSchema = z.object({
 
   // Testo delle istruzioni per la gara da mostrare agli insegnanti
   instructions: z.string().optional(),
+
+  // Possibilità per gli insegnanti di vedere il punteggio degli studenti
+  scoreVisibility: z.enum(["never", "always"]),
 });
 
 const onlineContest = baseContestSchema.extend({

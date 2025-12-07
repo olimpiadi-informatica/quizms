@@ -114,6 +114,8 @@ function Table() {
   const isContestFinished = useIsAfter(endTime) ?? true;
   const frozen = (contest.hasOnline && !isContestFinished) || participation.finalized;
 
+  const canViewScore = (contest.scoreVisibility === "always");
+
   const newStudentId = useRef(randomId());
   const setStudentAndUpdateId = async (student: Student) => {
     newStudentId.current = randomId();
@@ -135,8 +137,8 @@ function Table() {
   }
 
   const colDefs = useMemo(
-    () => columnDefinition(contest, variants, isContestFinished),
-    [contest, variants, isContestFinished],
+    () => columnDefinition(contest, variants, canViewScore),
+    [contest, variants, canViewScore],
   );
 
   const onCellEditRequest = async (ev: CellEditRequestEvent) => {
@@ -214,7 +216,7 @@ function Table() {
 function columnDefinition(
   contest: Contest,
   variants: Record<string, Variant>,
-  isContestFinished: boolean,
+  canViewScore: boolean,
 ): ColDef[] {
   const widths = {
     xs: 100,
@@ -310,7 +312,7 @@ function columnDefinition(
       pinned: "right",
       width: 100,
       ...defaultOptions,
-      hide: !isContestFinished,
+      hide: !canViewScore,
     },
     {
       field: "absent",
