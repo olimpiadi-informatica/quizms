@@ -2,7 +2,7 @@ import { Children, type ReactNode } from "react";
 
 import { Rng } from "@olinfo/quizms/utils";
 
-import { SectionClient } from "./client/section";
+import { Section as SectionClient } from "../client/section";
 import { JsonField, JsonObject } from "./json";
 
 export type SectionProps = {

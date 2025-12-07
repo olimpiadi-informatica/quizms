@@ -35,7 +35,7 @@ export type BlocklyProps<T> = {
   visualizer?: ComponentType<VisualizerProps<T>>;
 };
 
-export function BlocklyClient<State>({
+export function Blockly<State>({
   toolbox = defaultToolbox,
   initialBlocks = defaultInitialBlocks,
   debug = {},

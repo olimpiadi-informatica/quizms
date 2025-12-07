@@ -8,7 +8,6 @@ export default function firebasePreset(): PluginOption {
       return {
         environments: {
           firebase: {
-            ssr: false,
             resolve: {
               conditions: [...defaultClientConditions],
               mainFields: [...defaultClientMainFields],

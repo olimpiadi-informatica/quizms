@@ -24,5 +24,6 @@
     "rootDir": "src",
     "outDir": "dist"
   },
-  "include": ["src/"]
+  "include": ["src/"],
+  "exclude": ["src/cli/files/*.js"]
 }

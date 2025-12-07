@@ -3,16 +3,16 @@ import { Children, type ReactNode } from "react";
 import { Rng } from "@olinfo/quizms/utils";
 
 import {
-  AllCorrectAnswerClient,
-  AnswerGroupClient,
+  AllCorrectAnswer as AllCorrectAnswerClient,
+  AnswerGroup as AnswerGroupClient,
   type AnswerGroupProps,
   type AnswerProps,
-  AnyCorrectAnswerClient,
-  ExplanationClient,
-  MultipleChoiceAnswerClient,
-  OpenAnswerClient,
+  AnyCorrectAnswer as AnyCorrectAnswerClient,
+  Explanation as ExplanationClient,
+  MultipleChoiceAnswer as MultipleChoiceAnswerClient,
+  OpenAnswer as OpenAnswerClient,
   type OpenAnswerProps,
-} from "./client/answers";
+} from "../client/answers";
 import { JsonArray, JsonField, JsonObject } from "./json";
 
 export function AnswerGroup({ children }: AnswerGroupProps) {

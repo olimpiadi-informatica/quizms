@@ -16,7 +16,7 @@ const ContestContext = createContext<ContestContextProps>({
 });
 ContestContext.displayName = "ContestContext";
 
-export function ContestClient({ children }: { children: ReactNode }) {
+export function Contest({ children }: { children: ReactNode }) {
   const { student, setStudent, contest, registerSchema } = useStudent();
   const registerProblem = useCallback(
     (id: string, problem: ClientSchema[string]) => {

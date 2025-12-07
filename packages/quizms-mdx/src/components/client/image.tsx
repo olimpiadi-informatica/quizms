@@ -5,14 +5,27 @@ type ImageSrc = {
 };
 
 type Props = {
-  src: ImageSrc;
+  src: ImageSrc | null;
+  isLoading?: boolean;
   alt: string;
   title?: string;
 };
 
-export function Image({ src, alt, title }: Props) {
+export function Image({ src, isLoading, alt, title }: Props) {
+  if (isLoading) {
+    return (
+      <span className="p-4 first:rounded-l-xl last:rounded-r-xl bg-primary text-primary-content">
+        Caricamento...
+      </span>
+    );
+  }
+
   if (!src) {
-    return <div className="rounded-box bg-error p-4 text-error-content">Missing image</div>;
+    return (
+      <span className="p-4 first:rounded-l-xl last:rounded-r-xl bg-error text-error-content">
+        Missing image
+      </span>
+    );
   }
 
   return (

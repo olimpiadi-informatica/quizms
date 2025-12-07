@@ -1,3 +1,6 @@
+import { Code } from "../client/code";
+import { Equation } from "../client/equation";
+import { Image } from "../client/image";
 import {
   AllCorrectAnswer,
   AnswerGroup,
@@ -6,18 +9,17 @@ import {
   MultipleChoiceAnswer,
   OpenAnswer,
 } from "./answers";
+import { Asymptote } from "./asymptote";
 import { Blockly } from "./blockly";
-import { Code } from "./client/code";
-import { Equation } from "./client/equation";
 import { Contest } from "./contest";
-import { Image } from "./image";
 import { Problem, SubProblem } from "./problem";
 import { Section } from "./section";
 
 export {
-  AnyCorrectAnswer,
   AllCorrectAnswer,
   AnswerGroup,
+  AnyCorrectAnswer,
+  Asymptote,
   Blockly,
   Code,
   Contest,
@@ -33,9 +35,10 @@ export {
 
 export function useMDXComponents() {
   return {
-    AnyCorrectAnswer,
     AllCorrectAnswer,
     AnswerGroup,
+    AnyCorrectAnswer,
+    Asymptote,
     Blockly,
     Code,
     Contest,

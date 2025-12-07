@@ -8,7 +8,6 @@ export default function training(): PluginOption {
       return {
         environments: {
           training: {
-            ssr: false,
             resolve: {
               conditions: [...defaultClientConditions],
               mainFields: [...defaultClientMainFields],

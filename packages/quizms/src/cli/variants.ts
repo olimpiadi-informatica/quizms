@@ -5,8 +5,8 @@ import { cwd } from "node:process";
 import { pathToFileURL } from "node:url";
 
 import { uniq } from "lodash-es";
-import type { OutputAsset, RollupOutput } from "rollup";
-import { build, type InlineConfig, mergeConfig, transformWithEsbuild } from "vite";
+import type { GetManualChunk, OutputAsset, RollupOutput } from "rollup";
+import { createBuilder, type InlineConfig, mergeConfig, transformWithEsbuild } from "vite";
 import yaml from "yaml";
 
 import type { Schema, Variant } from "~/models";
@@ -130,26 +130,27 @@ async function buildBaseStatements(generationConfigs: VariantsConfig[]): Promise
           assetFileNames: "[name][extname]",
           chunkFileNames: "[name].js",
           hoistTransitiveImports: false,
-          manualChunks: (id, meta) => {
-            const info = meta.getModuleInfo(id);
-            const directives: string[] | undefined = info?.meta?.preserveDirectives?.directives;
-            const isClient = directives?.includes("use client");
-            if (isClient) {
-              return "client-modules";
-            }
-          },
+          manualChunks: manualChunks(),
         },
         external: externalLibs,
       },
     },
-    resolve: {
-      conditions: ["react-server"],
+    environments: {
+      rsc: {
+        resolve: {
+          conditions: ["react-server"],
+          noExternal: true,
+        },
+      },
     },
   } as InlineConfig);
 
+  const builder = await createBuilder(bundleConfig);
+  const environment = builder.environments.rsc;
+
   let outputs: RollupOutput[];
   try {
-    outputs = (await build(bundleConfig)) as RollupOutput[];
+    outputs = (await builder.build(environment)) as RollupOutput[];
   } catch (err) {
     fatal(`Build failed: ${err}`);
   }
@@ -203,6 +204,50 @@ async function buildBaseStatements(generationConfigs: VariantsConfig[]): Promise
   };
 }
 
+function manualChunks(): GetManualChunk {
+  const serverModules = new Set<string>();
+  const clientModules = new Set<string>();
+
+  return (id, meta) => {
+    const info = meta.getModuleInfo(id);
+    if (!info) return;
+    const { ast: _ast, code: _code, ...rest } = info;
+    console.log(JSON.stringify(rest, null, 2));
+
+    const directives: string[] | undefined = info.meta?.preserveDirectives?.directives;
+    const isClient = directives?.includes("use client");
+    if (isClient) {
+      clientModules.add(id);
+      console.log(id, "client");
+      return "client-modules";
+    }
+    if (info.isEntry) {
+      serverModules.add(id);
+      console.log(id, "server");
+      return;
+    }
+
+    const isClientChild = info.importers.some((importer) => clientModules.has(importer));
+    const isServerChild = info.importers.some((importer) => serverModules.has(importer));
+
+    if (isClientChild) clientModules.add(id);
+    if (isServerChild) serverModules.add(id);
+
+    if (isClientChild && isServerChild) {
+      console.log(id, "shared");
+      return "shared-modules";
+    }
+    if (isClientChild) {
+      console.log(id, "client");
+      return "client-modules";
+    }
+    if (isServerChild) {
+      console.log(id, "server");
+      return "server-modules";
+    }
+  };
+}
+
 function serverFile() {
   return `\
 import { createWriteStream } from "node:fs";
@@ -216,7 +261,7 @@ import { renderToPipeableStream } from "react-server-dom-webpack/server";
 register("./loader.js", import.meta.url);
 register("react-server-dom-webpack/node-loader", import.meta.url);
 
-const { default: Statement } = await import(\`./base-statement-\${process.env.QUIZMS_CONTEST_ID}.mjs\`);
+const { default: Statement } = await import(\`./\${process.env.QUIZMS_CONTEST_ID}.mjs\`);
 
 const manifest = JSON.parse(await readFile("manifest.json", "utf-8"));
 const { pipe } = renderToPipeableStream(createElement(Statement), manifest);

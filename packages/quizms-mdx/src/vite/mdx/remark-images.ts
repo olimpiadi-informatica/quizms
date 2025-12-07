@@ -89,23 +89,42 @@ const remarkImages: Plugin<[], Root> = () => {
         imgSrc = b.identifier(name);
       }
 
-      parent.children[index] = {
-        type: "mdxJsxTextElement",
-        name: "Image",
-        children: [],
-        attributes: compact([
-          jsxAttribute("alt", alt ?? ""),
-          jsxAttribute(
-            "src",
-            b.conditionalExpression(
-              b.binaryExpression("===", b.unaryExpression("typeof", imgSrc), b.literal("function")),
-              b.callExpression(imgSrc, [b.identifier("_variant")]),
-              imgSrc,
+      if (pathname.endsWith(".asy")) {
+        parent.children[index] = {
+          type: "mdxJsxTextElement",
+          name: "Asymptote",
+          children: [],
+          attributes: compact([
+            jsxAttribute("alt", alt ?? ""),
+            jsxAttribute(
+              "src",
+              b.callExpression(imgSrc, [
+                b.conditionalExpression(
+                  b.binaryExpression(
+                    "===",
+                    b.unaryExpression("typeof", b.identifier("_allVariants")),
+                    b.literal("undefined"),
+                  ),
+                  { type: "Literal", value: null, raw: "null" },
+                  b.memberExpression(b.identifier("_allVariants"), b.identifier("_variant"), true),
+                ),
+              ]),
             ),
-          ),
-          title && jsxAttribute("title", title),
-        ]),
-      };
+            title && jsxAttribute("title", title),
+          ]),
+        };
+      } else {
+        parent.children[index] = {
+          type: "mdxJsxTextElement",
+          name: "Image",
+          children: [],
+          attributes: compact([
+            jsxAttribute("alt", alt ?? ""),
+            jsxAttribute("src", imgSrc),
+            title && jsxAttribute("title", title),
+          ]),
+        };
+      }
 
       return [SKIP, index];
     });

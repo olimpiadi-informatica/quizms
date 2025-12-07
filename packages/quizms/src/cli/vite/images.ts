@@ -38,7 +38,7 @@ export default function images(): PluginOption {
     resolveId(id) {
       const [pathname, query] = id.split("?");
       const ext = path.extname(pathname);
-      if (imageExtensions.has(ext) || ext === ".svg" || ext === ".asy") {
+      if (imageExtensions.has(ext) || ext === ".svg") {
         const resolvedPathname = pathname.startsWith(rootDir)
           ? pathname
           : path.join(rootDir, pathname);
@@ -52,7 +52,7 @@ export default function images(): PluginOption {
         const params = new URLSearchParams(query);
         const ext = path.extname(pathname);
         if (
-          (imageExtensions.has(ext) || ext === ".svg" || ext === ".asy") &&
+          (imageExtensions.has(ext) || ext === ".svg") &&
           !params.has("url") &&
           !params.has("raw")
         ) {
@@ -75,7 +75,7 @@ export default function images(): PluginOption {
 
       let image: Image | undefined;
 
-      if (ext === ".svg" || ext === ".asy") {
+      if (ext === ".svg") {
         image = transformSvg(pathname, code, options);
       }
       if (imageExtensions.has(ext)) {
