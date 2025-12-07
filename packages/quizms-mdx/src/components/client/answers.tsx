@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  Children,
   createContext,
   type ReactNode,
   use,
@@ -37,6 +38,7 @@ export function AnswerGroupClient({ children }: AnswerGroupProps) {
 export type MultipleChoiceAnswerProps = {
   children: ReactNode;
   kind: "allCorrect" | "anyCorrect";
+  answerIds: string[];
 };
 
 type MultipleChoiceContextProps = {
@@ -47,7 +49,23 @@ const MultipleChoiceContext = createContext<MultipleChoiceContextProps>({
   registerCorrectOption: () => {},
 });
 
-export function MultipleChoiceAnswerClient({ children, kind }: MultipleChoiceAnswerProps) {
+type AnswerContextProps = {
+  id: string;
+};
+
+const AnswerContext = createContext<AnswerContextProps>({
+  id: "",
+});
+
+function useAnswer() {
+  return use(AnswerContext);
+}
+
+export function MultipleChoiceAnswerClient({
+  answerIds,
+  children,
+  kind,
+}: MultipleChoiceAnswerProps) {
   const { registerProblem } = useContest();
   const { id: problemId, points } = useProblem();
   const [correctOptions, setCorrectOptions] = useState<string[]>([]);
@@ -77,18 +95,25 @@ export function MultipleChoiceAnswerClient({ children, kind }: MultipleChoiceAns
 
   return (
     <MultipleChoiceContext.Provider value={{ registerCorrectOption }}>
-      {children}
+      {Children.toArray(children).map((child, i) => {
+        return (
+          <AnswerContext.Provider key={i} value={{ id: answerIds[i] }}>
+            {child}
+          </AnswerContext.Provider>
+        );
+      })}
     </MultipleChoiceContext.Provider>
   );
 }
 
 export type AnswerProps = {
-  id: string;
   correct?: boolean;
   children: ReactNode;
+  originalId?: string;
 };
 
-export function AllCorrectAnswerClient({ id, correct, children }: AnswerProps) {
+export function AllCorrectAnswerClient({ correct, children }: AnswerProps) {
+  const { id } = useAnswer();
   const { id: problemId } = useProblem();
   const { student, setStudent, terminated } = useStudent();
   const { registerCorrectOption } = use(MultipleChoiceContext);
@@ -148,7 +173,8 @@ export function AllCorrectAnswerClient({ id, correct, children }: AnswerProps) {
   );
 }
 
-export function AnyCorrectAnswerClient({ id, correct, children }: AnswerProps) {
+export function AnyCorrectAnswerClient({ correct, children }: AnswerProps) {
+  const { id } = useAnswer();
   const { id: problemId } = useProblem();
   const { student, setStudent, terminated } = useStudent();
   const { registerCorrectOption } = use(MultipleChoiceContext);

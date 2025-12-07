@@ -65,6 +65,8 @@ export default async function variants(options: ExportVariantsOptions) {
             QUIZMS_CONTEST_ID: config.id,
             QUIZMS_VARIANT_ID: variant,
             QUIZMS_VARIANT_HASH: variantHash.toString(),
+            QUIZMS_SHUFFLE_PROBLEMS: config.shuffleProblems ? "true" : undefined,
+            QUIZMS_SHUFFLE_ANSWERS: config.shuffleAnswers ? "true" : undefined,
           },
         });
         child.stdout.on("data", (data) => rawSchema.push(data));
@@ -243,20 +245,29 @@ export async function load(url, context, nextLoad) {
 }`;
 }
 
+function getFullSubProblemId(problemId: string, subProblemId: string | null): string {
+  return subProblemId == null ? problemId : `${problemId}.${subProblemId}`;
+}
+
 function parseSchema(schema: RawSchema): Schema {
   return Object.fromEntries(
     schema.flatMap((problem) =>
       problem.subProblems.map(
         (subProblem) =>
           [
-            subProblem.id == null ? problem.id : `${problem.id}.${subProblem.id}`,
+            getFullSubProblemId(problem.id, subProblem.id),
             {
+              originalId:
+                problem.originalId != null
+                  ? getFullSubProblemId(problem.originalId, subProblem.id)
+                  : undefined,
               type: subProblem.type,
               maxPoints: problem.pointsCorrect,
               options: [
                 ...subProblem.options.map((option) => ({
                   value: option.value,
                   points: option.correct ? problem.pointsCorrect : problem.pointsWrong,
+                  originalId: option.originalId,
                 })),
                 {
                   value: null,
@@ -276,12 +287,14 @@ type RawSchema = {
   pointsCorrect: number;
   pointsBlank: number;
   pointsWrong: number;
+  originalId?: string;
   subProblems: {
     id: string;
     type: "text" | "number";
     options: {
       value: string;
       correct: boolean;
+      originalId?: string;
     }[];
   }[];
 }[];

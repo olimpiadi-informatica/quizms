@@ -1,4 +1,6 @@
-import type { ReactNode } from "react";
+import { Children, type ReactNode } from "react";
+
+import { Rng } from "@olinfo/quizms/utils";
 
 import {
   AllCorrectAnswerClient,
@@ -21,16 +23,34 @@ AnswerGroup.displayName = "AnswerGroup";
 export function MultipleChoiceAnswer({
   children,
   kind,
+  answerIds,
+  groupHash,
 }: {
   children: ReactNode;
   kind: "allCorrect" | "anyCorrect";
+  answerIds: string[];
+  groupHash: string;
 }) {
+  const childrenArray = Children.toArray(children);
+  if (process.env.QUIZMS_SHUFFLE_ANSWERS) {
+    const rng = new Rng(`${process.env.QUIZMS_VARIANT_HASH}-${groupHash}`);
+    rng.shuffle(childrenArray);
+  }
   return (
     <>
       <JsonField field="type" value="text" />
       <JsonField field="options">
         <JsonArray>
-          <MultipleChoiceAnswerClient kind={kind}>{children}</MultipleChoiceAnswerClient>
+          <MultipleChoiceAnswerClient answerIds={answerIds} kind={kind}>
+            {childrenArray.map((child, i) => {
+              return (
+                <JsonObject key={i}>
+                  <JsonField field="value" value={answerIds[i]} />
+                  {child}
+                </JsonObject>
+              );
+            })}
+          </MultipleChoiceAnswerClient>
         </JsonArray>
       </JsonField>
     </>
@@ -60,32 +80,28 @@ export function OpenAnswer({ correct }: OpenAnswerProps) {
 }
 OpenAnswer.displayName = "OpenAnswer";
 
-export function AnyCorrectAnswer({ id, correct, children }: AnswerProps) {
+export function AnyCorrectAnswer({ correct, children, originalId }: AnswerProps) {
   return (
-    <JsonObject>
-      <JsonField field="value" value={id} />
+    <>
       <JsonField field="correct" value={!!correct} />
-      <AnyCorrectAnswerClient
-        id={id}
-        correct={process.env.QUIZMS_MODE === "contest" ? undefined : correct}>
+      {originalId !== undefined && <JsonField field="originalId" value={originalId} />}
+      <AnyCorrectAnswerClient correct={process.env.QUIZMS_MODE === "contest" ? undefined : correct}>
         {children}
       </AnyCorrectAnswerClient>
-    </JsonObject>
+    </>
   );
 }
 AnyCorrectAnswer.displayName = "AnyCorrectAnswer";
 
-export function AllCorrectAnswer({ id, correct, children }: AnswerProps) {
+export function AllCorrectAnswer({ correct, children, originalId }: AnswerProps) {
   return (
-    <JsonObject>
-      <JsonField field="value" value={id} />
+    <>
       <JsonField field="correct" value={!!correct} />
-      <AllCorrectAnswerClient
-        id={id}
-        correct={process.env.QUIZMS_MODE === "contest" ? undefined : correct}>
+      {originalId !== undefined && <JsonField field="originalId" value={originalId} />}
+      <AllCorrectAnswerClient correct={process.env.QUIZMS_MODE === "contest" ? undefined : correct}>
         {children}
       </AllCorrectAnswerClient>
-    </JsonObject>
+    </>
   );
 }
 AllCorrectAnswer.displayName = "AllCorrectAnswer";
