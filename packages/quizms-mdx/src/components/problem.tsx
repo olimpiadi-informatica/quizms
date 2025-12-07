@@ -6,21 +6,19 @@ import {
 } from "./client/problem";
 import { JsonArray, JsonField, JsonObject } from "./json";
 
-export function Problem({ id, points, children }: ProblemProps) {
+export function Problem({ points, children, originalId }: ProblemProps) {
   return (
-    <JsonObject>
-      <JsonField field="id" value={id.toString()} />
+    <>
       <JsonField field="pointsCorrect" value={points[0]} />
       <JsonField field="pointsBlank" value={points[1]} />
       <JsonField field="pointsWrong" value={points[2]} />
+      {originalId !== undefined && <JsonField field="originalId" value={originalId} />}
       <JsonField field="subProblems">
         <JsonArray>
-          <ProblemClient id={id} points={points}>
-            {children}
-          </ProblemClient>
+          <ProblemClient points={points}>{children}</ProblemClient>
         </JsonArray>
       </JsonField>
-    </JsonObject>
+    </>
   );
 }
 Problem.displayName = "Problem";

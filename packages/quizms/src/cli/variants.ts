@@ -9,7 +9,7 @@ import type { OutputAsset, RollupOutput } from "rollup";
 import { build, type InlineConfig, mergeConfig, transformWithEsbuild } from "vite";
 import yaml from "yaml";
 
-import type { Schema } from "~/models";
+import type { Schema, Variant } from "~/models";
 import { type VariantsConfig, variantsConfigSchema } from "~/models/variants-config";
 import { AsyncPool, hash } from "~/utils";
 import { fatal, info, load, success } from "~/utils-node";
@@ -65,6 +65,8 @@ export default async function variants(options: ExportVariantsOptions) {
             QUIZMS_CONTEST_ID: config.id,
             QUIZMS_VARIANT_ID: variant,
             QUIZMS_VARIANT_HASH: variantHash.toString(),
+            QUIZMS_SHUFFLE_PROBLEMS: config.shuffleProblems ? "true" : undefined,
+            QUIZMS_SHUFFLE_ANSWERS: config.shuffleAnswers ? "true" : undefined,
           },
         });
         child.stdout.on("data", (data) => rawSchema.push(data));
@@ -79,7 +81,13 @@ export default async function variants(options: ExportVariantsOptions) {
         const schema = yaml.parse(`{ "schema": ${Buffer.concat(rawSchema).toString("utf-8")} }`);
         await writeFile(
           path.join(variantDir, "answers.json"),
-          JSON.stringify({ id: variant, contestId: config.id, schema: parseSchema(schema.schema) }),
+          JSON.stringify({
+            id: variant,
+            isOnline: config.variantIds.includes(variant),
+            isPdf: config.pdfVariantIds.includes(variant),
+            contestId: config.id,
+            schema: parseSchema(schema.schema),
+          } satisfies Variant),
         );
       });
     }
@@ -237,20 +245,29 @@ export async function load(url, context, nextLoad) {
 }`;
 }
 
+function getFullSubProblemId(problemId: string, subProblemId: string | null): string {
+  return subProblemId == null ? problemId : `${problemId}.${subProblemId}`;
+}
+
 function parseSchema(schema: RawSchema): Schema {
   return Object.fromEntries(
     schema.flatMap((problem) =>
       problem.subProblems.map(
         (subProblem) =>
           [
-            subProblem.id == null ? problem.id : `${problem.id}.${subProblem.id}`,
+            getFullSubProblemId(problem.id, subProblem.id),
             {
+              originalId:
+                problem.originalId != null
+                  ? getFullSubProblemId(problem.originalId, subProblem.id)
+                  : undefined,
               type: subProblem.type,
               maxPoints: problem.pointsCorrect,
               options: [
                 ...subProblem.options.map((option) => ({
                   value: option.value,
                   points: option.correct ? problem.pointsCorrect : problem.pointsWrong,
+                  originalId: option.originalId,
                 })),
                 {
                   value: null,
@@ -270,12 +287,14 @@ type RawSchema = {
   pointsCorrect: number;
   pointsBlank: number;
   pointsWrong: number;
+  originalId?: string;
   subProblems: {
     id: string;
     type: "text" | "number";
     options: {
       value: string;
       correct: boolean;
+      originalId?: string;
     }[];
   }[];
 }[];

@@ -58,6 +58,7 @@ export async function getRandomVariant(contestId: string) {
     .collection("variants")
     .withConverter(variantConverter)
     .where("contestId", "==", contestId)
+    .where("isOnline", "==", true)
     .get();
   return rng.choice(snapshot.docs).data();
 }
