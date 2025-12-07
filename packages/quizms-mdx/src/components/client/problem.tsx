@@ -3,7 +3,6 @@
 import { createContext, type ReactNode, use } from "react";
 
 export type ProblemProps = {
-  id: number;
   points: [number, number, number];
   children: ReactNode;
 };
@@ -13,13 +12,14 @@ type ProblemContextProps = {
   points: [number, number, number];
 };
 
-const ProblemContext = createContext<ProblemContextProps>({
+export const ProblemContext = createContext<ProblemContextProps>({
   id: undefined,
   points: [0, 0, 0],
 });
 ProblemContext.displayName = "ProblemContext";
 
-export function ProblemClient({ id, points, children }: ProblemProps) {
+export function ProblemClient({ points, children }: ProblemProps) {
+  const { id } = use(ProblemContext);
   return (
     <ProblemContext.Provider value={{ id, points }}>
       <div className="relative">{children}</div>

@@ -1,40 +1,52 @@
+import path from "node:path";
+
 import { Parser } from "acorn";
 import type { Directive } from "estree";
+import { builders as b } from "estree-toolkit";
 import type { Blockquote, Root } from "mdast";
 import type { ContainerDirective } from "mdast-util-directive";
 import type { MdxJsxFlowElement } from "mdast-util-mdx-jsx";
 import type { Plugin } from "unified";
 import { visit } from "unist-util-visit";
+import type { VFile } from "vfile";
 
 import { jsxAttribute } from "./utils";
 
 const remarkAnswers: Plugin<[], Root> = () => {
-  return (tree: Root) => {
-    parseAnswers(tree);
+  return (tree: Root, file) => {
+    parseAnswers(tree, file);
     parseExplanation(tree);
   };
 };
 
 export default remarkAnswers;
 
-function parseAnswers(tree: Root) {
+function parseAnswers(tree: Root, file: VFile) {
+  const directory = path.basename(file.dirname ?? "");
+  let subId = 0;
   visit(tree, "containerDirective", (containerDirective: ContainerDirective, index, parent) => {
     if (containerDirective.name === "answers") {
-      const cls = containerDirective.attributes!.class;
+      const kind = containerDirective.attributes!.class;
       const AnswerComponent = {
         open: "OpenAnswer",
         anyCorrect: "AnyCorrectAnswer",
         allCorrect: "AllCorrectAnswer",
-      }[cls!];
+      }[kind!];
 
-      if (cls === "anyCorrect" || cls === "allCorrect") {
+      if (kind === "anyCorrect" || kind === "allCorrect") {
         const list = containerDirective.children[0];
         if (list?.type !== "list" || list.ordered) {
           throw new Error("Missing or invalid answers");
         }
-        if (cls === "anyCorrect" && !list.children.some((c) => c.checked)) {
+        if (kind === "anyCorrect" && !list.children.some((c) => c.checked)) {
           throw new Error("Missing or invalid answers");
         }
+
+        const answerIds = b.arrayExpression(
+          list.children.map((_, i) => b.literal(String.fromCharCode(65 + i))),
+        );
+
+        const groupHash = `${directory}-${subId++}`;
 
         parent!.children[index!] = {
           type: "mdxJsxFlowElement",
@@ -44,15 +56,16 @@ function parseAnswers(tree: Root) {
             {
               type: "mdxJsxFlowElement",
               name: "MultipleChoiceAnswer",
-              attributes: [jsxAttribute("kind", cls)],
-              children: list.children.map((child, i): MdxJsxFlowElement => {
+              attributes: [
+                jsxAttribute("kind", kind),
+                jsxAttribute("answerIds", answerIds),
+                jsxAttribute("groupHash", groupHash),
+              ],
+              children: list.children.map((child): MdxJsxFlowElement => {
                 return {
                   type: "mdxJsxFlowElement",
                   name: AnswerComponent,
-                  attributes: [
-                    jsxAttribute("id", String.fromCharCode(65 + i)),
-                    jsxAttribute("correct", child.checked),
-                  ],
+                  attributes: [jsxAttribute("correct", child.checked)],
                   children: child.children,
                 } as MdxJsxFlowElement;
               }),

@@ -1,3 +1,4 @@
+import { builders as b } from "estree-toolkit";
 import type { Root, TopLevelContent } from "mdast";
 import type { MdxJsxFlowElement } from "mdast-util-mdx-jsx";
 import type { Plugin } from "unified";
@@ -17,8 +18,13 @@ export default remarkProblemIds;
 function assignProblemIds(tree: Root) {
   let problemIndex = 1;
   visit(tree, "mdxJsxFlowElement", (node: MdxJsxFlowElement) => {
-    if (node.name === "Problem") {
-      node.attributes.push(jsxAttribute("id", problemIndex++));
+    if (node.name === "Section") {
+      const problems = node.children.filter(
+        (candidate) => candidate.type === "mdxJsxFlowElement" && candidate.name === "Problem",
+      );
+      const ids = b.arrayExpression(problems.map((_, i) => b.literal(problemIndex + i)));
+      problemIndex += problems.length;
+      node.attributes.push(jsxAttribute("problemIds", ids));
     }
   });
 }
