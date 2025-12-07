@@ -1,9 +1,44 @@
+import { readFile } from "node:fs/promises";
+
 import { variantsConfigSchema } from "@olinfo/quizms/models";
 import { reactComponentCase } from "@olinfo/quizms/utils";
 import { load } from "@olinfo/quizms/utils-node";
 import { type PluginOption, transformWithEsbuild } from "vite";
 
-export default function firebaseEntry(): PluginOption {
+async function getFirebaseRewrite() {
+  let firebaseConfig: any;
+  try {
+    firebaseConfig = JSON.parse(await readFile("firebase.json", "utf8"));
+  } catch (err: any) {
+    throw new Error(`Failed to read \`firebase-config.json\`: ${err.message}`, { cause: err });
+  }
+
+  const rewrites = firebaseConfig.hosting?.rewrites;
+  if (!rewrites) {
+    throw new Error("Failed to find API rewrite");
+  }
+  return rewrites as {
+    source: string;
+    function?: {
+      functionId: string;
+      region: string;
+    };
+  }[];
+}
+
+async function getProjectId() {
+  try {
+    const data = JSON.parse(await readFile(".firebaserc", "utf-8"));
+    return Object.values(data.projects)[0] as string;
+  } catch (err: any) {
+    throw new Error(`Failed to read \`.firebaserc\`: ${err.message}`, { cause: err });
+  }
+}
+
+export default async function firebaseEntry(): Promise<PluginOption> {
+  const rewrite = await getFirebaseRewrite();
+  const projectId = await getProjectId();
+
   return {
     name: "quizms:firebase-entry",
     api: {
@@ -21,6 +56,23 @@ export default function firebaseEntry(): PluginOption {
           module: "@olinfo/quizms-firebase/entry",
         },
       ],
+    },
+    config() {
+      return {
+        server: {
+          proxy: Object.fromEntries(
+            rewrite
+              .filter((rewrite) => rewrite.function)
+              .map((rewrite) => [
+                rewrite.source,
+                {
+                  target: `https://${rewrite.function!.region}-${projectId}.cloudfunctions.net/${rewrite.function!.functionId}`,
+                  changeOrigin: true,
+                },
+              ]),
+          ),
+        },
+      };
     },
     resolveId(id) {
       if (id === "virtual:quizms-firebase-config") {
