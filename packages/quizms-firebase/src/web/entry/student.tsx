@@ -90,7 +90,7 @@ function StudentForm({ contests }: { contests: Contest[] }) {
 
   const defaultValue = useMemo(
     () => ({
-      contestId: Object.keys(contests).length === 1 ? Object.keys(contests)[0] : undefined,
+      contestId: contests.length === 1 ? contests[0] : undefined,
     }),
     [contests],
   );
