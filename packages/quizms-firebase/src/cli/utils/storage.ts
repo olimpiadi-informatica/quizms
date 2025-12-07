@@ -2,6 +2,7 @@ import { existsSync } from "node:fs";
 
 import type { Bucket } from "@google-cloud/storage";
 import { confirm } from "@inquirer/prompts";
+import { AsyncPool } from "@olinfo/quizms/utils";
 import { fatal, success } from "@olinfo/quizms/utils-node";
 import { SingleBar } from "cli-progress";
 import { partition } from "lodash-es";
@@ -67,12 +68,16 @@ export async function importStorage(
   }
 
   bar.start(filesToImport.length, 0);
-  await Promise.all(
-    filesToImport.map(async ([local, remote]) => {
+
+  const pool = new AsyncPool(8);
+  for (const [local, remote] of filesToImport) {
+    void pool.run(async () => {
       await bucket.upload(local, { destination: remote });
       bar.increment();
-    }),
-  );
+    });
+  }
+  await pool.wait();
+
   bar.stop();
 
   success(`${filesToImport.length} ${collection} imported!`);
