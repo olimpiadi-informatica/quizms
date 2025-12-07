@@ -75,7 +75,7 @@ export function DevProvider({ contest, children }: { contest: Contest; children:
       student={student}
       setStudent={setStudent}
       reset={reset}
-      enforceFullscreen={true}>
+      enforceFullscreen={false}>
       {children}
     </StudentProvider>
   );
