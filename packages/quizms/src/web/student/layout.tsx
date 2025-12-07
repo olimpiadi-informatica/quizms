@@ -22,6 +22,7 @@ import {
   NavbarContent,
   SubmitButton,
 } from "@olinfo/react-components";
+import { addMilliseconds } from "date-fns";
 import { sumBy } from "lodash-es";
 import { FileChartColumn, LogOut, RotateCcw } from "lucide-react";
 
@@ -44,7 +45,7 @@ export function StudentLayout({
   const completedRef = useRef<HTMLDialogElement>(null);
   const submitRef = useRef<HTMLDialogElement>(null);
 
-  const { contest, student, schema, reset, participation, terminated } = useStudent();
+  const { contest, student, schema, reset, participation, terminated, logout } = useStudent();
 
   const answered = sumBy(Object.values(student.answers ?? {}), (s) => Number(s === 0 || !!s));
   const total = Math.max(Object.keys(schema).length, 1);
@@ -55,8 +56,10 @@ export function StudentLayout({
   const [warningDeadline, setWarningDeadline] = useState<Date | undefined>();
 
   const sendWarning = useCallback(() => {
-    console.log("Sent warning (TODO)");
-  }, []);
+    //Logout from firebase
+    logout?.();
+    console.log("Logged out student.");
+  }, [logout]);
 
   useEffect(() => {
     if (disableFullscreen || terminated) return;
@@ -64,26 +67,32 @@ export function StudentLayout({
     const interval = setInterval(() => {
       const isFullscreen = !!document.fullscreenElement;
       const isFocused = document.hasFocus();
+
       const key = `quizms_last_active_${student.id}`;
+      const now = new Date();
 
       if ((isFullscreen && isFocused) || terminated) {
-        localStorage.setItem(key, Date.now().toString());
+        localStorage.setItem(key, now.toISOString());
         setShowFocusWarning(false);
         setWarningDeadline(undefined);
       } else {
         setShowFocusWarning(true);
+
         const lastActive = localStorage.getItem(key);
-        const now = Date.now();
 
         if (lastActive) {
-          const lastActiveTime = Number.parseInt(lastActive, 10);
-          const deadline = new Date(lastActiveTime + warningTime);
-          setWarningDeadline((prev) => (prev?.getTime() === deadline.getTime() ? prev : deadline));
-          if (now - lastActiveTime > warningTime || lastActiveTime > now) {
+          const lastActiveTime = new Date(lastActive);
+          const deadlineDate = addMilliseconds(lastActiveTime, warningTime);
+
+          setWarningDeadline((prev) =>
+            prev?.getTime() === deadlineDate.getTime() ? prev : deadlineDate,
+          );
+
+          if (now.getTime() - lastActiveTime.getTime() > warningTime || lastActiveTime > now) {
             sendWarning();
           }
         } else {
-          localStorage.setItem(key, now.toString());
+          localStorage.setItem(key, now.toISOString());
         }
       }
     }, timeBetweenChecks);
@@ -126,102 +135,105 @@ export function StudentLayout({
     }
   };
 
+  if (showFocusWarning && !disableFullscreen && !terminated) {
+    return (
+      <>
+        {showFocusWarning && !disableFullscreen && !terminated && (
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-base-100 p-4 text-center">
+            <div className="flex max-w-lg flex-col items-center gap-6">
+              <h2 className="text-3xl font-bold">Attenzione!</h2>
+              <p className="text-xl">
+                Non puoi perdere il focus o uscire dalla modalità a schermo intero.
+              </p>
+              {warningDeadline && (
+                <div className="text-7xl font-black font-mono p-4">
+                  <Timer endTime={warningDeadline} displaySecondsOnly />
+                </div>
+              )}
+              {isShowingFullscreenButton && (
+                <Button
+                  className="btn-secondary btn-lg font-bold"
+                  onClick={() => document.documentElement.requestFullscreen().catch(console.error)}>
+                  Torna a schermo intero
+                </Button>
+              )}
+            </div>
+          </div>
+        )}
+      </>
+    );
+  }
+
   return (
     <>
-      {showFocusWarning && !disableFullscreen && !terminated && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-base-100 p-4 text-center">
-          <div className="flex max-w-lg flex-col items-center gap-6">
-            <h2 className="text-3xl font-bold">Attenzione!</h2>
-            <p className="text-xl">
-              Non puoi perdere il focus o uscire dalla modalità a schermo intero.
-            </p>
-            {warningDeadline && (
-              <div className="text-7xl font-black font-mono p-4">
-                <Timer endTime={warningDeadline} displaySecondsOnly />
-              </div>
-            )}
-            {isShowingFullscreenButton && (
-              <Button
-                className="btn-secondary btn-lg font-bold"
-                onClick={() => document.documentElement.requestFullscreen().catch(console.error)}>
-                Torna a schermo intero
-              </Button>
-            )}
+      <Navbar color="bg-base-300 text-base-content">
+        <NavbarBrand>
+          <div className="flex items-center h-full font-bold">
+            <Title />
           </div>
-        </div>
-      )}
-      {(!showFocusWarning || disableFullscreen || terminated) && (
-        <>
-          <Navbar color="bg-base-300 text-base-content">
-            <NavbarBrand>
-              <div className="flex items-center h-full font-bold">
-                <Title />
-              </div>
-            </NavbarBrand>
-            <NavbarContent>
-              <div className="flex items-center gap-2">
-                <Progress className="hidden w-20 sm:block" percentage={progress}>
-                  {progress}%
-                </Progress>
-                <div className="px-3">
-                  {terminated || !participation.startingTime || !contest.hasOnline ? (
-                    <span className="font-mono">00:00</span>
-                  ) : (
-                    <Timer
-                      startTime={participation.startingTime}
-                      duration={contest.duration}
-                      noAnimation
-                    />
-                  )}
-                </div>
-                {terminated && reset ? (
-                  <>
-                    <div className="tooltip tooltip-bottom h-full" data-tip="Mostra risultati">
-                      <Button
-                        className="btn-primary btn-sm h-full"
-                        onClick={() => completedRef.current?.showModal()}
-                        aria-label="Mostra risultati">
-                        <FileChartColumn />
-                      </Button>
-                    </div>
-                    {reset && (
-                      <div className="tooltip tooltip-bottom h-full" data-tip="Ricomincia">
-                        <Button
-                          className="btn-primary btn-sm h-full"
-                          onClick={reset}
-                          aria-label="Ricomincia">
-                          <RotateCcw />
-                        </Button>
-                      </div>
-                    )}
-                  </>
-                ) : (
+        </NavbarBrand>
+        <NavbarContent>
+          <div className="flex items-center gap-2">
+            <Progress className="hidden w-20 sm:block" percentage={progress}>
+              {progress}%
+            </Progress>
+            <div className="px-3">
+              {terminated || !participation.startingTime || !contest.hasOnline ? (
+                <span className="font-mono">00:00</span>
+              ) : (
+                <Timer
+                  startTime={participation.startingTime}
+                  duration={contest.duration}
+                  noAnimation
+                />
+              )}
+            </div>
+            {terminated && reset ? (
+              <>
+                <div className="tooltip tooltip-bottom h-full" data-tip="Mostra risultati">
                   <Button
                     className="btn-primary btn-sm h-full"
-                    disabled={
-                      terminated ||
-                      (process.env.NODE_ENV === "production" && !participation.startingTime)
-                    }
-                    onClick={submit}>
-                    Termina
+                    onClick={() => completedRef.current?.showModal()}
+                    aria-label="Mostra risultati">
+                    <FileChartColumn />
                   </Button>
+                </div>
+                {reset && (
+                  <div className="tooltip tooltip-bottom h-full" data-tip="Ricomincia">
+                    <Button
+                      className="btn-primary btn-sm h-full"
+                      onClick={reset}
+                      aria-label="Ricomincia">
+                      <RotateCcw />
+                    </Button>
+                  </div>
                 )}
-                <UserDropdown />
-              </div>
-            </NavbarContent>
-          </Navbar>
-          <div className="mx-auto flex w-full max-w-screen-xl grow flex-col p-4 pb-8">
-            <ErrorBoundary>
-              <CompletedModal ref={completedRef} schema={schema} />
-              <SubmitModal ref={submitRef} />
-              <Prose>
-                {contest.longName && <h1 className="text-pretty">{contest.longName}</h1>}
-                {children}
-              </Prose>
-            </ErrorBoundary>
+              </>
+            ) : (
+              <Button
+                className="btn-primary btn-sm h-full"
+                disabled={
+                  terminated ||
+                  (process.env.NODE_ENV === "production" && !participation.startingTime)
+                }
+                onClick={submit}>
+                Termina
+              </Button>
+            )}
+            <UserDropdown />
           </div>
-        </>
-      )}
+        </NavbarContent>
+      </Navbar>
+      <div className="mx-auto flex w-full max-w-screen-xl grow flex-col p-4 pb-8">
+        <ErrorBoundary>
+          <CompletedModal ref={completedRef} schema={schema} />
+          <SubmitModal ref={submitRef} />
+          <Prose>
+            {contest.longName && <h1 className="text-pretty">{contest.longName}</h1>}
+            {children}
+          </Prose>
+        </ErrorBoundary>
+      </div>
     </>
   );
 }
