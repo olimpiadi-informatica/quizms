@@ -114,7 +114,7 @@ function Table() {
   const isContestFinished = useIsAfter(endTime) ?? true;
   const frozen = (contest.hasOnline && !isContestFinished) || participation.finalized;
 
-  const canViewScore = (contest.scoreVisibility === "always");
+  const canViewScore = contest.scoreVisibility === "always";
 
   const newStudentId = useRef(randomId());
   const setStudentAndUpdateId = async (student: Student) => {
