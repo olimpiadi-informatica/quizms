@@ -26,6 +26,9 @@ export type AnswerGroupProps = {
 export function AnswerGroupClient({ children }: AnswerGroupProps) {
   return (
     <form
+      onSubmit={(event) => {
+        event.preventDefault();
+      }}
       className={clsx(
         "my-5 flex-wrap rounded-xl bg-base-200 p-3 prose-p:my-1 break-inside-avoid",
         "print:flex print:border print:border-[var(--tw-prose-hr)] print:p-1",
@@ -247,7 +250,8 @@ export function OpenAnswerClient({ correct, type }: OpenAnswerProps) {
 
   const answer = student.answers?.[problemId!];
   const setAnswer = async (value: string | null) => {
-    await setStudent({ ...student, answers: { ...student.answers, [problemId!]: value } });
+    const parsedValue = type === "number" ? value && Number.parseInt(value, 10) : value;
+    await setStudent({ ...student, answers: { ...student.answers, [problemId!]: parsedValue } });
   };
 
   useEffect(() => {
