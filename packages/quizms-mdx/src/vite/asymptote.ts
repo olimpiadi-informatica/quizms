@@ -1,199 +1,89 @@
-import child_process from "node:child_process";
-import fs, { readFile } from "node:fs/promises";
-import { cpus, platform } from "node:os";
+import { readFile } from "node:fs/promises";
 import path from "node:path";
-import { promisify } from "node:util";
+import { json } from "node:stream/consumers";
 
-import { AsyncPool, validate } from "@olinfo/quizms/utils";
-import { stubFalse, stubTrue } from "lodash-es";
-import type { PluginContext } from "rollup";
-import { temporaryFile, temporaryWrite } from "tempy";
-import type { PluginOption, TransformResult } from "vite";
-import { z } from "zod";
+import type { PluginOption } from "vite";
 
-import { executePython } from "./python";
+import { type AsySrc, findAsymptoteDependencies, transformAsymptote } from "~/asymptote";
 
 export default function asymptote(): PluginOption {
+  let rootDir: string;
+
   return {
     name: "quizms:asymptote",
-    async transform(_code, id) {
+    configResolved({ root }) {
+      rootDir = root;
+    },
+    resolveId(id) {
       const [pathname, query] = id.split("?");
+      const ext = path.extname(pathname);
+      if (ext === ".asy") {
+        const resolvedPathname = pathname.startsWith(rootDir)
+          ? pathname
+          : path.join(rootDir, pathname);
+        return `${resolvedPathname}?${query}`;
+      }
+    },
+    load: {
+      order: "pre",
+      handler(id) {
+        const [pathname, query] = id.split("?");
+        const params = new URLSearchParams(query);
+        const ext = path.extname(pathname);
+        if (ext === ".asy" && !params.has("url") && !params.has("raw")) {
+          return readFile(pathname, "utf8");
+        }
+      },
+    },
+    async transform(_code, id) {
+      const [pathname, _query] = id.split("?");
       if (path.extname(pathname) !== ".asy") return;
 
-      const params = new URLSearchParams(query);
-      if (params.has("v")) {
-        return transformAsymptoteVariants(pathname, params);
-      }
+      const hash = await findAsymptoteDependencies(this, pathname);
 
-      await findAsymptoteDependencies(this, pathname);
-
-      const inject = params.get("inject");
-
-      const image = await transformAsymptote(pathname, inject);
       return {
-        code: image,
+        code: `\
+export default function img(variant) {
+  return {
+    fileName: ${JSON.stringify(pathname)},
+    hash: ${JSON.stringify(hash)},
+    inject: variant,
+  };
+};`,
         map: { mappings: "" },
       };
     },
-  };
-}
+    configureServer(this, server) {
+      server.middlewares.use(async (req, res, next) => {
+        if (req.url === "/asy") {
+          res.setHeader("Content-Type", "application/json");
 
-async function transformAsymptoteVariants(
-  fileName: string,
-  params: URLSearchParams,
-): Promise<TransformResult> {
-  const variantFile = path.join(path.dirname(fileName), params.get("v")!);
+          const body = (await json(req)) as AsySrc;
+          let svg: { src: string; width: number; height: number };
 
-  let variants: z.infer<typeof pyVariantsSchema>;
-  try {
-    variants = validate(pyVariantsSchema, await executePython(variantFile));
-  } catch (err) {
-    throw new TypeError(`Invalid variants: ${(err as Error).message}`, { cause: err });
-  }
+          try {
+            svg = await transformAsymptote(body);
+          } catch (err: any) {
+            server.ws.send({
+              type: "error",
+              err: {
+                plugin: "quizms:asymptote",
+                message: err.message,
+                stack: "",
+                id: body?.fileName,
+              },
+            });
+            res.statusCode = 500;
+            res.end();
+            return;
+          }
 
-  params.delete("v");
+          res.end(JSON.stringify(svg));
+          return;
+        }
 
-  const imports = variants
-    .map((v, i) => {
-      const inject = Object.entries(v)
-        .map(([key, val]) => jsToAsy(key, val))
-        .join("\n");
-
-      params.set("inject", inject);
-
-      return `import img_${i} from "${fileName}?${params}";`;
-    })
-    .join("\n");
-
-  const code = `${imports}
-import "${variantFile}";
-
-const variants = [${variants.map((_, i) => `img_${i}`).join(", ")}];
-
-export default function img(variant) {
-  return variants[variant];
-}`;
-
-  return {
-    code,
-    map: { mappings: "" },
-  };
-}
-
-const pool = new AsyncPool(cpus().length);
-const execFile = promisify(child_process.execFile);
-
-async function transformAsymptote(fileName: string, inject: string | null): Promise<string> {
-  const svgFile = temporaryFile({ extension: "svg" });
-
-  // ????????? https://github.com/vitejs/vite/pull/2614
-  let decodedInject = inject;
-  while (decodedInject?.includes("%")) {
-    decodedInject = decodeURIComponent(decodedInject);
-  }
-
-  const injectFile = await temporaryWrite(decodedInject ?? "", { extension: "asy" });
-
-  try {
-    if (platform() === "darwin") {
-      const pdfFile = temporaryFile({ extension: "pdf" });
-      await pool.run(
-        execFile,
-        "asy",
-        [fileName, "-f", "pdf", "-autoimport", injectFile, "-o", pdfFile.replace(/\.pdf$/, "")],
-        { cwd: path.dirname(fileName) },
-      );
-
-      await pool.run(execFile, "pdf2svg", [pdfFile, svgFile], {});
-      await fs.unlink(pdfFile);
-    } else {
-      await pool.run(
-        execFile,
-        "asy",
-        [
-          fileName,
-          "-f",
-          "svg",
-          "-tex",
-          "pdflatex",
-          "-autoimport",
-          injectFile,
-          "-o",
-          svgFile.replace(/\.svg/, ""),
-        ],
-        { cwd: path.dirname(fileName) },
-      );
-    }
-  } catch (err: any) {
-    throw new Error(`Failed to compile asymptote:\n${err.stderr}`);
-  }
-
-  return readFile(svgFile, { encoding: "utf8" });
-}
-
-async function findAsymptoteDependencies(ctx: PluginContext, asyPath: string) {
-  const deps = new Set<string>();
-  const newDeps: string[] = [asyPath];
-
-  while (newDeps.length > 0) {
-    const file = newDeps.pop()!;
-    if (deps.has(file)) continue;
-    deps.add(file);
-    ctx.addWatchFile(file);
-
-    if (file !== asyPath) ctx.addWatchFile(file);
-
-    const content = await fs.readFile(file, { encoding: "utf8" });
-
-    const matches = content.matchAll(
-      /^(?:access|from|import|include)\s+(?:"([^\n"]+)"|([^\s"]+);)/gm,
-    );
-    for (const match of matches) {
-      const matchPath = match[1] ?? match[2];
-      const matchFile = path.format({
-        dir: path.join(path.dirname(file), path.dirname(matchPath)),
-        name: path.basename(matchPath, ".asy"),
-        ext: ".asy",
+        next();
       });
-
-      const exists = await fs.access(matchFile).then(stubTrue, stubFalse);
-      if (exists) newDeps.push(matchFile);
-    }
-  }
-}
-
-type PyVariable = number | boolean | string | PyVariable[];
-
-const pyVariabileSchema: z.ZodType<PyVariable> = z.union([
-  z.number().finite(),
-  z.boolean(),
-  z.string(),
-  z.lazy(() => pyVariabileSchema.array().nonempty()),
-]);
-
-const pyVariantsSchema = z.array(z.record(pyVariabileSchema));
-
-function jsToAsy(name: string, val: PyVariable): string {
-  return `${getAsyTypeName(val)} ${name} = ${getAsyValue(val)};`;
-}
-
-function getAsyTypeName(val: PyVariable): string {
-  if (typeof val === "number") {
-    return Number.isInteger(val) ? "int" : "real";
-  }
-  if (typeof val === "boolean") {
-    return "bool";
-  }
-  if (typeof val === "string") {
-    return "string";
-  }
-  return `${getAsyTypeName(val[0])}[]`;
-}
-
-function getAsyValue(val: PyVariable): string {
-  if (Array.isArray(val)) {
-    return `{ ${val.map((v) => getAsyValue(v)).join(", ")} }`;
-  }
-
-  return JSON.stringify(val);
+    },
+  };
 }

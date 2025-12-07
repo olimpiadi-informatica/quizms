@@ -10,7 +10,8 @@ export default defineConfig({
       entry: {
         "blockly-editor": "src/blockly-editor/index.tsx",
         "blockly-types": "src/blockly-types/index.ts",
-        components: "src/components/index.ts",
+        "components-client": "src/components/client/index.ts",
+        "components-server": "src/components/server/index.ts",
         vite: "src/vite/index.ts",
       },
       formats: ["es"],

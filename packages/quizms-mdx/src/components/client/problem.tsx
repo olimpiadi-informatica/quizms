@@ -19,7 +19,7 @@ export const ProblemContext = createContext<ProblemContextProps>({
 });
 ProblemContext.displayName = "ProblemContext";
 
-export function ProblemClient({ points, children }: ProblemProps) {
+export function Problem({ points, children }: ProblemProps) {
   const { id } = use(ProblemContext);
   return (
     <ProblemContext.Provider value={{ id, points }}>
@@ -34,7 +34,7 @@ export type SubProblemProps = {
   children: ReactNode;
 };
 
-export function SubProblemClient({ subId, children }: SubProblemProps) {
+export function SubProblem({ subId, children }: SubProblemProps) {
   const { id, points } = use(ProblemContext);
   const newId = subId ? `${id}.${subId}` : `${id}`;
 

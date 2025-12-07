@@ -21,7 +21,8 @@
     },
     "./components": {
       "types": "./dist/components.d.ts",
-      "default": "./dist/components.js"
+      "react-server": "./dist/components-server.js",
+      "default": "./dist/components-client.js"
     },
     "./css": "./dist/quizms-mdx.css",
     "./vite": {
@@ -38,16 +39,20 @@
     "@mdx-js/rollup": "^3.1.1",
     "@olinfo/quizms": "workspace:^",
     "@olinfo/react-components": "^0.12.0",
+    "@types/proper-lockfile": "^4.1.4",
     "acorn": "^8.15.0",
     "blockly": "^12.3.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "estree-toolkit": "^1.7.13",
     "file-saver": "^2.0.5",
+    "image-size": "^2.0.2",
     "js-interpreter": "^6.0.1",
     "katex": "^0.16.26",
     "lodash-es": "^4.17.21",
     "lucide-react": "^0.553.0",
+    "mini-svg-data-uri": "^1.4.4",
+    "proper-lockfile": "^4.1.2",
     "remark-directive": "^4.0.0",
     "remark-frontmatter": "^5.0.0",
     "remark-gfm": "^4.0.1",
@@ -55,6 +60,7 @@
     "remark-mdx-frontmatter": "^5.2.0",
     "remark-mdx-math-enhanced": "0.0.1-beta.3",
     "remark-smartypants": "^3.0.2",
+    "swr": "^2.3.7",
     "tailwindcss": "^3.4.18",
     "tempy": "^3.1.0",
     "tinyglobby": "^0.2.15",

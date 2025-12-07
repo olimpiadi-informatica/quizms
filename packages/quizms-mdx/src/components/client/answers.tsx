@@ -24,7 +24,7 @@ export type AnswerGroupProps = {
   children: ReactNode;
 };
 
-export function AnswerGroupClient({ children }: AnswerGroupProps) {
+export function AnswerGroup({ children }: AnswerGroupProps) {
   return (
     <form
       onSubmit={(event) => {
@@ -65,11 +65,7 @@ function useAnswer() {
   return use(AnswerContext);
 }
 
-export function MultipleChoiceAnswerClient({
-  answerIds,
-  children,
-  kind,
-}: MultipleChoiceAnswerProps) {
+export function MultipleChoiceAnswer({ answerIds, children, kind }: MultipleChoiceAnswerProps) {
   const { registerProblem } = useContest();
   const { id: problemId, points } = useProblem();
   const [correctOptions, setCorrectOptions] = useState<string[]>([]);
@@ -116,7 +112,7 @@ export type AnswerProps = {
   originalId?: string;
 };
 
-export function AllCorrectAnswerClient({ correct, children }: AnswerProps) {
+export function AllCorrectAnswer({ correct, children }: AnswerProps) {
   const { id } = useAnswer();
   const { id: problemId } = useProblem();
   const { student, setStudent, terminated } = useStudent();
@@ -181,7 +177,7 @@ export function AllCorrectAnswerClient({ correct, children }: AnswerProps) {
   );
 }
 
-export function AnyCorrectAnswerClient({ correct, children }: AnswerProps) {
+export function AnyCorrectAnswer({ correct, children }: AnswerProps) {
   const { id } = useAnswer();
   const { id: problemId } = useProblem();
   const { student, setStudent, terminated } = useStudent();
@@ -248,7 +244,7 @@ export type OpenAnswerProps = {
   type: "number" | "text";
 };
 
-export function OpenAnswerClient({ correct, type }: OpenAnswerProps) {
+export function OpenAnswer({ correct, type }: OpenAnswerProps) {
   const { registerProblem } = useContest();
   const { id: problemId, points } = useProblem();
   const { student, setStudent, terminated } = useStudent();
@@ -293,7 +289,7 @@ export function OpenAnswerClient({ correct, type }: OpenAnswerProps) {
   );
 }
 
-export function ExplanationClient({ children }: { children: ReactNode }) {
+export function Explanation({ children }: { children: ReactNode }) {
   const { terminated } = useStudent();
   const { id } = useProblem();
   if (process.env.NODE_ENV === "production" && !terminated) return;

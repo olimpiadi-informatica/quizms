@@ -1,12 +1,13 @@
 import { spawn } from "node:child_process";
-import { cp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { cp, mkdir, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { cwd } from "node:process";
 import { pathToFileURL } from "node:url";
 
 import { uniq } from "lodash-es";
 import type { OutputAsset, RollupOutput } from "rollup";
-import { build, type InlineConfig, mergeConfig, transformWithEsbuild } from "vite";
+import nodeExternals from "rollup-plugin-node-externals";
+import { build, createBuilder, type InlineConfig, mergeConfig } from "vite";
 import yaml from "yaml";
 
 import type { Schema, Variant } from "~/models";
@@ -15,6 +16,7 @@ import { hash } from "~/utils";
 import { fatal, load, success, withProgress } from "~/utils-node";
 
 import configs from "./vite/configs";
+import directives from "./vite/directives";
 import { externalLibs } from "./vite/statement-externals";
 
 export type ExportVariantsOptions = {
@@ -28,17 +30,35 @@ export default async function variants(options: ExportVariantsOptions) {
 
   const baseStatement = await buildBaseStatements(configs);
 
+  const cacheDir = path.join(cwd(), ".quizms", "cache");
   const buildDir = path.join(cwd(), ".quizms", "variants-build");
   const variantsDir = options?.outDir || path.join(cwd(), "variants");
 
+  await mkdir(cacheDir, { recursive: true });
   await rm(variantsDir, { recursive: true, force: true });
 
-  const rawCode = await readFile(baseStatement.clientModule.file, "utf-8");
-  const { code: clientModuleCode } = await transformWithEsbuild(
-    rawCode,
-    baseStatement.clientModule.file,
-    { minify: true, legalComments: "none" },
-  );
+  const clientModuleBuild = await build({
+    configFile: false,
+    root: buildDir,
+    mode: "production",
+    build: {
+      minify: true,
+      rollupOptions: {
+        input: baseStatement.clientModule.file,
+        output: {
+          entryFileNames: "[name].js",
+        },
+        preserveEntrySignatures: "strict",
+        treeshake: {
+          moduleSideEffects: false,
+        },
+      },
+    },
+    esbuild: {
+      legalComments: "none",
+    },
+    plugins: [directives(), nodeExternals()],
+  });
 
   const variants = configs.flatMap((config) =>
     uniq([...config.variantIds, ...config.pdfVariantIds]).map(
@@ -49,7 +69,10 @@ export default async function variants(options: ExportVariantsOptions) {
     const variantDir = path.join(variantsDir, config.id, variant);
     await mkdir(variantDir, { recursive: true });
 
-    await writeFile(path.join(variantDir, baseStatement.clientModule.id), clientModuleCode);
+    await cp(
+      path.join(buildDir, "dist", (clientModuleBuild as RollupOutput).output[0].fileName),
+      path.join(variantDir, baseStatement.clientModule.id),
+    );
     if (baseStatement.cssModule) {
       await cp(baseStatement.cssModule, path.join(variantDir, "statement.css"));
     }
@@ -68,6 +91,7 @@ export default async function variants(options: ExportVariantsOptions) {
         QUIZMS_VARIANT_HASH: variantHash.toString(),
         QUIZMS_SHUFFLE_PROBLEMS: config.shuffleProblems ? "true" : undefined,
         QUIZMS_SHUFFLE_ANSWERS: config.shuffleAnswers ? "true" : undefined,
+        QUIZMS_CACHE_DIR: cacheDir,
       },
     });
     child.stdout.on("data", (data) => rawSchema.push(data));
@@ -114,7 +138,8 @@ type BaseStatement = {
 async function buildBaseStatements(generationConfigs: VariantsConfig[]): Promise<BaseStatement> {
   const entry = Object.fromEntries(generationConfigs.map((c) => [c.id, c.entry]));
 
-  const outDir = path.join(cwd(), ".quizms", "variants-build");
+  const root = cwd();
+  const outDir = path.join(root, ".quizms", "variants-build");
   const bundleConfig = mergeConfig(configs("production"), {
     build: {
       copyPublicDir: false,
@@ -127,8 +152,8 @@ async function buildBaseStatements(generationConfigs: VariantsConfig[]): Promise
       },
       rollupOptions: {
         output: {
-          assetFileNames: "[name][extname]",
-          chunkFileNames: "[name].js",
+          assetFileNames: "chunks/[name][extname]",
+          chunkFileNames: "chunks/[name].js",
           hoistTransitiveImports: false,
           manualChunks: (id, meta) => {
             const info = meta.getModuleInfo(id);
@@ -137,19 +162,31 @@ async function buildBaseStatements(generationConfigs: VariantsConfig[]): Promise
             if (isClient) {
               return "client-modules";
             }
+            if (info?.isIncluded) {
+              return path.relative(root, id.replace("\0", "")).replace(/^(\.*\/)*/, "");
+            }
           },
+          onlyExplicitManualChunks: true,
         },
         external: externalLibs,
       },
     },
-    resolve: {
-      conditions: ["react-server"],
+    environments: {
+      rsc: {
+        resolve: {
+          conditions: ["react-server"],
+          noExternal: true,
+        },
+      },
     },
   } as InlineConfig);
 
+  const builder = await createBuilder(bundleConfig);
+  const environment = builder.environments.rsc;
+
   let outputs: RollupOutput[];
   try {
-    outputs = (await build(bundleConfig)) as RollupOutput[];
+    outputs = (await builder.build(environment)) as RollupOutput[];
   } catch (err) {
     fatal(`Build failed: ${err}`);
   }
@@ -216,7 +253,7 @@ import { renderToPipeableStream } from "react-server-dom-webpack/server";
 register("./loader.js", import.meta.url);
 register("react-server-dom-webpack/node-loader", import.meta.url);
 
-const { default: Statement } = await import(\`./base-statement-\${process.env.QUIZMS_CONTEST_ID}.mjs\`);
+const { default: Statement } = await import(\`./\${process.env.QUIZMS_CONTEST_ID}.mjs\`);
 
 const manifest = JSON.parse(await readFile("manifest.json", "utf-8"));
 const { pipe } = renderToPipeableStream(createElement(Statement), manifest);

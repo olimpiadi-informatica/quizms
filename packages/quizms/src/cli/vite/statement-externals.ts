@@ -6,7 +6,9 @@ import { fatal } from "~/utils-node";
 export const externalLibs = [
   "@olinfo/quizms/components",
   "@olinfo/quizms/student",
+  "@olinfo/quizms/models",
   "@olinfo/react-components",
+  "lodash-es",
   "react",
   "react/jsx-runtime",
 ];

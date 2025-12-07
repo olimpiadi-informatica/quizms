@@ -1,9 +1,9 @@
 import {
-  ProblemClient,
+  Problem as ProblemClient,
   type ProblemProps,
-  SubProblemClient,
+  SubProblem as SubProblemClient,
   type SubProblemProps,
-} from "./client/problem";
+} from "../client/problem";
 import { JsonArray, JsonField, JsonObject } from "./json";
 
 export function Problem({ points, children, originalId }: ProblemProps) {

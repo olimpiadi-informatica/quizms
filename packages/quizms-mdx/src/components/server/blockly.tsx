@@ -1,6 +1,6 @@
 import { Fragment } from "react";
 
-import { BlocklyClient, type BlocklyProps } from "./blockly/workspace";
+import { Blockly as BlocklyClient, type BlocklyProps } from "../blockly/workspace";
 import { JsonArray, JsonField, JsonObject, Token } from "./json";
 
 export function Blockly<State = any>(props: BlocklyProps<State>) {

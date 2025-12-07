@@ -1,6 +1,10 @@
 packages:
-  - 'packages/*'
-  - 'docs'
+  - packages/*
+  - docs
+
+ignoredBuiltDependencies:
+  - '@swc/core'
+
 linkWorkspacePackages: true
 
 onlyBuiltDependencies:
