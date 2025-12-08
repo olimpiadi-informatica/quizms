@@ -2,6 +2,7 @@ import { validate } from "@olinfo/quizms/utils";
 import type { CallableRequest } from "firebase-functions/https";
 import * as logger from "firebase-functions/logger";
 
+import { adminLogin } from "./admin";
 import { type ApiRequest, apiRequestSchema } from "./schema";
 import { studentLogin } from "./student";
 import {
@@ -31,6 +32,8 @@ async function dispatch(request: CallableRequest) {
 
   try {
     switch (data.action) {
+      case "adminLogin":
+        return await adminLogin(request, data);
       case "studentLogin":
         return await studentLogin(request, data);
       case "teacherLogin":

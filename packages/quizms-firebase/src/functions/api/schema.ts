@@ -42,6 +42,7 @@ export const teacherFinalizeParticipationSchema = z.object({
 export type TeacherFinalizeParticipation = z.infer<typeof teacherFinalizeParticipationSchema>;
 
 export const apiRequestSchema = z.discriminatedUnion("action", [
+  adminLoginSchema,
   studentLoginSchema,
   teacherLoginSchema,
   teacherStartParticipationSchema,
