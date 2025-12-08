@@ -8,7 +8,7 @@ import type { HtmlTagDescriptor } from "vite";
 
 import { warning } from "~/utils-node";
 
-import { getImportMap } from "./statement-externals";
+import { getBuildImportMap } from "./statement-externals";
 
 const template = `\
 <!DOCTYPE html>
@@ -87,7 +87,7 @@ export function generateHtmlFromBundle(
     {
       tag: "script",
       attrs: { type: "importmap" },
-      children: JSON.stringify(getImportMap()),
+      children: JSON.stringify(getBuildImportMap(bundle)),
       injectTo: "head",
     },
     {

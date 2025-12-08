@@ -1,4 +1,7 @@
+import type { OutputBundle } from "rollup";
 import type { PluginOption } from "vite";
+
+import { fatal } from "~/utils-node";
 
 export const externalLibs = [
   "@olinfo/quizms/components",
@@ -22,7 +25,6 @@ export function statementExternals(): PluginOption {
           this.emitFile({
             type: "chunk",
             id: `virtual:quizms-assets-${lib}`,
-            fileName: outputFile(lib),
             preserveSignature: "strict",
           });
         }
@@ -54,7 +56,7 @@ export function statementExternals(): PluginOption {
         }
 
         for (const lib of externalLibs) {
-          if (req.url === `/${outputFile(lib)}`) {
+          if (req.url === devFile(lib)) {
             const module = await server.transformRequest(`virtual:quizms-assets-${lib}`);
 
             res.setHeader("Content-Type", "application/javascript");
@@ -69,12 +71,25 @@ export function statementExternals(): PluginOption {
   };
 }
 
-export function getImportMap() {
-  const imports = Object.fromEntries(externalLibs.map((lib) => [lib, `/${outputFile(lib)}`]));
+export function getBuildImportMap(bundle: OutputBundle) {
+  const imports = Object.fromEntries(
+    externalLibs.map((lib) => {
+      const chunk = Object.values(bundle)
+        .filter((chunk) => chunk.type === "chunk")
+        .find((chunk) => chunk.facadeModuleId === `\0virtual:quizms-assets-${lib}`);
+      if (!chunk) fatal(`Missing chunk for ${lib}`);
+      return [lib, `/${chunk.fileName}`];
+    }),
+  );
   return { imports };
 }
 
-function outputFile(id: string) {
+export function getDevImportMap() {
+  const imports = Object.fromEntries(externalLibs.map((lib) => [lib, devFile(lib)]));
+  return { imports };
+}
+
+function devFile(id: string) {
   const fileName = id.replaceAll("/", "-").replaceAll(/[^\w-]/g, "");
-  return `assets/_lib/${fileName}.js`;
+  return `/statements-externals/${fileName}.js`;
 }
