@@ -26,6 +26,7 @@ export default async function staticExport(options: ExportOptions): Promise<void
       emitAssets: true,
       rollupOptions: {
         output: {
+          entryFileNames: "assets/[hash]-[name].js",
           hoistTransitiveImports: false,
           manualChunks: (id) => {
             if (id.includes("commonjsHelpers")) return "commonjs-helper";
