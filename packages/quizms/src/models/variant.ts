@@ -59,6 +59,21 @@ export type Schema = Variant["schema"];
 export type ClientVariant = z.infer<typeof clientVariantSchema>;
 export type ClientSchema = ClientVariant["schema"];
 
+export function decodeAllCorrectAnswer(answer?: Answer): string[] {
+  if (typeof answer !== "string") {
+    return [];
+  }
+  try {
+    return JSON.parse(answer);
+  } catch {
+    return [];
+  }
+}
+
+export function encodeAllCorrectAnswer(value: string[]): Answer {
+  return JSON.stringify(value);
+}
+
 export function parseAnswer(answer: string, schema: Schema[string]): Answer {
   let value: Answer = answer.trim().toUpperCase();
   if (!value) return null;
@@ -68,8 +83,28 @@ export function parseAnswer(answer: string, schema: Schema[string]): Answer {
       value = Number(value);
     }
   }
+
+  if (schema.kind === "allCorrect") {
+    value = encodeAllCorrectAnswer(answer.split(""));
+  }
+
   isValidAnswer(value, schema);
   return value;
+}
+
+export function displayAnswer(answer: Answer, kind: Schema[string]["kind"]): string {
+  switch (kind) {
+    case "allCorrect": {
+      const values = decodeAllCorrectAnswer(answer);
+      return values.join("");
+    }
+    default: {
+      if (answer === null) {
+        return "";
+      }
+      return `${answer}`;
+    }
+  }
 }
 
 export function isValidAnswer(answer: Answer, schema: Schema[string]) {
@@ -86,6 +121,16 @@ export function isValidAnswer(answer: Answer, schema: Schema[string]) {
       break;
     }
     case "allCorrect": {
+      const values = decodeAllCorrectAnswer(answer);
+      const wrong = values.filter(
+        (value) => !schema.options.some((option) => option.value === value),
+      );
+      if (wrong.length >= 1) {
+        throw new Error(`Opzioni non valide: ${wrong.join("")}`);
+      }
+      if (new Set(values).size !== values.length) {
+        throw new Error(`Opzioni ripetute: ${values.join("")}`);
+      }
       break;
     }
     default: {
@@ -114,6 +159,20 @@ export function calcScore(student: Student, schema?: Schema) {
 }
 
 export function calcProblemPoints(problem: Schema[string], answer?: Answer) {
+  if (problem.kind === "allCorrect") {
+    const values = decodeAllCorrectAnswer(answer);
+    if (values.length === 0) {
+      return 1; // TODO: save points in schema
+    }
+    const correctOptions = problem.options.filter((option) => option.points === 5);
+    if (
+      correctOptions.length !== values.length &&
+      correctOptions.some((option) => !values.some((value) => option.value === value))
+    ) {
+      return 0;
+    }
+    return 5;
+  }
   for (const option of problem.options ?? []) {
     if (option.value === (answer ?? null)) {
       return option.points;

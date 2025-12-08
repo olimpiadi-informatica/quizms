@@ -12,6 +12,7 @@ import {
   useState,
 } from "react";
 
+import { decodeAllCorrectAnswer, encodeAllCorrectAnswer } from "@olinfo/quizms/models";
 import { useStudent } from "@olinfo/quizms/student";
 import clsx from "clsx";
 import { Trash2 } from "lucide-react";
@@ -122,20 +123,24 @@ export function AllCorrectAnswerClient({ correct, children }: AnswerProps) {
   const { registerCorrectOption } = use(MultipleChoiceContext);
 
   const answer = student.answers?.[problemId!];
-  const currentlyChecked = useMemo(
-    () => typeof answer === "string" && answer.indexOf(id) !== -1,
-    [answer, id],
+  const parsedAnswer = useMemo<string[]>(() => decodeAllCorrectAnswer(answer), [answer]);
+  const currentlyChecked = useMemo(() => parsedAnswer.indexOf(id) !== -1, [parsedAnswer, id]);
+  const setAnswer = useCallback(
+    async (value: string, checked: boolean) => {
+      const newAnswer = parsedAnswer;
+      const index = parsedAnswer.indexOf(value);
+      if (checked && index === -1) {
+        newAnswer.push(value);
+      } else if (!checked && index !== -1) {
+        newAnswer.splice(index, 1);
+      }
+      await setStudent({
+        ...student,
+        answers: { ...student.answers, [problemId!]: encodeAllCorrectAnswer(newAnswer) },
+      });
+    },
+    [parsedAnswer, student, problemId, setStudent],
   );
-  const setAnswer = async (value: string, checked: boolean) => {
-    const currentAnswer = typeof answer !== "string" ? "" : answer;
-    let newAnswer = currentAnswer;
-    if (checked && !currentlyChecked) {
-      newAnswer = currentAnswer.split("").concat(value).sort().join("");
-    } else if (!checked && currentlyChecked) {
-      newAnswer = currentAnswer.replace(value, "");
-    }
-    await setStudent({ ...student, answers: { ...student.answers, [problemId!]: newAnswer } });
-  };
 
   const answerId = useId();
 

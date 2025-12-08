@@ -15,6 +15,7 @@ import { Download, FileCheck, Trash2, TriangleAlert, Upload, UserCheck } from "l
 import {
   type Contest,
   calcScore,
+  displayAnswer,
   formatUserData,
   parseAnswer,
   parseUserData,
@@ -299,7 +300,9 @@ function columnDefinition(
         valueGetter: ({ data }) => {
           if (data.absent || data.disabled) return "";
           if (!(id in (data.answers ?? {}))) return "";
-          return data.answers[id] ?? "";
+          return (
+            displayAnswer(data.answers[id], variants[data.variant as string].schema[id].kind) ?? ""
+          );
         },
         tooltipValueGetter: ({ data }) => data.answers?.[id],
         editable: ({ data }) => contest.allowAnswerEdit && !data.absent && !data.disabled,
