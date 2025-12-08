@@ -47,7 +47,7 @@ export function StudentRestoring({ user, children }: { user: User; children: Rea
           </div>
         </NavbarBrand>
         <NavbarContent>
-          <UserDropdown name={user.displayName} />
+          <UserDropdown name={`${studentRestore.name} ${studentRestore.surname}`} />
         </NavbarContent>
       </Navbar>
       <div className="flex flex-col justify-center items-center grow text-center m-4">

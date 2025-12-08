@@ -107,7 +107,6 @@ export const studentLogin: Endpoint<StudentLogin> = async (_request, data) => {
     updatedAt: Timestamp.now(),
   });
 
-  await auth.createUser({ uid, displayName: `${userData.name} ${userData.surname}` });
   const token = await auth.createCustomToken(uid, {
     role: "student",
     studentId: studentRef.id,
