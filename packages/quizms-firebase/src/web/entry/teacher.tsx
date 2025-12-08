@@ -88,7 +88,7 @@ function useAnnouncements(contestId: string) {
     arrayConstraints: {
       contestIds: contestId,
     },
-    orderBy: "createdAt",
+    orderBy: ["createdAt", "desc"],
     subscribe: true,
   });
   return announcements;
