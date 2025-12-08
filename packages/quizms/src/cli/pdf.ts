@@ -21,10 +21,12 @@ async function generatePdf(
   info(`Printing statement ${variant}.`);
   const page = await context.newPage();
   await page.goto(`${baseUrl}/${contest.id}?v=${variant}`, { waitUntil: "load" });
+  await page.waitForLoadState("networkidle");
+  await page.waitForTimeout(1000);
+  await page.waitForSelector("#loading", { strict: true, state: "detached" });
   for (const img of await page.getByRole("img").all()) {
     await img.isVisible();
   }
-  await page.waitForTimeout(1000);
 
   const basePdf = await page.pdf({
     format: "a4",
