@@ -1,5 +1,4 @@
 import { mkdir, writeFile } from "node:fs/promises";
-import { cpus } from "node:os";
 import path from "node:path";
 
 import { PDFDocument, type PDFPageDrawTextOptions, StandardFonts } from "@cantoo/pdf-lib";
@@ -8,8 +7,7 @@ import { type BrowserContext, chromium } from "playwright";
 
 import type { Contest } from "~/models";
 import type { VariantsConfig } from "~/models/variants-config";
-import { AsyncPool } from "~/utils";
-import { fatal, info } from "~/utils-node";
+import { fatal, withProgress } from "~/utils-node";
 
 async function generatePdf(
   context: BrowserContext,
@@ -18,7 +16,6 @@ async function generatePdf(
   variant: string,
   outDir: string,
 ) {
-  info(`Printing statement ${variant}.`);
   const page = await context.newPage();
   await page.goto(`${baseUrl}/${contest.id}?v=${variant}`, { waitUntil: "load" });
   await page.waitForLoadState("networkidle");
@@ -81,21 +78,19 @@ export default async function generatePdfs(
   const browser = await chromium.launch({ headless: true });
   const context = await browser.newContext();
 
-  const pool = new AsyncPool(cpus().length);
-
-  for (const contest of contests) {
+  const ids = contests.flatMap((contest) => {
     const config = variantConfigs.find((c) => c.id === contest.id);
     if (!config) {
       fatal(`Missing variants configuration for contest ${contest.id}.`);
     }
+    return uniq([...config.variantIds, ...config.pdfVariantIds]).map(
+      (id) => [contest, id] as const,
+    );
+  });
 
-    const ids = uniq([...config.variantIds, ...config.pdfVariantIds]);
-    for (const id of ids) {
-      void pool.run(() => generatePdf(context, contest, baseUrl, id, outDir));
-    }
-  }
-
-  await pool.wait();
+  await withProgress(ids, ids.length, ([contest, id]) =>
+    generatePdf(context, contest, baseUrl, id, outDir),
+  );
 
   await context.close();
   await browser.close();

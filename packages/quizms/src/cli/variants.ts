@@ -1,18 +1,18 @@
 import { spawn } from "node:child_process";
 import { cp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
-import { cpus } from "node:os";
 import path from "node:path";
 import { cwd } from "node:process";
 import { pathToFileURL } from "node:url";
 
+import { uniq } from "lodash-es";
 import type { OutputAsset, RollupOutput } from "rollup";
 import { build, type InlineConfig, mergeConfig, transformWithEsbuild } from "vite";
 import yaml from "yaml";
 
 import type { Schema, Variant } from "~/models";
 import { type VariantsConfig, variantsConfigSchema } from "~/models/variants-config";
-import { AsyncPool, hash } from "~/utils";
-import { fatal, info, load, success } from "~/utils-node";
+import { hash } from "~/utils";
+import { fatal, load, success, withProgress } from "~/utils-node";
 
 import configs from "./vite/configs";
 import { externalLibs } from "./vite/statement-externals";
@@ -40,60 +40,57 @@ export default async function variants(options: ExportVariantsOptions) {
     { minify: true, legalComments: "none" },
   );
 
-  const pool = new AsyncPool(cpus().length);
-  for (const config of configs) {
-    for (const variant of [...config.variantIds, ...config.pdfVariantIds]) {
-      void pool.run(async () => {
-        const variantDir = path.join(variantsDir, config.id, variant);
-        await mkdir(variantDir, { recursive: true });
+  const variants = configs.flatMap((config) =>
+    uniq([...config.variantIds, ...config.pdfVariantIds]).map(
+      (variant) => [config, variant] as const,
+    ),
+  );
+  await withProgress(variants, variants.length, async ([config, variant]) => {
+    const variantDir = path.join(variantsDir, config.id, variant);
+    await mkdir(variantDir, { recursive: true });
 
-        await writeFile(path.join(variantDir, baseStatement.clientModule.id), clientModuleCode);
-        if (baseStatement.cssModule) {
-          await cp(baseStatement.cssModule, path.join(variantDir, "statement.css"));
-        }
-
-        const variantHash = hash(`${config.id}-${variant}-${config.secret}`);
-        info(`Building variant ${variant} (${variantHash})...`);
-
-        const rawSchema: Buffer[] = [];
-        const child = spawn(process.execPath, ["--conditions=react-server", "server.js"], {
-          cwd: buildDir,
-          stdio: ["ignore", "pipe", "inherit"],
-          env: {
-            ...process.env,
-            NODE_ENV: "production",
-            QUIZMS_CONTEST_ID: config.id,
-            QUIZMS_VARIANT_ID: variant,
-            QUIZMS_VARIANT_HASH: variantHash.toString(),
-            QUIZMS_SHUFFLE_PROBLEMS: config.shuffleProblems ? "true" : undefined,
-            QUIZMS_SHUFFLE_ANSWERS: config.shuffleAnswers ? "true" : undefined,
-          },
-        });
-        child.stdout.on("data", (data) => rawSchema.push(data));
-        const code = await new Promise<number>((resolve, reject) => {
-          child.on("close", resolve);
-          child.on("error", reject);
-        });
-        if (code !== 0) {
-          fatal(`Failed to build variant ${variant}.`);
-        }
-
-        const schema = yaml.parse(`{ "schema": ${Buffer.concat(rawSchema).toString("utf-8")} }`);
-        await writeFile(
-          path.join(variantDir, "answers.json"),
-          JSON.stringify({
-            id: variant,
-            isOnline: config.variantIds.includes(variant),
-            isPdf: config.pdfVariantIds.includes(variant),
-            contestId: config.id,
-            schema: parseSchema(schema.schema),
-          } satisfies Variant),
-        );
-      });
+    await writeFile(path.join(variantDir, baseStatement.clientModule.id), clientModuleCode);
+    if (baseStatement.cssModule) {
+      await cp(baseStatement.cssModule, path.join(variantDir, "statement.css"));
     }
-  }
 
-  await pool.wait();
+    const variantHash = hash(`${config.id}-${variant}-${config.secret}`);
+
+    const rawSchema: Buffer[] = [];
+    const child = spawn(process.execPath, ["--conditions=react-server", "server.js"], {
+      cwd: buildDir,
+      stdio: ["ignore", "pipe", "inherit"],
+      env: {
+        ...process.env,
+        NODE_ENV: "production",
+        QUIZMS_CONTEST_ID: config.id,
+        QUIZMS_VARIANT_ID: variant,
+        QUIZMS_VARIANT_HASH: variantHash.toString(),
+        QUIZMS_SHUFFLE_PROBLEMS: config.shuffleProblems ? "true" : undefined,
+        QUIZMS_SHUFFLE_ANSWERS: config.shuffleAnswers ? "true" : undefined,
+      },
+    });
+    child.stdout.on("data", (data) => rawSchema.push(data));
+    const code = await new Promise<number>((resolve, reject) => {
+      child.on("close", resolve);
+      child.on("error", reject);
+    });
+    if (code !== 0) {
+      fatal(`Failed to build variant ${variant}.`);
+    }
+
+    const schema = yaml.parse(`{ "schema": ${Buffer.concat(rawSchema).toString("utf-8")} }`);
+    await writeFile(
+      path.join(variantDir, "answers.json"),
+      JSON.stringify({
+        id: variant,
+        isOnline: config.variantIds.includes(variant),
+        isPdf: config.pdfVariantIds.includes(variant),
+        contestId: config.id,
+        schema: parseSchema(schema.schema),
+      } satisfies Variant),
+    );
+  });
 }
 
 type Manifest = Record<

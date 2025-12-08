@@ -2,9 +2,7 @@ import { existsSync } from "node:fs";
 
 import type { Bucket } from "@google-cloud/storage";
 import { confirm } from "@inquirer/prompts";
-import { AsyncPool } from "@olinfo/quizms/utils";
-import { fatal, success } from "@olinfo/quizms/utils-node";
-import { SingleBar } from "cli-progress";
+import { fatal, success, withProgress } from "@olinfo/quizms/utils-node";
 import { partition } from "lodash-es";
 import pc from "picocolors";
 
@@ -19,32 +17,21 @@ export async function importStorage(
   files: [string, string][],
   options: ImportOptions,
 ) {
-  const bar = new SingleBar({
-    format: "  {bar} {percentage}% | {value}/{total}",
-    barCompleteChar: "\u2588",
-    barIncompleteChar: "\u2582",
-  });
-
   const existingFiles = new Set<string>();
 
-  bar.start(files.length, 0);
-  await Promise.all(
-    files.map(async ([local, remote]) => {
-      if (!existsSync(local)) {
-        fatal(
-          `Cannot find ${collection}. Make sure to generate them first, use \`quizms --help\` for usage.`,
-        );
-      }
+  await withProgress(files, files.length, async ([local, remote]) => {
+    if (!existsSync(local)) {
+      fatal(
+        `Cannot find ${collection}. Make sure to generate them first, use \`quizms --help\` for usage.`,
+      );
+    }
 
-      const file = bucket.file(remote);
-      const [exists] = await file.exists().catch(() => [false]);
-      if (exists) {
-        existingFiles.add(remote);
-      }
-      bar.increment();
-    }),
-  );
-  bar.stop();
+    const file = bucket.file(remote);
+    const [exists] = await file.exists().catch(() => [false]);
+    if (exists) {
+      existingFiles.add(remote);
+    }
+  });
 
   const [existing, nonExisting] = partition(files, ([_, remote]) => existingFiles.has(remote));
   if (existing.length > 0 && !options.skipExisting && !options.force) {
@@ -67,18 +54,9 @@ export async function importStorage(
     }
   }
 
-  bar.start(filesToImport.length, 0);
-
-  const pool = new AsyncPool(8);
-  for (const [local, remote] of filesToImport) {
-    void pool.run(async () => {
-      await bucket.upload(local, { destination: remote });
-      bar.increment();
-    });
-  }
-  await pool.wait();
-
-  bar.stop();
+  await withProgress(filesToImport, filesToImport.length, ([local, remote]) =>
+    bucket.upload(local, { destination: remote }),
+  );
 
   success(`${filesToImport.length} ${collection} imported!`);
 }
