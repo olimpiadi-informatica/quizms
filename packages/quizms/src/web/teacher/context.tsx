@@ -34,7 +34,7 @@ export type TeacherContextProps = {
   /** Funzione per ottenere i pdf dei testi */
   getPdfStatements: () => Promise<Record<string, ArrayBuffer>>;
   /** Hook per ottenere gli annunci */
-  useAnnouncements: (participationId: string) => Announcement[];
+  useAnnouncements: (contestId: string) => Announcement[];
   /** Hook per ottenere gli studenti di una scuola */
   useStudents: (
     participationId: string,
@@ -73,8 +73,8 @@ export function useTeacher(): Omit<OmitContestParam<TeacherContextProps>, `use${
 }
 
 export function useTeacherAnnouncements() {
-  const { participation, useAnnouncements } = use(TeacherContext);
-  return useAnnouncements(participation.id);
+  const { contest, useAnnouncements } = use(TeacherContext);
+  return useAnnouncements(contest.id);
 }
 
 export function useTeacherStudents() {

@@ -29,7 +29,7 @@ type TeacherProviderProps = {
     contestId: string,
     variantIds: string[],
   ) => Promise<Record<string, ArrayBuffer>>;
-  useAnnouncements: (participationId: string) => Announcement[];
+  useAnnouncements: (contestId: string) => Announcement[];
   useStudents: (
     participationId: string,
   ) => readonly [Student[], (student: Student) => Promise<void>];

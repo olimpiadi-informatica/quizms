@@ -9,6 +9,7 @@ import { getBytes, getStorage, ref } from "firebase/storage";
 import { finalizeParticipation, startParticipation, stopParticipation } from "~/web/common/api";
 import { useDb } from "~/web/common/base-login";
 import {
+  announcementConverter,
   contestConverter,
   participationConverter,
   studentConverter,
@@ -82,8 +83,15 @@ async function getPdfStatements(
   return Object.fromEntries(files);
 }
 
-function useAnnouncements(_participationId: string) {
-  return [];
+function useAnnouncements(contestId: string) {
+  const [announcements] = useCollection("announcements", announcementConverter, {
+    arrayConstraints: {
+      contestIds: contestId,
+    },
+    orderBy: "createdAt",
+    subscribe: true,
+  });
+  return announcements;
 }
 
 function useStudents(participationId: string) {
