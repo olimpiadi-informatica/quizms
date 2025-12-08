@@ -59,7 +59,7 @@ export function StudentLayout({
         const lastActive = localStorage.getItem(key);
         const lastActiveTime = lastActive ? new Date(lastActive) : now;
 
-        const deadlineDate = addMilliseconds(lastActiveTime, 15_500);
+        const deadlineDate = addMilliseconds(lastActiveTime, 10_500);
         setWarningDeadline(deadlineDate);
 
         if (isPast(deadlineDate)) {
