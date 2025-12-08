@@ -18,7 +18,6 @@ import { addMilliseconds, isPast } from "date-fns";
 import { sumBy } from "lodash-es";
 import { FileChartColumn, LogOut, RotateCcw } from "lucide-react";
 
-import { calcProblemPoints, type Schema } from "~/models";
 import { ErrorBoundary, Progress, Prose, Timer, Title } from "~/web/components";
 
 import { useStudent } from "./context";
@@ -171,7 +170,7 @@ export function StudentLayout({
       </Navbar>
       <div className="mx-auto flex w-full max-w-screen-xl grow flex-col p-4 pb-8">
         <ErrorBoundary>
-          <CompletedModal ref={completedRef} schema={schema} />
+          <CompletedModal ref={completedRef} />
           <SubmitModal ref={submitRef} />
           <Prose>
             {contest.longName && <h1 className="text-pretty">{contest.longName}</h1>}
@@ -207,54 +206,10 @@ function UserDropdown() {
   );
 }
 
-const CompletedModal = forwardRef(function CompletedModal(
-  { schema }: { schema: Schema },
-  ref: Ref<HTMLDialogElement>,
-) {
-  const { student } = useStudent();
-
-  const problems = Object.keys(schema);
-  problems.sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
-
-  const maxPoints = sumBy(Object.values(schema), "maxPoints");
-
+const CompletedModal = forwardRef(function CompletedModal(_props, ref: Ref<HTMLDialogElement>) {
   return (
     <Modal ref={ref} title="Prova terminata">
       <p>La prova è terminata.</p>
-      {student.score !== undefined && (
-        <>
-          <p>
-            Hai ottenuto un punteggio di <b>{student.score}</b> su <b>{maxPoints}</b>.
-          </p>
-          <table className="table table-sm text-center mt-4">
-            <thead>
-              <tr>
-                <th scope="col">Domanda</th>
-                <th scope="col">Risposta</th>
-                <th scope="col">Soluzione</th>
-                <th scope="col">Punteggio</th>
-              </tr>
-            </thead>
-            <tbody>
-              {problems.map((problem) => {
-                const answer = student.answers?.[problem];
-                const problemSchema = schema[problem];
-                const correctOptions = problemSchema.options
-                  ?.filter((o) => o.points === problemSchema.maxPoints)
-                  .map((o) => o.value);
-                return (
-                  <tr key={problem}>
-                    <td>{problem}</td>
-                    <td>{answer ?? "-"}</td>
-                    <td>{correctOptions?.join(", ")}</td>
-                    <td>{calcProblemPoints(problemSchema, answer)}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </>
-      )}
     </Modal>
   );
 });

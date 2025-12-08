@@ -54,7 +54,7 @@ export function BlocklyClient<State>({
   useEffect(() => {
     for (let i = 0; i < testcases.length; i++) {
       registerProblem(`${id}.${i + 1}`, {
-        type: "text",
+        kind: "anyCorrect",
         allowEmpty: true,
         maxPoints: points[0],
         options: [

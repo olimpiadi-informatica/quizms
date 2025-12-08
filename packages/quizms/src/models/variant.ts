@@ -7,7 +7,19 @@ export const answerSchema = z.union([z.string(), z.number(), z.null()]);
 export const answerOptionSchema = z.object({
   value: answerSchema,
   points: z.number(),
-  originalId: z.string().optional(),
+});
+
+export const clientVariantSchema = z.object({
+  id: z.string(),
+  contestId: z.string(),
+  schema: z.record(
+    z.object({
+      maxPoints: z.number(),
+      allowEmpty: z.boolean(),
+      kind: z.enum(["open", "allCorrect", "anyCorrect"]),
+      options: answerOptionSchema.array(),
+    }),
+  ),
 });
 
 export const variantSchema = z.object({
@@ -16,51 +28,67 @@ export const variantSchema = z.object({
   isPdf: z.boolean(),
   contestId: z.string(),
   schema: z.record(
-    z.object({
-      type: z.enum(["text", "number", "points"]),
-      maxPoints: z.number(),
-      originalId: z.coerce.string().optional(),
-      options: answerOptionSchema.array().optional(),
-      allowEmpty: z.boolean().default(true),
-    }),
+    z.intersection(
+      z.object({
+        type: z.enum(["text", "number"]),
+        maxPoints: z.number(),
+        originalId: z.string(),
+        allowEmpty: z.boolean().default(true),
+      }),
+      z.discriminatedUnion("kind", [
+        z.object({
+          kind: z.enum(["open"]),
+          options: answerOptionSchema.array(),
+        }),
+        z.object({
+          kind: z.enum(["allCorrect", "anyCorrect"]),
+          options: answerOptionSchema
+            .extend({
+              originalId: z.string(),
+            })
+            .array(),
+        }),
+      ]),
+    ),
   ),
 });
 
 export type Answer = z.infer<typeof answerSchema>;
 export type Variant = z.infer<typeof variantSchema>;
 export type Schema = Variant["schema"];
+export type ClientVariant = z.infer<typeof clientVariantSchema>;
+export type ClientSchema = ClientVariant["schema"];
 
 export function parseAnswer(answer: string, schema: Schema[string]): Answer {
   let value: Answer = answer.trim().toUpperCase();
   if (!value) return null;
 
-  const options = schema.options?.map((option) => option.value) ?? [];
-  if (!options.includes(value) && (schema.type === "number" || schema.type === "points")) {
-    value = Number(value);
+  if (schema.kind === "open") {
+    if (schema.type === "number") {
+      value = Number(value);
+    }
   }
   isValidAnswer(value, schema);
   return value;
 }
 
 export function isValidAnswer(answer: Answer, schema: Schema[string]) {
-  if (answer == null || schema.options?.some((option) => option.value === answer)) return;
-  switch (schema.type) {
-    case "text": {
-      throw new Error(`La risposta "${answer}" non è valida`);
-    }
-    case "number": {
-      if (!Number.isInteger(answer)) {
-        throw new TypeError("La risposta deve essere un numero intero");
+  if (answer == null) return;
+  if (schema.type === "number" && !Number.isInteger(answer)) {
+    throw new TypeError("La risposta deve essere un numero intero");
+  }
+
+  switch (schema.kind) {
+    case "anyCorrect": {
+      if (!schema.options.some((option) => option.value === answer)) {
+        throw new Error(`Opzione non valida: ${answer}`);
       }
       break;
     }
-    case "points": {
-      if (typeof answer !== "number" || !Number.isInteger(answer)) {
-        throw new TypeError("Il punteggio deve essere un numero intero");
-      }
-      if (!(0 <= answer && answer <= schema.maxPoints)) {
-        throw new Error(`Il punteggio deve essere compreso tra 0 e ${schema.maxPoints}`);
-      }
+    case "allCorrect": {
+      break;
+    }
+    default: {
       break;
     }
   }
@@ -77,10 +105,8 @@ export function calcScore(student: Student, schema?: Schema) {
   for (const id in schema) {
     const problem = schema[id];
     const answer = answers[id];
-    if (!problem.allowEmpty && (answer == null || answer === "")) return;
 
     const points = calcProblemPoints(problem, answer);
-    if (points == null) return;
     score += points;
   }
 
@@ -92,10 +118,6 @@ export function calcProblemPoints(problem: Schema[string], answer?: Answer) {
     if (option.value === (answer ?? null)) {
       return option.points;
     }
-  }
-
-  if (problem.type === "points") {
-    return answer as number;
   }
 
   return 0;

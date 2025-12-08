@@ -256,45 +256,71 @@ function parseSchema(schema: RawSchema): Schema {
         (subProblem) =>
           [
             getFullSubProblemId(problem.id, subProblem.id),
-            {
-              originalId:
-                problem.originalId != null
-                  ? getFullSubProblemId(problem.originalId, subProblem.id)
-                  : undefined,
-              type: subProblem.type,
-              maxPoints: problem.pointsCorrect,
-              options: [
-                ...subProblem.options.map((option) => ({
-                  value: option.value,
-                  points: option.correct ? problem.pointsCorrect : problem.pointsWrong,
-                  originalId: option.originalId,
-                })),
-                {
-                  value: null,
-                  points: problem.pointsBlank,
-                },
-              ],
-              allowEmpty: true,
-            },
+            parseSubProblem(problem, subProblem),
           ] as const,
       ),
     ),
   );
 }
 
-type RawSchema = {
+function parseSubProblem(problem: RawProblem, subProblem: RawSubProblem): Schema[string] {
+  const common = {
+    originalId: getFullSubProblemId(problem.originalId, subProblem.id),
+    type: subProblem.type,
+    maxPoints: problem.pointsCorrect,
+    allowEmpty: true,
+  };
+
+  if (subProblem.kind === "open") {
+    return {
+      ...common,
+      kind: subProblem.kind,
+      options: subProblem.options.map((option) => ({
+        value: option.value,
+        points: option.correct ? problem.pointsCorrect : problem.pointsWrong,
+      })),
+    };
+  }
+
+  return {
+    ...common,
+    kind: subProblem.kind,
+    options: subProblem.options.map((option) => ({
+      value: option.value,
+      points: option.correct ? problem.pointsCorrect : problem.pointsWrong,
+      originalId: option.originalId,
+    })),
+  };
+}
+
+type RawAnswerOption = {
+  value: string;
+  correct: boolean;
+};
+
+type RawSubProblem = {
+  id: string;
+  type: "text" | "number";
+} & (
+  | {
+      kind: "open";
+      options: RawAnswerOption[];
+    }
+  | {
+      kind: "anyCorrect" | "allCorrect";
+      options: (RawAnswerOption & {
+        originalId: string;
+      })[];
+    }
+);
+
+type RawProblem = {
   id: string;
   pointsCorrect: number;
   pointsBlank: number;
   pointsWrong: number;
-  originalId?: string;
-  subProblems: {
-    id: string;
-    type: "text" | "number";
-    options: {
-      value: string;
-      correct: boolean;
-      originalId?: string;
-    }[];
-  }[];
-}[];
+  originalId: string;
+  subProblems: RawSubProblem[];
+};
+
+type RawSchema = RawProblem[];

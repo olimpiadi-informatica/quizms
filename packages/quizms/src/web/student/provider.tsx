@@ -2,7 +2,14 @@ import { type ReactNode, useCallback, useEffect, useState } from "react";
 
 import { useIsAfter } from "@olinfo/react-components";
 
-import { type Contest, calcScore, type Participation, type Schema, type Student } from "~/models";
+import {
+  type ClientSchema,
+  type Contest,
+  calcScore,
+  type Participation,
+  type Schema,
+  type Student,
+} from "~/models";
 
 import { StudentContext, type StudentContextProps } from "./context";
 import { StudentLayout } from "./layout";
@@ -36,13 +43,13 @@ export function StudentProvider({
   children: ReactNode;
   enforceFullscreen: boolean;
 }) {
-  const [schema, registerSchema] = useState<Schema>({});
+  const [schema, registerSchema] = useState<ClientSchema>({});
   const terminated = useIsAfter(student.finishedAt) ?? false;
 
   const setStudentAndScore = useCallback(
     async (student: Student) => {
       if (process.env.QUIZMS_MODE === "training") {
-        await setStudent({ ...student, score: calcScore(student, schema) });
+        await setStudent({ ...student, score: calcScore(student, schema as Schema) });
       } else {
         await setStudent(student);
       }

@@ -80,7 +80,7 @@ export function MultipleChoiceAnswerClient({
   useEffect(() => {
     const toRegister = kind === "allCorrect" ? [correctOptions.join("")] : correctOptions;
     registerProblem(`${problemId}`, {
-      type: "text",
+      kind: kind,
       allowEmpty: true,
       maxPoints: points[0],
       options: [
@@ -256,15 +256,12 @@ export function OpenAnswerClient({ correct, type }: OpenAnswerProps) {
 
   useEffect(() => {
     registerProblem(`${problemId}`, {
-      type: "text",
+      kind: "open",
       allowEmpty: true,
       maxPoints: points[0],
-      options: [
-        { value: correct ?? null, points: points[0] },
-        { value: null, points: points[1] },
-      ],
+      options: [{ value: null, points: points[1] }],
     });
-  }, [registerProblem, problemId, correct, points]);
+  }, [registerProblem, problemId, points]);
 
   return (
     <div className="px-2">

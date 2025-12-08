@@ -39,6 +39,7 @@ export function MultipleChoiceAnswer({
   return (
     <>
       <JsonField field="type" value="text" />
+      <JsonField field="kind" value={kind} />
       <JsonField field="options">
         <JsonArray>
           <MultipleChoiceAnswerClient answerIds={answerIds} kind={kind}>
@@ -63,6 +64,7 @@ export function OpenAnswer({ correct }: OpenAnswerProps) {
   return (
     <>
       <JsonField field="type" value={type} />
+      <JsonField field="kind" value="open" />
       <JsonField field="options">
         <JsonArray>
           <JsonObject>

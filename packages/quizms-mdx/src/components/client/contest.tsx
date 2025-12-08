@@ -2,13 +2,13 @@
 
 import { createContext, type ReactNode, use, useCallback } from "react";
 
-import type { Schema } from "@olinfo/quizms/models";
+import type { ClientSchema } from "@olinfo/quizms/models";
 import { useStudent } from "@olinfo/quizms/student";
 import { Button } from "@olinfo/react-components";
 import { addMinutes } from "date-fns";
 
 type ContestContextProps = {
-  registerProblem: (id: string, schema: Schema[string]) => void;
+  registerProblem: (id: string, schema: ClientSchema[string]) => void;
 };
 
 const ContestContext = createContext<ContestContextProps>({
@@ -19,7 +19,7 @@ ContestContext.displayName = "ContestContext";
 export function ContestClient({ children }: { children: ReactNode }) {
   const { student, setStudent, contest, registerSchema } = useStudent();
   const registerProblem = useCallback(
-    (id: string, problem: Schema[string]) => {
+    (id: string, problem: ClientSchema[string]) => {
       registerSchema((schema) => ({
         ...schema,
         [id]: problem,

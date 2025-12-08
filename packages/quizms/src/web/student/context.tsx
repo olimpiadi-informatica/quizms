@@ -1,6 +1,6 @@
 import { createContext, type Dispatch, type SetStateAction, use } from "react";
 
-import type { Contest, Participation, Schema, Student } from "~/models";
+import type { ClientSchema, Contest, Participation, Student } from "~/models";
 
 export type StudentContextProps = {
   student: Student;
@@ -11,8 +11,8 @@ export type StudentContextProps = {
   onSubmit?: () => Promise<void> | void;
   logout?: () => Promise<void> | void;
   terminated: boolean;
-  schema: Schema;
-  registerSchema: Dispatch<SetStateAction<Schema>>;
+  schema: ClientSchema;
+  registerSchema: Dispatch<SetStateAction<ClientSchema>>;
 };
 
 export const StudentContext = createContext<StudentContextProps>({} as StudentContextProps);
