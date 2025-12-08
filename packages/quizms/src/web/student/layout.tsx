@@ -96,7 +96,7 @@ export function StudentLayout({
           <div className="text-7xl font-black font-mono p-4">
             <Timer endTime={warningDeadline} hideMinutes />
           </div>
-          {!document.fullscreenElement && (
+          {!isIOS && !document.fullscreenElement && (
             <Button
               className="btn-warning btn-lg font-bold"
               onClick={() => document.documentElement.requestFullscreen()}>
