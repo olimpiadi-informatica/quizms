@@ -122,14 +122,10 @@ export function StudentLayout({
               {progress}%
             </Progress>
             <div className="px-3">
-              {terminated || !participation.startingTime || !contest.hasOnline ? (
+              {terminated || !student.finishedAt || !contest.hasOnline ? (
                 <span className="font-mono">00:00</span>
               ) : (
-                <Timer
-                  startTime={participation.startingTime}
-                  duration={contest.duration}
-                  noAnimation
-                />
+                <Timer endTime={student.finishedAt} noAnimation />
               )}
             </div>
             {terminated && reset ? (
