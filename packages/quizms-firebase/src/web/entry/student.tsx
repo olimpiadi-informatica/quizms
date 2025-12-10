@@ -84,7 +84,6 @@ function StudentForm({ contests }: { contests: Contest[] }) {
 
       const auth = getAuth(db.app);
       await signInWithCustomToken(auth, data.token);
-      await document.documentElement.requestFullscreen?.();
     },
     [db],
   );

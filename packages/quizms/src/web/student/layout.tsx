@@ -47,6 +47,8 @@ export function StudentLayout({
   useEffect(() => {
     if (!enforceFullscreen || terminated) return;
 
+    if (!isIOS) document.documentElement.requestFullscreen?.();
+
     const interval = setInterval(() => {
       const isFullscreen = !!document.fullscreenElement || isIOS;
       const isFocused = document.hasFocus() || (isIOS && document.visibilityState === "visible");
