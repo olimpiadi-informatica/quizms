@@ -71,7 +71,8 @@ export const FinalizeModal = forwardRef(function FinalizeModal(
         <Form onSubmit={finalize} className="!max-w-full">
           <div className="prose">
             <p>
-              <strong className="text-error">Attenzione:</strong> questa operazione è irreversibile.
+              <strong className="text-error">Attenzione:</strong> questa operazione è irreversibile
+              e va fatta una sola volta <b>dopo tutti i turni di gara</b>.
             </p>
             <p>
               Finalizzando <b>non</b> sarà più possibile{" "}

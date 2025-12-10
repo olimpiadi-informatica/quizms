@@ -53,7 +53,8 @@ export function StudentRestoring({ user, children }: { user: User; children: Rea
       <div className="flex flex-col justify-center items-center grow text-center m-4">
         <p className="text-lg max-w-3xl">
           Il tuo account è già presente su un&apos;altro dispositivo. Per trasferire l&apos;accesso
-          al dispositivo corrente comunica al tuo insegnante il codice seguente:
+          al dispositivo corrente comunica al tuo insegnante di inserire il codice seguente in fondo
+          alla pagina di gestione gara, sezione &quot;richieste di accesso&quot;:
         </p>
         <div className="flex justify-center pt-3">
           <span className="pt-1 font-mono text-3xl">
