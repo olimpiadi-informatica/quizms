@@ -39,15 +39,17 @@ export function StudentLayout({
   const progress = Math.round((answered / total) * 100);
 
   const [warningDeadline, setWarningDeadline] = useState<Date | undefined>();
-
-  const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent) && navigator.maxTouchPoints > 1;
+  const isIOS =
+    typeof navigator !== "undefined" &&
+    (/iPhone|iPad|iPod/.test(navigator.userAgent) ||
+      (navigator.userAgent.includes("Mac") && navigator.maxTouchPoints > 0));
 
   useEffect(() => {
     if (!enforceFullscreen || terminated) return;
 
     const interval = setInterval(() => {
       const isFullscreen = !!document.fullscreenElement || isIOS;
-      const isFocused = document.hasFocus();
+      const isFocused = document.hasFocus() || (isIOS && document.visibilityState === "visible");
 
       const key = `quizms_last_active_${student.uid}`;
       const now = new Date();
