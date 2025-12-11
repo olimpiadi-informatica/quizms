@@ -300,9 +300,8 @@ function columnDefinition(
         valueGetter: ({ data }) => {
           if (data.absent || data.disabled) return "";
           if (!(id in (data.answers ?? {}))) return "";
-          return (
-            displayAnswer(data.answers[id], variants[data.variant as string].schema[id].kind) ?? ""
-          );
+          if (variants[data.variant] === undefined) return "";
+          return displayAnswer(data.answers[id], variants[data.variant].schema[id].kind) ?? "";
         },
         tooltipValueGetter: ({ data }) => data.answers?.[id],
         editable: ({ data }) => contest.allowAnswerEdit && !data.absent && !data.disabled,

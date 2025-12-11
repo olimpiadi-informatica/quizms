@@ -28,7 +28,6 @@ function exportStudents(students: Student[], contest: Contest) {
         ...contest.userData.map((field) => formatUserData(student, field)),
         ...(contest.hasVariants ? [student.variant] : []),
         ...contest.problemIds.map((id) => student.answers?.[id]),
-        student.score ?? "",
       ];
     });
 
@@ -36,7 +35,6 @@ function exportStudents(students: Student[], contest: Contest) {
     ...contest.userData.map((field) => field.label),
     ...(contest.hasVariants ? ["Variante"] : []),
     ...contest.problemIds,
-    "Punteggio",
   ]);
 
   const csv = stringifyCSV(flatStudents, {
