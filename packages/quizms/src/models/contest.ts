@@ -61,7 +61,7 @@ const baseContestSchema = z.object({
   instructions: z.string().optional(),
 
   // Possibilità per gli insegnanti di vedere il punteggio degli studenti
-  scoreVisibility: z.enum(["never", "always"]),
+  scoreVisibility: z.enum(["never", "always", "finalized"]),
 });
 
 const onlineContest = baseContestSchema.extend({

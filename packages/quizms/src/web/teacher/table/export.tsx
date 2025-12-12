@@ -3,11 +3,13 @@ import { forwardRef, type Ref } from "react";
 import { saveAs } from "file-saver";
 import { unparse as stringifyCSV } from "papaparse";
 
-import { type Contest, formatUserData, type Student } from "~/models";
+import { type Contest, formatUserData, type Participation, type Student } from "~/models";
 import { useTeacher, useTeacherStudents } from "~/web/teacher/context";
 
+import { canViewScore } from "./utils";
+
 export const ExportModal = forwardRef(function Exporter(_, ref: Ref<HTMLButtonElement> | null) {
-  const { contest } = useTeacher();
+  const { contest, participation } = useTeacher();
   const [students] = useTeacherStudents();
 
   return (
@@ -15,12 +17,13 @@ export const ExportModal = forwardRef(function Exporter(_, ref: Ref<HTMLButtonEl
       ref={ref}
       type="button"
       className="hidden"
-      onClick={() => exportStudents(students, contest)}
+      onClick={() => exportStudents(students, contest, participation)}
     />
   );
 });
 
-function exportStudents(students: Student[], contest: Contest) {
+function exportStudents(students: Student[], contest: Contest, participation: Participation) {
+  const scoreVisible = canViewScore(contest, participation);
   const flatStudents = students
     .filter((student) => !student.disabled)
     .map((student) => {
@@ -28,6 +31,7 @@ function exportStudents(students: Student[], contest: Contest) {
         ...contest.userData.map((field) => formatUserData(student, field)),
         ...(contest.hasVariants ? [student.variant] : []),
         ...contest.problemIds.map((id) => student.answers?.[id]),
+        ...(scoreVisible ? [student.score] : []),
       ];
     });
 
@@ -35,6 +39,7 @@ function exportStudents(students: Student[], contest: Contest) {
     ...contest.userData.map((field) => field.label),
     ...(contest.hasVariants ? ["Variante"] : []),
     ...contest.problemIds,
+    ...(scoreVisible ? ["Punteggio"] : []),
   ]);
 
   const csv = stringifyCSV(flatStudents, {

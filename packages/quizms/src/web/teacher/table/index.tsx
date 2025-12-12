@@ -31,7 +31,7 @@ import { DeleteAllModal } from "./delete-all";
 import { ExportModal } from "./export";
 import { FinalizeModal } from "./finalize";
 import { ImportModal } from "./importer";
-import { deleteConfirmStorageKey, isStudentIncomplete } from "./utils";
+import { canViewScore, deleteConfirmStorageKey, isStudentIncomplete } from "./utils";
 
 export default function TeacherTable() {
   const { contest, participation } = useTeacher();
@@ -115,8 +115,6 @@ function Table() {
   const isContestFinished = useIsAfter(endTime) ?? true;
   const frozen = (contest.hasOnline && !isContestFinished) || participation.finalized;
 
-  const canViewScore = contest.scoreVisibility === "always";
-
   const newStudentId = useRef(randomId());
   const setStudentAndUpdateId = async (student: Student) => {
     newStudentId.current = randomId();
@@ -138,8 +136,8 @@ function Table() {
   }
 
   const colDefs = useMemo(
-    () => columnDefinition(contest, variants, canViewScore),
-    [contest, variants, canViewScore],
+    () => columnDefinition(contest, variants, canViewScore(contest, participation)),
+    [contest, variants, participation],
   );
 
   const onCellEditRequest = async (ev: CellEditRequestEvent) => {

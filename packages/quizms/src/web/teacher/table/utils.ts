@@ -1,4 +1,10 @@
-import { type Contest, isValidAnswer, type Student, type Variant } from "~/models";
+import {
+  type Contest,
+  isValidAnswer,
+  type Participation,
+  type Student,
+  type Variant,
+} from "~/models";
 
 export const deleteConfirmStorageKey = "delete-confirm";
 
@@ -32,4 +38,17 @@ export function isStudentIncomplete(
       return (err as Error).message;
     }
   }
+}
+
+export function canViewScore(contest: Contest, participation: Participation) {
+  if (contest.scoreVisibility === "never") {
+    return false;
+  }
+  if (contest.scoreVisibility === "always") {
+    return true;
+  }
+  if (contest.scoreVisibility === "finalized") {
+    return participation.finalized;
+  }
+  return false;
 }
