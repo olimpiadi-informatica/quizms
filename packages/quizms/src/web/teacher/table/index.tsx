@@ -136,8 +136,8 @@ function Table() {
   }
 
   const colDefs = useMemo(
-    () => columnDefinition(contest, variants, canViewScore(contest, participation)),
-    [contest, variants, participation],
+    () => columnDefinition(contest, variants, canViewScore(contest, participation), frozen),
+    [contest, variants, participation, frozen],
   );
 
   const onCellEditRequest = async (ev: CellEditRequestEvent) => {
@@ -216,6 +216,7 @@ function columnDefinition(
   contest: Contest,
   variants: Record<string, Variant>,
   canViewScore: boolean,
+  frozen: boolean,
 ): ColDef[] {
   const widths = {
     xs: 100,
@@ -240,7 +241,7 @@ function columnDefinition(
         cellDataType: field.type,
         width: widths[field.size ?? "md"],
         equals: field.type === "date" ? isEqualDate : undefined,
-        editable: contest.allowStudentEdit,
+        editable: contest.allowStudentEdit && !frozen,
         ...defaultOptions,
         tooltipValueGetter: ({ data }: ITooltipParams<Student>) => {
           return isStudentIncomplete(data!, contest, variants);
@@ -268,7 +269,7 @@ function columnDefinition(
       field: "variant",
       headerName: "Variante",
       width: 100,
-      editable: true,
+      editable: !frozen,
       ...defaultOptions,
       hide: !contest.hasVariants,
     },
@@ -302,7 +303,8 @@ function columnDefinition(
           return displayAnswer(data.answers[id], variants[data.variant].schema[id].kind) ?? "";
         },
         tooltipValueGetter: ({ data }) => data.answers?.[id],
-        editable: ({ data }) => contest.allowAnswerEdit && !data.absent && !data.disabled,
+        editable: ({ data }) =>
+          contest.allowAnswerEdit && !data.absent && !data.disabled && !frozen,
         resizable: true,
       };
     }),
@@ -320,7 +322,7 @@ function columnDefinition(
       cellDataType: "boolean",
       width: 120,
       valueGetter: ({ data }) => data.absent ?? false,
-      editable: true,
+      editable: !frozen,
       ...defaultOptions,
       sortable: false,
       hide: !contest.allowAnswerEdit,
@@ -353,7 +355,7 @@ function columnDefinition(
       cellDataType: "boolean",
       width: 120,
       valueGetter: ({ data }) => data.disabled ?? false,
-      editable: true,
+      editable: !frozen,
       ...defaultOptions,
       sortable: false,
       hide: !contest.allowStudentDelete,
