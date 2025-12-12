@@ -179,5 +179,5 @@ export function calcProblemPoints(problem: Schema[string], answer?: Answer) {
     }
   }
 
-  return 0;
+  return 1;
 }
