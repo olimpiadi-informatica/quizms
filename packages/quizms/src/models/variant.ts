@@ -179,5 +179,11 @@ export function calcProblemPoints(problem: Schema[string], answer?: Answer) {
     }
   }
 
-  return 1;
+  if (problem.kind === "anyCorrect") {
+    return 1;
+  }
+  if ((problem.kind === "open" && answer === undefined) || answer === null || answer === "") {
+    return 1;
+  }
+  return 0;
 }
