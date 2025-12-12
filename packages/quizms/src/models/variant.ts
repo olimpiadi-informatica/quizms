@@ -157,3 +157,19 @@ export function calcProblemPoints(problem: Schema[string], answer?: Answer) {
   }
   return 0;
 }
+
+export function unshuffleAnswer(problem: Schema[string], answer?: Answer) {
+  if (problem.kind === "open") {
+    return answer;
+  }
+  const unshuffleAnswer = (value: Answer) =>
+    problem.options.find((option) => option.value === value)?.originalId ?? "";
+  if (problem.kind === "allCorrect") {
+    const values = decodeAllCorrectAnswer(answer);
+    const unshuffledValues = values.map(unshuffleAnswer);
+    return encodeAllCorrectAnswer(unshuffledValues);
+  }
+  if (problem.kind === "anyCorrect") {
+    return answer ? unshuffleAnswer(answer) : answer;
+  }
+}
