@@ -1,4 +1,4 @@
-import { Suspense } from "react";
+import { Suspense, useCallback } from "react";
 
 import { Loading } from "@olinfo/quizms/components";
 import type { Participation, Student } from "@olinfo/quizms/models";
@@ -11,10 +11,14 @@ import { useCount } from "~/web/hooks/count";
 import Announcements from "./announcements";
 import ContestSettings from "./contest-settings";
 import { useAdmin } from "./context";
-import Export from "./export";
+import Export, { scoreboardFormatter, scoreboradHeader } from "./export";
 
 export default function Dashboard() {
-  const { contest } = useAdmin();
+  const { contest, variants } = useAdmin();
+  const contestScoreboardFormatter = useCallback(
+    (student: Student) => scoreboardFormatter(contest, variants, student),
+    [contest, variants],
+  );
 
   return (
     <div className="flex flex-col gap-4">
@@ -45,20 +49,35 @@ export default function Dashboard() {
           <CardActions>
             <Export
               label="scuole"
-              description="tutte le scuole"
+              description="i dati di tutte le scuole"
               collection="participations"
               converter={participationConverter}
               options={{ constraints: { contestId: contest.id, disabled: false } }}
+              formatter={(data: Participation) => JSON.stringify(data)}
             />
             <Export
               label="studenti"
-              description="tutti gli studenti"
+              description="i dati di tutti gli studenti"
               collection="students"
               converter={studentConverter}
               options={{
                 constraints: { contestId: contest.id, disabled: false },
                 group: true,
               }}
+              formatter={(data: Student) => JSON.stringify(data)}
+            />
+            <Export
+              label="classifica"
+              description="la classifica"
+              collection="students"
+              suggestedName={`scoreboard-${contest.id}.csv`}
+              converter={studentConverter}
+              options={{
+                constraints: { contestId: contest.id, disabled: false },
+                group: true,
+              }}
+              formatter={contestScoreboardFormatter}
+              header={scoreboradHeader(contest)}
             />
           </CardActions>
         </CardBody>
