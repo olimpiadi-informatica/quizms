@@ -1,8 +1,9 @@
 import { cpus } from "node:os";
 
-import { AsyncPool } from "@olinfo/quizms/utils";
 import { SingleBar } from "cli-progress";
 import { formatDistanceStrict } from "date-fns";
+
+import { AsyncPool } from "~/utils";
 
 export async function withProgress<T>(
   values: AsyncIterable<T> | Iterable<T>,
