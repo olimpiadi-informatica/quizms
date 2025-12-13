@@ -37,8 +37,8 @@
     "@noble/hashes": "^1.8.0",
     "@olinfo/quizms": "workspace:^",
     "@olinfo/react-components": "^0.12.0",
-    "@trpc/client": "^11.7.2",
-    "@trpc/server": "^11.7.2",
+    "@trpc/client": "^11.8.0",
+    "@trpc/server": "^11.8.0",
     "@types/cli-progress": "^3.11.6",
     "@types/express": "^5.0.6",
     "@types/express-serve-static-core": "^5.1.0",
@@ -65,14 +65,14 @@
     "superjson": "^2.2.6",
     "swr": "^2.3.7",
     "tinyglobby": "^0.2.15",
-    "vite": "^7.2.6",
+    "vite": "^7.2.7",
     "vite-plugin-dts": "^4.5.4",
     "vite-tsconfig-paths": "^5.1.4",
     "wouter": "^3.8.1",
     "zod": "^3.25.76"
   },
   "peerDependencies": {
-    "react": "~19.1"
+    "react": "~19.1.4"
   },
   "postcss": {
     "plugins": {
