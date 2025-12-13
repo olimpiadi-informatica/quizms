@@ -5,6 +5,7 @@ import useSWR, { SWRConfig } from "swr";
 import { type BaseLocationHook, Router, useLocation } from "wouter";
 
 import { Loading } from "~/web/components";
+import { BrowserCheck } from "~/web/entry/browser-check";
 
 export function BaseLayout({ children }: { children: ReactNode }) {
   const [location, setLocation] = useLocation();
@@ -17,7 +18,9 @@ export function BaseLayout({ children }: { children: ReactNode }) {
       <Layout>
         <LayoutInner>
           <Suspense fallback={<Loading />}>
-            <Router hook={hook}>{children}</Router>
+            <BrowserCheck>
+              <Router hook={hook}>{children}</Router>
+            </BrowserCheck>
             <DatePolyfill />
           </Suspense>
         </LayoutInner>

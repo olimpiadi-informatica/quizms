@@ -18,6 +18,7 @@ import { addMilliseconds, isPast } from "date-fns";
 import { sumBy } from "lodash-es";
 import { FileChartColumn, LogOut, RotateCcw } from "lucide-react";
 
+import { useUserAgent } from "~/utils";
 import { ErrorBoundary, Progress, Prose, Timer, Title } from "~/web/components";
 
 import { useStudent } from "./context";
@@ -39,19 +40,15 @@ export function StudentLayout({
   const progress = Math.round((answered / total) * 100);
 
   const [warningDeadline, setWarningDeadline] = useState<Date | undefined>();
-  const isIOS =
-    typeof navigator !== "undefined" &&
-    (/iPhone|iPad|iPod/.test(navigator.userAgent) ||
-      (navigator.userAgent.includes("Mac") && navigator.maxTouchPoints > 0));
+  const ua = useUserAgent();
 
   useEffect(() => {
     if (!enforceFullscreen || terminated) return;
 
-    if (!isIOS) document.documentElement.requestFullscreen?.();
-
     const interval = setInterval(() => {
-      const isFullscreen = !!document.fullscreenElement || isIOS;
-      const isFocused = document.hasFocus() || (isIOS && document.visibilityState === "visible");
+      const isFullscreen = !!document.fullscreenElement || !ua.hasFullscreen;
+      const isFocused =
+        document.hasFocus() || (!ua.hasFullscreen && document.visibilityState === "visible");
 
       const key = `quizms_last_active_${student.uid}`;
       const now = new Date();
@@ -73,7 +70,7 @@ export function StudentLayout({
     }, 200);
 
     return () => clearInterval(interval);
-  }, [enforceFullscreen, logout, student.uid, terminated, isIOS]);
+  }, [enforceFullscreen, logout, student.uid, terminated, ua.hasFullscreen]);
 
   const submit = async () => {
     const modal = submitRef.current;
@@ -100,7 +97,7 @@ export function StudentLayout({
           <div className="text-7xl font-black font-mono p-4">
             <Timer endTime={warningDeadline} hideMinutes />
           </div>
-          {!isIOS && !document.fullscreenElement && (
+          {ua.hasFullscreen && !document.fullscreenElement && (
             <Button
               className="btn-warning btn-lg font-bold"
               onClick={() => document.documentElement.requestFullscreen()}>
