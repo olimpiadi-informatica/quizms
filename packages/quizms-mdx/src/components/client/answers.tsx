@@ -244,7 +244,7 @@ export function AnyCorrectAnswerClient({ correct, children }: AnswerProps) {
 }
 
 export type OpenAnswerProps = {
-  correct?: string;
+  correct?: string[];
   type: "number" | "text";
 };
 
@@ -276,8 +276,8 @@ export function OpenAnswerClient({ correct, type }: OpenAnswerProps) {
           "input input-bordered w-72 max-w-full border-2 print:placeholder:text-transparent",
           terminated &&
             correct !== undefined && {
-              "disabled:input-success": correct === answer,
-              "disabled:input-error": correct !== answer,
+              "disabled:input-success": correct?.includes(answer?.toString() ?? ""),
+              "disabled:input-error": !correct?.includes(answer?.toString() ?? ""),
             },
         )}
         onChange={(e) => setAnswer(e.target.value || null)}
