@@ -72,7 +72,12 @@ export const FinalizeModal = forwardRef(function FinalizeModal(
           <div className="prose">
             <p>
               <strong className="text-error">Attenzione:</strong> questa operazione è irreversibile
-              e va fatta una sola volta <b>dopo tutti i turni di gara</b>.
+              {contest.hasOnline && contest.allowRestart && (
+                <>
+                  e va fatta una sola volta <b>dopo tutti i turni di gara</b>
+                </>
+              )}
+              .
             </p>
             <p>
               Finalizzando <b>non</b> sarà più possibile{" "}
