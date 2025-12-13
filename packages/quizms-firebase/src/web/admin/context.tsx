@@ -1,11 +1,12 @@
 import { createContext, use } from "react";
 
-import type { Contest } from "@olinfo/quizms/models";
+import type { Contest, Variant } from "@olinfo/quizms/models";
 
 export type AdminContextProps = {
   name: string;
   contest: Contest;
   contests: Contest[];
+  variants: Record<string, Variant>;
   setContest: (contest: Contest) => Promise<void>;
 };
 
