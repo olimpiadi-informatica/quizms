@@ -60,20 +60,23 @@ export function MultipleChoiceAnswer({
 MultipleChoiceAnswer.displayName = "MultipleChoiceAnswer";
 
 export function OpenAnswer({ correct }: OpenAnswerProps) {
-  const type = Number.isFinite(Number(correct)) ? "number" : "text";
+  const type =
+    (correct?.some((value) => !Number.isFinite(Number(value))) ?? true) ? "text" : "number";
   return (
     <>
       <JsonField field="type" value={type} />
       <JsonField field="kind" value="open" />
       <JsonField field="options">
         <JsonArray>
-          <JsonObject>
-            <JsonField
-              field="value"
-              value={type === "number" ? Number(correct) : (correct ?? null)}
-            />
-            <JsonField field="correct" value={true} />
-          </JsonObject>
+          {correct?.map((value, i) => (
+            <JsonObject key={i}>
+              <JsonField
+                field="value"
+                value={type === "number" ? Number(value) : (value ?? null)}
+              />
+              <JsonField field="correct" value={true} />
+            </JsonObject>
+          ))}
         </JsonArray>
       </JsonField>
       <OpenAnswerClient correct={correct} type={type} />

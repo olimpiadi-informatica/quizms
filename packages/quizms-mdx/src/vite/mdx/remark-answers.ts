@@ -74,35 +74,39 @@ function parseAnswers(tree: Root, file: VFile) {
           ],
         } as MdxJsxFlowElement;
       } else {
-        const paragraph = containerDirective.children[0];
-        if (paragraph.type !== "paragraph") {
+        const list = containerDirective.children[0];
+        if (list.type !== "list") {
           throw new Error("Missing or invalid answers");
         }
 
-        const text = paragraph.children[0];
-        if (text?.type !== "text") return;
-        if (!text.value.startsWith("?> ")) return;
-
-        text.value = text.value.slice(3);
-
-        let templateLiteral = "String.raw`";
-        for (const child of paragraph.children) {
-          if (child.type === "text") {
-            templateLiteral += child.value;
-          } else if (child.type === "mdxTextExpression") {
-            templateLiteral += `\${${child.value}}`;
-          } else {
-            throw new Error("Open answer solution must be in plain text");
+        const correctOptions = [];
+        for (const item of list.children) {
+          let templateLiteral = "String.raw`";
+          for (const itemChild of item.children) {
+            if (itemChild.type === "paragraph") {
+              for (const child of itemChild.children) {
+                if (child.type === "text") {
+                  templateLiteral += child.value;
+                } else if (child.type === "mdxTextExpression") {
+                  templateLiteral += `\${${child.value}}`;
+                } else {
+                  throw new Error("Open answer solution must be in plain text");
+                }
+              }
+            } else if (itemChild.type === "mdxFlowExpression") {
+              templateLiteral += `\${${itemChild.value}}`;
+            } else {
+              throw new Error("Open answer solution must be in plain text");
+            }
           }
+          templateLiteral += "`";
+          const template = Parser.parse(templateLiteral, {
+            ecmaVersion: "latest",
+            sourceType: "module",
+          });
+          correctOptions.push((template.body[0] as Directive).expression);
         }
-        templateLiteral += "`";
-
-        const template = Parser.parse(templateLiteral, {
-          ecmaVersion: "latest",
-          sourceType: "module",
-        });
-
-        const attributes = [jsxAttribute("correct", (template.body[0] as Directive).expression)];
+        const attributes = [jsxAttribute("correct", b.arrayExpression(correctOptions))];
 
         parent!.children[index!] = {
           type: "mdxJsxFlowElement",
