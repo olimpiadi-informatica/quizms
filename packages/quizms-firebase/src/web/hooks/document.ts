@@ -21,17 +21,8 @@ const mutationConfig: MutatorOptions = {
   populateCache: true,
 };
 
-type Options = {
-  subscribe?: boolean;
-};
-
-export function useDocument<T>(
-  path: string,
-  id: string,
-  converter: FirestoreDataConverter<T>,
-  options?: Options,
-) {
-  const [data, setData] = useDocumentOptional<T>(path, id, converter, options);
+export function useDocument<T>(path: string, id: string, converter: FirestoreDataConverter<T>) {
+  const [data, setData] = useDocumentOptional<T>(path, id, converter);
   if (!data) throw new Error(`Document ${path}/${id} not found`);
   return [data, setData] as const;
 }
@@ -40,7 +31,6 @@ export function useDocumentOptional<T>(
   path: string,
   id: string,
   converter: FirestoreDataConverter<T>,
-  options?: Options,
 ) {
   const db = useDb();
   const { showBoundary } = useErrorBoundary();
@@ -48,20 +38,18 @@ export function useDocumentOptional<T>(
   const ref = doc(db, path, id).withConverter(converter);
 
   const swrConfig: SWRConfiguration = {
-    revalidateIfStale: !options?.subscribe,
-    revalidateOnFocus: !options?.subscribe,
-    revalidateOnMount: !options?.subscribe,
-    revalidateOnReconnect: !options?.subscribe,
+    revalidateIfStale: false,
+    revalidateOnFocus: false,
+    revalidateOnMount: false,
+    revalidateOnReconnect: false,
     suspense: true,
   };
 
-  const key = `${ref.path}?${JSON.stringify(options)}`;
-  const { data, mutate } = useSWR<[T?]>(key, () => fetcher(ref), swrConfig);
+  const { data, mutate } = useSWR<[T?]>(ref.path, () => fetcher(ref), swrConfig);
 
   useSubscriptionListener<[T?]>(
-    key,
+    ref.path,
     (setData) => {
-      if (!options?.subscribe) return;
       const unsubscribe = onSnapshot(
         ref,
         (snap) => {

@@ -37,7 +37,6 @@ export default function StudentEntry() {
   const website = useWebsite();
   const [contests] = useCollection("contests", contestConverter, {
     constraints: { id: website.contests },
-    subscribe: true,
   });
 
   if (auth) {
@@ -147,11 +146,8 @@ function StudentInner({
     `participations/${participationId}/students`,
     studentId,
     studentConverter,
-    { subscribe: true },
   );
-  const [participation] = useDocument("participations", participationId, participationConverter, {
-    subscribe: true,
-  });
+  const [participation] = useDocument("participations", participationId, participationConverter);
 
   const contest = useMemo(
     () => contests.find((c) => c.id === student.contestId)!,

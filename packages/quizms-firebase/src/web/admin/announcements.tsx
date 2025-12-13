@@ -30,7 +30,6 @@ export default function Announcements() {
       contestIds: contest.id,
     },
     orderBy: ["createdAt", "desc"],
-    subscribe: true,
   });
 
   return (

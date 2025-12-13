@@ -36,11 +36,9 @@ function TeacherInner({ user, schoolId }: { user: User; schoolId: string }) {
   const website = useWebsite();
   const [contests] = useCollection("contests", contestConverter, {
     constraints: { id: website.contests },
-    subscribe: true,
   });
   const [participations] = useCollection("participations", participationConverter, {
     constraints: { contestId: website.contests, schoolId: schoolId },
-    subscribe: true,
   });
   const [variants] = useCollection("variants", variantConverter);
 
@@ -89,7 +87,6 @@ function useAnnouncements(contestId: string) {
       contestIds: contestId,
     },
     orderBy: ["createdAt", "desc"],
-    subscribe: true,
   });
   return announcements;
 }
@@ -97,7 +94,6 @@ function useAnnouncements(contestId: string) {
 function useStudents(participationId: string) {
   return useCollection(`participations/${participationId}/students`, studentConverter, {
     orderBy: "createdAt",
-    subscribe: true,
   });
 }
 
@@ -110,14 +106,11 @@ function useStudentRestores(
 ] {
   const db = useDb();
 
-  const [participation] = useDocument("participations", participationId, participationConverter, {
-    subscribe: true,
-  });
+  const [participation] = useDocument("participations", participationId, participationConverter);
 
   const [studentRestores] = useCollection("studentRestores", studentRestoreConvert, {
     constraints: { participationId, token: participation.token, status: "pending" },
     orderBy: "createdAt",
-    subscribe: true,
   });
 
   const reject = async (studentId: string, excludeRestoreId?: string) => {
