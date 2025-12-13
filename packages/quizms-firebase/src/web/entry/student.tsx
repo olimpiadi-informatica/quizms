@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo } from "react";
 import { StudentFormField, Title } from "@olinfo/quizms/components";
 import type { Contest, Student } from "@olinfo/quizms/models";
 import { StudentProvider } from "@olinfo/quizms/student";
+import { useUserAgent } from "@olinfo/quizms/utils";
 import {
   Form,
   Navbar,
@@ -61,6 +62,7 @@ type FormStudent = {
 
 function StudentForm({ contests }: { contests: Contest[] }) {
   const db = useDb();
+  const ua = useUserAgent();
 
   const submit = useCallback(
     async ({ contestId, token, ...userData }: FormStudent) => {
@@ -69,7 +71,7 @@ function StudentForm({ contests }: { contests: Contest[] }) {
         token,
         userData,
         extraData: {
-          userAgent: navigator.userAgent,
+          userAgent: ua,
           windowWidth: window.innerWidth,
           windowHeight: window.innerHeight,
           screenWidth: window.screen.availWidth,
@@ -81,8 +83,11 @@ function StudentForm({ contests }: { contests: Contest[] }) {
 
       const auth = getAuth(db.app);
       await signInWithCustomToken(auth, authToken);
+      if (ua.hasFullscreen) {
+        await document.documentElement.requestFullscreen?.();
+      }
     },
-    [db],
+    [db, ua],
   );
 
   const defaultValue = useMemo(
