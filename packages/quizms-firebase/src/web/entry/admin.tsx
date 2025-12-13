@@ -16,9 +16,7 @@ function AdminInner({ user }: { user: User }) {
   const db = useDb();
   const name = user.displayName ?? "Utente anonimo";
 
-  const [contests, setContest] = useCollection("contests", contestConverter, {
-    subscribe: true,
-  });
+  const [contests, setContest] = useCollection("contests", contestConverter);
 
   const logout = useCallback(async () => {
     await signOut(getAuth(db.app));

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 
 type Subscription<T> = {
   promise: Promise<void>;
@@ -15,9 +15,9 @@ export function useSubscription<T>(
   subscribe: (set: (value: T) => void) => (() => void) | undefined,
 ) {
   const subscription = useBaseSubscription(key, subscribe);
-  if (!subscription.data) throw subscription.promise;
+  use(subscription.promise);
 
-  const [value, setValue] = useState(subscription.data.value);
+  const [value, setValue] = useState(subscription.data!.value);
   useEffect(() => {
     subscription.listeners.add(setValue);
     return () => void subscription.listeners.delete(setValue);

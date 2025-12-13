@@ -20,9 +20,7 @@ import { useDocumentOptional } from "~/web/hooks";
 export function StudentRestoring({ user, children }: { user: User; children: ReactNode }) {
   const db = useDb();
 
-  const [studentRestore] = useDocumentOptional("studentRestores", user.uid, studentRestoreConvert, {
-    subscribe: true,
-  });
+  const [studentRestore] = useDocumentOptional("studentRestores", user.uid, studentRestoreConvert);
 
   useEffect(() => {
     if (studentRestore?.status === "revoked") {

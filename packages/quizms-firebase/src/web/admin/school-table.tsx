@@ -18,7 +18,6 @@ export function SchoolTable() {
     participationConverter,
     {
       constraints: { contestId: contest.id },
-      subscribe: true,
     },
   );
 

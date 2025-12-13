@@ -25,14 +25,10 @@ const mutationConfig: MutatorOptions = {
   populateCache: true,
 };
 
-type CollectionOptions<T> = QueryOption<T> & {
-  subscribe?: boolean;
-};
-
 export function useCollection<T extends { id: string }>(
   path: string,
   converter: FirestoreDataConverter<T>,
-  options?: CollectionOptions<T>,
+  options?: QueryOption<T>,
 ) {
   const db = useDb();
   const { showBoundary } = useErrorBoundary();
@@ -41,10 +37,10 @@ export function useCollection<T extends { id: string }>(
   const q = query(db, path, converter, options);
 
   const swrConfig: SWRConfiguration = {
-    revalidateIfStale: !options?.subscribe,
-    revalidateOnFocus: !options?.subscribe,
-    revalidateOnMount: !options?.subscribe,
-    revalidateOnReconnect: !options?.subscribe,
+    revalidateIfStale: false,
+    revalidateOnFocus: false,
+    revalidateOnMount: false,
+    revalidateOnReconnect: false,
     suspense: true,
   };
 
@@ -59,7 +55,6 @@ export function useCollection<T extends { id: string }>(
   useSubscriptionListener<T[]>(
     key,
     (setData) => {
-      if (!options?.subscribe) return;
       const unsubscribe = onSnapshot(
         q,
         (snap) => {
@@ -83,7 +78,7 @@ async function setDocument<T extends { id: string }>(
   ref: CollectionReference<T>,
   newDoc: T,
   mutator: KeyedMutator<T[]>,
-  options?: CollectionOptions<T>,
+  options?: QueryOption<T>,
 ): Promise<void> {
   await mutator(
     async (prev) => {
@@ -101,7 +96,7 @@ async function setDocument<T extends { id: string }>(
 function merge<T extends { id: string }>(
   prev: T[] | undefined,
   newDoc: T,
-  options?: CollectionOptions<T>,
+  options?: QueryOption<T>,
 ) {
   if (!prev) return [newDoc];
   let coll = prev.filter((doc) => newDoc.id !== doc.id);
