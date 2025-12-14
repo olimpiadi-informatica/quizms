@@ -36,7 +36,6 @@ export default function configs(mode: "development" | "production"): InlineConfi
     resolve: {
       alias: {
         "~": root,
-        vm: "vm-browserify",
       },
       dedupe: ["react", "react-dom", "wouter"],
       extensions: [".js", ".jsx", ".ts", ".tsx", ".md", ".mdx"],
@@ -64,7 +63,6 @@ export default function configs(mode: "development" | "production"): InlineConfi
           ) {
             return;
           }
-          if (log.code === "EVAL" && log.loc?.file?.includes("vm-browserify")) return;
           let message = log.message;
           if (log.loc) {
             message += `  ${pc.blue("➜")} ${pc.bold(

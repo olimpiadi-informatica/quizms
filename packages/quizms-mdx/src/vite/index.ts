@@ -1,3 +1,5 @@
+import blocklyVm from "~/vite/blockly-vm";
+
 import asymptote from "./asymptote";
 import blocklyBlocks from "./blockly-blocks";
 import blocklyEditor from "./blockly-editor";
@@ -11,6 +13,7 @@ export default [
   blocklyBlocks(),
   blocklyEditor(),
   blocklyMedia(),
+  blocklyVm(),
   mdx(),
   python(),
   resolveMdxComponents(),
