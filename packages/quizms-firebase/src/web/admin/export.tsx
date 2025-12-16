@@ -107,6 +107,7 @@ export function scoreboradHeader(contest: Contest) {
     row.push(`${problemId}A`, `${problemId}P`);
   }
   row.push("Punteggio");
+  row.push("Assente");
   return `${row.map((s) => `"${s}"`).join(",")}\n`;
 }
 
@@ -150,6 +151,7 @@ export function scoreboardFormatter(
     }
   }
   row.push(`${student.score ?? ""}`);
+  row.push(`${student.absent ? 1 : 0}`);
   return row.map((s) => `"${s}"`).join(",");
 }
 
