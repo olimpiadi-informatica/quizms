@@ -3,9 +3,9 @@ import { access, readFile, rm, stat } from "node:fs/promises";
 import { platform } from "node:os";
 import path from "node:path";
 import { promisify } from "node:util";
-import svgToMiniDataURI from "mini-svg-data-uri";
 
 import sizeOf from "image-size";
+import svgToMiniDataURI from "mini-svg-data-uri";
 import { temporaryFile, temporaryWrite } from "tempy";
 
 import { createAsymptoteInject } from "./inject";
