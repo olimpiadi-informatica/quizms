@@ -10,6 +10,7 @@ import {
   type Variant,
 } from "@olinfo/quizms/models";
 import { Button, Modal } from "@olinfo/react-components";
+import { formatISO } from "date-fns";
 import {
   type DocumentSnapshot,
   type Firestore,
@@ -119,7 +120,16 @@ export function scoreboardFormatter(
 ) {
   const row: string[] = [];
   for (const field of contest.userData) {
-    row.push(formatUserData(student, field));
+    if (field.type === "date") {
+      const value = student.userData?.[field.name];
+      if (value) {
+        row.push(formatISO(value, { representation: "date" }));
+      } else {
+        row.push("");
+      }
+    } else {
+      row.push(formatUserData(student, field));
+    }
   }
   row.push(student.participationId?.split("-")[0] ?? "");
   row.push(student.variant ?? "");
