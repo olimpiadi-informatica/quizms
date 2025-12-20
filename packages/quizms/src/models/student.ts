@@ -5,7 +5,7 @@ import { answerSchema } from "~/models/variant";
 export const studentSchema = z
   .object({
     uid: z.string(),
-    userData: z.record(z.union([z.string(), z.number(), z.date()]).optional()),
+    userData: z.record(z.string(), z.union([z.string(), z.number(), z.date()]).optional()),
     userDataHash: z.string(),
 
     absent: z.boolean(),
@@ -18,10 +18,10 @@ export const studentSchema = z
     finishedAt: z.date(),
 
     variant: z.string(),
-    answers: z.record(answerSchema),
+    answers: z.record(z.string(), answerSchema),
     score: z.number(),
     maxScore: z.number(),
-    extraData: z.record(z.any()),
+    extraData: z.record(z.string(), z.any()),
 
     createdAt: z.coerce.date(),
     updatedAt: z.date(),

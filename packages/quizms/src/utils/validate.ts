@@ -1,12 +1,7 @@
-import type { ZodType } from "zod";
-import { type FromZodErrorOptions, fromZodError } from "zod-validation-error";
+import z from "zod";
 
-export function validate<In, Out>(
-  schema: ZodType<Out, any, In>,
-  data: In,
-  options?: FromZodErrorOptions,
-): Out {
-  const ret = schema.safeParse(data);
-  if (!ret.success) throw fromZodError(ret.error, options);
+export function validate<Out>(schema: z.core.$ZodType<Out>, data: any): Out {
+  const ret = z.safeParse(schema, data);
+  if (!ret.success) throw Error(z.prettifyError(ret.error));
   return ret.data;
 }

@@ -69,7 +69,7 @@
     "vite-plugin-dts": "^4.5.4",
     "vite-tsconfig-paths": "^5.1.4",
     "wouter": "^3.8.1",
-    "zod": "^3.25.76"
+    "zod": "^4.2.1"
   },
   "peerDependencies": {
     "react": "~19.1.4"

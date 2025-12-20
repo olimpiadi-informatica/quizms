@@ -19,8 +19,6 @@ import z, {
   ZodObject,
   ZodOptional,
   ZodRecord,
-  type ZodType,
-  type ZodTypeAny,
   ZodUnion,
 } from "zod";
 
@@ -41,46 +39,40 @@ function convertToFirestore(data: Record<string, any>) {
   });
 }
 
-function toFirebaseSchema(schema: ZodTypeAny): ZodTypeAny {
+function toFirebaseSchema(schema: z.core.$ZodType): z.core.$ZodType {
   if (schema instanceof ZodDate) {
-    return z
-      .instanceof(Timestamp)
-      .transform((ts) => ts.toDate())
-      .pipe(schema);
+    return z.pipe(
+      z.instanceof(Timestamp).transform((ts) => ts.toDate()),
+      schema,
+    );
   }
   if (schema instanceof ZodObject) {
     return z.object(mapValues(schema.shape, (field) => toFirebaseSchema(field)));
   }
   if (schema instanceof ZodRecord) {
-    return z.record(toFirebaseSchema(schema.element));
+    return z.record(schema.keyType, toFirebaseSchema(schema.valueType));
   }
   if (schema instanceof ZodArray) {
-    return toFirebaseSchema(schema.element).array();
+    return z.array(toFirebaseSchema(schema.element));
   }
   if (schema instanceof ZodOptional) {
-    return z.preprocess((val) => val ?? undefined, toFirebaseSchema(schema.unwrap()).optional());
+    return z.optional(z.preprocess((val) => val ?? undefined, toFirebaseSchema(schema.unwrap())));
   }
   if (schema instanceof ZodDefault) {
-    return toFirebaseSchema(schema.removeDefault()).pipe(schema);
+    return z.pipe(toFirebaseSchema(schema.unwrap()), schema);
   }
-  if (schema instanceof ZodUnion) {
-    return z.union(schema.options.map((option: ZodTypeAny) => toFirebaseSchema(option)));
-  }
-  if (schema instanceof ZodDiscriminatedUnion) {
-    return z.discriminatedUnion(
-      schema.discriminator,
-      schema.options.map((option: ZodTypeAny) => toFirebaseSchema(option)),
-    );
+  if (schema instanceof ZodUnion || schema instanceof ZodDiscriminatedUnion) {
+    return z.union(schema.options.map((option) => toFirebaseSchema(option)));
   }
   return schema;
 }
 
-function parse<T>(schema: ZodType<T, any, any>, snapshot: DocumentSnapshot): T {
+function parse<T>(schema: z.core.$ZodType<T>, snapshot: DocumentSnapshot): T {
   const data = { ...snapshot.data(), id: snapshot.id };
-  return validate(toFirebaseSchema(schema), data);
+  return validate(toFirebaseSchema(schema), data) as T;
 }
 
-function converter<T extends object>(schema: ZodType<T, any, any>): FirestoreDataConverter<T> {
+function converter<T extends object>(schema: z.core.$ZodType<T>): FirestoreDataConverter<T> {
   return {
     toFirestore: (data) => convertToFirestore(data),
     fromFirestore: (snapshot) => parse(schema, snapshot),

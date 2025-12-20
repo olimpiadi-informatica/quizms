@@ -1,6 +1,6 @@
 import { validate } from "@olinfo/quizms/utils";
 import { intersection, sortBy } from "lodash-es";
-import z, { type ZodType } from "zod";
+import z from "zod";
 
 const productEnabled = [
   "Cloud Firestore",
@@ -30,13 +30,14 @@ export async function getGcpRegions() {
   );
 }
 
-async function api<T>(url: string, schema: ZodType<T, any, any>) {
+async function api<T>(url: string, schema: z.core.$ZodType<T>) {
   const resp = await fetch(url);
   if (!resp.ok) throw new Error("Request failed");
   return validate(schema, await resp.json());
 }
 
 const regionsSchema = z.record(
+  z.string(),
   z.object({
     name: z.string(),
     latitude: z.number(),
@@ -44,7 +45,7 @@ const regionsSchema = z.record(
   }),
 );
 
-const productsSchema = z.record(z.record(z.boolean()));
+const productsSchema = z.record(z.string(), z.record(z.string(), z.boolean()));
 
 const geoipSchema = z.object({
   latitude: z.number(),

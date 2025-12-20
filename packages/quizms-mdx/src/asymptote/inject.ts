@@ -1,5 +1,6 @@
 import { validate } from "@olinfo/quizms/utils";
 import { z } from "zod";
+import type { $ZodType } from "zod/v4/core";
 
 export function createAsymptoteInject(variables: object | null) {
   if (variables === null) return null;
@@ -9,14 +10,14 @@ export function createAsymptoteInject(variables: object | null) {
 
 type VariantVariable = number | boolean | string | VariantVariable[];
 
-const variantVariableSchema: z.ZodType<VariantVariable> = z.union([
-  z.number().finite(),
+const variantVariableSchema: $ZodType<VariantVariable> = z.union([
+  z.number(),
   z.boolean(),
   z.string(),
-  z.lazy(() => variantVariableSchema.array().nonempty()),
+  z.lazy(() => z.array(variantVariableSchema).nonempty()),
 ]);
 
-const variantSchema = z.record(variantVariableSchema);
+const variantSchema = z.record(z.string(), variantVariableSchema);
 
 function jsToAsy([name, val]: [string, VariantVariable]): string {
   return `${getAsyTypeName(val)} ${name} = ${getAsyValue(val)};`;

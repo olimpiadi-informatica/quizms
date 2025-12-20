@@ -21,8 +21,8 @@ export const studentLogin = publicProcedure
     z.object({
       contestId: z.string(),
       token: z.string(),
-      userData: z.record(z.union([z.string(), z.number(), z.date()]).optional()),
-      extraData: z.record(z.any()),
+      userData: z.record(z.string(), z.union([z.string(), z.number(), z.date()]).optional()),
+      extraData: z.record(z.string(), z.any()),
     }),
   )
   .mutation(async (opts) => {

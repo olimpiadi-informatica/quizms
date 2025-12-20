@@ -6,7 +6,7 @@ import { camelCase, cloneDeepWith, isPlainObject } from "lodash-es";
 import Papa from "papaparse";
 import * as toml from "smol-toml";
 import yaml from "yaml";
-import type { ZodType } from "zod";
+import z from "zod";
 
 import { validate } from "~/utils";
 
@@ -20,7 +20,7 @@ const parsers: { ext: string; parser: (str: string) => any }[] = [
   { ext: ".csv", parser: parseCsv },
 ];
 
-export async function load<T>(collection: string, schema: ZodType<T, any, any>) {
+export async function load<T>(collection: string, schema: z.core.$ZodType<T>) {
   const fileName = path.join("data", collection);
 
   for (const { ext, parser } of parsers) {
@@ -43,7 +43,7 @@ export async function load<T>(collection: string, schema: ZodType<T, any, any>) 
 
     try {
       if (Array.isArray(rawData)) {
-        return validate(schema.array(), renameKeys(rawData));
+        return validate(z.array(schema), renameKeys(rawData));
       }
       if (isPlainObject(rawData)) {
         return Object.entries(rawData).map(([id, record]) => {

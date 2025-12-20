@@ -13,6 +13,7 @@ export const clientVariantSchema = z.object({
   id: z.string(),
   contestId: z.string(),
   schema: z.record(
+    z.string(),
     z.object({
       maxPoints: z.number(),
       allowEmpty: z.boolean(),
@@ -28,6 +29,7 @@ export const variantSchema = z.object({
   isPdf: z.boolean(),
   contestId: z.string(),
   schema: z.record(
+    z.string(),
     z.intersection(
       z.object({
         type: z.enum(["text", "number"]),
