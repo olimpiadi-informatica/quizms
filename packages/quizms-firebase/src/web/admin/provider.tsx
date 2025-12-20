@@ -1,6 +1,6 @@
 import { lazy } from "react";
 
-import type { Contest } from "@olinfo/quizms/models";
+import type { Contest, Variant } from "@olinfo/quizms/models";
 import { Link, Redirect, Route, Switch, useParams } from "wouter";
 
 import { AdminContext } from "./context";
@@ -10,11 +10,18 @@ import { SchoolTable } from "./school-table";
 type AdminProviderProps = {
   name: string;
   contests: Contest[];
+  variants: Variant[];
   setContest: (contest: Contest) => Promise<void>;
   logout: () => Promise<void>;
 };
 
-export function AdminProvider({ name, contests, setContest, logout }: AdminProviderProps) {
+export function AdminProvider({
+  name,
+  contests,
+  setContest,
+  logout,
+  ...props
+}: AdminProviderProps) {
   return (
     <AdminLayout name={name} contests={contests} logout={logout}>
       <Route path="/">
@@ -31,7 +38,13 @@ export function AdminProvider({ name, contests, setContest, logout }: AdminProvi
         </div>
       </Route>
       <Route path="/:contestId" nest>
-        <ProviderInner name={name} contests={contests} setContest={setContest} logout={logout} />
+        <ProviderInner
+          name={name}
+          contests={contests}
+          setContest={setContest}
+          logout={logout}
+          {...props}
+        />
       </Route>
     </AdminLayout>
   );
@@ -39,7 +52,7 @@ export function AdminProvider({ name, contests, setContest, logout }: AdminProvi
 
 const Dashboard = lazy(() => import("./dashboard"));
 
-function ProviderInner({ contests, ...props }: AdminProviderProps) {
+function ProviderInner({ contests, variants, ...props }: AdminProviderProps) {
   const { contestId } = useParams();
 
   const contest = contests.find((c) => c.id === contestId);
@@ -47,8 +60,12 @@ function ProviderInner({ contests, ...props }: AdminProviderProps) {
     return <Redirect to="/" />;
   }
 
+  const contestVariants = Object.fromEntries(
+    variants.filter((v) => v.contestId === contest?.id).map((v) => [v.id, v]),
+  );
+
   return (
-    <AdminContext.Provider value={{ ...props, contest, contests }}>
+    <AdminContext.Provider value={{ ...props, variants: contestVariants, contest, contests }}>
       <Switch>
         <Route path="/">
           <Dashboard />
