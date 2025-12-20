@@ -17,14 +17,5 @@ jobs:
           version: latest
           run_install: true
 
-      - name: Build @olinfo/quizms
-        run: pnpm build
-        working-directory: packages/quizms
-
-      - name: Build @olinfo/quizms-mdx
-        run: pnpm build
-        working-directory: packages/quizms-mdx
-
-      - name: Build @olinfo/quizms-firebase
-        run: pnpm build
-        working-directory: packages/quizms-firebase
+      - name: Build
+        run: pnpm -r build

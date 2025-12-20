@@ -3,7 +3,10 @@ packages:
   - docs
 
 ignoredBuiltDependencies:
+  - '@firebase/util'
   - '@swc/core'
+  - esbuild
+  - protobufjs
 
 linkWorkspacePackages: true
 

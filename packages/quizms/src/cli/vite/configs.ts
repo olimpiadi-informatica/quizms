@@ -1,11 +1,11 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
-import { cwd } from "node:process";
+import { cwd, stderr } from "node:process";
 import { pathToFileURL } from "node:url";
+import { styleText } from "node:util";
 
 import react from "@vitejs/plugin-react-swc";
 import { sumBy } from "lodash-es";
-import pc from "picocolors";
 import type { InlineConfig, PluginOption } from "vite";
 import inspect from "vite-plugin-inspect";
 
@@ -65,8 +65,10 @@ export default function configs(mode: "development" | "production"): InlineConfi
           }
           let message = log.message;
           if (log.loc) {
-            message += `  ${pc.blue("➜")} ${pc.bold(
+            message += `  ${styleText("blue", "➜", { stream: stderr })} ${styleText(
+              "bold",
               `${log.loc.file}:${log.loc.line}:${log.loc.column}`,
+              { stream: stderr },
             )}`;
 
             if (log.frame) {
@@ -78,7 +80,7 @@ export default function configs(mode: "development" | "production"): InlineConfi
           }
           warning(message);
           if (log.url) {
-            info(`See ${pc.bold(log.url)} for more information.`);
+            info(`See ${styleText("bold", log.url)} for more information.`);
           }
         },
         output: {

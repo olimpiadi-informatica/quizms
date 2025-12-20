@@ -1,9 +1,10 @@
+import { styleText } from "node:util";
+
 import { confirm } from "@inquirer/prompts";
 import { fatal } from "@olinfo/quizms/utils-node";
 import type { Firestore } from "firebase-admin/firestore";
 import { info } from "firebase-functions/logger";
 import { upperFirst } from "lodash-es";
-import pc from "picocolors";
 
 import type { User } from "~/models/user";
 
@@ -24,7 +25,8 @@ export async function importUsers(
 ) {
   if (options.delete) {
     const confirmed = await confirm({
-      message: `You are about to delete all ${pc.bold(
+      message: `You are about to delete all ${styleText(
+        "bold",
         role,
       )} users. Any previous data will be lost, this operation cannot be undone. Are you really sure?`,
       default: false,

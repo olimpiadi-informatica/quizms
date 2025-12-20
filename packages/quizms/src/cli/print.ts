@@ -1,11 +1,11 @@
 import path from "node:path";
 import { cwd } from "node:process";
+import { styleText } from "node:util";
 
 import fastifyStatic, { type FastifyStaticOptions } from "@fastify/static";
 import { detect } from "detect-port";
 import Fastify, { type RegisterOptions } from "fastify";
 import { noop } from "lodash-es";
-import pc from "picocolors";
 import {
   build,
   type InlineConfig,
@@ -78,7 +78,7 @@ export default async function print(options: PrintOptions) {
           info.family === "IPv6"
             ? `[${info.address}]`
             : info.address.replace("127.0.0.1", "localhost");
-        return `  ${pc.green("→")}  ${pc.bold(`${info.family}:`.padEnd(8))} ${pc.cyan(`http://${address}:${pc.bold(info.port)}/`)}`;
+        return `  ${styleText("green", "→")}  ${styleText("bold", `${info.family}:`.padEnd(8))} ${styleText("cyan", `http://${address}:${styleText("bold", String(info.port))}/`)}`;
       })
       .join("\n");
     success(`Server started:\n${addresses}`);

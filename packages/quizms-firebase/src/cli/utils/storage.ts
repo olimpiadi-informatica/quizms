@@ -1,10 +1,10 @@
 import { existsSync } from "node:fs";
+import { styleText } from "node:util";
 
 import type { Bucket } from "@google-cloud/storage";
 import { confirm } from "@inquirer/prompts";
 import { fatal, success, withProgress } from "@olinfo/quizms/utils-node";
 import { partition } from "lodash-es";
-import pc from "picocolors";
 
 type ImportOptions = {
   skipExisting?: true;
@@ -44,7 +44,8 @@ export async function importStorage(
 
   if (options.force && existing.length > 0) {
     const confirmed = await confirm({
-      message: `You are about to import the ${pc.bold(
+      message: `You are about to import the ${styleText(
+        "bold",
         collection,
       )}. ${existing.length} files will be overwritten, the previous data will be lost. Are you really sure?`,
       default: false,

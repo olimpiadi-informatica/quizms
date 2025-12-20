@@ -1,6 +1,5 @@
-import { exit } from "node:process";
-
-import pc from "picocolors";
+import { exit, stderr } from "node:process";
+import { styleText } from "node:util";
 
 export function fatal(msg: string): never {
   error(msg);
@@ -8,19 +7,19 @@ export function fatal(msg: string): never {
 }
 
 export function error(msg: string) {
-  console.error(`${clearLine}${pc.red("✗")} ${msg}`);
+  console.error(`${clearLine}${styleText("red", "✗", { stream: stderr })} ${msg}`);
 }
 
 export function warning(msg: string) {
-  console.warn(`${clearLine}${pc.yellow("⚠")} ${msg}`);
+  console.warn(`${clearLine}${styleText("yellow", "⚠", { stream: stderr })} ${msg}`);
 }
 
 export function info(msg: string) {
-  console.info(`${clearLine}${pc.blue("𝓲")} ${msg}`);
+  console.info(`${clearLine}${styleText("blue", "𝓲")} ${msg}`);
 }
 
 export function success(msg: string) {
-  console.info(`${clearLine}${pc.green("✓")} ${msg}`);
+  console.info(`${clearLine}${styleText("green", "✓")} ${msg}`);
 }
 
 const clearLine = "\u001B[2K\u001B[0G";

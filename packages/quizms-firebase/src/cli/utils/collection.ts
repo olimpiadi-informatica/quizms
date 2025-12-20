@@ -1,9 +1,10 @@
+import { styleText } from "node:util";
+
 import { confirm } from "@inquirer/prompts";
 import { fatal, info, success } from "@olinfo/quizms/utils-node";
 import { SingleBar } from "cli-progress";
 import type { Firestore, FirestoreDataConverter } from "firebase-admin/firestore";
 import { partition, upperFirst } from "lodash-es";
-import pc from "picocolors";
 
 type ImportOptions = {
   delete?: true;
@@ -28,7 +29,8 @@ export async function importCollection<T extends { id: string }>(
 
   if (options.delete) {
     const confirmed = await confirm({
-      message: `You are about to delete all ${pc.bold(
+      message: `You are about to delete all ${styleText(
+        "bold",
         collection,
       )}. Any previous data will be lost, this operation cannot be undone. Are you really sure?`,
       default: false,
@@ -57,7 +59,8 @@ export async function importCollection<T extends { id: string }>(
 
   if (options.force && existing.length > 0) {
     const confirmed = await confirm({
-      message: `You are about to import the ${pc.bold(
+      message: `You are about to import the ${styleText(
+        "bold",
         collection,
       )}. ${existing.length} document will be overwritten, the previous data will be lost. Are you really sure?`,
       default: false,

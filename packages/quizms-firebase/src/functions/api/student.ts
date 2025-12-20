@@ -1,6 +1,5 @@
-import crypto from "node:crypto";
+import crypto, { createHash } from "node:crypto";
 
-import { sha256 } from "@noble/hashes/sha2";
 import { type Contest, getNormalizedUserData, type Student } from "@olinfo/quizms/models";
 import { TRPCError } from "@trpc/server";
 import { Timestamp } from "firebase-admin/firestore";
@@ -12,8 +11,10 @@ import { getContest, getParticipationByToken, getRandomVariant, getStudentByHash
 import { publicProcedure } from "./trpc";
 
 function studentHash(contest: Contest, userData: NonNullable<Student["userData"]>) {
-  const hash = sha256(getNormalizedUserData(contest, { userData }));
-  return Buffer.from(hash).toString("base64url");
+  return createHash("sha256")
+    .update(getNormalizedUserData(contest, { userData }))
+    .digest()
+    .toString("base64url");
 }
 
 export const studentLogin = publicProcedure

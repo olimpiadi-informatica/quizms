@@ -168,7 +168,7 @@ async function buildBaseStatements(generationConfigs: VariantsConfig[]): Promise
           },
           onlyExplicitManualChunks: true,
         },
-        external: externalLibs,
+        external: [...externalLibs, "sharp", "svgo"],
       },
     },
     environments: {

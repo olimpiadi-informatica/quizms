@@ -1,12 +1,12 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { cwd } from "node:process";
+import { styleText } from "node:util";
 
 import type { Bucket } from "@google-cloud/storage";
 import { confirm, select } from "@inquirer/prompts";
 import { error, info, success } from "@olinfo/quizms/utils-node";
 import { type App, applicationDefault } from "firebase-admin/app";
-import pc from "picocolors";
 
 import { getGcpRegions } from "~/cli/utils/region-finder";
 
@@ -231,7 +231,7 @@ async function initFile(fileName: string, content: string, options?: InitOptions
 
   if (!write) {
     write = await confirm({
-      message: `The file ${pc.bold(path.basename(fileName))} already exists. Do you want to overwrite it?`,
+      message: `The file ${styleText("bold", path.basename(fileName))} already exists. Do you want to overwrite it?`,
     });
   }
 
