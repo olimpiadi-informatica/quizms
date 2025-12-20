@@ -7,7 +7,7 @@ export async function studentUpdatedHandler(
   event: FirestoreAuthEvent<Change<DocumentSnapshot> | undefined>,
 ) {
   const data = event.data?.after;
-  if (!data) return;
+  if (!data?.exists) return;
 
   await db.collection("submissions").add({
     authType: event.authType,
