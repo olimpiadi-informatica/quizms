@@ -4,8 +4,7 @@ import { platform } from "node:os";
 import path from "node:path";
 import { promisify } from "node:util";
 
-import sizeOf from "image-size";
-import svgToMiniDataURI from "mini-svg-data-uri";
+import { imageToDataUri, transformSvg } from "@olinfo/quizms/utils-node";
 import { temporaryFile, temporaryWrite } from "tempy";
 
 import { createAsymptoteInject } from "./inject";
@@ -37,12 +36,11 @@ export async function compileAsymptote({ fileName, inject }: AsySrc) {
     await execAsy(fileName, injectFile, "svg", "-tex", "pdflatex");
   }
 
-  const svg = await readFile(svgFile);
-  const size = sizeOf(svg);
+  const image = transformSvg(svgFile, await readFile(svgFile, "utf-8"));
   return {
-    src: svgToMiniDataURI(svg.toString()),
-    width: size.width,
-    height: size.height,
+    src: imageToDataUri(image),
+    width: image.width,
+    height: image.height,
   };
 }
 
