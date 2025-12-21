@@ -1,6 +1,11 @@
 import crypto, { createHash } from "node:crypto";
 
-import { type Contest, getNormalizedUserData, type Student } from "@olinfo/quizms/models";
+import {
+  type Contest,
+  getNormalizedUserData,
+  type Student,
+  studentSchema,
+} from "@olinfo/quizms/models";
 import { TRPCError } from "@trpc/server";
 import { Timestamp } from "firebase-admin/firestore";
 import * as logger from "firebase-functions/logger";
@@ -19,11 +24,11 @@ function studentHash(contest: Contest, userData: NonNullable<Student["userData"]
 
 export const studentLogin = publicProcedure
   .input(
-    z.object({
+    z.strictObject({
       contestId: z.string(),
       token: z.string(),
-      userData: z.record(z.string(), z.union([z.string(), z.number(), z.date()]).optional()),
-      extraData: z.record(z.string(), z.any()),
+      userData: studentSchema.shape.userData.unwrap().required(),
+      extraData: studentSchema.shape.extraData.unwrap(),
     }),
   )
   .mutation(async (opts) => {

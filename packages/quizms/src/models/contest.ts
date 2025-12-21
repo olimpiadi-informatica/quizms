@@ -4,7 +4,7 @@ import z from "zod";
 
 import type { Student } from "~/models/student";
 
-const baseUserData = z.object({
+const baseUserData = z.strictObject({
   name: z.string(),
   label: z.string(),
   size: z.enum(["xs", "sm", "md", "lg", "xl"]).optional(),
@@ -28,7 +28,14 @@ const userDataDate = baseUserData.extend({
   max: z.coerce.date(),
 });
 
-const baseContestSchema = z.object({
+const userData = z
+  .array(z.discriminatedUnion("type", [userDataText, userDataNumber, userDataDate]))
+  .refine((data) => data.some((d) => d.name === "surname"), {
+    error: "Must contain a surname field",
+  })
+  .refine((data) => data.some((d) => d.name === "name"), { error: "Must contain a name field" });
+
+const baseContestSchema = z.strictObject({
   // Identificativo univoco della gara
   id: z.string(),
   // Nome corto della gara
@@ -39,7 +46,7 @@ const baseContestSchema = z.object({
   problemIds: z.coerce.string().array(),
 
   // Informazioni personali richieste agli studenti
-  userData: z.array(z.discriminatedUnion("type", [userDataText, userDataNumber, userDataDate])),
+  userData,
 
   // Se i testi della gara hanno più varianti
   hasVariants: z.boolean(),

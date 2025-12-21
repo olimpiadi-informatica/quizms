@@ -57,7 +57,7 @@ export default function StudentEntry() {
 type FormStudent = {
   contestId: string;
   token: string;
-} & Student["userData"];
+} & Required<NonNullable<Student["userData"]>>;
 
 function StudentForm({ contests }: { contests: Contest[] }) {
   const db = useDb();

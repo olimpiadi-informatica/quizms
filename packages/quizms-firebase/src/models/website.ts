@@ -1,6 +1,6 @@
 import z from "zod";
 
-export const websiteSchema = z.object({
+export const websiteSchema = z.strictObject({
   id: z.string(),
   origin: z.string(),
   title: z.string(),

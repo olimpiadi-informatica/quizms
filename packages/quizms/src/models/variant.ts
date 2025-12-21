@@ -4,17 +4,17 @@ import type { Student } from "~/models/student";
 
 export const answerSchema = z.union([z.string(), z.number(), z.null()]);
 
-export const answerOptionSchema = z.object({
+export const answerOptionSchema = z.strictObject({
   value: answerSchema,
   points: z.number(),
 });
 
-export const clientVariantSchema = z.object({
+export const clientVariantSchema = z.strictObject({
   id: z.string(),
   contestId: z.string(),
   schema: z.record(
     z.string(),
-    z.object({
+    z.strictObject({
       maxPoints: z.number(),
       allowEmpty: z.boolean(),
       kind: z.enum(["open", "allCorrect", "anyCorrect"]),
@@ -23,36 +23,30 @@ export const clientVariantSchema = z.object({
   ),
 });
 
-export const variantSchema = z.object({
+const baseProblemSchema = z.strictObject({
+  type: z.enum(["text", "number"]),
+  maxPoints: z.number(),
+  originalId: z.string(),
+  allowEmpty: z.boolean().default(true),
+});
+
+const problemSchema = z.discriminatedUnion("kind", [
+  baseProblemSchema.extend({
+    kind: z.enum(["open"]),
+    options: answerOptionSchema.array(),
+  }),
+  baseProblemSchema.extend({
+    kind: z.enum(["allCorrect", "anyCorrect"]),
+    options: answerOptionSchema.extend({ originalId: z.string() }).array(),
+  }),
+]);
+
+export const variantSchema = z.strictObject({
   id: z.string(),
   isOnline: z.boolean(),
   isPdf: z.boolean(),
   contestId: z.string(),
-  schema: z.record(
-    z.string(),
-    z.intersection(
-      z.object({
-        type: z.enum(["text", "number"]),
-        maxPoints: z.number(),
-        originalId: z.string(),
-        allowEmpty: z.boolean().default(true),
-      }),
-      z.discriminatedUnion("kind", [
-        z.object({
-          kind: z.enum(["open"]),
-          options: answerOptionSchema.array(),
-        }),
-        z.object({
-          kind: z.enum(["allCorrect", "anyCorrect"]),
-          options: answerOptionSchema
-            .extend({
-              originalId: z.string(),
-            })
-            .array(),
-        }),
-      ]),
-    ),
-  ),
+  schema: z.record(z.string(), problemSchema),
 });
 
 export type Answer = z.infer<typeof answerSchema>;

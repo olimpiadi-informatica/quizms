@@ -154,7 +154,9 @@ async function importStudents(
       if (err) {
         throw new Error(`Errore nella riga ${row + 1}: ${err[0]}`);
       }
-      userData[field.name] = value;
+      if (value != null) {
+        userData[field.name] = value;
+      }
     }
 
     const off = contest.userData.length + Number(contest.hasVariants || 0);

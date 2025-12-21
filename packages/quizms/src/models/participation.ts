@@ -1,6 +1,6 @@
 import z from "zod";
 
-export const participationSchema = z.object({
+export const participationSchema = z.strictObject({
   id: z.string(),
   schoolId: z.string(),
   contestId: z.string(),

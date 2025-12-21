@@ -15,22 +15,12 @@ import {
   serverTimestamp,
   Timestamp,
 } from "firebase/firestore";
-import { cloneDeepWith, isDate, isString, mapValues, omit } from "lodash-es";
-import z, {
-  ZodArray,
-  ZodDate,
-  ZodDefault,
-  ZodDiscriminatedUnion,
-  ZodIntersection,
-  ZodObject,
-  ZodOptional,
-  ZodRecord,
-  ZodUnion,
-} from "zod";
+import { cloneDeepWith, isDate, isString, omit } from "lodash-es";
+import type z from "zod";
 
 import { websiteSchema } from "~/models/website";
 
-function convertToFirestore(data: Record<string, any>) {
+function convertToFirestore(data: object) {
   return cloneDeepWith(omit(data, "id"), (value) => {
     if (isDate(value)) {
       return Timestamp.fromDate(value);
@@ -44,40 +34,17 @@ function convertToFirestore(data: Record<string, any>) {
   });
 }
 
-function toFirebaseSchema(schema: z.core.$ZodType): z.core.$ZodType {
-  if (schema instanceof ZodDate) {
-    return z.pipe(
-      z.instanceof(Timestamp).transform((ts) => ts.toDate()),
-      schema,
-    );
-  }
-  if (schema instanceof ZodObject) {
-    return z.object(mapValues(schema.shape, (field) => toFirebaseSchema(field)));
-  }
-  if (schema instanceof ZodRecord) {
-    return z.record(schema.keyType, toFirebaseSchema(schema.valueType));
-  }
-  if (schema instanceof ZodArray) {
-    return z.array(toFirebaseSchema(schema.element));
-  }
-  if (schema instanceof ZodOptional) {
-    return z.preprocess((val) => val ?? undefined, z.optional(toFirebaseSchema(schema.unwrap())));
-  }
-  if (schema instanceof ZodDefault) {
-    return z.pipe(toFirebaseSchema(schema.unwrap()), schema);
-  }
-  if (schema instanceof ZodUnion || schema instanceof ZodDiscriminatedUnion) {
-    return z.union(schema.options.map((option) => toFirebaseSchema(option)));
-  }
-  if (schema instanceof ZodIntersection) {
-    return z.intersection(toFirebaseSchema(schema.def.left), toFirebaseSchema(schema.def.right));
-  }
-  return schema;
+function convertFromFirestore(data: object) {
+  return cloneDeepWith(data, (value) => {
+    if (value instanceof Timestamp) {
+      return value.toDate();
+    }
+  });
 }
 
 function parse<T>(schema: z.core.$ZodType<T>, snapshot: DocumentSnapshot): T {
-  const data = { ...snapshot.data({ serverTimestamps: "estimate" }), id: snapshot.id };
-  return validate(toFirebaseSchema(schema), data) as T;
+  const data = convertFromFirestore({ ...snapshot.data(), id: snapshot.id });
+  return validate(schema, data);
 }
 
 function converter<T extends object>(schema: z.core.$ZodType<T>): FirestoreDataConverter<T> {

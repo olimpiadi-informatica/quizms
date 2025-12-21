@@ -5,7 +5,13 @@ import { answerSchema } from "~/models/variant";
 export const studentSchema = z
   .object({
     uid: z.string(),
-    userData: z.record(z.string(), z.union([z.string(), z.number(), z.date()]).optional()),
+    userData: z
+      .object({
+        surname: z.string(),
+        name: z.string(),
+      })
+      .partial()
+      .catchall(z.union([z.string(), z.number(), z.date()])),
     userDataHash: z.string(),
 
     absent: z.boolean(),

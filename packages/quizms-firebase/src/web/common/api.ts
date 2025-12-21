@@ -31,7 +31,7 @@ export function teacherLogin(body: { username: string; password: string }) {
 export function studentLogin(body: {
   contestId: string;
   token: string;
-  userData: NonNullable<Student["userData"]>;
+  userData: Required<NonNullable<Student["userData"]>>;
   extraData: Record<string, any>;
 }) {
   return trpc.studentLogin.mutate(body);

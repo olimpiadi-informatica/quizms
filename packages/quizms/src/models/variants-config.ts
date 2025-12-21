@@ -1,6 +1,6 @@
 import z from "zod";
 
-export const variantsConfigSchema = z.object({
+export const variantsConfigSchema = z.strictObject({
   id: z.string(),
   secret: z.string(),
   entry: z.string(),

@@ -25,7 +25,7 @@ const region = defineString("QUIZMS_REGION");
 
 export const teacherLogin = publicProcedure
   .input(
-    z.object({
+    z.strictObject({
       username: z.string(),
       password: z.string(),
     }),
@@ -92,7 +92,7 @@ async function generateToken() {
 }
 
 export const teacherStartParticipation = publicProcedure
-  .input(z.object({ participationId: z.string() }))
+  .input(z.strictObject({ participationId: z.string() }))
   .mutation(async (opts) => {
     const { input: data, ctx } = opts;
     logger.info("Teacher start participation received", { data });
@@ -141,7 +141,7 @@ export const teacherStartParticipation = publicProcedure
   });
 
 export const teacherStopParticipation = publicProcedure
-  .input(z.object({ participationId: z.string() }))
+  .input(z.strictObject({ participationId: z.string() }))
   .mutation(async (opts) => {
     const { input: data, ctx } = opts;
     logger.info("Teacher stop participation received", { data });
@@ -185,7 +185,7 @@ async function revokeTokens(students: Student[]) {
 }
 
 export const teacherFinalizeParticipation = publicProcedure
-  .input(z.object({ participationId: z.string() }))
+  .input(z.strictObject({ participationId: z.string() }))
   .mutation(async (opts) => {
     const { input: data, ctx } = opts;
     logger.info("Teacher finalize participation received", { data });

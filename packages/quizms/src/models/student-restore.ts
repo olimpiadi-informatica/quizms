@@ -1,6 +1,6 @@
 import z from "zod";
 
-export const studentRestoreSchema = z.object({
+export const studentRestoreSchema = z.strictObject({
   id: z.string(),
   studentId: z.string(),
   participationId: z.string(),

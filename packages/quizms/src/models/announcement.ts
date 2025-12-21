@@ -1,6 +1,6 @@
 import z from "zod";
 
-export const announcementSchema = z.object({
+export const announcementSchema = z.strictObject({
   id: z.string(),
   createdAt: z.date(),
   contestIds: z.string().array(),

@@ -10,7 +10,7 @@ import { publicProcedure } from "./trpc";
 
 export const adminLogin = publicProcedure
   .input(
-    z.object({
+    z.strictObject({
       username: z.string(),
       password: z.string(),
     }),
