@@ -12,6 +12,8 @@ import {
   parseUserData,
   type Student,
   type Variant,
+  validateAnswer,
+  validateUserData,
 } from "~/models";
 import { randomId } from "~/utils";
 import { useTeacher, useTeacherStudents } from "~/web/teacher/context";
@@ -145,13 +147,14 @@ async function importStudents(
 
     const userData: Student["userData"] = {};
     for (const [i, field] of contest.userData.entries()) {
-      try {
-        userData[field.name] = parseUserData(record[i], field, {
-          dateFormat: "dd/MM/yyyy",
-        });
-      } catch (err) {
-        throw new Error(`Errore nella riga ${row + 1}: ${(err as Error).message}`, { cause: err });
+      const value = parseUserData(record[i], field, {
+        dateFormat: "dd/MM/yyyy",
+      });
+      const err = validateUserData(value, field);
+      if (err) {
+        throw new Error(`Errore nella riga ${row + 1}: ${err[0]}`);
       }
+      userData[field.name] = value;
     }
 
     const off = contest.userData.length + Number(contest.hasVariants || 0);
@@ -165,7 +168,14 @@ async function importStudents(
         throw new Error(`Errore nella riga ${row + 1}: La variante "${variantId}" non è valida`);
       }
       answers = Object.fromEntries(
-        contest.problemIds.map((id, i) => [id, parseAnswer(rawAnswers[i], variant.schema[id])]),
+        contest.problemIds.map((id, i) => {
+          const answer = parseAnswer(rawAnswers[i], variant.schema[id]);
+          const err = validateAnswer(answer, variant.schema[id]);
+          if (err) {
+            throw new Error(`Errore nella riga ${row + 1}: ${err[0]}`);
+          }
+          return [id, answer];
+        }),
       );
     } else if (rawAnswers.some(Boolean)) {
       throw new Error(`Errore nella riga ${row + 1}: Variante mancante`);

@@ -1,31 +1,17 @@
 import { Suspense, useMemo, useRef, useState } from "react";
 
 import { Button, useIsAfter } from "@olinfo/react-components";
-import type {
-  CellEditRequestEvent,
-  ColDef,
-  ICellRendererParams,
-  IFilterOptionDef,
-  ITooltipParams,
-} from "ag-grid-community";
-import { addMinutes, isEqual as isEqualDate } from "date-fns";
-import { cloneDeep, omit, setWith, sumBy, toPath } from "lodash-es";
-import { Download, FileCheck, Trash2, TriangleAlert, Upload, UserCheck } from "lucide-react";
+import type { CellEditRequestEvent } from "ag-grid-community";
+import { addMinutes } from "date-fns";
+import { cloneDeep, omit, setWith, sumBy } from "lodash-es";
+import { Download, FileCheck, Trash2, Upload, UserCheck } from "lucide-react";
 
-import {
-  type Contest,
-  calcScore,
-  displayAnswer,
-  formatUserData,
-  parseAnswer,
-  parseUserData,
-  type Student,
-  type Variant,
-} from "~/models";
+import { calcScore, type Student } from "~/models";
 import { randomId } from "~/utils";
 import { AgGrid, Loading } from "~/web/components";
 import { useTeacher, useTeacherStudents } from "~/web/teacher/context";
 
+import { columnDefinition } from "./col-def";
 import { DeleteModal } from "./delete";
 import { DeleteAllModal } from "./delete-all";
 import { ExportModal } from "./export";
@@ -146,22 +132,7 @@ function Table() {
     setCurrentStudent(name);
 
     let value = ev.newValue;
-    const [field, subfield] = toPath(ev.colDef.field!);
-    if (field === "userData") {
-      const schema = contest.userData.find((f) => f.name === subfield);
-      value = parseUserData(value, schema!);
-    }
-    if (field === "variant" && value && !variants[value]) {
-      throw new Error(`La variante ${value} non è valida`);
-    }
-    if (field === "answers") {
-      const schema = variants[student.variant!]?.schema;
-      if (!schema) {
-        throw new Error("Variante mancante");
-      }
-      value = parseAnswer(value, schema[subfield]);
-    }
-    if (field === "disabled" && value) {
+    if (ev.colDef.field === "disabled" && value) {
       const modal = modalRef.current!;
       if (sessionStorage.getItem(deleteConfirmStorageKey) !== "1") {
         ev.api.refreshCells();
@@ -210,177 +181,4 @@ function Table() {
       <DeleteModal studentName={currentStudent} ref={modalRef} />
     </div>
   );
-}
-
-function columnDefinition(
-  contest: Contest,
-  variants: Record<string, Variant>,
-  canViewScore: boolean,
-  frozen: boolean,
-): ColDef[] {
-  const widths = {
-    xs: 100,
-    sm: 125,
-    md: 150,
-    lg: 200,
-    xl: 250,
-  };
-
-  const defaultOptions: ColDef = {
-    sortable: true,
-    filter: true,
-    resizable: true,
-  };
-
-  return [
-    ...contest.userData.map(
-      (field): ColDef => ({
-        field: `userData.${field.name}`,
-        headerName: field.label,
-        pinned: field.pinned,
-        cellDataType: field.type,
-        width: widths[field.size ?? "md"],
-        equals: field.type === "date" ? isEqualDate : undefined,
-        editable: contest.allowStudentEdit && !frozen,
-        ...defaultOptions,
-        tooltipValueGetter: ({ data }: ITooltipParams<Student>) => {
-          return isStudentIncomplete(data!, contest, variants);
-        },
-        cellRenderer: ({ api, data, value }: ICellRendererParams<Student>) => {
-          value = formatUserData(data, field);
-          if (
-            field.pinned &&
-            data?.updatedAt &&
-            !api.getSelectedRows().some((s: Student) => s.id === data.id) &&
-            isStudentIncomplete(data, contest, variants)
-          ) {
-            return (
-              <span>
-                {value}{" "}
-                <TriangleAlert className="mb-1 inline-block cursor-text text-warning" size={16} />
-              </span>
-            );
-          }
-          return value;
-        },
-      }),
-    ),
-    {
-      field: "variant",
-      headerName: "Variante",
-      width: 100,
-      editable: !frozen,
-      ...defaultOptions,
-      hide: !contest.hasVariants,
-    },
-    {
-      headerName: "Vedi Prova",
-      width: 100,
-      cellRenderer: ({ data }: ICellRendererParams<Student>) => {
-        if (data?.absent || data?.disabled || !data?.variant) return;
-        return (
-          <a
-            className="link link-info"
-            href={`./students/${data.id}`}
-            target="_blank"
-            rel="noreferrer">
-            apri
-          </a>
-        );
-      },
-      sortable: false,
-      hide: !contest.hasOnline,
-    },
-    ...contest.problemIds.map((id): ColDef => {
-      return {
-        field: `answers[${id}]`,
-        headerName: id,
-        width: 60,
-        valueGetter: ({ data }) => {
-          if (data.absent || data.disabled) return "";
-          if (!(id in (data.answers ?? {}))) return "";
-          if (variants[data.variant] === undefined) return "";
-          return displayAnswer(data.answers[id], variants[data.variant].schema[id].kind) ?? "";
-        },
-        tooltipValueGetter: ({ data }) => data.answers?.[id],
-        editable: ({ data }) =>
-          contest.allowAnswerEdit && !data.absent && !data.disabled && !frozen,
-        resizable: true,
-      };
-    }),
-    {
-      field: "score",
-      headerName: "Punti",
-      pinned: "right",
-      width: 100,
-      ...defaultOptions,
-      hide: !canViewScore,
-    },
-    {
-      field: "absent",
-      headerName: "Assente",
-      cellDataType: "boolean",
-      width: 120,
-      valueGetter: ({ data }) => data.absent ?? false,
-      editable: !frozen,
-      ...defaultOptions,
-      sortable: false,
-      hide: !contest.allowAnswerEdit,
-      filterParams: {
-        filterOptions: [
-          {
-            displayKey: "all",
-            displayName: "Seleziona tutti",
-            predicate: () => true,
-            numberOfInputs: 0,
-          },
-          {
-            displayKey: "absent",
-            displayName: "Assenti",
-            predicate: (_filter: any[], absent: boolean) => absent,
-            numberOfInputs: 0,
-          },
-          {
-            displayKey: "present",
-            displayName: "Presenti",
-            predicate: (_filter: any[], absent: boolean) => !absent,
-            numberOfInputs: 0,
-          },
-        ] as IFilterOptionDef[],
-      },
-    },
-    {
-      field: "disabled",
-      headerName: "Cancella",
-      cellDataType: "boolean",
-      width: 120,
-      valueGetter: ({ data }) => data.disabled ?? false,
-      editable: !frozen,
-      ...defaultOptions,
-      sortable: false,
-      hide: !contest.allowStudentDelete,
-      filterParams: {
-        filterOptions: [
-          {
-            displayKey: "all",
-            displayName: "Seleziona tutti",
-            predicate: () => true,
-            numberOfInputs: 0,
-          },
-          {
-            displayKey: "disabled",
-            displayName: "Cancellati",
-            predicate: (_filter: any[], disabled: boolean) => disabled,
-            numberOfInputs: 0,
-          },
-          {
-            displayKey: "enabled",
-            displayName: "Non cancellati",
-            predicate: (_filter: any[], disabled: boolean) => !disabled,
-            numberOfInputs: 0,
-          },
-        ] as IFilterOptionDef[],
-      },
-    },
-  ];
 }

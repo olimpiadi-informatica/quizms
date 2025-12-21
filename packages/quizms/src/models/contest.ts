@@ -90,53 +90,71 @@ export function parseUserData(
   options?: { dateFormat?: string },
 ): string | number | Date | undefined {
   if (!value) return undefined;
-  const label = `"${schema.label}"`.toLowerCase();
   switch (schema.type) {
     case "text": {
-      const normalized = value
+      return value
         .replaceAll(/\s+/g, " ")
         .replaceAll(/[`´‘’]/g, "'")
         .trim();
-      if (/[^-'\s\p{Alpha}]/u.test(normalized)) {
-        const helpUtf8 = /[^\p{ASCII}]/u.test(normalized) ? " e che la codifica sia UTF-8" : "";
-        throw new Error(
-          `Il campo ${label} contiene caratteri non validi. Assicurati che non ci siano numeri o simboli${helpUtf8}.`,
-        );
-      }
-      if (value.length > 256) {
-        throw new Error(`Il campo ${label} non può essere più lungo di 256 caratteri.`);
-      }
-      return normalized;
     }
     case "number": {
-      const num = Number(value);
-      if (!Number.isInteger(num)) {
-        throw new Error(`Il campo ${label} deve essere un numero intero.`);
-      }
-      if (schema?.min !== undefined && num < schema.min) {
-        throw new Error(`Il campo ${label} deve essere maggiore o uguale a ${schema.min}.`);
-      }
-      if (schema?.max !== undefined && num > schema.max) {
-        throw new Error(`Il campo ${label} deve essere minore o uguale a ${schema.max}.`);
-      }
-      return num;
+      return Number(value);
     }
     case "date": {
-      let date = options?.dateFormat
+      const date = options?.dateFormat
         ? parseDate(value, options.dateFormat, new Date())
         : new Date(value);
-      date = subMinutes(date, date.getTimezoneOffset());
-      if (date < schema?.min) {
-        throw new Error(
+      return subMinutes(date, date.getTimezoneOffset());
+    }
+  }
+}
+
+export function validateUserData(
+  rawValue: string | number | Date | undefined,
+  schema: Contest["userData"][number],
+): [string] | null {
+  if (rawValue == null) return null;
+  const label = `"${schema.label}"`.toLowerCase();
+  switch (schema.type) {
+    case "text": {
+      const value = rawValue as string;
+      if (/[^-'\s\p{Alpha}]/u.test(value)) {
+        const helpUtf8 = /[^\p{ASCII}]/u.test(value) ? " e che la codifica sia UTF-8" : "";
+        return [
+          `Il campo ${label} contiene caratteri non validi. Assicurati che non ci siano numeri o simboli${helpUtf8}.`,
+        ];
+      }
+      if (value.length > 256) {
+        return [`Il campo ${label} non può essere più lungo di 256 caratteri.`];
+      }
+      return null;
+    }
+    case "number": {
+      const value = rawValue as number;
+      if (!Number.isInteger(value)) {
+        return [`Il campo ${label} deve essere un numero intero.`];
+      }
+      if (schema?.min !== undefined && value < schema.min) {
+        return [`Il campo ${label} deve essere maggiore o uguale a ${schema.min}.`];
+      }
+      if (schema?.max !== undefined && value > schema.max) {
+        return [`Il campo ${label} deve essere minore o uguale a ${schema.max}.`];
+      }
+      return null;
+    }
+    case "date": {
+      const value = rawValue as Date;
+      if (schema.min && value < schema.min) {
+        return [
           `Il campo ${label} deve contenere una data successiva al ${formatDate(schema.min)}.`,
-        );
+        ];
       }
-      if (date > schema?.max) {
-        throw new Error(
+      if (schema.max && value > schema.max) {
+        return [
           `Il campo ${label} deve contenere una data precedente al ${formatDate(schema.max)}.`,
-        );
+        ];
       }
-      return date;
+      return null;
     }
   }
 }

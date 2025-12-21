@@ -80,47 +80,39 @@ export function parseAnswer(answer: string, schema: Schema[string]): Answer {
   let value: Answer = answer.trim().toUpperCase();
   if (!value) return null;
 
-  if (schema.kind === "open") {
-    if (schema.type === "number") {
-      value = Number(value);
-    }
+  if (schema.kind === "open" && schema.type === "number") {
+    value = Number(value);
   }
-
   if (schema.kind === "allCorrect") {
     value = encodeAllCorrectAnswer(answer.split(""));
   }
 
-  isValidAnswer(value, schema);
   return value;
 }
 
 export function displayAnswer(answer: Answer, kind: Schema[string]["kind"]): string {
-  switch (kind) {
-    case "allCorrect": {
-      const values = decodeAllCorrectAnswer(answer);
-      return values.join("");
-    }
-    default: {
-      if (answer === null) {
-        return "";
-      }
-      return `${answer}`;
-    }
+  if (kind === "allCorrect") {
+    const values = decodeAllCorrectAnswer(answer);
+    return values.join("");
   }
+  if (answer == null) {
+    return "";
+  }
+  return String(answer);
 }
 
-export function isValidAnswer(answer: Answer, schema: Schema[string]) {
-  if (answer == null) return;
+export function validateAnswer(answer: Answer, schema: Schema[string]): [string] | null {
+  if (answer == null || answer === "") return null;
   if (schema.type === "number" && !Number.isInteger(answer)) {
-    throw new TypeError("La risposta deve essere un numero intero");
+    return ["La risposta deve essere un numero intero"];
   }
 
   switch (schema.kind) {
     case "anyCorrect": {
       if (!schema.options.some((option) => option.value === answer)) {
-        throw new Error(`Opzione non valida: ${answer}`);
+        return [`Opzione non valida: ${answer}`];
       }
-      break;
+      return null;
     }
     case "allCorrect": {
       const values = decodeAllCorrectAnswer(answer);
@@ -128,17 +120,15 @@ export function isValidAnswer(answer: Answer, schema: Schema[string]) {
         (value) => !schema.options.some((option) => option.value === value),
       );
       if (wrong.length >= 1) {
-        throw new Error(`Opzioni non valide: ${wrong.join("")}`);
+        return [`Opzioni non valide: ${wrong.join("")}`];
       }
       if (new Set(values).size !== values.length) {
-        throw new Error(`Opzioni ripetute: ${values.join("")}`);
+        return [`Opzioni ripetute: ${values.join("")}`];
       }
-      break;
-    }
-    default: {
-      break;
+      return null;
     }
   }
+  return null;
 }
 
 export function calcScore(student: Student, schema?: Schema) {

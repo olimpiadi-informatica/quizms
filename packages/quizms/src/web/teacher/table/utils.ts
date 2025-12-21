@@ -1,9 +1,9 @@
 import {
   type Contest,
-  isValidAnswer,
   type Participation,
   type Student,
   type Variant,
+  validateAnswer,
 } from "~/models";
 
 export const deleteConfirmStorageKey = "delete-confirm";
@@ -32,10 +32,9 @@ export function isStudentIncomplete(
     if (!variant.schema[id].allowEmpty && !(id in answers)) {
       return `Domanda ${id} mancante`;
     }
-    try {
-      isValidAnswer(answers[id], variant.schema[id]);
-    } catch (err) {
-      return (err as Error).message;
+    const err = validateAnswer(answers[id], variant.schema[id]);
+    if (err) {
+      return err[0];
     }
   }
 }
