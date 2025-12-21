@@ -163,7 +163,10 @@ async function buildBaseStatements(generationConfigs: VariantsConfig[]): Promise
               return "client-modules";
             }
             if (info?.isIncluded) {
-              return path.relative(root, id.replace("\0", "")).replace(/^(\.*\/)*/, "");
+              return path
+                .relative(root, id.replace("\0", ""))
+                .replace(/^(\.*\/)*/, "")
+                .replace(/\.\w+$/, "");
             }
           },
           onlyExplicitManualChunks: true,

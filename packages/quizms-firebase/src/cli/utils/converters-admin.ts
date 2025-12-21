@@ -16,6 +16,7 @@ import z, {
   ZodDate,
   ZodDefault,
   ZodDiscriminatedUnion,
+  ZodIntersection,
   ZodObject,
   ZodOptional,
   ZodRecord,
@@ -56,13 +57,16 @@ function toFirebaseSchema(schema: z.core.$ZodType): z.core.$ZodType {
     return z.array(toFirebaseSchema(schema.element));
   }
   if (schema instanceof ZodOptional) {
-    return z.optional(z.preprocess((val) => val ?? undefined, toFirebaseSchema(schema.unwrap())));
+    return z.preprocess((val) => val ?? undefined, z.optional(toFirebaseSchema(schema.unwrap())));
   }
   if (schema instanceof ZodDefault) {
     return z.pipe(toFirebaseSchema(schema.unwrap()), schema);
   }
   if (schema instanceof ZodUnion || schema instanceof ZodDiscriminatedUnion) {
     return z.union(schema.options.map((option) => toFirebaseSchema(option)));
+  }
+  if (schema instanceof ZodIntersection) {
+    return z.intersection(toFirebaseSchema(schema.def.left), toFirebaseSchema(schema.def.right));
   }
   return schema;
 }
