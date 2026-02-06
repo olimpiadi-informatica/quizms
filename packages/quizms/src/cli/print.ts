@@ -46,7 +46,7 @@ export default async function print(options: PrintOptions) {
       chunkSizeWarningLimit: Number.MAX_SAFE_INTEGER,
       rollupOptions: {
         input: Object.fromEntries(
-          pages.map((page) => [page, "virtual:quizms-entry?virtual:quizms-print-entry"]),
+          pages.map((page) => [page, "virtual:quizms-entry?id=virtual:quizms-print-entry"]),
         ),
       },
       minify: false,

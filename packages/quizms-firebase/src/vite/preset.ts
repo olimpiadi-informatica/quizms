@@ -16,7 +16,7 @@ export default function firebasePreset(): PluginOption {
             build: {
               rollupOptions: {
                 input: {
-                  index: "virtual:quizms-entry?@olinfo/quizms-firebase/entry",
+                  index: "virtual:quizms-entry?id=@olinfo/quizms-firebase/entry",
                 },
               },
             },

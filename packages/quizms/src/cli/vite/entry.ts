@@ -22,14 +22,15 @@ export default function entry(): PluginOption {
       }
     },
     load(id) {
-      const [pathname, entryId] = id.split("?");
+      const [pathname, query] = id.split("?");
       if (pathname === "\0virtual:quizms-entry") {
         if (!existsSync(path.join(root, "global.css"))) {
           error("Missing global.css file");
         }
 
+        const params = new URLSearchParams(query);
         return `\
-import createApp from "${entryId}";
+import createApp from "${params.get("id")}";
 import "@olinfo/quizms/css";
 import "~/global.css";
 

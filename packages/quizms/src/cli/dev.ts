@@ -133,7 +133,7 @@ export default function createDevEntry() {
               {
                 tag: "script",
                 attrs: { type: "module" },
-                children: `import "virtual:quizms-entry?${route.module}";`,
+                children: `import "virtual:quizms-entry?id=${route.module}";`,
                 injectTo: "body",
               },
             ];

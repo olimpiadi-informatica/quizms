@@ -12,7 +12,7 @@ export default function blocklyEditor(): PluginOption {
       const input = config.build?.rollupOptions?.input;
       if (input) {
         (input as Record<string, string>).__blockly_iframe =
-          "virtual:quizms-entry?@olinfo/quizms-mdx/blockly-editor";
+          "virtual:quizms-entry?id=@olinfo/quizms-mdx/blockly-editor";
       }
     },
   };
