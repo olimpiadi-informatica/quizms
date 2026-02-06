@@ -1,10 +1,17 @@
+import type { ReactNode } from "react";
+
 import {
   Problem as ProblemClient,
-  type ProblemProps,
   SubProblem as SubProblemClient,
   type SubProblemProps,
 } from "../client/problem";
 import { JsonArray, JsonField, JsonObject } from "./json";
+
+export type ProblemProps = {
+  points: [number, number, number];
+  children: ReactNode;
+  originalId?: string;
+};
 
 export function Problem({ points, children, originalId }: ProblemProps) {
   return (
@@ -15,7 +22,7 @@ export function Problem({ points, children, originalId }: ProblemProps) {
       {originalId !== undefined && <JsonField field="originalId" value={originalId} />}
       <JsonField field="subProblems">
         <JsonArray>
-          <ProblemClient points={points}>{children}</ProblemClient>
+          <ProblemClient>{children}</ProblemClient>
         </JsonArray>
       </JsonField>
     </>

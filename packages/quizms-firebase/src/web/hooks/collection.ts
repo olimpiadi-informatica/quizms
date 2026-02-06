@@ -61,7 +61,7 @@ export function useCollection<T extends { id: string }>(
           try {
             setData(snap.docs.map((doc) => doc.data()));
           } catch (err) {
-            showBoundary(err);
+            showBoundary(err as Error);
           }
         },
         (error) => showBoundary(error),

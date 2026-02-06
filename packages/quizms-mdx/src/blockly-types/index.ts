@@ -1,5 +1,7 @@
 import type { utils } from "blockly/core";
 
+export type ToolboxInfo = utils.toolbox.ToolboxInfo;
+
 export type BlocklyType = number | string | boolean | undefined;
 
 export type Context = {
@@ -7,16 +9,28 @@ export type Context = {
   pause: () => Promise<void>;
 };
 
-export type CustomBlock<State> = {
+type Message0<Args extends any[], Counter extends any[] = []> = Args extends [any, ...infer Rest]
+  ? `${string} %${[...Counter, any]["length"]}${Message0<Rest, [...Counter, any]>}`
+  : string;
+
+export type CustomBlock<State, Args extends any[] = any[]> = {
   type: string;
-  message0: string;
+  message0: Message0<Args>;
   previousStatement?: null;
   nextStatement?: null;
   colour: number;
   tooltip: string;
   maxInstances?: number;
-  fn: (ctx: Context, state: State, ...args: any[]) => Promise<BlocklyType> | BlocklyType | void;
+  fn: (
+    ctx: Context,
+    state: State,
+    ...args: Args
+  ) => Promise<BlocklyType> | BlocklyType | Promise<void> | void;
 };
+
+export function defineBlocks<State>() {
+  return <T extends any[][]>(blocks: { [K in keyof T]: CustomBlock<State, T[K]> }) => blocks;
+}
 
 export type BlocklyTypeLiteral = "Number" | "String" | "Array" | "Boolean";
 
@@ -69,5 +83,3 @@ export type WorkspaceToIframeMessage =
   | { cmd: "error"; message: string };
 
 export type TestcaseResult = { success: boolean; message: string };
-
-export const __dummy = true;

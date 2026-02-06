@@ -5,7 +5,7 @@ import process from "node:process";
 import type { PluginContext } from "rollup";
 import type { PluginOption } from "vite";
 
-import { type Image, type ImageOptions, imageToDataUri, transformImage } from "~/utils-node";
+import { type Image, imageToDataUri, parseImageOptions, transformImage } from "~/utils-node";
 
 const imageExtensions = new Set([
   ".png",
@@ -20,23 +20,11 @@ const imageExtensions = new Set([
 
 export default function images(): PluginOption {
   let isBuild = true;
-  let rootDir: string;
 
   return {
     name: "quizms:images",
-    configResolved({ command, root }) {
+    configResolved({ command }) {
       isBuild = command === "build";
-      rootDir = root;
-    },
-    resolveId(id) {
-      const [pathname, query] = id.split("?");
-      const ext = path.extname(pathname);
-      if (imageExtensions.has(ext)) {
-        const resolvedPathname = pathname.startsWith(rootDir)
-          ? pathname
-          : path.join(rootDir, pathname);
-        return `${resolvedPathname}?${query}`;
-      }
     },
     load: {
       order: "pre",
@@ -54,14 +42,8 @@ export default function images(): PluginOption {
       const params = new URLSearchParams(query);
       const ext = path.extname(pathname);
 
-      const options: ImageOptions = {
-        scale: Number(params.get("s")),
-        width: Number(params.get("w")),
-        height: Number(params.get("h")),
-      };
-
       if (imageExtensions.has(ext)) {
-        const image = await transformImage(pathname, code, options);
+        const image = await transformImage(pathname, code, parseImageOptions(params));
 
         return {
           code: emitFile(this, pathname, image, isBuild),

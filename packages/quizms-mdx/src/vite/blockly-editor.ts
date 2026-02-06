@@ -5,15 +5,20 @@ export default function blocklyEditor(): PluginOption {
     name: "quizms:blockly-entry",
     api: {
       quizmsDevRoutes: [
-        { pathname: "/__blockly_iframe.html", module: "@olinfo/quizms-mdx/blockly-editor" },
+        { pathname: "/__blockly_iframe", module: "@olinfo/quizms-mdx/blockly-editor" },
       ],
     },
     config(config) {
-      const input = config.build?.rollupOptions?.input;
-      if (input) {
-        (input as Record<string, string>).__blockly_iframe =
-          "virtual:quizms-entry?id=@olinfo/quizms-mdx/blockly-editor";
-      }
+      if (config.build?.lib) return;
+      return {
+        build: {
+          rollupOptions: {
+            input: {
+              __blockly_iframe: "virtual:quizms-entry?id=@olinfo/quizms-mdx/blockly-editor",
+            },
+          },
+        },
+      };
     },
   };
 }

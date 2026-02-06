@@ -4,7 +4,7 @@ import { platform } from "node:os";
 import path from "node:path";
 import { promisify } from "node:util";
 
-import { imageToDataUri, transformSvg } from "@olinfo/quizms/utils-node";
+import { type ImageOptions, imageToDataUri, transformSvg } from "@olinfo/quizms/utils-node";
 import { temporaryFile, temporaryWrite } from "tempy";
 
 import { createAsymptoteInject } from "./inject";
@@ -15,9 +15,10 @@ export type AsySrc = {
   fileName: string;
   hash: string;
   inject: object | null;
+  options: ImageOptions;
 };
 
-export async function compileAsymptote({ fileName, inject }: AsySrc) {
+export async function compileAsymptote({ fileName, inject, options }: AsySrc) {
   const svgFile = temporaryFile({ extension: "svg" });
 
   const injectString = createAsymptoteInject(inject);
@@ -37,8 +38,7 @@ export async function compileAsymptote({ fileName, inject }: AsySrc) {
     await execAsy(fileName, injectFile, svgFile, "svg", "-tex", "pdflatex");
   }
 
-  const image = transformSvg(svgFile, await readFile(svgFile, "utf-8"));
-  console.log(image, "!!!!!");
+  const image = transformSvg(svgFile, await readFile(svgFile, "utf-8"), options);
   return {
     src: imageToDataUri(image),
     width: image.width,

@@ -42,7 +42,7 @@ export function MultipleChoiceAnswer({
       <JsonField field="kind" value={kind} />
       <JsonField field="options">
         <JsonArray>
-          <MultipleChoiceAnswerClient answerIds={answerIds} kind={kind}>
+          <MultipleChoiceAnswerClient answerIds={answerIds}>
             {childrenArray.map((child, i) => {
               return (
                 <JsonObject key={i}>
@@ -59,7 +59,7 @@ export function MultipleChoiceAnswer({
 }
 MultipleChoiceAnswer.displayName = "MultipleChoiceAnswer";
 
-export function OpenAnswer({ correct }: OpenAnswerProps) {
+export function OpenAnswer({ correct }: OpenAnswerProps & { correct: string }) {
   const type = Number.isFinite(Number(correct)) ? "number" : "text";
   return (
     <>
@@ -76,33 +76,37 @@ export function OpenAnswer({ correct }: OpenAnswerProps) {
           </JsonObject>
         </JsonArray>
       </JsonField>
-      <OpenAnswerClient correct={correct} type={type} />
+      <OpenAnswerClient type={type} />
     </>
   );
 }
 OpenAnswer.displayName = "OpenAnswer";
 
-export function AnyCorrectAnswer({ correct, children, originalId }: AnswerProps) {
+export function AnyCorrectAnswer({
+  correct,
+  children,
+  originalId,
+}: AnswerProps & { correct: string }) {
   return (
     <>
       <JsonField field="correct" value={!!correct} />
       {originalId !== undefined && <JsonField field="originalId" value={originalId} />}
-      <AnyCorrectAnswerClient correct={process.env.QUIZMS_MODE === "contest" ? undefined : correct}>
-        {children}
-      </AnyCorrectAnswerClient>
+      <AnyCorrectAnswerClient>{children}</AnyCorrectAnswerClient>
     </>
   );
 }
 AnyCorrectAnswer.displayName = "AnyCorrectAnswer";
 
-export function AllCorrectAnswer({ correct, children, originalId }: AnswerProps) {
+export function AllCorrectAnswer({
+  correct,
+  children,
+  originalId,
+}: AnswerProps & { correct: boolean }) {
   return (
     <>
-      <JsonField field="correct" value={!!correct} />
+      <JsonField field="correct" value={correct} />
       {originalId !== undefined && <JsonField field="originalId" value={originalId} />}
-      <AllCorrectAnswerClient correct={process.env.QUIZMS_MODE === "contest" ? undefined : correct}>
-        {children}
-      </AllCorrectAnswerClient>
+      <AllCorrectAnswerClient>{children}</AllCorrectAnswerClient>
     </>
   );
 }

@@ -56,7 +56,7 @@ export function useDocumentOptional<T>(
           try {
             setData([snap.data()]);
           } catch (err) {
-            showBoundary(err);
+            showBoundary(err as Error);
           }
         },
         (error) => showBoundary(error),

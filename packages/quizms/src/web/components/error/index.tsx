@@ -22,6 +22,7 @@ export function ErrorBoundary({
     </BaseErrorBoundary>
   );
 }
+ErrorBoundary.displayName = "ErrorBoundary";
 
 function ErrorBoundaryContent({ error, resetErrorBoundary }: FallbackProps) {
   useEffect(() => {
@@ -54,3 +55,4 @@ function ErrorBoundaryContent({ error, resetErrorBoundary }: FallbackProps) {
     </div>
   );
 }
+ErrorBoundaryContent.displayName = "ErrorBoundaryContent";

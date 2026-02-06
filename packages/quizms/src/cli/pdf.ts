@@ -7,7 +7,7 @@ import { type BrowserContext, chromium } from "playwright";
 
 import type { Contest } from "~/models";
 import type { VariantsConfig } from "~/models/variants-config";
-import { fatal, withProgress } from "~/utils-node";
+import { withProgress } from "~/utils-node";
 
 async function generatePdf(
   context: BrowserContext,
@@ -70,8 +70,7 @@ async function generatePdf(
 }
 
 export default async function generatePdfs(
-  contests: Contest[],
-  variantConfigs: VariantsConfig[],
+  contests: (Contest & VariantsConfig)[],
   baseUrl: string,
   outDir: string,
 ) {
@@ -79,11 +78,7 @@ export default async function generatePdfs(
   const context = await browser.newContext();
 
   const ids = contests.flatMap((contest) => {
-    const config = variantConfigs.find((c) => c.id === contest.id);
-    if (!config) {
-      fatal(`Missing variants configuration for contest ${contest.id}.`);
-    }
-    return uniq([...config.variantIds, ...config.pdfVariantIds]).map(
+    return uniq([...contest.variantIds, ...contest.pdfVariantIds]).map(
       (id) => [contest, id] as const,
     );
   });

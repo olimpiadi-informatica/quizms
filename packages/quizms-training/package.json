@@ -1,0 +1,50 @@
+{
+  "name": "@olinfo/quizms-training",
+  "version": "4.0.0",
+  "type": "module",
+  "author": "Alessandro Bortolin <bortolin.alessandro@outlook.it>",
+  "license": "MIT",
+  "scripts": {
+    "prebuild": "biome check && tsc --noEmit",
+    "build": "vite build",
+    "watch": "vite build --watch",
+    "lint": "biome check --write && tsc --noEmit",
+    "prepack": "pnpm build"
+  },
+  "exports": {
+    "./entry": {
+      "types": "./dist/entry.d.ts",
+      "default": "./dist/entry.js"
+    },
+    "./vite": {
+      "types": "./dist/vite.d.ts",
+      "default": "./dist/vite.js"
+    }
+  },
+  "dependencies": {
+    "@olinfo/quizms": "workspace:^",
+    "@olinfo/react-components": "^0.12.0",
+    "date-fns": "^4.1.0",
+    "swr": "^2.4.0",
+    "vite": "^7.3.1",
+    "zod": "^4.3.6"
+  },
+  "peerDependencies": {
+    "react": "~19.1.4"
+  },
+  "postcss": {
+    "plugins": {
+      "tailwindcss": {}
+    }
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.3.15",
+    "@types/node": "^25.2.3",
+    "@types/react": "^19.2.14",
+    "rollup-plugin-node-externals": "^8.1.2",
+    "rollup-preserve-directives": "^1.1.3",
+    "typescript": "5.8.2",
+    "vite-plugin-dts": "^4.5.4",
+    "vite-tsconfig-paths": "^6.1.1"
+  }
+}

@@ -14,10 +14,10 @@ import {
   transformWithEsbuild,
 } from "vite";
 
-import { type Contest, contestSchema } from "~/models";
-import { type VariantsConfig, variantsConfigSchema } from "~/models/variants-config";
+import type { Contest } from "~/models";
+import type { VariantsConfig } from "~/models/variants-config";
 import { reactComponentCase } from "~/utils";
-import { fatal, info, load, success, warning } from "~/utils-node";
+import { fatal, info, loadContests, success, warning } from "~/utils-node";
 
 import generatePdfs from "./pdf";
 import configs from "./vite/configs";
@@ -29,8 +29,7 @@ export type PrintOptions = {
 };
 
 export default async function print(options: PrintOptions) {
-  const contests = await load("contests", contestSchema);
-  const variantConfigs = await load("variants", variantsConfigSchema);
+  const contests = await loadContests();
 
   info("Building website...");
   process.env.QUIZMS_MODE = "print";
@@ -51,7 +50,7 @@ export default async function print(options: PrintOptions) {
       },
       minify: false,
     },
-    plugins: [printEntry(contests, variantConfigs)],
+    plugins: [printEntry(contests)],
     logLevel: "info",
   } as InlineConfig);
   try {
@@ -86,25 +85,12 @@ export default async function print(options: PrintOptions) {
   }
 
   const address = fastify.addresses()[0];
-  await generatePdfs(
-    contests,
-    variantConfigs,
-    `http://${address.address}:${address.port}`,
-    options.outDir,
-  );
+  await generatePdfs(contests, `http://${address.address}:${address.port}`, options.outDir);
 
   await fastify.close();
 }
 
-function printEntry(contests: Contest[], variantConfigs: VariantsConfig[]): PluginOption {
-  const contestConfigs = contests.map((contest) => {
-    const config = variantConfigs.find((c) => c.id === contest.id);
-    if (!config) {
-      fatal(`Missing variants configuration for contest ${contest.id}.`);
-    }
-    return { ...contest, ...config };
-  });
-
+function printEntry(contestConfigs: (Contest & VariantsConfig)[]): PluginOption {
   return {
     name: "quizms:print-entry",
     resolveId(id) {
@@ -135,7 +121,7 @@ export default function createPrintEntry() {
           (contest) => `
             <Route path="/${contest.id}">
               <PrintProvider contest={${JSON.stringify(contest)}}>
-                ${contest.header && `<${reactComponentCase(contest.id)}Header />`}
+                ${contest.header ? `<${reactComponentCase(contest.id)}Header />` : ""}
               </PrintProvider>
             </Route>`,
         )

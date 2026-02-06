@@ -2,27 +2,17 @@
 
 import { createContext, type ReactNode, use } from "react";
 
-export type ProblemProps = {
-  points: [number, number, number];
-  children: ReactNode;
-  originalId?: string;
-};
-
 type ProblemContextProps = {
   id?: string;
-  points: [number, number, number];
 };
 
-export const ProblemContext = createContext<ProblemContextProps>({
-  id: undefined,
-  points: [0, 0, 0],
-});
+export const ProblemContext = createContext<ProblemContextProps>({});
 ProblemContext.displayName = "ProblemContext";
 
-export function Problem({ points, children }: ProblemProps) {
+export function Problem({ children }: { children: ReactNode }) {
   const { id } = use(ProblemContext);
   return (
-    <ProblemContext.Provider value={{ id, points }}>
+    <ProblemContext.Provider value={{ id }}>
       <div className="relative">{children}</div>
       <hr className="last:hidden" />
     </ProblemContext.Provider>
@@ -35,11 +25,11 @@ export type SubProblemProps = {
 };
 
 export function SubProblem({ subId, children }: SubProblemProps) {
-  const { id, points } = use(ProblemContext);
+  const { id } = use(ProblemContext);
   const newId = subId ? `${id}.${subId}` : `${id}`;
 
   return (
-    <ProblemContext.Provider value={{ id: newId, points }}>
+    <ProblemContext.Provider value={{ id: newId }}>
       <div className="break-inside-avoid">
         <h3>Domanda {newId}</h3>
         {children}

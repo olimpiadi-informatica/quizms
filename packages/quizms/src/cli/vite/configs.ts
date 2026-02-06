@@ -9,7 +9,6 @@ import { sumBy } from "lodash-es";
 import type { InlineConfig, PluginOption } from "vite";
 import inspect from "vite-plugin-inspect";
 
-import training from "~/cli/vite/training";
 import { info, warning } from "~/utils-node";
 
 import directives from "./directives";
@@ -44,16 +43,7 @@ export default function configs(mode: "development" | "production"): InlineConfi
       "process.env.NODE_ENV": JSON.stringify(mode),
       "process.env.QUIZMS_MODE": JSON.stringify(process.env.QUIZMS_MODE),
     },
-    plugins: [
-      plugins,
-      directives(),
-      images(),
-      inspect(),
-      react(),
-      statementExternals(),
-      entry(),
-      training(),
-    ],
+    plugins: [plugins, directives(), images(), inspect(), react(), statementExternals(), entry()],
     build: {
       rollupOptions: {
         onwarn: (log) => {

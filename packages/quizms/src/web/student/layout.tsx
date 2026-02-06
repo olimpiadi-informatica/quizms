@@ -1,4 +1,4 @@
-import { forwardRef, type ReactNode, type Ref, useEffect, useRef, useState } from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 
 import {
   Button,
@@ -6,13 +6,9 @@ import {
   DropdownButton,
   DropdownItem,
   DropdownMenu,
-  Form,
-  FormButton,
-  Modal,
   Navbar,
   NavbarBrand,
   NavbarContent,
-  SubmitButton,
 } from "@olinfo/react-components";
 import { addMilliseconds, isPast } from "date-fns";
 import { sumBy } from "lodash-es";
@@ -22,21 +18,17 @@ import { useUserAgent } from "~/utils";
 import { ErrorBoundary, Progress, Prose, Timer, Title } from "~/web/components";
 
 import { useStudent } from "./context";
+import { CompletedModal, SubmitModal } from "./modals";
 
-export function StudentLayout({
-  children,
-  enforceFullscreen,
-}: {
-  children: ReactNode;
-  enforceFullscreen?: boolean;
-}) {
+export function StudentLayout({ children }: { children: ReactNode }) {
   const completedRef = useRef<HTMLDialogElement>(null);
   const submitRef = useRef<HTMLDialogElement>(null);
 
-  const { contest, student, schema, reset, participation, terminated, logout } = useStudent();
+  const { contest, student, schema, reset, participation, terminated, logout, enforceFullscreen } =
+    useStudent();
 
   const answered = sumBy(Object.values(student.answers ?? {}), (s) => Number(s === 0 || !!s));
-  const total = Math.max(Object.keys(schema).length, 1);
+  const total = Math.max(schema ? Object.keys(schema).length : contest.problemIds.length, 1);
   const progress = Math.round((answered / total) * 100);
 
   const [warningDeadline, setWarningDeadline] = useState<Date | undefined>();
@@ -131,14 +123,16 @@ export function StudentLayout({
             </div>
             {terminated && reset ? (
               <>
-                <div className="tooltip tooltip-bottom h-full" data-tip="Mostra risultati">
-                  <Button
-                    className="btn-primary btn-sm h-full"
-                    onClick={() => completedRef.current?.showModal()}
-                    aria-label="Mostra risultati">
-                    <FileChartColumn />
-                  </Button>
-                </div>
+                {schema && (
+                  <div className="tooltip tooltip-bottom h-full" data-tip="Mostra risultati">
+                    <Button
+                      className="btn-primary btn-sm h-full"
+                      onClick={() => completedRef.current?.showModal()}
+                      aria-label="Mostra risultati">
+                      <FileChartColumn />
+                    </Button>
+                  </div>
+                )}
                 {reset && (
                   <div className="tooltip tooltip-bottom h-full" data-tip="Ricomincia">
                     <Button
@@ -178,6 +172,7 @@ export function StudentLayout({
     </>
   );
 }
+StudentLayout.displayName = "StudentLayout";
 
 function UserDropdown() {
   const { student, logout } = useStudent();
@@ -202,48 +197,4 @@ function UserDropdown() {
     </Dropdown>
   );
 }
-
-const CompletedModal = forwardRef(function CompletedModal(_props, ref: Ref<HTMLDialogElement>) {
-  return (
-    <Modal ref={ref} title="Prova terminata">
-      <p>La prova è terminata.</p>
-    </Modal>
-  );
-});
-
-const SubmitModal = forwardRef(function SubmitModal(_, ref: Ref<HTMLDialogElement>) {
-  const { student, setStudent, onSubmit } = useStudent();
-
-  const close = () => {
-    if (ref && "current" in ref) {
-      ref.current?.close();
-    }
-  };
-
-  const confirm = async () => {
-    try {
-      await setStudent({
-        ...student,
-        finishedAt: new Date(),
-      });
-      await onSubmit?.();
-      if (ref && "current" in ref && ref.current) {
-        ref.current.returnValue = "1";
-      }
-    } finally {
-      close();
-    }
-  };
-
-  return (
-    <Modal ref={ref} title="Confermi di voler terminare?">
-      <p>Confermando non potrai più modificare le tue risposte.</p>
-      <Form onSubmit={confirm} className="!max-w-full">
-        <div className="flex flex-wrap justify-center gap-2">
-          <FormButton onClick={close}>Annulla</FormButton>
-          <SubmitButton className="btn-error">Conferma</SubmitButton>
-        </div>
-      </Form>
-    </Modal>
-  );
-});
+UserDropdown.displayName = "UserDropdown";

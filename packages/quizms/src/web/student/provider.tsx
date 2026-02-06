@@ -1,15 +1,8 @@
-import { type ReactNode, useCallback, useEffect, useState } from "react";
+import type { ReactNode } from "react";
 
 import { useIsAfter } from "@olinfo/react-components";
 
-import {
-  type ClientSchema,
-  type Contest,
-  calcScore,
-  type Participation,
-  type Schema,
-  type Student,
-} from "~/models";
+import type { Contest, Participation, Schema, Student } from "~/models";
 
 import { StudentContext, type StudentContextProps } from "./context";
 import { StudentLayout } from "./layout";
@@ -29,58 +22,32 @@ type StudentProviderProps = {
   onSubmit?: () => Promise<void> | void;
   /** Funzione per cambiare utente */
   logout?: () => Promise<void> | void;
+  /** Flag che indica se è obbligatorio entrare in fullscreen */
+  enforceFullscreen: boolean;
   /** Flag che indica se la prova è terminata */
   terminated: boolean;
+  /** Risposte corrette */
+  schema?: Schema;
 };
 
 export function StudentProvider({
-  setStudent,
   children,
   student,
-  enforceFullscreen,
   ...props
 }: Omit<StudentProviderProps, "terminated"> & {
   children: ReactNode;
-  enforceFullscreen: boolean;
 }) {
-  const [schema, registerSchema] = useState<ClientSchema>({});
   const terminated = useIsAfter(student.finishedAt) ?? false;
-
-  const setStudentAndScore = useCallback(
-    async (student: Student) => {
-      if (process.env.QUIZMS_MODE === "training") {
-        await setStudent({ ...student, score: calcScore(student, schema as Schema) });
-      } else {
-        await setStudent(student);
-      }
-    },
-    [setStudent, schema],
-  );
 
   const value: StudentContextProps = {
     ...props,
     student,
-    setStudent: setStudentAndScore,
     terminated,
-    schema,
-    registerSchema,
   };
-
-  useEffect(() => {
-    if (process.env.QUIZMS_MODE === "training" && student.maxScore == null) {
-      let maxScore = 0;
-      const answers = { ...student.answers };
-      for (const id in schema) {
-        maxScore += schema[id].maxPoints;
-        answers[id] ??= null;
-      }
-      setStudent({ ...student, maxScore, answers });
-    }
-  }, [student, setStudent, schema]);
 
   return (
     <StudentContext.Provider value={value}>
-      <StudentLayout enforceFullscreen={enforceFullscreen}>{children}</StudentLayout>
+      <StudentLayout>{children}</StudentLayout>
     </StudentContext.Provider>
   );
 }

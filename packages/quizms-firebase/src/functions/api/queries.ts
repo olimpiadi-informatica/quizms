@@ -1,5 +1,3 @@
-import crypto from "node:crypto";
-
 import { Rng } from "@olinfo/quizms/utils";
 
 import {
@@ -11,7 +9,7 @@ import {
 } from "~/cli/utils/converters-admin";
 import { db } from "~/functions/common";
 
-const rng = new Rng(crypto.randomUUID());
+const rng = new Rng();
 
 export async function getContest(contestId: string) {
   const snapshot = await db.doc(`contests/${contestId}`).withConverter(contestConverter).get();

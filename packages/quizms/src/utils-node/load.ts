@@ -8,9 +8,10 @@ import * as toml from "smol-toml";
 import yaml from "yaml";
 import z from "zod";
 
+import { contestSchema, variantsConfigSchema } from "~/models";
 import { validate } from "~/utils";
 
-import { fatal, info } from "./logs";
+import { fatal } from "./logs";
 
 const parsers: { ext: string; parser: (str: string) => any }[] = [
   { ext: ".toml", parser: toml.parse },
@@ -20,19 +21,26 @@ const parsers: { ext: string; parser: (str: string) => any }[] = [
   { ext: ".csv", parser: parseCsv },
 ];
 
+const cache = new Map<string, Promise<string | null>>();
+
+function readFileCached(fileName: string) {
+  if (!cache.has(fileName)) {
+    cache.set(
+      fileName,
+      readFile(fileName, "utf8").catch(() => null),
+    );
+  }
+  return cache.get(fileName)!;
+}
+
 export async function load<T>(collection: string, schema: z.core.$ZodType<T>) {
   const fileName = path.join("data", collection);
 
   for (const { ext, parser } of parsers) {
     const relativePath = path.relative(cwd(), collection) + ext;
 
-    let content: string;
-    try {
-      content = await readFile(fileName + ext, "utf8");
-    } catch {
-      continue;
-    }
-    info(`Reading from ${fileName + ext}`);
+    const content = await readFileCached(fileName + ext);
+    if (content == null) continue;
 
     let rawData: any;
     try {
@@ -82,5 +90,18 @@ function renameKeys(value: any): any {
     if (isPlainObject(v)) {
       return Object.fromEntries(Object.entries(v).map(([k, v]) => [camelCase(k), renameKeys(v)]));
     }
+  });
+}
+
+export async function loadContests() {
+  const contests = await load("contests", contestSchema);
+  const variantConfigs = await load("variants", variantsConfigSchema);
+
+  return contests.map((contest) => {
+    const config = variantConfigs.find((c) => c.id === contest.id);
+    if (!config) {
+      fatal(`Missing variants configuration for contest ${contest.id}.`);
+    }
+    return { ...contest, ...config };
   });
 }

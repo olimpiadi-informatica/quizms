@@ -20,7 +20,7 @@ type WebpImage = {
 
 export type Image = (SvgImage | WebpImage) & { width: number; height: number };
 
-export function transformSvg(filename: string, content: string, options: ImageOptions = {}): Image {
+export function transformSvg(filename: string, content: string, options: ImageOptions): Image {
   const { data } = optimize(content, {
     multipass: true,
     plugins: [
@@ -57,10 +57,7 @@ export function transformSvg(filename: string, content: string, options: ImageOp
   return { format: ".svg", data, width, height };
 }
 
-export async function transformRaster(
-  fileName: string,
-  options: ImageOptions = {},
-): Promise<Image> {
+export async function transformRaster(fileName: string, options: ImageOptions): Promise<Image> {
   const image = await readFile(fileName);
   let process = sharp(image).webp();
 
@@ -88,7 +85,7 @@ export async function transformRaster(
 export function transformImage(
   filename: string,
   content: string,
-  options: ImageOptions = {},
+  options: ImageOptions,
 ): Promise<Image> {
   if (path.extname(filename) === ".svg") {
     return Promise.resolve(transformSvg(filename, content, options));
@@ -101,4 +98,12 @@ export function imageToDataUri(image: Image) {
     return svgToMiniDataURI(image.data);
   }
   return `data:image/webp;base64,${image.data.toString("base64")}`;
+}
+
+export function parseImageOptions(params: URLSearchParams): ImageOptions {
+  return {
+    scale: params.has("s") ? Number(params.get("s")) : undefined,
+    width: params.has("w") ? Number(params.get("w")) : undefined,
+    height: params.has("h") ? Number(params.get("h")) : undefined,
+  };
 }

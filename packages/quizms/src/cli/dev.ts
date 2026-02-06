@@ -11,10 +11,10 @@ import {
   transformWithEsbuild,
 } from "vite";
 
-import { type Contest, contestSchema } from "~/models";
-import { type VariantsConfig, variantsConfigSchema } from "~/models/variants-config";
+import type { Contest } from "~/models";
+import type { VariantsConfig } from "~/models/variants-config";
 import { reactComponentCase } from "~/utils";
-import { fatal, load } from "~/utils-node";
+import { loadContests } from "~/utils-node";
 
 import configs from "./vite/configs";
 import { generateHtml } from "./vite/html";
@@ -25,14 +25,13 @@ export type DevOptions = {
 };
 
 export default async function devServer(options: DevOptions) {
-  const contests = await load("contests", contestSchema);
-  const variantConfigs = await load("variants", variantsConfigSchema);
+  const contests = await loadContests();
 
   process.env.QUIZMS_MODE = "development";
 
   const config = mergeConfig(configs("development"), {
     publicDir: path.join(cwd(), "public"),
-    plugins: [devEntry(contests, variantConfigs)],
+    plugins: [devEntry(contests)],
   } as InlineConfig);
   const server = await createServer(config);
   await server.listen(options.port);
@@ -42,16 +41,8 @@ export default async function devServer(options: DevOptions) {
   await new Promise(noop);
 }
 
-function devEntry(contests: Contest[], variantConfigs: VariantsConfig[]): PluginOption {
-  const contestConfigs = contests.map((contest) => {
-    const config = variantConfigs.find((c) => c.id === contest.id);
-    if (!config) {
-      fatal(`Missing variants configuration for contest ${contest.id}.`);
-    }
-    return { ...contest, ...config };
-  });
-
-  const pages = ["", ...contests.map((contest) => contest.id)];
+function devEntry(contestConfigs: (Contest & VariantsConfig)[]): PluginOption {
+  const pages = ["", ...contestConfigs.map((contest) => contest.id)];
 
   return {
     name: "quizms:dev-entry",
@@ -85,13 +76,13 @@ ${contestConfigs
 
 export default function createDevEntry() {
   return createApp(
-    <DevRoutes contests={${JSON.stringify(contests)}}>
+    <DevRoutes contests={${JSON.stringify(contestConfigs)}}>
       ${contestConfigs
         .map((contest) => {
           return `
             <Route path="/${contest.id}">
               <DevProvider contest={${JSON.stringify(contest)}}>
-                ${contest.header && `<${reactComponentCase(contest.id)}Header />`}
+                ${contest.header ? `<${reactComponentCase(contest.id)}Header />` : ""}
                 <${reactComponentCase(contest.id)} />
               </DevProvider>
             </Route>`;
@@ -133,7 +124,7 @@ export default function createDevEntry() {
               {
                 tag: "script",
                 attrs: { type: "module" },
-                children: `import "virtual:quizms-entry?id=${route.module}";`,
+                children: `import "virtual:quizms-entry?id=${encodeURIComponent(route.module)}";`,
                 injectTo: "body",
               },
             ];

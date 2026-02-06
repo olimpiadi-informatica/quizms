@@ -5,8 +5,8 @@ import { hash } from "~/utils/hash";
 export class Rng {
   private readonly rng: RandomGenerator;
 
-  constructor(seed: string) {
-    this.rng = xoroshiro128plus(hash(seed));
+  constructor(seed?: string) {
+    this.rng = xoroshiro128plus(seed ? hash(seed) : Date.now() ^ (Math.random() * 0x100000000));
   }
 
   public randInt = (min: number, max: number): number => {

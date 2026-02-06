@@ -1,3 +1,4 @@
+import { hash } from "node:crypto";
 import { mkdir, open } from "node:fs/promises";
 import path from "node:path";
 
@@ -5,9 +6,11 @@ import { fatal, warning } from "@olinfo/quizms/utils-node";
 import { version } from "package.json";
 import { lock } from "proper-lockfile";
 
-async function withCache<T>(key: string, fn: () => Promise<T>): Promise<T> {
+async function withCache<T>(key: any, fn: () => Promise<T>): Promise<T> {
+  const keyStr = hash("sha256", JSON.stringify(key));
+
   const cacheDir = path.join(process.env.QUIZMS_CACHE_DIR || ".quizms/cache", `asy-v${version}`);
-  const cacheFile = path.join(cacheDir, `${key}.json`);
+  const cacheFile = path.join(cacheDir, `${keyStr}.json`);
 
   await mkdir(cacheDir, { recursive: true });
   const fh = await open(cacheFile, "a+");

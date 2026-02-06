@@ -10,7 +10,7 @@ import configs from "./vite/configs";
 
 export type ExportOptions = {
   outDir: string;
-  preset: string;
+  preset?: string;
 };
 
 export default async function staticExport(options: ExportOptions): Promise<void> {
@@ -62,12 +62,24 @@ export default async function staticExport(options: ExportOptions): Promise<void
   } as InlineConfig);
 
   const builder = await createBuilder(config);
-  const environment = builder.environments[options.preset];
+
+  const availablePresets = Object.keys(builder.environments).filter(
+    (preset) => preset !== "client",
+  );
+
+  if (availablePresets.length === 0) {
+    fatal("No preset available. Make sure to install the required dependencies.");
+  }
+
+  const preset =
+    options.preset ?? (availablePresets.length === 1 ? availablePresets[0] : undefined);
+  if (!preset) {
+    fatal(`No preset specified. Specify one of the following: ${availablePresets.join(", ")}`);
+  }
+
+  const environment = builder.environments[preset];
   if (!environment) {
-    const availablePresets = Object.keys(builder.environments)
-      .filter((preset) => preset !== "client")
-      .join(", ");
-    fatal(`Invalid preset "${options.preset}". Available presets: ${availablePresets}`);
+    fatal(`Invalid preset "${preset}". Available presets: ${availablePresets.join(", ")}`);
   }
 
   try {

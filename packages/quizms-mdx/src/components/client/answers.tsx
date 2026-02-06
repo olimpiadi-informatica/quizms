@@ -1,23 +1,13 @@
 "use client";
 
-import {
-  Children,
-  createContext,
-  type ReactNode,
-  use,
-  useCallback,
-  useEffect,
-  useId,
-  useMemo,
-  useState,
-} from "react";
+import { Children, createContext, type ReactNode, use, useCallback, useId, useMemo } from "react";
 
 import { decodeAllCorrectAnswer, encodeAllCorrectAnswer } from "@olinfo/quizms/models";
 import { useStudent } from "@olinfo/quizms/student";
 import clsx from "clsx";
+import { maxBy } from "lodash-es";
 import { Trash2 } from "lucide-react";
 
-import { useContest } from "./contest";
 import { useProblem } from "./problem";
 
 export type AnswerGroupProps = {
@@ -41,17 +31,8 @@ export function AnswerGroup({ children }: AnswerGroupProps) {
 
 export type MultipleChoiceAnswerProps = {
   children: ReactNode;
-  kind: "allCorrect" | "anyCorrect";
   answerIds: string[];
 };
-
-type MultipleChoiceContextProps = {
-  registerCorrectOption: (value: string) => void;
-};
-
-const MultipleChoiceContext = createContext<MultipleChoiceContextProps>({
-  registerCorrectOption: () => {},
-});
 
 type AnswerContextProps = {
   id: string;
@@ -65,58 +46,26 @@ function useAnswer() {
   return use(AnswerContext);
 }
 
-export function MultipleChoiceAnswer({ answerIds, children, kind }: MultipleChoiceAnswerProps) {
-  const { registerProblem } = useContest();
-  const { id: problemId, points } = useProblem();
-  const [correctOptions, setCorrectOptions] = useState<string[]>([]);
-
-  const registerCorrectOption = useCallback((value: string) => {
-    setCorrectOptions((correctOptions) => [...new Set([...correctOptions, value])]);
-  }, []);
-
-  useEffect(() => {
-    const toRegister = kind === "allCorrect" ? [correctOptions.join("")] : correctOptions;
-    registerProblem(`${problemId}`, {
-      kind: kind,
-      allowEmpty: true,
-      maxPoints: points[0],
-      options: [
-        ...toRegister.map((option) => {
-          return {
-            value: option,
-            points: points[0],
-          };
-        }),
-        { value: null, points: points[1] },
-        { value: "", points: points[1] },
-      ],
-    });
-  }, [kind, registerProblem, points, correctOptions, problemId]);
-
-  return (
-    <MultipleChoiceContext.Provider value={{ registerCorrectOption }}>
-      {Children.toArray(children).map((child, i) => {
-        return (
-          <AnswerContext.Provider key={i} value={{ id: answerIds[i] }}>
-            {child}
-          </AnswerContext.Provider>
-        );
-      })}
-    </MultipleChoiceContext.Provider>
-  );
+export function MultipleChoiceAnswer({ answerIds, children }: MultipleChoiceAnswerProps) {
+  return Children.toArray(children).map((child, i) => (
+    <AnswerContext.Provider key={i} value={{ id: answerIds[i] }}>
+      {child}
+    </AnswerContext.Provider>
+  ));
 }
 
 export type AnswerProps = {
-  correct?: boolean;
   children: ReactNode;
   originalId?: string;
 };
 
-export function AllCorrectAnswer({ correct, children }: AnswerProps) {
+export function AllCorrectAnswer({ children }: AnswerProps) {
   const { id } = useAnswer();
   const { id: problemId } = useProblem();
-  const { student, setStudent, terminated } = useStudent();
-  const { registerCorrectOption } = use(MultipleChoiceContext);
+  const { student, setStudent, terminated, schema } = useStudent();
+  const correct = decodeAllCorrectAnswer(
+    maxBy(schema?.[problemId!].options, (o) => o.points)?.value,
+  );
 
   const answer = student.answers?.[problemId!];
   const parsedAnswer = useMemo<string[]>(() => decodeAllCorrectAnswer(answer), [answer]);
@@ -140,18 +89,13 @@ export function AllCorrectAnswer({ correct, children }: AnswerProps) {
 
   const answerId = useId();
 
-  useEffect(() => {
-    if (!correct) return;
-    registerCorrectOption(id);
-  }, [registerCorrectOption, id, correct]);
-
   return (
     <div
       className={clsx(
         "relative my-1 flex rounded-lg pl-2 pr-1 hover:bg-base-300 print:mr-4",
         terminated && {
-          "border-2 border-success": correct === true,
-          "border-2 border-error": currentlyChecked && correct === false,
+          "border-2 border-success": correct.includes(id),
+          "border-2 border-error": currentlyChecked && correct.length > 0 && !correct.includes(id),
         },
       )}>
       <input
@@ -161,8 +105,8 @@ export function AllCorrectAnswer({ correct, children }: AnswerProps) {
           "checkbox checkbox-sm my-auto mr-4 bg-base-100 [print-color-adjust:exact] disabled:opacity-90 print:mr-2",
           terminated &&
             currentlyChecked && {
-              "checkbox-success": correct === true,
-              "checkbox-error": correct === false,
+              "checkbox-success": correct.includes(id),
+              "checkbox-error": correct.length > 0 && !correct.includes(id),
             },
         )}
         onChange={(e) => setAnswer(id, e.target.checked)}
@@ -177,11 +121,11 @@ export function AllCorrectAnswer({ correct, children }: AnswerProps) {
   );
 }
 
-export function AnyCorrectAnswer({ correct, children }: AnswerProps) {
+export function AnyCorrectAnswer({ children }: AnswerProps) {
   const { id } = useAnswer();
   const { id: problemId } = useProblem();
-  const { student, setStudent, terminated } = useStudent();
-  const { registerCorrectOption } = use(MultipleChoiceContext);
+  const { student, setStudent, terminated, schema } = useStudent();
+  const correct = maxBy(schema?.[problemId!].options, (o) => o.points)?.value;
 
   const answer = student.answers?.[problemId!];
   const setAnswer = async (value: string | null) => {
@@ -190,18 +134,13 @@ export function AnyCorrectAnswer({ correct, children }: AnswerProps) {
 
   const answerId = useId();
 
-  useEffect(() => {
-    if (!correct) return;
-    registerCorrectOption(id);
-  }, [registerCorrectOption, id, correct]);
-
   return (
     <div
       className={clsx(
         "relative my-1 flex rounded-lg pl-2 pr-1 hover:bg-base-300 print:mr-4",
         terminated && {
-          "border-2 border-success": correct === true,
-          "border-2 border-error": answer === id && correct === false,
+          "border-2 border-success": correct === id,
+          "border-2 border-error": answer === id && correct != null && correct !== id,
         },
       )}>
       <input
@@ -211,8 +150,8 @@ export function AnyCorrectAnswer({ correct, children }: AnswerProps) {
           "radio radio-sm my-auto mr-4 bg-base-100 [print-color-adjust:exact] disabled:opacity-90 print:mr-2",
           terminated &&
             answer === id && {
-              "radio-success": correct === true,
-              "radio-error": correct === false,
+              "radio-success": correct === id,
+              "radio-error": correct != null && correct !== id,
             },
         )}
         onChange={(e) => setAnswer(e.target.checked ? id : null)}
@@ -240,29 +179,19 @@ export function AnyCorrectAnswer({ correct, children }: AnswerProps) {
 }
 
 export type OpenAnswerProps = {
-  correct?: string;
   type: "number" | "text";
 };
 
-export function OpenAnswer({ correct, type }: OpenAnswerProps) {
-  const { registerProblem } = useContest();
-  const { id: problemId, points } = useProblem();
-  const { student, setStudent, terminated } = useStudent();
+export function OpenAnswer({ type }: OpenAnswerProps) {
+  const { id: problemId } = useProblem();
+  const { student, setStudent, terminated, schema } = useStudent();
+  const correct = maxBy(schema?.[problemId!].options, (o) => o.points)?.value;
 
   const answer = student.answers?.[problemId!];
   const setAnswer = async (value: string | null) => {
     const parsedValue = type === "number" ? value && Number.parseInt(value, 10) : value;
     await setStudent({ ...student, answers: { ...student.answers, [problemId!]: parsedValue } });
   };
-
-  useEffect(() => {
-    registerProblem(`${problemId}`, {
-      kind: "open",
-      allowEmpty: true,
-      maxPoints: points[0],
-      options: [{ value: null, points: points[1] }],
-    });
-  }, [registerProblem, problemId, points]);
 
   return (
     <div className="px-2">

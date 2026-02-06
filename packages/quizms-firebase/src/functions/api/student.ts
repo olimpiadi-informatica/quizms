@@ -1,4 +1,4 @@
-import crypto, { createHash } from "node:crypto";
+import crypto, { hash } from "node:crypto";
 
 import {
   type Contest,
@@ -16,10 +16,7 @@ import { getContest, getParticipationByToken, getRandomVariant, getStudentByHash
 import { publicProcedure } from "./trpc";
 
 function studentHash(contest: Contest, userData: NonNullable<Student["userData"]>) {
-  return createHash("sha256")
-    .update(getNormalizedUserData(contest, { userData }))
-    .digest()
-    .toString("base64url");
+  return hash("sha256", getNormalizedUserData(contest, { userData }));
 }
 
 export const studentLogin = publicProcedure

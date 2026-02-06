@@ -1,6 +1,6 @@
 "use client";
 
-import { type ComponentType, useCallback, useEffect, useState } from "react";
+import { type ComponentType, useCallback, useState } from "react";
 
 import { ErrorBoundary } from "@olinfo/quizms/components";
 import { useStudent } from "@olinfo/quizms/student";
@@ -9,7 +9,6 @@ import clsx from "clsx";
 import { CircleCheck, MessageSquareOff, TriangleAlert } from "lucide-react";
 
 import type { CustomBlock, TestcaseResult, VisualizerProps } from "~/blockly-types";
-import { useContest } from "~/components/client/contest";
 import { useProblem } from "~/components/client/problem";
 
 import { defaultInitialBlocks, defaultToolbox } from "./defaults";
@@ -48,23 +47,7 @@ export function Blockly<State>({
   if (!Visualizer) throw new Error("No visualizer specified");
 
   const { student, setStudent, terminated } = useStudent();
-  const { registerProblem } = useContest();
-  const { id, points } = useProblem();
-
-  useEffect(() => {
-    for (let i = 0; i < testcases.length; i++) {
-      registerProblem(`${id}.${i + 1}`, {
-        kind: "anyCorrect",
-        allowEmpty: true,
-        maxPoints: points[0],
-        options: [
-          { value: "✅", points: points[0] },
-          { value: null, points: points[1] },
-          { value: "❌", points: points[2] },
-        ],
-      });
-    }
-  }, [registerProblem, id, testcases, points]);
+  const { id } = useProblem();
 
   const [iframe, setIframe] = useState<HTMLIFrameElement | null>(null);
   const [selectedTestcase, setSelectedTestcase] = useState(0);

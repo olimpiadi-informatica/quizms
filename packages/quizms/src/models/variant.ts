@@ -9,20 +9,6 @@ export const answerOptionSchema = z.strictObject({
   points: z.number(),
 });
 
-export const clientVariantSchema = z.strictObject({
-  id: z.string(),
-  contestId: z.string(),
-  schema: z.record(
-    z.string(),
-    z.strictObject({
-      maxPoints: z.number(),
-      allowEmpty: z.boolean(),
-      kind: z.enum(["open", "allCorrect", "anyCorrect"]),
-      options: answerOptionSchema.array(),
-    }),
-  ),
-});
-
 const baseProblemSchema = z.strictObject({
   type: z.enum(["text", "number"]),
   maxPoints: z.number(),
@@ -52,8 +38,6 @@ export const variantSchema = z.strictObject({
 export type Answer = z.infer<typeof answerSchema>;
 export type Variant = z.infer<typeof variantSchema>;
 export type Schema = Variant["schema"];
-export type ClientVariant = z.infer<typeof clientVariantSchema>;
-export type ClientSchema = ClientVariant["schema"];
 
 export function decodeAllCorrectAnswer(answer?: Answer): string[] {
   if (typeof answer !== "string") {

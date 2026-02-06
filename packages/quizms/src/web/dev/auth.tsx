@@ -1,4 +1,4 @@
-import { type ReactNode, useCallback, useEffect, useState } from "react";
+import { type ReactNode, useCallback, useState } from "react";
 
 import { Link, Route, Switch } from "wouter";
 
@@ -35,7 +35,7 @@ function ContestList({ contests }: { contests: Contest[] }) {
 ContestList.displayName = "ContestList";
 
 export function DevProvider({ contest, children }: { contest: Contest; children: ReactNode }) {
-  const [student, setStudent] = useLocalStorage<Student>({
+  const [student, setStudent] = useState<Student>({
     id: "",
     userData: {
       name: "Utente",
@@ -66,7 +66,7 @@ export function DevProvider({ contest, children }: { contest: Contest; children:
         finishedAt: undefined,
       }),
     );
-  }, [setStudent]);
+  }, []);
 
   return (
     <StudentProvider
@@ -81,19 +81,3 @@ export function DevProvider({ contest, children }: { contest: Contest; children:
   );
 }
 DevProvider.displayName = "DevProvider";
-
-function useLocalStorage<T>(defaultValue: T) {
-  const key = window.location.pathname;
-
-  const [value, setValue] = useState<T>(() => {
-    return JSON.parse(localStorage.getItem("quizms") ?? "{}")[key] ?? defaultValue;
-  });
-
-  useEffect(() => {
-    const storage = JSON.parse(localStorage.getItem("quizms") ?? "{}");
-    storage[key] = value;
-    localStorage.setItem("quizms", JSON.stringify(storage));
-  }, [key, value]);
-
-  return [value, setValue] as const;
-}

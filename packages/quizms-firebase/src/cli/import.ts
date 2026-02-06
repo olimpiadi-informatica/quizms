@@ -8,12 +8,11 @@ import {
   type Participation,
   participationSchema,
   studentSchema,
-  type VariantsConfig,
   variantSchema,
   variantsConfigSchema,
 } from "@olinfo/quizms/models";
 import { Rng, validate } from "@olinfo/quizms/utils";
-import { fatal, load, success, warning } from "@olinfo/quizms/utils-node";
+import { fatal, load, loadContests, success, warning } from "@olinfo/quizms/utils-node";
 import { deleteApp } from "firebase-admin/app";
 import type { Firestore } from "firebase-admin/firestore";
 import { groupBy, uniq } from "lodash-es";
@@ -123,8 +122,7 @@ async function importParticipations(db: Firestore, options: ImportOptions) {
       password: z.string(),
     });
   const schools = await load("schools", schoolSchema);
-  const contests = await load("contests", contestSchema);
-  let configs: VariantsConfig[] | undefined;
+  const contests = await loadContests();
 
   if (options.teachers) {
     const teachers = schools.map((school) => ({
@@ -147,16 +145,8 @@ async function importParticipations(db: Firestore, options: ImportOptions) {
           if (school.pdfVariants) {
             pdfVariants = school.pdfVariants.map((id) => `${contest.id}-${id}`);
           } else {
-            if (!configs) {
-              configs = await load("variants", variantsConfigSchema);
-            }
-            const config = configs.find((c) => c.id === contest.id);
-            if (!config) {
-              fatal(`Missing variants configuration for contest ${contest.id}.`);
-            }
-
-            const rng = new Rng(`${config.secret}-${config.id}-${school.id}-participation`);
-            pdfVariants = rng.sample(config.pdfVariantIds, config.pdfPerSchool);
+            const rng = new Rng(`${contest.secret}-${contest.id}-${school.id}-participation`);
+            pdfVariants = rng.sample(contest.pdfVariantIds, contest.pdfPerSchool);
           }
         }
 
@@ -222,17 +212,11 @@ async function importWebsites(db: Firestore, options: ImportOptions) {
 }
 
 async function importStatements(bucket: Bucket, options: ImportOptions) {
-  const contests = await load("contests", contestSchema);
-  const variantsConfig = await load("variants", variantsConfigSchema);
+  const contests = await loadContests();
 
   const timestamp = new Date().toISOString().replace(/:/g, "-");
 
-  const statements = contests.map(async (contest) => {
-    const config = variantsConfig.find((c) => c.id === contest.id);
-    if (!config) {
-      fatal(`Missing variants configuration for contest ${contest.id}.`);
-    }
-
+  const statements = contests.map(async (config) => {
     const files = uniq([...config.variantIds, ...config.pdfVariantIds]).map(
       async (id): Promise<[string, string][]> => {
         const localDir = path.join("variants", config.id, id);

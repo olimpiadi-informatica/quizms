@@ -14,7 +14,7 @@ export type { AsySrc };
 const pool = new AsyncPool(2);
 
 export function transformAsymptote(src: AsySrc) {
-  return pool.run(withCache, src.hash, () => compileAsymptote(src));
+  return pool.run(withCache, src, () => compileAsymptote(src));
 }
 
 export async function findAsymptoteDependencies(ctx: PluginContext, asyPath: string) {
