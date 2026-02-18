@@ -188,6 +188,7 @@ export function columnDefinition(
       width: 120,
       valueGetter: ({ data }) => data.disabled ?? false,
       editable: !frozen,
+      pinned: "right",
       ...defaultOptions,
       sortable: false,
       hide: !contest.allowStudentDelete,
