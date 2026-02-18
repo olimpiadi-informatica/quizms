@@ -39,43 +39,74 @@ const userData = z
   })
   .refine((data) => data.some((d) => d.name === "name"), { error: "Must contain a name field" });
 
-const baseContestSchema = z.strictObject({
-  // Identificativo univoco della gara
-  id: z.string(),
-  // Nome corto della gara
-  name: z.string(),
-  // Nome lungo della gara
-  longName: z.string(),
-  // ID dei problemi della gara
-  problemIds: z.coerce.string().array(),
+const matchingRules = z.array(
+  z
+    .strictObject({
+      ordered: z.boolean().default(false),
+      required: z.number().optional(),
+      fields: z.string().array(),
+    })
+    .transform((data) => {
+      return {
+        ...data,
+        required: data.required ?? data.fields.length,
+      };
+    }),
+);
 
-  // Informazioni personali richieste agli studenti
-  userData,
+const baseContestSchema = z
+  .strictObject({
+    // Identificativo univoco della gara
+    id: z.string(),
+    // Nome corto della gara
+    name: z.string(),
+    // Nome lungo della gara
+    longName: z.string(),
+    // ID dei problemi della gara
+    problemIds: z.coerce.string().array(),
 
-  // Se i testi della gara hanno più varianti
-  hasVariants: z.boolean(),
-  // Se la gara può essere svolta online
-  hasOnline: z.boolean(),
-  // Se la gara può essere svolta in modalità cartacea
-  hasPdf: z.boolean(),
+    // Informazioni personali richieste agli studenti
+    userData,
+    matchingRules,
 
-  // Se permette all'insegnante di aggiungere o importare studenti
-  allowStudentImport: z.boolean().default(true),
-  // Se permette all'insegnante di modificare i dati personali degli studenti
-  allowStudentEdit: z.boolean().default(true),
-  // Se permette all'insegnante di modificare le risposte degli studenti
-  allowAnswerEdit: z.boolean().default(true),
-  // Se permette all'insegnante di eliminare gli studenti
-  allowStudentDelete: z.boolean().default(true),
+    // Se i testi della gara hanno più varianti
+    hasVariants: z.boolean(),
+    // Se la gara può essere svolta online
+    hasOnline: z.boolean(),
+    // Se la gara può essere svolta in modalità cartacea
+    hasPdf: z.boolean(),
 
-  // Testo delle istruzioni per la gara da mostrare agli insegnanti
-  instructions: z.string().optional(),
+    // Se permette all'insegnante di aggiungere o importare studenti
+    allowStudentImport: z.boolean().default(true),
+    // Se permette all'insegnante di modificare i dati personali degli studenti
+    allowStudentEdit: z.boolean().default(true),
+    // Se permette all'insegnante di modificare le risposte degli studenti
+    allowAnswerEdit: z.boolean().default(true),
+    // Se permette all'insegnante di eliminare gli studenti
+    allowStudentDelete: z.boolean().default(true),
 
-  // Possibilità per gli insegnanti di vedere il punteggio degli studenti
-  scoreVisibility: z.enum(["never", "always", "finalized"]),
-});
+    // Testo delle istruzioni per la gara da mostrare agli insegnanti
+    instructions: z.string().optional(),
 
-const onlineContest = baseContestSchema.extend({
+    // Possibilità per gli insegnanti di vedere il punteggio degli studenti
+    scoreVisibility: z.enum(["never", "always", "finalized"]),
+  })
+  .superRefine((data, ctx) => {
+    // Checks that each field in the matchin rules corresponds to a real item
+    data.matchingRules.forEach((rule, ruleIndex) => {
+      rule.fields.forEach((field, fieldIndex) => {
+        if (!data.userData.some((row) => row.name === field)) {
+          ctx.addIssue({
+            code: "custom",
+            message: `Value '${field}' is not in userData`,
+            path: ["matchingRules", ruleIndex, fieldIndex],
+          });
+        }
+      });
+    });
+  });
+
+const onlineContest = baseContestSchema.safeExtend({
   hasOnline: z.literal(true),
 
   // Orario da cui è possibile far partire la gara
@@ -90,7 +121,7 @@ const onlineContest = baseContestSchema.extend({
 
 export const contestSchema = z.discriminatedUnion("hasOnline", [
   onlineContest,
-  baseContestSchema.extend({ hasOnline: z.literal(false) }),
+  baseContestSchema.safeExtend({ hasOnline: z.literal(false) }),
 ]);
 
 export type Contest = z.infer<typeof contestSchema>;
@@ -194,8 +225,35 @@ export function getNormalizedUserData(
   student: { userData?: Student["userData"]; token?: string },
 ) {
   const fields = contest.userData
-    .filter((filer) => !filer.excludeFromUniqueCheck)
-    .map((field) => formatUserData(student, field));
+    .filter((field) => !field.excludeFromUniqueCheck)
+    .map((field) => formatUserData(student, field))
+    .sort();
 
   return deburr(fields.join("\n").toLowerCase()).replaceAll(/[^\w\n]/g, "");
+}
+
+export function userDataMatch(
+  contest: Contest,
+  student1: { userData?: Student["userData"] },
+  student2: { userData?: Student["userData"] },
+) {
+  return contest.matchingRules.every((rule) => {
+    const fields = rule.fields.map(
+      (fieldName) => contest.userData.find((field) => field.name === fieldName)!,
+    );
+    let userFields1 = fields.map((field) => formatUserData(student1, field));
+    let userFields2 = fields.map((field) => formatUserData(student2, field));
+    if (!rule.ordered) {
+      userFields1 = userFields1.sort();
+      userFields2 = userFields2.sort();
+    }
+
+    let count = 0;
+    for (let i = 0; i < fields.length; i++) {
+      if (userFields1[i] === userFields2[i]) {
+        count++;
+      }
+    }
+    return count >= rule.required;
+  });
 }

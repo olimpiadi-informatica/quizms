@@ -4,7 +4,7 @@ import { Form, FormButton, Modal, SubmitButton, TextField } from "@olinfo/react-
 import { lowerFirst } from "lodash-es";
 import { TriangleAlert } from "lucide-react";
 
-import { getNormalizedUserData } from "~/models";
+import { userDataMatch } from "~/models";
 import { useTeacher, useTeacherStudents } from "~/web/teacher/context";
 
 import { isStudentIncomplete } from "./utils";
@@ -17,7 +17,7 @@ export const FinalizeModal = forwardRef(function FinalizeModal(
   const [students] = useTeacherStudents();
 
   const error = useMemo(() => {
-    const prevStudents = new Set<string>();
+    const prevStudents = [];
 
     for (const student of students) {
       if (student.disabled) continue;
@@ -30,11 +30,12 @@ export const FinalizeModal = forwardRef(function FinalizeModal(
         return `Lo studente ${name} ${surname} non può essere finalizzato: ${lowerFirst(reason)}.`;
       }
 
-      const normalized = getNormalizedUserData(contest, student);
-      if (prevStudents.has(normalized)) {
-        return `Lo studente ${name} ${surname} è stato inserito più volte`;
+      for (const prevStudent of prevStudents) {
+        if (userDataMatch(contest, student, prevStudent)) {
+          return `Lo studente ${name} ${surname} è stato inserito più volte`;
+        }
       }
-      prevStudents.add(normalized);
+      prevStudents.push(student);
     }
   }, [students, contest, variants]);
 
