@@ -169,7 +169,7 @@ async function enableBackups(app: App) {
       "v1",
       "/databases/(default)/backupSchedules",
     );
-    const hasDaily = existingsBackups.backupSchedules && existingsBackups.backupSchedules.some((s: any) => s.dailyRecurrence);
+    const hasDaily = existingsBackups.backupSchedules?.some((s: any) => s.dailyRecurrence);
     if (hasDaily) {
       info("Daily backup schedule already exists.");
     } else {
@@ -179,7 +179,7 @@ async function enableBackups(app: App) {
       });
     }
 
-    const hasWeekly = existingsBackups.backupSchedules && existingsBackups.backupSchedules.some((s: any) => s.weeklyRecurrence);
+    const hasWeekly = existingsBackups.backupSchedules?.some((s: any) => s.weeklyRecurrence);
     if (hasWeekly) {
       info("Weekly backup schedule already exists.");
     } else {
