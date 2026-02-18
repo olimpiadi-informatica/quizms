@@ -24,7 +24,8 @@ export async function compileAsymptote({ fileName, inject }: AsySrc) {
   const injectFile = await temporaryWrite(injectString ?? "", { extension: "asy" });
 
   if (platform() === "darwin") {
-    const pdfFile = await execAsy(fileName, injectFile, "pdf");
+    const pdfFile = temporaryFile({ extension: "pdf" });
+    await execAsy(fileName, injectFile, pdfFile, "pdf");
 
     try {
       await execFile("pdf2svg", [pdfFile, svgFile]);
@@ -33,10 +34,11 @@ export async function compileAsymptote({ fileName, inject }: AsySrc) {
       throw new Error(`Failed to run pdf2svg:\n${err.stderr ?? err.message}`);
     }
   } else {
-    await execAsy(fileName, injectFile, "svg", "-tex", "pdflatex");
+    await execAsy(fileName, injectFile, svgFile, "svg", "-tex", "pdflatex");
   }
 
   const image = transformSvg(svgFile, await readFile(svgFile, "utf-8"));
+  console.log(image, "!!!!!");
   return {
     src: imageToDataUri(image),
     width: image.width,
@@ -47,12 +49,11 @@ export async function compileAsymptote({ fileName, inject }: AsySrc) {
 async function execAsy(
   fileName: string,
   injectFile: string,
+  outputFile: string,
   extension: string,
   ...extraArgs: string[]
 ) {
-  let outputFile: string;
   try {
-    outputFile = temporaryFile({ extension });
     await execFile(
       "asy",
       [
@@ -79,6 +80,4 @@ async function execAsy(
 
   const { size } = await stat(outputFile);
   if (size === 0) throw new Error("Failed to compile asymptote: Output file is empty.");
-
-  return outputFile;
 }
