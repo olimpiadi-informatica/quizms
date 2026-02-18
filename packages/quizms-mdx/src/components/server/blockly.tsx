@@ -11,15 +11,18 @@ export function Blockly<State = any>(props: BlocklyProps<State>) {
           {i !== 0 && <Token value="},{" />}
           <JsonField field="id" value={i + 1} />
           <JsonField field="type" value="text" />
+          <JsonField field="kind" value="anyCorrect" />
           <JsonField field="options">
             <JsonArray>
               <JsonObject>
                 <JsonField field="value" value="✅" />
                 <JsonField field="correct" value={true} />
+                <JsonField field="originalId" value="A" />
               </JsonObject>
               <JsonObject>
                 <JsonField field="value" value="❌" />
                 <JsonField field="correct" value={false} />
+                <JsonField field="originalId" value="B" />
               </JsonObject>
             </JsonArray>
           </JsonField>
