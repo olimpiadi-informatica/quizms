@@ -14,6 +14,9 @@ const baseUserData = z.strictObject({
 
 const userDataText = baseUserData.extend({
   type: z.literal("text"),
+  pattern: z.string().default("[\\-'\\s\\p{Alpha}]+"),
+  patternMismatch: z.string().default("Il campo non può contenere numeri o simboli."),
+  patternHelp: z.string().default("Assicurati che non ci siano numeri o lettere"),
 });
 
 const userDataNumber = baseUserData.extend({
@@ -125,10 +128,11 @@ export function validateUserData(
   switch (schema.type) {
     case "text": {
       const value = rawValue as string;
-      if (/[^-'\s\p{Alpha}]/u.test(value)) {
+      const re = new RegExp(schema.pattern);
+      if (!re.test(value)) {
         const helpUtf8 = /[^\p{ASCII}]/u.test(value) ? " e che la codifica sia UTF-8" : "";
         return [
-          `Il campo ${label} contiene caratteri non validi. Assicurati che non ci siano numeri o simboli${helpUtf8}.`,
+          `Il campo ${label} contiene caratteri non validi. ${schema.patternHelp}${helpUtf8}.`,
         ];
       }
       if (value.length > 256) {

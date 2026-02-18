@@ -32,12 +32,15 @@ export function StudentFormField({ field }: { field: Contest["userData"][number]
     label: field.label,
     placeholder: `Inserisci ${field.label.toLowerCase()}`,
   };
-  if (field.type === "text" || process.env.QUIZMS_MODE === "print") {
+  if (process.env.QUIZMS_MODE === "print") {
+    return <TextField {...commonProps} />;
+  }
+  if (field.type === "text") {
     return (
       <TextField
         {...commonProps}
-        pattern="[\-'\s\p{Alpha}]+"
-        validationErrorMap={{ patternMismatch: "Il campo non può contenere numeri o simboli." }}
+        pattern={field.pattern}
+        validationErrorMap={{ patternMismatch: field.patternMismatch }}
       />
     );
   }
