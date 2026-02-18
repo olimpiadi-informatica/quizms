@@ -1,6 +1,7 @@
 import { DateField, Form, NumberField, TextField } from "@olinfo/react-components";
 
 import type { Contest } from "~/models";
+import { titleCase } from "~/utils";
 import { useStudent } from "~/web/student/context";
 
 export function StudentForm() {
@@ -41,6 +42,7 @@ export function StudentFormField({ field }: { field: Contest["userData"][number]
         {...commonProps}
         pattern={field.pattern}
         validationErrorMap={{ patternMismatch: field.patternMismatch }}
+        refine={field.title ? (s) => titleCase(s) : undefined}
       />
     );
   }
