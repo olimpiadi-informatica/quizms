@@ -16,7 +16,7 @@ const userDataText = baseUserData.extend({
   type: z.literal("text"),
   pattern: z.string().default("[\\-'\\s\\p{Alpha}]+"),
   patternMismatch: z.string().default("Il campo non può contenere numeri o simboli."),
-  patternHelp: z.string().default("Assicurati che non ci siano numeri o lettere"),
+  patternHelp: z.string().default("Assicurati che non ci siano numeri o simboli"),
 });
 
 const userDataNumber = baseUserData.extend({
