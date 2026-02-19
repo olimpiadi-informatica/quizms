@@ -13,7 +13,7 @@ import {
   WithinTimeRange,
 } from "@olinfo/react-components";
 import { downloadZip } from "client-zip";
-import { addMinutes, isSameDay, subMinutes } from "date-fns";
+import { isSameDay, subMinutes } from "date-fns";
 import { saveAs } from "file-saver";
 import { range } from "lodash-es";
 import Markdown from "react-markdown";
@@ -186,10 +186,9 @@ export default function TeacherDashboard() {
           <CardActions>
             {contest.hasOnline && (
               <WithinTimeRange start={contest.contestWindowStart} end={contest.contestWindowEnd}>
-                {participation.startingTime ? (
+                {participation.endingTime ? (
                   contest.allowRestart && (
-                    <WithinTimeRange
-                      start={addMinutes(participation.startingTime, contest.duration)}>
+                    <WithinTimeRange start={participation.endingTime}>
                       <StartContestButton />
                     </WithinTimeRange>
                   )

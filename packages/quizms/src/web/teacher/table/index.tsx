@@ -2,7 +2,6 @@ import { Suspense, useMemo, useRef, useState } from "react";
 
 import { Button, useIsAfter } from "@olinfo/react-components";
 import type { CellEditRequestEvent } from "ag-grid-community";
-import { addMinutes } from "date-fns";
 import { cloneDeep, omit, setWith, sumBy } from "lodash-es";
 import { Download, FileCheck, Trash2, Upload, UserCheck } from "lucide-react";
 
@@ -26,6 +25,12 @@ export default function TeacherTable() {
   const finalizeRef = useRef<HTMLDialogElement>(null);
   const deleterRef = useRef<HTMLDialogElement>(null);
 
+  const endTime =
+    participation.endingTime && contest.hasOnline ? participation.endingTime : undefined;
+  console.log(endTime);
+  const isContestFinished = useIsAfter(endTime) ?? true;
+  const frozen = (contest.hasOnline && !isContestFinished) || participation.finalized;
+
   return (
     <>
       <div className="mb-3 flex flex-none justify-start gap-2">
@@ -36,7 +41,7 @@ export default function TeacherTable() {
             <div className="hidden md:block"> studenti</div>
           </div>
         </Suspense>
-        {contest.allowStudentImport && !participation.finalized && (
+        {contest.allowStudentImport && !frozen && (
           <Button
             className="btn-primary btn-sm h-10"
             icon={Upload}
@@ -50,7 +55,7 @@ export default function TeacherTable() {
           onClick={() => exportRef.current?.click()}>
           <div className="hidden md:block">Esporta</div>
         </Button>
-        {!participation.finalized && (
+        {!frozen && (
           <Button
             className="btn-primary btn-sm h-10"
             icon={FileCheck}
@@ -59,7 +64,7 @@ export default function TeacherTable() {
           </Button>
         )}
         <FinalizeModal key={participation.id} ref={finalizeRef} />
-        {contest.allowStudentDelete && !participation.finalized && (
+        {contest.allowStudentDelete && !frozen && (
           <Button
             className="btn-primary btn-sm h-10"
             icon={Trash2}
@@ -69,7 +74,7 @@ export default function TeacherTable() {
         )}
       </div>
       <Suspense fallback={<Loading />}>
-        <Table key={participation.id} />
+        <Table frozen={frozen} key={participation.id} />
         <ImportModal ref={importRef} />
         <ExportModal ref={exportRef} />
         <DeleteAllModal ref={deleterRef} />
@@ -87,19 +92,12 @@ function Counter() {
   });
 }
 
-function Table() {
+function Table({ frozen }: { frozen: boolean }) {
   const { contest, participation, variants } = useTeacher();
   const [students, setStudent] = useTeacherStudents();
 
   const modalRef = useRef<HTMLDialogElement>(null);
   const [currentStudent, setCurrentStudent] = useState("");
-
-  const endTime =
-    participation.startingTime && contest.hasOnline
-      ? addMinutes(participation.startingTime, contest.duration)
-      : undefined;
-  const isContestFinished = useIsAfter(endTime) ?? true;
-  const frozen = (contest.hasOnline && !isContestFinished) || participation.finalized;
 
   const newStudentId = useRef(randomId());
   const setStudentAndUpdateId = async (student: Student) => {
