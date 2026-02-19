@@ -53,6 +53,12 @@ export function AdminLayout({ name, contests, logout, children }: Props) {
                 );
               })}
             </NavbarSubmenu>
+            <NavbarMenuItem>
+              <Link href={`/${contest.id}`}>Gestione gara</Link>
+            </NavbarMenuItem>
+            <NavbarMenuItem>
+              <Link href={`/${contest.id}/schools`}>Gestione scuole</Link>
+            </NavbarMenuItem>
           </NavbarMenu>
         )}
         <NavbarContent>
