@@ -17,12 +17,12 @@ export function Blockly<State = any>(props: BlocklyProps<State>) {
               <JsonObject>
                 <JsonField field="value" value="✅" />
                 <JsonField field="correct" value={true} />
-                <JsonField field="originalId" value="A" />
+                <JsonField field="originalId" value="✅" />
               </JsonObject>
               <JsonObject>
                 <JsonField field="value" value="❌" />
                 <JsonField field="correct" value={false} />
-                <JsonField field="originalId" value="B" />
+                <JsonField field="originalId" value="❌" />
               </JsonObject>
             </JsonArray>
           </JsonField>
