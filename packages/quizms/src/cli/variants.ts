@@ -312,6 +312,7 @@ function parseSubProblem(problem: RawProblem, subProblem: RawSubProblem): Schema
     return {
       ...common,
       kind: subProblem.kind,
+      pointsBlank: problem.pointsBlank,
       options: subProblem.options.map((option) => ({
         value: option.value,
         points: option.correct ? problem.pointsCorrect : problem.pointsWrong,
@@ -322,6 +323,7 @@ function parseSubProblem(problem: RawProblem, subProblem: RawSubProblem): Schema
   return {
     ...common,
     kind: subProblem.kind,
+    pointsBlank: problem.pointsBlank,
     options: subProblem.options.map((option) => ({
       value: option.value,
       points: option.correct ? problem.pointsCorrect : problem.pointsWrong,

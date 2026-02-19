@@ -14,6 +14,7 @@ const baseProblemSchema = z.strictObject({
   maxPoints: z.number(),
   originalId: z.string(),
   allowEmpty: z.boolean().default(true),
+  pointsBlank: z.number().default(1),
 });
 
 const problemSchema = z.discriminatedUnion("kind", [
@@ -132,7 +133,7 @@ export function calcProblemPoints(problem: Schema[string], answer?: Answer) {
   if (problem.kind === "allCorrect") {
     const values = decodeAllCorrectAnswer(answer);
     if (values.length === 0) {
-      return 1; // TODO: save points in schema
+      return problem.pointsBlank;
     }
     const correctOptions = problem.options.filter((option) => option.points === 5);
     if (
@@ -141,7 +142,7 @@ export function calcProblemPoints(problem: Schema[string], answer?: Answer) {
     ) {
       return 0;
     }
-    return 5;
+    return problem.maxPoints;
   }
   for (const option of problem.options ?? []) {
     if (option.value === (answer ?? null)) {
@@ -150,10 +151,10 @@ export function calcProblemPoints(problem: Schema[string], answer?: Answer) {
   }
 
   if (problem.kind === "anyCorrect") {
-    return 1;
+    return problem.pointsBlank;
   }
   if ((problem.kind === "open" && answer === undefined) || answer === null || answer === "") {
-    return 1;
+    return problem.pointsBlank;
   }
   return 0;
 }
