@@ -28,6 +28,10 @@ export function teacherLogin(body: { username: string; password: string }) {
   return trpc.teacherLogin.mutate(body);
 }
 
+export function adminLogin(body: { username: string; password: string }) {
+  return trpc.adminLogin.mutate(body);
+}
+
 export function studentLogin(body: {
   contestId: string;
   token: string;
