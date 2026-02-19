@@ -160,7 +160,7 @@ export function validateUserData(
   switch (schema.type) {
     case "text": {
       const value = rawValue as string;
-      const re = new RegExp(schema.pattern);
+      const re = new RegExp(schema.pattern, "u");
       if (!re.test(value)) {
         const helpUtf8 = /[^\p{ASCII}]/u.test(value) ? " e che la codifica sia UTF-8" : "";
         return [
@@ -241,8 +241,8 @@ export function userDataMatch(
     const fields = rule.fields.map(
       (fieldName) => contest.userData.find((field) => field.name === fieldName)!,
     );
-    let userFields1 = fields.map((field) => formatUserData(student1, field));
-    let userFields2 = fields.map((field) => formatUserData(student2, field));
+    let userFields1 = fields.map((field) => formatUserData(student1, field).toLowerCase());
+    let userFields2 = fields.map((field) => formatUserData(student2, field).toLowerCase());
     if (!rule.ordered) {
       userFields1 = userFields1.sort();
       userFields2 = userFields2.sort();
