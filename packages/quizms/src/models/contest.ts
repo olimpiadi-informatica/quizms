@@ -226,10 +226,10 @@ export function getNormalizedUserData(
 ) {
   const fields = contest.userData
     .filter((field) => !field.excludeFromUniqueCheck)
-    .map((field) => formatUserData(student, field))
+    .map((field) => formatUserData(student, field).toLowerCase())
     .sort();
 
-  return deburr(fields.join("\n").toLowerCase()).replaceAll(/[^\w\n]/g, "");
+  return deburr(fields.join("\n")).replaceAll(/[^\w\n]/g, "");
 }
 
 export function userDataMatch(
