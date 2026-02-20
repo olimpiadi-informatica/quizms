@@ -53,7 +53,7 @@ export default function asymptote(): PluginOption {
           options,
         });
         return {
-          code: `export default ${JSON.stringify({ ...svg, _hash: hash })};`,
+          code: `export default JSON.parse(${JSON.stringify(JSON.stringify({ ...svg, _hash: hash }))});`,
           map: { mappings: "" },
         };
       }

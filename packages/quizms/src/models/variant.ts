@@ -1,30 +1,50 @@
+import { isString, xor } from "lodash-es";
 import z from "zod";
 
 import type { Student } from "~/models/student";
 
-export const answerSchema = z.union([z.string(), z.number(), z.null(), z.undefined()]);
+export const answerSchemas = {
+  openNumber: z.number(),
+  openText: z.string(),
+  multipleChoice: z.string(),
+  multipleResponse: z.array(z.string()),
+  complex: z.strictObject({
+    display: z.enum(["✅", "❌"]),
+    metadata: z.record(z.string(), z.any()),
+  }),
+};
 
-export const answerOptionSchema = z.strictObject({
-  value: answerSchema,
-  points: z.number(),
-});
+export const answerSchema = z.union(Object.values(answerSchemas));
 
 const baseProblemSchema = z.strictObject({
-  type: z.enum(["text", "number"]),
-  maxPoints: z.number(),
+  pointsCorrect: z.number(),
+  pointsBlank: z.number(),
+  pointsWrong: z.number(),
   originalId: z.string(),
-  allowEmpty: z.boolean().default(true),
-  pointsBlank: z.number().default(1),
 });
 
-const problemSchema = z.discriminatedUnion("kind", [
+const problemSchema = z.discriminatedUnion("type", [
   baseProblemSchema.extend({
-    kind: z.enum(["open"]),
-    options: answerOptionSchema.array(),
+    type: z.literal("openNumber"),
+    correct: answerSchemas.openNumber,
   }),
   baseProblemSchema.extend({
-    kind: z.enum(["allCorrect", "anyCorrect"]),
-    options: answerOptionSchema.extend({ originalId: z.string() }).array(),
+    type: z.literal("openText"),
+    correct: answerSchemas.openText,
+  }),
+  baseProblemSchema.extend({
+    type: z.literal("multipleResponse"),
+    correct: answerSchemas.multipleResponse,
+    options: z.array(z.string()),
+  }),
+  baseProblemSchema.extend({
+    type: z.literal("multipleChoice"),
+    correct: answerSchemas.multipleChoice,
+    options: z.array(z.string()),
+  }),
+  baseProblemSchema.extend({
+    type: z.literal("complex"),
+    correct: z.literal(""),
   }),
 ]);
 
@@ -36,73 +56,78 @@ export const variantSchema = z.strictObject({
   schema: z.record(z.string(), problemSchema),
 });
 
-export type Answer = z.infer<typeof answerSchema>;
+export type AnswerType = Schema[string]["type"];
+export type Answer<T extends AnswerType = AnswerType> = z.infer<(typeof answerSchemas)[T]>;
 export type Variant = z.infer<typeof variantSchema>;
 export type Schema = Variant["schema"];
 
-export function decodeAllCorrectAnswer(answer?: Answer): string[] {
-  if (typeof answer !== "string") {
-    return [];
-  }
-  try {
-    return JSON.parse(answer);
-  } catch {
-    return [];
+export function parseAnswer(answer: string, schema: Schema[string]): Answer | undefined {
+  const value = answer.trim().toUpperCase();
+  if (!value) return undefined;
+
+  switch (schema.type) {
+    case "openNumber":
+      return Number(value);
+    case "multipleResponse":
+      return answer.split("");
+    case "openText":
+    case "multipleChoice":
+      return value;
+    case "complex":
+      throw new Error("Unsupported problem type");
   }
 }
 
-export function encodeAllCorrectAnswer(value: string[]): Answer {
-  return JSON.stringify(value);
-}
-
-export function parseAnswer(answer: string, schema: Schema[string]): Answer {
-  let value: Answer = answer.trim().toUpperCase();
-  if (!value) return null;
-
-  if (schema.kind === "open" && schema.type === "number") {
-    value = Number(value);
-  }
-  if (schema.kind === "allCorrect") {
-    value = encodeAllCorrectAnswer(answer.split(""));
-  }
-
-  return value;
-}
-
-export function displayAnswer(answer: Answer, kind: Schema[string]["kind"]): string {
-  if (kind === "allCorrect") {
-    const values = decodeAllCorrectAnswer(answer);
-    return values.join("");
-  }
+export function displayAnswer(answer: Answer | null | undefined, type: AnswerType): string {
   if (answer == null) {
     return "";
   }
-  return String(answer);
+  switch (type) {
+    case "openNumber":
+      return String(answer as Answer<"openNumber">);
+    case "openText":
+    case "multipleChoice":
+      return answer as Answer<"openText" | "multipleChoice">;
+    case "multipleResponse":
+      return (answer as Answer<"multipleResponse">).join("");
+    case "complex":
+      return isString(answer) ? answer : (answer as Answer<"complex">).display;
+  }
 }
 
-export function validateAnswer(answer: Answer, schema: Schema[string]): [string] | null {
+export function validateAnswer(
+  answer: Answer | null | undefined,
+  schema: Schema[string],
+): [string] | null {
   if (answer == null || answer === "") return null;
-  if (schema.type === "number" && !Number.isInteger(answer)) {
-    return ["La risposta deve essere un numero intero"];
-  }
 
-  switch (schema.kind) {
-    case "anyCorrect": {
-      if (!schema.options.some((option) => option.value === answer)) {
+  switch (schema.type) {
+    case "openNumber": {
+      if (!Number.isInteger(answer as Answer<"openNumber">)) {
+        return ["La risposta deve essere un numero intero"];
+      }
+      return null;
+    }
+    case "openText": {
+      if ((answer as Answer<"openText">).length > 256) {
+        return ["La risposta non può essere più lunga di 256 caratteri"];
+      }
+      return null;
+    }
+    case "multipleChoice": {
+      if (!schema.options.includes(answer as Answer<"multipleChoice">)) {
         return [`Opzione non valida: ${answer}`];
       }
       return null;
     }
-    case "allCorrect": {
-      const values = decodeAllCorrectAnswer(answer);
-      const wrong = values.filter(
-        (value) => !schema.options.some((option) => option.value === value),
-      );
+    case "multipleResponse": {
+      const mrAnswer = answer as Answer<"multipleResponse">;
+      const wrong = mrAnswer.filter((value) => !schema.options.includes(value));
       if (wrong.length >= 1) {
         return [`Opzioni non valide: ${wrong.join("")}`];
       }
-      if (new Set(values).size !== values.length) {
-        return [`Opzioni ripetute: ${values.join("")}`];
+      if (new Set(mrAnswer).size !== mrAnswer.length) {
+        return [`Opzioni ripetute: ${mrAnswer.join("")}`];
       }
       return null;
     }
@@ -129,48 +154,42 @@ export function calcScore(student: Student, schema?: Schema) {
   return score;
 }
 
-export function calcProblemPoints(problem: Schema[string], answer?: Answer) {
-  if (problem.kind === "allCorrect") {
-    const values = decodeAllCorrectAnswer(answer);
-    if (values.length === 0) {
-      return problem.pointsBlank;
-    }
-    const correctOptions = problem.options.filter((option) => option.points === 5);
-    if (
-      correctOptions.length !== values.length &&
-      correctOptions.some((option) => !values.some((value) => option.value === value))
-    ) {
-      return 0;
-    }
-    return problem.maxPoints;
-  }
-  for (const option of problem.options ?? []) {
-    if (option.value === (answer ?? null)) {
-      return option.points;
-    }
-  }
+export function calcProblemPoints(problem: Schema[string], answer?: Answer): number {
+  if (answer == null || answer === "") return problem.pointsBlank;
 
-  if (problem.kind === "anyCorrect") {
-    return problem.pointsBlank;
+  switch (problem.type) {
+    case "openNumber":
+    case "openText":
+    case "multipleChoice":
+      return answer === problem.correct ? problem.pointsCorrect : problem.pointsWrong;
+    case "multipleResponse": {
+      const multipleAnswer = answer as Answer<"multipleResponse">;
+      if (multipleAnswer.length === 0) return problem.pointsBlank;
+
+      return xor(multipleAnswer, problem.correct).length === 0
+        ? problem.pointsCorrect
+        : problem.pointsWrong;
+    }
+    case "complex":
+      return (answer as Answer<"complex">).display === "✅"
+        ? problem.pointsCorrect
+        : problem.pointsWrong;
   }
-  if ((problem.kind === "open" && answer === undefined) || answer === null || answer === "") {
-    return problem.pointsBlank;
-  }
-  return 0;
 }
 
-export function unshuffleAnswer(problem: Schema[string], answer?: Answer) {
-  if (problem.kind === "open") {
-    return answer;
-  }
-  const unshuffleAnswer = (value: Answer) =>
-    problem.options.find((option) => option.value === value)?.originalId ?? "";
-  if (problem.kind === "allCorrect") {
-    const values = decodeAllCorrectAnswer(answer);
-    const unshuffledValues = values.map(unshuffleAnswer);
-    return encodeAllCorrectAnswer(unshuffledValues);
-  }
-  if (problem.kind === "anyCorrect") {
-    return answer ? unshuffleAnswer(answer) : answer;
-  }
+export function unshuffleAnswer(_problem: Schema[string], _answer?: Answer) {
+  throw new Error("Not implemented");
+  // if (problem.type === "open") {
+  //   return answer;
+  // }
+  // const unshuffleAnswer = (value: Answer) =>
+  //   problem.options.find((option) => option.value === value)?.originalId ?? "";
+  // if (problem.type === "multipleResponse") {
+  //   const values = decodeMultipleResponseAnswer(answer);
+  //   const unshuffledValues = values.map(unshuffleAnswer);
+  //   return encodeMultipleResponseAnswer(unshuffledValues);
+  // }
+  // if (problem.type === "multipleChoice") {
+  //   return answer ? unshuffleAnswer(answer) : answer;
+  // }
 }

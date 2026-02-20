@@ -170,14 +170,16 @@ async function importStudents(
         throw new Error(`Errore nella riga ${row + 1}: La variante "${variantId}" non è valida`);
       }
       answers = Object.fromEntries(
-        contest.problemIds.map((id, i) => {
-          const answer = parseAnswer(rawAnswers[i], variant.schema[id]);
-          const err = validateAnswer(answer, variant.schema[id]);
-          if (err) {
-            throw new Error(`Errore nella riga ${row + 1}: ${err[0]}`);
-          }
-          return [id, answer];
-        }),
+        contest.problemIds
+          .map((id, i) => {
+            const answer = parseAnswer(rawAnswers[i], variant.schema[id]);
+            const err = validateAnswer(answer, variant.schema[id]);
+            if (err) {
+              throw new Error(`Errore nella riga ${row + 1}: ${err[0]}`);
+            }
+            return [id, answer];
+          })
+          .filter(([_, answer]) => answer !== undefined),
       );
     } else if (rawAnswers.some(Boolean)) {
       throw new Error(`Errore nella riga ${row + 1}: Variante mancante`);

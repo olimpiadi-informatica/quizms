@@ -1,6 +1,6 @@
 {
   "name": "@olinfo/quizms-mdx",
-  "version": "4.1.4",
+  "version": "5.0.0",
   "type": "module",
   "author": "Alessandro Bortolin <bortolin.alessandro@outlook.it>",
   "license": "MIT",
@@ -21,10 +21,12 @@
     },
     "./components": {
       "types": "./dist/components.d.ts",
+      "schema": "./dist/components-schema.js",
       "react-server": "./dist/components-server.js",
       "default": "./dist/components-client.js"
     },
     "./css": "./dist/quizms-mdx.css",
+    "./schema": "./dist/schema.js",
     "./vite": {
       "types": "./dist/vite.d.ts",
       "default": "./dist/vite.js"
@@ -70,8 +72,8 @@
     "zod": "^4.3.6"
   },
   "peerDependencies": {
-    "react": "~19.1.4",
-    "react-dom": "~19.1.4"
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.2",

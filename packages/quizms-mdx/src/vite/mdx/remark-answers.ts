@@ -2,7 +2,7 @@ import path from "node:path";
 
 import { Parser } from "acorn";
 import type { Directive } from "estree";
-import { builders as b } from "estree-toolkit";
+import { upperFirst } from "lodash-es";
 import type { Blockquote, Root } from "mdast";
 import type { ContainerDirective } from "mdast-util-directive";
 import type { MdxJsxFlowElement } from "mdast-util-mdx-jsx";
@@ -26,25 +26,18 @@ function parseAnswers(tree: Root, file: VFile) {
   let subId = 0;
   visit(tree, "containerDirective", (containerDirective: ContainerDirective, index, parent) => {
     if (containerDirective.name === "answers") {
-      const kind = containerDirective.attributes!.class;
-      const AnswerComponent = {
-        open: "OpenAnswer",
-        anyCorrect: "AnyCorrectAnswer",
-        allCorrect: "AllCorrectAnswer",
-      }[kind!];
+      const type = containerDirective.attributes!.class;
 
-      if (kind === "anyCorrect" || kind === "allCorrect") {
+      if (type === "multipleChoice" || type === "multipleResponse") {
         const list = containerDirective.children[0];
         if (list?.type !== "list" || list.ordered) {
           throw new Error("Missing or invalid answers");
         }
-        if (kind === "anyCorrect" && !list.children.some((c) => c.checked)) {
+        if (type === "multipleChoice" && !list.children.some((c) => c.checked)) {
           throw new Error("Missing or invalid answers");
         }
 
-        const ids = list.children.map((_, i) => String.fromCharCode(65 + i));
-
-        const groupHash = `${directory}-${subId++}`;
+        const problemId = `${directory}-${subId++}`;
 
         parent!.children[index!] = {
           type: "mdxJsxFlowElement",
@@ -53,20 +46,13 @@ function parseAnswers(tree: Root, file: VFile) {
           children: [
             {
               type: "mdxJsxFlowElement",
-              name: "MultipleChoiceAnswer",
-              attributes: [
-                jsxAttribute("kind", kind),
-                jsxAttribute("answerIds", b.arrayExpression(ids.map((id) => b.literal(id)))),
-                jsxAttribute("groupHash", groupHash),
-              ],
-              children: list.children.map((child, i): MdxJsxFlowElement => {
+              name: "ClosedAnswer",
+              attributes: [jsxAttribute("type", type), jsxAttribute("problemId", problemId)],
+              children: list.children.map((child): MdxJsxFlowElement => {
                 return {
                   type: "mdxJsxFlowElement",
-                  name: AnswerComponent,
-                  attributes: [
-                    jsxAttribute("correct", child.checked),
-                    jsxAttribute("originalId", ids[i]),
-                  ],
+                  name: `${upperFirst(type)}Answer`,
+                  attributes: [jsxAttribute("correct", child.checked)],
                   children: child.children,
                 } as MdxJsxFlowElement;
               }),

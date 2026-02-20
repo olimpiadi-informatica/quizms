@@ -2,31 +2,31 @@ import type { ReactNode } from "react";
 
 import { useIsAfter } from "@olinfo/react-components";
 
-import type { Contest, Participation, Schema, Student } from "~/models";
+import type { Answer, Contest, Participation, Schema, Student } from "~/models";
 
 import { StudentContext, type StudentContextProps } from "./context";
 import { StudentLayout } from "./layout";
 
 type StudentProviderProps = {
-  /** Dati dello studente */
+  /** Student data */
   student: Student;
-  /** Funzione per aggiornare i dati dello studente */
-  setStudent: (value: Student) => Promise<void> | void;
-  /** Contest dello studente */
+  /** Function to update student answers */
+  setAnswer: (problemId: string, answer: Answer | undefined) => Promise<void> | void;
+  /** Contest data */
   contest: Contest;
-  /** Scuola dello studente */
+  /** School data */
   participation: Participation;
-  /** Funzione per resettare le risposte e ricominciare la prova (opzionale) */
+  /** Function to reset answers and restart the test (optional) */
   reset?: () => Promise<void> | void;
-  /** Funzione eseguita quando lo studente ha terminato la prova (opzionale) */
-  onSubmit?: () => Promise<void> | void;
-  /** Funzione per cambiare utente */
+  /** Function to end the test */
+  submit: () => Promise<void> | void;
+  /** Function to change user (optional) */
   logout?: () => Promise<void> | void;
-  /** Flag che indica se è obbligatorio entrare in fullscreen */
+  /** Whether fullscreen is required */
   enforceFullscreen: boolean;
-  /** Flag che indica se la prova è terminata */
+  /** Whether the test is completed */
   terminated: boolean;
-  /** Risposte corrette */
+  /** Correct answers */
   schema?: Schema;
 };
 

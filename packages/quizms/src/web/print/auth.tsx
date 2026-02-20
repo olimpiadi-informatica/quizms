@@ -83,6 +83,7 @@ export function PrintProvider({ contest, children }: { contest: Contest; childre
     schoolId: "",
     contestId: contest.id,
     name: "",
+    startingTime: new Date(0),
     finalized: false,
     disabled: false,
   };
@@ -92,9 +93,10 @@ export function PrintProvider({ contest, children }: { contest: Contest; childre
       contest={contest}
       participation={mockParticipation}
       student={student}
-      setStudent={() => {}}
+      setAnswer={() => {}}
+      submit={() => {}}
       enforceFullscreen={false}>
-      <StudentForm />
+      <StudentForm printLayout />
       {children}
       <PrintStatement />
     </StudentProvider>

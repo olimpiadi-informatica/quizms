@@ -32,7 +32,6 @@ export default async function print(options: PrintOptions) {
   const contests = await loadContests();
 
   info("Building website...");
-  process.env.QUIZMS_MODE = "print";
 
   const pages = ["index", ...contests.map((contest) => contest.id)];
 

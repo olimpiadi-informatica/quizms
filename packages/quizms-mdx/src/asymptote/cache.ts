@@ -38,12 +38,12 @@ async function withCache<T>(key: any, fn: () => Promise<T>): Promise<T> {
       return parsedResult;
     }
   } catch {
-    await fh.truncate(0);
     warning("Corrupted cache file");
   }
 
   try {
     const result = await fn();
+    await fh.truncate(0);
     await fh.writeFile(JSON.stringify(result));
     return result;
   } catch (err: any) {

@@ -11,3 +11,4 @@ export function Contest({ children }: { children: ReactNode }) {
     </div>
   );
 }
+Contest.displayName = "Contest";

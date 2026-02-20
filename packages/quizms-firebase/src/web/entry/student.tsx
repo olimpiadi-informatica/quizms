@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo } from "react";
 
 import { StudentFormField, Title } from "@olinfo/quizms/components";
-import type { Contest, Student } from "@olinfo/quizms/models";
+import type { Answer, Contest, Student } from "@olinfo/quizms/models";
 import { StudentProvider } from "@olinfo/quizms/student";
 import { useUserAgent } from "@olinfo/quizms/utils";
 import {
@@ -14,7 +14,7 @@ import {
 } from "@olinfo/react-components";
 import { getAuth, signInWithCustomToken, signOut } from "firebase/auth";
 import { waitForPendingWrites } from "firebase/firestore";
-import { isEqual } from "lodash-es";
+import { omit } from "lodash-es";
 
 import { studentLogin } from "~/web/common/api";
 import { useDb } from "~/web/common/base-login";
@@ -154,9 +154,10 @@ function StudentInner({
     [contests, student.contestId],
   );
 
-  const onSubmit = useCallback(async () => {
+  const submit = useCallback(async () => {
+    await setStudent({ ...student, finishedAt: new Date() });
     await waitForPendingWrites(db);
-  }, [db]);
+  }, [db, student, setStudent]);
 
   const logout = useCallback(async () => {
     await waitForPendingWrites(db);
@@ -170,10 +171,14 @@ function StudentInner({
     }
   }, [participation.token, student.token, logout]);
 
-  const setStudentAndSubmission = async (newStudent: Student) => {
-    if (!isEqual(student, newStudent)) {
-      await setStudent({ ...newStudent });
-    }
+  const setAnswer = async (problemId: string, answer: Answer | undefined) => {
+    await setStudent({
+      ...student,
+      answers:
+        answer == null
+          ? omit(student.answers, problemId)
+          : { ...student.answers, [problemId]: answer },
+    });
   };
 
   return (
@@ -181,9 +186,9 @@ function StudentInner({
       contest={contest}
       participation={participation}
       student={student}
-      setStudent={setStudentAndSubmission}
+      setAnswer={setAnswer}
       logout={logout}
-      onSubmit={onSubmit}
+      submit={submit}
       enforceFullscreen={true}>
       <Header contestId={contest.id} />
       <FirebaseStatement />

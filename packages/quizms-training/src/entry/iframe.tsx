@@ -2,10 +2,9 @@ import { type Student, studentSchema } from "@olinfo/quizms/models";
 import { validate } from "@olinfo/quizms/utils";
 import z from "zod";
 
-export async function getIframeStudent([_, contestId]: [string, string]): Promise<Student | null> {
+export async function getStudentIframe([_, contestId]: [string, string]): Promise<Student | null> {
   if (window.parent === window) return null;
 
-  const controller = new AbortController();
   const messageId = crypto.randomUUID();
   window.parent.postMessage({
     messageId,
@@ -13,6 +12,63 @@ export async function getIframeStudent([_, contestId]: [string, string]): Promis
     contestId,
   });
 
+  return await getResponse(messageId);
+}
+
+export async function setAnswersIframe(student: Student): Promise<Student | null> {
+  if (window.parent === window) return null;
+
+  const messageId = crypto.randomUUID();
+  window.parent.postMessage({
+    messageId,
+    type: "setAnswers",
+    contestId: student.contestId,
+    answers: student.answers,
+  });
+
+  return await getResponse(messageId);
+}
+
+export async function startIframe(student: Student): Promise<Student | null> {
+  if (window.parent === window) return null;
+
+  const messageId = crypto.randomUUID();
+  window.parent.postMessage({
+    messageId,
+    type: "start",
+    contestId: student.contestId,
+  });
+  return await getResponse(messageId);
+}
+
+export async function submitIframe(student: Student): Promise<Student | null> {
+  if (window.parent === window) return null;
+
+  const messageId = crypto.randomUUID();
+  window.parent.postMessage({
+    messageId,
+    type: "submit",
+    contestId: student.contestId,
+  });
+
+  return await getResponse(messageId);
+}
+
+export async function resetIframe(student: Student): Promise<Student | null> {
+  if (window.parent === window) return null;
+
+  const messageId = crypto.randomUUID();
+  window.parent.postMessage({
+    messageId,
+    type: "reset",
+    contestId: student.contestId,
+  });
+
+  return await getResponse(messageId);
+}
+
+async function getResponse(messageId: string) {
+  const controller = new AbortController();
   const student = await new Promise<Student | null>((resolve, reject) => {
     window.addEventListener(
       "message",
@@ -35,19 +91,8 @@ export async function getIframeStudent([_, contestId]: [string, string]): Promis
       { signal: controller.signal },
     );
   });
-
   controller.abort();
   return student;
-}
-
-export function saveIframeStudent(student: Student) {
-  if (window.parent === window) return;
-
-  window.parent.postMessage({
-    messageId: crypto.randomUUID(),
-    type: "setStudent",
-    student,
-  });
 }
 
 const messageSchema = z.discriminatedUnion("success", [

@@ -1,8 +1,9 @@
-import { type ReactNode, useCallback, useState } from "react";
+import { type ReactNode, useCallback, useMemo, useState } from "react";
 
+import { omit } from "lodash-es";
 import { Link, Route, Switch } from "wouter";
 
-import type { Contest, Participation, Student } from "~/models";
+import type { Answer, Contest, Participation, Student } from "~/models";
 import { StudentProvider } from "~/web/student/provider";
 
 export function DevRoutes({ contests, children }: { contests: Contest[]; children: ReactNode }) {
@@ -46,22 +47,38 @@ export function DevProvider({ contest, children }: { contest: Contest; children:
     variant: "0",
   });
 
-  const mockParticipation: Participation = {
-    id: "",
-    schoolId: "",
-    contestId: contest.id,
-    name: "",
-    startingTime: student.startedAt,
-    finalized: false,
-    disabled: false,
-  };
+  const mockParticipation: Participation = useMemo(
+    () => ({
+      id: "",
+      schoolId: "",
+      contestId: contest.id,
+      name: "",
+      startingTime: student.startedAt,
+      finalized: false,
+      disabled: false,
+    }),
+    [contest.id, student.startedAt],
+  );
+
+  const setAnswer = useCallback((problemId: string, answer: Answer | undefined) => {
+    setStudent((student) => ({
+      ...student,
+      answers:
+        answer == null
+          ? omit(student.answers, problemId)
+          : { ...student.answers, [problemId]: answer },
+    }));
+  }, []);
+
+  const submit = useCallback(() => {
+    setStudent((student) => ({ ...student, finishedAt: new Date() }));
+  }, []);
 
   const reset = useCallback(() => {
     setStudent(
       (student): Student => ({
         ...student,
         answers: {},
-        extraData: {},
         startedAt: undefined,
         finishedAt: undefined,
       }),
@@ -73,7 +90,8 @@ export function DevProvider({ contest, children }: { contest: Contest; children:
       contest={contest}
       participation={mockParticipation}
       student={student}
-      setStudent={setStudent}
+      setAnswer={setAnswer}
+      submit={submit}
       reset={reset}
       enforceFullscreen={false}>
       {children}

@@ -4,7 +4,7 @@ import type { Contest } from "~/models";
 import { titleCase } from "~/utils";
 import { useStudent } from "~/web/student/context";
 
-export function StudentForm() {
+export function StudentForm({ printLayout = false }: { printLayout?: boolean }) {
   const { contest, student } = useStudent();
 
   return (
@@ -15,7 +15,7 @@ export function StudentForm() {
       disabled>
       {contest.userData.map((field) => (
         <div key={field.name}>
-          <StudentFormField field={field} />
+          <StudentFormField field={field} printLayout={printLayout} />
         </div>
       ))}
       {contest.hasVariants && (
@@ -27,13 +27,19 @@ export function StudentForm() {
   );
 }
 
-export function StudentFormField({ field }: { field: Contest["userData"][number] }) {
+export function StudentFormField({
+  field,
+  printLayout,
+}: {
+  field: Contest["userData"][number];
+  printLayout?: boolean;
+}) {
   const commonProps = {
     field: field.name,
     label: field.label,
     placeholder: `Inserisci ${field.label.toLowerCase()}`,
   };
-  if (process.env.QUIZMS_MODE === "print") {
+  if (printLayout) {
     return <TextField {...commonProps} />;
   }
   if (field.type === "text") {

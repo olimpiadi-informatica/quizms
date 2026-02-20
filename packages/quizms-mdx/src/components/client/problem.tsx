@@ -6,37 +6,38 @@ type ProblemContextProps = {
   id?: string;
 };
 
-export const ProblemContext = createContext<ProblemContextProps>({});
+const ProblemContext = createContext<ProblemContextProps>({});
 ProblemContext.displayName = "ProblemContext";
 
+export function ProblemProvider({ children, id }: { children: ReactNode; id: string }) {
+  return <ProblemContext.Provider value={{ id }}>{children}</ProblemContext.Provider>;
+}
+ProblemProvider.displayName = "ProblemProvider";
+
 export function Problem({ children }: { children: ReactNode }) {
-  const { id } = use(ProblemContext);
   return (
-    <ProblemContext.Provider value={{ id }}>
+    <>
       <div className="relative">{children}</div>
       <hr className="last:hidden" />
-    </ProblemContext.Provider>
+    </>
   );
 }
+Problem.displayName = "Problem";
 
-export type SubProblemProps = {
-  subId: number;
-  children: ReactNode;
-};
-
-export function SubProblem({ subId, children }: SubProblemProps) {
+export function SubProblem({ subId, children }: { subId: number; children: ReactNode }) {
   const { id } = use(ProblemContext);
   const newId = subId ? `${id}.${subId}` : `${id}`;
 
   return (
-    <ProblemContext.Provider value={{ id: newId }}>
+    <ProblemProvider id={newId}>
       <div className="break-inside-avoid">
         <h3>Domanda {newId}</h3>
         {children}
       </div>
-    </ProblemContext.Provider>
+    </ProblemProvider>
   );
 }
+Problem.displayName = "Problem";
 
 export function useProblem() {
   return use(ProblemContext);

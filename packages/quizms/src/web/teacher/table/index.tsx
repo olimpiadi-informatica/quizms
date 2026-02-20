@@ -27,7 +27,6 @@ export default function TeacherTable() {
 
   const endTime =
     participation.endingTime && contest.hasOnline ? participation.endingTime : undefined;
-  console.log(endTime);
   const isContestFinished = useIsAfter(endTime) ?? true;
   const frozen = (contest.hasOnline && !isContestFinished) || participation.finalized;
 

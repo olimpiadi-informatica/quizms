@@ -1,11 +1,9 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
-import process from "node:process";
 
-import type { PluginContext } from "rollup";
 import type { PluginOption } from "vite";
 
-import { type Image, imageToDataUri, parseImageOptions, transformImage } from "~/utils-node";
+import { imageToDataUri, parseImageOptions, transformImage } from "~/utils-node";
 
 const imageExtensions = new Set([
   ".png",
@@ -19,13 +17,8 @@ const imageExtensions = new Set([
 ]);
 
 export default function images(): PluginOption {
-  let isBuild = true;
-
   return {
     name: "quizms:images",
-    configResolved({ command }) {
-      isBuild = command === "build";
-    },
     load: {
       order: "pre",
       handler(id) {
@@ -44,33 +37,17 @@ export default function images(): PluginOption {
 
       if (imageExtensions.has(ext)) {
         const image = await transformImage(pathname, code, parseImageOptions(params));
+        const src = {
+          src: imageToDataUri(image),
+          width: image.width,
+          height: image.height,
+        };
 
         return {
-          code: emitFile(this, pathname, image, isBuild),
+          code: `export default JSON.parse(${JSON.stringify(JSON.stringify(src))});`,
           map: { mappings: "" },
         };
       }
     },
   };
-}
-
-function emitFile(ctx: PluginContext, fileName: string, image: Image, isBuild: boolean) {
-  let src: string;
-  if (isBuild && process.env.QUIZMS_MODE !== "contest") {
-    const id = ctx.emitFile({
-      type: "asset",
-      name: path.basename(fileName, path.extname(fileName)) + image.format,
-      source: image.data,
-    });
-    src = `import.meta.ROLLUP_FILE_URL_${id}`;
-  } else {
-    src = JSON.stringify(imageToDataUri(image));
-  }
-
-  return `\
-export default {
-  src: ${src},
-  width: ${image.width},
-  height: ${image.height},
-};`;
 }

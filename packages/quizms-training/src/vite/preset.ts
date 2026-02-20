@@ -33,6 +33,7 @@ export default async function trainingPreset(): Promise<PluginOption> {
     },
     buildStart() {
       if (this.environment.name === "training") {
+        process.env.QUIZMS_SHOW_SOLUTIONS = "true";
         this.emitFile({
           type: "asset",
           fileName: "contests.json",

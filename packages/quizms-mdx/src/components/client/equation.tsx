@@ -23,3 +23,4 @@ export function Equation({ display, children }: MathProps) {
 
   return <span ref={ref} />;
 }
+Equation.displayName = "Equation";

@@ -3,7 +3,7 @@ import { forwardRef, type Ref } from "react";
 import { Form, FormButton, Modal, SubmitButton } from "@olinfo/react-components";
 import { sumBy } from "lodash-es";
 
-import { calcProblemPoints, type Schema } from "~/models";
+import { calcProblemPoints, displayAnswer, type Schema } from "~/models";
 
 import { useStudent } from "./context";
 
@@ -28,12 +28,12 @@ export function PointsTable({ schema }: { schema: Schema }) {
   const problems = Object.keys(schema);
   problems.sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
 
-  const maxPoints = sumBy(Object.values(schema), "maxPoints");
+  const pointsCorrect = sumBy(Object.values(schema), "pointsCorrect");
 
   return (
     <>
       <p>
-        Hai ottenuto un punteggio di <b>{student.score}</b> su <b>{maxPoints}</b>.
+        Hai ottenuto un punteggio di <b>{student.score}</b> su <b>{pointsCorrect}</b>.
       </p>
       <table className="table table-sm text-center mt-4">
         <thead>
@@ -48,14 +48,11 @@ export function PointsTable({ schema }: { schema: Schema }) {
           {problems.map((problem) => {
             const answer = student.answers?.[problem];
             const problemSchema = schema[problem];
-            const correctOptions = problemSchema.options
-              ?.filter((o) => o.points === problemSchema.maxPoints)
-              .map((o) => o.value);
             return (
               <tr key={problem}>
                 <td>{problem}</td>
-                <td>{answer ?? "-"}</td>
-                <td>{correctOptions?.join(", ")}</td>
+                <td>{displayAnswer(answer, problemSchema.type) ?? "-"}</td>
+                <td>{displayAnswer(problemSchema.correct, problemSchema.type)}</td>
                 <td>{calcProblemPoints(problemSchema, answer)}</td>
               </tr>
             );
@@ -67,7 +64,7 @@ export function PointsTable({ schema }: { schema: Schema }) {
 }
 
 export const SubmitModal = forwardRef(function SubmitModal(_, ref: Ref<HTMLDialogElement>) {
-  const { student, setStudent, onSubmit } = useStudent();
+  const { submit } = useStudent();
 
   const close = () => {
     if (ref && "current" in ref) {
@@ -77,11 +74,7 @@ export const SubmitModal = forwardRef(function SubmitModal(_, ref: Ref<HTMLDialo
 
   const confirm = async () => {
     try {
-      await setStudent({
-        ...student,
-        finishedAt: new Date(),
-      });
-      await onSubmit?.();
+      await submit();
       if (ref && "current" in ref && ref.current) {
         ref.current.returnValue = "1";
       }

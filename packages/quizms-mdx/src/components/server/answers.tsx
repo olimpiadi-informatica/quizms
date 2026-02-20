@@ -1,119 +1,39 @@
-import { Children, type ReactNode } from "react";
+import type { ReactNode } from "react";
 
-import { Rng } from "@olinfo/quizms/utils";
+import { shuffleChildren } from "~/components/utils";
 
 import {
-  AllCorrectAnswer as AllCorrectAnswerClient,
-  AnswerGroup as AnswerGroupClient,
-  type AnswerGroupProps,
-  type AnswerProps,
-  AnyCorrectAnswer as AnyCorrectAnswerClient,
+  ClosedAnswer as ClosedAnswerClient,
   Explanation as ExplanationClient,
   MultipleChoiceAnswer as MultipleChoiceAnswerClient,
+  MultipleResponseAnswer as MultipleResponseAnswerClient,
   OpenAnswer as OpenAnswerClient,
-  type OpenAnswerProps,
 } from "../client/answers";
-import { JsonArray, JsonField, JsonObject } from "./json";
 
-export function AnswerGroup({ children }: AnswerGroupProps) {
-  return <AnswerGroupClient>{children}</AnswerGroupClient>;
+export function ClosedAnswer({ children, problemId }: { children: ReactNode; problemId: string }) {
+  const [childrenNodes] = shuffleChildren(children, "answers", problemId);
+  return <ClosedAnswerClient>{childrenNodes}</ClosedAnswerClient>;
 }
-AnswerGroup.displayName = "AnswerGroup";
+ClosedAnswer.displayName = "ClosedAnswer";
 
-export function MultipleChoiceAnswer({
-  children,
-  kind,
-  answerIds,
-  groupHash,
-}: {
-  children: ReactNode;
-  kind: "allCorrect" | "anyCorrect";
-  answerIds: string[];
-  groupHash: string;
-}) {
-  const childrenArray = Children.toArray(children);
-  if (process.env.QUIZMS_SHUFFLE_ANSWERS) {
-    const rng = new Rng(`${process.env.QUIZMS_VARIANT_HASH}-${groupHash}`);
-    rng.shuffle(childrenArray);
-  }
-  return (
-    <>
-      <JsonField field="type" value="text" />
-      <JsonField field="kind" value={kind} />
-      <JsonField field="options">
-        <JsonArray>
-          <MultipleChoiceAnswerClient answerIds={answerIds}>
-            {childrenArray.map((child, i) => {
-              return (
-                <JsonObject key={i}>
-                  <JsonField field="value" value={answerIds[i]} />
-                  {child}
-                </JsonObject>
-              );
-            })}
-          </MultipleChoiceAnswerClient>
-        </JsonArray>
-      </JsonField>
-    </>
-  );
-}
-MultipleChoiceAnswer.displayName = "MultipleChoiceAnswer";
-
-export function OpenAnswer({ correct }: OpenAnswerProps & { correct: string }) {
+export function OpenAnswer({ correct }: { correct: string }) {
   const type = Number.isFinite(Number(correct)) ? "number" : "text";
-  return (
-    <>
-      <JsonField field="type" value={type} />
-      <JsonField field="kind" value="open" />
-      <JsonField field="options">
-        <JsonArray>
-          <JsonObject>
-            <JsonField
-              field="value"
-              value={type === "number" ? Number(correct) : (correct ?? null)}
-            />
-            <JsonField field="correct" value={true} />
-          </JsonObject>
-        </JsonArray>
-      </JsonField>
-      <OpenAnswerClient type={type} />
-    </>
-  );
+  return <OpenAnswerClient type={type} />;
 }
 OpenAnswer.displayName = "OpenAnswer";
 
-export function AnyCorrectAnswer({
-  correct,
-  children,
-  originalId,
-}: AnswerProps & { correct: string }) {
-  return (
-    <>
-      <JsonField field="correct" value={!!correct} />
-      {originalId !== undefined && <JsonField field="originalId" value={originalId} />}
-      <AnyCorrectAnswerClient>{children}</AnyCorrectAnswerClient>
-    </>
-  );
+export function MultipleChoiceAnswer({ children }: { children: ReactNode }) {
+  return <MultipleChoiceAnswerClient>{children}</MultipleChoiceAnswerClient>;
 }
-AnyCorrectAnswer.displayName = "AnyCorrectAnswer";
+MultipleChoiceAnswer.displayName = "MultipleChoiceAnswer";
 
-export function AllCorrectAnswer({
-  correct,
-  children,
-  originalId,
-}: AnswerProps & { correct: boolean }) {
-  return (
-    <>
-      <JsonField field="correct" value={correct} />
-      {originalId !== undefined && <JsonField field="originalId" value={originalId} />}
-      <AllCorrectAnswerClient>{children}</AllCorrectAnswerClient>
-    </>
-  );
+export function MultipleResponseAnswer({ children }: { children: ReactNode }) {
+  return <MultipleResponseAnswerClient>{children}</MultipleResponseAnswerClient>;
 }
-AllCorrectAnswer.displayName = "AllCorrectAnswer";
+MultipleResponseAnswer.displayName = "MultipleResponseAnswer";
 
 export function Explanation({ children }: { children: ReactNode }) {
-  if (process.env.QUIZMS_MODE === "contest") return;
+  if (!process.env.QUIZMS_SHOW_SOLUTIONS) return;
   return <ExplanationClient>{children}</ExplanationClient>;
 }
 Explanation.displayName = "Explanation";

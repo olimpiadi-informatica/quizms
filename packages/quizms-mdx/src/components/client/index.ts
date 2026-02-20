@@ -1,10 +1,10 @@
 import { Blockly } from "../blockly/workspace";
 import {
-  AllCorrectAnswer,
   AnswerGroup,
-  AnyCorrectAnswer,
+  ClosedAnswer,
   Explanation,
   MultipleChoiceAnswer,
+  MultipleResponseAnswer,
   OpenAnswer,
 } from "./answers";
 import { Asymptote } from "./asymptote";
@@ -16,17 +16,17 @@ import { Problem, SubProblem } from "./problem";
 import { Section } from "./section";
 
 export {
-  AllCorrectAnswer,
   AnswerGroup,
-  AnyCorrectAnswer,
   Asymptote,
   Blockly,
+  ClosedAnswer,
   Code,
   Contest,
   Equation,
   Explanation,
   Image,
   MultipleChoiceAnswer,
+  MultipleResponseAnswer,
   OpenAnswer,
   Problem,
   Section,
@@ -35,17 +35,17 @@ export {
 
 export function useMDXComponents() {
   return {
-    AllCorrectAnswer,
     AnswerGroup,
-    AnyCorrectAnswer,
     Asymptote,
     Blockly,
+    ClosedAnswer,
     Code,
     Contest,
     Equation,
     Explanation,
     Image,
     MultipleChoiceAnswer,
+    MultipleResponseAnswer,
     OpenAnswer,
     Problem,
     Section,

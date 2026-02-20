@@ -3,7 +3,7 @@ import { z } from "zod";
 import type { $ZodType } from "zod/v4/core";
 
 export function createAsymptoteInject(variables: object | null) {
-  if (variables === null || variables === undefined) return null;
+  if (variables == null) return null;
   const injectVariables = validate(variantSchema, variables);
   return Object.entries(injectVariables).map(jsToAsy).join("\n");
 }

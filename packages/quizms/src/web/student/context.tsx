@@ -1,14 +1,14 @@
 import { createContext, use } from "react";
 
-import type { Contest, Participation, Schema, Student } from "~/models";
+import type { Answer, Contest, Participation, Schema, Student } from "~/models";
 
 export type StudentContextProps = {
   student: Student;
-  setStudent: (value: Student) => Promise<void> | void;
+  setAnswer: (problemId: string, answer: Answer | undefined) => Promise<void> | void;
   contest: Contest;
   participation: Participation;
   reset?: () => Promise<void> | void;
-  onSubmit?: () => Promise<void> | void;
+  submit: () => Promise<void> | void;
   logout?: () => Promise<void> | void;
   enforceFullscreen: boolean;
   terminated: boolean;

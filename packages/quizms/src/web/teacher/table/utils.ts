@@ -29,9 +29,6 @@ export function isStudentIncomplete(
 
   const answers = student.answers ?? {};
   for (const id of Object.keys(variant.schema)) {
-    if (!variant.schema[id].allowEmpty && !(id in answers)) {
-      return `Domanda ${id} mancante`;
-    }
     const err = validateAnswer(answers[id], variant.schema[id]);
     if (err) {
       return err[0];

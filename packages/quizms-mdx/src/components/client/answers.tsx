@@ -2,19 +2,14 @@
 
 import { Children, createContext, type ReactNode, use, useCallback, useId, useMemo } from "react";
 
-import { decodeAllCorrectAnswer, encodeAllCorrectAnswer } from "@olinfo/quizms/models";
+import type { Answer } from "@olinfo/quizms/models";
 import { useStudent } from "@olinfo/quizms/student";
 import clsx from "clsx";
-import { maxBy } from "lodash-es";
 import { Trash2 } from "lucide-react";
 
 import { useProblem } from "./problem";
 
-export type AnswerGroupProps = {
-  children: ReactNode;
-};
-
-export function AnswerGroup({ children }: AnswerGroupProps) {
+export function AnswerGroup({ children }: { children: ReactNode }) {
   return (
     <form
       onSubmit={(event) => {
@@ -28,11 +23,7 @@ export function AnswerGroup({ children }: AnswerGroupProps) {
     </form>
   );
 }
-
-export type MultipleChoiceAnswerProps = {
-  children: ReactNode;
-  answerIds: string[];
-};
+AnswerGroup.displayName = "AnswerGroup";
 
 type AnswerContextProps = {
   id: string;
@@ -41,50 +32,39 @@ type AnswerContextProps = {
 const AnswerContext = createContext<AnswerContextProps>({
   id: "",
 });
+AnswerContext.displayName = "AnswerContext";
 
 function useAnswer() {
   return use(AnswerContext);
 }
 
-export function MultipleChoiceAnswer({ answerIds, children }: MultipleChoiceAnswerProps) {
+export function ClosedAnswer({ children }: { children: ReactNode }) {
   return Children.toArray(children).map((child, i) => (
-    <AnswerContext.Provider key={i} value={{ id: answerIds[i] }}>
+    <AnswerContext.Provider key={i} value={{ id: String.fromCharCode(65 + i) }}>
       {child}
     </AnswerContext.Provider>
   ));
 }
+ClosedAnswer.displayName = "ClosedAnswer";
 
-export type AnswerProps = {
-  children: ReactNode;
-  originalId?: string;
-};
-
-export function AllCorrectAnswer({ children }: AnswerProps) {
+export function MultipleResponseAnswer({ children }: { children: ReactNode }) {
   const { id } = useAnswer();
   const { id: problemId } = useProblem();
-  const { student, setStudent, terminated, schema } = useStudent();
-  const correct = decodeAllCorrectAnswer(
-    maxBy(schema?.[problemId!].options, (o) => o.points)?.value,
-  );
+  const { student, setAnswer, terminated, schema } = useStudent();
+  const correct = schema?.[problemId!].correct as Answer<"multipleResponse"> | undefined;
 
-  const answer = student.answers?.[problemId!];
-  const parsedAnswer = useMemo<string[]>(() => decodeAllCorrectAnswer(answer), [answer]);
-  const currentlyChecked = useMemo(() => parsedAnswer.indexOf(id) !== -1, [parsedAnswer, id]);
-  const setAnswer = useCallback(
-    async (value: string, checked: boolean) => {
-      const newAnswer = parsedAnswer;
-      const index = parsedAnswer.indexOf(value);
-      if (checked && index === -1) {
-        newAnswer.push(value);
-      } else if (!checked && index !== -1) {
-        newAnswer.splice(index, 1);
+  const answer = student.answers?.[problemId!] as Answer<"multipleResponse"> | undefined;
+  const currentlyChecked = useMemo(() => answer?.includes(id), [answer, id]);
+
+  const submitAnswer = useCallback(
+    async (checked: boolean) => {
+      if (checked) {
+        await setAnswer(problemId!, [...(answer ?? []), id]);
+      } else if (!checked) {
+        await setAnswer(problemId!, answer?.filter((v) => v !== id) ?? []);
       }
-      await setStudent({
-        ...student,
-        answers: { ...student.answers, [problemId!]: encodeAllCorrectAnswer(newAnswer) },
-      });
     },
-    [parsedAnswer, student, problemId, setStudent],
+    [answer, id, problemId, setAnswer],
   );
 
   const answerId = useId();
@@ -94,8 +74,9 @@ export function AllCorrectAnswer({ children }: AnswerProps) {
       className={clsx(
         "relative my-1 flex rounded-lg pl-2 pr-1 hover:bg-base-300 print:mr-4",
         terminated && {
-          "border-2 border-success": correct.includes(id),
-          "border-2 border-error": currentlyChecked && correct.length > 0 && !correct.includes(id),
+          "border-2 border-success": correct?.includes(id),
+          "border-2 border-error":
+            currentlyChecked && correct && correct.length > 0 && !correct.includes(id),
         },
       )}>
       <input
@@ -105,11 +86,11 @@ export function AllCorrectAnswer({ children }: AnswerProps) {
           "checkbox checkbox-sm my-auto mr-4 bg-base-100 [print-color-adjust:exact] disabled:opacity-90 print:mr-2",
           terminated &&
             currentlyChecked && {
-              "checkbox-success": correct.includes(id),
-              "checkbox-error": correct.length > 0 && !correct.includes(id),
+              "checkbox-success": correct?.includes(id),
+              "checkbox-error": correct && correct.length > 0 && !correct.includes(id),
             },
         )}
-        onChange={(e) => setAnswer(id, e.target.checked)}
+        onChange={(e) => submitAnswer(e.target.checked)}
         type="checkbox"
         disabled={terminated}
       />
@@ -120,16 +101,17 @@ export function AllCorrectAnswer({ children }: AnswerProps) {
     </div>
   );
 }
+MultipleResponseAnswer.displayName = "MultipleResponseAnswer";
 
-export function AnyCorrectAnswer({ children }: AnswerProps) {
+export function MultipleChoiceAnswer({ children }: { children: ReactNode }) {
   const { id } = useAnswer();
   const { id: problemId } = useProblem();
-  const { student, setStudent, terminated, schema } = useStudent();
-  const correct = maxBy(schema?.[problemId!].options, (o) => o.points)?.value;
+  const { student, setAnswer, terminated, schema } = useStudent();
+  const correct = schema?.[problemId!].correct;
 
-  const answer = student.answers?.[problemId!];
-  const setAnswer = async (value: string | null) => {
-    await setStudent({ ...student, answers: { ...student.answers, [problemId!]: value } });
+  const answer = student.answers?.[problemId!] as Answer<"multipleChoice"> | undefined;
+  const submitAnswer = async (value: string | undefined) => {
+    await setAnswer(problemId!, value);
   };
 
   const answerId = useId();
@@ -154,7 +136,7 @@ export function AnyCorrectAnswer({ children }: AnswerProps) {
               "radio-error": correct != null && correct !== id,
             },
         )}
-        onChange={(e) => setAnswer(e.target.checked ? id : null)}
+        onChange={(e) => submitAnswer(e.target.checked ? id : undefined)}
         type="radio"
         disabled={terminated}
       />
@@ -169,7 +151,7 @@ export function AnyCorrectAnswer({ children }: AnswerProps) {
             (answer !== id || terminated) && "hidden",
           )}
           type="button"
-          onClick={() => setAnswer(null)}
+          onClick={() => submitAnswer(undefined)}
           aria-label="Cancella risposta">
           <Trash2 size={20} />
         </button>
@@ -177,6 +159,7 @@ export function AnyCorrectAnswer({ children }: AnswerProps) {
     </div>
   );
 }
+MultipleChoiceAnswer.displayName = "MultipleChoiceAnswer";
 
 export type OpenAnswerProps = {
   type: "number" | "text";
@@ -184,13 +167,13 @@ export type OpenAnswerProps = {
 
 export function OpenAnswer({ type }: OpenAnswerProps) {
   const { id: problemId } = useProblem();
-  const { student, setStudent, terminated, schema } = useStudent();
-  const correct = maxBy(schema?.[problemId!].options, (o) => o.points)?.value;
+  const { student, setAnswer, terminated, schema } = useStudent();
+  const correct = schema?.[problemId!].correct;
 
-  const answer = student.answers?.[problemId!];
-  const setAnswer = async (value: string | null) => {
-    const parsedValue = type === "number" ? value && Number.parseInt(value, 10) : value;
-    await setStudent({ ...student, answers: { ...student.answers, [problemId!]: parsedValue } });
+  const answer = student.answers?.[problemId!] as Answer<"openNumber" | "openText"> | undefined;
+  const submitAnswer = async (value: string | undefined) => {
+    const parsedValue = type === "number" ? value && Number(value) : value;
+    await setAnswer(problemId!, parsedValue);
   };
 
   return (
@@ -205,7 +188,7 @@ export function OpenAnswer({ type }: OpenAnswerProps) {
               "disabled:input-error": correct !== answer,
             },
         )}
-        onChange={(e) => setAnswer(e.target.value || null)}
+        onChange={(e) => submitAnswer(e.target.value || undefined)}
         onWheel={(e) => e.currentTarget.blur()}
         placeholder="Inserisci la risposta"
         maxLength={100}
@@ -217,6 +200,7 @@ export function OpenAnswer({ type }: OpenAnswerProps) {
     </div>
   );
 }
+OpenAnswer.displayName = "OpenAnswer";
 
 export function Explanation({ children }: { children: ReactNode }) {
   const { terminated } = useStudent();
@@ -232,3 +216,4 @@ export function Explanation({ children }: { children: ReactNode }) {
     </div>
   );
 }
+Explanation.displayName = "Explanation";

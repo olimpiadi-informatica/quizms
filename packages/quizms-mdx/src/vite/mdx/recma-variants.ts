@@ -1,4 +1,5 @@
 import path from "node:path";
+import process from "node:process";
 
 import { hash } from "@olinfo/quizms/utils";
 import type { AssignmentProperty, Node, Program, Property, Statement } from "estree";
@@ -58,7 +59,7 @@ function injectLocalVariables(ast: Program, file: string) {
 
       const node = nodePath.node!;
       if (node.id?.name === "_createMdxContent") {
-        if (process.env.QUIZMS_MODE !== "contest") {
+        if (process.env.NODE_ENV === "development") {
           // import React from "react";
           const importReact = b.importDeclaration(
             [b.importDefaultSpecifier(b.identifier("_react$q"))],
@@ -85,7 +86,7 @@ function injectLocalVariables(ast: Program, file: string) {
         ]);
 
         let variant: Statement;
-        if (process.env.QUIZMS_MODE === "contest") {
+        if (process.env.NODE_ENV !== "development") {
           const problem = path.dirname(file);
 
           // A prime number smaller than √ MAX_SAFE_INTEGER
@@ -208,7 +209,7 @@ function injectLocalVariables(ast: Program, file: string) {
           variables,
         );
 
-        if (process.env.QUIZMS_MODE === "development") {
+        if (process.env.NODE_ENV === "development") {
           injectVariantSelect(node.body.body.at(-1));
         }
       }

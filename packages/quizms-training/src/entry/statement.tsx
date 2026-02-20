@@ -1,20 +1,17 @@
+import { createContext, useContext } from "react";
+
 import { RemoteStatement, useStudent } from "@olinfo/quizms/student";
 import { Button } from "@olinfo/react-components";
-import { addMinutes, subSeconds } from "date-fns";
+
+export const TrainingStatementContext = createContext<{
+  start?: () => Promise<void> | void;
+}>({});
 
 export function TrainingStatement() {
-  const { student, setStudent, contest } = useStudent();
+  const { student, contest } = useStudent();
+  const { start } = useContext(TrainingStatementContext);
 
   if (!student.startedAt) {
-    const start = async () => {
-      const now = new Date();
-      await setStudent({
-        ...student,
-        startedAt: subSeconds(now, 2),
-        finishedAt: addMinutes(now, contest.hasOnline ? contest.duration : 0),
-      });
-    };
-
     return (
       <div className="flex h-[50vh] flex-col items-center justify-center">
         <Button className="btn-success btn-lg" onClick={start}>

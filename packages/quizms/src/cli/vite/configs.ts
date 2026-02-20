@@ -41,7 +41,6 @@ export default function configs(mode: "development" | "production"): InlineConfi
     },
     define: {
       "process.env.NODE_ENV": JSON.stringify(mode),
-      "process.env.QUIZMS_MODE": JSON.stringify(process.env.QUIZMS_MODE),
     },
     plugins: [plugins, directives(), images(), inspect(), react(), statementExternals(), entry()],
     build: {

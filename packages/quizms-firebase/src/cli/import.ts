@@ -52,8 +52,6 @@ type ImportOptions = {
 };
 
 export default async function importData(options: ImportOptions) {
-  process.env.QUIZMS_MODE = "contest";
-
   if (!existsSync("data")) {
     fatal("Cannot find data directory. Make sure you're inside a QuizMS project.");
   }
@@ -221,20 +219,18 @@ async function importStatements(bucket: Bucket, options: ImportOptions) {
       async (id): Promise<[string, string][]> => {
         const localDir = path.join("variants", config.id, id);
         const remoteDir = path.join("statements", config.id, id);
-        const files = await glob("*", { cwd: localDir });
+        const files = await glob("*.{pdf,js,css}", { cwd: localDir });
 
-        return files
-          .filter((file) => path.basename(file) !== "answers.json")
-          .flatMap((file) => {
-            const ext = path.extname(file);
-            return [
-              [
-                path.join(localDir, file),
-                path.join(remoteDir, `${path.basename(file, ext)}-${timestamp}${ext}`),
-              ],
-              [path.join(localDir, file), path.join(remoteDir, file)],
-            ];
-          });
+        return files.flatMap((file) => {
+          const ext = path.extname(file);
+          return [
+            [
+              path.join(localDir, file),
+              path.join(remoteDir, `${path.basename(file, ext)}-${timestamp}${ext}`),
+            ],
+            [path.join(localDir, file), path.join(remoteDir, file)],
+          ];
+        });
       },
     );
     return (await Promise.all(files)).flat();

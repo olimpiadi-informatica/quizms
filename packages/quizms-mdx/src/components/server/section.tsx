@@ -1,31 +1,25 @@
-import { Children, type ReactNode } from "react";
+import type { ReactNode } from "react";
 
-import { Rng } from "@olinfo/quizms/utils";
+import { shuffleChildren } from "~/components/utils";
 
+import { ProblemProvider } from "../client/problem";
 import { Section as SectionClient } from "../client/section";
-import { JsonField, JsonObject } from "./json";
 
-export type SectionProps = {
+export function Section({
+  firstProblemId,
+  children,
+}: {
+  firstProblemId: number;
   children: ReactNode;
-  problemIds: string[];
-};
-
-export function Section({ children, problemIds }: SectionProps) {
-  const childrenArray = Children.toArray(children);
-  if (process.env.QUIZMS_SHUFFLE_PROBLEMS) {
-    const rng = new Rng(`${process.env.QUIZMS_VARIANT_HASH}-${problemIds}`);
-    rng.shuffle(childrenArray);
-  }
+}) {
+  const [childrenNodes] = shuffleChildren(children, "problems", firstProblemId);
   return (
-    <SectionClient problemIds={problemIds}>
-      {childrenArray.map((child, i) => {
-        return (
-          <JsonObject key={i}>
-            <JsonField field="id" value={problemIds[i].toString()} />
-            {child}
-          </JsonObject>
-        );
-      })}
+    <SectionClient>
+      {childrenNodes.map((child, i) => (
+        <ProblemProvider key={i} id={`${firstProblemId + i}`}>
+          {child}
+        </ProblemProvider>
+      ))}
     </SectionClient>
   );
 }

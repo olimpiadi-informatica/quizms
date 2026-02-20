@@ -27,8 +27,6 @@ export type DevOptions = {
 export default async function devServer(options: DevOptions) {
   const contests = await loadContests();
 
-  process.env.QUIZMS_MODE = "development";
-
   const config = mergeConfig(configs("development"), {
     publicDir: path.join(cwd(), "public"),
     plugins: [devEntry(contests)],

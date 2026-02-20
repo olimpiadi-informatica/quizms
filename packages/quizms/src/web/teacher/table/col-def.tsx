@@ -123,7 +123,7 @@ export function columnDefinition(
           if (data.absent || data.disabled) return "";
           if (!(id in (data.answers ?? {}))) return "";
           if (variants[data.variant] == null) return "";
-          return displayAnswer(data.answers[id], variants[data.variant].schema[id].kind) ?? "";
+          return displayAnswer(data.answers[id], variants[data.variant].schema[id].type) ?? "";
         },
         tooltipValueGetter: ({ data }) => data.answers?.[id],
         editable: ({ data }) =>

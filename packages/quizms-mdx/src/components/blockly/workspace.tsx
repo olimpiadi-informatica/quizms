@@ -3,6 +3,7 @@
 import { type ComponentType, useCallback, useState } from "react";
 
 import { ErrorBoundary } from "@olinfo/quizms/components";
+import type { Answer } from "@olinfo/quizms/models";
 import { useStudent } from "@olinfo/quizms/student";
 import type { utils } from "blockly/core";
 import clsx from "clsx";
@@ -46,7 +47,7 @@ export function Blockly<State>({
   if (!customBlocks) throw new Error("No custom blocks specified");
   if (!Visualizer) throw new Error("No visualizer specified");
 
-  const { student, setStudent, terminated } = useStudent();
+  const { student, setAnswer, terminated } = useStudent();
   const { id } = useProblem();
 
   const [iframe, setIframe] = useState<HTMLIFrameElement | null>(null);
@@ -56,21 +57,13 @@ export function Blockly<State>({
     testcases.map(() => undefined),
   );
 
-  const onBlockChanges = useCallback(
-    (blocks: object) =>
-      setStudent({
-        ...student,
-        extraData: {
-          ...student.extraData,
-          [`blockly-${id}`]: JSON.stringify(blocks),
-        },
-      }),
-    [student, setStudent, id],
-  );
   const onCodeChanges = useCallback(() => {
     setTestcaseResults(testcases.map(() => undefined));
   }, [testcases]);
-  const savedBlocks = student.extraData?.[`blockly-${id}`];
+
+  const savedBlocks = (student.answers?.[`${id}.1`] as Answer<"complex"> | undefined)?.metadata
+    ?.blocks;
+
   const { ready, blocks, svg, code, variableMappings, highlightBlock } = useIframe(
     iframe,
     terminated,
@@ -79,7 +72,7 @@ export function Blockly<State>({
       initialBlocks: savedBlocks ? JSON.parse(savedBlocks) : initialBlocks,
       customBlocks,
     },
-    { onBlockChanges, onCodeChanges },
+    { onCodeChanges },
     debug,
   );
 
@@ -113,13 +106,18 @@ export function Blockly<State>({
 
     setTestcaseResults(results);
 
-    const answers = { ...student.answers };
     for (let tc = 0; tc < testcases.length; tc++) {
-      answers[`${id}.${tc + 1}`] = results[tc].success ? "✅" : "❌";
+      const answer: Answer<"complex"> = {
+        display: results[tc].success ? "✅" : "❌",
+        metadata: {},
+      };
+      if (tc === 0) {
+        answer.metadata.blocks = JSON.stringify(blocks);
+        answer.metadata.code = code;
+      }
+      await setAnswer(`${id}.${tc + 1}`, answer);
     }
-
-    await setStudent({ ...student, answers });
-  }, [student, setStudent, code, customBlocks, testcases, id]);
+  }, [setAnswer, code, customBlocks, testcases, id, blocks]);
 
   return (
     <div className={clsx(style.workspace, "not-prose")}>

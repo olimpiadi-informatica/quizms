@@ -24,9 +24,6 @@ function convertToFirestore(data: object) {
     if (isString(value)) {
       return value.trim();
     }
-    if (value === undefined) {
-      return null;
-    }
   });
 }
 

@@ -14,8 +14,6 @@ export type ExportOptions = {
 };
 
 export default async function staticExport(options: ExportOptions): Promise<void> {
-  process.env.QUIZMS_MODE = "contest";
-
   const config: InlineConfig = mergeConfig(configs("production"), {
     publicDir: path.join(cwd(), "public"),
     build: {

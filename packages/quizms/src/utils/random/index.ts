@@ -1,6 +1,6 @@
-import { Rng } from "./rng";
+import { Rng, shuffle } from "./rng";
 
-export { Rng };
+export { Rng, shuffle };
 
 export function randomId() {
   return crypto.randomUUID();
