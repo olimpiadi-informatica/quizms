@@ -1,4 +1,4 @@
-import { type ReactNode, useEffect, useRef, useState } from "react";
+import { type ReactNode, useRef } from "react";
 
 import {
   Button,
@@ -10,11 +10,9 @@ import {
   NavbarBrand,
   NavbarContent,
 } from "@olinfo/react-components";
-import { addMilliseconds, isPast } from "date-fns";
 import { sumBy } from "lodash-es";
 import { FileChartColumn, LogOut, RotateCcw } from "lucide-react";
 
-import { useUserAgent } from "~/utils";
 import { ErrorBoundary, Progress, Prose, Timer, Title } from "~/web/components";
 
 import { useStudent } from "./context";
@@ -24,45 +22,11 @@ export function StudentLayout({ children }: { children: ReactNode }) {
   const completedRef = useRef<HTMLDialogElement>(null);
   const submitRef = useRef<HTMLDialogElement>(null);
 
-  const { contest, student, schema, reset, participation, terminated, logout, enforceFullscreen } =
-    useStudent();
+  const { contest, student, schema, reset, participation, terminated } = useStudent();
 
   const answered = sumBy(Object.values(student.answers ?? {}), (s) => Number(s === 0 || !!s));
   const total = Math.max(schema ? Object.keys(schema).length : contest.problemIds.length, 1);
   const progress = Math.round((answered / total) * 100);
-
-  const [warningDeadline, setWarningDeadline] = useState<Date | undefined>();
-  const ua = useUserAgent();
-
-  useEffect(() => {
-    if (!enforceFullscreen || terminated) return;
-
-    const interval = setInterval(() => {
-      const isFullscreen = !!document.fullscreenElement || !ua.hasFullscreen;
-      const isFocused =
-        document.hasFocus() || (!ua.hasFullscreen && document.visibilityState === "visible");
-
-      const key = `quizms_last_active_${student.uid}`;
-      const now = new Date();
-
-      if (isFullscreen && isFocused) {
-        localStorage.setItem(key, now.toISOString());
-        setWarningDeadline(undefined);
-      } else {
-        const lastActive = localStorage.getItem(key);
-        const lastActiveTime = lastActive ? new Date(lastActive) : now;
-
-        const deadlineDate = addMilliseconds(lastActiveTime, 10_500);
-        setWarningDeadline(deadlineDate);
-
-        if (isPast(deadlineDate)) {
-          logout?.();
-        }
-      }
-    }, 200);
-
-    return () => clearInterval(interval);
-  }, [enforceFullscreen, logout, student.uid, terminated, ua.hasFullscreen]);
 
   const submit = async () => {
     const modal = submitRef.current;
@@ -77,29 +41,6 @@ export function StudentLayout({ children }: { children: ReactNode }) {
       completedRef.current?.showModal();
     }
   };
-
-  if (warningDeadline && !terminated) {
-    return (
-      <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-base-100 p-4 text-center">
-        <div className="flex max-w-lg flex-col items-center gap-6">
-          <h2 className="text-3xl font-bold">Attenzione!</h2>
-          <p className="text-xl">
-            Non puoi perdere il focus o uscire dalla modalità a schermo intero.
-          </p>
-          <div className="text-7xl font-black font-mono p-4">
-            <Timer endTime={warningDeadline} hideMinutes />
-          </div>
-          {ua.hasFullscreen && !document.fullscreenElement && (
-            <Button
-              className="btn-warning btn-lg font-bold"
-              onClick={() => document.documentElement.requestFullscreen()}>
-              Torna a schermo intero
-            </Button>
-          )}
-        </div>
-      </div>
-    );
-  }
 
   return (
     <>
