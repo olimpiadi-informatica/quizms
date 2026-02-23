@@ -109,7 +109,7 @@ function useStudentRestores(
   const [participation] = useDocument("participations", participationId, participationConverter);
 
   const [studentRestores] = useCollection("studentRestores", studentRestoreConvert, {
-    constraints: { participationId, token: participation.token, status: "pending" },
+    constraints: { participationId, token: participation.token ?? undefined, status: "pending" },
     orderBy: "createdAt",
   });
 
