@@ -10,7 +10,7 @@ import {
   type FirestoreDataConverter,
   Timestamp,
 } from "firebase-admin/firestore";
-import { cloneDeepWith, isDate, isString, omit } from "lodash-es";
+import { cloneDeepWith, isDate, isObject, isString, omit, transform } from "lodash-es";
 import type z from "zod";
 
 import { submissionSchema } from "~/models/submission";
@@ -32,9 +32,15 @@ function convertToFirestore(data: object) {
 }
 
 function convertFromFirestore(data: object) {
-  return cloneDeepWith(data, (value) => {
-    if (value instanceof Timestamp) {
-      return value.toDate();
+  return transform(data, (result: any, value: any, key: string | number) => {
+    if (value === null) {
+      result[key] = undefined;
+    } else if (value instanceof Timestamp) {
+      result[key] = value.toDate();
+    } else if (isObject(value)) {
+      result[key] = convertFromFirestore(value);
+    } else {
+      result[key] = value;
     }
   });
 }
