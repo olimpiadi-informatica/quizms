@@ -14,6 +14,7 @@ import {
   contestConverter,
   participationConverter,
   studentConverter,
+  submissionConverter,
   variantConverter,
 } from "./utils/converters-admin";
 import { initializeFirebase } from "./utils/initialize";
@@ -22,6 +23,7 @@ type ExportOptions = {
   contests?: true;
   participations?: true;
   students?: true;
+  submissions?: true;
   variants?: true;
 };
 
@@ -47,6 +49,10 @@ export default async function exportContests(options: ExportOptions) {
   if (options.contests) {
     const ref = db.collection("contests").withConverter(contestConverter);
     await exportCollection(ref, "contests", outDir);
+  }
+  if (options.submissions) {
+    const ref = db.collection("submissions").withConverter(submissionConverter);
+    await exportCollection(ref, "submissions", outDir);
   }
 
   await deleteApp(app);
