@@ -13,6 +13,7 @@ import {
 import { cloneDeepWith, isDate, isString, omit } from "lodash-es";
 import type z from "zod";
 
+import { submissionSchema } from "~/models/submission";
 import { userSchema } from "~/models/user";
 import { websiteSchema } from "~/models/website";
 
@@ -53,6 +54,7 @@ function converter<T extends object>(schema: z.core.$ZodType<T>): FirestoreDataC
 export const contestConverter = converter(contestSchema);
 export const participationConverter = converter(participationSchema);
 export const studentConverter = converter(studentSchema);
+export const submissionConverter = converter(submissionSchema);
 export const userConverter = converter(userSchema);
 export const variantConverter = converter(variantSchema);
 export const websiteConverter = converter(websiteSchema);

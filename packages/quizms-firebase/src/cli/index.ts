@@ -46,6 +46,7 @@ async function main() {
     .option("--contests", "Export the contests.")
     .option("--participations", "Export the participations.")
     .option("--students", "Export the students.")
+    .option("--submissions", "Export the submissions.")
     .option("--variants", "Export the variants.")
     .action(exportData);
 
