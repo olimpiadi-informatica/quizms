@@ -21,16 +21,16 @@ import type { Contest, Participation } from "~/models";
 import { ErrorBoundary, Loading, Title } from "~/web/components";
 
 type Props = {
+  name: string;
   contests: Contest[];
   participations: Participation[];
   logout: () => Promise<void>;
   children: ReactNode;
 };
 
-export function TeacherLayout({ contests, participations, logout, children }: Props) {
+export function TeacherLayout({ name, contests, participations, logout, children }: Props) {
   const [, params] = useRoute("/:contestId/*?");
   const contest = contests.find((c) => c.id === params?.contestId);
-  const participation = participations.find((p) => p.contestId === params?.contestId);
 
   return (
     <>
@@ -66,11 +66,7 @@ export function TeacherLayout({ contests, participations, logout, children }: Pr
           </NavbarMenu>
         )}
         <NavbarContent>
-          <UserDropdown
-            participation={participation}
-            participations={participations}
-            logout={logout}
-          />
+          <UserDropdown name={name} logout={logout} />
         </NavbarContent>
       </Navbar>
       <div className="mx-auto flex w-full max-w-screen-xl grow flex-col p-4 pb-8">
@@ -84,16 +80,15 @@ export function TeacherLayout({ contests, participations, logout, children }: Pr
 TeacherLayout.displayName = "TeacherLayout";
 
 type DropdownProps = {
-  participations: Participation[];
-  participation?: Participation;
+  name: string;
   logout: () => Promise<void>;
 };
 
-function UserDropdown({ participation, participations, logout }: DropdownProps) {
+function UserDropdown({ name, logout }: DropdownProps) {
   return (
     <Dropdown className="dropdown-end">
       <DropdownButton>
-        <div className="truncate uppercase">{(participation ?? participations[0]).name}</div>
+        <div className="truncate uppercase">{name}</div>
       </DropdownButton>
       <DropdownMenu>
         <DropdownItem>

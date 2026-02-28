@@ -26,16 +26,22 @@ export function AdminProvider({
     <AdminLayout name={name} contests={contests} logout={logout}>
       <Route path="/">
         {contests.length === 1 && <Redirect to={`/${contests[0].id}`} />}
-        <div className="flex w-full grow flex-col items-center justify-center gap-4">
-          <p className="text-2xl">Seleziona una gara</p>
-          <div className="flex flex-wrap justify-center gap-2">
-            {contests.map((c) => (
-              <Link key={c.id} className="btn btn-primary" href={`/${c.id}`}>
-                {c.name}
-              </Link>
-            ))}
+        {contests.length === 0 ? (
+          <div className="flex w-full grow flex-col items-center justify-center gap-4">
+            <p className="text-2xl">Non sono state trovate gare</p>
           </div>
-        </div>
+        ) : (
+          <div className="flex w-full grow flex-col items-center justify-center gap-4">
+            <p className="text-2xl">Seleziona una gara</p>
+            <div className="flex flex-wrap justify-center gap-2">
+              {contests.map((c) => (
+                <Link key={c.id} className="btn btn-primary" href={`/${c.id}`}>
+                  {c.name}
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
       </Route>
       <Route path="/:contestId" nest>
         <ProviderInner

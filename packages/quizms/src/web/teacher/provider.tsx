@@ -17,6 +17,7 @@ import { TeacherContext, type TeacherContextProps } from "./context";
 import { TeacherLayout } from "./layout";
 
 type TeacherProviderProps = {
+  name: string;
   participations: Participation[];
   contests: Contest[];
   startParticipation: (participationId: string) => Promise<void>;
@@ -43,28 +44,36 @@ type TeacherProviderProps = {
 };
 
 export function TeacherProvider({
+  name,
   participations,
   contests,
   logout,
   ...props
 }: TeacherProviderProps) {
   return (
-    <TeacherLayout participations={participations} contests={contests} logout={logout}>
+    <TeacherLayout name={name} participations={participations} contests={contests} logout={logout}>
       <Route path="/">
         {participations.length === 1 && <Redirect to={`/${participations[0].contestId}`} />}
-        <div className="flex w-full grow flex-col items-center justify-center gap-4">
-          <p className="text-2xl">Seleziona una gara</p>
-          <div className="flex flex-wrap justify-center gap-2">
-            {participations.map((p) => (
-              <Link key={p.id} className="btn btn-primary" href={`/${p.contestId}`}>
-                {contests.find((c) => c.id === p.contestId)?.name}
-              </Link>
-            ))}
+        {participations.length === 0 ? (
+          <div className="flex w-full grow flex-col items-center justify-center gap-4">
+            <p className="text-2xl">Non sei iscritto a nessuna gara, contatta l&apos;assistenza</p>
           </div>
-        </div>
+        ) : (
+          <div className="flex w-full grow flex-col items-center justify-center gap-4">
+            <p className="text-2xl">Seleziona una gara</p>
+            <div className="flex flex-wrap justify-center gap-2">
+              {participations.map((p) => (
+                <Link key={p.id} className="btn btn-primary" href={`/${p.contestId}`}>
+                  {contests.find((c) => c.id === p.contestId)?.name}
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
       </Route>
       <Route path="/:contestId" nest>
         <ProviderInner
+          name={name}
           participations={participations}
           contests={contests}
           logout={logout}

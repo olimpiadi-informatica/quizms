@@ -49,6 +49,7 @@ function TeacherInner({ user, schoolId }: { user: User; schoolId: string }) {
 
   return (
     <TeacherProvider
+      name={participations[0]?.name ?? schoolId}
       participations={participations}
       contests={contests}
       startParticipation={(...args) => startParticipation(user, ...args)}
