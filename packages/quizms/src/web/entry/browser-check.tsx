@@ -1,16 +1,36 @@
-import { type ReactNode, useEffect, useRef } from "react";
+import { type ReactNode, useEffect, useMemo, useRef } from "react";
 
 import { Modal } from "@olinfo/react-components";
 import type { IResult } from "ua-parser-js";
-import { BrowserName } from "ua-parser-js/enums";
+import { BrowserName, BrowserType, EngineName } from "ua-parser-js/enums";
 
-import { useUserAgent } from "~/utils";
+import { hash, useUserAgent } from "~/utils";
 
 export function BrowserCheck({ children }: { children: ReactNode }) {
   const ua = useUserAgent();
 
-  const name = ua.browser.name?.replace("Mobile ", "");
-  const version = Number(ua.browser.major);
+  if (ua.browser.type === BrowserType.INAPP) {
+    return (
+      <>
+        {children}
+        <BrowserModal
+          message="stai usando una versione limitata del browser."
+          description={
+            "Per un'esperienza migliore ti consigliamo di passare all'app che usi di solito per navigare su internet"
+          }
+          ua={ua}
+        />
+      </>
+    );
+  }
+
+  const browserName = ua.browser.name?.replace("Mobile ", "");
+  const engineMajorVersion = ua.engine.version?.split(".")[0];
+
+  const { name, version } =
+    ua.engine.name === EngineName.BLINK && engineMajorVersion
+      ? { name: BrowserName.CHROMIUM, version: Number(engineMajorVersion) }
+      : { name: browserName, version: Number(ua.browser.major) };
 
   if (!name || !(name in browserVersions)) {
     return (
@@ -19,7 +39,7 @@ export function BrowserCheck({ children }: { children: ReactNode }) {
         <BrowserModal
           message="stai usando un browser non supportato!"
           description={
-            "La piattaforma potrebbe non funzionare correttamente, è consigliato usare Chrome, Safari, Edge o Firefox"
+            "La piattaforma potrebbe non funzionare correttamente, è consigliato usare Chrome, Safari o Firefox"
           }
           ua={ua}
         />
@@ -31,8 +51,8 @@ export function BrowserCheck({ children }: { children: ReactNode }) {
     return (
       <div className="flex grow items-center justify-center m-6 text-center">
         <BrowserWarning
-          message={`stai usando una versione di ${name} non supportata!`}
-          description={`Per continuare a usare la piattaforma è necessario aggiornare ${name} alla versione più recente.`}
+          message={`stai usando una versione di ${browserName} non supportata!`}
+          description={`Per continuare a usare la piattaforma è necessario aggiornare ${browserName} alla versione più recente.`}
           ua={ua}
         />
       </div>
@@ -44,8 +64,8 @@ export function BrowserCheck({ children }: { children: ReactNode }) {
       <>
         {children}
         <BrowserModal
-          message={`stai usando una versione di ${name} non supportata!`}
-          description={`La piattaforma potrebbe non funzionare correttamente, è consigliato aggiornare ${name} alla versione più recente.`}
+          message={`stai usando una versione di ${browserName} non supportata!`}
+          description={`La piattaforma potrebbe non funzionare correttamente, è consigliato aggiornare ${browserName} alla versione più recente.`}
           ua={ua}
         />
       </>
@@ -66,13 +86,14 @@ function BrowserModal({
   ua: IResult;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
+  const uaHash = useMemo(() => hash(JSON.stringify(ua)), [ua]);
 
   useEffect(() => {
-    if (ref.current && !sessionStorage.getItem("browser-check-shown")) {
-      ref.current.onclose = () => sessionStorage.setItem("browser-check-shown", "1");
+    if (ref.current && !sessionStorage.getItem(`browser-check-shown-${uaHash}`)) {
+      ref.current.onclose = () => sessionStorage.setItem(`browser-check-shown-${uaHash}`, "1");
       ref.current.showModal();
     }
-  }, []);
+  }, [uaHash]);
 
   return (
     <Modal ref={ref} title="Browser non supportato">
@@ -107,10 +128,7 @@ function BrowserWarning({
 BrowserWarning.displayName = "BrowserWarning";
 
 const browserVersions: Partial<Record<string, { minimum: number; recommended: number }>> = {
-  [BrowserName.CHROME]: { minimum: 101, recommended: 120 },
-  [BrowserName.EDGE]: { minimum: 101, recommended: 120 },
+  [BrowserName.CHROMIUM]: { minimum: 101, recommended: 120 },
   [BrowserName.FIREFOX]: { minimum: 108, recommended: 126 },
   [BrowserName.SAFARI]: { minimum: 16.4, recommended: 18.0 },
-  [BrowserName.OPERA]: { minimum: 106, recommended: 106 },
-  [BrowserName.SAMSUNG]: { minimum: 27, recommended: 27 },
 };
