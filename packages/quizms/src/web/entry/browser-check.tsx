@@ -47,7 +47,7 @@ export function BrowserCheck({ children }: { children: ReactNode }) {
     );
   }
 
-  if (version < browserVersions[name]!.minimum) {
+  if (version < browserVersions[name].minimum) {
     return (
       <div className="flex grow items-center justify-center m-6 text-center">
         <BrowserWarning
@@ -59,7 +59,7 @@ export function BrowserCheck({ children }: { children: ReactNode }) {
     );
   }
 
-  if (version < browserVersions[name]!.recommended) {
+  if (version < browserVersions[name].recommended) {
     return (
       <>
         {children}
@@ -127,8 +127,8 @@ function BrowserWarning({
 }
 BrowserWarning.displayName = "BrowserWarning";
 
-const browserVersions: Partial<Record<string, { minimum: number; recommended: number }>> = {
-  [BrowserName.CHROMIUM]: { minimum: 101, recommended: 120 },
-  [BrowserName.FIREFOX]: { minimum: 108, recommended: 126 },
-  [BrowserName.SAFARI]: { minimum: 16.4, recommended: 18.0 },
+const browserVersions: Record<string, { minimum: number; recommended: number }> = {
+  [BrowserName.CHROMIUM]: { minimum: 109, recommended: 120 },
+  [BrowserName.FIREFOX]: { minimum: 121, recommended: 126 },
+  [BrowserName.SAFARI]: { minimum: 17.0, recommended: 18.0 },
 };
