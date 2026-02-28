@@ -36,7 +36,7 @@ function convertFromFirestore(data: object) {
   });
 }
 
-function parse<T>(schema: z.core.$ZodType<T>, snapshot: DocumentSnapshot): T {
+export function parseSnapshot<T>(schema: z.core.$ZodType<T>, snapshot: DocumentSnapshot): T {
   const data = convertFromFirestore({ ...snapshot.data(), id: snapshot.id });
   return validate(schema, data);
 }
@@ -44,7 +44,7 @@ function parse<T>(schema: z.core.$ZodType<T>, snapshot: DocumentSnapshot): T {
 function converter<T extends object>(schema: z.core.$ZodType<T>): FirestoreDataConverter<T> {
   return {
     toFirestore: (data) => convertToFirestore(data),
-    fromFirestore: (snapshot) => parse(schema, snapshot),
+    fromFirestore: (snapshot) => parseSnapshot(schema, snapshot),
   };
 }
 
