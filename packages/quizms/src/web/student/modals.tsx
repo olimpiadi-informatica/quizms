@@ -1,4 +1,4 @@
-import { forwardRef, type Ref } from "react";
+import type { RefObject } from "react";
 
 import { Form, FormButton, Modal, SubmitButton } from "@olinfo/react-components";
 import { sumBy } from "lodash-es";
@@ -7,10 +7,7 @@ import { calcProblemPoints, displayAnswer, type Schema } from "~/models";
 
 import { useStudent } from "./context";
 
-export const CompletedModal = forwardRef(function CompletedModal(
-  _props,
-  ref: Ref<HTMLDialogElement>,
-) {
+export function CompletedModal({ ref }: { ref: RefObject<HTMLDialogElement | null> }) {
   const { schema } = useStudent();
 
   return (
@@ -19,7 +16,7 @@ export const CompletedModal = forwardRef(function CompletedModal(
       {schema && <PointsTable schema={schema} />}
     </Modal>
   );
-});
+}
 CompletedModal.displayName = "CompletedModal";
 
 export function PointsTable({ schema }: { schema: Schema }) {
@@ -63,19 +60,17 @@ export function PointsTable({ schema }: { schema: Schema }) {
   );
 }
 
-export const SubmitModal = forwardRef(function SubmitModal(_, ref: Ref<HTMLDialogElement>) {
+export function SubmitModal({ ref }: { ref: RefObject<HTMLDialogElement | null> }) {
   const { submit } = useStudent();
 
   const close = () => {
-    if (ref && "current" in ref) {
-      ref.current?.close();
-    }
+    ref.current?.close();
   };
 
   const confirm = async () => {
     try {
       await submit();
-      if (ref && "current" in ref && ref.current) {
+      if (ref.current) {
         ref.current.returnValue = "1";
       }
     } finally {
@@ -94,5 +89,5 @@ export const SubmitModal = forwardRef(function SubmitModal(_, ref: Ref<HTMLDialo
       </Form>
     </Modal>
   );
-});
+}
 SubmitModal.displayName = "SubmitModal";

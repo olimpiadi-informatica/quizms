@@ -1,11 +1,8 @@
-import { forwardRef, type Ref } from "react";
+import type { Ref } from "react";
 
 import { Loading } from "@olinfo/quizms/components";
 
-export const Editor = forwardRef(function Editor(
-  { ready }: { ready: boolean },
-  ref: Ref<HTMLIFrameElement>,
-) {
+export function Editor({ ready, ref }: { ready: boolean; ref: Ref<HTMLIFrameElement> }) {
   return (
     <>
       <iframe
@@ -24,4 +21,4 @@ export const Editor = forwardRef(function Editor(
       )}
     </>
   );
-});
+}

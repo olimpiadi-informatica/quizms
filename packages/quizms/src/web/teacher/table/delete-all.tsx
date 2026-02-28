@@ -1,19 +1,14 @@
-import { forwardRef, type Ref } from "react";
+import type { RefObject } from "react";
 
 import { Form, FormButton, Modal, SubmitButton } from "@olinfo/react-components";
 
 import { useTeacherStudents } from "~/web/teacher/context";
 
-export const DeleteAllModal = forwardRef(function DeleteModal(
-  _,
-  ref: Ref<HTMLDialogElement> | null,
-) {
+export function DeleteAllModal({ ref }: { ref: RefObject<HTMLDialogElement | null> }) {
   const [students, setStudent] = useTeacherStudents();
 
   const close = () => {
-    if (ref && "current" in ref && ref.current) {
-      ref.current.close();
-    }
+    ref.current?.close();
   };
 
   const confirm = async () => {
@@ -38,4 +33,4 @@ export const DeleteAllModal = forwardRef(function DeleteModal(
       </div>
     </Modal>
   );
-});
+}

@@ -1,4 +1,4 @@
-import { forwardRef, type Ref, useRef } from "react";
+import { type RefObject, useRef } from "react";
 
 import {
   type Answer,
@@ -48,27 +48,23 @@ export default function Export<T>(props: Props<T>) {
   );
 }
 
-const ExportModal = forwardRef(function StudentExportModal(
-  {
-    label,
-    description,
-    collection,
-    converter,
-    options,
-    formatter,
-    suggestedName,
-    header,
-  }: Props<any>,
-  ref: Ref<HTMLDialogElement>,
-) {
+function ExportModal({
+  label,
+  description,
+  collection,
+  converter,
+  options,
+  formatter,
+  suggestedName,
+  header,
+  ref,
+}: Props<any> & { ref: RefObject<HTMLDialogElement | null> }) {
   const { contest } = useAdmin();
   const db = useDb();
 
   const onExport = async () => {
     await saveExport(db, collection, converter, options, formatter, suggestedName, header);
-    if (ref && "current" in ref) {
-      ref.current?.close();
-    }
+    ref.current?.close();
   };
 
   return (
@@ -96,7 +92,7 @@ const ExportModal = forwardRef(function StudentExportModal(
       )}
     </Modal>
   );
-});
+}
 
 export function scoreboradHeader(contest: Contest) {
   const row: string[] = [];

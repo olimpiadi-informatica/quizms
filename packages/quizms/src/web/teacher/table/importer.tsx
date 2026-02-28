@@ -1,4 +1,4 @@
-import { type CSSProperties, forwardRef, type Ref, useState } from "react";
+import { type CSSProperties, type RefObject, useState } from "react";
 
 import { Form, Modal, SingleFileField, SubmitButton } from "@olinfo/react-components";
 import { Upload } from "lucide-react";
@@ -18,10 +18,7 @@ import {
 import { randomId } from "~/utils";
 import { useTeacher, useTeacherStudents } from "~/web/teacher/context";
 
-export const ImportModal = forwardRef(function ImportModal(
-  _props,
-  ref: Ref<HTMLDialogElement> | null,
-) {
+export function ImportModal({ ref }: { ref: RefObject<HTMLDialogElement | null> }) {
   const { contest, participation } = useTeacher();
 
   const labels = contest.userData.map((field) => field.label);
@@ -45,9 +42,7 @@ export const ImportModal = forwardRef(function ImportModal(
       const text = await file.text();
       await importStudents(text, contest, variants, participation, setStudent);
     } finally {
-      if (ref && "current" in ref) {
-        ref.current?.close();
-      }
+      ref.current?.close();
     }
   };
 
@@ -114,7 +109,7 @@ export const ImportModal = forwardRef(function ImportModal(
       </div>
     </Modal>
   );
-});
+}
 
 function columnName(index: number): string {
   const name = String.fromCharCode(65 + (index % 26));

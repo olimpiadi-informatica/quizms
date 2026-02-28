@@ -1,15 +1,18 @@
-import { forwardRef, type Ref } from "react";
+import type { RefObject } from "react";
 
 import { CheckboxField, Form, FormButton, Modal, SubmitButton } from "@olinfo/react-components";
 
 import { deleteConfirmStorageKey } from "./utils";
 
-export const DeleteModal = forwardRef(function DeleteModal(
-  { studentName }: { studentName: string },
-  ref: Ref<HTMLDialogElement> | null,
-) {
+export function DeleteModal({
+  studentName,
+  ref,
+}: {
+  studentName: string;
+  ref: RefObject<HTMLDialogElement | null>;
+}) {
   const close = (value: string) => {
-    if (ref && "current" in ref && ref.current) {
+    if (ref.current) {
       ref.current.returnValue = value;
       ref.current.close();
     }
@@ -46,4 +49,4 @@ export const DeleteModal = forwardRef(function DeleteModal(
       </div>
     </Modal>
   );
-});
+}

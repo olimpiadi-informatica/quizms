@@ -1,4 +1,4 @@
-import { Fragment, forwardRef, type Ref, useReducer, useRef } from "react";
+import { Fragment, type RefObject, useReducer, useRef } from "react";
 
 import type { Announcement } from "@olinfo/quizms/models";
 import { randomId } from "@olinfo/quizms/utils";
@@ -63,10 +63,13 @@ export default function Announcements() {
   );
 }
 
-const AnnouncementModal = forwardRef(function AnnouncementModal(
-  { addAnnouncement }: { addAnnouncement: (announcement: Announcement) => Promise<void> },
-  ref: Ref<HTMLDialogElement>,
-) {
+function AnnouncementModal({
+  addAnnouncement,
+  ref,
+}: {
+  addAnnouncement: (announcement: Announcement) => Promise<void>;
+  ref: RefObject<HTMLDialogElement | null>;
+}) {
   const { contest } = useAdmin();
   const [id, nextId] = useReducer((prev) => prev + 1, 0);
 
@@ -86,9 +89,7 @@ const AnnouncementModal = forwardRef(function AnnouncementModal(
       });
       nextId();
     } finally {
-      if (ref && "current" in ref) {
-        ref.current?.close();
-      }
+      ref.current?.close();
     }
   };
 
@@ -112,4 +113,4 @@ const AnnouncementModal = forwardRef(function AnnouncementModal(
       </Form>
     </Modal>
   );
-});
+}

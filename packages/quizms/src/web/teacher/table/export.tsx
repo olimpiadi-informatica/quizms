@@ -1,4 +1,4 @@
-import { forwardRef, type Ref } from "react";
+import type { RefObject } from "react";
 
 import { saveAs } from "file-saver";
 import { unparse as stringifyCSV } from "papaparse";
@@ -8,7 +8,7 @@ import { useTeacher, useTeacherStudents } from "~/web/teacher/context";
 
 import { canViewScore } from "./utils";
 
-export const ExportModal = forwardRef(function Exporter(_, ref: Ref<HTMLButtonElement> | null) {
+export function ExportModal({ ref }: { ref: RefObject<HTMLButtonElement | null> | null }) {
   const { contest, participation } = useTeacher();
   const [students] = useTeacherStudents();
 
@@ -20,7 +20,7 @@ export const ExportModal = forwardRef(function Exporter(_, ref: Ref<HTMLButtonEl
       onClick={() => exportStudents(students, contest, participation)}
     />
   );
-});
+}
 
 function exportStudents(students: Student[], contest: Contest, participation: Participation) {
   const scoreVisible = canViewScore(contest, participation);

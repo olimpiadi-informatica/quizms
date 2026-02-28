@@ -1,4 +1,4 @@
-import { forwardRef, type Ref, useMemo } from "react";
+import { type RefObject, useMemo } from "react";
 
 import { Form, FormButton, Modal, SubmitButton, TextField } from "@olinfo/react-components";
 import { lowerFirst } from "lodash-es";
@@ -9,10 +9,7 @@ import { useTeacher, useTeacherStudents } from "~/web/teacher/context";
 
 import { isStudentIncomplete } from "./utils";
 
-export const FinalizeModal = forwardRef(function FinalizeModal(
-  _props,
-  ref: Ref<HTMLDialogElement> | null,
-) {
+export function FinalizeModal({ ref }: { ref: RefObject<HTMLDialogElement | null> }) {
   const { contest, variants, finalizeParticipation } = useTeacher();
   const [students] = useTeacherStudents();
 
@@ -42,9 +39,7 @@ export const FinalizeModal = forwardRef(function FinalizeModal(
   const correctConfirm = "tutti gli studenti sono stati correttamente inseriti";
 
   const close = () => {
-    if (ref && "current" in ref) {
-      ref.current?.close();
-    }
+    ref.current?.close();
   };
 
   const finalize = async () => {
@@ -110,4 +105,4 @@ export const FinalizeModal = forwardRef(function FinalizeModal(
       )}
     </Modal>
   );
-});
+}
