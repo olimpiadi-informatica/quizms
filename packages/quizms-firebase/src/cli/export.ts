@@ -52,7 +52,7 @@ export default async function exportContests(options: ExportOptions) {
   }
   if (options.submissions) {
     const ref = db.collection("submissions").withConverter(submissionConverter);
-    await exportCollection(ref, "submissions", outDir);
+    await exportHugeCollection(ref, "submissions", outDir);
   }
 
   await deleteApp(app);
@@ -85,4 +85,57 @@ async function exportCollection(ref: Query, collection: string, dir: string) {
 
   bar.stop();
   success(`${capitalize(collection)} export completed.`);
+}
+
+async function exportHugeCollection(ref: Query, collection: string, dir: string) {
+  info(`Exporting ${collection}.`);
+
+  const count = await ref.count().get();
+  const bar = new SingleBar({
+    format: "  {bar} {percentage}% | ETA: {eta_formatted} | {value}/{total}",
+    barCompleteChar: "\u2588",
+    barIncompleteChar: "\u2582",
+    etaBuffer: 10000,
+    formatTime: (t) => formatDistanceStrict(0, t * 1000),
+  });
+  bar.start(count.data().count, 0);
+
+  await pipeline(
+    // 1. Source: Use the paginated generator instead of ref.stream()
+    getPaginatedDocuments(ref), 
+
+    // 2. Transform: Your existing logic remains almost identical
+    async function* (source) {
+      for await (const doc of source) {
+        bar.increment();
+        // No need to cast as unknown anymore, `doc` is cleanly a QueryDocumentSnapshot
+        yield `${JSON.stringify(doc.data())}\n`; 
+      }
+    },
+
+    // 3. Destination: Your existing write stream
+    createWriteStream(path.format({ dir, name: collection, ext: ".jsonl" }))
+  );
+  bar.stop();
+  success(`${capitalize(collection)} export completed.`);
+}
+
+async function* getPaginatedDocuments(collectionRef: Query, batchSize = 1000) {
+  // Order by document ID to ensure a stable, sequential read
+  let query = collectionRef.orderBy('__name__').limit(batchSize);
+  let snapshot = await query.get();
+
+  while (!snapshot.empty) {
+    // Yield each document in the current batch
+    for (const doc of snapshot.docs) {
+      yield doc;
+    }
+
+    // Grab the last document to act as the cursor for the next network request
+    const lastDoc = snapshot.docs[snapshot.docs.length - 1];
+    
+    // Fetch the next batch
+    query = collectionRef.orderBy('__name__').startAfter(lastDoc).limit(batchSize);
+    snapshot = await query.get();
+  }
 }
