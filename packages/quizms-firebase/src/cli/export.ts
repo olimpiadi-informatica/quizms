@@ -7,7 +7,7 @@ import { info, success } from "@olinfo/quizms/utils-node";
 import { SingleBar } from "cli-progress";
 import { formatDistanceStrict } from "date-fns";
 import { deleteApp } from "firebase-admin/app";
-import type { Query, QueryDocumentSnapshot } from "firebase-admin/firestore";
+import type { Query } from "firebase-admin/firestore";
 import { capitalize } from "lodash-es";
 
 import {
@@ -72,12 +72,16 @@ async function exportCollection(ref: Query, collection: string, dir: string) {
   bar.start(count.data().count, 0);
 
   await pipeline(
-    ref.stream(),
-    async function* (stream) {
-      for await (const data of stream) {
-        bar.increment();
-        const snapshot = data as unknown as QueryDocumentSnapshot;
-        yield `${JSON.stringify(snapshot.data())}\n`;
+    async function* () {
+      let snapshot = await ref.limit(1000).get();
+
+      while (!snapshot.empty) {
+        for (const doc of snapshot.docs) {
+          bar.increment();
+          yield `${JSON.stringify(doc.data())}\n`;
+        }
+        const last = snapshot.docs.at(-1);
+        snapshot = await ref.startAfter(last).limit(1000).get();
       }
     },
     createWriteStream(path.format({ dir, name: collection, ext: ".jsonl" })),
