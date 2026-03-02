@@ -185,7 +185,7 @@ async function importStudents(
       userData,
       contestId: contest.id,
       participationId: participation.id,
-      variant: variantId,
+      variantId: variantId,
       answers,
       extraData: { imported: true },
       createdAt: new Date(),

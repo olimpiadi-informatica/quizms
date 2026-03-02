@@ -44,17 +44,17 @@ service cloud.firestore {
                 return participation != null
                     && participation.data.token != null
                     && participation.data.token == request.resource.data.token
-                    && participation.data.startingTime == request.resource.data.startedAt
-                    && participation.data.endingTime >= request.resource.data.finishedAt
+                    && participation.data.contestWindow.start == request.resource.data.contestRange.start
+                    && participation.data.contestWindow.end >= request.resource.data.contestRange.end
                     && participation.data.contestId == request.resource.data.contestId
-                    && request.time <= resource.data.finishedAt + duration.value(10, 's');
+                    && request.time <= resource.data.contestRange.end + duration.value(10, 's');
             }
 
             function canStudentUpdate() {
                 let keys = affectedKeys();
                 return isAuthenticated(resource.data.uid)
                     && checkToken()
-                    && keys.hasOnly(['answers', 'updatedAt', 'finishedAt', 'extraData'])
+                    && keys.hasOnly(['answers', 'updatedAt', 'contestRange', 'extraData'])
                     && hasTimestamp('updatedAt');
             }
 

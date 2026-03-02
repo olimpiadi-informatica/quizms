@@ -22,10 +22,10 @@ export function isStudentIncomplete(
   }
 
   if (contest.hasVariants) {
-    if (!student.variant) return "Variante mancante";
-    if (!(student.variant in variants)) return `La variante ${student.variant} non è valida`;
+    if (!student.variantId) return "Variante mancante";
+    if (!(student.variantId in variants)) return `La variante ${student.variantId} non è valida`;
   }
-  const variant = variants[student.variant!] ?? Object.values(variants)[0];
+  const variant = variants[student.variantId!] ?? Object.values(variants)[0];
 
   const answers = student.answers ?? {};
   for (const id of Object.keys(variant.schema)) {

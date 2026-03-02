@@ -99,7 +99,7 @@ export function columnDefinition(
       headerName: "Vedi Prova",
       width: 100,
       cellRenderer: ({ data }: ICellRendererParams<Student>) => {
-        if (data?.absent || data?.disabled || !data?.variant) return;
+        if (data?.absent || data?.disabled || !data?.variantId) return;
         return (
           <a
             className="link link-info"
@@ -134,7 +134,7 @@ export function columnDefinition(
         },
         cellEditorParams: {
           getValidationErrors: (params) => {
-            const schema = variants[params.cellEditorParams.data.variant!].schema;
+            const schema = variants[params.cellEditorParams.data.variantId!].schema;
             return validateAnswer(params.value, schema[id]);
           },
         } satisfies Partial<ICellEditorParams<Student>>,

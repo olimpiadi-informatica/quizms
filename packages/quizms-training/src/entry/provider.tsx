@@ -61,7 +61,7 @@ export function TrainingProvider({
     [type, mutate],
   );
 
-  const { data: variant } = useSWR(["variant", contest.id, student.variant], getVariant);
+  const { data: variant } = useSWR(["variant", contest.id, student.variantId], getVariant);
 
   const mockParticipation: Participation = useMemo(
     () => ({
@@ -69,11 +69,11 @@ export function TrainingProvider({
       schoolId: "",
       contestId: contest.id,
       name: "",
-      startingTime: student.startedAt,
+      contestWindow: student.contestRange,
       finalized: false,
       disabled: false,
     }),
-    [contest.id, student.startedAt],
+    [contest.id, student.contestRange],
   );
 
   const setAnswer = useCallback(
@@ -97,9 +97,8 @@ export function TrainingProvider({
     await updateStudent(resetIframe, (student) => ({
       ...student,
       answers: {},
-      startedAt: undefined,
-      finishedAt: undefined,
-      variant: getRandomVariant(contest),
+      contestRange: undefined,
+      variantId: getRandomVariant(contest),
     }));
   }, [contest, updateStudent]);
 
@@ -107,8 +106,10 @@ export function TrainingProvider({
     const now = new Date();
     await updateStudent(startIframe, (student) => ({
       ...student,
-      startedAt: subSeconds(now, 2),
-      finishedAt: addMinutes(now, contest.hasOnline ? contest.duration : 0),
+      contestRange: {
+        start: subSeconds(now, 2),
+        end: addMinutes(now, contest.hasOnline ? contest.duration : 0),
+      },
     }));
   }, [contest, updateStudent]);
 
@@ -140,7 +141,7 @@ function createAnonymousStudent(contest: VariantsConfig): Student {
     },
     answers: {},
     contestId: contest.id,
-    variant: getRandomVariant(contest),
+    variantId: getRandomVariant(contest),
   };
 }
 

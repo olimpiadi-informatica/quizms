@@ -14,7 +14,10 @@ export async function studentUpdatedHandler(
 
   const student = parseSnapshot(studentSchema, data);
 
-  const variant = await db.doc(`variants/${student.variant}`).withConverter(variantConverter).get();
+  const variant = await db
+    .doc(`variants/${student.variantId}`)
+    .withConverter(variantConverter)
+    .get();
   student.score = calcScore(student, variant.data()?.schema);
 
   await db.collection("submissions").withConverter(submissionConverter).add({

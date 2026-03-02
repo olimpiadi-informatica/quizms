@@ -19,6 +19,7 @@ import { range } from "lodash-es";
 import Markdown from "react-markdown";
 import { Link } from "wouter";
 
+import type { TimeRange } from "~/models";
 import { Timer } from "~/web/components";
 
 import { useTeacher } from "./context";
@@ -84,8 +85,9 @@ function StopContestButton() {
   );
 }
 
-function ContestData({ startingTime, endingTime }: { startingTime: Date; endingTime: Date }) {
+function ContestData({ contestWindow }: { contestWindow: TimeRange }) {
   const { participation } = useTeacher();
+  const { start: startingTime, end: endingTime } = contestWindow;
 
   const undoEnd = subMinutes(startingTime!, 1);
 
@@ -175,20 +177,17 @@ export default function TeacherDashboard() {
         <CardBody title="Gestione Gara">
           {/* contest data */}
           {contest.hasOnline &&
-            (participation.startingTime && participation.endingTime ? (
-              <ContestData
-                startingTime={participation.startingTime}
-                endingTime={participation.endingTime}
-              />
+            (participation.contestWindow ? (
+              <ContestData contestWindow={participation.contestWindow} />
             ) : (
               <p>La gara non è ancora iniziata!</p>
             ))}
           <CardActions>
             {contest.hasOnline && (
               <WithinTimeRange start={contest.contestWindowStart} end={contest.contestWindowEnd}>
-                {participation.endingTime ? (
+                {participation.contestWindow ? (
                   contest.allowRestart && (
-                    <WithinTimeRange start={participation.endingTime}>
+                    <WithinTimeRange start={participation.contestWindow.end}>
                       <StartContestButton />
                     </WithinTimeRange>
                   )
@@ -197,8 +196,8 @@ export default function TeacherDashboard() {
                 )}
               </WithinTimeRange>
             )}
-            {contest.hasOnline && participation.startingTime && (
-              <WithinTimeRange end={subMinutes(participation.startingTime, 1)}>
+            {contest.hasOnline && participation.contestWindow && (
+              <WithinTimeRange end={subMinutes(participation.contestWindow.start, 1)}>
                 <StopContestButton />
               </WithinTimeRange>
             )}

@@ -26,7 +26,7 @@ export default function TeacherTable() {
   const deleterRef = useRef<HTMLDialogElement>(null);
 
   const endTime =
-    participation.endingTime && contest.hasOnline ? participation.endingTime : undefined;
+    participation.contestWindow && contest.hasOnline ? participation.contestWindow.end : undefined;
   const isContestFinished = useIsAfter(endTime) ?? true;
   const frozen = (contest.hasOnline && !isContestFinished) || participation.finalized;
 
@@ -110,7 +110,7 @@ function Table({ frozen }: { frozen: boolean }) {
       id: newStudentId.current,
       contestId: contest.id,
       participationId: participation.id,
-      variant: contest.hasVariants ? undefined : Object.keys(variants)[0],
+      variantId: contest.hasVariants ? undefined : Object.keys(variants)[0],
       createdAt: new Date(),
       answers: {},
       absent: false,
@@ -149,7 +149,7 @@ function Table({ frozen }: { frozen: boolean }) {
       student = cloneDeep(student);
       setWith(student, ev.colDef.field!, value, Object);
     }
-    student.score = calcScore(student, variants[student.variant!]?.schema);
+    student.score = calcScore(student, variants[student.variantId!]?.schema);
     await setStudentAndUpdateId(student);
 
     ev.api.refreshCells({ force: true });
