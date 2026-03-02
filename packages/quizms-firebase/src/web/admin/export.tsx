@@ -128,14 +128,14 @@ export function scoreboardFormatter(
     }
   }
   row.push(student.participationId?.split("-")[0] ?? "");
-  row.push(student.variant ?? "");
+  row.push(student.variantId ?? "");
   const unshuflledProblems: Record<string, [Answer, number]> = {};
   if (
     student.answers !== undefined &&
-    student.variant !== undefined &&
-    variants[student.variant] !== undefined
+    student.variantId !== undefined &&
+    variants[student.variantId] !== undefined
   ) {
-    const schema = variants[student.variant].schema;
+    const schema = variants[student.variantId].schema;
     for (const problemId in schema) {
       const problem = schema[problemId];
       const originalId = problem.originalId;

@@ -19,8 +19,8 @@ service firebase.storage {
                 return student != null
                     && isAuthenticated(student.data.uid)
                     && student.data.contestId == contestId
-                    && student.data.variant == variantId
-                    && student.data.startedAt <= request.time;
+                    && student.data.variantId == variantId
+                    && student.data.contestRange.start <= request.time;
             }
 
             allow read: if canStudentReadVariant() || isTeacher();

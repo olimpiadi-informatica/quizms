@@ -115,10 +115,10 @@ export function StudentLayout({ children }: { children: ReactNode }) {
               {progress}%
             </Progress>
             <div className="px-3">
-              {terminated || !student.finishedAt || !contest.hasOnline ? (
+              {terminated || !student.contestRange || !contest.hasOnline ? (
                 <span className="font-mono">00:00</span>
               ) : (
-                <Timer endTime={student.finishedAt} noAnimation />
+                <Timer endTime={student.contestRange.end} noAnimation />
               )}
             </div>
             {terminated && reset ? (
@@ -149,7 +149,7 @@ export function StudentLayout({ children }: { children: ReactNode }) {
                 className="btn-primary btn-sm h-full"
                 disabled={
                   terminated ||
-                  (process.env.NODE_ENV === "production" && !participation.startingTime)
+                  (process.env.NODE_ENV === "production" && !participation.contestWindow)
                 }
                 onClick={submit}>
                 Termina

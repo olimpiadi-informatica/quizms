@@ -17,13 +17,15 @@ export function ImpersonationAuth({ children }: { children: ReactNode }) {
     return <Redirect to="/student" />;
   }
 
+  const fakeRange = { start: new Date(0), end: new Date(0) };
+
   return (
     <div className="fixed inset-0 z-30 overflow-y-auto bg-base-100">
       <div className="">
         <StudentProvider
           contest={contest}
-          participation={{ ...participation, startingTime: new Date(0) }}
-          student={{ ...student, finishedAt: new Date(0) }}
+          participation={{ ...participation, contestWindow: fakeRange }}
+          student={{ ...student, contestRange: fakeRange }}
           setAnswer={() => {}}
           submit={() => {}}
           enforceFullscreen={false}>

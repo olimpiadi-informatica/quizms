@@ -37,7 +37,7 @@ export function StudentProvider({
 }: Omit<StudentProviderProps, "terminated"> & {
   children: ReactNode;
 }) {
-  const terminated = useIsAfter(student.finishedAt) ?? false;
+  const terminated = useIsAfter(student.contestRange?.end) ?? false;
 
   const value: StudentContextProps = {
     ...props,

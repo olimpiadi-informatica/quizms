@@ -155,7 +155,10 @@ function StudentInner({
   );
 
   const submit = useCallback(async () => {
-    await setStudent({ ...student, finishedAt: new Date() });
+    await setStudent({
+      ...student,
+      contestRange: { start: student.contestRange!.start, end: new Date() },
+    });
     await waitForPendingWrites(db);
   }, [db, student, setStudent]);
 

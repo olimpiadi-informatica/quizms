@@ -44,7 +44,7 @@ export function DevProvider({ contest, children }: { contest: Contest; children:
     },
     answers: {},
     contestId: contest.id,
-    variant: "0",
+    variantId: "0",
   });
 
   const mockParticipation: Participation = useMemo(
@@ -53,11 +53,11 @@ export function DevProvider({ contest, children }: { contest: Contest; children:
       schoolId: "",
       contestId: contest.id,
       name: "",
-      startingTime: student.startedAt,
+      contestWindow: student.contestRange,
       finalized: false,
       disabled: false,
     }),
-    [contest.id, student.startedAt],
+    [contest.id, student.contestRange],
   );
 
   const setAnswer = useCallback((problemId: string, answer: Answer | undefined) => {
@@ -71,7 +71,10 @@ export function DevProvider({ contest, children }: { contest: Contest; children:
   }, []);
 
   const submit = useCallback(() => {
-    setStudent((student) => ({ ...student, finishedAt: new Date() }));
+    setStudent((student) => ({
+      ...student,
+      contestRange: { start: student.contestRange!.start, end: new Date() },
+    }));
   }, []);
 
   const reset = useCallback(() => {
@@ -79,8 +82,7 @@ export function DevProvider({ contest, children }: { contest: Contest; children:
       (student): Student => ({
         ...student,
         answers: {},
-        startedAt: undefined,
-        finishedAt: undefined,
+        contestRange: undefined,
       }),
     );
   }, []);

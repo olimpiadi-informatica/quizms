@@ -75,7 +75,7 @@ export function PrintProvider({ contest, children }: { contest: Contest; childre
     },
     answers: {},
     contestId: contest.id,
-    variant: new URLSearchParams(window.location.search).get("v") ?? "",
+    variantId: new URLSearchParams(window.location.search).get("v") ?? "",
   };
 
   const mockParticipation: Participation = {
@@ -83,7 +83,10 @@ export function PrintProvider({ contest, children }: { contest: Contest; childre
     schoolId: "",
     contestId: contest.id,
     name: "",
-    startingTime: new Date(0),
+    contestWindow: {
+      start: new Date(0),
+      end: new Date(0),
+    },
     finalized: false,
     disabled: false,
   };

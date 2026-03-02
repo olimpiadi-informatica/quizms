@@ -20,10 +20,13 @@ export const studentSchema = z
     participationId: z.string(),
     contestId: z.string(),
     token: z.string(),
-    startedAt: z.date(),
-    finishedAt: z.date(),
 
-    variant: z.string(),
+    contestRange: z.object({
+      start: z.date(),
+      end: z.date(),
+    }),
+
+    variantId: z.string(),
     answers: z.record(z.string(), answerSchema),
     score: z.number(),
     maxScore: z.number(),

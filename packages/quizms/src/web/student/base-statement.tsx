@@ -9,8 +9,8 @@ import { useStudent } from "~/web/student/context";
 export function BaseStatement({ children }: { children: ReactNode }) {
   const { participation } = useStudent();
   const startingTime = useMemo(
-    () => addMilliseconds(participation.startingTime!, 1000 + Math.random() * 1000),
-    [participation.startingTime],
+    () => addMilliseconds(participation.contestWindow!.start, 1000 + Math.random() * 1000),
+    [participation.contestWindow],
   );
 
   return (
@@ -19,7 +19,7 @@ export function BaseStatement({ children }: { children: ReactNode }) {
         <div className="flex h-[50vh] items-center justify-center text-2xl">
           La gara inizierà tra
           <span className="px-2">
-            <Timer endTime={participation.startingTime!} />
+            <Timer endTime={participation.contestWindow!.start} />
           </span>
         </div>
       </WithinTimeRange>

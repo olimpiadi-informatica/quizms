@@ -61,7 +61,7 @@ export function RemoteStatement({ statementUrl, stylesheetUrl, moduleUrl }: Prop
 function StatementStylesheet({ stylesheetUrl }: { stylesheetUrl: () => Promise<string> | string }) {
   const { student } = useStudent();
   const { data } = useSWR(
-    `statement/${student.contestId}/${student.variant}/stylesheet`,
+    `statement/${student.contestId}/${student.variantId}/stylesheet`,
     stylesheetUrl,
     { suspense: true },
   );
@@ -93,9 +93,13 @@ function InnerStatement({ statementUrl }: Pick<Props, "statementUrl">) {
     ) as Promise<ReactNode>;
   }, [statementUrl]);
 
-  const { data } = useSWR(`statement/${student.contestId}/${student.variant}/statement`, fetcher, {
-    suspense: true,
-  });
+  const { data } = useSWR(
+    `statement/${student.contestId}/${student.variantId}/statement`,
+    fetcher,
+    {
+      suspense: true,
+    },
+  );
   return data;
 }
 

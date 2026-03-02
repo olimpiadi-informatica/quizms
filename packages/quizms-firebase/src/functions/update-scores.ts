@@ -27,8 +27,8 @@ export async function updateScoresHandler(request: Request) {
       await db.runTransaction(async (t) => {
         const studentSnap = await t.get(ref);
         const student = studentSnap.data();
-        if (!student?.variant) return;
-        const score = calcScore(student, variants[student.variant]?.schema);
+        if (!student?.variantId) return;
+        const score = calcScore(student, variants[student.variantId]?.schema);
         if (score !== student.score) {
           t.update(ref, { score });
         }

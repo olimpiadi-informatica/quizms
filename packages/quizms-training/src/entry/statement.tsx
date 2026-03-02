@@ -11,7 +11,7 @@ export function TrainingStatement() {
   const { student, contest } = useStudent();
   const { start } = useContext(TrainingStatementContext);
 
-  if (!student.startedAt) {
+  if (!student.contestRange) {
     return (
       <div className="flex h-[50vh] flex-col items-center justify-center">
         <Button className="btn-success btn-lg" onClick={start}>
@@ -23,8 +23,8 @@ export function TrainingStatement() {
 
   return (
     <RemoteStatement
-      statementUrl={() => `/variants/${contest.id}/${student.variant}/statement.txt`}
-      moduleUrl={(id) => `/variants/${contest.id}/${student.variant}/${id}`}
+      statementUrl={() => `/variants/${contest.id}/${student.variantId}/statement.txt`}
+      moduleUrl={(id) => `/variants/${contest.id}/${student.variantId}/${id}`}
     />
   );
 }

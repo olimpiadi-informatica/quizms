@@ -7,9 +7,9 @@ export function PrintStatement() {
   return (
     <RemoteStatement
       statementUrl={() =>
-        `/print-proxy/files/${student.contestId}/${student.variant}/statement.txt`
+        `/print-proxy/files/${student.contestId}/${student.variantId}/statement.txt`
       }
-      moduleUrl={(id) => `/print-proxy/files/${student.contestId}/${student.variant}/${id}`}
+      moduleUrl={(id) => `/print-proxy/files/${student.contestId}/${student.variantId}/${id}`}
     />
   );
 }

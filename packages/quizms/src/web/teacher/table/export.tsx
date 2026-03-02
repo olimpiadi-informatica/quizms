@@ -29,7 +29,7 @@ function exportStudents(students: Student[], contest: Contest, participation: Pa
     .map((student) => {
       return [
         ...contest.userData.map((field) => formatUserData(student, field)),
-        ...(contest.hasVariants ? [student.variant] : []),
+        ...(contest.hasVariants ? [student.variantId] : []),
         ...contest.problemIds.map((id) => student.answers?.[id]),
         ...(scoreVisible ? [student.score] : []),
       ];

@@ -104,9 +104,9 @@ export const teacherStartParticipation = publicProcedure
     );
 
     if (
-      participation.endingTime != null &&
+      participation.contestWindow &&
       contest.hasOnline &&
-      (isFuture(participation.endingTime) || !contest.allowRestart)
+      (isFuture(participation.contestWindow.end) || !contest.allowRestart)
     ) {
       throw new TRPCError({ code: "FORBIDDEN", message: "Gara già iniziata" });
     }
@@ -123,8 +123,10 @@ export const teacherStartParticipation = publicProcedure
 
     await db.doc(`participations/${participation.id}`).update({
       token,
-      startingTime,
-      endingTime,
+      contestRange: {
+        start: startingTime,
+        end: endingTime,
+      },
     });
 
     try {
@@ -148,11 +150,11 @@ export const teacherStopParticipation = publicProcedure
 
     const [participation] = await checkParticipation(data.participationId, ctx.claims, true);
 
-    if (participation.startingTime == null) {
+    if (participation.contestWindow == null) {
       throw new TRPCError({ code: "FORBIDDEN", message: "Gara non iniziata" });
     }
 
-    if (isPast(participation.startingTime)) {
+    if (isPast(participation.contestWindow.start)) {
       throw new TRPCError({ code: "FORBIDDEN", message: "Gara già iniziata" });
     }
 
@@ -169,8 +171,7 @@ export const teacherStopParticipation = publicProcedure
 
     await db.doc(`participations/${participation.id}`).update({
       token: null,
-      startingTime: null,
-      endingTime: null,
+      contestRange: null,
     });
   });
 

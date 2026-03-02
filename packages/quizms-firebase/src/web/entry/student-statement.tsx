@@ -15,7 +15,7 @@ export function FirebaseStatement() {
     (fileName: string) => {
       const statementRef = ref(
         storage,
-        `statements/${student.contestId}/${student.variant}/${fileName}`,
+        `statements/${student.contestId}/${student.variantId}/${fileName}`,
       );
       return getDownloadURL(statementRef);
     },
