@@ -1,4 +1,4 @@
-import { isString, xor } from "lodash-es";
+import { xor } from "lodash-es";
 import z from "zod";
 
 import type { Student } from "~/models/student";
@@ -8,8 +8,9 @@ export const answerSchemas = {
   openText: z.string(),
   multipleChoice: z.string(),
   multipleResponse: z.array(z.string()),
-  complex: z.strictObject({
-    display: z.enum(["✅", "❌"]),
+  blockly: z.strictObject({
+    score: z.number(),
+    results: z.array(z.boolean()),
     metadata: z.record(z.string(), z.any()),
   }),
 };
@@ -43,8 +44,8 @@ const problemSchema = z.discriminatedUnion("type", [
     options: z.array(z.string()),
   }),
   baseProblemSchema.extend({
-    type: z.literal("complex"),
-    correct: z.literal(""),
+    type: z.literal("blockly"),
+    numTestcases: z.number(),
   }),
 ]);
 
@@ -73,7 +74,7 @@ export function parseAnswer(answer: string, schema: Schema[string]): Answer | un
     case "openText":
     case "multipleChoice":
       return value;
-    case "complex":
+    case "blockly":
       throw new Error("Unsupported problem type");
   }
 }
@@ -90,8 +91,8 @@ export function displayAnswer(answer: Answer | null | undefined, type: AnswerTyp
       return answer as Answer<"openText" | "multipleChoice">;
     case "multipleResponse":
       return (answer as Answer<"multipleResponse">).join("");
-    case "complex":
-      return isString(answer) ? answer : (answer as Answer<"complex">).display;
+    case "blockly":
+      return (answer as Answer<"blockly">).results.map((c) => (c ? "✅" : "❌")).join("");
   }
 }
 
@@ -170,10 +171,8 @@ export function calcProblemPoints(problem: Schema[string], answer?: Answer): num
         ? problem.pointsCorrect
         : problem.pointsWrong;
     }
-    case "complex":
-      return (answer as Answer<"complex">).display === "✅"
-        ? problem.pointsCorrect
-        : problem.pointsWrong;
+    case "blockly":
+      return (answer as Answer<"blockly">).score;
   }
 }
 

@@ -51,7 +51,10 @@ export function MultipleResponseAnswer({ children }: { children: ReactNode }) {
   const { id } = useAnswer();
   const { id: problemId } = useProblem();
   const { student, setAnswer, terminated, schema } = useStudent();
-  const correct = schema?.[problemId!].correct as Answer<"multipleResponse"> | undefined;
+  const problemSchema = schema?.[problemId!];
+  if (problemSchema && problemSchema.type !== "multipleResponse")
+    throw new Error("Expected MultipleResponse problem");
+  const correct = problemSchema?.correct;
 
   const answer = student.answers?.[problemId!] as Answer<"multipleResponse"> | undefined;
   const currentlyChecked = useMemo(() => answer?.includes(id), [answer, id]);
@@ -107,7 +110,10 @@ export function MultipleChoiceAnswer({ children }: { children: ReactNode }) {
   const { id } = useAnswer();
   const { id: problemId } = useProblem();
   const { student, setAnswer, terminated, schema } = useStudent();
-  const correct = schema?.[problemId!].correct;
+  const problemSchema = schema?.[problemId!];
+  if (problemSchema && problemSchema.type !== "multipleChoice")
+    throw new Error("Expected multipleChoice problem");
+  const correct = problemSchema?.correct;
 
   const answer = student.answers?.[problemId!] as Answer<"multipleChoice"> | undefined;
   const submitAnswer = async (value: string | undefined) => {
@@ -168,7 +174,10 @@ export type OpenAnswerProps = {
 export function OpenAnswer({ type }: OpenAnswerProps) {
   const { id: problemId } = useProblem();
   const { student, setAnswer, terminated, schema } = useStudent();
-  const correct = schema?.[problemId!].correct;
+  const problemSchema = schema?.[problemId!];
+  if (problemSchema && problemSchema.type !== "openNumber" && problemSchema.type !== "openText")
+    throw new Error("Expected open problem");
+  const correct = problemSchema?.correct;
 
   const answer = student.answers?.[problemId!] as Answer<"openNumber" | "openText"> | undefined;
   const submitAnswer = async (value: string | undefined) => {

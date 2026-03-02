@@ -20,6 +20,11 @@ export default function configs(mode: "development" | "production"): InlineConfi
   const root = path.join(cwd(), "src");
 
   const packageJson = JSON.parse(readFileSync(path.join(cwd(), "package.json"), "utf8"));
+  console.log(
+    (Object.keys(packageJson.dependencies) as string[]).filter((key) =>
+      key.startsWith("@olinfo/quizms-"),
+    ),
+  );
   const plugins: PluginOption = (Object.keys(packageJson.dependencies) as string[])
     .filter((key) => key.startsWith("@olinfo/quizms-"))
     .map(async (pkg) => {

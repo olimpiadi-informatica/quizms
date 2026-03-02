@@ -61,7 +61,7 @@ export function Blockly<State>({
     setTestcaseResults(testcases.map(() => undefined));
   }, [testcases]);
 
-  const savedBlocks = (student.answers?.[`${id}.1`] as Answer<"complex"> | undefined)?.metadata
+  const savedBlocks = (student.answers?.[`${id}.1`] as Answer<"blockly"> | undefined)?.metadata
     ?.blocks;
 
   const { ready, blocks, svg, code, variableMappings, highlightBlock } = useIframe(
@@ -106,17 +106,15 @@ export function Blockly<State>({
 
     setTestcaseResults(results);
 
-    for (let tc = 0; tc < testcases.length; tc++) {
-      const answer: Answer<"complex"> = {
-        display: results[tc].success ? "✅" : "❌",
-        metadata: {},
-      };
-      if (tc === 0) {
-        answer.metadata.blocks = JSON.stringify(blocks);
-        answer.metadata.code = code;
-      }
-      await setAnswer(`${id}.${tc + 1}`, answer);
-    }
+    const answer: Answer<"blockly"> = {
+      score: 0,
+      results: results.map((res) => res.success),
+      metadata: {
+        blocks: JSON.stringify(blocks),
+        code,
+      },
+    };
+    await setAnswer(`${id}`, answer);
   }, [setAnswer, code, customBlocks, testcases, id, blocks]);
 
   return (

@@ -49,7 +49,10 @@ export function PointsTable({ schema }: { schema: Schema }) {
               <tr key={problem}>
                 <td>{problem}</td>
                 <td>{displayAnswer(answer, problemSchema.type) ?? "-"}</td>
-                <td>{displayAnswer(problemSchema.correct, problemSchema.type)}</td>
+                <td>
+                  {problemSchema.type !== "blockly" &&
+                    displayAnswer(problemSchema.correct, problemSchema.type)}
+                </td>
                 <td>{calcProblemPoints(problemSchema, answer)}</td>
               </tr>
             );

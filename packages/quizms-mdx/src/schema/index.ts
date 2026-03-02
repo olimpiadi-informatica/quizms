@@ -57,15 +57,12 @@ export function parseRawSchema(rawSchemaHtml: string): Schema {
           break;
         }
         case "blockly": {
-          for (let i = 0; i < subProblem.numTestcases; i++) {
-            schema[`${problem.id}.${i}`] = {
-              ...baseProblem,
-              originalId: `${problem.originalId}.${i}`,
-              type: "complex",
-              correct: "",
-            };
-          }
-          break;
+          schema[`${problem.id}`] = {
+            ...baseProblem,
+            originalId: `${problem.originalId}`,
+            type: "blockly",
+            numTestcases: subProblem.numTestcases,
+          };
         }
       }
     }
