@@ -3,19 +3,39 @@ import z from "zod";
 
 import type { Student } from "~/models/student";
 
-export const answerSchemas = {
+export const answerValues = {
   openNumber: z.number(),
   openText: z.string(),
   multipleChoice: z.string(),
   multipleResponse: z.array(z.string()),
   blockly: z.strictObject({
-    score: z.number(),
     results: z.array(z.boolean()),
     metadata: z.record(z.string(), z.any()),
   }),
 };
 
-export const answerSchema = z.union(Object.values(answerSchemas));
+export const answerSchema = z.discriminatedUnion("type", [
+  z.strictObject({
+    type: z.literal("openNumber"),
+    value: answerValues.openNumber.nullable(),
+  }),
+  z.strictObject({
+    type: z.literal("openText"),
+    value: answerValues.openText.nullable(),
+  }),
+  z.strictObject({
+    type: z.literal("multipleChoice"),
+    value: answerValues.multipleChoice.nullable(),
+  }),
+  z.strictObject({
+    type: z.literal("multipleResponse"),
+    value: answerValues.multipleResponse.nullable(),
+  }),
+  z.strictObject({
+    type: z.literal("blockly"),
+    value: answerValues.blockly.nullable(),
+  }),
+]);
 
 export const optionSchema = z.strictObject({
   id: z.string(),
@@ -33,11 +53,11 @@ const baseProblemSchema = z.strictObject({
 const problemSchema = z.discriminatedUnion("type", [
   baseProblemSchema.extend({
     type: z.literal("openNumber"),
-    correct: z.array(answerSchemas.openNumber),
+    correct: z.array(answerValues.openNumber),
   }),
   baseProblemSchema.extend({
     type: z.literal("openText"),
-    correct: z.array(answerSchemas.openText),
+    correct: z.array(answerValues.openText),
   }),
   baseProblemSchema.extend({
     type: z.literal("multipleResponse"),
@@ -61,72 +81,98 @@ export const variantSchema = z.strictObject({
   schema: z.record(z.string(), problemSchema),
 });
 
-export type AnswerType = Schema[string]["type"];
-export type Answer<T extends AnswerType = AnswerType> = z.infer<(typeof answerSchemas)[T]>;
-export type Variant = z.infer<typeof variantSchema>;
 export type Schema = Variant["schema"];
+export type ProblemType = Schema[string]["type"];
+export type Problem<T extends ProblemType = ProblemType> = Extract<Schema[string], { type: T }>;
+export type Answer<T extends ProblemType = ProblemType> = Extract<
+  z.infer<typeof answerSchema>,
+  { type: T }
+>;
+export type AnswerValue<T extends ProblemType = ProblemType> = NonNullable<Answer<T>["value"]>;
+export type Variant = z.infer<typeof variantSchema>;
 
-export function parseAnswer(answer: string, schema: Schema[string]): Answer | undefined {
+export function parseAnswer(answer: string, problem: Problem): Answer | undefined {
   const value = answer.trim().toUpperCase();
   if (!value) return undefined;
-
-  switch (schema.type) {
+  switch (problem.type) {
     case "openNumber":
-      return Number(value);
+      return {
+        value: Number(value),
+        type: "openNumber",
+      };
     case "multipleResponse":
-      return answer.split("");
+      return {
+        value: value.split(""),
+        type: "multipleResponse",
+      };
     case "openText":
+      return {
+        value: value,
+        type: "openText",
+      };
     case "multipleChoice":
-      return value;
+      return {
+        value: value,
+        type: "multipleChoice",
+      };
     case "blockly":
       throw new Error("Unsupported problem type");
   }
 }
 
-export function displayAnswer(answer: Answer | null | undefined, type: AnswerType): string {
-  if (answer == null) {
+export function displayAnswer({ value, type }: Answer): string {
+  if (value === null) {
     return "";
   }
   switch (type) {
     case "openNumber":
-      return String(answer as Answer<"openNumber">);
+      return String(value as AnswerValue<"openNumber">);
     case "openText":
     case "multipleChoice":
-      return answer as Answer<"openText" | "multipleChoice">;
+      return value as AnswerValue<"openText" | "multipleChoice">;
     case "multipleResponse":
-      return (answer as Answer<"multipleResponse">).join("");
+      return (value as AnswerValue<"multipleResponse">).join("");
     case "blockly":
-      return (answer as Answer<"blockly">).results.map((c) => (c ? "✅" : "❌")).join("");
+      return (value as AnswerValue<"blockly">).results.map((c) => (c ? "✅" : "❌")).join("");
   }
 }
 
-export function validateAnswer(
-  answer: Answer | null | undefined,
+export function displayCorrectAnswers(problem: Problem): string {
+  if (problem.type === "blockly") return "";
+  return getCorrectValues(problem)
+    .map((value) => displayAnswer({ value, type: problem.type } as Answer))
+    .join(",");
+}
+
+export function validateAnswerValue(
+  answer: AnswerValue | null,
   schema: Schema[string],
 ): [string] | null {
   if (answer == null || answer === "") return null;
 
   switch (schema.type) {
     case "openNumber": {
-      if (!Number.isInteger(answer as Answer<"openNumber">)) {
+      if (!Number.isInteger(answer as AnswerValue<"openNumber">)) {
         return ["La risposta deve essere un numero intero"];
       }
       return null;
     }
     case "openText": {
-      if ((answer as Answer<"openText">).length > 256) {
+      if ((answer as AnswerValue<"openText">).length > 256) {
         return ["La risposta non può essere più lunga di 256 caratteri"];
       }
       return null;
     }
     case "multipleChoice": {
-      if (!schema.options.map((option) => option.id).includes(answer as Answer<"multipleChoice">)) {
+      if (
+        !schema.options.map((option) => option.id).includes(answer as AnswerValue<"multipleChoice">)
+      ) {
         return [`Opzione non valida: ${answer}`];
       }
       return null;
     }
     case "multipleResponse": {
-      const mrAnswer = answer as Answer<"multipleResponse">;
+      const mrAnswer = answer as AnswerValue<"multipleResponse">;
       const optionValues = schema.options.map((option) => option.id);
       const wrong = mrAnswer.filter((value) => !optionValues.includes(value));
       if (wrong.length >= 1) {
@@ -141,7 +187,7 @@ export function validateAnswer(
   return null;
 }
 
-export function getCorrectOptions(problem: Schema[string]) {
+export function getCorrectValues(problem: Schema[string]) {
   switch (problem.type) {
     case "openNumber":
     case "openText":
@@ -174,27 +220,33 @@ export function calcScore(student: Student, schema?: Schema) {
 }
 
 export function calcProblemPoints(problem: Schema[string], answer?: Answer): number {
-  if (answer == null || answer === "") return problem.pointsBlank;
+  if (
+    answer == null ||
+    answer.value === null ||
+    answer.value === "" ||
+    answer.type !== problem.type
+  )
+    return problem.pointsBlank;
 
   switch (problem.type) {
     case "openNumber":
-      return typeof answer === "number" && problem.correct.includes(answer)
+      return problem.type === answer.type && problem.correct.includes(answer.value)
         ? problem.pointsCorrect
         : problem.pointsWrong;
     case "openText":
-      return typeof answer === "string" && problem.correct.includes(answer)
+      return problem.type === answer.type && problem.correct.includes(answer.value)
         ? problem.pointsCorrect
         : problem.pointsWrong;
     case "multipleChoice":
-      return typeof answer === "string" &&
+      return problem.type === answer.type &&
         problem.options
           .filter((option) => option.correct)
           .map((option) => option.id)
-          .includes(answer)
+          .includes(answer.value)
         ? problem.pointsCorrect
         : problem.pointsWrong;
     case "multipleResponse": {
-      const multipleAnswer = answer as Answer<"multipleResponse">;
+      const multipleAnswer = answer.value as AnswerValue<"multipleResponse">;
       const correct = problem.options.filter((option) => option.correct).map((option) => option.id);
       if (multipleAnswer.length === 0) return problem.pointsBlank;
 
@@ -203,20 +255,27 @@ export function calcProblemPoints(problem: Schema[string], answer?: Answer): num
         : problem.pointsWrong;
     }
     case "blockly":
-      return (answer as Answer<"blockly">).score;
+      return (answer.value as AnswerValue<"blockly">).results
+        .map((tc) => (tc ? problem.pointsCorrect : problem.pointsWrong))
+        .reduce((a, b) => a + b, 0);
   }
 }
 
-export function unshuffleAnswer(problem: Schema[string], answer?: Answer): Answer | undefined {
+export function unshuffleAnswer<T extends ProblemType>(
+  pproblem: Problem<T>,
+  answerValue: AnswerValue<T>,
+): AnswerValue<T> {
+  const problem = pproblem as Problem;
   if (problem.type === "openNumber" || problem.type === "openText" || problem.type === "blockly") {
-    return answer;
+    return answerValue;
   }
-  const unshuffleAnswer = (id: string) =>
+  const unshuffleValue = (id: AnswerValue<"multipleResponse" | "multipleChoice">) =>
     problem.options.find((option) => option.id === id)?.originalId ?? "";
   if (problem.type === "multipleResponse") {
-    return (answer as string[]).map(unshuffleAnswer);
+    return (answerValue as string[]).map(unshuffleValue) as AnswerValue<T>;
   }
   if (problem.type === "multipleChoice") {
-    return answer ? unshuffleAnswer(answer as string) : answer;
+    return (answerValue ? unshuffleValue(answerValue as string) : answerValue) as AnswerValue<T>;
   }
+  throw Error("Unknown problem type");
 }

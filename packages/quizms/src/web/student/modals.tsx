@@ -3,7 +3,7 @@ import type { RefObject } from "react";
 import { Form, FormButton, Modal, SubmitButton } from "@olinfo/react-components";
 import { sumBy } from "lodash-es";
 
-import { calcProblemPoints, displayAnswer, getCorrectOptions, type Schema } from "~/models";
+import { calcProblemPoints, displayAnswer, displayCorrectAnswers, type Schema } from "~/models";
 
 import { useStudent } from "./context";
 
@@ -48,11 +48,8 @@ export function PointsTable({ schema }: { schema: Schema }) {
             return (
               <tr key={problem}>
                 <td>{problem}</td>
-                <td>{displayAnswer(answer, problemSchema.type) ?? "-"}</td>
-                <td>
-                  {problemSchema.type !== "blockly" &&
-                    displayAnswer(getCorrectOptions(problemSchema)[0], problemSchema.type)}
-                </td>
+                <td>{answer ? displayAnswer(answer) : "-"}</td>
+                <td>{problemSchema.type !== "blockly" && displayCorrectAnswers(problemSchema)}</td>
                 <td>{calcProblemPoints(problemSchema, answer)}</td>
               </tr>
             );
