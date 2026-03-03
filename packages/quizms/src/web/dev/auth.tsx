@@ -3,7 +3,7 @@ import { type ReactNode, useCallback, useMemo, useState } from "react";
 import { omit } from "lodash-es";
 import { Link, Route, Switch } from "wouter";
 
-import type { Answer, Contest, Participation, Student } from "~/models";
+import type { Answer, Contest, Student, Venue } from "~/models";
 import { StudentProvider } from "~/web/student/provider";
 
 export function DevRoutes({ contests, children }: { contests: Contest[]; children: ReactNode }) {
@@ -47,7 +47,7 @@ export function DevProvider({ contest, children }: { contest: Contest; children:
     variantId: "0",
   });
 
-  const mockParticipation: Participation = useMemo(
+  const mockVenue: Venue = useMemo(
     () => ({
       id: "",
       schoolId: "",
@@ -91,7 +91,7 @@ export function DevProvider({ contest, children }: { contest: Contest; children:
   return (
     <StudentProvider
       contest={contest}
-      participation={mockParticipation}
+      venue={mockVenue}
       student={student}
       setAnswer={setAnswer}
       submit={submit}

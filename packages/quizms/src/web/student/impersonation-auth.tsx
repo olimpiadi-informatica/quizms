@@ -7,7 +7,7 @@ import { useTeacher, useTeacherStudents } from "~/web/teacher/context";
 import { StudentProvider } from "./provider";
 
 export function ImpersonationAuth({ children }: { children: ReactNode }) {
-  const { contest, participation } = useTeacher();
+  const { contest, venue } = useTeacher();
   const [students] = useTeacherStudents();
 
   const { studentId } = useParams();
@@ -24,7 +24,7 @@ export function ImpersonationAuth({ children }: { children: ReactNode }) {
       <div className="">
         <StudentProvider
           contest={contest}
-          participation={{ ...participation, contestWindow: fakeRange }}
+          venue={{ ...venue, contestWindow: fakeRange }}
           student={{ ...student, contestRange: fakeRange }}
           setAnswer={() => {}}
           submit={() => {}}

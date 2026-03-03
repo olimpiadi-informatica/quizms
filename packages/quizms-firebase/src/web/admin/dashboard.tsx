@@ -1,11 +1,11 @@
 import { Suspense, useCallback } from "react";
 
 import { Loading } from "@olinfo/quizms/components";
-import type { Participation, Student } from "@olinfo/quizms/models";
+import type { Student, Venue } from "@olinfo/quizms/models";
 import { Card, CardActions, CardBody } from "@olinfo/react-components";
 import { Link } from "wouter";
 
-import { participationConverter, studentConverter } from "~/web/common/converters";
+import { studentConverter, venueConverter } from "~/web/common/converters";
 import { useCount } from "~/web/hooks/count";
 
 import Announcements from "./announcements";
@@ -50,10 +50,10 @@ export default function Dashboard() {
             <Export
               label="scuole"
               description="i dati di tutte le scuole"
-              collection="participations"
-              converter={participationConverter}
+              collection="venues"
+              converter={venueConverter}
               options={{ constraints: { contestId: contest.id, disabled: false } }}
-              formatter={(data: Participation) => JSON.stringify(data)}
+              formatter={(data: Venue) => JSON.stringify(data)}
             />
             <Export
               label="studenti"
@@ -89,14 +89,14 @@ export default function Dashboard() {
 function ContestInformation() {
   const { contest } = useAdmin();
 
-  const totalSchools = useCount<Participation>("participations", {
+  const totalSchools = useCount<Venue>("venues", {
     constraints: {
       contestId: contest.id,
       disabled: false,
     },
   });
 
-  const finalizedSchools = useCount<Participation>("participations", {
+  const finalizedSchools = useCount<Venue>("venues", {
     constraints: {
       contestId: contest.id,
       finalized: true,

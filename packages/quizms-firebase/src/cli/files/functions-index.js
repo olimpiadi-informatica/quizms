@@ -13,7 +13,7 @@ setGlobalOptions({ region: "QUIZMS_REGION" });
 export const api = onRequest({ cors: ["http://localhost:1234"] }, apiHandler);
 
 export const submissions = onDocumentWrittenWithAuthContext(
-  "participations/{participationId}/students/{studentId}",
+  "venues/{venueId}/students/{studentId}",
   studentUpdatedHandler,
 );
 

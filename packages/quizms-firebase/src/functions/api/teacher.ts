@@ -1,6 +1,6 @@
 import crypto from "node:crypto";
 
-import type { Contest, Participation, Student } from "@olinfo/quizms/models";
+import type { Contest, Student, Venue } from "@olinfo/quizms/models";
 import { randomToken } from "@olinfo/quizms/utils";
 import { TRPCError } from "@trpc/server";
 import { addMinutes, addSeconds, isFuture, isPast, roundToNearestMinutes } from "date-fns";
@@ -12,13 +12,7 @@ import { chunk } from "lodash-es";
 import z from "zod";
 
 import { auth, db } from "../common";
-import {
-  getContest,
-  getParticipation,
-  getParticipationByToken,
-  getParticipationStudents,
-  getUser,
-} from "./queries";
+import { getContest, getUser, getVenue, getVenueByToken, getVenueStudents } from "./queries";
 import { publicProcedure } from "./trpc";
 
 const region = defineString("QUIZMS_REGION");
@@ -52,21 +46,21 @@ export const teacherLogin = publicProcedure
     });
   });
 
-async function checkParticipation(
-  participationId: string,
+async function checkVenue(
+  venueId: string,
   claims: DecodedIdToken | undefined,
   onlineOnly: boolean,
-): Promise<[Participation, Contest]> {
-  const participation = await getParticipation(participationId);
-  if (!participation) {
+): Promise<[Venue, Contest]> {
+  const venue = await getVenue(venueId);
+  if (!venue) {
     throw new TRPCError({ code: "BAD_REQUEST", message: "Gara non valida" });
   }
 
-  if (participation.schoolId !== claims?.schoolId) {
+  if (venue.schoolId !== claims?.schoolId) {
     throw new TRPCError({ code: "FORBIDDEN", message: "Gara non valida" });
   }
 
-  const contest = await getContest(participation.contestId);
+  const contest = await getContest(venue.contestId);
   if (onlineOnly) {
     if (!contest.hasOnline) {
       throw new TRPCError({ code: "FORBIDDEN", message: "Gara non abilitata per prove online" });
@@ -79,40 +73,36 @@ async function checkParticipation(
     }
   }
 
-  return [participation, contest];
+  return [venue, contest];
 }
 
 async function generateToken() {
   for (;;) {
     const token = await randomToken();
-    if (!(await getParticipationByToken(token))) {
+    if (!(await getVenueByToken(token))) {
       return token;
     }
   }
 }
 
 export const teacherStartContestWindow = publicProcedure
-  .input(z.strictObject({ participationId: z.string() }))
+  .input(z.strictObject({ venueId: z.string() }))
   .mutation(async (opts) => {
     const { input: data, ctx } = opts;
-    logger.info("Teacher start participation received", { data });
+    logger.info("Teacher start venue received", { data });
 
-    const [participation, contest] = await checkParticipation(
-      data.participationId,
-      ctx.claims,
-      true,
-    );
+    const [venue, contest] = await checkVenue(data.venueId, ctx.claims, true);
 
     if (
-      participation.contestWindow &&
+      venue.contestWindow &&
       contest.hasOnline &&
-      (isFuture(participation.contestWindow.end) || !contest.allowRestart)
+      (isFuture(venue.contestWindow.end) || !contest.allowRestart)
     ) {
       throw new TRPCError({ code: "FORBIDDEN", message: "Gara già iniziata" });
     }
 
-    if (participation.token) {
-      const students = await getParticipationStudents(participation.id, participation.token);
+    if (venue.token) {
+      const students = await getVenueStudents(venue.id, venue.token);
       await revokeTokens(students);
     }
 
@@ -121,7 +111,7 @@ export const teacherStartContestWindow = publicProcedure
 
     const token = await generateToken();
 
-    await db.doc(`participations/${participation.id}`).update({
+    await db.doc(`venues/${venue.id}`).update({
       token,
       contestRange: {
         start: startingTime,
@@ -134,7 +124,7 @@ export const teacherStartContestWindow = publicProcedure
         `locations/${region.value()}/functions/updateScores`,
       );
       await taskQueue.enqueue(
-        { participationId: participation.id, token },
+        { venueId: venue.id, token },
         { scheduleTime: addSeconds(endingTime, 5) },
       );
     } catch (error) {
@@ -143,33 +133,33 @@ export const teacherStartContestWindow = publicProcedure
   });
 
 export const teacherStopContestWindow = publicProcedure
-  .input(z.strictObject({ participationId: z.string() }))
+  .input(z.strictObject({ venueId: z.string() }))
   .mutation(async (opts) => {
     const { input: data, ctx } = opts;
-    logger.info("Teacher stop participation received", { data });
+    logger.info("Teacher stop venue received", { data });
 
-    const [participation] = await checkParticipation(data.participationId, ctx.claims, true);
+    const [venue] = await checkVenue(data.venueId, ctx.claims, true);
 
-    if (participation.contestWindow == null) {
+    if (venue.contestWindow == null) {
       throw new TRPCError({ code: "FORBIDDEN", message: "Gara non iniziata" });
     }
 
-    if (isPast(participation.contestWindow.start)) {
+    if (isPast(venue.contestWindow.start)) {
       throw new TRPCError({ code: "FORBIDDEN", message: "Gara già iniziata" });
     }
 
-    const students = await getParticipationStudents(participation.id, participation.token!);
+    const students = await getVenueStudents(venue.id, venue.token!);
     await revokeTokens(students);
 
     for (const studentChunk of chunk(students, 300)) {
       const batch = db.batch();
       for (const student of studentChunk) {
-        batch.delete(db.doc(`participations/${participation.id}/students/${student.id}`));
+        batch.delete(db.doc(`venues/${venue.id}/students/${student.id}`));
       }
       await batch.commit();
     }
 
-    await db.doc(`participations/${participation.id}`).update({
+    await db.doc(`venues/${venue.id}`).update({
       token: null,
       contestRange: null,
     });
@@ -185,13 +175,13 @@ async function revokeTokens(students: Student[]) {
   );
 }
 
-export const teacherFinalizeParticipation = publicProcedure
-  .input(z.strictObject({ participationId: z.string() }))
+export const teacherFinalizeVenue = publicProcedure
+  .input(z.strictObject({ venueId: z.string() }))
   .mutation(async (opts) => {
     const { input: data, ctx } = opts;
-    logger.info("Teacher finalize participation received", { data });
+    logger.info("Teacher finalize venue received", { data });
 
-    const [participation] = await checkParticipation(data.participationId, ctx.claims, false);
+    const [venue] = await checkVenue(data.venueId, ctx.claims, false);
 
-    await db.doc(`participations/${participation.id}`).update({ finalized: true });
+    await db.doc(`venues/${venue.id}`).update({ finalized: true });
   });

@@ -9,14 +9,14 @@ import { studentConverter, variantConverter } from "~/cli/utils/converters-admin
 import { db } from "./common";
 
 export async function updateScoresHandler(request: Request) {
-  const { participationId, token } = request.data;
+  const { venueId, token } = request.data;
 
   const variantRef = db.collection("variants").withConverter(variantConverter);
   const variantSnap = await variantRef.get();
   const variants = Object.fromEntries(variantSnap.docs.map((doc) => [doc.id, doc.data()]));
 
   const ref = db
-    .collection(`participations/${participationId}/students`)
+    .collection(`venues/${venueId}/students`)
     .where("token", "==", token)
     .withConverter(studentConverter);
 

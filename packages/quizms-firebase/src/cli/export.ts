@@ -12,16 +12,16 @@ import { capitalize } from "lodash-es";
 
 import {
   contestConverter,
-  participationConverter,
   studentConverter,
   submissionConverter,
   variantConverter,
+  venueConverter,
 } from "./utils/converters-admin";
 import { initializeFirebase } from "./utils/initialize";
 
 type ExportOptions = {
   contests?: true;
-  participations?: true;
+  venues?: true;
   students?: true;
   submissions?: true;
   variants?: true;
@@ -38,9 +38,9 @@ export default async function exportContests(options: ExportOptions) {
     const ref = db.collectionGroup("students").withConverter(studentConverter);
     await exportCollection(ref, "students", outDir);
   }
-  if (options.participations) {
-    const ref = db.collection("participations").withConverter(participationConverter);
-    await exportCollection(ref, "participations", outDir);
+  if (options.venues) {
+    const ref = db.collection("venues").withConverter(venueConverter);
+    await exportCollection(ref, "venues", outDir);
   }
   if (options.variants) {
     const ref = db.collection("variants").withConverter(variantConverter);

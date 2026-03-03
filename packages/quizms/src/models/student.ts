@@ -17,7 +17,7 @@ export const studentSchema = z
     absent: z.boolean(),
     disabled: z.boolean(),
 
-    participationId: z.string(),
+    venueId: z.string(),
     contestId: z.string(),
     token: z.string(),
 

@@ -127,7 +127,7 @@ export function scoreboardFormatter(
       row.push(formatUserData(student, field));
     }
   }
-  row.push(student.participationId?.split("-")[0] ?? "");
+  row.push(student.venueId?.split("-")[0] ?? "");
   row.push(student.variantId ?? "");
   const unshuflledProblems: Record<string, [Answer, number]> = {};
   if (

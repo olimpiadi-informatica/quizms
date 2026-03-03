@@ -24,7 +24,7 @@ export function StudentLayout({ children }: { children: ReactNode }) {
   const completedRef = useRef<HTMLDialogElement>(null);
   const submitRef = useRef<HTMLDialogElement>(null);
 
-  const { contest, student, schema, reset, participation, terminated, logout, enforceFullscreen } =
+  const { contest, student, schema, reset, venue, terminated, logout, enforceFullscreen } =
     useStudent();
 
   const answered = sumBy(Object.values(student.answers ?? {}), (s) => Number(s === 0 || !!s));
@@ -148,8 +148,7 @@ export function StudentLayout({ children }: { children: ReactNode }) {
               <Button
                 className="btn-primary btn-sm h-full"
                 disabled={
-                  terminated ||
-                  (process.env.NODE_ENV === "production" && !participation.contestWindow)
+                  terminated || (process.env.NODE_ENV === "production" && !venue.contestWindow)
                 }
                 onClick={submit}>
                 Termina

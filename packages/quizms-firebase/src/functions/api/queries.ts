@@ -2,10 +2,10 @@ import { Rng } from "@olinfo/quizms/utils";
 
 import {
   contestConverter,
-  participationConverter,
   studentConverter,
   userConverter,
   variantConverter,
+  venueConverter,
 } from "~/cli/utils/converters-admin";
 import { db } from "~/functions/common";
 
@@ -16,27 +16,24 @@ export async function getContest(contestId: string) {
   return snapshot.data()!;
 }
 
-export async function getParticipation(participationId: string) {
-  const snapshot = await db
-    .doc(`participations/${participationId}`)
-    .withConverter(participationConverter)
-    .get();
+export async function getVenue(venueId: string) {
+  const snapshot = await db.doc(`venues/${venueId}`).withConverter(venueConverter).get();
   return snapshot.data();
 }
 
-export async function getParticipationStudents(participationId: string, token: string) {
+export async function getVenueStudents(venueId: string, token: string) {
   const snapshot = await db
-    .collection(`participations/${participationId}/students`)
+    .collection(`venues/${venueId}/students`)
     .where("token", "==", token)
     .withConverter(studentConverter)
     .get();
   return snapshot.docs.map((doc) => doc.data());
 }
 
-export async function getParticipationByToken(token: string) {
+export async function getVenueByToken(token: string) {
   const snapshot = await db
-    .collection("participations")
-    .withConverter(participationConverter)
+    .collection("venues")
+    .withConverter(venueConverter)
     .where("token", "==", token)
     .get();
   return snapshot.docs[0]?.data();
@@ -60,9 +57,9 @@ export async function getRandomVariant(contestId: string) {
     .get();
   return rng.choice(snapshot.docs).data();
 }
-export async function getStudentByHash(participationId: string, userDataHash: string) {
+export async function getStudentByHash(venueId: string, userDataHash: string) {
   const snapshot = await db
-    .collection(`participations/${participationId}/students`)
+    .collection(`venues/${venueId}/students`)
     .withConverter(studentConverter)
     .where("userDataHash", "==", userDataHash)
     .where("disabled", "!=", true)

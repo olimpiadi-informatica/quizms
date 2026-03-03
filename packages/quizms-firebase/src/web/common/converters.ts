@@ -2,11 +2,11 @@ import {
   type Announcement,
   announcementSchema,
   contestSchema,
-  participationSchema,
   type Student,
   studentRestoreSchema,
   studentSchema,
   variantSchema,
+  venueSchema,
 } from "@olinfo/quizms/models";
 import { validate } from "@olinfo/quizms/utils";
 import {
@@ -52,7 +52,7 @@ function converter<T extends object>(schema: z.core.$ZodType<T>): FirestoreDataC
 }
 
 export const contestConverter = converter(contestSchema);
-export const participationConverter = converter(participationSchema);
+export const venueConverter = converter(venueSchema);
 export const studentRestoreConvert = converter(studentRestoreSchema);
 export const variantConverter = converter(variantSchema);
 export const websiteConverter = converter(websiteSchema);

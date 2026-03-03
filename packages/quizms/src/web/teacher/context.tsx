@@ -1,19 +1,12 @@
 import { createContext, use } from "react";
 
-import type {
-  Announcement,
-  Contest,
-  Participation,
-  Student,
-  StudentRestore,
-  Variant,
-} from "~/models";
+import type { Announcement, Contest, Student, StudentRestore, Variant, Venue } from "~/models";
 
 export type TeacherContextProps = {
   /** Tutte le partecipazioni */
-  participations: Participation[];
+  venues: Venue[];
   /** Partecipazione selezionata */
-  participation: Participation;
+  venue: Venue;
 
   /** Tutte le gare */
   contests: Contest[];
@@ -21,11 +14,11 @@ export type TeacherContextProps = {
   contest: Contest;
 
   /** Funzione per iniziare la gara */
-  startContestWindow: (participationId: string) => Promise<void>;
+  startContestWindow: (venueId: string) => Promise<void>;
   /** Funzione per annullare la gara */
-  stopContestWindow: (participationId: string) => Promise<void>;
+  stopContestWindow: (venueId: string) => Promise<void>;
   /** Funzione per finalizzare i risultati della gara */
-  finalizeParticipation: (participationId: string) => Promise<void>;
+  finalizeVenue: (venueId: string) => Promise<void>;
 
   /** Varianti dei testi */
   variants: Record<string, Variant>;
@@ -36,12 +29,10 @@ export type TeacherContextProps = {
   /** Hook per ottenere gli annunci */
   useAnnouncements: (contestId: string) => Announcement[];
   /** Hook per ottenere gli studenti di una scuola */
-  useStudents: (
-    participationId: string,
-  ) => readonly [Student[], (student: Student) => Promise<void>];
+  useStudents: (venueId: string) => readonly [Student[], (student: Student) => Promise<void>];
   /** Hook per ottenere le richieste di accesso degli studenti */
   useStudentRestores: (
-    participationId: string,
+    venueId: string,
     token: string,
   ) => readonly [
     StudentRestore[],
@@ -60,15 +51,14 @@ export type OmitContestParam<T> = {
 };
 
 export function useTeacher(): Omit<OmitContestParam<TeacherContextProps>, `use${string}`> {
-  const { startContestWindow, stopContestWindow, finalizeParticipation, ...ctx } =
-    use(TeacherContext);
-  const participationId = ctx.participation.id;
+  const { startContestWindow, stopContestWindow, finalizeVenue, ...ctx } = use(TeacherContext);
+  const venueId = ctx.venue.id;
 
   return {
     ...ctx,
-    startContestWindow: () => startContestWindow(participationId),
-    stopContestWindow: () => stopContestWindow(participationId),
-    finalizeParticipation: () => finalizeParticipation(participationId),
+    startContestWindow: () => startContestWindow(venueId),
+    stopContestWindow: () => stopContestWindow(venueId),
+    finalizeVenue: () => finalizeVenue(venueId),
   };
 }
 
@@ -78,11 +68,11 @@ export function useTeacherAnnouncements() {
 }
 
 export function useTeacherStudents() {
-  const { participation, useStudents } = use(TeacherContext);
-  return useStudents(participation.id);
+  const { venue, useStudents } = use(TeacherContext);
+  return useStudents(venue.id);
 }
 
 export function useTeacherStudentRestores() {
-  const { participation, useStudentRestores } = use(TeacherContext);
-  return useStudentRestores(participation.id, participation.token ?? "");
+  const { venue, useStudentRestores } = use(TeacherContext);
+  return useStudentRestores(venue.id, venue.token ?? "");
 }

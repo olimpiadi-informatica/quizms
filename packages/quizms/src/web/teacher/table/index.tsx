@@ -19,16 +19,15 @@ import { ImportModal } from "./importer";
 import { canViewScore, deleteConfirmStorageKey, isStudentIncomplete } from "./utils";
 
 export default function TeacherTable() {
-  const { contest, participation } = useTeacher();
+  const { contest, venue } = useTeacher();
   const importRef = useRef<HTMLDialogElement>(null);
   const exportRef = useRef<HTMLButtonElement>(null);
   const finalizeRef = useRef<HTMLDialogElement>(null);
   const deleterRef = useRef<HTMLDialogElement>(null);
 
-  const endTime =
-    participation.contestWindow && contest.hasOnline ? participation.contestWindow.end : undefined;
+  const endTime = venue.contestWindow && contest.hasOnline ? venue.contestWindow.end : undefined;
   const isContestFinished = useIsAfter(endTime) ?? true;
-  const frozen = (contest.hasOnline && !isContestFinished) || participation.finalized;
+  const frozen = (contest.hasOnline && !isContestFinished) || venue.finalized;
 
   return (
     <>
@@ -62,7 +61,7 @@ export default function TeacherTable() {
             <div className="hidden md:block">Finalizza</div>
           </Button>
         )}
-        <FinalizeModal key={participation.id} ref={finalizeRef} />
+        <FinalizeModal key={venue.id} ref={finalizeRef} />
         {contest.allowStudentDelete && !frozen && (
           <Button
             className="btn-primary btn-sm h-10"
@@ -73,7 +72,7 @@ export default function TeacherTable() {
         )}
       </div>
       <Suspense fallback={<Loading />}>
-        <Table frozen={frozen} key={participation.id} />
+        <Table frozen={frozen} key={venue.id} />
         <ImportModal ref={importRef} />
         <ExportModal ref={exportRef} />
         <DeleteAllModal ref={deleterRef} />
@@ -92,7 +91,7 @@ function Counter() {
 }
 
 function Table({ frozen }: { frozen: boolean }) {
-  const { contest, participation, variants } = useTeacher();
+  const { contest, venue, variants } = useTeacher();
   const [students, setStudent] = useTeacherStudents();
 
   const modalRef = useRef<HTMLDialogElement>(null);
@@ -109,7 +108,7 @@ function Table({ frozen }: { frozen: boolean }) {
     allStudents.push({
       id: newStudentId.current,
       contestId: contest.id,
-      participationId: participation.id,
+      venueId: venue.id,
       variantId: contest.hasVariants ? undefined : Object.keys(variants)[0],
       createdAt: new Date(),
       answers: {},
@@ -119,8 +118,8 @@ function Table({ frozen }: { frozen: boolean }) {
   }
 
   const colDefs = useMemo(
-    () => columnDefinition(contest, variants, canViewScore(contest, participation), frozen),
-    [contest, variants, participation, frozen],
+    () => columnDefinition(contest, variants, canViewScore(contest, venue), frozen),
+    [contest, variants, venue, frozen],
   );
 
   const onCellEditRequest = async (ev: CellEditRequestEvent) => {

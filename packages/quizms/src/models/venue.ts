@@ -1,6 +1,6 @@
 import z from "zod";
 
-export const participationSchema = z.strictObject({
+export const venueSchema = z.strictObject({
   id: z.string(),
   schoolId: z.string(),
   contestId: z.string(),
@@ -17,5 +17,5 @@ export const participationSchema = z.strictObject({
   disabled: z.boolean().default(false),
 });
 
-export type Participation = z.infer<typeof participationSchema>;
-export type TimeRange = NonNullable<Participation["contestWindow"]>;
+export type Venue = z.infer<typeof venueSchema>;
+export type TimeRange = NonNullable<Venue["contestWindow"]>;

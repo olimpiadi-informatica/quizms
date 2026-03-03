@@ -7,11 +7,11 @@ import { parse as parseCSV } from "papaparse";
 import {
   type Contest,
   calcScore,
-  type Participation,
   parseAnswer,
   parseUserData,
   type Student,
   type Variant,
+  type Venue,
   validateAnswer,
   validateUserData,
 } from "~/models";
@@ -19,7 +19,7 @@ import { randomId } from "~/utils";
 import { useTeacher, useTeacherStudents } from "~/web/teacher/context";
 
 export function ImportModal({ ref }: { ref: RefObject<HTMLDialogElement | null> }) {
-  const { contest, participation } = useTeacher();
+  const { contest, venue } = useTeacher();
 
   const labels = contest.userData.map((field) => field.label);
   if (contest.hasVariants) {
@@ -40,7 +40,7 @@ export function ImportModal({ ref }: { ref: RefObject<HTMLDialogElement | null> 
     setUploadCount((count) => count + 1);
     try {
       const text = await file.text();
-      await importStudents(text, contest, variants, participation, setStudent);
+      await importStudents(text, contest, variants, venue, setStudent);
     } finally {
       ref.current?.close();
     }
@@ -123,7 +123,7 @@ async function importStudents(
   file: string,
   contest: Contest,
   variants: Record<string, Variant>,
-  participation: Participation,
+  venue: Venue,
   addStudent: (student: Student) => Promise<void>,
 ) {
   const records = parseCSV<string[]>(file, {
@@ -184,7 +184,7 @@ async function importStudents(
       id: randomId(),
       userData,
       contestId: contest.id,
-      participationId: participation.id,
+      venueId: venue.id,
       variantId: variantId,
       answers,
       extraData: { imported: true },

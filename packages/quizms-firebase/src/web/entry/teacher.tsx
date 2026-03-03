@@ -6,15 +6,15 @@ import { getAuth, signOut, type User } from "firebase/auth";
 import { doc, type Firestore, serverTimestamp, writeBatch } from "firebase/firestore";
 import { getBytes, getStorage, ref } from "firebase/storage";
 
-import { finalizeParticipation, startContestWindow, stopContestWindow } from "~/web/common/api";
+import { finalizeVenue, startContestWindow, stopContestWindow } from "~/web/common/api";
 import { useDb } from "~/web/common/base-login";
 import {
   announcementConverter,
   contestConverter,
-  participationConverter,
   studentConverter,
   studentRestoreConvert,
   variantConverter,
+  venueConverter,
 } from "~/web/common/converters";
 import TokenLogin from "~/web/common/token-login";
 import { useWebsite } from "~/web/common/website";
@@ -37,7 +37,7 @@ function TeacherInner({ user, schoolId }: { user: User; schoolId: string }) {
   const [contests] = useCollection("contests", contestConverter, {
     constraints: { id: website.contests },
   });
-  const [participations] = useCollection("participations", participationConverter, {
+  const [venues] = useCollection("venues", venueConverter, {
     constraints: { contestId: website.contests, schoolId: schoolId },
   });
   const [variants] = useCollection("variants", variantConverter);
@@ -49,12 +49,12 @@ function TeacherInner({ user, schoolId }: { user: User; schoolId: string }) {
 
   return (
     <TeacherProvider
-      name={participations[0]?.name ?? schoolId}
-      participations={participations}
+      name={venues[0]?.name ?? schoolId}
+      venues={venues}
       contests={contests}
       startContestWindow={(...args) => startContestWindow(user, ...args)}
       stopContestWindow={(...args) => stopContestWindow(user, ...args)}
-      finalizeParticipation={(...args) => finalizeParticipation(user, ...args)}
+      finalizeVenue={(...args) => finalizeVenue(user, ...args)}
       variants={variants}
       logout={logout}
       statementComponent={() => <FirebaseStatement />}
@@ -92,14 +92,14 @@ function useAnnouncements(contestId: string) {
   return announcements;
 }
 
-function useStudents(participationId: string) {
-  return useCollection(`participations/${participationId}/students`, studentConverter, {
+function useStudents(venueId: string) {
+  return useCollection(`venues/${venueId}/students`, studentConverter, {
     orderBy: "createdAt",
   });
 }
 
 function useStudentRestores(
-  participationId: string,
+  venueId: string,
 ): readonly [
   StudentRestore[],
   (request: StudentRestore) => Promise<void>,
@@ -107,10 +107,10 @@ function useStudentRestores(
 ] {
   const db = useDb();
 
-  const [participation] = useDocument("participations", participationId, participationConverter);
+  const [venue] = useDocument("venues", venueId, venueConverter);
 
   const [studentRestores] = useCollection("studentRestores", studentRestoreConvert, {
-    constraints: { participationId, token: participation.token ?? undefined, status: "pending" },
+    constraints: { venueId, token: venue.token ?? undefined, status: "pending" },
     orderBy: "createdAt",
   });
 
@@ -128,7 +128,7 @@ function useStudentRestores(
 
   const approve = async (request: StudentRestore) => {
     const batch = writeBatch(db);
-    batch.update(doc(db, `/participations/${participationId}/students`, request.studentId), {
+    batch.update(doc(db, `/venues/${venueId}/students`, request.studentId), {
       uid: request.id,
       updatedAt: serverTimestamp(),
     });

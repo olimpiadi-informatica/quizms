@@ -3,10 +3,10 @@ import { type ReactNode, useCallback, useMemo, useState } from "react";
 import {
   type Answer,
   type Contest,
-  type Participation,
   type Student,
   type Variant,
   type VariantsConfig,
+  type Venue,
   variantSchema,
 } from "@olinfo/quizms/models";
 import { StudentProvider } from "@olinfo/quizms/student";
@@ -63,7 +63,7 @@ export function TrainingProvider({
 
   const { data: variant } = useSWR(["variant", contest.id, student.variantId], getVariant);
 
-  const mockParticipation: Participation = useMemo(
+  const mockVenue: Venue = useMemo(
     () => ({
       id: "",
       schoolId: "",
@@ -119,7 +119,7 @@ export function TrainingProvider({
       <title>{contest.name}</title>
       <StudentProvider
         contest={contest}
-        participation={mockParticipation}
+        venue={mockVenue}
         student={student}
         setAnswer={setAnswer}
         submit={submit}

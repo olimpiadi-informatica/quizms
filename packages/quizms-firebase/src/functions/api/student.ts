@@ -12,7 +12,7 @@ import * as logger from "firebase-functions/logger";
 import z from "zod";
 
 import { auth, db } from "../common";
-import { getContest, getParticipationByToken, getRandomVariant, getStudentByHash } from "./queries";
+import { getContest, getRandomVariant, getStudentByHash, getVenueByToken } from "./queries";
 import { publicProcedure } from "./trpc";
 
 function studentHash(contest: Contest, userData: NonNullable<Student["userData"]>) {
@@ -32,20 +32,20 @@ export const studentLogin = publicProcedure
     const { input: data } = opts;
     logger.info("Student login request received", { data });
 
-    const participation = await getParticipationByToken(data.token);
-    if (!participation) {
+    const venue = await getVenueByToken(data.token);
+    if (!venue) {
       throw new TRPCError({ code: "BAD_REQUEST", message: "Codice prova non valido" });
     }
-    if (participation.contestId !== data.contestId) {
+    if (venue.contestId !== data.contestId) {
       throw new TRPCError({ code: "FORBIDDEN", message: "Codice prova non valido" });
     }
 
-    const contest = await getContest(participation.contestId);
+    const contest = await getContest(venue.contestId);
 
     const uid = crypto.randomUUID();
     const userDataHash = studentHash(contest, data.userData);
 
-    const duplicated = await getStudentByHash(participation.id, userDataHash);
+    const duplicated = await getStudentByHash(venue.id, userDataHash);
     if (duplicated) {
       if (duplicated.token !== data.token) {
         throw new TRPCError({
@@ -56,7 +56,7 @@ export const studentLogin = publicProcedure
 
       await db.doc(`studentRestores/${uid}`).set({
         studentId: duplicated.id,
-        participationId: duplicated.participationId,
+        venueId: duplicated.venueId,
         token: data.token,
         name: data.userData.name,
         surname: data.userData.surname,
@@ -68,23 +68,23 @@ export const studentLogin = publicProcedure
       return auth.createCustomToken(uid, {
         role: "student",
         studentId: duplicated.id,
-        participationId: duplicated.participationId,
+        venueId: duplicated.venueId,
         variantId: duplicated.variantId,
       });
     }
 
     const variant = await getRandomVariant(data.contestId);
 
-    const studentRef = await db.collection(`participations/${participation.id}/students`).add({
+    const studentRef = await db.collection(`venues/${venue.id}/students`).add({
       uid,
       userData: data.userData,
       userDataHash,
       absent: false,
       disabled: false,
-      participationId: participation.id,
+      venueId: venue.id,
       contestId: data.contestId,
       token: data.token,
-      contestRange: participation.contestWindow,
+      contestRange: venue.contestWindow,
       variant: variant.id,
       answers: {},
       extraData: data.extraData,
@@ -95,7 +95,7 @@ export const studentLogin = publicProcedure
     return auth.createCustomToken(uid, {
       role: "student",
       studentId: studentRef.id,
-      participationId: participation.id,
+      venueId: venue.id,
       variant,
     });
   });

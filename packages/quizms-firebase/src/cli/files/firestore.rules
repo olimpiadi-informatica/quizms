@@ -17,13 +17,13 @@ service cloud.firestore {
             return request.auth != null && request.auth.token.role == 'teacher';
         }
 
-        function getParticipation(id) {
-            return get(/databases/$(database)/documents/participations/$(id));
+        function getVenue(id) {
+            return get(/databases/$(database)/documents/venues/$(id));
         }
 
-        function isTeacherParticipation(participationId) {
-            let participation = getParticipation(participationId);
-            return participation != null && participation.data.schoolId == request.auth.token.schoolId;
+        function isTeacherVenue(venueId) {
+            let venue = getVenue(venueId);
+            return venue != null && venue.data.schoolId == request.auth.token.schoolId;
         }
 
         match /announcements/{announcement} {
@@ -34,19 +34,19 @@ service cloud.firestore {
             allow read: if true;
         }
 
-        match /participations/{participationId} {
-            allow read: if participationId == request.auth.token.participationId || resource.data.schoolId == request.auth.token.schoolId;
+        match /venues/{venueId} {
+            allow read: if venueId == request.auth.token.venueId || resource.data.schoolId == request.auth.token.schoolId;
         }
 
-        match /participations/{participationId}/students/{student} {
+        match /venues/{venueId}/students/{student} {
             function checkToken() {
-                let participation = getParticipation(participationId);
-                return participation != null
-                    && participation.data.token != null
-                    && participation.data.token == request.resource.data.token
-                    && participation.data.contestWindow.start == request.resource.data.contestRange.start
-                    && participation.data.contestWindow.end >= request.resource.data.contestRange.end
-                    && participation.data.contestId == request.resource.data.contestId
+                let venue = getVenue(venueId);
+                return venue != null
+                    && venue.data.token != null
+                    && venue.data.token == request.resource.data.token
+                    && venue.data.contestWindow.start == request.resource.data.contestRange.start
+                    && venue.data.contestWindow.end >= request.resource.data.contestRange.end
+                    && venue.data.contestId == request.resource.data.contestId
                     && request.time <= resource.data.contestRange.end + duration.value(10, 's');
             }
 
@@ -60,21 +60,21 @@ service cloud.firestore {
 
             function canTeacherUpdate() {
                 let keys = affectedKeys();
-                return isTeacherParticipation(participationId)
-                    && !keys.hasAny(['participationId', 'createdAt'])
+                return isTeacherVenue(venueId)
+                    && !keys.hasAny(['venueId', 'createdAt'])
                     && hasTimestamp('updatedAt');
             }
 
-            allow read: if isAuthenticated(resource.data.uid) || isTeacherParticipation(participationId);
-            allow create: if isTeacherParticipation(participationId) && request.resource.data.participationId == participationId;
+            allow read: if isAuthenticated(resource.data.uid) || isTeacherVenue(venueId);
+            allow create: if isTeacherVenue(venueId) && request.resource.data.venueId == venueId;
             allow update: if canStudentUpdate() || canTeacherUpdate();
-            allow delete: if isTeacherParticipation(participationId);
+            allow delete: if isTeacherVenue(venueId);
         }
 
         match /studentRestores/{uid} {
-            allow read: if isAuthenticated(uid) || isTeacherParticipation(resource.data.participationId);
-            allow update: if isTeacherParticipation(resource.data.participationId);
-            allow delete: if isTeacherParticipation(resource.data.participationId);
+            allow read: if isAuthenticated(uid) || isTeacherVenue(resource.data.venueId);
+            allow update: if isTeacherVenue(resource.data.venueId);
+            allow delete: if isTeacherVenue(resource.data.venueId);
         }
 
         match /variants/{variant} {
