@@ -6,7 +6,7 @@ export const venueSchema = z.strictObject({
   contestId: z.string(),
   name: z.string(),
   token: z.string().optional(),
-  contestWindow: z
+  participationWindow: z
     .object({
       start: z.date(),
       end: z.date(),
@@ -18,4 +18,4 @@ export const venueSchema = z.strictObject({
 });
 
 export type Venue = z.infer<typeof venueSchema>;
-export type TimeRange = NonNullable<Venue["contestWindow"]>;
+export type TimeRange = NonNullable<Venue["participationWindow"]>;

@@ -85,9 +85,9 @@ function StopContestButton() {
   );
 }
 
-function ContestData({ contestWindow }: { contestWindow: TimeRange }) {
+function ContestData({ participationWindow }: { participationWindow: TimeRange }) {
   const { venue } = useTeacher();
-  const { start: startingTime, end: endingTime } = contestWindow;
+  const { start: startingTime, end: endingTime } = participationWindow;
 
   const undoEnd = subMinutes(startingTime!, 1);
 
@@ -149,23 +149,27 @@ export default function TeacherDashboard() {
           <div className="prose prose-a:link-info max-w-none">
             <Markdown>{contest.instructions}</Markdown>
           </div>
-          {contest.hasOnline && (
+          {contest.onlineSettings && (
             <div className="font-bold">
               La gara si potrà svolgere dal{" "}
-              <DateTime date={contest.contestWindowStart} dateStyle="long" />{" "}
-              {isSameDay(contest.contestWindowStart, contest.contestWindowEnd) ? (
+              <DateTime date={contest.onlineSettings.contestWindow.start} dateStyle="long" />{" "}
+              {isSameDay(
+                contest.onlineSettings.contestWindow.start,
+                contest.onlineSettings.contestWindow.end,
+              ) ? (
                 <>
-                  alle <DateTime date={contest.contestWindowEnd} dateStyle="hidden" />
+                  alle{" "}
+                  <DateTime date={contest.onlineSettings.contestWindow.end} dateStyle="hidden" />
                 </>
               ) : (
                 <>
-                  al <DateTime date={contest.contestWindowEnd} dateStyle="long" />
+                  al <DateTime date={contest.onlineSettings.contestWindow.end} dateStyle="long" />
                 </>
               )}
               .
             </div>
           )}
-          {contest.hasPdf && (
+          {contest.hasOffline && (
             <CardActions>
               <DownloadPdfButton />
               <DownloadZipButton />
@@ -176,18 +180,20 @@ export default function TeacherDashboard() {
       <Card>
         <CardBody title="Gestione Gara">
           {/* contest data */}
-          {contest.hasOnline &&
-            (venue.contestWindow ? (
-              <ContestData contestWindow={venue.contestWindow} />
+          {contest.onlineSettings &&
+            (venue.participationWindow ? (
+              <ContestData participationWindow={venue.participationWindow} />
             ) : (
               <p>La gara non è ancora iniziata!</p>
             ))}
           <CardActions>
-            {contest.hasOnline && (
-              <WithinTimeRange start={contest.contestWindowStart} end={contest.contestWindowEnd}>
-                {venue.contestWindow ? (
-                  contest.allowRestart && (
-                    <WithinTimeRange start={venue.contestWindow.end}>
+            {contest.onlineSettings && (
+              <WithinTimeRange
+                start={contest.onlineSettings.contestWindow.start}
+                end={contest.onlineSettings.contestWindow.end}>
+                {venue.participationWindow ? (
+                  contest.onlineSettings.allowRestart && (
+                    <WithinTimeRange start={venue.participationWindow.end}>
                       <StartContestButton />
                     </WithinTimeRange>
                   )
@@ -196,8 +202,8 @@ export default function TeacherDashboard() {
                 )}
               </WithinTimeRange>
             )}
-            {contest.hasOnline && venue.contestWindow && (
-              <WithinTimeRange end={subMinutes(venue.contestWindow.start, 1)}>
+            {contest.onlineSettings && venue.participationWindow && (
+              <WithinTimeRange end={subMinutes(venue.participationWindow.start, 1)}>
                 <StopContestButton />
               </WithinTimeRange>
             )}
@@ -207,7 +213,7 @@ export default function TeacherDashboard() {
           </CardActions>
         </CardBody>
       </Card>
-      {contest.hasOnline && (
+      {contest.onlineSettings && (
         <Card>
           <CardBody title="Richieste di accesso">
             <div className="h-96 max-h-screen">

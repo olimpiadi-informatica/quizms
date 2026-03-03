@@ -53,12 +53,12 @@ export function DevProvider({ contest, children }: { contest: Contest; children:
       schoolId: "",
       contestId: contest.id,
       name: "",
-      contestWindow: student.contestRange,
+      participationWindow: student.participationWindow,
       pdfVariants: [],
       finalized: false,
       disabled: false,
     }),
-    [contest.id, student.contestRange],
+    [contest.id, student.participationWindow],
   );
 
   const setAnswer = useCallback((problemId: string, answer: Answer | undefined) => {
@@ -74,7 +74,7 @@ export function DevProvider({ contest, children }: { contest: Contest; children:
   const submit = useCallback(() => {
     setStudent((student) => ({
       ...student,
-      contestRange: { start: student.contestRange!.start, end: new Date() },
+      participationWindow: { start: student.participationWindow!.start, end: new Date() },
     }));
   }, []);
 
@@ -83,7 +83,7 @@ export function DevProvider({ contest, children }: { contest: Contest; children:
       (student): Student => ({
         ...student,
         answers: {},
-        contestRange: undefined,
+        participationWindow: undefined,
       }),
     );
   }, []);

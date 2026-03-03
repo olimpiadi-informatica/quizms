@@ -62,13 +62,13 @@ async function checkVenue(
 
   const contest = await getContest(venue.contestId);
   if (onlineOnly) {
-    if (!contest.hasOnline) {
+    if (!contest.onlineSettings) {
       throw new TRPCError({ code: "FORBIDDEN", message: "Gara non abilitata per prove online" });
     }
-    if (isFuture(contest.contestWindowStart)) {
+    if (isFuture(contest.onlineSettings.contestWindow.start)) {
       throw new TRPCError({ code: "FORBIDDEN", message: "Gara non iniziata" });
     }
-    if (isPast(contest.contestWindowEnd)) {
+    if (isPast(contest.onlineSettings.contestWindow.end)) {
       throw new TRPCError({ code: "FORBIDDEN", message: "Gara già terminata" });
     }
   }
@@ -94,9 +94,9 @@ export const teacherStartContestWindow = publicProcedure
     const [venue, contest] = await checkVenue(data.venueId, ctx.claims, true);
 
     if (
-      venue.contestWindow &&
-      contest.hasOnline &&
-      (isFuture(venue.contestWindow.end) || !contest.allowRestart)
+      venue.participationWindow &&
+      contest.onlineSettings &&
+      (isFuture(venue.participationWindow.end) || !contest.onlineSettings.allowRestart)
     ) {
       throw new TRPCError({ code: "FORBIDDEN", message: "Gara già iniziata" });
     }
@@ -107,13 +107,13 @@ export const teacherStartContestWindow = publicProcedure
     }
 
     const startingTime = roundToNearestMinutes(addSeconds(Date.now(), 3.5 * 60));
-    const endingTime = addMinutes(startingTime, contest.hasOnline ? contest.duration : 0);
+    const endingTime = addMinutes(startingTime, contest.onlineSettings?.duration ?? 0);
 
     const token = await generateToken();
 
     await db.doc(`venues/${venue.id}`).update({
       token,
-      contestRange: {
+      participationWindow: {
         start: startingTime,
         end: endingTime,
       },
@@ -140,11 +140,11 @@ export const teacherStopContestWindow = publicProcedure
 
     const [venue] = await checkVenue(data.venueId, ctx.claims, true);
 
-    if (venue.contestWindow == null) {
+    if (venue.participationWindow == null) {
       throw new TRPCError({ code: "FORBIDDEN", message: "Gara non iniziata" });
     }
 
-    if (isPast(venue.contestWindow.start)) {
+    if (isPast(venue.participationWindow.start)) {
       throw new TRPCError({ code: "FORBIDDEN", message: "Gara già iniziata" });
     }
 
@@ -161,7 +161,7 @@ export const teacherStopContestWindow = publicProcedure
 
     await db.doc(`venues/${venue.id}`).update({
       token: null,
-      contestRange: null,
+      participationWindow: null,
     });
   });
 

@@ -11,7 +11,7 @@ export function TrainingStatement() {
   const { student, contest } = useStudent();
   const { start } = useContext(TrainingStatementContext);
 
-  if (!student.contestRange) {
+  if (!student.participationWindow) {
     return (
       <div className="flex h-[50vh] flex-col items-center justify-center">
         <Button className="btn-success btn-lg" onClick={start}>

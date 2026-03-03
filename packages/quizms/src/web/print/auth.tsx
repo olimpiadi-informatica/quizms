@@ -83,7 +83,7 @@ export function PrintProvider({ contest, children }: { contest: Contest; childre
     schoolId: "",
     contestId: contest.id,
     name: "",
-    contestWindow: {
+    participationWindow: {
       start: new Date(0),
       end: new Date(0),
     },
