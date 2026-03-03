@@ -111,7 +111,7 @@ export function columnDefinition(
         );
       },
       sortable: false,
-      hide: !contest.hasOnline,
+      hide: !contest.onlineSettings,
     },
     ...contest.problemIds.map((id): ColDef => {
       return {

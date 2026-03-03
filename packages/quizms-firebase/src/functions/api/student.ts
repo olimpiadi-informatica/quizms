@@ -84,7 +84,7 @@ export const studentLogin = publicProcedure
       venueId: venue.id,
       contestId: data.contestId,
       token: data.token,
-      contestRange: venue.contestWindow,
+      participationWindow: venue.participationWindow,
       variant: variant.id,
       answers: {},
       extraData: data.extraData,

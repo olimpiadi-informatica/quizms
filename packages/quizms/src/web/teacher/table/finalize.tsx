@@ -68,7 +68,7 @@ export function FinalizeModal({ ref }: { ref: RefObject<HTMLDialogElement | null
           <div className="prose">
             <p>
               <strong className="text-error">Attenzione:</strong> questa operazione è irreversibile
-              {contest.hasOnline && contest.allowRestart && (
+              {contest.onlineSettings?.allowRestart && (
                 <>
                   e va fatta una sola volta <b>dopo tutti i turni di gara</b>
                 </>

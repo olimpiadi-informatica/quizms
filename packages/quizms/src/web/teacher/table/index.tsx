@@ -25,9 +25,10 @@ export default function TeacherTable() {
   const finalizeRef = useRef<HTMLDialogElement>(null);
   const deleterRef = useRef<HTMLDialogElement>(null);
 
-  const endTime = venue.contestWindow && contest.hasOnline ? venue.contestWindow.end : undefined;
+  const endTime =
+    venue.participationWindow && contest.onlineSettings ? venue.participationWindow.end : undefined;
   const isContestFinished = useIsAfter(endTime) ?? true;
-  const frozen = (contest.hasOnline && !isContestFinished) || venue.finalized;
+  const frozen = (contest.onlineSettings && !isContestFinished) || venue.finalized;
 
   return (
     <>

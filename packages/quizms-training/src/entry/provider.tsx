@@ -69,12 +69,12 @@ export function TrainingProvider({
       schoolId: "",
       contestId: contest.id,
       name: "",
-      contestWindow: student.contestRange,
+      participationWindow: student.participationWindow,
       finalized: false,
       disabled: false,
       pdfVariants: [],
     }),
-    [contest.id, student.contestRange],
+    [contest.id, student.participationWindow],
   );
 
   const setAnswer = useCallback(
@@ -98,7 +98,7 @@ export function TrainingProvider({
     await updateStudent(resetIframe, (student) => ({
       ...student,
       answers: {},
-      contestRange: undefined,
+      participationWindow: undefined,
       variantId: getRandomVariant(contest),
     }));
   }, [contest, updateStudent]);
@@ -107,9 +107,9 @@ export function TrainingProvider({
     const now = new Date();
     await updateStudent(startIframe, (student) => ({
       ...student,
-      contestRange: {
+      participationWindow: {
         start: subSeconds(now, 2),
-        end: addMinutes(now, contest.hasOnline ? contest.duration : 0),
+        end: addMinutes(now, contest.onlineSettings?.duration ?? 0),
       },
     }));
   }, [contest, updateStudent]);

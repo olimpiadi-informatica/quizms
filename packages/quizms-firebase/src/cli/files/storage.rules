@@ -20,7 +20,7 @@ service firebase.storage {
                     && isAuthenticated(student.data.uid)
                     && student.data.contestId == contestId
                     && student.data.variantId == variantId
-                    && student.data.contestRange.start <= request.time;
+                    && student.data.participationWindow.start <= request.time;
             }
 
             allow read: if canStudentReadVariant() || isTeacher();

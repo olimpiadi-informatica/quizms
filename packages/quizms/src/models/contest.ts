@@ -54,7 +54,19 @@ const matchingRules = z.array(
     }),
 );
 
-const baseContestSchema = z
+const onlineContestSettings = z.object({
+  // Finestra di tempo durante la quale è possibile far partire la gara
+  contestWindow: z.strictObject({
+    start: z.date(),
+    end: z.date(),
+  }),
+  // Durata della gara in minuti
+  duration: z.coerce.number().positive(),
+  // Se la gara può essere svolta su più turni
+  allowRestart: z.boolean(),
+});
+
+export const contestSchema = z
   .strictObject({
     // Identificativo univoco della gara
     id: z.string(),
@@ -71,10 +83,10 @@ const baseContestSchema = z
 
     // Se i testi della gara hanno più varianti
     hasVariants: z.boolean(),
-    // Se la gara può essere svolta online
-    hasOnline: z.boolean(),
+    // Se la gara può essere svolta online, impostazioni della gara online
+    onlineSettings: onlineContestSettings.optional(),
     // Se la gara può essere svolta in modalità cartacea
-    hasPdf: z.boolean(),
+    hasOffline: z.boolean(),
 
     // Se permette all'insegnante di aggiungere o importare studenti
     allowStudentImport: z.boolean().default(true),
@@ -105,24 +117,6 @@ const baseContestSchema = z
       });
     });
   });
-
-const onlineContest = baseContestSchema.safeExtend({
-  hasOnline: z.literal(true),
-
-  // Orario da cui è possibile far partire la gara
-  contestWindowStart: z.date(),
-  // Orario entro cui è possibile far partire la gara
-  contestWindowEnd: z.date(),
-  // Durata della gara in minuti
-  duration: z.coerce.number().positive(),
-  // Se la gara può essere svolta su più turni
-  allowRestart: z.boolean(),
-});
-
-export const contestSchema = z.discriminatedUnion("hasOnline", [
-  onlineContest,
-  baseContestSchema.safeExtend({ hasOnline: z.literal(false) }),
-]);
 
 export type Contest = z.infer<typeof contestSchema>;
 

@@ -24,8 +24,8 @@ export function ImpersonationAuth({ children }: { children: ReactNode }) {
       <div className="">
         <StudentProvider
           contest={contest}
-          venue={{ ...venue, contestWindow: fakeRange }}
-          student={{ ...student, contestRange: fakeRange }}
+          venue={{ ...venue, participationWindow: fakeRange }}
+          student={{ ...student, participationWindow: fakeRange }}
           setAnswer={() => {}}
           submit={() => {}}
           enforceFullscreen={false}>
