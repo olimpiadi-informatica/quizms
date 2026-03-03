@@ -37,29 +37,22 @@ export function parseRawSchema(rawSchemaHtml: string): Schema {
 
       switch (subProblem.type) {
         case "openNumber":
-          schema[id] = { ...baseProblem, type: "openNumber", correct: subProblem.correct };
+          schema[id] = { ...baseProblem, type: "openNumber", correct: [subProblem.correct] };
           break;
         case "openText":
-          schema[id] = { ...baseProblem, type: "openText", correct: subProblem.correct };
+          schema[id] = { ...baseProblem, type: "openText", correct: [subProblem.correct] };
           break;
         case "multipleChoice": {
-          const options = subProblem.options.map((option) => option.originalId);
-          const correct = subProblem.options.find((option) => option.correct)!.originalId;
-          schema[id] = { ...baseProblem, type: "multipleChoice", options, correct };
+          schema[id] = { ...baseProblem, type: "multipleChoice", options: subProblem.options };
           break;
         }
         case "multipleResponse": {
-          const options = subProblem.options.map((option) => option.originalId);
-          const correct = subProblem.options
-            .filter((option) => option.correct)
-            .map((option) => option.id);
-          schema[id] = { ...baseProblem, type: "multipleResponse", options, correct };
+          schema[id] = { ...baseProblem, type: "multipleResponse", options: subProblem.options };
           break;
         }
         case "blockly": {
           schema[`${problem.id}`] = {
             ...baseProblem,
-            originalId: `${problem.originalId}`,
             type: "blockly",
             numTestcases: subProblem.numTestcases,
           };
