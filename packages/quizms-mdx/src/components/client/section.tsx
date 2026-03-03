@@ -1,12 +1,20 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { Children, type ReactNode } from "react";
 
-export type SectionProps = {
+import { ProblemProvider } from "~/components/client/problem";
+
+export function Section({
+  firstProblemId,
+  children,
+}: {
+  firstProblemId: number;
   children: ReactNode;
-};
-
-export function Section({ children }: SectionProps) {
-  return children;
+}) {
+  return Children.toArray(children).map((child, i) => (
+    <ProblemProvider key={i} id={`${firstProblemId + i}`}>
+      {child}
+    </ProblemProvider>
+  ));
 }
 Section.displayName = "Section";
