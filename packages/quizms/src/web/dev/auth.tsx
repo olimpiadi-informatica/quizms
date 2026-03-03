@@ -54,6 +54,7 @@ export function DevProvider({ contest, children }: { contest: Contest; children:
       contestId: contest.id,
       name: "",
       contestWindow: student.contestRange,
+      pdfVariants: [],
       finalized: false,
       disabled: false,
     }),

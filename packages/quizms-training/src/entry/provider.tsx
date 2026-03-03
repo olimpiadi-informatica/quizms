@@ -72,6 +72,7 @@ export function TrainingProvider({
       contestWindow: student.contestRange,
       finalized: false,
       disabled: false,
+      pdfVariants: [],
     }),
     [contest.id, student.contestRange],
   );

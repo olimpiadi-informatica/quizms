@@ -138,7 +138,7 @@ async function importParticipations(db: Firestore, options: ImportOptions) {
       for (const school of schools) {
         if (!picomatch.isMatch(contest.id, school.contestIds)) continue;
 
-        let pdfVariants: string[] | undefined;
+        let pdfVariants: string[] = [];
         if (contest.hasVariants) {
           if (school.pdfVariants) {
             pdfVariants = school.pdfVariants.map((id) => `${contest.id}-${id}`);

@@ -41,12 +41,12 @@ export function studentLogin(body: {
   return trpc.studentLogin.mutate(body);
 }
 
-export async function startParticipation(user: User, participationId: string) {
-  await trpc.teacherStartParticipation.mutate({ participationId }, { context: { user } });
+export async function startContestWindow(user: User, participationId: string) {
+  await trpc.teacherStartContestWindow.mutate({ participationId }, { context: { user } });
 }
 
-export async function stopParticipation(user: User, participationId: string) {
-  await trpc.teacherStopParticipation.mutate({ participationId }, { context: { user } });
+export async function stopContestWindow(user: User, participationId: string) {
+  await trpc.teacherStopContestWindow.mutate({ participationId }, { context: { user } });
 }
 
 export async function finalizeParticipation(user: User, participationId: string) {

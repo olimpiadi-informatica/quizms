@@ -6,7 +6,7 @@ import { getAuth, signOut, type User } from "firebase/auth";
 import { doc, type Firestore, serverTimestamp, writeBatch } from "firebase/firestore";
 import { getBytes, getStorage, ref } from "firebase/storage";
 
-import { finalizeParticipation, startParticipation, stopParticipation } from "~/web/common/api";
+import { finalizeParticipation, startContestWindow, stopContestWindow } from "~/web/common/api";
 import { useDb } from "~/web/common/base-login";
 import {
   announcementConverter,
@@ -52,8 +52,8 @@ function TeacherInner({ user, schoolId }: { user: User; schoolId: string }) {
       name={participations[0]?.name ?? schoolId}
       participations={participations}
       contests={contests}
-      startParticipation={(...args) => startParticipation(user, ...args)}
-      stopParticipation={(...args) => stopParticipation(user, ...args)}
+      startContestWindow={(...args) => startContestWindow(user, ...args)}
+      stopContestWindow={(...args) => stopContestWindow(user, ...args)}
       finalizeParticipation={(...args) => finalizeParticipation(user, ...args)}
       variants={variants}
       logout={logout}

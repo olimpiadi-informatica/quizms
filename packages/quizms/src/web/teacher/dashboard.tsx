@@ -27,14 +27,14 @@ import { Announcements } from "./dashboard-announcements";
 import { StudentRestoreList } from "./dashboard-student-restore";
 
 function StartContestButton() {
-  const { startParticipation } = useTeacher();
+  const { startContestWindow } = useTeacher();
 
   const modalRef = useRef<HTMLDialogElement>(null);
 
   const close = () => modalRef.current?.close();
 
   const start = async () => {
-    await startParticipation();
+    await startContestWindow();
     close();
   };
 
@@ -57,13 +57,13 @@ function StartContestButton() {
 }
 
 function StopContestButton() {
-  const { stopParticipation } = useTeacher();
+  const { stopContestWindow } = useTeacher();
   const modalRef = useRef<HTMLDialogElement>(null);
 
   const close = () => modalRef.current?.close();
 
   const undoContestStart = async () => {
-    await stopParticipation();
+    await stopContestWindow();
     close();
   };
 

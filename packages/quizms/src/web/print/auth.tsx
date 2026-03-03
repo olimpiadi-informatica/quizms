@@ -89,6 +89,7 @@ export function PrintProvider({ contest, children }: { contest: Contest; childre
     },
     finalized: false,
     disabled: false,
+    pdfVariants: [],
   };
 
   return (
