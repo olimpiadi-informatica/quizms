@@ -17,6 +17,12 @@ export const answerSchemas = {
 
 export const answerSchema = z.union(Object.values(answerSchemas));
 
+export const optionSchema = z.strictObject({
+  id: z.string(),
+  correct: z.boolean(),
+  originalId: z.string(),
+});
+
 const baseProblemSchema = z.strictObject({
   pointsCorrect: z.number(),
   pointsBlank: z.number(),
@@ -27,21 +33,19 @@ const baseProblemSchema = z.strictObject({
 const problemSchema = z.discriminatedUnion("type", [
   baseProblemSchema.extend({
     type: z.literal("openNumber"),
-    correct: answerSchemas.openNumber,
+    correct: z.array(answerSchemas.openNumber),
   }),
   baseProblemSchema.extend({
     type: z.literal("openText"),
-    correct: answerSchemas.openText,
+    correct: z.array(answerSchemas.openText),
   }),
   baseProblemSchema.extend({
     type: z.literal("multipleResponse"),
-    correct: answerSchemas.multipleResponse,
-    options: z.array(z.string()),
+    options: z.array(optionSchema),
   }),
   baseProblemSchema.extend({
     type: z.literal("multipleChoice"),
-    correct: answerSchemas.multipleChoice,
-    options: z.array(z.string()),
+    options: z.array(optionSchema),
   }),
   baseProblemSchema.extend({
     type: z.literal("blockly"),
@@ -116,14 +120,15 @@ export function validateAnswer(
       return null;
     }
     case "multipleChoice": {
-      if (!schema.options.includes(answer as Answer<"multipleChoice">)) {
+      if (!schema.options.map((option) => option.id).includes(answer as Answer<"multipleChoice">)) {
         return [`Opzione non valida: ${answer}`];
       }
       return null;
     }
     case "multipleResponse": {
       const mrAnswer = answer as Answer<"multipleResponse">;
-      const wrong = mrAnswer.filter((value) => !schema.options.includes(value));
+      const optionValues = schema.options.map((option) => option.id);
+      const wrong = mrAnswer.filter((value) => !optionValues.includes(value));
       if (wrong.length >= 1) {
         return [`Opzioni non valide: ${wrong.join("")}`];
       }
@@ -134,6 +139,19 @@ export function validateAnswer(
     }
   }
   return null;
+}
+
+export function getCorrectOptions(problem: Schema[string]) {
+  switch (problem.type) {
+    case "openNumber":
+    case "openText":
+      return problem.correct;
+    case "multipleResponse":
+    case "multipleChoice":
+      return problem.options.filter((option) => option.correct).map((option) => option.id);
+    default:
+      return [];
+  }
 }
 
 export function calcScore(student: Student, schema?: Schema) {
@@ -160,14 +178,27 @@ export function calcProblemPoints(problem: Schema[string], answer?: Answer): num
 
   switch (problem.type) {
     case "openNumber":
+      return typeof answer === "number" && problem.correct.includes(answer)
+        ? problem.pointsCorrect
+        : problem.pointsWrong;
     case "openText":
+      return typeof answer === "string" && problem.correct.includes(answer)
+        ? problem.pointsCorrect
+        : problem.pointsWrong;
     case "multipleChoice":
-      return answer === problem.correct ? problem.pointsCorrect : problem.pointsWrong;
+      return typeof answer === "string" &&
+        problem.options
+          .filter((option) => option.correct)
+          .map((option) => option.id)
+          .includes(answer)
+        ? problem.pointsCorrect
+        : problem.pointsWrong;
     case "multipleResponse": {
       const multipleAnswer = answer as Answer<"multipleResponse">;
+      const correct = problem.options.filter((option) => option.correct).map((option) => option.id);
       if (multipleAnswer.length === 0) return problem.pointsBlank;
 
-      return xor(multipleAnswer, problem.correct).length === 0
+      return xor(multipleAnswer, correct).length === 0
         ? problem.pointsCorrect
         : problem.pointsWrong;
     }
@@ -176,19 +207,16 @@ export function calcProblemPoints(problem: Schema[string], answer?: Answer): num
   }
 }
 
-export function unshuffleAnswer(_problem: Schema[string], _answer?: Answer) {
-  throw new Error("Not implemented");
-  // if (problem.type === "open") {
-  //   return answer;
-  // }
-  // const unshuffleAnswer = (value: Answer) =>
-  //   problem.options.find((option) => option.value === value)?.originalId ?? "";
-  // if (problem.type === "multipleResponse") {
-  //   const values = decodeMultipleResponseAnswer(answer);
-  //   const unshuffledValues = values.map(unshuffleAnswer);
-  //   return encodeMultipleResponseAnswer(unshuffledValues);
-  // }
-  // if (problem.type === "multipleChoice") {
-  //   return answer ? unshuffleAnswer(answer) : answer;
-  // }
+export function unshuffleAnswer(problem: Schema[string], answer?: Answer): Answer | undefined {
+  if (problem.type === "openNumber" || problem.type === "openText" || problem.type === "blockly") {
+    return answer;
+  }
+  const unshuffleAnswer = (id: string) =>
+    problem.options.find((option) => option.id === id)?.originalId ?? "";
+  if (problem.type === "multipleResponse") {
+    return (answer as string[]).map(unshuffleAnswer);
+  }
+  if (problem.type === "multipleChoice") {
+    return answer ? unshuffleAnswer(answer as string) : answer;
+  }
 }
