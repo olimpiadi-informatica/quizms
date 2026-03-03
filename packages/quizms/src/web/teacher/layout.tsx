@@ -17,18 +17,18 @@ import clsx from "clsx";
 import { LogOut } from "lucide-react";
 import { Link, useRoute } from "wouter";
 
-import type { Contest, Participation } from "~/models";
+import type { Contest, Venue } from "~/models";
 import { ErrorBoundary, Loading, Title } from "~/web/components";
 
 type Props = {
   name: string;
   contests: Contest[];
-  participations: Participation[];
+  venues: Venue[];
   logout: () => Promise<void>;
   children: ReactNode;
 };
 
-export function TeacherLayout({ name, contests, participations, logout, children }: Props) {
+export function TeacherLayout({ name, contests, venues, logout, children }: Props) {
   const [, params] = useRoute("/:contestId/*?");
   const contest = contests.find((c) => c.id === params?.contestId);
 
@@ -42,9 +42,9 @@ export function TeacherLayout({ name, contests, participations, logout, children
         </NavbarBrand>
         {contest && (
           <NavbarMenu>
-            {participations.length >= 2 && (
+            {venues.length >= 2 && (
               <NavbarSubmenu title={contest.name}>
-                {participations.map((p) => {
+                {venues.map((p) => {
                   const path = params?.["*"];
                   const href = path ? `/${p.contestId}/${path}` : `/${p.contestId}`;
                   return (

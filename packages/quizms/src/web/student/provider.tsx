@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 
 import { useIsAfter } from "@olinfo/react-components";
 
-import type { Answer, Contest, Participation, Schema, Student } from "~/models";
+import type { Answer, Contest, Schema, Student, Venue } from "~/models";
 
 import { StudentContext, type StudentContextProps } from "./context";
 import { StudentLayout } from "./layout";
@@ -15,7 +15,7 @@ type StudentProviderProps = {
   /** Contest data */
   contest: Contest;
   /** School data */
-  participation: Participation;
+  venue: Venue;
   /** Function to reset answers and restart the test (optional) */
   reset?: () => Promise<void> | void;
   /** Function to end the test */

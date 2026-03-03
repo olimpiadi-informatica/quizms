@@ -86,7 +86,7 @@ function StopContestButton() {
 }
 
 function ContestData({ contestWindow }: { contestWindow: TimeRange }) {
-  const { participation } = useTeacher();
+  const { venue } = useTeacher();
   const { start: startingTime, end: endingTime } = contestWindow;
 
   const undoEnd = subMinutes(startingTime!, 1);
@@ -95,7 +95,7 @@ function ContestData({ contestWindow }: { contestWindow: TimeRange }) {
     <div className="flex flex-col gap-2">
       <WithinTimeRange end={startingTime}>
         <p className="my-2 text-lg">
-          <b>Codice:</b> <span className="font-mono">{participation.token}</span>
+          <b>Codice:</b> <span className="font-mono">{venue.token}</span>
         </p>
         <p>
           La gara inizierà alle ore <DateTime date={startingTime} dateStyle="hidden" />.
@@ -112,7 +112,7 @@ function ContestData({ contestWindow }: { contestWindow: TimeRange }) {
       </WithinTimeRange>
       <WithinTimeRange start={startingTime} end={endingTime}>
         <p>
-          <b>Codice:</b> <span className="font-mono">{participation.token}</span>
+          <b>Codice:</b> <span className="font-mono">{venue.token}</span>
         </p>
         <p>
           La gara terminerà alle <DateTime date={endingTime} dateStyle="hidden" />.
@@ -135,7 +135,7 @@ function ContestData({ contestWindow }: { contestWindow: TimeRange }) {
 }
 
 export default function TeacherDashboard() {
-  const { contest, participation } = useTeacher();
+  const { contest, venue } = useTeacher();
 
   return (
     <div className="flex flex-col gap-4">
@@ -177,17 +177,17 @@ export default function TeacherDashboard() {
         <CardBody title="Gestione Gara">
           {/* contest data */}
           {contest.hasOnline &&
-            (participation.contestWindow ? (
-              <ContestData contestWindow={participation.contestWindow} />
+            (venue.contestWindow ? (
+              <ContestData contestWindow={venue.contestWindow} />
             ) : (
               <p>La gara non è ancora iniziata!</p>
             ))}
           <CardActions>
             {contest.hasOnline && (
               <WithinTimeRange start={contest.contestWindowStart} end={contest.contestWindowEnd}>
-                {participation.contestWindow ? (
+                {venue.contestWindow ? (
                   contest.allowRestart && (
-                    <WithinTimeRange start={participation.contestWindow.end}>
+                    <WithinTimeRange start={venue.contestWindow.end}>
                       <StartContestButton />
                     </WithinTimeRange>
                   )
@@ -196,8 +196,8 @@ export default function TeacherDashboard() {
                 )}
               </WithinTimeRange>
             )}
-            {contest.hasOnline && participation.contestWindow && (
-              <WithinTimeRange end={subMinutes(participation.contestWindow.start, 1)}>
+            {contest.hasOnline && venue.contestWindow && (
+              <WithinTimeRange end={subMinutes(venue.contestWindow.start, 1)}>
                 <StopContestButton />
               </WithinTimeRange>
             )}
@@ -211,7 +211,7 @@ export default function TeacherDashboard() {
         <Card>
           <CardBody title="Richieste di accesso">
             <div className="h-96 max-h-screen">
-              <StudentRestoreList isStarted={!!participation.token} />
+              <StudentRestoreList isStarted={!!venue.token} />
             </div>
           </CardBody>
         </Card>
@@ -221,7 +221,7 @@ export default function TeacherDashboard() {
 }
 
 function DownloadPdfButton() {
-  const { participation, getPdfStatements } = useTeacher();
+  const { venue, getPdfStatements } = useTeacher();
 
   const onClick = async () => {
     const statements = await getPdfStatements();
@@ -247,7 +247,7 @@ function DownloadPdfButton() {
 
     const data = await pdf.save();
     const blob = new Blob([data as Uint8Array<ArrayBuffer>], { type: "application/pdf" });
-    saveAs(blob, `${participation.id}.pdf`);
+    saveAs(blob, `${venue.id}.pdf`);
   };
 
   return (
@@ -258,7 +258,7 @@ function DownloadPdfButton() {
 }
 
 function DownloadZipButton() {
-  const { participation, getPdfStatements } = useTeacher();
+  const { venue, getPdfStatements } = useTeacher();
 
   const onClick = async () => {
     const statements = await getPdfStatements();
@@ -271,7 +271,7 @@ function DownloadZipButton() {
     );
     const zip = await downloadZip(files).blob();
 
-    saveAs(zip, `${participation.id}.zip`);
+    saveAs(zip, `${venue.id}.zip`);
   };
 
   return (

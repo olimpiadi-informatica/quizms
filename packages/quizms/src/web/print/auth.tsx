@@ -2,7 +2,7 @@ import { Fragment, type ReactNode } from "react";
 
 import { Link, Route, Switch } from "wouter";
 
-import type { Contest, Participation, Student } from "~/models";
+import type { Contest, Student, Venue } from "~/models";
 import type { VariantsConfig } from "~/models/variants-config";
 import { StudentForm } from "~/web/components/student-form";
 import { StudentProvider } from "~/web/student/provider";
@@ -78,7 +78,7 @@ export function PrintProvider({ contest, children }: { contest: Contest; childre
     variantId: new URLSearchParams(window.location.search).get("v") ?? "",
   };
 
-  const mockParticipation: Participation = {
+  const mockVenue: Venue = {
     id: "",
     schoolId: "",
     contestId: contest.id,
@@ -95,7 +95,7 @@ export function PrintProvider({ contest, children }: { contest: Contest; childre
   return (
     <StudentProvider
       contest={contest}
-      participation={mockParticipation}
+      venue={mockVenue}
       student={student}
       setAnswer={() => {}}
       submit={() => {}}

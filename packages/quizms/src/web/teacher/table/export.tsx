@@ -3,13 +3,13 @@ import type { RefObject } from "react";
 import { saveAs } from "file-saver";
 import { unparse as stringifyCSV } from "papaparse";
 
-import { type Contest, formatUserData, type Participation, type Student } from "~/models";
+import { type Contest, formatUserData, type Student, type Venue } from "~/models";
 import { useTeacher, useTeacherStudents } from "~/web/teacher/context";
 
 import { canViewScore } from "./utils";
 
 export function ExportModal({ ref }: { ref: RefObject<HTMLButtonElement | null> | null }) {
-  const { contest, participation } = useTeacher();
+  const { contest, venue } = useTeacher();
   const [students] = useTeacherStudents();
 
   return (
@@ -17,13 +17,13 @@ export function ExportModal({ ref }: { ref: RefObject<HTMLButtonElement | null> 
       ref={ref}
       type="button"
       className="hidden"
-      onClick={() => exportStudents(students, contest, participation)}
+      onClick={() => exportStudents(students, contest, venue)}
     />
   );
 }
 
-function exportStudents(students: Student[], contest: Contest, participation: Participation) {
-  const scoreVisible = canViewScore(contest, participation);
+function exportStudents(students: Student[], contest: Contest, venue: Venue) {
+  const scoreVisible = canViewScore(contest, venue);
   const flatStudents = students
     .filter((student) => !student.disabled)
     .map((student) => {

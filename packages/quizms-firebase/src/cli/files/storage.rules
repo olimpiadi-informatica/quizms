@@ -10,7 +10,7 @@ service firebase.storage {
         }
 
         function getStudent() {
-            return firestore.get(/databases/(default)/documents/participations/$(request.auth.token.participationId)/students/$(request.auth.token.studentId));
+            return firestore.get(/databases/(default)/documents/venues/$(request.auth.token.venueId)/students/$(request.auth.token.studentId));
         }
 
         match /statements/{contestId}/{variantId}/{filename} {

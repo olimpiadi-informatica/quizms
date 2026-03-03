@@ -19,7 +19,7 @@
       "queryScope": "COLLECTION",
       "fields": [
         {
-          "fieldPath": "participationId",
+          "fieldPath": "venueId",
           "order": "ASCENDING"
         },
         {

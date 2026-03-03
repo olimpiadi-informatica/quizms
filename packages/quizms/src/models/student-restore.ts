@@ -3,7 +3,7 @@ import z from "zod";
 export const studentRestoreSchema = z.strictObject({
   id: z.string(),
   studentId: z.string(),
-  participationId: z.string(),
+  venueId: z.string(),
   token: z.string(),
   name: z.string(),
   surname: z.string(),

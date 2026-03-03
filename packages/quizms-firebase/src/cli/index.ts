@@ -44,7 +44,7 @@ async function main() {
     .command("export")
     .description("Export the contests data.")
     .option("--contests", "Export the contests.")
-    .option("--participations", "Export the participations.")
+    .option("--venues", "Export the venues.")
     .option("--students", "Export the students.")
     .option("--submissions", "Export the submissions.")
     .option("--variants", "Export the variants.")
@@ -72,7 +72,7 @@ async function main() {
     )
     .action(importData);
 
-  program.command("definalize").description("Definalize all participations.").action(definalize);
+  program.command("definalize").description("Definalize all venues.").action(definalize);
   program.command("update-scores").description("Update student scores.").action(updateScores);
 
   findProjectDirectory();

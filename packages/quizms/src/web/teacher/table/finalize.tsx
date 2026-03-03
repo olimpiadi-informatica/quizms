@@ -10,7 +10,7 @@ import { useTeacher, useTeacherStudents } from "~/web/teacher/context";
 import { isStudentIncomplete } from "./utils";
 
 export function FinalizeModal({ ref }: { ref: RefObject<HTMLDialogElement | null> }) {
-  const { contest, variants, finalizeParticipation } = useTeacher();
+  const { contest, variants, finalizeVenue } = useTeacher();
   const [students] = useTeacherStudents();
 
   const error = useMemo(() => {
@@ -44,7 +44,7 @@ export function FinalizeModal({ ref }: { ref: RefObject<HTMLDialogElement | null
 
   const finalize = async () => {
     try {
-      await finalizeParticipation();
+      await finalizeVenue();
     } finally {
       close();
     }

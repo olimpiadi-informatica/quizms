@@ -5,7 +5,7 @@ import { logger } from "firebase-functions/logger";
 import { adminLogin } from "./admin";
 import { studentLogin } from "./student";
 import {
-  teacherFinalizeParticipation,
+  teacherFinalizeVenue,
   teacherLogin,
   teacherStartContestWindow,
   teacherStopContestWindow,
@@ -18,7 +18,7 @@ const appRouter = router({
   teacherLogin,
   teacherStartContestWindow,
   teacherStopContestWindow,
-  teacherFinalizeParticipation,
+  teacherFinalizeVenue,
 });
 
 export type AppRouter = typeof appRouter;

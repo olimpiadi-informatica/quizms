@@ -5,11 +5,11 @@ import path from "node:path";
 import type { Bucket } from "@google-cloud/storage";
 import {
   contestSchema,
-  type Participation,
-  participationSchema,
   studentSchema,
+  type Venue,
   variantSchema,
   variantsConfigSchema,
+  venueSchema,
 } from "@olinfo/quizms/models";
 import { Rng, validate } from "@olinfo/quizms/utils";
 import { fatal, load, loadContests, success, warning } from "@olinfo/quizms/utils-node";
@@ -26,9 +26,9 @@ import { websiteSchema } from "~/models/website";
 import { importCollection } from "./utils/collection";
 import {
   contestConverter,
-  participationConverter,
   studentConverter,
   variantConverter,
+  venueConverter,
   websiteConverter,
 } from "./utils/converters-admin";
 import { initializeFirebase } from "./utils/initialize";
@@ -80,7 +80,7 @@ export default async function importData(options: ImportOptions) {
     await importContests(db, options);
   }
   if (options.schools || options.teachers) {
-    await importParticipations(db, options);
+    await importVenues(db, options);
   }
   if (options.students) {
     await importStudents(db, options);
@@ -109,8 +109,8 @@ async function importContests(db: Firestore, options: ImportOptions) {
   await importCollection(db, "contests", contests, contestConverter, options);
 }
 
-async function importParticipations(db: Firestore, options: ImportOptions) {
-  const schoolSchema = participationSchema
+async function importVenues(db: Firestore, options: ImportOptions) {
+  const schoolSchema = venueSchema
     .omit({
       schoolId: true,
       contestId: true,
@@ -132,7 +132,7 @@ async function importParticipations(db: Firestore, options: ImportOptions) {
   }
 
   if (options.schools) {
-    const participations: Participation[] = [];
+    const venues: Venue[] = [];
 
     for (const contest of contests) {
       for (const school of schools) {
@@ -143,12 +143,12 @@ async function importParticipations(db: Firestore, options: ImportOptions) {
           if (school.pdfVariants) {
             pdfVariants = school.pdfVariants.map((id) => `${contest.id}-${id}`);
           } else {
-            const rng = new Rng(`${contest.secret}-${contest.id}-${school.id}-participation`);
+            const rng = new Rng(`${contest.secret}-${contest.id}-${school.id}-venue`);
             pdfVariants = rng.sample(contest.pdfVariantIds, contest.pdfPerSchool);
           }
         }
 
-        participations.push({
+        venues.push({
           id: `${school.id}-${contest.id}`,
           schoolId: school.id,
           contestId: contest.id,
@@ -160,22 +160,16 @@ async function importParticipations(db: Firestore, options: ImportOptions) {
       }
     }
 
-    await importCollection(db, "participations", participations, participationConverter, options);
+    await importCollection(db, "venues", venues, venueConverter, options);
   }
 }
 
 async function importStudents(db: Firestore, options: ImportOptions) {
   const students = await load("students", studentSchema);
-  const participations = groupBy(students, "participationId");
+  const venues = groupBy(students, "venueId");
   await Promise.all(
-    Object.entries(participations).map(([participationId, students]) =>
-      importCollection(
-        db,
-        `participations/${participationId}/students`,
-        students,
-        studentConverter,
-        options,
-      ),
+    Object.entries(venues).map(([venueId, students]) =>
+      importCollection(db, `venues/${venueId}/students`, students, studentConverter, options),
     ),
   );
 }

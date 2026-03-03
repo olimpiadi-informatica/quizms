@@ -1,10 +1,10 @@
 import { Suspense, useMemo } from "react";
 
 import { AgGrid, Loading } from "@olinfo/quizms/components";
-import type { Participation, Student } from "@olinfo/quizms/models";
+import type { Student, Venue } from "@olinfo/quizms/models";
 import type { CellEditRequestEvent, ColDef, ICellRendererParams } from "ag-grid-community";
 
-import { participationConverter } from "~/web/common/converters";
+import { venueConverter } from "~/web/common/converters";
 import { useCollection } from "~/web/hooks";
 import { useCount } from "~/web/hooks/count";
 
@@ -13,20 +13,16 @@ import { useAdmin } from "./context";
 export function SchoolTable() {
   const { contest } = useAdmin();
 
-  const [participations, setParticipation] = useCollection(
-    "participations",
-    participationConverter,
-    {
-      constraints: { contestId: contest.id },
-    },
-  );
+  const [venues, setVenue] = useCollection("venues", venueConverter, {
+    constraints: { contestId: contest.id },
+  });
 
   const colDefs = useMemo(() => columnDefinition(), []);
 
   const onCellEditRequest = async (ev: CellEditRequestEvent) => {
-    const participation = ev.data as Participation;
+    const venue = ev.data as Venue;
     if (ev.colDef.field === "finalized") {
-      await setParticipation({ ...participation, finalized: ev.newValue });
+      await setVenue({ ...venue, finalized: ev.newValue });
     }
     ev.api.refreshCells({ force: true });
   };
@@ -36,8 +32,8 @@ export function SchoolTable() {
       <div className="relative grow p-2">
         <div className="absolute inset-0">
           <AgGrid
-            rowData={participations}
-            getRowId={(row) => (row.data as Participation).id}
+            rowData={venues}
+            getRowId={(row) => (row.data as Venue).id}
             columnDefs={colDefs}
             onCellEditRequest={onCellEditRequest}
           />
@@ -67,11 +63,11 @@ function columnDefinition(): ColDef[] {
       headerName: "Studenti",
       width: 100,
       sortable: false,
-      cellRenderer: ({ data }: ICellRendererParams<Participation>) => {
+      cellRenderer: ({ data }: ICellRendererParams<Venue>) => {
         if (!data) return;
         return (
           <Suspense>
-            <Count participationId={data.id} />
+            <Count venueId={data.id} />
           </Suspense>
         );
       },
@@ -87,8 +83,8 @@ function columnDefinition(): ColDef[] {
   ];
 }
 
-function Count({ participationId }: { participationId: string }) {
-  return useCount<Student>(`participations/${participationId}/students`, {
+function Count({ venueId }: { venueId: string }) {
+  return useCount<Student>(`venues/${venueId}/students`, {
     constraints: { disabled: false },
   });
 }

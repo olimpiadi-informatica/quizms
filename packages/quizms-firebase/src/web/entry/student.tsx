@@ -18,11 +18,7 @@ import { omit } from "lodash-es";
 
 import { studentLogin } from "~/web/common/api";
 import { useDb } from "~/web/common/base-login";
-import {
-  contestConverter,
-  participationConverter,
-  studentConverter,
-} from "~/web/common/converters";
+import { contestConverter, studentConverter, venueConverter } from "~/web/common/converters";
 import { useWebsite } from "~/web/common/website";
 import { useAuth, useCollection, useDocument } from "~/web/hooks";
 
@@ -44,7 +40,7 @@ export default function StudentEntry() {
       <StudentRestoring user={auth.user}>
         <StudentInner
           contests={contests}
-          participationId={auth.claims.participationId}
+          venueId={auth.claims.venueId}
           studentId={auth.claims.studentId}
         />
       </StudentRestoring>
@@ -133,21 +129,21 @@ function StudentForm({ contests }: { contests: Contest[] }) {
 
 function StudentInner({
   contests,
-  participationId,
+  venueId,
   studentId,
 }: {
   contests: Contest[];
-  participationId: string;
+  venueId: string;
   studentId: string;
 }) {
   const db = useDb();
 
   const [student, setStudent] = useDocument(
-    `participations/${participationId}/students`,
+    `venues/${venueId}/students`,
     studentId,
     studentConverter,
   );
-  const [participation] = useDocument("participations", participationId, participationConverter);
+  const [venue] = useDocument("venues", venueId, venueConverter);
 
   const contest = useMemo(
     () => contests.find((c) => c.id === student.contestId)!,
@@ -169,10 +165,10 @@ function StudentInner({
   }, [db]);
 
   useEffect(() => {
-    if (participation.token !== student.token) {
+    if (venue.token !== student.token) {
       void logout();
     }
-  }, [participation.token, student.token, logout]);
+  }, [venue.token, student.token, logout]);
 
   const setAnswer = async (problemId: string, answer: Answer | undefined) => {
     await setStudent({
@@ -187,7 +183,7 @@ function StudentInner({
   return (
     <StudentProvider
       contest={contest}
-      participation={participation}
+      venue={venue}
       student={student}
       setAnswer={setAnswer}
       logout={logout}
