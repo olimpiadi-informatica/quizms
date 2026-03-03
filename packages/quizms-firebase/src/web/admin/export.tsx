@@ -1,9 +1,9 @@
 import { type RefObject, useRef } from "react";
 
 import {
-  type Answer,
   type Contest,
   calcProblemPoints,
+  displayAnswer,
   formatUserData,
   type Student,
   unshuffleAnswer,
@@ -129,7 +129,7 @@ export function scoreboardFormatter(
   }
   row.push(student.venueId?.split("-")[0] ?? "");
   row.push(student.variantId ?? "");
-  const unshuflledProblems: Record<string, [Answer, number]> = {};
+  const unshuflledProblems: Record<string, [string, number]> = {};
   if (
     student.answers !== undefined &&
     student.variantId !== undefined &&
@@ -141,7 +141,12 @@ export function scoreboardFormatter(
       const originalId = problem.originalId;
       const answer = student.answers[problemId];
       unshuflledProblems[originalId] = [
-        unshuffleAnswer(problem, answer) ?? "",
+        answer?.value
+          ? displayAnswer({
+              type: answer.type,
+              value: unshuffleAnswer(problem, answer.value) as any,
+            })
+          : "",
         calcProblemPoints(problem, answer),
       ];
     }

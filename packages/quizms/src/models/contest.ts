@@ -84,7 +84,7 @@ export const contestSchema = z
     // Se i testi della gara hanno più varianti
     hasVariants: z.boolean(),
     // Se la gara può essere svolta online, impostazioni della gara online
-    onlineSettings: onlineContestSettings.optional(),
+    onlineSettings: onlineContestSettings.nullable().default(null),
     // Se la gara può essere svolta in modalità cartacea
     hasOffline: z.boolean(),
 

@@ -170,7 +170,7 @@ function StudentInner({
     }
   }, [venue.token, student.token, logout]);
 
-  const setAnswer = async (problemId: string, answer: Answer | undefined) => {
+  const setAnswer = async (problemId: string, answer: Answer | null) => {
     await setStudent({
       ...student,
       answers:

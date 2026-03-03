@@ -61,8 +61,8 @@ export function Blockly<State>({
     setTestcaseResults(testcases.map(() => undefined));
   }, [testcases]);
 
-  const savedBlocks = (student.answers?.[`${id}.1`] as Answer<"blockly"> | undefined)?.metadata
-    ?.blocks;
+  const savedBlocks = (student.answers?.[`${id}`] as Answer<"blockly"> | undefined)?.value?.metadata
+    .blocks;
 
   const { ready, blocks, svg, code, variableMappings, highlightBlock } = useIframe(
     iframe,
@@ -107,11 +107,13 @@ export function Blockly<State>({
     setTestcaseResults(results);
 
     const answer: Answer<"blockly"> = {
-      score: 0,
-      results: results.map((res) => res.success),
-      metadata: {
-        blocks: JSON.stringify(blocks),
-        code,
+      type: "blockly",
+      value: {
+        results: results.map((res) => res.success),
+        metadata: {
+          blocks: JSON.stringify(blocks),
+          code,
+        },
       },
     };
     await setAnswer(`${id}`, answer);
@@ -128,7 +130,7 @@ export function Blockly<State>({
       </div>
       <div className={style.visualizer}>
         <ErrorBoundary
-          onError={(err) => {
+          onError={(err: Error) => {
             if (process.env.NODE_ENV === "production") {
               err.message = "Visualizzazione del livello fallita";
             }

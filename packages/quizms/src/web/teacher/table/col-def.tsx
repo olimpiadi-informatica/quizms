@@ -16,7 +16,7 @@ import {
   parseUserData,
   type Student,
   type Variant,
-  validateAnswer,
+  validateAnswerValue,
   validateUserData,
 } from "~/models";
 
@@ -123,7 +123,7 @@ export function columnDefinition(
           if (data.absent || data.disabled) return "";
           if (!(id in (data.answers ?? {}))) return "";
           if (variants[data.variant] == null) return "";
-          return displayAnswer(data.answers[id], variants[data.variant].schema[id].type) ?? "";
+          return displayAnswer(data.answers[id]);
         },
         tooltipValueGetter: ({ data }) => data.answers?.[id],
         editable: ({ data }) =>
@@ -135,7 +135,7 @@ export function columnDefinition(
         cellEditorParams: {
           getValidationErrors: (params) => {
             const schema = variants[params.cellEditorParams.data.variantId!].schema;
-            return validateAnswer(params.value, schema[id]);
+            return validateAnswerValue(params.value, schema[id]);
           },
         } satisfies Partial<ICellEditorParams<Student>>,
       };

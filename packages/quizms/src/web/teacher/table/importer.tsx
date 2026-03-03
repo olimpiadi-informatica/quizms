@@ -12,7 +12,7 @@ import {
   type Student,
   type Variant,
   type Venue,
-  validateAnswer,
+  validateAnswerValue,
   validateUserData,
 } from "~/models";
 import { randomId } from "~/utils";
@@ -168,7 +168,7 @@ async function importStudents(
         contest.problemIds
           .map((id, i) => {
             const answer = parseAnswer(rawAnswers[i], variant.schema[id]);
-            const err = validateAnswer(answer, variant.schema[id]);
+            const err = validateAnswerValue(answer?.value ?? null, variant.schema[id]);
             if (err) {
               throw new Error(`Errore nella riga ${row + 1}: ${err[0]}`);
             }

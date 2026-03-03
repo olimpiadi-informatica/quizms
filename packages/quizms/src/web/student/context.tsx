@@ -4,7 +4,7 @@ import type { Answer, Contest, Schema, Student, Venue } from "~/models";
 
 export type StudentContextProps = {
   student: Student;
-  setAnswer: (problemId: string, answer: Answer | undefined) => Promise<void> | void;
+  setAnswer: (problemId: string, answer: Answer | null) => Promise<void> | void;
   contest: Contest;
   venue: Venue;
   reset?: () => Promise<void> | void;

@@ -11,7 +11,7 @@ type StudentProviderProps = {
   /** Student data */
   student: Student;
   /** Function to update student answers */
-  setAnswer: (problemId: string, answer: Answer | undefined) => Promise<void> | void;
+  setAnswer: (problemId: string, answer: Answer | null) => Promise<void> | void;
   /** Contest data */
   contest: Contest;
   /** School data */

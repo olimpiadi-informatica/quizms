@@ -1,4 +1,10 @@
-import { type Contest, type Student, type Variant, type Venue, validateAnswer } from "~/models";
+import {
+  type Contest,
+  type Student,
+  type Variant,
+  type Venue,
+  validateAnswerValue,
+} from "~/models";
 
 export const deleteConfirmStorageKey = "delete-confirm";
 
@@ -23,7 +29,7 @@ export function isStudentIncomplete(
 
   const answers = student.answers ?? {};
   for (const id of Object.keys(variant.schema)) {
-    const err = validateAnswer(answers[id], variant.schema[id]);
+    const err = validateAnswerValue(answers[id].value, variant.schema[id]);
     if (err) {
       return err[0];
     }

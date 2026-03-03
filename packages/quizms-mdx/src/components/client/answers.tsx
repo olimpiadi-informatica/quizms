@@ -2,7 +2,7 @@
 
 import { Children, createContext, type ReactNode, use, useCallback, useId, useMemo } from "react";
 
-import { type Answer, getCorrectOptions } from "@olinfo/quizms/models";
+import { type AnswerValue, getCorrectValues } from "@olinfo/quizms/models";
 import { useStudent } from "@olinfo/quizms/student";
 import clsx from "clsx";
 import { Trash2 } from "lucide-react";
@@ -51,23 +51,29 @@ export function MultipleResponseAnswer({ children }: { children: ReactNode }) {
   const { id } = useAnswer();
   const { id: problemId } = useProblem();
   const { student, setAnswer, terminated, schema } = useStudent();
-  const problemSchema = schema?.[problemId!];
-  if (problemSchema && problemSchema.type !== "multipleResponse")
-    throw new Error("Expected MultipleResponse problem");
-  const correct = problemSchema && (getCorrectOptions(problemSchema) as string[]);
 
-  const answer = student.answers?.[problemId!] as Answer<"multipleResponse"> | undefined;
-  const currentlyChecked = useMemo(() => answer?.includes(id), [answer, id]);
+  const problemSchema = schema?.[problemId!];
+  const correct = (problemSchema && (getCorrectValues(problemSchema) as AnswerValue[])) ?? null;
+
+  const answerValue = student.answers?.[problemId!]
+    ?.value as AnswerValue<"multipleResponse"> | null;
+  const currentlyChecked = useMemo(() => answerValue?.includes(id) ?? false, [answerValue, id]);
 
   const submitAnswer = useCallback(
     async (checked: boolean) => {
       if (checked) {
-        await setAnswer(problemId!, [...(answer ?? []), id]);
+        await setAnswer(problemId!, {
+          type: "multipleResponse",
+          value: [...(answerValue ?? []), id],
+        });
       } else if (!checked) {
-        await setAnswer(problemId!, answer?.filter((v) => v !== id) ?? []);
+        await setAnswer(problemId!, {
+          type: "multipleResponse",
+          value: answerValue?.filter((v) => v !== id) ?? [],
+        });
       }
     },
-    [answer, id, problemId, setAnswer],
+    [answerValue, id, problemId, setAnswer],
   );
 
   const answerId = useId();
@@ -111,13 +117,14 @@ export function MultipleChoiceAnswer({ children }: { children: ReactNode }) {
   const { id: problemId } = useProblem();
   const { student, setAnswer, terminated, schema } = useStudent();
   const problemSchema = schema?.[problemId!];
-  if (problemSchema && problemSchema.type !== "multipleChoice")
-    throw new Error("Expected multipleChoice problem");
-  const correct = problemSchema && (getCorrectOptions(problemSchema) as string[]);
+  const correct = (problemSchema && (getCorrectValues(problemSchema) as AnswerValue[])) ?? null;
 
-  const answer = student.answers?.[problemId!] as Answer<"multipleChoice"> | undefined;
-  const submitAnswer = async (value: string | undefined) => {
-    await setAnswer(problemId!, value);
+  const answerValue = student.answers?.[problemId!]?.value as AnswerValue<"multipleChoice"> | null;
+  const submitAnswer = async (value: string | null) => {
+    await setAnswer(problemId!, {
+      type: "multipleChoice",
+      value,
+    });
   };
 
   const answerId = useId();
@@ -128,21 +135,21 @@ export function MultipleChoiceAnswer({ children }: { children: ReactNode }) {
         "relative my-1 flex rounded-lg pl-2 pr-1 hover:bg-base-300 print:mr-4",
         terminated && {
           "border-2 border-success": correct?.includes(id),
-          "border-2 border-error": answer === id && correct != null && !correct.includes(id),
+          "border-2 border-error": answerValue === id && correct != null && !correct.includes(id),
         },
       )}>
       <input
         id={answerId}
-        checked={answer === id}
+        checked={answerValue === id}
         className={clsx(
           "radio radio-sm my-auto mr-4 bg-base-100 [print-color-adjust:exact] disabled:opacity-90 print:mr-2",
           terminated &&
-            answer === id && {
+            answerValue === id && {
               "radio-success": correct?.includes(id),
               "radio-error": correct != null && !correct.includes(id),
             },
         )}
-        onChange={(e) => submitAnswer(e.target.checked ? id : undefined)}
+        onChange={(e) => submitAnswer(e.target.checked ? id : null)}
         type="radio"
         disabled={terminated}
       />
@@ -154,10 +161,10 @@ export function MultipleChoiceAnswer({ children }: { children: ReactNode }) {
         <button
           className={clsx(
             "btn btn-square btn-ghost btn-sm my-auto",
-            (answer !== id || terminated) && "hidden",
+            (answerValue !== id || terminated) && "hidden",
           )}
           type="button"
-          onClick={() => submitAnswer(undefined)}
+          onClick={() => submitAnswer(null)}
           aria-label="Cancella risposta">
           <Trash2 size={20} />
         </button>
@@ -175,14 +182,17 @@ export function OpenAnswer({ type }: OpenAnswerProps) {
   const { id: problemId } = useProblem();
   const { student, setAnswer, terminated, schema } = useStudent();
   const problemSchema = schema?.[problemId!];
-  if (problemSchema && problemSchema.type !== "openNumber" && problemSchema.type !== "openText")
-    throw new Error("Expected open problem");
-  const correct = problemSchema?.correct as (string | number)[];
+  const correct = (problemSchema && (getCorrectValues(problemSchema) as AnswerValue[])) ?? null;
 
-  const answer = student.answers?.[problemId!] as Answer<"openNumber" | "openText"> | undefined;
+  const answerValue = student.answers?.[problemId!]?.value as AnswerValue<
+    "openNumber" | "openText"
+  > | null;
   const submitAnswer = async (value: string | undefined) => {
     const parsedValue = type === "number" ? value && Number(value) : value;
-    await setAnswer(problemId!, parsedValue);
+    await setAnswer(problemId!, {
+      type: { number: "openNumber", text: "openText" }[type] as "openNumber" | "openText",
+      value: parsedValue as any,
+    });
   };
 
   return (
@@ -193,8 +203,8 @@ export function OpenAnswer({ type }: OpenAnswerProps) {
           "input input-bordered w-72 max-w-full border-2 print:placeholder:text-transparent",
           terminated &&
             correct !== undefined && {
-              "disabled:input-success": answer && correct?.includes(answer),
-              "disabled:input-error": answer && correct && !correct.includes(answer),
+              "disabled:input-success": answerValue && correct?.includes(answerValue),
+              "disabled:input-error": answerValue && correct && !correct.includes(answerValue),
             },
         )}
         onChange={(e) => submitAnswer(e.target.value || undefined)}
@@ -202,7 +212,7 @@ export function OpenAnswer({ type }: OpenAnswerProps) {
         placeholder="Inserisci la risposta"
         maxLength={100}
         type={type}
-        value={answer ?? ""}
+        value={answerValue ?? ""}
         disabled={terminated}
         aria-label="Risposta"
       />
