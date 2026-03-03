@@ -91,7 +91,7 @@ async function generateToken() {
   }
 }
 
-export const teacherStartParticipation = publicProcedure
+export const teacherStartContestWindow = publicProcedure
   .input(z.strictObject({ participationId: z.string() }))
   .mutation(async (opts) => {
     const { input: data, ctx } = opts;
@@ -142,7 +142,7 @@ export const teacherStartParticipation = publicProcedure
     }
   });
 
-export const teacherStopParticipation = publicProcedure
+export const teacherStopContestWindow = publicProcedure
   .input(z.strictObject({ participationId: z.string() }))
   .mutation(async (opts) => {
     const { input: data, ctx } = opts;

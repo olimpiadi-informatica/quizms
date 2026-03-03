@@ -20,8 +20,8 @@ type TeacherProviderProps = {
   name: string;
   participations: Participation[];
   contests: Contest[];
-  startParticipation: (participationId: string) => Promise<void>;
-  stopParticipation: (participationId: string) => Promise<void>;
+  startContestWindow: (participationId: string) => Promise<void>;
+  stopContestWindow: (participationId: string) => Promise<void>;
   finalizeParticipation: (participationId: string) => Promise<void>;
   variants: Variant[];
   logout: () => Promise<void>;
@@ -90,8 +90,8 @@ const TeacherTable = lazy(() => import("./table"));
 function ProviderInner({
   participations,
   contests,
-  startParticipation,
-  stopParticipation,
+  startContestWindow,
+  stopContestWindow,
   finalizeParticipation,
   variants,
   logout,
@@ -118,8 +118,8 @@ function ProviderInner({
     contest,
     participations,
     participation,
-    startParticipation,
-    stopParticipation,
+    startContestWindow,
+    stopContestWindow,
     finalizeParticipation,
     variants: contestVariants,
     logout,

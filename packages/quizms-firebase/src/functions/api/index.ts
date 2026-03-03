@@ -7,8 +7,8 @@ import { studentLogin } from "./student";
 import {
   teacherFinalizeParticipation,
   teacherLogin,
-  teacherStartParticipation,
-  teacherStopParticipation,
+  teacherStartContestWindow,
+  teacherStopContestWindow,
 } from "./teacher";
 import { createContext, router } from "./trpc";
 
@@ -16,8 +16,8 @@ const appRouter = router({
   adminLogin,
   studentLogin,
   teacherLogin,
-  teacherStartParticipation,
-  teacherStopParticipation,
+  teacherStartContestWindow,
+  teacherStopContestWindow,
   teacherFinalizeParticipation,
 });
 
