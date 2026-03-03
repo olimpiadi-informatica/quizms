@@ -85,7 +85,7 @@ export function PrintProvider({ contest, children }: { contest: Contest; childre
     name: "",
     participationWindow: {
       start: new Date(0),
-      end: new Date(0),
+      end: new Date(1e13),
     },
     finalized: false,
     disabled: false,

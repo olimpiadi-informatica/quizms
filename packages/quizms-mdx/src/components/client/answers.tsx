@@ -2,7 +2,7 @@
 
 import { Children, createContext, type ReactNode, use, useCallback, useId, useMemo } from "react";
 
-import { type AnswerValue, getCorrectValues } from "@olinfo/quizms/models";
+import type { AnswerValue, Schema } from "@olinfo/quizms/models";
 import { useStudent } from "@olinfo/quizms/student";
 import clsx from "clsx";
 import { Trash2 } from "lucide-react";
@@ -53,25 +53,19 @@ export function MultipleResponseAnswer({ children }: { children: ReactNode }) {
   const { student, setAnswer, terminated, schema } = useStudent();
 
   const problemSchema = schema?.[problemId!];
-  const correct = (problemSchema && (getCorrectValues(problemSchema) as AnswerValue[])) ?? null;
+  const correct = isCorrectAnswer(problemSchema, id);
 
-  const answerValue = student.answers?.[problemId!]
-    ?.value as AnswerValue<"multipleResponse"> | null;
-  const currentlyChecked = useMemo(() => answerValue?.includes(id) ?? false, [answerValue, id]);
+  const answerValue = (student.answers?.[problemId!]?.value ??
+    []) as AnswerValue<"multipleResponse">;
+  const currentlyChecked = useMemo(() => answerValue.includes(id), [answerValue, id]);
 
   const submitAnswer = useCallback(
     async (checked: boolean) => {
-      if (checked) {
-        await setAnswer(problemId!, {
-          type: "multipleResponse",
-          value: [...(answerValue ?? []), id],
-        });
-      } else if (!checked) {
-        await setAnswer(problemId!, {
-          type: "multipleResponse",
-          value: answerValue?.filter((v) => v !== id) ?? [],
-        });
-      }
+      const value = checked ? [...answerValue, id] : answerValue.filter((v) => v !== id);
+      await setAnswer(problemId!, {
+        type: "multipleResponse",
+        value,
+      });
     },
     [answerValue, id, problemId, setAnswer],
   );
@@ -83,9 +77,8 @@ export function MultipleResponseAnswer({ children }: { children: ReactNode }) {
       className={clsx(
         "relative my-1 flex rounded-lg pl-2 pr-1 hover:bg-base-300 print:mr-4",
         terminated && {
-          "border-2 border-success": correct?.includes(id),
-          "border-2 border-error":
-            currentlyChecked && correct && correct.length > 0 && !correct.includes(id),
+          "border-2 border-success": correct,
+          "border-2 border-error": currentlyChecked && correct === false,
         },
       )}>
       <input
@@ -95,8 +88,8 @@ export function MultipleResponseAnswer({ children }: { children: ReactNode }) {
           "checkbox checkbox-sm my-auto mr-4 bg-base-100 [print-color-adjust:exact] disabled:opacity-90 print:mr-2",
           terminated &&
             currentlyChecked && {
-              "checkbox-success": correct?.includes(id),
-              "checkbox-error": correct && correct.length > 0 && !correct.includes(id),
+              "checkbox-success": correct === true,
+              "checkbox-error": correct === false,
             },
         )}
         onChange={(e) => submitAnswer(e.target.checked)}
@@ -117,10 +110,12 @@ export function MultipleChoiceAnswer({ children }: { children: ReactNode }) {
   const { id: problemId } = useProblem();
   const { student, setAnswer, terminated, schema } = useStudent();
   const problemSchema = schema?.[problemId!];
-  const correct = (problemSchema && (getCorrectValues(problemSchema) as AnswerValue[])) ?? null;
+  const correct = isCorrectAnswer(problemSchema, id);
 
-  const answerValue = student.answers?.[problemId!]?.value as AnswerValue<"multipleChoice"> | null;
-  const submitAnswer = async (value: string | null) => {
+  const answerValue = student.answers?.[problemId!]?.value as
+    | AnswerValue<"multipleChoice">
+    | undefined;
+  const submitAnswer = async (value: string | undefined) => {
     await setAnswer(problemId!, {
       type: "multipleChoice",
       value,
@@ -134,8 +129,8 @@ export function MultipleChoiceAnswer({ children }: { children: ReactNode }) {
       className={clsx(
         "relative my-1 flex rounded-lg pl-2 pr-1 hover:bg-base-300 print:mr-4",
         terminated && {
-          "border-2 border-success": correct?.includes(id),
-          "border-2 border-error": answerValue === id && correct != null && !correct.includes(id),
+          "border-2 border-success": correct === true,
+          "border-2 border-error": answerValue === id && correct === false,
         },
       )}>
       <input
@@ -145,11 +140,11 @@ export function MultipleChoiceAnswer({ children }: { children: ReactNode }) {
           "radio radio-sm my-auto mr-4 bg-base-100 [print-color-adjust:exact] disabled:opacity-90 print:mr-2",
           terminated &&
             answerValue === id && {
-              "radio-success": correct?.includes(id),
-              "radio-error": correct != null && !correct.includes(id),
+              "radio-success": correct === true,
+              "radio-error": correct === false,
             },
         )}
-        onChange={(e) => submitAnswer(e.target.checked ? id : null)}
+        onChange={(e) => submitAnswer(e.target.checked ? id : undefined)}
         type="radio"
         disabled={terminated}
       />
@@ -164,7 +159,7 @@ export function MultipleChoiceAnswer({ children }: { children: ReactNode }) {
             (answerValue !== id || terminated) && "hidden",
           )}
           type="button"
-          onClick={() => submitAnswer(null)}
+          onClick={() => submitAnswer(undefined)}
           aria-label="Cancella risposta">
           <Trash2 size={20} />
         </button>
@@ -182,11 +177,11 @@ export function OpenAnswer({ type }: OpenAnswerProps) {
   const { id: problemId } = useProblem();
   const { student, setAnswer, terminated, schema } = useStudent();
   const problemSchema = schema?.[problemId!];
-  const correct = (problemSchema && (getCorrectValues(problemSchema) as AnswerValue[])) ?? null;
 
-  const answerValue = student.answers?.[problemId!]?.value as AnswerValue<
-    "openNumber" | "openText"
-  > | null;
+  const answerValue = student.answers?.[problemId!]?.value as
+    | AnswerValue<"openNumber" | "openText">
+    | undefined;
+  const correct = isCorrectAnswer(problemSchema, answerValue);
   const submitAnswer = async (value: string | undefined) => {
     const parsedValue = type === "number" ? value && Number(value) : value;
     await setAnswer(problemId!, {
@@ -201,11 +196,10 @@ export function OpenAnswer({ type }: OpenAnswerProps) {
         id={`answer-${problemId}`}
         className={clsx(
           "input input-bordered w-72 max-w-full border-2 print:placeholder:text-transparent",
-          terminated &&
-            correct !== undefined && {
-              "disabled:input-success": answerValue && correct?.includes(answerValue),
-              "disabled:input-error": answerValue && correct && !correct.includes(answerValue),
-            },
+          terminated && {
+            "disabled:input-success": correct === true,
+            "disabled:input-error": correct === false,
+          },
         )}
         onChange={(e) => submitAnswer(e.target.value || undefined)}
         onWheel={(e) => e.currentTarget.blur()}
@@ -236,3 +230,20 @@ export function Explanation({ children }: { children: ReactNode }) {
   );
 }
 Explanation.displayName = "Explanation";
+
+function isCorrectAnswer(problem?: Schema[string], answer?: string | number): boolean | undefined {
+  if (problem == null || answer == null || answer === "") return;
+
+  switch (problem.type) {
+    case "openNumber":
+      return problem.correct.includes(answer as number);
+    case "openText":
+      return problem.correct.includes(answer as string);
+    case "multipleChoice":
+    case "multipleResponse":
+      return problem.options
+        .filter((option) => option.correct)
+        .map((option) => option.id)
+        .includes(answer as string);
+  }
+}

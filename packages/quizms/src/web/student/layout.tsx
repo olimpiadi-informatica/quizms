@@ -115,7 +115,7 @@ export function StudentLayout({ children }: { children: ReactNode }) {
               {progress}%
             </Progress>
             <div className="px-3">
-              {terminated || !student.participationWindow || !contest.onlineSettings ? (
+              {terminated || !student.participationWindow ? (
                 <span className="font-mono">00:00</span>
               ) : (
                 <Timer endTime={student.participationWindow.end} noAnimation />

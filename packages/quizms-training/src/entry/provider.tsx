@@ -78,7 +78,7 @@ export function TrainingProvider({
   );
 
   const setAnswer = useCallback(
-    async (problemId: string, answer: Answer | null) => {
+    async (problemId: string, answer: Answer | undefined) => {
       await updateStudent(setAnswersIframe, (student) => ({
         ...student,
         answers:

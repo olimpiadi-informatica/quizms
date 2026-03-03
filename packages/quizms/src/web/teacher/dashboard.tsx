@@ -202,7 +202,7 @@ export default function TeacherDashboard() {
                 )}
               </WithinTimeRange>
             )}
-            {contest.onlineSettings && venue.participationWindow && (
+            {venue.participationWindow && (
               <WithinTimeRange end={subMinutes(venue.participationWindow.start, 1)}>
                 <StopContestButton />
               </WithinTimeRange>

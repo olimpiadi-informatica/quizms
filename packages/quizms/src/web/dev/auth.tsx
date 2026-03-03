@@ -61,7 +61,7 @@ export function DevProvider({ contest, children }: { contest: Contest; children:
     [contest.id, student.participationWindow],
   );
 
-  const setAnswer = useCallback((problemId: string, answer: Answer | null) => {
+  const setAnswer = useCallback((problemId: string, answer: Answer | undefined) => {
     setStudent((student) => ({
       ...student,
       answers:

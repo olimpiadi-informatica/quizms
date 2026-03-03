@@ -17,23 +17,23 @@ export const answerValues = {
 export const answerSchema = z.discriminatedUnion("type", [
   z.strictObject({
     type: z.literal("openNumber"),
-    value: answerValues.openNumber.nullable(),
+    value: answerValues.openNumber.optional(),
   }),
   z.strictObject({
     type: z.literal("openText"),
-    value: answerValues.openText.nullable(),
+    value: answerValues.openText.optional(),
   }),
   z.strictObject({
     type: z.literal("multipleChoice"),
-    value: answerValues.multipleChoice.nullable(),
+    value: answerValues.multipleChoice.optional(),
   }),
   z.strictObject({
     type: z.literal("multipleResponse"),
-    value: answerValues.multipleResponse.nullable(),
+    value: answerValues.multipleResponse.optional(),
   }),
   z.strictObject({
     type: z.literal("blockly"),
-    value: answerValues.blockly.nullable(),
+    value: answerValues.blockly.optional(),
   }),
 ]);
 
@@ -120,32 +120,25 @@ export function parseAnswer(answer: string, problem: Problem): Answer | undefine
   }
 }
 
-export function displayAnswer({ value, type }: Answer): string {
-  if (value === null) {
+export function displayAnswer(answer?: Answer): string {
+  if (answer?.value == null) {
     return "";
   }
-  switch (type) {
+  switch (answer.type) {
     case "openNumber":
-      return String(value as AnswerValue<"openNumber">);
+      return String(answer.value);
     case "openText":
     case "multipleChoice":
-      return value as AnswerValue<"openText" | "multipleChoice">;
+      return answer.value;
     case "multipleResponse":
-      return (value as AnswerValue<"multipleResponse">).join("");
+      return answer.value.join("");
     case "blockly":
-      return (value as AnswerValue<"blockly">).results.map((c) => (c ? "✅" : "❌")).join("");
+      return answer.value.results.map((c) => (c ? "✅" : "❌")).join("");
   }
-}
-
-export function displayCorrectAnswers(problem: Problem): string {
-  if (problem.type === "blockly") return "";
-  return getCorrectValues(problem)
-    .map((value) => displayAnswer({ value, type: problem.type } as Answer))
-    .join(",");
 }
 
 export function validateAnswerValue(
-  answer: AnswerValue | null,
+  answer: AnswerValue | undefined,
   schema: Schema[string],
 ): [string] | null {
   if (answer == null || answer === "") return null;
@@ -187,19 +180,6 @@ export function validateAnswerValue(
   return null;
 }
 
-export function getCorrectValues(problem: Schema[string]) {
-  switch (problem.type) {
-    case "openNumber":
-    case "openText":
-      return problem.correct;
-    case "multipleResponse":
-    case "multipleChoice":
-      return problem.options.filter((option) => option.correct).map((option) => option.id);
-    default:
-      return [];
-  }
-}
-
 export function calcScore(student: Student, schema?: Schema) {
   if (student.absent || student.disabled) return;
 
@@ -220,13 +200,9 @@ export function calcScore(student: Student, schema?: Schema) {
 }
 
 export function calcProblemPoints(problem: Schema[string], answer?: Answer): number {
-  if (
-    answer == null ||
-    answer.value === null ||
-    answer.value === "" ||
-    answer.type !== problem.type
-  )
+  if (answer?.value == null || answer.value === "" || answer.type !== problem.type) {
     return problem.pointsBlank;
+  }
 
   switch (problem.type) {
     case "openNumber":

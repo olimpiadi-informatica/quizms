@@ -96,9 +96,7 @@ function InnerStatement({ statementUrl }: Pick<Props, "statementUrl">) {
   const { data } = useSWR(
     `statement/${student.contestId}/${student.variantId}/statement`,
     fetcher,
-    {
-      suspense: true,
-    },
+    { suspense: true },
   );
   return data;
 }

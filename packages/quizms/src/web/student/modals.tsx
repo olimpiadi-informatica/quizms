@@ -3,7 +3,7 @@ import type { RefObject } from "react";
 import { Form, FormButton, Modal, SubmitButton } from "@olinfo/react-components";
 import { sumBy } from "lodash-es";
 
-import { calcProblemPoints, displayAnswer, displayCorrectAnswers, type Schema } from "~/models";
+import { calcProblemPoints, displayAnswer, type Schema } from "~/models";
 
 import { useStudent } from "./context";
 
@@ -48,8 +48,8 @@ export function PointsTable({ schema }: { schema: Schema }) {
             return (
               <tr key={problem}>
                 <td>{problem}</td>
-                <td>{answer ? displayAnswer(answer) : "-"}</td>
-                <td>{problemSchema.type !== "blockly" && displayCorrectAnswers(problemSchema)}</td>
+                <td>{displayAnswer(answer) ?? "-"}</td>
+                <td>{getCorrectOptions(problemSchema)}</td>
                 <td>{calcProblemPoints(problemSchema, answer)}</td>
               </tr>
             );
@@ -91,3 +91,27 @@ export function SubmitModal({ ref }: { ref: RefObject<HTMLDialogElement | null> 
   );
 }
 SubmitModal.displayName = "SubmitModal";
+
+function getCorrectOptions(problem: Schema[string]): string {
+  switch (problem.type) {
+    case "openNumber":
+    case "openText":
+      return joinOptions(problem.correct, " oppure ");
+    case "multipleResponse": {
+      const correct = problem.options.filter((option) => option.correct).map((option) => option.id);
+      return joinOptions(correct, " e ");
+    }
+    case "multipleChoice": {
+      const correct = problem.options.filter((option) => option.correct).map((option) => option.id);
+      return joinOptions(correct, " oppure ");
+    }
+    case "blockly":
+      return "";
+  }
+}
+
+function joinOptions(options: (string | number)[], sep: string): string {
+  const last = options.at(-1);
+  const others = options.slice(0, -1);
+  return others.join(", ") + (others.length ? sep : "") + last;
+}
