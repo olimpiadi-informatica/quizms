@@ -1,11 +1,10 @@
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useRef } from "react";
 
 import { DisableTopBlocks } from "@blockly/disable-top-blocks";
 import "blockly/blocks";
 
 import {
   type BlocklyOptions,
-  dialog,
   Events,
   inject,
   serialization,
@@ -24,6 +23,7 @@ import type {
 } from "~/blockly-types";
 
 import { initGenerator, toJS } from "./generator";
+import { BlocklyModal } from "./modal";
 
 setLocale(locale as unknown as Record<string, string>);
 
@@ -34,20 +34,6 @@ function send(msg: IframeToWorkspaceMessage) {
 export function BlocklyEditor() {
   const id = useId();
   const workspace = useRef<WorkspaceSvg>(null);
-
-  const [promptState, setPromptState] = useState<{
-    isOpen: boolean;
-    message: string;
-    defaultValue: string;
-    callback?: (result: string | null) => void;
-  }>({ isOpen: false, message: "", defaultValue: "" });
-
-  useEffect(() => {
-    dialog.setPrompt((message, defaultValue, callback) => {
-      setPromptState({ isOpen: true, message, defaultValue, callback });
-    });
-    return () => dialog.setPrompt(undefined);
-  }, []);
 
   useEffect(() => {
     window.addEventListener("message", onMessage);
@@ -66,63 +52,10 @@ export function BlocklyEditor() {
   useEffect(() => send({ cmd: "init" }), []);
   useEffect(() => document.documentElement.setAttribute("data-theme", "light"), []);
 
-  const inputRef = useRef<HTMLInputElement>(null);
-  useEffect(() => {
-    if (promptState.isOpen) {
-      inputRef.current?.focus();
-    }
-  }, [promptState.isOpen]);
-
   return (
     <>
       <div className="!fixed !inset-0 [all:initial]" id={id} />
-      {promptState.isOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 flex items-center justify-center z-[999999]"
-          style={{ zIndex: 999999 }}>
-          <div
-            className="bg-white p-6 rounded-lg shadow-xl w-96 max-w-[90vw]"
-            style={{ fontFamily: "sans-serif" }}>
-            <p className="text-gray-800 mb-4">{promptState.message}</p>
-            <input
-              ref={inputRef}
-              type="text"
-              className="w-full border border-gray-300 rounded px-3 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              defaultValue={promptState.defaultValue}
-              onChange={(e) => setPromptState((s) => ({ ...s, defaultValue: e.target.value }))}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  promptState.callback?.(promptState.defaultValue);
-                  setPromptState((s) => ({ ...s, isOpen: false }));
-                } else if (e.key === "Escape") {
-                  promptState.callback?.(null);
-                  setPromptState((s) => ({ ...s, isOpen: false }));
-                }
-              }}
-            />
-            <div className="flex justify-end gap-2">
-              <button
-                type="button"
-                className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded"
-                onClick={() => {
-                  promptState.callback?.(null);
-                  setPromptState((s) => ({ ...s, isOpen: false }));
-                }}>
-                Annulla
-              </button>
-              <button
-                type="button"
-                className="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded"
-                onClick={() => {
-                  promptState.callback?.(promptState.defaultValue);
-                  setPromptState((s) => ({ ...s, isOpen: false }));
-                }}>
-                OK
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <BlocklyModal />
     </>
   );
 }
