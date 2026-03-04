@@ -7,3 +7,12 @@ export function reactComponentCase(name: string) {
 export function titleCase(str: string) {
   return str.toLowerCase().replace(/\b\w/g, (s) => s.toUpperCase());
 }
+
+export function strip(str: string) {
+  return str.replace(/\r/g, "").trim();
+}
+
+export function normalizeName(str: string) {
+  const singleSpaced = str.replace(/\s+/g, " ");
+  return titleCase(singleSpaced);
+}
