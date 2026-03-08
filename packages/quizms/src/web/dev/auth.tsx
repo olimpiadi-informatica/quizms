@@ -1,6 +1,5 @@
 import { type ReactNode, useCallback, useMemo, useState } from "react";
 
-import { omit } from "lodash-es";
 import { Link, Route, Switch } from "wouter";
 
 import type { Answer, Contest, Student, Venue } from "~/models";
@@ -61,32 +60,14 @@ export function DevProvider({ contest, children }: { contest: Contest; children:
     [contest.id, student.participationWindow],
   );
 
-  const setAnswer = useCallback((problemId: string, answer: Answer | undefined) => {
+  const setAnswer = useCallback((problemId: string, answer: Answer) => {
     setStudent((student) => ({
       ...student,
-      answers:
-        answer == null
-          ? omit(student.answers, problemId)
-          : { ...student.answers, [problemId]: answer },
+      answers: { ...student.answers, [problemId]: answer },
     }));
   }, []);
 
-  const submit = useCallback(() => {
-    setStudent((student) => ({
-      ...student,
-      participationWindow: { start: student.participationWindow!.start, end: new Date() },
-    }));
-  }, []);
-
-  const reset = useCallback(() => {
-    setStudent(
-      (student): Student => ({
-        ...student,
-        answers: {},
-        participationWindow: undefined,
-      }),
-    );
-  }, []);
+  const submit = useCallback(() => {}, []);
 
   return (
     <StudentProvider
@@ -95,7 +76,6 @@ export function DevProvider({ contest, children }: { contest: Contest; children:
       student={student}
       setAnswer={setAnswer}
       submit={submit}
-      reset={reset}
       enforceFullscreen={false}>
       {children}
     </StudentProvider>

@@ -17,7 +17,7 @@ export function ClosedAnswer({ children, problemId }: { children: ReactNode; pro
 ClosedAnswer.displayName = "ClosedAnswer";
 
 export function OpenAnswer({ correct }: { correct: string }) {
-  const type = Number.isFinite(Number(correct)) ? "number" : "text";
+  const type = Number.isFinite(Number(correct)) ? "openNumber" : "openText";
   return <OpenAnswerClient type={type} />;
 }
 OpenAnswer.displayName = "OpenAnswer";

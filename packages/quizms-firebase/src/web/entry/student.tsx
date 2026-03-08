@@ -14,7 +14,6 @@ import {
 } from "@olinfo/react-components";
 import { getAuth, signInWithCustomToken, signOut } from "firebase/auth";
 import { waitForPendingWrites } from "firebase/firestore";
-import { omit } from "lodash-es";
 
 import { studentLogin } from "~/web/common/api";
 import { useDb } from "~/web/common/base-login";
@@ -170,13 +169,10 @@ function StudentInner({
     }
   }, [venue.token, student.token, logout]);
 
-  const setAnswer = async (problemId: string, answer: Answer | undefined) => {
+  const setAnswer = async (problemId: string, answer: Answer) => {
     await setStudent({
       ...student,
-      answers:
-        answer == null
-          ? omit(student.answers, problemId)
-          : { ...student.answers, [problemId]: answer },
+      answers: { ...student.answers, [problemId]: answer },
     });
   };
 

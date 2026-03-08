@@ -7,7 +7,7 @@ export const venueSchema = z.strictObject({
   name: z.string(),
   token: z.string().optional(),
   participationWindow: z
-    .object({
+    .strictObject({
       start: z.date(),
       end: z.date(),
     })

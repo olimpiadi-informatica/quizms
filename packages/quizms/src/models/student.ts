@@ -21,7 +21,7 @@ export const studentSchema = z
     contestId: z.string(),
     token: z.string(),
 
-    participationWindow: z.object({
+    participationWindow: z.strictObject({
       start: z.date(),
       end: z.date(),
     }),

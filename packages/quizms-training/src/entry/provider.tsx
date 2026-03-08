@@ -1,5 +1,6 @@
 import { type ReactNode, useCallback, useMemo, useState } from "react";
 
+import { TitleProvider } from "@olinfo/quizms/components";
 import {
   type Answer,
   type Contest,
@@ -12,11 +13,12 @@ import {
 import { StudentProvider } from "@olinfo/quizms/student";
 import { Rng, validate } from "@olinfo/quizms/utils";
 import { addMinutes, subSeconds } from "date-fns";
-import { omit } from "lodash-es";
 import useSWR from "swr";
 
 import {
   getStudentIframe,
+  getTitleIframe,
+  logoutIframe,
   resetIframe,
   setAnswersIframe,
   startIframe,
@@ -31,6 +33,8 @@ export function TrainingProvider({
   contest: Contest & VariantsConfig;
   children: ReactNode;
 }) {
+  const { data: title } = useSWR("getTitle", getTitleIframe, { suspense: true });
+
   const { data: iframeStudent, mutate } = useSWR(["student", contest.id], getStudentIframe, {
     suspense: true,
   });
@@ -47,21 +51,24 @@ export function TrainingProvider({
   );
   const updateStudent = useCallback(
     async (
-      iframeFn: (student: Student) => Promise<Student | null>,
+      iframeFn: (student: Student, contest: Contest) => Promise<Student | null>,
       updateFn: (student: Student) => Student,
     ) => {
       if (type === "anonymous") {
         setAnonymousStudent(updateFn);
       } else {
-        await mutate((student) => (student ? iframeFn(updateFn(student)) : null), {
+        await mutate((student) => (student ? iframeFn(updateFn(student), contest) : null), {
           optimisticData: (student) => (student ? updateFn(student) : null),
         });
       }
     },
-    [type, mutate],
+    [type, contest, mutate],
   );
 
-  const { data: variant } = useSWR(["variant", contest.id, student.variantId], getVariant);
+  const { data: variant } = useSWR(
+    student.variantId && ["variant", contest.id, student.variantId],
+    getVariant,
+  );
 
   const mockVenue: Venue = useMemo(
     () => ({
@@ -78,57 +85,76 @@ export function TrainingProvider({
   );
 
   const setAnswer = useCallback(
-    async (problemId: string, answer: Answer | undefined) => {
-      await updateStudent(setAnswersIframe, (student) => ({
-        ...student,
-        answers:
-          answer == null
-            ? omit(student.answers, problemId)
-            : { ...student.answers, [problemId]: answer },
-      }));
+    async (problemId: string, answer: Answer) => {
+      await updateStudent(
+        setAnswersIframe,
+        (student) =>
+          ({ ...student, answers: { ...student.answers, [problemId]: answer } }) satisfies Student,
+      );
     },
     [updateStudent],
   );
 
   const submit = useCallback(async () => {
-    await updateStudent(submitIframe, (student) => ({ ...student, finishedAt: new Date() }));
+    await updateStudent(
+      submitIframe,
+      (student) =>
+        ({
+          ...student,
+          participationWindow: { start: student.participationWindow!.start, end: new Date() },
+        }) satisfies Student,
+    );
   }, [updateStudent]);
 
   const reset = useCallback(async () => {
-    await updateStudent(resetIframe, (student) => ({
-      ...student,
-      answers: {},
-      participationWindow: undefined,
-      variantId: getRandomVariant(contest),
-    }));
-  }, [contest, updateStudent]);
+    await updateStudent(
+      resetIframe,
+      (student) =>
+        ({
+          ...student,
+          answers: {},
+          participationWindow: undefined,
+        }) satisfies Student,
+    );
+  }, [updateStudent]);
+
+  const logout = useCallback(async () => {
+    await updateStudent(logoutIframe, (student) => student);
+  }, [updateStudent]);
 
   const start = useCallback(async () => {
     const now = new Date();
-    await updateStudent(startIframe, (student) => ({
-      ...student,
-      participationWindow: {
-        start: subSeconds(now, 2),
-        end: addMinutes(now, contest.onlineSettings?.duration ?? 0),
-      },
-    }));
+    await updateStudent(
+      startIframe,
+      (student) =>
+        ({
+          ...student,
+          variantId: getRandomVariant(contest),
+          participationWindow: {
+            start: subSeconds(now, 2),
+            end: addMinutes(now, contest.onlineSettings?.duration ?? 0),
+          },
+        }) satisfies Student,
+    );
   }, [contest, updateStudent]);
 
   return (
-    <TrainingStatementContext.Provider value={{ start }}>
-      <title>{contest.name}</title>
-      <StudentProvider
-        contest={contest}
-        venue={mockVenue}
-        student={student}
-        setAnswer={setAnswer}
-        submit={submit}
-        reset={reset}
-        enforceFullscreen={false}
-        schema={variant?.schema}>
-        {children}
-      </StudentProvider>
-    </TrainingStatementContext.Provider>
+    <TitleProvider title={title}>
+      <TrainingStatementContext.Provider value={{ start }}>
+        <StudentProvider
+          contest={contest}
+          venue={mockVenue}
+          student={student}
+          setAnswer={setAnswer}
+          submit={submit}
+          reset={reset}
+          logout={logout}
+          enforceFullscreen={false}
+          schema={variant?.schema}>
+          {children}
+        </StudentProvider>
+      </TrainingStatementContext.Provider>
+    </TitleProvider>
   );
 }
 TrainingProvider.displayName = "TrainingProvider";
@@ -142,7 +168,6 @@ function createAnonymousStudent(contest: VariantsConfig): Student {
     },
     answers: {},
     contestId: contest.id,
-    variantId: getRandomVariant(contest),
   };
 }
 

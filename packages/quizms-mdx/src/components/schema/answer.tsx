@@ -1,7 +1,5 @@
 import type { ReactNode } from "react";
 
-import { upperFirst } from "lodash-es";
-
 import { shuffleChildren } from "~/components/utils";
 
 export function ClosedAnswer({
@@ -30,10 +28,10 @@ export function ClosedAnswer({
 }
 
 export function OpenAnswer({ correct }: { correct: string }) {
-  const type = Number.isFinite(Number(correct)) ? "number" : "text";
+  const type = Number.isFinite(Number(correct)) ? "openNumber" : "openText";
   return [
-    `"type": ${JSON.stringify(`open${upperFirst(type)}`)}, `,
-    `"correct": ${type === "number" ? correct : JSON.stringify(correct)}, `,
+    `"type": ${JSON.stringify(type)}, `,
+    `"correct": ${type === "openNumber" ? correct : JSON.stringify(correct)}, `,
   ];
 }
 

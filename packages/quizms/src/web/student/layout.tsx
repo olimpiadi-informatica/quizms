@@ -27,7 +27,7 @@ export function StudentLayout({ children }: { children: ReactNode }) {
   const { contest, student, schema, reset, venue, terminated, logout, enforceFullscreen } =
     useStudent();
 
-  const answered = sumBy(Object.values(student.answers ?? {}), (s) => Number(s.value === 0 || !!s));
+  const answered = sumBy(Object.values(student.answers ?? {}), (s) => Number(s.value != null));
   const total = Math.max(schema ? Object.keys(schema).length : contest.problemIds.length, 1);
   const progress = Math.round((answered / total) * 100);
 
