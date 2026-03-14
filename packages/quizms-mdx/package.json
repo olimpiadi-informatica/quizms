@@ -26,7 +26,14 @@
       "default": "./dist/components-client.js"
     },
     "./css": "./dist/quizms-mdx.css",
-    "./schema": "./dist/schema.js",
+    "./jsx-schema": {
+      "types": "./dist/jsx-schema.d.ts",
+      "default": "./dist/jsx-schema.js"
+    },
+    "./schema": {
+      "types": "./dist/schema.d.ts",
+      "default": "./dist/schema.js"
+    },
     "./vite": {
       "types": "./dist/vite.d.ts",
       "default": "./dist/vite.js"

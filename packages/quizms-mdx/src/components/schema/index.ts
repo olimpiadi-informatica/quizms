@@ -16,17 +16,6 @@ function Passthrough({ children }: { children: ReactNode }) {
 
 export function useMDXComponents() {
   return {
-    h1: Empty,
-    h2: Empty,
-    h3: Empty,
-    h4: Empty,
-    h5: Empty,
-    h6: Empty,
-    hr: Empty,
-    ol: Empty,
-    p: Empty,
-    table: Empty,
-    ul: Empty,
     AnswerGroup: Passthrough,
     Asymptote: Empty,
     Blockly,

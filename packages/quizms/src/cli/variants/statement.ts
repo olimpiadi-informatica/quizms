@@ -1,6 +1,5 @@
 import { writeFile } from "node:fs/promises";
 import path from "node:path";
-import { cwd } from "node:process";
 import { pathToFileURL } from "node:url";
 
 import type { OutputAsset, RollupOutput } from "rollup";
@@ -11,7 +10,7 @@ import { externalLibs } from "~/cli/vite/statement-externals";
 import type { VariantsConfig } from "~/models";
 import { fatal, success } from "~/utils-node";
 
-import { loaderFile, serverStatementFile } from "./files";
+import { loaderStatementFile, serverStatementFile } from "./files";
 
 type Manifest = Record<
   string,
@@ -49,8 +48,8 @@ export async function buildBaseStatements(
       },
       rollupOptions: {
         output: {
-          assetFileNames: "chunks/[name][extname]",
-          chunkFileNames: "chunks/[name].js",
+          assetFileNames: "chunks/[hash]-[extname]",
+          chunkFileNames: "chunks/[hash].js",
           hoistTransitiveImports: false,
           manualChunks: (id, meta) => {
             const info = meta.getModuleInfo(id);
@@ -60,10 +59,7 @@ export async function buildBaseStatements(
               return "client-modules";
             }
             if (info?.isIncluded) {
-              return path
-                .relative(cwd(), id.replace("\0", ""))
-                .replace(/^(\.*\/)*/, "")
-                .replace(/\.\w+$/, "");
+              return id;
             }
           },
           onlyExplicitManualChunks: true,
@@ -124,7 +120,7 @@ export async function buildBaseStatements(
 
   await Promise.all([
     writeFile(path.join(outDir, "manifest.json"), JSON.stringify(manifest)),
-    writeFile(path.join(outDir, "loader.js"), loaderFile()),
+    writeFile(path.join(outDir, "loader.js"), loaderStatementFile()),
     writeFile(path.join(outDir, "package.json"), '{"type":"module"}'),
     writeFile(path.join(outDir, "server.js"), serverStatementFile()),
   ]);

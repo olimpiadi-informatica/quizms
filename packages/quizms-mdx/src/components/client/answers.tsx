@@ -182,7 +182,7 @@ export function OpenAnswer({ type = "openText" }: OpenAnswerProps) {
     | AnswerValue<"openNumber" | "openText">
     | undefined;
   const correct = isCorrectAnswer(problemSchema, answerValue);
-  const submitAnswer = async (value: string | undefined) => {
+  const submitAnswer = async (value: string) => {
     if (type === "openNumber") {
       await setAnswer(problemId!, { type, value: value ? Number(value) : undefined });
     } else {
@@ -201,7 +201,7 @@ export function OpenAnswer({ type = "openText" }: OpenAnswerProps) {
             "disabled:input-error": correct === false,
           },
         )}
-        onChange={(e) => submitAnswer(e.target.value || undefined)}
+        onChange={(e) => submitAnswer(e.target.value.trim())}
         onWheel={(e) => e.currentTarget.blur()}
         placeholder="Inserisci la risposta"
         maxLength={100}

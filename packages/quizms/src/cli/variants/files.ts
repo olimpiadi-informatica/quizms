@@ -30,9 +30,13 @@ pipe(createWriteStream(statementPath));`;
 
 export function serverSchemaFile() {
   return `\
+import { register } from "node:module";
+
 import { renderToStaticMarkup } from "react-dom/server";
 import { createElement } from "react";
 import { parseRawSchema } from "@olinfo/quizms-mdx/schema";
+
+register("./loader.js", import.meta.url);
 
 const { default: Statement } = await import(\`./\${process.env.QUIZMS_CONTEST_ID}.mjs\`);
 
@@ -41,7 +45,7 @@ console.log(JSON.stringify(parseRawSchema(html)));
 `;
 }
 
-export function loaderFile() {
+export function loaderStatementFile() {
   return `\
 export async function load(url, context, nextLoad) {
   const result = await nextLoad(url, context);
@@ -49,5 +53,15 @@ export async function load(url, context, nextLoad) {
     result.source = result.source.toString("utf-8");
   }
   return result;
+}`;
+}
+
+export function loaderSchemaFile() {
+  return `\
+export function load(url, context, nextLoad) {
+  if (url.endsWith(".css")) {
+    return { source: "export default '';", format: "module", shortCircuit: true };
+  }
+  return nextLoad(url, context);
 }`;
 }

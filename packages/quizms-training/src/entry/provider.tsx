@@ -13,7 +13,7 @@ import {
 import { StudentProvider } from "@olinfo/quizms/student";
 import { Rng, validate } from "@olinfo/quizms/utils";
 import { addMinutes, subSeconds } from "date-fns";
-import useSWR from "swr";
+import useSWR, { preload } from "swr";
 
 import {
   getStudentIframe,
@@ -49,6 +49,16 @@ export function TrainingProvider({
         : { type: "anonymous", student: anonymousStudent },
     [iframeStudent, anonymousStudent],
   );
+
+  const { data: variant } = useSWR(
+    student.variantId && ["variant", contest.id, student.variantId],
+    getVariant,
+    {
+      revalidateOnFocus: false,
+      revalidateIfStale: false,
+    },
+  );
+
   const updateStudent = useCallback(
     async (
       iframeFn: (student: Student, contest: Contest) => Promise<Student | null>,
@@ -63,11 +73,6 @@ export function TrainingProvider({
       }
     },
     [type, contest, mutate],
-  );
-
-  const { data: variant } = useSWR(
-    student.variantId && ["variant", contest.id, student.variantId],
-    getVariant,
   );
 
   const mockVenue: Venue = useMemo(
@@ -86,13 +91,14 @@ export function TrainingProvider({
 
   const setAnswer = useCallback(
     async (problemId: string, answer: Answer) => {
+      if (!variant) throw new Error("Variant non loaded");
       await updateStudent(
-        setAnswersIframe,
+        setAnswersIframe(variant),
         (student) =>
           ({ ...student, answers: { ...student.answers, [problemId]: answer } }) satisfies Student,
       );
     },
-    [updateStudent],
+    [updateStudent, variant],
   );
 
   const submit = useCallback(async () => {
@@ -124,12 +130,14 @@ export function TrainingProvider({
 
   const start = useCallback(async () => {
     const now = new Date();
+    const variantId = getRandomVariant(contest);
+    const variant = await preload(["variant", contest.id, variantId], getVariant);
     await updateStudent(
-      startIframe,
+      startIframe(variant),
       (student) =>
         ({
           ...student,
-          variantId: getRandomVariant(contest),
+          variantId,
           participationWindow: {
             start: subSeconds(now, 2),
             end: addMinutes(now, contest.onlineSettings?.duration ?? 0),

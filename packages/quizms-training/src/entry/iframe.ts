@@ -1,6 +1,12 @@
-import { type Contest, type Student, studentSchema } from "@olinfo/quizms/models";
+import {
+  type Contest,
+  calcScore,
+  type Student,
+  studentSchema,
+  type Variant,
+} from "@olinfo/quizms/models";
 import { validate } from "@olinfo/quizms/utils";
-import { cloneDeepWith, isDate } from "lodash-es";
+import { cloneDeepWith, isDate, sumBy } from "lodash-es";
 import z from "zod";
 
 export async function getTitleIframe(): Promise<string> {
@@ -19,34 +25,39 @@ export async function getStudentIframe([_, contestId]: [string, string]): Promis
   return await getResponse({ type: "getStudent", contestId }, studentSchema.nullable());
 }
 
-export async function setAnswersIframe(
-  student: Student,
-  contest: Contest,
-): Promise<Student | null> {
-  if (window.parent === window) return null;
+export function setAnswersIframe(variant: Variant) {
+  return async (student: Student, contest: Contest): Promise<Student | null> => {
+    if (window.parent === window) return null;
 
-  return await getResponse(
-    {
-      type: "setAnswers",
-      contestId: contest.id,
-      answers: student.answers,
-    },
-    studentSchema,
-  );
+    return await getResponse(
+      {
+        type: "setAnswers",
+        contestId: contest.id,
+        answers: student.answers,
+        score: calcScore(student, variant.schema),
+        maxScore: sumBy(Object.values(variant.schema).map((problem) => problem.pointsCorrect)),
+      },
+      studentSchema,
+    );
+  };
 }
 
-export async function startIframe(student: Student, contest: Contest): Promise<Student | null> {
-  if (window.parent === window) return null;
+export function startIframe(variant: Variant) {
+  return async (student: Student, contest: Contest): Promise<Student | null> => {
+    if (window.parent === window) return null;
 
-  return await getResponse(
-    {
-      type: "start",
-      contestId: contest.id,
-      variantId: student.variantId,
-      duration: contest.onlineSettings?.duration ?? 0,
-    },
-    studentSchema,
-  );
+    return await getResponse(
+      {
+        type: "start",
+        contestId: contest.id,
+        variantId: student.variantId,
+        duration: contest.onlineSettings?.duration ?? 0,
+        score: calcScore(student, variant.schema),
+        maxScore: sumBy(Object.values(variant.schema).map((problem) => problem.pointsCorrect)),
+      },
+      studentSchema,
+    );
+  };
 }
 
 export async function submitIframe(_student: Student, contest: Contest): Promise<Student | null> {

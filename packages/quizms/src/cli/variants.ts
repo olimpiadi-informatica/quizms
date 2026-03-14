@@ -66,22 +66,28 @@ export default async function variants(options: ExportVariantsOptions) {
       QUIZMS_CACHE_DIR: cacheDir,
     };
 
-    let schema: string;
     try {
       await promisify(execFile)(process.execPath, ["--conditions=react-server", "server.js"], {
         cwd: statementBuildDir,
         signal: controller.signal,
         env,
       });
+    } catch (err) {
+      controller.abort();
+      fatal(`Failed to build statement for variant ${config.id}/${variant}: ${err}`);
+    }
 
+    let schema: string;
+    try {
       const { stdout } = await promisify(execFile)(process.execPath, ["server.js"], {
         cwd: schemaBuildDir,
+        signal: controller.signal,
         env,
       });
       schema = stdout;
     } catch (err) {
       controller.abort();
-      fatal(`Failed to build variant ${config.id}/${variant}: ${err}`);
+      fatal(`Failed to build schema for variant ${config.id}/${variant}: ${err}`);
     }
 
     await writeFile(

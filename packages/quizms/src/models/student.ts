@@ -29,7 +29,6 @@ export const studentSchema = z
     variantId: z.string(),
     answers: z.record(z.string(), answerSchema),
     score: z.number(),
-    maxScore: z.number(),
     extraData: z.record(z.string(), z.any()),
 
     createdAt: z.coerce.date(),
