@@ -41,9 +41,16 @@ export function DevProvider({ contest, children }: { contest: Contest; children:
       name: "Utente",
       surname: "anonimo",
     },
-    answers: {},
+    absent: false,
+    disabled: false,
+    venueId: "",
     contestId: contest.id,
+    token: null,
+    participationWindow: null,
     variantId: "0",
+    answers: {},
+    score: null,
+    createdAt: new Date(),
   });
 
   const mockVenue: Venue = useMemo(
@@ -51,8 +58,9 @@ export function DevProvider({ contest, children }: { contest: Contest; children:
       id: "",
       schoolId: "",
       contestId: contest.id,
+      token: null,
       name: "",
-      participationWindow: student.participationWindow,
+      participationWindow: student.participationWindow ?? null,
       pdfVariants: [],
       finalized: false,
       disabled: false,

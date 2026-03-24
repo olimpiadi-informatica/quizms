@@ -168,7 +168,7 @@ async function importStudents(
         contest.problemIds
           .map((id, i) => {
             const answer = parseAnswer(rawAnswers[i], variant.schema[id]);
-            const err = validateAnswerValue(answer?.value, variant.schema[id]);
+            const err = validateAnswerValue(answer?.value || null, variant.schema[id]);
             if (err) {
               throw new Error(`Errore nella riga ${row + 1}: ${err[0]}`);
             }
@@ -191,6 +191,10 @@ async function importStudents(
       createdAt: new Date(),
       absent: false,
       disabled: false,
+
+      token: null,
+      participationWindow: null,
+      score: null,
     };
     student.score = calcScore(student, variants[variantId]?.schema);
     students.push(student);

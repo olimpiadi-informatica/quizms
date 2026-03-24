@@ -1,4 +1,4 @@
-import { contestSchema, studentSchema, variantSchema, venueSchema } from "@olinfo/quizms/models";
+import { contestSchema, variantSchema, venueSchema } from "@olinfo/quizms/models";
 import { validate } from "@olinfo/quizms/utils";
 import {
   type DocumentSnapshot,
@@ -8,6 +8,7 @@ import {
 import { cloneDeepWith, isDate, isString, omit } from "lodash-es";
 import type z from "zod";
 
+import { studentSchema } from "~/models/student";
 import { submissionSchema } from "~/models/submission";
 import { userSchema } from "~/models/user";
 import { websiteSchema } from "~/models/website";

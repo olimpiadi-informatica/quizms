@@ -106,6 +106,7 @@ function Table({ frozen }: { frozen: boolean }) {
   const allStudents = [...students];
   if (contest.allowStudentImport && !frozen) {
     allStudents.push({
+      userData: {},
       id: newStudentId.current,
       contestId: contest.id,
       venueId: venue.id,
@@ -114,6 +115,9 @@ function Table({ frozen }: { frozen: boolean }) {
       answers: {},
       absent: false,
       disabled: false,
+      participationWindow: null,
+      token: null,
+      score: null,
     } as Student);
   }
 
