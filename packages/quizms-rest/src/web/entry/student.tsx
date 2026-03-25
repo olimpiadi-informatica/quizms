@@ -1,18 +1,22 @@
 import { useCallback } from "react";
 
 import { Title } from "@olinfo/quizms/components";
-import { contestSchema, studentSchema, venueSchema, type Answer } from "@olinfo/quizms/models";
-import { RemoteStatement, StudentProvider } from "@olinfo/quizms/student";
+import { type Answer, contestSchema, studentSchema, venueSchema } from "@olinfo/quizms/models";
+import { RemoteStatement, StudentProvider, useStudent } from "@olinfo/quizms/student";
 import { useUserAgent, validate } from "@olinfo/quizms/utils";
-import { Form, Navbar, NavbarBrand, TextField } from "@olinfo/react-components";
+import {
+  Button,
+  Form,
+  Navbar,
+  NavbarBrand,
+  SubmitButton,
+  TextField,
+} from "@olinfo/react-components";
 import { useCookies } from "react-cookie";
-import useSWR from "swr";
+import useSWR, { mutate, type SWRConfiguration } from "swr";
 
-import type { Contest as ContestResponse } from "../hooks/bindings/Contest";
-import type { Student as StudentResponse } from "../hooks/bindings/Student";
-import type { Venue as VenueResponse } from "../hooks/bindings/Venue";
-import { restToContest, restToStudent, restToVenue } from "../hooks/converters";
-import { parse } from "zod";
+// @ts-expect-error
+import Header from "virtual:quizms-rest-header";
 
 export default function StudentEntry() {
   const [{ token }] = useCookies(["token"], {
@@ -52,6 +56,7 @@ function StudentForm() {
       <Form onSubmit={submit} className="p-4 pb-8">
         <h1 className="mb-2 text-xl font-bold">Accedi alla gara</h1>
         <TextField field="token" label="Codice di accesso" placeholder="aaaaa-bbbbb-ccccc" />
+        <SubmitButton>Inizia la prova</SubmitButton>
       </Form>
     </>
   );
@@ -59,63 +64,111 @@ function StudentForm() {
 
 function StudentInner() {
   const [{ token }, _setCookie, removeCookie] = useCookies(["token"]);
-  const {
-    data: restStudent,
-    error: studentError,
-    isLoading: isStudentLoading,
-  } = useSWR(["/api/contestant/status", token], ([url, _token]) =>
-    fetch(url).then((d) => d.json()).then((j) => validate(studentSchema, {...j, score: null})),
+
+  const swrConfig: SWRConfiguration = {
+    revalidateIfStale: false,
+    revalidateOnFocus: false,
+    revalidateOnMount: false,
+    revalidateOnReconnect: false,
+    suspense: true,
+  };
+
+  const { data: student, mutate: mutateStudent } = useSWR(
+    `contestant/status/${token}`,
+    () =>
+      fetch("/api/contestant/status")
+        .then((d) => d.json())
+        .then((j) => validate(studentSchema, { ...j, score: null })),
+    swrConfig,
   );
-  const {
-    data: contest,
-    error: contestError,
-    isLoading: isContestLoading,
-  } = useSWR(["/api/contestant/contest", token], ([url, _token]) =>
-    fetch(url).then((d) => d.json()).then((j) => validate(contestSchema, j)),
+  const { data: contest } = useSWR(
+    `/contestant/contest/${token}`,
+    () =>
+      fetch("/api/contestant/contest")
+        .then((d) => d.json())
+        .then((j) => validate(contestSchema, j)),
+    swrConfig,
   );
-  const {
-    data: venue,
-    error: venueError,
-    isLoading: isVenueLoading,
-  } = useSWR(["/api/contestant/venue", token], ([url, _token]) =>
-    fetch(url).then((d) => d.json()).then((j) => validate(venueSchema, j)),
+  const { data: venue } = useSWR(
+    `/api/contestant/venue/${token}`,
+    () =>
+      fetch("/api/contestant/venue")
+        .then((d) => d.json())
+        .then((j) => validate(venueSchema, j)),
+    swrConfig,
   );
 
   const logout = useCallback(() => {
     removeCookie("token");
   }, [removeCookie]);
 
-  if (studentError || contestError || venueError) {
+  const submit = useCallback(async () => {
+    await fetch("/api/contestant/end", { method: "post" });
+    await mutate(`contestant/status/${token}`);
+  }, [token]);
+
+  const setAnswer = useCallback(
+    async (problemId: string, answer: Answer) => {
+      const answers = {
+        ...student!.answers,
+        [problemId]: answer,
+      };
+      await fetch("/api/contestant/set_answers", {
+        method: "post",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(answers),
+      });
+      await mutateStudent({ ...student!, answers });
+    },
+    [mutateStudent, student],
+  );
+
+  if (!student || !contest || !venue) {
     return <> ERROR </>;
   }
-  if (isStudentLoading || isContestLoading || isVenueLoading) {
-    return <> LOADING </>;
-  }
-
-  const student = restToStudent(restStudent!);
 
   return (
     <StudentProvider
       contest={contest}
       venue={venue}
       student={student}
-      setAnswer={async (problemId: string, answer: Answer) => {
-        const answers = student.answers!;
-        answers[problemId] = answer;
-        await fetch("/api/contestant/set_answers", {
-          method: "post",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(answers),
-        });
-      }}
+      setAnswer={setAnswer}
       logout={logout}
-      submit={() => {}}
+      submit={submit}
       enforceFullscreen={true}>
-      {JSON.stringify(student, undefined, 2)}
-      {JSON.stringify(contest, undefined, 2)}
-      {JSON.stringify(venue, undefined, 2)}
+      <Header contestId={contest.id} />
+      <RestStatement />
     </StudentProvider>
+  );
+}
+
+function RestStatement() {
+  const { student } = useStudent();
+  const [{ token }] = useCookies(["token"], {
+    doNotParse: true,
+  });
+
+  const start = async () => {
+    await fetch("/api/contestant/start", { method: "post" });
+    await mutate(`contestant/status/${token}`);
+  };
+
+  const getFileUrl = (fileName: string) => {
+    return `/api/contestant/file/${fileName}`;
+  };
+
+  if (!student.participationWindow) {
+    return (
+      <div className="flex h-[50vh] flex-col items-center justify-center">
+        <Button className="btn-success btn-lg" onClick={start}>
+          Inizia
+        </Button>
+      </div>
+    );
+  }
+  return (
+    <RemoteStatement statementUrl={() => getFileUrl("statement.txt")} moduleUrl={getFileUrl} />
   );
 }

@@ -1,4 +1,7 @@
-import type { PluginOption } from "vite";
+import { variantsConfigSchema } from "@olinfo/quizms/models";
+import { reactComponentCase } from "@olinfo/quizms/utils";
+import { load } from "@olinfo/quizms/utils-node";
+import { type PluginOption, transformWithEsbuild } from "vite";
 
 export default function restEntry(): PluginOption {
   return {
@@ -31,6 +34,30 @@ export default function restEntry(): PluginOption {
           },
         },
       };
+    },
+    resolveId(id) {
+      if (id === "virtual:quizms-rest-header") {
+        return `\0${id}`;
+      }
+    },
+    async load(id) {
+      if (id === "\0virtual:quizms-rest-header") {
+        const configs = await load("variants", variantsConfigSchema);
+        const header = `
+import { lazy } from "react";
+
+${configs.map((c) => `const ${reactComponentCase(c.id)}Header = lazy(() => import("~/${c.header}"));`).join("\n")}
+
+export default function RestHeader({ contestId }) {
+  switch (contestId) {
+  ${configs.map((c) => `case "${c.id}": return <${reactComponentCase(c.id)}Header />;`).join("\n")}
+  }
+}`;
+
+        return transformWithEsbuild(header, "virtual:quizms-rest-header.jsx", {
+          jsx: "automatic",
+        });
+      }
     },
   } satisfies PluginOption;
 }
