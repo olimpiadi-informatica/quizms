@@ -1,4 +1,10 @@
-import { contestSchema, studentSchema, variantSchema, venueSchema } from "@olinfo/quizms/models";
+import {
+  announcementSchema,
+  contestSchema,
+  studentSchema,
+  variantSchema,
+  venueSchema,
+} from "@olinfo/quizms/models";
 import { useCookies } from "react-cookie";
 import z from "zod";
 
@@ -28,4 +34,12 @@ export function useRestStudents(venueId: string) {
 
 export function useRestVariants() {
   return useRestData("/variants", "/api/teacher/variants", variantSchema.array());
+}
+
+export function useRestAnnouncements(contestId: string) {
+  return useRestData(
+    `/announcements/${contestId}`,
+    `/api/teacher/announcements/${contestId}`,
+    announcementSchema.array(),
+  );
 }

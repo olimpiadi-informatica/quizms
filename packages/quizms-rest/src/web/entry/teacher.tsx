@@ -2,6 +2,7 @@ import { useCallback, useEffect } from "react";
 
 import { Title } from "@olinfo/quizms/components";
 import type { Student } from "@olinfo/quizms/models";
+import { RemoteStatement, useStudent } from "@olinfo/quizms/student";
 import { TeacherProvider } from "@olinfo/quizms/teacher";
 import {
   CurrentPasswordField,
@@ -14,7 +15,13 @@ import {
 import { useCookies } from "react-cookie";
 import { useSearch } from "wouter";
 
-import { useRestContests, useRestStudents, useRestVariants, useRestVenues } from "../hooks";
+import {
+  useRestAnnouncements,
+  useRestContests,
+  useRestStudents,
+  useRestVariants,
+  useRestVenues,
+} from "../hooks";
 
 export default function TeacherEntry() {
   const [{ username, password }] = useCookies(["username", "password"], {
@@ -73,10 +80,30 @@ function useStudents(venueId: string): [Student[], (s: Student) => Promise<void>
   return [useRestStudents(venueId).data!, async () => {}];
 }
 
+function useAnnouncements(contestId: string) {
+  return useRestAnnouncements(contestId).data!;
+}
+
+function TeacherStatement() {
+  const { student } = useStudent();
+  const getFileUrl = useCallback(
+    (fileName: string) => {
+      return `/api/teacher/file/${student.id}/${fileName}`;
+    },
+    [student.id],
+  );
+  return (
+    <RemoteStatement statementUrl={() => getFileUrl("statement.txt")} moduleUrl={getFileUrl} />
+  );
+}
+
 function TeacherInner() {
   const { data: contests } = useRestContests();
   const { data: venues, mutate: mutateVenues } = useRestVenues();
   const { data: variants } = useRestVariants();
+  const [_cookies, _setCookie, removeCookie] = useCookies(["username", "password"], {
+    doNotParse: true,
+  });
 
   const start = useCallback(
     async (venueId: string) => {
@@ -85,6 +112,16 @@ function TeacherInner() {
     },
     [mutateVenues],
   );
+
+  const finalize = async (venueId: string) => {
+    await fetch(`/api/teacher/finalize/${venueId}`, { method: "post" });
+    await mutateVenues();
+  };
+
+  const logout = useCallback(() => {
+    removeCookie("username");
+    removeCookie("password");
+  }, [removeCookie]);
 
   if (!contests || !venues || !variants) {
     return;
@@ -97,12 +134,12 @@ function TeacherInner() {
       contests={contests}
       startContestWindow={start}
       stopContestWindow={async () => {}}
-      finalizeVenue={async () => {}}
+      finalizeVenue={finalize}
       variants={variants}
-      logout={async () => {}}
-      statementComponent={() => <></>}
+      logout={logout}
+      statementComponent={() => <TeacherStatement />}
       getPdfStatements={async () => ({})}
-      useAnnouncements={() => []}
+      useAnnouncements={useAnnouncements}
       useStudents={useStudents}
       useStudentRestores={() => [[], async () => {}, async () => {}]}
     />

@@ -8,6 +8,7 @@ export function useRestData<Out>(key: string, url: string, schema: z.core.$ZodTy
     revalidateOnFocus: false,
     revalidateOnMount: false,
     revalidateOnReconnect: false,
+    refreshInterval: 5000,
     suspense: true,
   };
 

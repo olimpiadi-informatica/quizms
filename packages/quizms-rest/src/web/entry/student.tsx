@@ -111,12 +111,12 @@ function StudentInner() {
       submit={submit}
       enforceFullscreen={true}>
       <Header contestId={contest.id} />
-      <RestStatement />
+      <StudentStatement />
     </StudentProvider>
   );
 }
 
-function RestStatement() {
+function StudentStatement() {
   const { student } = useStudent();
   const [{ token }] = useCookies(["token"], {
     doNotParse: true,
