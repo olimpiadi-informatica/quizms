@@ -29,6 +29,7 @@ type ImportOptions = {
 
   contests?: true;
   venues?: true;
+  teachers?: true;
   statements?: true;
   students?: true;
   variants?: true;
@@ -42,7 +43,7 @@ export default async function importData(options: ImportOptions) {
   if (options.contests) {
     await importContests(options);
   }
-  if (options.venues) {
+  if (options.venues || options.teachers) {
     await importVenues(options);
   }
   if (options.students) {
@@ -97,8 +98,18 @@ async function importVenues(options: ImportOptions) {
   const schools = await load("venues", importVenueSchema);
   const contests = await loadContests();
 
+  if (options.teachers) {
+    const teachers = schools.map((school) => ({
+      id: school.id,
+      password: school.password,
+      venues: contests
+        .filter((contest) => picomatch.isMatch(contest.id, school.contestIds))
+        .map((contest) => `${school.id}-${contest.id}`),
+    }));
+    await adminImport("teachers", urlBuilder("teacher"), teachers, options);
+  }
   if (options.venues) {
-    const venues: Venue[] = [];
+    const venues: Omit<Venue, "participationWindow">[] = [];
 
     for (const contest of contests) {
       for (const school of schools) {
@@ -117,7 +128,6 @@ async function importVenues(options: ImportOptions) {
         venues.push({
           id: `${school.id}-${contest.id}`,
           token: null,
-          participationWindow: school.participationWindow,
           schoolId: school.id,
           contestId: contest.id,
           name: school.name,
@@ -127,7 +137,7 @@ async function importVenues(options: ImportOptions) {
         });
       }
     }
-    await adminImport("venues", urlBuilder("venue"), venues, options);
+    await adminImport("venues", urlBuilder("venue_data"), venues, options);
   }
 }
 
@@ -232,6 +242,8 @@ async function adminImport<T extends { id: string }>(
   const existing: Record<string, T> = {};
   for (const elem of data) {
     try {
+      const getUrl = new URL(url(elem.id).get, options.apiUrl);
+      console.log(getUrl);
       const res = await fetch(new URL(url(elem.id).get, options.apiUrl), {
         headers: {
           cookie: `admin_token=${options.adminToken}`,

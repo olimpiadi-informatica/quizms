@@ -5,6 +5,8 @@ import { createApp } from "@olinfo/quizms/entry";
 import { CookiesProvider } from "react-cookie";
 import { Route, Router, Switch } from "wouter";
 
+import TeacherEntry from "./teacher";
+
 const StudentEntry = lazy(() => import("./student"));
 
 export default function createRestEntry() {
@@ -15,7 +17,9 @@ export default function createRestEntry() {
           <Suspense fallback={<Loading />}>
             <Switch>
               <Route path="/admin" nest />
-              <Route path="/teacher" nest />
+              <Route path="/teacher" nest>
+                <TeacherEntry />
+              </Route>
               <Route path="/">
                 <StudentEntry />
               </Route>

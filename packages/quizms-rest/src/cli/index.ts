@@ -35,6 +35,7 @@ async function main() {
     .description("Import the contests data.")
     .option("--contests", "Import the contests.")
     .option("--venues", "Import the venues.")
+    .option("--teachers", "Import the teachers.")
     .option("--statements", "Import the statements.")
     .option("--students", "Import the students.")
     .option("--variants", "Import the variants.")

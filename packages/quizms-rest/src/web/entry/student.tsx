@@ -1,9 +1,9 @@
 import { useCallback } from "react";
 
 import { Title } from "@olinfo/quizms/components";
-import { type Answer, contestSchema, studentSchema, venueSchema } from "@olinfo/quizms/models";
+import type { Answer } from "@olinfo/quizms/models";
 import { RemoteStatement, StudentProvider, useStudent } from "@olinfo/quizms/student";
-import { useUserAgent, validate } from "@olinfo/quizms/utils";
+import { useUserAgent } from "@olinfo/quizms/utils";
 import {
   Button,
   Form,
@@ -13,8 +13,9 @@ import {
   TextField,
 } from "@olinfo/react-components";
 import { useCookies } from "react-cookie";
-import useSWR, { mutate, type SWRConfiguration } from "swr";
+import { mutate } from "swr";
 
+import { useRestContest, useRestStudent, useRestVenue } from "../hooks";
 // @ts-expect-error
 import Header from "virtual:quizms-rest-header";
 
@@ -65,38 +66,9 @@ function StudentForm() {
 function StudentInner() {
   const [{ token }, _setCookie, removeCookie] = useCookies(["token"]);
 
-  const swrConfig: SWRConfiguration = {
-    revalidateIfStale: false,
-    revalidateOnFocus: false,
-    revalidateOnMount: false,
-    revalidateOnReconnect: false,
-    suspense: true,
-  };
-
-  const { data: student, mutate: mutateStudent } = useSWR(
-    `contestant/status/${token}`,
-    () =>
-      fetch("/api/contestant/status")
-        .then((d) => d.json())
-        .then((j) => validate(studentSchema, { ...j, score: null })),
-    swrConfig,
-  );
-  const { data: contest } = useSWR(
-    `/contestant/contest/${token}`,
-    () =>
-      fetch("/api/contestant/contest")
-        .then((d) => d.json())
-        .then((j) => validate(contestSchema, j)),
-    swrConfig,
-  );
-  const { data: venue } = useSWR(
-    `/api/contestant/venue/${token}`,
-    () =>
-      fetch("/api/contestant/venue")
-        .then((d) => d.json())
-        .then((j) => validate(venueSchema, j)),
-    swrConfig,
-  );
+  const { data: student, mutate: mutateStudent } = useRestStudent();
+  const { data: contest } = useRestContest();
+  const { data: venue } = useRestVenue();
 
   const logout = useCallback(() => {
     removeCookie("token");
