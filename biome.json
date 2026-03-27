@@ -1,7 +1,12 @@
 {
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
   "files": {
-    "includes": ["packages/*/src/**", "packages/*/*.mjs", "packages/*/*.json", "!packages/src/quizms-rest/src/web/hooks/bindings/*"]
+    "includes": [
+      "packages/*/src/**",
+      "packages/*/*.mjs",
+      "packages/*/*.json",
+      "!packages/src/quizms-rest/src/web/hooks/bindings/*"
+    ]
   },
   "formatter": {
     "indentStyle": "space",
