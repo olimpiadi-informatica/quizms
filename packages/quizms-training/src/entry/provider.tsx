@@ -171,10 +171,9 @@ TrainingProvider.displayName = "TrainingProvider";
 function createAnonymousStudent(contest: VariantsConfig): Student {
   return {
     id: "",
-    userData: {
-      name: "Utente",
-      surname: "anonimo",
-    },
+    name: "Utente",
+    surname: "anonimo",
+    userData: {},
     answers: {},
     contestId: contest.id,
     absent: false,
