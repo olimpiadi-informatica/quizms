@@ -5,13 +5,13 @@ export const venueSchema = z.strictObject({
   schoolId: z.string(),
   contestId: z.string(),
   name: z.string(),
-  token: z.string().optional(),
+  token: z.string().nullable(),
   participationWindow: z
     .strictObject({
-      start: z.date(),
-      end: z.date(),
+      start: z.coerce.date(),
+      end: z.coerce.date(),
     })
-    .optional(),
+    .nullable(),
   finalized: z.boolean().default(false),
   pdfVariants: z.array(z.coerce.string()),
   disabled: z.boolean().default(false),

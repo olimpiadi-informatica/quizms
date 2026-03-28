@@ -122,14 +122,14 @@ export function columnDefinition(
         valueGetter: ({ data }) => {
           if (data.absent || data.disabled) return "";
           if (!(id in (data.answers ?? {}))) return "";
-          if (variants[data.variant] == null) return "";
+          if (variants[data.variantId] == null) return "";
           return displayAnswer(data.answers[id]);
         },
         tooltipValueGetter: ({ data }) => data.answers?.[id],
         editable: ({ data }) =>
-          contest.allowAnswerEdit && data.variant && !data.absent && !data.disabled && !frozen,
+          contest.allowAnswerEdit && data.variantId && !data.absent && !data.disabled && !frozen,
         valueParser: (params) => {
-          const schema = variants[params.data.variant!].schema;
+          const schema = variants[params.data.variantId!].schema;
           return parseAnswer(params.newValue, schema[id]);
         },
         cellEditorParams: {

@@ -24,7 +24,7 @@ type Props = {
   name: string;
   contests: Contest[];
   venues: Venue[];
-  logout: () => Promise<void>;
+  logout: () => void | Promise<void>;
   children: ReactNode;
 };
 
@@ -81,7 +81,7 @@ TeacherLayout.displayName = "TeacherLayout";
 
 type DropdownProps = {
   name: string;
-  logout: () => Promise<void>;
+  logout: () => void | Promise<void>;
 };
 
 function UserDropdown({ name, logout }: DropdownProps) {

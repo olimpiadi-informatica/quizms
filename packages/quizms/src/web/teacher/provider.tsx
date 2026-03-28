@@ -17,7 +17,7 @@ type TeacherProviderProps = {
   stopContestWindow: (venueId: string) => Promise<void>;
   finalizeVenue: (venueId: string) => Promise<void>;
   variants: Variant[];
-  logout: () => Promise<void>;
+  logout: () => void | Promise<void>;
   statementComponent: ComponentType<Record<never, never>>;
   getPdfStatements: (
     contestId: string,

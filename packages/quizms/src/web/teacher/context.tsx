@@ -23,7 +23,7 @@ export type TeacherContextProps = {
   /** Varianti dei testi */
   variants: Record<string, Variant>;
   /** Funzione per effettuare il logout */
-  logout: () => Promise<void>;
+  logout: () => void | Promise<void>;
   /** Funzione per ottenere i pdf dei testi */
   getPdfStatements: () => Promise<Record<string, ArrayBuffer>>;
   /** Hook per ottenere gli annunci */

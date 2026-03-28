@@ -42,7 +42,7 @@ export function StudentLayout({ children }: { children: ReactNode }) {
       const isFocused =
         document.hasFocus() || (!ua.hasFullscreen && document.visibilityState === "visible");
 
-      const key = `quizms_last_active_${student.uid}`;
+      const key = `quizms_last_active_${student.id}`; // TODO: should we use id or uid?
       const now = new Date();
 
       if (isFullscreen && isFocused) {
@@ -62,7 +62,7 @@ export function StudentLayout({ children }: { children: ReactNode }) {
     }, 200);
 
     return () => clearInterval(interval);
-  }, [enforceFullscreen, logout, student.uid, terminated, ua.hasFullscreen]);
+  }, [enforceFullscreen, logout, student.id, terminated, ua.hasFullscreen]);
 
   const submit = async () => {
     const modal = submitRef.current;

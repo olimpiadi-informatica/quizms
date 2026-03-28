@@ -17,23 +17,23 @@ export const answerValues = {
 export const answerSchema = z.discriminatedUnion("type", [
   z.strictObject({
     type: z.literal("openNumber"),
-    value: answerValues.openNumber.optional(),
+    value: answerValues.openNumber.nullable(),
   }),
   z.strictObject({
     type: z.literal("openText"),
-    value: answerValues.openText.optional(),
+    value: answerValues.openText.nullable(),
   }),
   z.strictObject({
     type: z.literal("multipleChoice"),
-    value: answerValues.multipleChoice.optional(),
+    value: answerValues.multipleChoice.nullable(),
   }),
   z.strictObject({
     type: z.literal("multipleResponse"),
-    value: answerValues.multipleResponse.optional(),
+    value: answerValues.multipleResponse.nullable(),
   }),
   z.strictObject({
     type: z.literal("blockly"),
-    value: answerValues.blockly.optional(),
+    value: answerValues.blockly.nullable(),
   }),
 ]);
 
@@ -138,7 +138,7 @@ export function displayAnswer(answer?: Answer): string {
 }
 
 export function validateAnswerValue(
-  answer: AnswerValue | undefined,
+  answer: AnswerValue | null,
   schema: Schema[string],
 ): [string] | null {
   if (answer == null || answer === "") return null;
@@ -181,11 +181,11 @@ export function validateAnswerValue(
 }
 
 export function calcScore(student: Student, schema?: Schema) {
-  if (student.absent || student.disabled) return;
+  if (student.absent || student.disabled) return null;
 
   const answers = student.answers;
 
-  if (!schema || !answers) return;
+  if (!schema || !answers) return null;
 
   let score = 0;
   for (const id in schema) {

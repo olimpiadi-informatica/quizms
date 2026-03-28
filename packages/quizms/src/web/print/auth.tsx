@@ -69,16 +69,23 @@ VariantList.displayName = "VariantList";
 export function PrintProvider({ contest, children }: { contest: Contest; children: ReactNode }) {
   const student: Student = {
     id: "",
-    userData: {
-      name: "",
-      surname: "",
-    },
-    answers: {},
+    userData: {},
+    name: "",
+    surname: "",
+    absent: false,
+    disabled: false,
+    venueId: "",
     contestId: contest.id,
+    token: null,
+    participationWindow: null,
     variantId: new URLSearchParams(window.location.search).get("v") ?? "",
+    answers: {},
+    score: null,
+    createdAt: new Date(),
   };
 
   const mockVenue: Venue = {
+    token: null,
     id: "",
     schoolId: "",
     contestId: contest.id,

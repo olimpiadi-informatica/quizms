@@ -85,6 +85,7 @@ export function TrainingProvider({
       finalized: false,
       disabled: false,
       pdfVariants: [],
+      token: null,
     }),
     [contest.id, student.participationWindow],
   );
@@ -119,7 +120,7 @@ export function TrainingProvider({
         ({
           ...student,
           answers: {},
-          participationWindow: undefined,
+          participationWindow: null,
         }) satisfies Student,
     );
   }, [updateStudent]);
@@ -170,12 +171,19 @@ TrainingProvider.displayName = "TrainingProvider";
 function createAnonymousStudent(contest: VariantsConfig): Student {
   return {
     id: "",
-    userData: {
-      name: "Utente",
-      surname: "anonimo",
-    },
+    name: "Utente",
+    surname: "anonimo",
+    userData: {},
     answers: {},
     contestId: contest.id,
+    absent: false,
+    disabled: false,
+    venueId: "",
+    token: null,
+    participationWindow: null,
+    variantId: "",
+    score: null,
+    createdAt: new Date(),
   };
 }
 
