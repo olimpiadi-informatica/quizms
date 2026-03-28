@@ -37,10 +37,9 @@ ContestList.displayName = "ContestList";
 export function DevProvider({ contest, children }: { contest: Contest; children: ReactNode }) {
   const [student, setStudent] = useState<Student>({
     id: "",
-    userData: {
-      name: "Utente",
-      surname: "anonimo",
-    },
+    userData: {},
+    name: "Utente",
+    surname: "anonimo",
     absent: false,
     disabled: false,
     venueId: "",

@@ -15,7 +15,7 @@ import {
 import { Rng, validate } from "@olinfo/quizms/utils";
 import { fatal, load, loadContests, success } from "@olinfo/quizms/utils-node";
 import { SingleBar } from "cli-progress";
-import { uniq, xor } from "lodash-es";
+import { keyBy, uniq, xor } from "lodash-es";
 import picomatch from "picomatch";
 import { glob } from "tinyglobby";
 import z from "zod";
@@ -59,7 +59,16 @@ export default async function importData(options: ImportOptions) {
 
 async function importContests(options: ImportOptions) {
   const contests = await load("contests", contestSchema);
-  await adminImport("contests", urlBuilder("contest"), contests, options);
+  await adminImport(
+    "contests",
+    contests.map((c) => ({
+      id: c.id,
+      get: `admin/contest/${c.id}/get`,
+      cas: `admin/contest/${c.id}/cas`,
+      value: c,
+    })),
+    options,
+  );
 }
 
 async function importStudents(options: ImportOptions) {
@@ -78,7 +87,16 @@ async function importStudents(options: ImportOptions) {
     })
     .transform((data) => ({ ...data, id: data.token }));
   const students = await load("students", importStudentSchema);
-  await adminImport("students", urlBuilder("student_data"), students, options);
+  await adminImport(
+    "students",
+    students.map((s) => ({
+      id: s.id,
+      get: `admin/venue/${s.venueId}/student/${s.id}/data/get`,
+      cas: `admin/venue/${s.venueId}/student/${s.id}/data/cas`,
+      value: s,
+    })),
+    options,
+  );
 }
 
 async function importVenues(options: ImportOptions) {
@@ -100,13 +118,22 @@ async function importVenues(options: ImportOptions) {
 
   if (options.teachers) {
     const teachers = schools.map((school) => ({
-      id: school.id,
+      username: school.id,
       password: school.password,
       venues: contests
         .filter((contest) => picomatch.isMatch(contest.id, school.contestIds))
         .map((contest) => `${school.id}-${contest.id}`),
     }));
-    await adminImport("teachers", urlBuilder("teacher"), teachers, options);
+    await adminImport(
+      "teacher",
+      teachers.map((t) => ({
+        id: t.username,
+        get: `admin/teacher/${t.username}/get`,
+        cas: `admin/teacher/${t.username}/cas`,
+        value: t,
+      })),
+      options,
+    );
   }
   if (options.venues) {
     const venues: Omit<Venue, "participationWindow">[] = [];
@@ -137,7 +164,16 @@ async function importVenues(options: ImportOptions) {
         });
       }
     }
-    await adminImport("venues", urlBuilder("venue_data"), venues, options);
+    await adminImport(
+      "venues",
+      venues.map((v) => ({
+        id: v.id,
+        get: `admin/venue/${v.id}/data/get`,
+        cas: `admin/venue/${v.id}/data/cas`,
+        value: v,
+      })),
+      options,
+    );
   }
 }
 
@@ -162,7 +198,16 @@ async function importVariants(options: ImportOptions) {
       });
     }),
   );
-  await adminImport("variants", urlBuilder("variant"), variants, options);
+  await adminImport(
+    "variants",
+    variants.map((v) => ({
+      id: v.id,
+      get: `admin/variant/${v.id}/get`,
+      cas: `admin/variant/${v.id}/cas`,
+      value: v,
+    })),
+    options,
+  );
 }
 
 async function importStatements(_options: ImportOptions) {
@@ -218,33 +263,20 @@ async function importStatements(_options: ImportOptions) {
   }
 }
 
-function urlBuilder(prefix: string) {
-  return (id: string) => ({
-    get: `/admin/${prefix}/get/${id}`,
-    cas: `/admin/${prefix}/cas`,
-  });
-}
+type importable<T> = {
+  id: string;
+  get: string;
+  cas: string;
+  value: T;
+};
 
-async function adminImport<T extends { id: string }>(
-  name: string,
-  url: (id: string) => { get: string; cas: string },
-  data: T[],
-  options: ImportOptions,
-) {
-  const newElems: Record<string, T> = {};
-  for (const elem of data) {
-    if (newElems[elem.id]) {
-      fatal(`Cannot import multiple ${name} with the same id: ${elem.id}`);
-    }
-    newElems[elem.id] = elem;
-  }
-
+async function adminImport<T>(name: string, dataList: importable<T>[], options: ImportOptions) {
+  const data = keyBy(dataList, (d) => d.id);
   const existing: Record<string, T> = {};
-  for (const elem of data) {
+  for (const id in data) {
     try {
-      const getUrl = new URL(url(elem.id).get, options.apiUrl);
-      console.log(getUrl);
-      const res = await fetch(new URL(url(elem.id).get, options.apiUrl), {
+      const getUrl = new URL(data[id].get, options.apiUrl);
+      const res = await fetch(getUrl, {
         headers: {
           cookie: `admin_token=${options.adminToken}`,
         },
@@ -256,7 +288,7 @@ async function adminImport<T extends { id: string }>(
       }
       const j = await res.json();
       if (j !== null) {
-        existing[elem.id] = j;
+        existing[id] = j;
       }
     } catch (err) {
       fatal(`Cannot import ${name}, error while fetching existing data: ${err}`);
@@ -271,12 +303,9 @@ async function adminImport<T extends { id: string }>(
     );
   }
 
-  const nonExistingIds = xor(
-    data.map((elem) => elem.id),
-    existingIds,
-  );
+  const nonExistingIds = xor(Object.keys(data), existingIds);
 
-  const idsToImport = options.skipExisting ? nonExistingIds : [...existingIds, ...nonExistingIds];
+  const idsToImport = options.skipExisting ? nonExistingIds : Object.keys(data);
 
   if (options.force && existingIds.length > 0) {
     const confirmed = await confirm({
@@ -299,8 +328,12 @@ async function adminImport<T extends { id: string }>(
   bar.start(idsToImport.length, 0);
 
   for (const id of idsToImport) {
-    const casUrl = new URL(url(id).cas, options.apiUrl);
+    const casUrl = new URL(data[id].cas, options.apiUrl);
     try {
+      console.log({
+        old: existing[id] ?? null,
+        new: data[id].value,
+      });
       const res = await fetch(casUrl, {
         method: "post",
         headers: {
@@ -309,7 +342,7 @@ async function adminImport<T extends { id: string }>(
         },
         body: JSON.stringify({
           old: existing[id] ?? null,
-          new: newElems[id],
+          new: data[id].value,
         }),
       });
       if (!res.ok) {

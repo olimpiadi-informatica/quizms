@@ -12,6 +12,9 @@ export const studentSchema = z.object({
     .partial()
     .catchall(z.union([z.string(), z.number(), z.date()])), // TODO: tag this union
 
+  name: z.string(),
+  surname: z.string(),
+
   absent: z.boolean(),
   disabled: z.boolean(),
 

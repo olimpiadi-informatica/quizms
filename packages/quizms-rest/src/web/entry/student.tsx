@@ -38,7 +38,7 @@ function StudentForm() {
   });
   const submit = useCallback(
     async ({ token }: { token: string }) => {
-      setCookie("token", token);
+      setCookie("token", token, { path: "/" });
       if (ua.hasFullscreen) {
         await document.documentElement.requestFullscreen?.();
       }

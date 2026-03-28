@@ -69,10 +69,9 @@ VariantList.displayName = "VariantList";
 export function PrintProvider({ contest, children }: { contest: Contest; children: ReactNode }) {
   const student: Student = {
     id: "",
-    userData: {
-      name: "",
-      surname: "",
-    },
+    userData: {},
+    name: "",
+    surname: "",
     absent: false,
     disabled: false,
     venueId: "",

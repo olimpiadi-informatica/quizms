@@ -183,6 +183,8 @@ async function importStudents(
     const student: Student = {
       id: randomId(),
       userData,
+      name: "",
+      surname: "", // TODO: fix
       contestId: contest.id,
       venueId: venue.id,
       variantId: variantId,
