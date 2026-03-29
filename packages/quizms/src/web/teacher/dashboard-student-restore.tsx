@@ -1,12 +1,12 @@
 import { Suspense, useMemo, useRef } from "react";
 
-import { Form, Modal, NumberField, SubmitButton } from "@olinfo/react-components";
+import { Form, Modal, NumberField, SubmitButton, useIsAfter } from "@olinfo/react-components";
 import { groupBy, sortBy } from "lodash-es";
 import { Check, X } from "lucide-react";
 
 import type { StudentRestore } from "~/models";
 
-import { useTeacherStudentRestores } from "./context";
+import { useTeacher, useTeacherStudentRestores } from "./context";
 
 function StudentRestoreEntry({
   studentRestore,
@@ -94,7 +94,10 @@ function StudentRestoreListInner() {
   ));
 }
 
-export function StudentRestoreList({ isStarted }: { isStarted: boolean }) {
+export function StudentRestoreList() {
+  const { venue } = useTeacher();
+  const isStarted = useIsAfter(venue.participationWindow?.start);
+
   return (
     <div className="h-full overflow-auto rounded-lg border border-base-content/15">
       <table className="table table-pin-rows">
