@@ -57,7 +57,12 @@ export function columnDefinition(
           return isStudentIncomplete(data!, contest, variants);
         },
         cellRenderer: ({ api, data, value }: ICellRendererParams<Student>) => {
-          value = formatUserData(data, field);
+          value =
+            field.name === "name"
+              ? data?.name
+              : field.name === "surname"
+                ? data?.surname
+                : formatUserData(data, field);
           if (
             field.pinned &&
             data?.updatedAt &&
