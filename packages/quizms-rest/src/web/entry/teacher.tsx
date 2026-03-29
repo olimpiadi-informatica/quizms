@@ -26,8 +26,9 @@ import {
 } from "../hooks";
 
 export default function TeacherEntry() {
-  const [{ username, password }] = useCookies(["username", "password"]);
-  if (username && password) {
+  const [{ token }] = useCookies(["token"], { doNotParse: true });
+
+  if (token) {
     return <TeacherInner />;
   }
 
@@ -35,7 +36,8 @@ export default function TeacherEntry() {
 }
 
 function TeacherLogin() {
-  const [, setCookie] = useCookies(["username", "password"], { doNotParse: true });
+  const [, , , updateCookies] = useCookies(["token"], { doNotParse: true });
+
   const params = new URLSearchParams(useSearch());
 
   useEffect(() => {
@@ -50,9 +52,9 @@ function TeacherLogin() {
     password: params.get("password") ?? "",
   };
 
-  const signIn = ({ username, password }: { username: string; password: string }) => {
-    setCookie("username", username, { path: "/" });
-    setCookie("password", password, { path: "/" });
+  const signIn = async (credential: { username: string; password: string }) => {
+    await ky.post("/api/teacher/login", { json: credential });
+    updateCookies();
   };
 
   return (
@@ -100,7 +102,7 @@ function TeacherInner() {
   const { data: venues, mutate: mutateVenues } = useRestVenues();
   const { data: variants } = useRestVariants();
 
-  const [, , removeCookie] = useCookies(["username", "password"], { doNotParse: true });
+  const [, , removeCookie] = useCookies(["token"], { doNotParse: true });
 
   const start = useCallback(
     async (venueId: string) => {
@@ -116,8 +118,7 @@ function TeacherInner() {
   };
 
   const logout = useCallback(() => {
-    removeCookie("username");
-    removeCookie("password");
+    removeCookie("token");
   }, [removeCookie]);
 
   return (

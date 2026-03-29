@@ -36,15 +36,18 @@ export default function StudentEntry() {
 }
 
 function StudentForm() {
+  const [, , , updateCookies] = useCookies(["token"], { doNotParse: true });
+
   const ua = useUserAgent();
   const submit = useCallback(
     async ({ token }: { token: string }) => {
       await ky.post("/api/contestant/login", { json: token });
+      updateCookies();
       if (ua.hasFullscreen) {
         await document.documentElement.requestFullscreen?.();
       }
     },
-    [ua],
+    [ua, updateCookies],
   );
   return (
     <>
