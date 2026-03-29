@@ -1,7 +1,7 @@
 import { useCallback, useEffect } from "react";
 
 import { Title } from "@olinfo/quizms/components";
-import type { Student } from "@olinfo/quizms/models";
+import type { Student, StudentRestore } from "@olinfo/quizms/models";
 import { RemoteStatement, useStudent } from "@olinfo/quizms/student";
 import { TeacherProvider } from "@olinfo/quizms/teacher";
 import {
@@ -99,7 +99,6 @@ function TeacherInner() {
   const { data: contests } = useRestContests();
   const { data: venues, mutate: mutateVenues } = useRestVenues();
   const { data: variants } = useRestVariants();
-  const { data: studentRestores } = useRestStudentRestores();
 
   const [, , removeCookie] = useCookies(["username", "password"], { doNotParse: true });
 
@@ -121,10 +120,6 @@ function TeacherInner() {
     removeCookie("password");
   }, [removeCookie]);
 
-  if (!contests || !venues || !variants) {
-    return;
-  }
-
   return (
     <TeacherProvider
       name={venues[0]?.name}
@@ -139,7 +134,27 @@ function TeacherInner() {
       getPdfStatements={async () => ({})}
       useAnnouncements={useAnnouncements}
       useStudents={useStudents}
-      useStudentRestores={() => [studentRestores ?? [], async () => {}, async () => {}]}
+      useStudentRestores={useStudentRestores}
     />
   );
+}
+
+function useStudentRestores(
+  venueId: string,
+): readonly [
+  StudentRestore[],
+  (request: StudentRestore) => Promise<void>,
+  (studentId: string) => Promise<void>,
+] {
+  const { data: studentRestores } = useRestStudentRestores(venueId);
+
+  const reject = async (studentId: string) => {
+    await ky.post(`/api/teacher/revoke-restores/${venueId}/${studentId}`);
+  };
+
+  const approve = async (request: StudentRestore) => {
+    await ky.post(`/api/teacher/approve-restore/${venueId}/${request.id}`);
+  };
+
+  return [studentRestores, approve, reject];
 }

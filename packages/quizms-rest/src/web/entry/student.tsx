@@ -93,10 +93,6 @@ function StudentInner() {
     [mutateStudent, student],
   );
 
-  if (!student || !contest || !venue) {
-    throw new Error("Missing student, contest or venue");
-  }
-
   return (
     <StudentProvider
       contest={contest}
