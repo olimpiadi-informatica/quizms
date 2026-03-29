@@ -111,7 +111,8 @@ function StudentInner() {
 }
 
 function StudentStatement() {
-  const { student } = useStudent();
+  const { student, venue } = useStudent();
+  console.log(student, venue);
   const [{ token }] = useCookies(["token"], {
     doNotParse: true,
   });
@@ -126,9 +127,14 @@ function StudentStatement() {
   };
 
   if (!student.participationWindow) {
+    const now = new Date();
+    const canStart =
+      venue.participationWindow &&
+      venue.participationWindow.start <= now &&
+      venue.participationWindow.end;
     return (
       <div className="flex h-[50vh] flex-col items-center justify-center">
-        <Button className="btn-success btn-lg" onClick={start}>
+        <Button className="btn-success btn-lg" onClick={start} disabled={!canStart}>
           Inizia
         </Button>
       </div>
