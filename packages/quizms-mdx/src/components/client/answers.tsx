@@ -85,12 +85,11 @@ export function MultipleResponseAnswer({ children }: { children: ReactNode }) {
         id={answerId}
         checked={currentlyChecked}
         className={clsx(
-          "checkbox checkbox-sm my-auto mr-4 bg-base-100 [print-color-adjust:exact] disabled:opacity-90 print:mr-2",
-          terminated &&
-            currentlyChecked && {
-              "checkbox-success": correct === true,
-              "checkbox-error": correct === false,
-            },
+          "checkbox checkbox-sm rounded-md my-auto mr-4 bg-base-100 [print-color-adjust:exact] disabled:opacity-90 print:mr-2",
+          terminated && {
+            "checkbox-success border-2": correct === true,
+            "checkbox-error": currentlyChecked && correct === false,
+          },
         )}
         onChange={(e) => submitAnswer(e.target.checked)}
         type="checkbox"
