@@ -16,6 +16,7 @@ import { useCookies } from "react-cookie";
 import { mutate } from "swr";
 
 import { useRestContest, useRestStudent, useRestVenue } from "../hooks";
+import { StudentRestoring } from "./student-restoring";
 // @ts-expect-error
 import Header from "virtual:quizms-rest-header";
 
@@ -25,7 +26,11 @@ export default function StudentEntry() {
   });
 
   if (token) {
-    return <StudentInner />;
+    return (
+      <StudentRestoring>
+        <StudentInner />
+      </StudentRestoring>
+    );
   }
 
   return <StudentForm />;
@@ -64,20 +69,21 @@ function StudentForm() {
 }
 
 function StudentInner() {
-  const [{ token }, _setCookie, removeCookie] = useCookies(["token"]);
+  const [, , removeCookie] = useCookies(["token"]);
 
   const { data: student, mutate: mutateStudent } = useRestStudent();
   const { data: contest } = useRestContest();
   const { data: venue } = useRestVenue();
 
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
     removeCookie("token");
+    await mutate(() => true, undefined, { revalidate: false });
   }, [removeCookie]);
 
   const submit = useCallback(async () => {
     await fetch("/api/contestant/end", { method: "post" });
-    await mutate(`contestant/status/${token}`);
-  }, [token]);
+    await mutateStudent();
+  }, [mutateStudent]);
 
   const setAnswer = useCallback(
     async (problemId: string, answer: Answer) => {
@@ -85,20 +91,20 @@ function StudentInner() {
         ...student!.answers,
         [problemId]: answer,
       };
-      await fetch("/api/contestant/set_answers", {
+      const resp = fetch("/api/contestant/set_answers", {
         method: "post",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(answers),
-      });
-      await mutateStudent({ ...student!, answers });
+      }).then(() => undefined);
+      await mutateStudent(resp, { optimisticData: { ...student!, answers } });
     },
     [mutateStudent, student],
   );
 
   if (!student || !contest || !venue) {
-    return <> ERROR </>;
+    throw new Error("Missing student, contest or venue");
   }
 
   return (

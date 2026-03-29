@@ -1,4 +1,9 @@
-import { contestSchema, studentSchema, venueSchema } from "@olinfo/quizms/models";
+import {
+  contestSchema,
+  studentRestoreSchema,
+  studentSchema,
+  venueSchema,
+} from "@olinfo/quizms/models";
 import { useCookies } from "react-cookie";
 import z from "zod";
 
@@ -10,6 +15,15 @@ export function useRestStudent() {
     `contestant/status/${token}`,
     "/api/contestant/status",
     z.preprocess((data: any) => ({ ...data, score: null }), studentSchema),
+  );
+}
+
+export function useRestStudentRestore() {
+  const [{ token }] = useCookies(["token"]);
+  return useRestData(
+    `contestant/restore/${token}`,
+    "/api/contestant/restore-status",
+    studentRestoreSchema,
   );
 }
 
