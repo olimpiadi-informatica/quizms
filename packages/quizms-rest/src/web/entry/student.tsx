@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { startTransition, useCallback } from "react";
 
 import { Title } from "@olinfo/quizms/components";
 import type { Answer } from "@olinfo/quizms/models";
@@ -95,7 +95,6 @@ function StudentInner() {
     },
     [mutateStudent, student],
   );
-
   return (
     <StudentProvider
       contest={contest}
