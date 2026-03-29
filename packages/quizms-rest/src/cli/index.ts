@@ -38,6 +38,7 @@ async function main() {
     .option("--teachers", "Import the teachers.")
     .option("--statements", "Import the statements.")
     .option("--students", "Import the students.")
+    .option("--tokens", "Import the tokens.")
     .option("--variants", "Import the variants.")
     .option("-d, --delete", "Delete existing collections.")
     .requiredOption("--api-url <string>", "Base api url.")

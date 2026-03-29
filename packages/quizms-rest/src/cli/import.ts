@@ -32,6 +32,7 @@ type ImportOptions = {
   teachers?: true;
   statements?: true;
   students?: true;
+  tokens?: true;
   variants?: true;
 };
 
@@ -46,7 +47,7 @@ export default async function importData(options: ImportOptions) {
   if (options.venues || options.teachers) {
     await importVenues(options);
   }
-  if (options.students) {
+  if (options.students || options.tokens) {
     await importStudents(options);
   }
   if (options.variants) {
@@ -87,16 +88,33 @@ async function importStudents(options: ImportOptions) {
     })
     .transform((data) => ({ ...data, id: data.token }));
   const students = await load("students", importStudentSchema);
-  await adminImport(
-    "students",
-    students.map((s) => ({
-      id: s.id,
-      get: `admin/venue/${s.venueId}/student/${s.id}/data/get`,
-      cas: `admin/venue/${s.venueId}/student/${s.id}/data/cas`,
-      value: s,
-    })),
-    options,
-  );
+  if (options.students) {
+    await adminImport(
+      "students",
+      students.map((s) => ({
+        id: s.id,
+        get: `admin/venue/${s.venueId}/student/${s.id}/data/get`,
+        cas: `admin/venue/${s.venueId}/student/${s.id}/data/cas`,
+        value: s,
+      })),
+      options,
+    );
+  }
+  if (options.tokens) {
+    await adminImport(
+      "tokens",
+      students.map((s) => ({
+        id: s.id,
+        get: `admin/token/${s.token}/get`,
+        cas: `admin/token/${s.token}/cas`,
+        value: {
+          value: s.token,
+          student: [s.venueId, s.id],
+        },
+      })),
+      options,
+    );
+  }
 }
 
 async function importVenues(options: ImportOptions) {
