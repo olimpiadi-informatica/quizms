@@ -87,11 +87,11 @@ function StudentInner() {
   const setAnswer = useCallback(
     async (problemId: string, answer: Answer) => {
       const answers = {
-        ...student!.answers,
+        ...student.answers,
         [problemId]: answer,
       };
       const resp = ky.post("/api/contestant/set_answers", { json: answers }).then(() => undefined);
-      await mutateStudent(resp, { optimisticData: { ...student!, answers } });
+      await mutateStudent(resp, { optimisticData: { ...student, answers }, populateCache: false });
     },
     [mutateStudent, student],
   );
