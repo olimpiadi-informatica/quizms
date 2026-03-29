@@ -24,7 +24,7 @@ export function StudentLayout({ children }: { children: ReactNode }) {
   const completedRef = useRef<HTMLDialogElement>(null);
   const submitRef = useRef<HTMLDialogElement>(null);
 
-  const { contest, student, schema, reset, venue, terminated, logout, enforceFullscreen } =
+  const { contest, student, schema, reset, venue, started, terminated, logout, enforceFullscreen } =
     useStudent();
 
   const answered = sumBy(Object.values(student.answers ?? {}), (s) => Number(s.value != null));
@@ -35,7 +35,7 @@ export function StudentLayout({ children }: { children: ReactNode }) {
   const ua = useUserAgent();
 
   useEffect(() => {
-    if (!enforceFullscreen || terminated) return;
+    if (!enforceFullscreen || terminated || !started) return;
 
     const interval = setInterval(() => {
       const isFullscreen = !!document.fullscreenElement || !ua.hasFullscreen;
@@ -62,7 +62,7 @@ export function StudentLayout({ children }: { children: ReactNode }) {
     }, 200);
 
     return () => clearInterval(interval);
-  }, [enforceFullscreen, logout, student.id, terminated, ua.hasFullscreen]);
+  }, [enforceFullscreen, logout, student.id, terminated, ua.hasFullscreen, started]);
 
   const submit = async () => {
     const modal = submitRef.current;
@@ -78,7 +78,7 @@ export function StudentLayout({ children }: { children: ReactNode }) {
     }
   };
 
-  if (warningDeadline && !terminated) {
+  if (warningDeadline && !terminated && started) {
     return (
       <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-base-100 p-4 text-center">
         <div className="flex max-w-lg flex-col items-center gap-6">
@@ -148,6 +148,7 @@ export function StudentLayout({ children }: { children: ReactNode }) {
               <Button
                 className="btn-primary btn-sm h-full"
                 disabled={
+                  !started ||
                   terminated ||
                   (process.env.NODE_ENV === "production" && !venue.participationWindow)
                 }

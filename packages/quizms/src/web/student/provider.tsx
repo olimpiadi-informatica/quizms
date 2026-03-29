@@ -24,6 +24,8 @@ type StudentProviderProps = {
   logout?: () => Promise<void> | void;
   /** Whether fullscreen is required */
   enforceFullscreen: boolean;
+  /** Whether the test is started */
+  started: boolean;
   /** Whether the test is completed */
   terminated: boolean;
   /** Correct answers */
@@ -34,14 +36,16 @@ export function StudentProvider({
   children,
   student,
   ...props
-}: Omit<StudentProviderProps, "terminated"> & {
+}: Omit<StudentProviderProps, "terminated" | "started"> & {
   children: ReactNode;
 }) {
+  const started = useIsAfter(student.participationWindow?.start) ?? false;
   const terminated = useIsAfter(student.participationWindow?.end) ?? false;
 
   const value: StudentContextProps = {
     ...props,
     student,
+    started,
     terminated,
   };
 
