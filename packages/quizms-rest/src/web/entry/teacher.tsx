@@ -88,9 +88,9 @@ function TeacherStatement() {
   const { student } = useStudent();
   const getFileUrl = useCallback(
     (fileName: string) => {
-      return `/api/teacher/file/${student.id}/${fileName}`;
+      return `/api/teacher/file/${student.venueId}/${student.id}/${fileName}`;
     },
-    [student.id],
+    [student.venueId, student.id],
   );
   return (
     <RemoteStatement statementUrl={() => getFileUrl("statement.txt")} moduleUrl={getFileUrl} />
