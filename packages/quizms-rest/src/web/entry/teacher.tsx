@@ -12,6 +12,7 @@ import {
   SubmitButton,
   UsernameField,
 } from "@olinfo/react-components";
+import ky from "ky";
 import { useCookies } from "react-cookie";
 import { useSearch } from "wouter";
 
@@ -107,14 +108,14 @@ function TeacherInner() {
 
   const start = useCallback(
     async (venueId: string) => {
-      await fetch(`/api/teacher/start/${venueId}`, { method: "post" });
+      await ky.post(`/api/teacher/start/${venueId}`);
       await mutateVenues();
     },
     [mutateVenues],
   );
 
   const finalize = async (venueId: string) => {
-    await fetch(`/api/teacher/finalize/${venueId}`, { method: "post" });
+    await ky.post(`/api/teacher/finalize/${venueId}`);
     await mutateVenues();
   };
 

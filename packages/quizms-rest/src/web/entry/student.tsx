@@ -12,6 +12,7 @@ import {
   SubmitButton,
   TextField,
 } from "@olinfo/react-components";
+import ky from "ky";
 import { useCookies } from "react-cookie";
 import { mutate } from "swr";
 
@@ -81,7 +82,7 @@ function StudentInner() {
   }, [removeCookie]);
 
   const submit = useCallback(async () => {
-    await fetch("/api/contestant/end", { method: "post" });
+    await ky.post("/api/contestant/end");
     await mutateStudent();
   }, [mutateStudent]);
 
@@ -91,13 +92,7 @@ function StudentInner() {
         ...student!.answers,
         [problemId]: answer,
       };
-      const resp = fetch("/api/contestant/set_answers", {
-        method: "post",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(answers),
-      }).then(() => undefined);
+      const resp = ky.post("/api/contestant/set_answers", { json: answers }).then(() => undefined);
       await mutateStudent(resp, { optimisticData: { ...student!, answers } });
     },
     [mutateStudent, student],
@@ -129,7 +124,7 @@ function StudentStatement() {
   });
 
   const start = async () => {
-    await fetch("/api/contestant/start", { method: "post" });
+    await ky.post("/api/contestant/start");
     await mutate(`contestant/status/${token}`);
   };
 

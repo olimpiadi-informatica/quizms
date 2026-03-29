@@ -39,6 +39,7 @@
     "clsx": "^2.1.1",
     "commander": "^14.0.3",
     "date-fns": "^4.1.0",
+    "ky": "^1.14.3",
     "lodash-es": "^4.17.23",
     "lucide-react": "^0.562.0",
     "picomatch": "^4.0.3",
