@@ -22,9 +22,7 @@ import { StudentRestoring } from "./student-restoring";
 import Header from "virtual:quizms-rest-header";
 
 export default function StudentEntry() {
-  const [{ token }] = useCookies(["token"], {
-    doNotParse: true,
-  });
+  const [{ token }] = useCookies(["token"], { doNotParse: true });
 
   if (token) {
     return (
@@ -39,17 +37,14 @@ export default function StudentEntry() {
 
 function StudentForm() {
   const ua = useUserAgent();
-  const [_cookies, setCookie, _removeCookie] = useCookies(["token"], {
-    doNotParse: true,
-  });
   const submit = useCallback(
     async ({ token }: { token: string }) => {
-      setCookie("token", token, { path: "/" });
+      await ky.post("/api/contestant/login", { json: token });
       if (ua.hasFullscreen) {
         await document.documentElement.requestFullscreen?.();
       }
     },
-    [setCookie, ua],
+    [ua],
   );
   return (
     <>
@@ -70,7 +65,7 @@ function StudentForm() {
 }
 
 function StudentInner() {
-  const [, , removeCookie] = useCookies(["token"]);
+  const [, , removeCookie] = useCookies(["token"], { doNotParse: true });
 
   const { data: student, mutate: mutateStudent } = useRestStudent();
   const { data: contest } = useRestContest();

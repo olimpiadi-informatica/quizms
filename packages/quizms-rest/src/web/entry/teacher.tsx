@@ -25,9 +25,7 @@ import {
 } from "../hooks";
 
 export default function TeacherEntry() {
-  const [{ username, password }] = useCookies(["username", "password"], {
-    doNotParse: true,
-  });
+  const [{ username, password }] = useCookies(["username", "password"]);
   if (username && password) {
     return <TeacherInner />;
   }
@@ -36,9 +34,7 @@ export default function TeacherEntry() {
 }
 
 function TeacherLogin() {
-  const [_cookies, setCookie, _removeCookie] = useCookies(["username", "password"], {
-    doNotParse: true,
-  });
+  const [, setCookie] = useCookies(["username", "password"], { doNotParse: true });
   const params = new URLSearchParams(useSearch());
 
   useEffect(() => {
@@ -102,9 +98,7 @@ function TeacherInner() {
   const { data: contests } = useRestContests();
   const { data: venues, mutate: mutateVenues } = useRestVenues();
   const { data: variants } = useRestVariants();
-  const [_cookies, _setCookie, removeCookie] = useCookies(["username", "password"], {
-    doNotParse: true,
-  });
+  const [, , removeCookie] = useCookies(["username", "password"], { doNotParse: true });
 
   const start = useCallback(
     async (venueId: string) => {

@@ -56,7 +56,7 @@ export function StudentRestoring({ children }: { children: ReactNode }) {
 }
 
 function UserDropdown({ name }: { name: ReactNode }) {
-  const [, , removeCookie] = useCookies(["token"]);
+  const [, , removeCookie] = useCookies(["token"], { doNotParse: true });
 
   const logout = useCallback(async () => {
     removeCookie("token");
