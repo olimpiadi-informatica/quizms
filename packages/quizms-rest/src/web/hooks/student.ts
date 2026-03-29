@@ -16,7 +16,7 @@ export function useRestStudent() {
 }
 
 export function useRestStudentRestore() {
-  return useRestData("/api/contestant/restore-status", studentRestoreSchema);
+  return useRestData("/api/contestant/restore-status", studentRestoreSchema.nullable());
 }
 
 export function useRestVenue() {
