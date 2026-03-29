@@ -1,6 +1,6 @@
 "use client";
 
-import { type ComponentType, useCallback, useState } from "react";
+import { type ComponentType, useCallback, useEffect, useState } from "react";
 
 import { ErrorBoundary } from "@olinfo/quizms/components";
 import type { Answer } from "@olinfo/quizms/models";
@@ -89,6 +89,8 @@ export function Blockly<State>({
     variableMappings,
     highlightBlock,
   );
+
+  useEffect(() => setAlert(selectedResult?.message), [selectedResult]);
 
   const evaluate = useCallback(async () => {
     const results = await Promise.all(

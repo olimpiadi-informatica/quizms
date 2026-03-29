@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 
-import type { CustomBlock } from "~/blockly-types";
+import type { CustomBlock, TestcaseResult } from "~/blockly-types";
 
 import { BlocklyInterpreter } from "./interpreter";
 
@@ -13,7 +13,7 @@ export function useExecutor<State>(
 ) {
   const [interpreter, setInterpreter] = useState<BlocklyInterpreter<State>>();
   const [state, setState] = useState<State>(initialState);
-  const [result, setResult] = useState<any>(undefined);
+  const [result, setResult] = useState<TestcaseResult | undefined>(undefined);
   const [variables, setVariables] = useState<object>({});
 
   const updateVariables = useCallback(
