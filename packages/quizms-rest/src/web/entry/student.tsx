@@ -1,4 +1,4 @@
-import { startTransition, useCallback } from "react";
+import { useCallback } from "react";
 
 import { Title } from "@olinfo/quizms/components";
 import type { Answer } from "@olinfo/quizms/models";
