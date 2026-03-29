@@ -19,6 +19,7 @@ import { useSearch } from "wouter";
 import {
   useRestAnnouncements,
   useRestContests,
+  useRestStudentRestores,
   useRestStudents,
   useRestVariants,
   useRestVenues,
@@ -98,6 +99,8 @@ function TeacherInner() {
   const { data: contests } = useRestContests();
   const { data: venues, mutate: mutateVenues } = useRestVenues();
   const { data: variants } = useRestVariants();
+  const { data: studentRestores } = useRestStudentRestores();
+
   const [, , removeCookie] = useCookies(["username", "password"], { doNotParse: true });
 
   const start = useCallback(
@@ -136,7 +139,7 @@ function TeacherInner() {
       getPdfStatements={async () => ({})}
       useAnnouncements={useAnnouncements}
       useStudents={useStudents}
-      useStudentRestores={() => [[], async () => {}, async () => {}]}
+      useStudentRestores={() => [studentRestores ?? [], async () => {}, async () => {}]}
     />
   );
 }

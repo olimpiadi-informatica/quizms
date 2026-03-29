@@ -3,7 +3,7 @@ import ky from "ky";
 import useSWR, { type SWRConfiguration } from "swr";
 import type z from "zod";
 
-export function useRestData<Out>(key: string, url: string, schema: z.core.$ZodType<Out>) {
+export function useRestData<Out>(url: string, schema: z.core.$ZodType<Out>) {
   const swrConfig: SWRConfiguration = {
     revalidateIfStale: false,
     revalidateOnFocus: false,
@@ -14,7 +14,7 @@ export function useRestData<Out>(key: string, url: string, schema: z.core.$ZodTy
   };
 
   return useSWR<Out>(
-    key,
+    url,
     () =>
       ky
         .get(url)
