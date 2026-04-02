@@ -12,7 +12,7 @@ import {
   SubmitButton,
   UsernameField,
 } from "@olinfo/react-components";
-import ky from "ky";
+import ky, { HTTPError } from "ky";
 import { useCookies } from "react-cookie";
 import { useSearch } from "wouter";
 
@@ -53,7 +53,20 @@ function TeacherLogin() {
   };
 
   const signIn = async (credential: { username: string; password: string }) => {
-    await ky.post("/api/teacher/login", { json: credential });
+    try {
+      await ky.post("/api/teacher/login", { json: credential });
+    } catch (error) {
+      console.log("error");
+      if (error instanceof HTTPError) {
+        const { status } = error.response;
+        console.log(status);
+
+        if (status === 403) {
+          throw new Error("Credenziali non valide", { cause: error });
+        }
+      }
+      throw error;
+    }
     updateCookies();
   };
 
@@ -118,7 +131,7 @@ function TeacherInner() {
   };
 
   const logout = useCallback(() => {
-    removeCookie("token");
+    removeCookie("token", { path: "/" });
   }, [removeCookie]);
 
   return (

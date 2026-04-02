@@ -12,7 +12,7 @@ import {
   SubmitButton,
   TextField,
 } from "@olinfo/react-components";
-import ky from "ky";
+import ky, { HTTPError } from "ky";
 import { useCookies } from "react-cookie";
 import { mutate } from "swr";
 
@@ -40,7 +40,18 @@ function StudentForm() {
 
   const submit = useCallback(
     async ({ token }: { token: string }) => {
-      await ky.post("/api/contestant/login", { json: token });
+      try {
+        await ky.post("/api/contestant/login", { json: token });
+      } catch (error) {
+        if (error instanceof HTTPError) {
+          const { status } = error.response;
+
+          if (status === 403) {
+            throw new Error("Token non valido", { cause: error });
+          }
+        }
+        throw error;
+      }
       updateCookies();
     },
     [updateCookies],
@@ -71,7 +82,7 @@ function StudentInner() {
   const { data: venue } = useRestVenue();
 
   const logout = useCallback(async () => {
-    removeCookie("token");
+    removeCookie("token", { path: "/" });
     await mutate(() => true, undefined, { revalidate: false });
   }, [removeCookie]);
 
