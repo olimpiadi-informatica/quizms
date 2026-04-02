@@ -79,6 +79,7 @@ async function importStudents(options: ImportOptions) {
       answers: true,
       participationWindow: true,
       id: true,
+      uid: true,
     })
     .extend({
       token: studentSchema.shape.token.unwrap(),
@@ -87,7 +88,7 @@ async function importStudents(options: ImportOptions) {
       score: studentSchema.shape.score.default(null),
       createdAt: studentSchema.shape.createdAt.default(new Date()),
     })
-    .transform((data) => ({ ...data, id: data.token }));
+    .transform((data) => ({ ...data, id: data.token, uid: null }));
   const students = await load("students", importStudentSchema);
   if (options.students) {
     await adminImport(
