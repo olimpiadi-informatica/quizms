@@ -36,6 +36,7 @@ async function main() {
     .option("--contests", "Import the contests.")
     .option("--venues", "Import the venues.")
     .option("--teachers", "Import the teachers.")
+    .option("--venue-windows", "Import the venue windows.")
     .option("--statements", "Import the statements.")
     .option("--students", "Import the students.")
     .option("--tokens", "Import the tokens.")

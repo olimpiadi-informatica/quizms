@@ -30,6 +30,7 @@ type ImportOptions = {
   contests?: true;
   venues?: true;
   teachers?: true;
+  venueWindows?: true;
   statements?: true;
   students?: true;
   tokens?: true;
@@ -47,7 +48,7 @@ export default async function importData(options: ImportOptions) {
   if (options.venues || options.teachers) {
     await importVenues(options);
   }
-  if (options.students || options.tokens) {
+  if (options.students || options.tokens || options.venueWindows) {
     await importStudents(options);
   }
   if (options.variants) {
@@ -118,19 +119,28 @@ async function importStudents(options: ImportOptions) {
 }
 
 async function importVenues(options: ImportOptions) {
-  const importVenueSchema = venueSchema
-    .omit({
-      schoolId: true,
-      contestId: true,
-      token: true,
-      pdfVariants: true,
-    })
-    .extend({
-      pdfVariants: venueSchema.shape.pdfVariants.nullable().default(null),
-      participationWindow: venueSchema.shape.participationWindow.default(null),
-      contestIds: z.union([z.string(), z.array(z.string())]).default("*"),
-      password: z.string(),
-    });
+  const importVenueSchema = z.preprocess(
+    (data: any) => ({
+      ...data,
+      participationWindow: data.start && data.end && { start: data.start, end: data.end },
+      start: undefined,
+      end: undefined,
+    }),
+    venueSchema
+      .omit({
+        schoolId: true,
+        contestId: true,
+        token: true,
+        pdfVariants: true,
+      })
+      .extend({
+        pdfVariants: venueSchema.shape.pdfVariants.nullable().default(null),
+        participationWindow: venueSchema.shape.participationWindow.default(null),
+        contestIds: z.union([z.string(), z.array(z.string())]).default("*"),
+        password: z.string(),
+      })
+      .strip(),
+  );
   const schools = await load("venues", importVenueSchema);
   const contests = await loadContests();
 
@@ -153,8 +163,8 @@ async function importVenues(options: ImportOptions) {
       options,
     );
   }
-  if (options.venues) {
-    const venues: Omit<Venue, "participationWindow">[] = [];
+  if (options.venues || options.venueWindows) {
+    const venues: Venue[] = [];
 
     for (const contest of contests) {
       for (const school of schools) {
@@ -179,19 +189,34 @@ async function importVenues(options: ImportOptions) {
           finalized: false,
           pdfVariants,
           disabled: false,
+          participationWindow: school.participationWindow,
         });
       }
     }
-    await adminImport(
-      "venues",
-      venues.map((v) => ({
-        id: v.id,
-        get: `admin/venue/${v.id}/data/get`,
-        cas: `admin/venue/${v.id}/data/cas`,
-        value: v,
-      })),
-      options,
-    );
+    if (options.venues) {
+      await adminImport(
+        "venues",
+        venues.map((v) => ({
+          id: v.id,
+          get: `admin/venue/${v.id}/data/get`,
+          cas: `admin/venue/${v.id}/data/cas`,
+          value: v,
+        })),
+        options,
+      );
+    }
+    if (options.venueWindows) {
+      await adminImport(
+        "venueWindows",
+        venues.map((v) => ({
+          id: v.id,
+          get: `admin/venue/${v.id}/window/get`,
+          cas: `admin/venue/${v.id}/window/cas`,
+          value: v.participationWindow,
+        })),
+        options,
+      );
+    }
   }
 }
 
