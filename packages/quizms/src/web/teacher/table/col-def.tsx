@@ -83,7 +83,7 @@ export function columnDefinition(
       }),
     ),
     {
-      field: "variant",
+      field: "variantId",
       headerName: "Variante",
       width: 100,
       editable: !frozen,
