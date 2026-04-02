@@ -79,7 +79,7 @@ export default function TeacherTable() {
             <ExportModal ref={exportRef} />
           ) /* TODO: add allowStudentsExport config for contest */
         }
-        <DeleteAllModal ref={deleterRef} />
+        {contest.allowStudentDelete && <DeleteAllModal ref={deleterRef} />}
       </Suspense>
     </>
   );
