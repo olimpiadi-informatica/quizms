@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 
+import { useStudent } from "@olinfo/quizms/student";
 import { Pause, Play, RotateCcw, Send, SkipForward } from "lucide-react";
 
 type Props = {
@@ -11,6 +12,7 @@ type Props = {
 };
 
 export function ExecutionButtons({ evaluate, evaluated, selectedEvaluated, step, reset }: Props) {
+  const { terminated } = useStudent();
   const [playing, setPlaying] = useState(false);
   const [speed, setSpeed] = useState(3);
   useEffect(() => {
@@ -66,7 +68,7 @@ export function ExecutionButtons({ evaluate, evaluated, selectedEvaluated, step,
           type="button"
           className="btn btn-success"
           aria-label="Correggi la soluzione"
-          disabled={evaluated}
+          disabled={evaluated || terminated}
           onClick={evaluate}>
           <Send className="size-6" />
         </button>
