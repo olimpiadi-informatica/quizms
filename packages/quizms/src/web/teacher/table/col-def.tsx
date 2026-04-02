@@ -3,10 +3,8 @@ import type {
   ICellEditorParams,
   ICellRendererParams,
   IFilterOptionDef,
-  ITooltipParams,
 } from "ag-grid-community";
 import { isEqual as isEqualDate } from "date-fns";
-import { TriangleAlert } from "lucide-react";
 
 import {
   type Contest,
@@ -19,8 +17,6 @@ import {
   validateAnswerValue,
   validateUserData,
 } from "~/models";
-
-import { isStudentIncomplete } from "./utils";
 
 export function columnDefinition(
   contest: Contest,
@@ -53,29 +49,31 @@ export function columnDefinition(
         equals: field.type === "date" ? isEqualDate : undefined,
         editable: contest.allowStudentEdit && !frozen,
         ...defaultOptions,
-        tooltipValueGetter: ({ data }: ITooltipParams<Student>) => {
-          return isStudentIncomplete(data!, contest, variants);
-        },
-        cellRenderer: ({ api, data, value }: ICellRendererParams<Student>) => {
+        // TODO: restore warnings
+        // tooltipValueGetter: ({ data }: ITooltipParams<Student>) => {
+        //   return isStudentIncomplete(data!, contest, variants);
+        // },
+        cellRenderer: ({ api: _api, data, value }: ICellRendererParams<Student>) => {
           value =
             field.name === "name"
               ? data?.name
               : field.name === "surname"
                 ? data?.surname
                 : formatUserData(data, field);
-          if (
-            field.pinned &&
-            data?.updatedAt &&
-            !api.getSelectedRows().some((s: Student) => s.id === data.id) &&
-            isStudentIncomplete(data, contest, variants)
-          ) {
-            return (
-              <span>
-                {value}{" "}
-                <TriangleAlert className="mb-1 inline-block cursor-text text-warning" size={16} />
-              </span>
-            );
-          }
+          // TODO: restore warnings
+          // if (
+          //   field.pinned &&
+          //   data?.updatedAt &&
+          //   !api.getSelectedRows().some((s: Student) => s.id === data.id) &&
+          //   isStudentIncomplete(data, contest, variants)
+          // ) {
+          //   return (
+          //     <span>
+          //       {value}{" "}
+          //       <TriangleAlert className="mb-1 inline-block cursor-text text-warning" size={16} />
+          //     </span>
+          //   );
+          // }
           return value;
         },
         valueParser: (params) => parseUserData(params.newValue, field),
