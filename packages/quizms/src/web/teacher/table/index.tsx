@@ -39,20 +39,23 @@ export default function TeacherTable() {
             <div className="hidden md:block"> studenti</div>
           </div>
         </Suspense>
-        {contest.allowStudentImport && !frozen && (
-          <Button
-            className="btn-primary btn-sm h-10"
-            icon={Upload}
-            onClick={() => importRef.current?.showModal()}>
-            <div className="hidden md:block">Importa studenti</div>
-          </Button>
-        )}
-        <Button
-          className="btn-primary btn-sm h-10"
-          icon={Download}
-          onClick={() => exportRef.current?.click()}>
-          <div className="hidden md:block">Esporta</div>
-        </Button>
+        {contest.allowStudentImport &&
+          !frozen && ( // TODO: add allowStudentsExport config option
+            <>
+              <Button
+                className="btn-primary btn-sm h-10"
+                icon={Upload}
+                onClick={() => importRef.current?.showModal()}>
+                <div className="hidden md:block">Importa studenti</div>
+              </Button>
+              <Button
+                className="btn-primary btn-sm h-10"
+                icon={Download}
+                onClick={() => exportRef.current?.click()}>
+                <div className="hidden md:block">Esporta</div>
+              </Button>
+            </>
+          )}
         {!frozen && (
           <Button
             className="btn-primary btn-sm h-10"
@@ -74,12 +77,8 @@ export default function TeacherTable() {
       <Suspense fallback={<Loading />}>
         <Table frozen={frozen} key={venue.id} />
         <ImportModal ref={importRef} />
-        {
-          contest.allowStudentImport && (
-            <ExportModal ref={exportRef} />
-          ) /* TODO: add allowStudentsExport config for contest */
-        }
-        {contest.allowStudentDelete && <DeleteAllModal ref={deleterRef} />}
+        <ExportModal ref={exportRef} />
+        <DeleteAllModal ref={deleterRef} />
       </Suspense>
     </>
   );
