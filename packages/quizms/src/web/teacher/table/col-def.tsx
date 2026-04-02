@@ -104,7 +104,7 @@ export function columnDefinition(
       headerName: "Vedi Prova",
       width: 100,
       cellRenderer: ({ data }: ICellRendererParams<Student>) => {
-        if (data?.absent || data?.disabled || !data?.variantId) return;
+        if (data?.absent || data?.disabled || !data?.variantId || !data.participationWindow) return;
         return (
           <a
             className="link link-info"
