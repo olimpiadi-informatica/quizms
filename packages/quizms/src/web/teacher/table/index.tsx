@@ -74,7 +74,11 @@ export default function TeacherTable() {
       <Suspense fallback={<Loading />}>
         <Table frozen={frozen} key={venue.id} />
         <ImportModal ref={importRef} />
-        <ExportModal ref={exportRef} />
+        {
+          contest.allowStudentImport && (
+            <ExportModal ref={exportRef} />
+          ) /* TODO: add allowStudentsExport config for contest */
+        }
         <DeleteAllModal ref={deleterRef} />
       </Suspense>
     </>
