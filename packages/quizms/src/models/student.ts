@@ -3,6 +3,7 @@ import z from "zod";
 import { answerSchema } from "~/models/variant";
 
 export const studentSchema = z.object({
+  uid: z.string().nullable(),
   id: z.string(),
   userData: z
     .object({

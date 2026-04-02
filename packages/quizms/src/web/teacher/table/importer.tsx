@@ -181,6 +181,7 @@ async function importStudents(
     }
 
     const student: Student = {
+      uid: null,
       id: randomId(),
       userData,
       name: "",
