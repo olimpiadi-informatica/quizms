@@ -1,6 +1,6 @@
 "use client";
 
-import { type ComponentType, useCallback, useEffect, useState } from "react";
+import { type ComponentType, useCallback, useEffect, useRef, useState } from "react";
 
 import { ErrorBoundary } from "@olinfo/quizms/components";
 import type { Answer } from "@olinfo/quizms/models";
@@ -64,6 +64,8 @@ export function Blockly<State>({
   const savedBlocks = (student.answers?.[`${id}`] as Answer<"blockly"> | undefined)?.value?.metadata
     .blocks;
 
+  const blocksChangedRef = useRef(false);
+
   const { ready, blocks, svg, code, variableMappings, highlightBlock } = useIframe(
     iframe,
     terminated,
@@ -72,9 +74,35 @@ export function Blockly<State>({
       initialBlocks: savedBlocks ? JSON.parse(savedBlocks) : initialBlocks,
       customBlocks,
     },
-    { onCodeChanges },
+    {
+      onCodeChanges,
+      onBlockChanges: () => {
+        blocksChangedRef.current = true;
+      },
+    },
     debug,
   );
+
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      if (blocksChangedRef.current) {
+        const answer: Answer<"blockly"> = {
+          type: "blockly",
+          value: {
+            results: testcaseResults.map((res) => res?.success || false),
+            metadata: {
+              blocks: JSON.stringify(blocks),
+              code,
+            },
+          },
+        };
+        await setAnswer(`${id}`, answer);
+        blocksChangedRef.current = false;
+      }
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [id, blocks, testcaseResults, code, setAnswer]);
 
   const {
     state,
