@@ -160,14 +160,26 @@ function useStudentRestores(
   (request: StudentRestore) => Promise<void>,
   (studentId: string) => Promise<void>,
 ] {
-  const { data: studentRestores } = useRestStudentRestores(venueId);
+  const { data: studentRestores, mutate: mutateStudentRestores } = useRestStudentRestores(venueId);
 
   const reject = async (studentId: string) => {
-    await ky.post(`/api/teacher/revoke-restores/${venueId}/${studentId}`);
+    const resp = ky
+      .post(`/api/teacher/revoke-restores/${venueId}/${studentId}`)
+      .then(() => undefined);
+    await mutateStudentRestores(resp, {
+      optimisticData: studentRestores.filter((s) => s.studentId !== studentId),
+      populateCache: false,
+    });
   };
 
   const approve = async (request: StudentRestore) => {
-    await ky.post(`/api/teacher/approve-restore/${venueId}/${request.id}`);
+    const resp = ky
+      .post(`/api/teacher/approve-restore/${venueId}/${request.id}`)
+      .then(() => undefined);
+    await mutateStudentRestores(resp, {
+      optimisticData: studentRestores.filter((s) => s.studentId !== request.studentId),
+      populateCache: false,
+    });
   };
 
   return [studentRestores, approve, reject];
