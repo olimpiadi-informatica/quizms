@@ -1,8 +1,8 @@
-import { lazy, Suspense } from "react";
+import { lazy, type PropsWithChildren, Suspense, useCallback } from "react";
 
 import { ErrorBoundary, Loading } from "@olinfo/quizms/components";
 import { createApp } from "@olinfo/quizms/entry";
-import { CookiesProvider } from "react-cookie";
+import { CookiesProvider, useCookies } from "react-cookie";
 import { Route, Router, Switch } from "wouter";
 
 import TeacherEntry from "./teacher";
@@ -13,7 +13,7 @@ export default function createRestEntry() {
   return createApp(
     <Router base={process.env.NODE_ENV === "development" ? "/rest" : ""}>
       <CookiesProvider>
-        <ErrorBoundary>
+        <RestErrorBoundary>
           <Suspense fallback={<Loading />}>
             <Switch>
               <Route path="/admin" nest />
@@ -25,8 +25,17 @@ export default function createRestEntry() {
               </Route>
             </Switch>
           </Suspense>
-        </ErrorBoundary>
+        </RestErrorBoundary>
       </CookiesProvider>
     </Router>,
   );
+}
+
+function RestErrorBoundary({ children }: PropsWithChildren) {
+  const [, , removeCookie] = useCookies(["token"]);
+  const onReset = useCallback(() => {
+    removeCookie("token", { path: "/" });
+    window.location.reload();
+  }, [removeCookie]);
+  return <ErrorBoundary onReset={onReset}>{children}</ErrorBoundary>;
 }
