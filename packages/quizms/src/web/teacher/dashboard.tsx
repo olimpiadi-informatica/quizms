@@ -217,7 +217,7 @@ export default function TeacherDashboard() {
         <Card>
           <CardBody title="Richieste di accesso">
             <div className="h-96 max-h-screen">
-              <StudentRestoreList isStarted={!!venue.token} />
+              <StudentRestoreList />
             </div>
           </CardBody>
         </Card>

@@ -5,7 +5,7 @@ export default function blocklyEditor(): PluginOption {
     name: "quizms:blockly-entry",
     api: {
       quizmsDevRoutes: [
-        { pathname: "/__blockly_iframe", module: "@olinfo/quizms-mdx/blockly-editor" },
+        { pathname: "/__blockly_iframe.html", module: "@olinfo/quizms-mdx/blockly-editor" },
       ],
     },
     config(config) {

@@ -1,0 +1,80 @@
+import { type ReactNode, useCallback } from "react";
+
+import { Loading, Title } from "@olinfo/quizms/components";
+import {
+  Dropdown,
+  DropdownButton,
+  DropdownItem,
+  DropdownMenu,
+  Navbar,
+  NavbarBrand,
+  NavbarContent,
+} from "@olinfo/react-components";
+import { LogOut } from "lucide-react";
+import { useCookies } from "react-cookie";
+import { mutate } from "swr";
+
+import { useRestStudentRestore } from "~/web/hooks";
+
+export function StudentRestoring({ children }: { children: ReactNode }) {
+  const { data: studentRestore } = useRestStudentRestore();
+
+  if (!studentRestore || studentRestore.status === "approved") {
+    return children;
+  }
+
+  if (studentRestore.status === "revoked") {
+    return <Loading />;
+  }
+
+  return (
+    <>
+      <Navbar color="bg-base-300 text-base-content">
+        <NavbarBrand>
+          <div className="flex items-center h-full font-bold">
+            <Title />
+          </div>
+        </NavbarBrand>
+        <NavbarContent>
+          <UserDropdown name={`${studentRestore.name} ${studentRestore.surname}`} />
+        </NavbarContent>
+      </Navbar>
+      <div className="flex flex-col justify-center items-center grow text-center m-4">
+        <p className="text-lg max-w-3xl">
+          Il tuo account è già presente su un&apos;altro dispositivo. Per trasferire l&apos;accesso
+          al dispositivo corrente comunica al tuo insegnante di inserire il codice seguente in fondo
+          alla pagina di gestione gara, sezione &quot;richieste di accesso&quot;:
+        </p>
+        <div className="flex justify-center pt-3">
+          <span className="pt-1 font-mono text-3xl">
+            {String(studentRestore?.approvalCode).padStart(3, "0")}
+          </span>
+        </div>
+      </div>
+    </>
+  );
+}
+
+function UserDropdown({ name }: { name: ReactNode }) {
+  const [, , removeCookie] = useCookies(["token"], { doNotParse: true });
+
+  const logout = useCallback(async () => {
+    removeCookie("token");
+    await mutate(() => true, undefined, { revalidate: false });
+  }, [removeCookie]);
+
+  return (
+    <Dropdown className="dropdown-end">
+      <DropdownButton>
+        <div className="truncate uppercase">{name}</div>
+      </DropdownButton>
+      <DropdownMenu>
+        <DropdownItem>
+          <button type="button" className="flex justify-between gap-4" onClick={logout}>
+            Esci <LogOut size={20} />
+          </button>
+        </DropdownItem>
+      </DropdownMenu>
+    </Dropdown>
+  );
+}

@@ -2,41 +2,41 @@ import z from "zod";
 
 import { answerSchema } from "~/models/variant";
 
-export const studentSchema = z
-  .object({
-    uid: z.string(),
-    userData: z
-      .object({
-        surname: z.string(),
-        name: z.string(),
-      })
-      .partial()
-      .catchall(z.union([z.string(), z.number(), z.date()])),
-    userDataHash: z.string(),
+export const studentSchema = z.object({
+  uid: z.string().nullable(),
+  id: z.string(),
+  userData: z
+    .object({
+      surname: z.string(),
+      name: z.string(),
+    })
+    .partial()
+    .catchall(z.union([z.string(), z.number(), z.date()])), // TODO: tag this union
 
-    absent: z.boolean(),
-    disabled: z.boolean(),
+  name: z.string(),
+  surname: z.string(),
 
-    venueId: z.string(),
-    contestId: z.string(),
-    token: z.string(),
+  absent: z.boolean(),
+  disabled: z.boolean(),
 
-    participationWindow: z.strictObject({
-      start: z.date(),
-      end: z.date(),
-    }),
+  venueId: z.string(),
+  contestId: z.string(),
+  token: z.string().nullable(),
 
-    variantId: z.string(),
-    answers: z.record(z.string(), answerSchema),
-    score: z.number(),
-    extraData: z.record(z.string(), z.any()),
+  participationWindow: z
+    .strictObject({
+      start: z.coerce.date(),
+      end: z.coerce.date(),
+    })
+    .nullable(),
 
-    createdAt: z.coerce.date(),
-    updatedAt: z.date(),
-  })
-  .partial()
-  .extend({
-    id: z.string(),
-  });
+  variantId: z.string(),
+  answers: z.record(z.string(), answerSchema),
+  score: z.number().nullable(),
+  extraData: z.record(z.string(), z.any()).optional(),
+
+  createdAt: z.coerce.date(),
+  updatedAt: z.coerce.date().optional(),
+});
 
 export type Student = z.infer<typeof studentSchema>;

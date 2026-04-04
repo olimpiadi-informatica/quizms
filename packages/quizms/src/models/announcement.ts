@@ -2,7 +2,7 @@ import z from "zod";
 
 export const announcementSchema = z.strictObject({
   id: z.string(),
-  createdAt: z.date(),
+  createdAt: z.coerce.date(),
   contestIds: z.string().array(),
   level: z.enum(["info", "warning", "error"]),
   title: z.string(),

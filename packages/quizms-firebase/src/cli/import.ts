@@ -150,6 +150,8 @@ async function importVenues(db: Firestore, options: ImportOptions) {
 
         venues.push({
           id: `${school.id}-${contest.id}`,
+          token: null,
+          participationWindow: null,
           schoolId: school.id,
           contestId: contest.id,
           name: school.name,

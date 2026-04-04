@@ -9,7 +9,7 @@ export const studentRestoreSchema = z.strictObject({
   surname: z.string(),
   approvalCode: z.number(),
   status: z.enum(["pending", "approved", "revoked"]),
-  createdAt: z.date(),
+  createdAt: z.coerce.date(),
 });
 
 export type StudentRestore = z.infer<typeof studentRestoreSchema>;

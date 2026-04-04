@@ -57,8 +57,8 @@ const matchingRules = z.array(
 const onlineContestSettings = z.strictObject({
   // Finestra di tempo durante la quale è possibile far partire la gara
   contestWindow: z.strictObject({
-    start: z.date(),
-    end: z.date(),
+    start: z.coerce.date(),
+    end: z.coerce.date(),
   }),
   // Durata della gara in minuti
   duration: z.coerce.number().positive(),
