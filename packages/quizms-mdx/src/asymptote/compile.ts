@@ -77,7 +77,6 @@ async function execAsy(
   } catch {
     throw new Error("Failed to compile asymptote: Output file does not exist.");
   }
-  console.log(outputFile, "!!!");
 
   const { size } = await stat(outputFile);
   if (size === 0) throw new Error("Failed to compile asymptote: Output file is empty.");
