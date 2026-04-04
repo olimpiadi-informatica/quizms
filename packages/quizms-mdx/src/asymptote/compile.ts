@@ -35,7 +35,7 @@ export async function compileAsymptote({ fileName, inject, options }: AsySrc) {
       throw new Error(`Failed to run pdf2svg:\n${err.stderr ?? err.message}`);
     }
   } else {
-    await execAsy(fileName, injectFile, svgFile, "svg", "-tex", "pdflatex");
+    await execAsy(fileName, injectFile, svgFile, "svg");
   }
 
   const image = transformSvg(svgFile, await readFile(svgFile, "utf-8"), options);
@@ -77,6 +77,7 @@ async function execAsy(
   } catch {
     throw new Error("Failed to compile asymptote: Output file does not exist.");
   }
+  console.log(outputFile, "!!!");
 
   const { size } = await stat(outputFile);
   if (size === 0) throw new Error("Failed to compile asymptote: Output file is empty.");
