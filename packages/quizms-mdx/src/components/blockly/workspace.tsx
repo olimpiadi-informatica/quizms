@@ -53,13 +53,14 @@ export function Blockly<State>({
   const [iframe, setIframe] = useState<HTMLIFrameElement | null>(null);
   const [selectedTestcase, setSelectedTestcase] = useState(0);
   const [alert, setAlert] = useState<string>();
-  const [testcaseResults, setTestcaseResults] = useState<(TestcaseResult | undefined)[]>(
-    testcases.map(() => undefined),
+  const [testcaseResults, setTestcaseResults] = useState<TestcaseResult[]>(
+    testcases.map(() => ({ success: false, message: "" })),
   );
+  const [evaluated, setEvaluated] = useState(false);
 
   const onCodeChanges = useCallback(() => {
-    setTestcaseResults(testcases.map(() => undefined));
-  }, [testcases]);
+    setEvaluated(false);
+  }, []);
 
   const savedBlocks = (student.answers?.[`${id}`] as Answer<"blockly"> | undefined)?.value?.metadata
     .blocks;
@@ -135,6 +136,7 @@ export function Blockly<State>({
     );
 
     setTestcaseResults(results);
+    setEvaluated(true);
 
     const answer: Answer<"blockly"> = {
       type: "blockly",
@@ -153,7 +155,7 @@ export function Blockly<State>({
     <div className={clsx(style.workspace, "not-prose")}>
       <div className={style.visualizerButtons}>
         <TestcaseSelector
-          results={testcaseResults}
+          results={testcaseResults.map((t) => (evaluated ? t : undefined))}
           selectedTestcase={selectedTestcase}
           setSelectedTestcase={setSelectedTestcase}
         />
@@ -193,7 +195,7 @@ export function Blockly<State>({
       <div className={style.editorButtons}>
         <ExecutionButtons
           evaluate={evaluate}
-          evaluated={!!testcaseResults[0]}
+          evaluated={evaluated}
           selectedEvaluated={!!selectedResult}
           step={step}
           reset={resetSelected}
