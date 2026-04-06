@@ -12,10 +12,11 @@ import {
   SubmitButton,
   UsernameField,
 } from "@olinfo/react-components";
-import ky, { HTTPError } from "ky";
+import { HTTPError } from "ky";
 import { useCookies } from "react-cookie";
 import { useSearch } from "wouter";
 
+import api from "../common/api";
 import {
   useRestAnnouncements,
   useRestContests,
@@ -54,7 +55,7 @@ function TeacherLogin() {
 
   const signIn = async (credential: { username: string; password: string }) => {
     try {
-      await ky.post("/api/teacher/login", { json: credential });
+      await api.post("teacher/login", { json: credential });
     } catch (error) {
       console.log("error");
       if (error instanceof HTTPError) {
@@ -101,7 +102,7 @@ function TeacherStatement() {
   const { student } = useStudent();
   const getFileUrl = useCallback(
     (fileName: string) => {
-      return `/api/teacher/file/${student.venueId}/${student.id}/${fileName}`;
+      return `teacher/file/${student.venueId}/${student.id}/${fileName}`;
     },
     [student.venueId, student.id],
   );
@@ -119,14 +120,14 @@ function TeacherInner() {
 
   const start = useCallback(
     async (venueId: string) => {
-      await ky.post(`/api/teacher/start/${venueId}`);
+      await api.post(`teacher/start/${venueId}`);
       await mutateVenues();
     },
     [mutateVenues],
   );
 
   const finalize = async (venueId: string) => {
-    await ky.post(`/api/teacher/finalize/${venueId}`);
+    await api.post(`teacher/finalize/${venueId}`);
     await mutateVenues();
   };
 
@@ -163,8 +164,8 @@ function useStudentRestores(
   const { data: studentRestores, mutate: mutateStudentRestores } = useRestStudentRestores(venueId);
 
   const reject = async (studentId: string) => {
-    const resp = ky
-      .post(`/api/teacher/revoke-restores/${venueId}/${studentId}`)
+    const resp = api
+      .post(`teacher/revoke-restores/${venueId}/${studentId}`)
       .then(() => undefined);
     await mutateStudentRestores(resp, {
       optimisticData: studentRestores.filter((s) => s.studentId !== studentId),
@@ -173,8 +174,8 @@ function useStudentRestores(
   };
 
   const approve = async (request: StudentRestore) => {
-    const resp = ky
-      .post(`/api/teacher/approve-restore/${venueId}/${request.id}`)
+    const resp = api
+      .post(`teacher/approve-restore/${venueId}/${request.id}`)
       .then(() => undefined);
     await mutateStudentRestores(resp, {
       optimisticData: studentRestores.filter((s) => s.studentId !== request.studentId),

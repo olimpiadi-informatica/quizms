@@ -10,19 +10,19 @@ import { useRestData } from "./common";
 
 export function useRestStudent() {
   return useRestData(
-    "/api/contestant/status",
+    "contestant/status",
     z.preprocess((data: any) => ({ ...data, score: null }), studentSchema),
   );
 }
 
 export function useRestStudentRestore() {
-  return useRestData("/api/contestant/restore-status", studentRestoreSchema.nullable());
+  return useRestData("contestant/restore-status", studentRestoreSchema.nullable());
 }
 
 export function useRestVenue() {
-  return useRestData("/api/contestant/venue", venueSchema);
+  return useRestData("contestant/venue", venueSchema);
 }
 
 export function useRestContest() {
-  return useRestData("/api/contestant/contest", contestSchema);
+  return useRestData("contestant/contest", contestSchema);
 }

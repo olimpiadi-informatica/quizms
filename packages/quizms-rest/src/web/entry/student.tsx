@@ -12,10 +12,11 @@ import {
   SubmitButton,
   TextField,
 } from "@olinfo/react-components";
-import ky, { HTTPError } from "ky";
+import { HTTPError } from "ky";
 import { useCookies } from "react-cookie";
 import { mutate } from "swr";
 
+import api from "../common/api";
 import { useRestContest, useRestStudent, useRestVenue } from "../hooks";
 import { StudentRestoring } from "./student-restoring";
 // @ts-expect-error
@@ -41,7 +42,7 @@ function StudentForm() {
   const submit = useCallback(
     async ({ token }: { token: string }) => {
       try {
-        await ky.post("/api/contestant/login", { json: token });
+        await api.post("contestant/login", { json: token });
       } catch (error) {
         if (error instanceof HTTPError) {
           const { status } = error.response;
@@ -87,7 +88,7 @@ function StudentInner() {
   }, [removeCookie]);
 
   const submit = useCallback(async () => {
-    await ky.post("/api/contestant/end");
+    await api.post("contestant/end");
     await mutateStudent();
   }, [mutateStudent]);
 
@@ -97,7 +98,7 @@ function StudentInner() {
         ...student.answers,
         [problemId]: answer,
       };
-      const resp = ky.post("/api/contestant/set_answers", { json: answers }).then(() => undefined);
+      const resp = api.post("contestant/set_answers", { json: answers }).then(() => undefined);
       await mutateStudent(resp, { optimisticData: { ...student, answers }, populateCache: false });
     },
     [mutateStudent, student],
@@ -126,7 +127,7 @@ function StudentStatement() {
   });
 
   const start = async () => {
-    await ky.post("/api/contestant/start");
+    await api.post("contestant/start");
     await mutate(`contestant/status/${token}`);
     if (ua.hasFullscreen) {
       await document.documentElement.requestFullscreen?.();
@@ -134,7 +135,7 @@ function StudentStatement() {
   };
 
   const getFileUrl = (fileName: string) => {
-    return `/api/contestant/file/${fileName}`;
+    return `contestant/file/${fileName}`;
   };
 
   if (!student.participationWindow) {

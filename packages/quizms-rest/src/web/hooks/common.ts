@@ -1,13 +1,14 @@
 import { validate } from "@olinfo/quizms/utils";
-import ky from "ky";
 import useSWR from "swr";
 import type z from "zod";
+
+import api from "../common/api";
 
 export function useRestData<Out>(url: string, schema: z.core.$ZodType<Out>) {
   return useSWR(
     url,
     () =>
-      ky
+      api
         .get(url)
         .json()
         .then((j) => validate(schema, j)),
