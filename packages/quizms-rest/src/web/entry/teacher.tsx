@@ -102,7 +102,7 @@ function TeacherStatement() {
   const { student } = useStudent();
   const getFileUrl = useCallback(
     (fileName: string) => {
-      return `teacher/file/${student.venueId}/${student.id}/${fileName}`;
+      return `${process.env.BASE_PATH}/api/teacher/file/${student.venueId}/${student.id}/${fileName}`;
     },
     [student.venueId, student.id],
   );
@@ -164,9 +164,7 @@ function useStudentRestores(
   const { data: studentRestores, mutate: mutateStudentRestores } = useRestStudentRestores(venueId);
 
   const reject = async (studentId: string) => {
-    const resp = api
-      .post(`teacher/revoke-restores/${venueId}/${studentId}`)
-      .then(() => undefined);
+    const resp = api.post(`teacher/revoke-restores/${venueId}/${studentId}`).then(() => undefined);
     await mutateStudentRestores(resp, {
       optimisticData: studentRestores.filter((s) => s.studentId !== studentId),
       populateCache: false,
@@ -174,9 +172,7 @@ function useStudentRestores(
   };
 
   const approve = async (request: StudentRestore) => {
-    const resp = api
-      .post(`teacher/approve-restore/${venueId}/${request.id}`)
-      .then(() => undefined);
+    const resp = api.post(`teacher/approve-restore/${venueId}/${request.id}`).then(() => undefined);
     await mutateStudentRestores(resp, {
       optimisticData: studentRestores.filter((s) => s.studentId !== request.studentId),
       populateCache: false,

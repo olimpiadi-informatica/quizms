@@ -135,7 +135,7 @@ function StudentStatement() {
   };
 
   const getFileUrl = (fileName: string) => {
-    return `contestant/file/${fileName}`;
+    return `${process.env.BASE_PATH}api/contestant/file/${fileName}`;
   };
 
   if (!student.participationWindow) {
