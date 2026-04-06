@@ -64,8 +64,10 @@ export function generateHtmlFromBundle(
   bundle: OutputBundle,
   options?: {
     includeDynamicImports?: boolean;
+    base?: string;
   },
 ) {
+  const base = options?.base || "/";
   const modules = new Set<string>();
   const queue = [entry];
 
@@ -87,7 +89,7 @@ export function generateHtmlFromBundle(
     {
       tag: "script",
       attrs: { type: "importmap" },
-      children: JSON.stringify(getBuildImportMap(bundle)),
+      children: JSON.stringify(getBuildImportMap(bundle, { base })),
       injectTo: "head",
     },
     {
@@ -97,7 +99,7 @@ export function generateHtmlFromBundle(
     },
     {
       tag: "script",
-      attrs: { type: "module", src: `/${entry.fileName}` },
+      attrs: { type: "module", src: `${base}${entry.fileName}` },
       injectTo: "body",
     },
   ];
@@ -117,7 +119,7 @@ export function generateHtmlFromBundle(
       tag: "link",
       attrs: {
         rel: fileName.endsWith(".css") ? "stylesheet" : "modulepreload",
-        href: `/${fileName}`,
+        href: `${base}${fileName}`,
       },
       injectTo: "head",
     });

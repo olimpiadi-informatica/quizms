@@ -9,11 +9,13 @@ import { generateHtmlFromBundle } from "./html";
 
 export default function entry(): PluginOption {
   let root = "";
+  let base = "/";
 
   return {
     name: "quizms:entry",
     configResolved(config) {
       root = config.root;
+      base = config.base;
     },
     resolveId(id) {
       const [pathname] = id.split("?");
@@ -46,7 +48,7 @@ createApp();`;
         this.emitFile({
           type: "asset",
           fileName: `${chunk.name}.html`,
-          source: await generateHtmlFromBundle(chunk, bundle),
+          source: await generateHtmlFromBundle(chunk, bundle, { base }),
         });
       }
     },

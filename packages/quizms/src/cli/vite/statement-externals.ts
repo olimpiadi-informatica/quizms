@@ -73,14 +73,15 @@ export function statementExternals(): PluginOption {
   };
 }
 
-export function getBuildImportMap(bundle: OutputBundle) {
+export function getBuildImportMap(bundle: OutputBundle, options?: { base?: string }) {
+  const base = options?.base || "/";
   const imports = Object.fromEntries(
     externalLibs.map((lib) => {
       const chunk = Object.values(bundle)
         .filter((chunk) => chunk.type === "chunk")
         .find((chunk) => chunk.facadeModuleId === `\0virtual:quizms-assets-${lib}`);
       if (!chunk) fatal(`Missing chunk for ${lib}`);
-      return [lib, `/${chunk.fileName}`];
+      return [lib, `${base}${chunk.fileName}`];
     }),
   );
   return { imports };

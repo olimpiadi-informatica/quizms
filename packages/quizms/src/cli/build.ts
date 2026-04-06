@@ -10,11 +10,16 @@ import configs from "./vite/configs";
 
 export type ExportOptions = {
   outDir: string;
+  basePath: string;
   preset?: string;
 };
 
 export default async function staticExport(options: ExportOptions): Promise<void> {
   const config: InlineConfig = mergeConfig(configs("production"), {
+    base: options.basePath,
+    define: {
+      "process.env.BASE_PATH": JSON.stringify(options.basePath),
+    },
     publicDir: path.join(cwd(), "public"),
     build: {
       outDir: path.join(cwd(), options.outDir),

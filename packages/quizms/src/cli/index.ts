@@ -56,6 +56,7 @@ async function main() {
       "The directory to output the bundle.",
       path.join(".quizms", "hosting-build"),
     )
+    .option("-p, --base-path <path>", "The base path for serving the static files.", "/")
     .argument("[preset]", "The preset to use.")
     .action((preset, options) => staticExport({ ...options, preset }));
 
