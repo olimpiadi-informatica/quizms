@@ -178,8 +178,8 @@ StudentLayout.displayName = "StudentLayout";
 function UserDropdown() {
   const { student, logout } = useStudent();
 
-  const name = student.userData?.name as string;
-  const surname = student.userData?.surname as string;
+  const name = student.name;
+  const surname = student.surname;
 
   return (
     <Dropdown className="dropdown-end">
