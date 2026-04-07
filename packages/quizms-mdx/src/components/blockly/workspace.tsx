@@ -84,20 +84,30 @@ export function Blockly<State>({
     debug,
   );
 
-  const saveAnswer = useCallback(async () => {
-    const answer: Answer<"blockly"> = {
-      type: "blockly",
-      value: {
-        results: testcaseResults.map((res) => res?.success || false),
-        metadata: {
-          blocks: JSON.stringify(blocks),
-          code,
+  const saveAnswer = useCallback(
+    async (results?: boolean[]) => {
+      const answer: Answer<"blockly"> = {
+        type: "blockly",
+        value: {
+          results:
+            results ||
+            (id &&
+            student.answers[id] &&
+            student.answers[id].type === "blockly" &&
+            student.answers[id].value
+              ? student.answers[id].value.results
+              : testcases.map(() => false)),
+          metadata: {
+            blocks: JSON.stringify(blocks),
+            code,
+          },
         },
-      },
-    };
-    await setAnswer(`${id}`, answer);
-    blocksChangedRef.current = false;
-  }, [blocks, code, id, setAnswer, testcaseResults]);
+      };
+      await setAnswer(`${id}`, answer);
+      blocksChangedRef.current = false;
+    },
+    [blocks, code, id, setAnswer, student.answers, testcases.map],
+  );
 
   useEffect(() => {
     const interval = setInterval(async () => {
@@ -141,7 +151,7 @@ export function Blockly<State>({
 
     setTestcaseResults(results);
     setEvaluated(true);
-    if (!terminated) await saveAnswer();
+    if (!terminated) await saveAnswer(results.map((r) => r.success));
   }, [code, customBlocks, testcases, saveAnswer, terminated]);
 
   return (
