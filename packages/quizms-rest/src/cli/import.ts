@@ -111,7 +111,8 @@ async function importStudents(options: ImportOptions) {
         cas: `admin/token/${s.token}/cas`,
         value: {
           value: s.token,
-          student: [s.venueId, s.id],
+          venue_id: s.venueId,
+          student_id: s.id
         },
       })),
       options,

@@ -107,7 +107,7 @@ function StudentInner() {
         ...student.answers,
         [problemId]: answer,
       };
-      const resp = api.post("contestant/set_answers", { json: answers }).then(() => undefined);
+      const resp = api.post(`contestant/set_answer/${problemId}`, { json: answer }).then(() => undefined);
       await mutateStudent(resp, { optimisticData: { ...student, answers }, populateCache: false });
     },
     [mutateStudent, student],
