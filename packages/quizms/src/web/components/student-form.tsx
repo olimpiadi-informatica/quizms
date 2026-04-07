@@ -9,7 +9,12 @@ export function StudentForm({ printLayout = false }: { printLayout?: boolean }) 
 
   return (
     <Form
-      defaultValue={{ variant: student.variantId, ...student.userData }}
+      defaultValue={{
+        variant: student.variantId,
+        ...student.userData,
+        name: student.name,
+        surname: student.surname,
+      }}
       onSubmit={() => {}}
       className="!max-w-full !flex-row flex-wrap *:basis-1/2 odd:*:pr-2 even:*:pl-2"
       disabled>
