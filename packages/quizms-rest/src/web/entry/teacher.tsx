@@ -102,7 +102,7 @@ function TeacherStatement() {
   const { student } = useStudent();
   const getFileUrl = useCallback(
     (fileName: string) => {
-      return `${process.env.BASE_PATH}/api/teacher/file/${student.venueId}/${student.id}/${fileName}`;
+      return `${process.env.BASE_PATH}api/teacher/file/${student.venueId}/${student.id}/${fileName}`;
     },
     [student.venueId, student.id],
   );

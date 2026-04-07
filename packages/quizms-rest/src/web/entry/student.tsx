@@ -88,9 +88,18 @@ function StudentInner() {
   }, [removeCookie]);
 
   const submit = useCallback(async () => {
-    await api.post("contestant/end");
-    await mutateStudent();
-  }, [mutateStudent]);
+    const resp = api.post("contestant/end").then(() => undefined);
+    await mutateStudent(resp, {
+      optimisticData: {
+        ...student,
+        participationWindow: student.participationWindow && {
+          start: student.participationWindow.start,
+          end: new Date(),
+        },
+      },
+      populateCache: false,
+    });
+  }, [mutateStudent, student]);
 
   const setAnswer = useCallback(
     async (problemId: string, answer: Answer) => {
@@ -120,19 +129,16 @@ function StudentInner() {
 
 function StudentStatement() {
   const { student, venue } = useStudent();
+  const { mutate: mutateStudent } = useRestStudent();
   const ua = useUserAgent();
-  console.log(student, venue);
-  const [{ token }] = useCookies(["token"], {
-    doNotParse: true,
-  });
 
-  const start = async () => {
+  const start = useCallback(async () => {
     await api.post("contestant/start");
-    await mutate(`contestant/status/${token}`);
+    await mutateStudent();
     if (ua.hasFullscreen) {
       await document.documentElement.requestFullscreen?.();
     }
-  };
+  }, [mutateStudent, ua.hasFullscreen]);
 
   const getFileUrl = (fileName: string) => {
     return `${process.env.BASE_PATH}api/contestant/file/${fileName}`;
