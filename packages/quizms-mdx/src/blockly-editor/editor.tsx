@@ -131,7 +131,7 @@ function createConfig({ toolbox, customBlocks, readonly }: InitProps): BlocklyOp
   const config: BlocklyOptions = {
     renderer: "zelos",
     sounds: false,
-    media: process.env.NODE_ENV === "production" ? "/blockly/" : undefined,
+    media: process.env.NODE_ENV === "production" ? `${process.env.BASE_PATH}blockly/` : undefined,
     zoom: {
       controls: true,
       startScale: 0.8,
