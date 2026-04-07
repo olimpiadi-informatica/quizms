@@ -112,7 +112,7 @@ async function importStudents(options: ImportOptions) {
         value: {
           value: s.token,
           venue_id: s.venueId,
-          student_id: s.id
+          student_id: s.id,
         },
       })),
       options,
