@@ -66,7 +66,7 @@ export default async function variants(options: ExportVariantsOptions) {
       QUIZMS_SHUFFLE_PROBLEMS: config.shuffleProblems ? "true" : undefined,
       QUIZMS_SHUFFLE_ANSWERS: config.shuffleAnswers ? "true" : undefined,
       QUIZMS_CACHE_DIR: cacheDir,
-      QUIZMS_BASE_PATH: basePath,
+      BASE_PATH: basePath,
     };
 
     try {
