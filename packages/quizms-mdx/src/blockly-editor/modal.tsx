@@ -33,7 +33,7 @@ export function BlocklyModal() {
   return (
     <Modal ref={ref} title="" className="max-w-sm">
       <Form key={id} defaultValue={{ value: defaultValue }} onSubmit={submit}>
-        <TextField field="value" label={message} placeholder="" autoFocus />
+        <TextField field="value" label={message} placeholder="" autoFocus={ref.current?.open} />
         <div className="flex flex-wrap justify-center gap-2">
           <SubmitButton className="btn-primary">Conferma</SubmitButton>
         </div>
