@@ -24,7 +24,7 @@ export const studentLogin = publicProcedure
     z.strictObject({
       contestId: z.string(),
       token: z.string(),
-      userData: studentSchema.shape.userData.unwrap().required(),
+      userData: studentSchema.shape.userData.required(),
       extraData: studentSchema.shape.extraData.unwrap(),
     }),
   )

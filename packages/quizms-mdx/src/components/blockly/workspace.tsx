@@ -1,6 +1,6 @@
 "use client";
 
-import { type ComponentType, useCallback, useState } from "react";
+import { type ComponentType, useCallback, useEffect, useRef, useState } from "react";
 
 import { ErrorBoundary } from "@olinfo/quizms/components";
 import type { Answer } from "@olinfo/quizms/models";
@@ -53,16 +53,19 @@ export function Blockly<State>({
   const [iframe, setIframe] = useState<HTMLIFrameElement | null>(null);
   const [selectedTestcase, setSelectedTestcase] = useState(0);
   const [alert, setAlert] = useState<string>();
-  const [testcaseResults, setTestcaseResults] = useState<(TestcaseResult | undefined)[]>(
-    testcases.map(() => undefined),
+  const [testcaseResults, setTestcaseResults] = useState<TestcaseResult[]>(
+    testcases.map(() => ({ success: false, message: "" })),
   );
+  const [evaluated, setEvaluated] = useState(false);
 
   const onCodeChanges = useCallback(() => {
-    setTestcaseResults(testcases.map(() => undefined));
-  }, [testcases]);
+    setEvaluated(false);
+  }, []);
 
   const savedBlocks = (student.answers?.[`${id}`] as Answer<"blockly"> | undefined)?.value?.metadata
     .blocks;
+
+  const blocksChangedRef = useRef(false);
 
   const { ready, blocks, svg, code, variableMappings, highlightBlock } = useIframe(
     iframe,
@@ -72,9 +75,49 @@ export function Blockly<State>({
       initialBlocks: savedBlocks ? JSON.parse(savedBlocks) : initialBlocks,
       customBlocks,
     },
-    { onCodeChanges },
+    {
+      onCodeChanges,
+      onBlockChanges: () => {
+        blocksChangedRef.current = true;
+      },
+    },
     debug,
   );
+
+  const saveAnswer = useCallback(
+    async (results?: boolean[]) => {
+      const answer: Answer<"blockly"> = {
+        type: "blockly",
+        value: {
+          results:
+            results ||
+            (id &&
+            student.answers[id] &&
+            student.answers[id].type === "blockly" &&
+            student.answers[id].value
+              ? student.answers[id].value.results
+              : testcases.map(() => false)),
+          metadata: {
+            blocks: JSON.stringify(blocks),
+            code,
+          },
+        },
+      };
+      await setAnswer(`${id}`, answer);
+      blocksChangedRef.current = false;
+    },
+    [blocks, code, id, setAnswer, student.answers, testcases.map],
+  );
+
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      if (blocksChangedRef.current) {
+        if (!terminated) await saveAnswer();
+      }
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [saveAnswer, terminated]);
 
   const {
     state,
@@ -89,6 +132,8 @@ export function Blockly<State>({
     variableMappings,
     highlightBlock,
   );
+
+  useEffect(() => setAlert(selectedResult?.message), [selectedResult]);
 
   const evaluate = useCallback(async () => {
     const results = await Promise.all(
@@ -105,25 +150,15 @@ export function Blockly<State>({
     );
 
     setTestcaseResults(results);
-
-    const answer: Answer<"blockly"> = {
-      type: "blockly",
-      value: {
-        results: results.map((res) => res.success),
-        metadata: {
-          blocks: JSON.stringify(blocks),
-          code,
-        },
-      },
-    };
-    await setAnswer(`${id}`, answer);
-  }, [setAnswer, code, customBlocks, testcases, id, blocks]);
+    setEvaluated(true);
+    if (!terminated) await saveAnswer(results.map((r) => r.success));
+  }, [code, customBlocks, testcases, saveAnswer, terminated]);
 
   return (
     <div className={clsx(style.workspace, "not-prose")}>
       <div className={style.visualizerButtons}>
         <TestcaseSelector
-          results={testcaseResults}
+          results={testcaseResults.map((t) => (evaluated ? t : undefined))}
           selectedTestcase={selectedTestcase}
           setSelectedTestcase={setSelectedTestcase}
         />
@@ -163,7 +198,7 @@ export function Blockly<State>({
       <div className={style.editorButtons}>
         <ExecutionButtons
           evaluate={evaluate}
-          evaluated={!!testcaseResults[0]}
+          evaluated={evaluated}
           selectedEvaluated={!!selectedResult}
           step={step}
           reset={resetSelected}

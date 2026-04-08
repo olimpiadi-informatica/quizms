@@ -39,20 +39,23 @@ export default function TeacherTable() {
             <div className="hidden md:block"> studenti</div>
           </div>
         </Suspense>
-        {contest.allowStudentImport && !frozen && (
-          <Button
-            className="btn-primary btn-sm h-10"
-            icon={Upload}
-            onClick={() => importRef.current?.showModal()}>
-            <div className="hidden md:block">Importa studenti</div>
-          </Button>
-        )}
-        <Button
-          className="btn-primary btn-sm h-10"
-          icon={Download}
-          onClick={() => exportRef.current?.click()}>
-          <div className="hidden md:block">Esporta</div>
-        </Button>
+        {contest.allowStudentImport &&
+          !frozen && ( // TODO: add allowStudentsExport config option
+            <>
+              <Button
+                className="btn-primary btn-sm h-10"
+                icon={Upload}
+                onClick={() => importRef.current?.showModal()}>
+                <div className="hidden md:block">Importa studenti</div>
+              </Button>
+              <Button
+                className="btn-primary btn-sm h-10"
+                icon={Download}
+                onClick={() => exportRef.current?.click()}>
+                <div className="hidden md:block">Esporta</div>
+              </Button>
+            </>
+          )}
         {!frozen && (
           <Button
             className="btn-primary btn-sm h-10"
@@ -106,6 +109,7 @@ function Table({ frozen }: { frozen: boolean }) {
   const allStudents = [...students];
   if (contest.allowStudentImport && !frozen) {
     allStudents.push({
+      userData: {},
       id: newStudentId.current,
       contestId: contest.id,
       venueId: venue.id,
@@ -114,6 +118,9 @@ function Table({ frozen }: { frozen: boolean }) {
       answers: {},
       absent: false,
       disabled: false,
+      participationWindow: null,
+      token: null,
+      score: null,
     } as Student);
   }
 

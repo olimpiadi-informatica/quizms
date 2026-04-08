@@ -64,7 +64,7 @@ export function MultipleResponseAnswer({ children }: { children: ReactNode }) {
       const value = checked ? [...answerValue, id] : answerValue.filter((v) => v !== id);
       await setAnswer(problemId!, {
         type: "multipleResponse",
-        value: value.length === 0 ? undefined : value,
+        value: value.length === 0 ? null : value,
       });
     },
     [answerValue, id, problemId, setAnswer],
@@ -85,12 +85,11 @@ export function MultipleResponseAnswer({ children }: { children: ReactNode }) {
         id={answerId}
         checked={currentlyChecked}
         className={clsx(
-          "checkbox checkbox-sm my-auto mr-4 bg-base-100 [print-color-adjust:exact] disabled:opacity-90 print:mr-2",
-          terminated &&
-            currentlyChecked && {
-              "checkbox-success": correct === true,
-              "checkbox-error": correct === false,
-            },
+          "checkbox checkbox-sm rounded-md my-auto mr-4 bg-base-100 [print-color-adjust:exact] disabled:opacity-90 print:mr-2",
+          terminated && {
+            "checkbox-success border-2": correct === true,
+            "checkbox-error": currentlyChecked && correct === false,
+          },
         )}
         onChange={(e) => submitAnswer(e.target.checked)}
         type="checkbox"
@@ -112,13 +111,11 @@ export function MultipleChoiceAnswer({ children }: { children: ReactNode }) {
   const problemSchema = schema?.[problemId!];
   const correct = isCorrectAnswer(problemSchema, id);
 
-  const answerValue = student.answers?.[problemId!]?.value as
-    | AnswerValue<"multipleChoice">
-    | undefined;
-  const submitAnswer = async (value: string | undefined) => {
+  const answerValue = student.answers?.[problemId!]?.value as AnswerValue<"multipleChoice"> | null;
+  const submitAnswer = async (value: string | null) => {
     await setAnswer(problemId!, {
       type: "multipleChoice",
-      value,
+      value: value,
     });
   };
 
@@ -144,7 +141,7 @@ export function MultipleChoiceAnswer({ children }: { children: ReactNode }) {
               "radio-error": correct === false,
             },
         )}
-        onChange={(e) => submitAnswer(e.target.checked ? id : undefined)}
+        onChange={(e) => submitAnswer(e.target.checked ? id : null)}
         type="radio"
         disabled={terminated}
       />
@@ -159,7 +156,7 @@ export function MultipleChoiceAnswer({ children }: { children: ReactNode }) {
             (answerValue !== id || terminated) && "hidden",
           )}
           type="button"
-          onClick={() => submitAnswer(undefined)}
+          onClick={() => submitAnswer(null)}
           aria-label="Cancella risposta">
           <Trash2 size={20} />
         </button>
@@ -184,9 +181,9 @@ export function OpenAnswer({ type = "openText" }: OpenAnswerProps) {
   const correct = isCorrectAnswer(problemSchema, answerValue);
   const submitAnswer = async (value: string) => {
     if (type === "openNumber") {
-      await setAnswer(problemId!, { type, value: value ? Number(value) : undefined });
+      await setAnswer(problemId!, { type, value: value ? Number(value) : null });
     } else {
-      await setAnswer(problemId!, { type, value: value || undefined });
+      await setAnswer(problemId!, { type, value: value || null });
     }
   };
 

@@ -56,40 +56,40 @@ function StartContestButton() {
   );
 }
 
-function StopContestButton() {
-  const { stopContestWindow } = useTeacher();
-  const modalRef = useRef<HTMLDialogElement>(null);
-
-  const close = () => modalRef.current?.close();
-
-  const undoContestStart = async () => {
-    await stopContestWindow();
-    close();
-  };
-
-  return (
-    <>
-      <Button className="btn-error" onClick={() => modalRef.current?.showModal()}>
-        Annulla inizio gara
-      </Button>
-      <Modal ref={modalRef} title="Conferma">
-        <p>Sei sicuro di voler annullare l&apos;inizio della gara?</p>
-        <Form onSubmit={undoContestStart} className="!max-w-full">
-          <div className="flex flex-wrap justify-center gap-2">
-            <FormButton onClick={close}>Indietro</FormButton>
-            <SubmitButton className="btn-warning">Conferma</SubmitButton>
-          </div>
-        </Form>
-      </Modal>
-    </>
-  );
-}
+// function StopContestButton() {
+//   const { stopContestWindow } = useTeacher();
+//   const modalRef = useRef<HTMLDialogElement>(null);
+//
+//   const close = () => modalRef.current?.close();
+//
+//   const undoContestStart = async () => {
+//     await stopContestWindow();
+//     close();
+//   };
+//
+//   return (
+//     <>
+//       <Button className="btn-error" onClick={() => modalRef.current?.showModal()}>
+//         Annulla inizio gara
+//       </Button>
+//       <Modal ref={modalRef} title="Conferma">
+//         <p>Sei sicuro di voler annullare l&apos;inizio della gara?</p>
+//         <Form onSubmit={undoContestStart} className="!max-w-full">
+//           <div className="flex flex-wrap justify-center gap-2">
+//             <FormButton onClick={close}>Indietro</FormButton>
+//             <SubmitButton className="btn-warning">Conferma</SubmitButton>
+//           </div>
+//         </Form>
+//       </Modal>
+//     </>
+//   );
+// }
 
 function ContestData({ participationWindow }: { participationWindow: TimeRange }) {
   const { venue } = useTeacher();
   const { start: startingTime, end: endingTime } = participationWindow;
 
-  const undoEnd = subMinutes(startingTime!, 1);
+  const _undoEnd = subMinutes(startingTime!, 1);
 
   return (
     <div className="flex flex-col gap-2">
@@ -103,12 +103,14 @@ function ContestData({ participationWindow }: { participationWindow: TimeRange }
         <p>
           Tempo rimanente all&apos;inizio: <Timer endTime={startingTime} />
         </p>
+        {/*
         <WithinTimeRange end={undoEnd}>
           <p>
             Se hai iniziato per sbaglio, puoi ancora annullare la gara fino a un minuto prima
             dell&apos;inizio.
           </p>
         </WithinTimeRange>
+        */}
       </WithinTimeRange>
       <WithinTimeRange start={startingTime} end={endingTime}>
         <p>
@@ -202,11 +204,11 @@ export default function TeacherDashboard() {
                 )}
               </WithinTimeRange>
             )}
-            {venue.participationWindow && (
+            {/*venue.participationWindow && ( TODO: ripristinare funzionalità annulla inizio gara
               <WithinTimeRange end={subMinutes(venue.participationWindow.start, 1)}>
                 <StopContestButton />
               </WithinTimeRange>
-            )}
+            )*/}
             <Link className="btn btn-primary" href="/students">
               Gestisci studenti e risposte
             </Link>
@@ -217,7 +219,7 @@ export default function TeacherDashboard() {
         <Card>
           <CardBody title="Richieste di accesso">
             <div className="h-96 max-h-screen">
-              <StudentRestoreList isStarted={!!venue.token} />
+              <StudentRestoreList />
             </div>
           </CardBody>
         </Card>

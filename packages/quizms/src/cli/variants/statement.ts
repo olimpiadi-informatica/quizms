@@ -33,10 +33,14 @@ export type BaseStatement = {
 export async function buildBaseStatements(
   generationConfigs: VariantsConfig[],
   outDir: string,
+  basePath: string,
 ): Promise<BaseStatement> {
   const entry = Object.fromEntries(generationConfigs.map((c) => [c.id, c.entry]));
 
   const bundleConfig = mergeConfig(configs("production"), {
+    define: {
+      "process.env.BASE_PATH": JSON.stringify(basePath),
+    },
     build: {
       copyPublicDir: false,
       outDir,

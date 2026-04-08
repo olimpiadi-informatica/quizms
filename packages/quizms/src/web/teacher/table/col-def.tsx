@@ -3,10 +3,8 @@ import type {
   ICellEditorParams,
   ICellRendererParams,
   IFilterOptionDef,
-  ITooltipParams,
 } from "ag-grid-community";
 import { isEqual as isEqualDate } from "date-fns";
-import { TriangleAlert } from "lucide-react";
 
 import {
   type Contest,
@@ -19,8 +17,6 @@ import {
   validateAnswerValue,
   validateUserData,
 } from "~/models";
-
-import { isStudentIncomplete } from "./utils";
 
 export function columnDefinition(
   contest: Contest,
@@ -53,24 +49,31 @@ export function columnDefinition(
         equals: field.type === "date" ? isEqualDate : undefined,
         editable: contest.allowStudentEdit && !frozen,
         ...defaultOptions,
-        tooltipValueGetter: ({ data }: ITooltipParams<Student>) => {
-          return isStudentIncomplete(data!, contest, variants);
-        },
-        cellRenderer: ({ api, data, value }: ICellRendererParams<Student>) => {
-          value = formatUserData(data, field);
-          if (
-            field.pinned &&
-            data?.updatedAt &&
-            !api.getSelectedRows().some((s: Student) => s.id === data.id) &&
-            isStudentIncomplete(data, contest, variants)
-          ) {
-            return (
-              <span>
-                {value}{" "}
-                <TriangleAlert className="mb-1 inline-block cursor-text text-warning" size={16} />
-              </span>
-            );
-          }
+        // TODO: restore warnings
+        // tooltipValueGetter: ({ data }: ITooltipParams<Student>) => {
+        //   return isStudentIncomplete(data!, contest, variants);
+        // },
+        cellRenderer: ({ api: _api, data, value }: ICellRendererParams<Student>) => {
+          value =
+            field.name === "name"
+              ? data?.name
+              : field.name === "surname"
+                ? data?.surname
+                : formatUserData(data, field);
+          // TODO: restore warnings
+          // if (
+          //   field.pinned &&
+          //   data?.updatedAt &&
+          //   !api.getSelectedRows().some((s: Student) => s.id === data.id) &&
+          //   isStudentIncomplete(data, contest, variants)
+          // ) {
+          //   return (
+          //     <span>
+          //       {value}{" "}
+          //       <TriangleAlert className="mb-1 inline-block cursor-text text-warning" size={16} />
+          //     </span>
+          //   );
+          // }
           return value;
         },
         valueParser: (params) => parseUserData(params.newValue, field),
@@ -80,7 +83,7 @@ export function columnDefinition(
       }),
     ),
     {
-      field: "variant",
+      field: "variantId",
       headerName: "Variante",
       width: 100,
       editable: !frozen,
@@ -99,7 +102,7 @@ export function columnDefinition(
       headerName: "Vedi Prova",
       width: 100,
       cellRenderer: ({ data }: ICellRendererParams<Student>) => {
-        if (data?.absent || data?.disabled || !data?.variantId) return;
+        if (data?.absent || data?.disabled || !data?.variantId || !data.participationWindow) return;
         return (
           <a
             className="link link-info"
@@ -122,14 +125,14 @@ export function columnDefinition(
         valueGetter: ({ data }) => {
           if (data.absent || data.disabled) return "";
           if (!(id in (data.answers ?? {}))) return "";
-          if (variants[data.variant] == null) return "";
+          if (variants[data.variantId] == null) return "";
           return displayAnswer(data.answers[id]);
         },
         tooltipValueGetter: ({ data }) => data.answers?.[id],
         editable: ({ data }) =>
-          contest.allowAnswerEdit && data.variant && !data.absent && !data.disabled && !frozen,
+          contest.allowAnswerEdit && data.variantId && !data.absent && !data.disabled && !frozen,
         valueParser: (params) => {
-          const schema = variants[params.data.variant!].schema;
+          const schema = variants[params.data.variantId!].schema;
           return parseAnswer(params.newValue, schema[id]);
         },
         cellEditorParams: {

@@ -28,6 +28,9 @@ export default async function devServer(options: DevOptions) {
   const contests = await loadContests();
 
   const config = mergeConfig(configs("development"), {
+    define: {
+      "process.env.BASE_PATH": JSON.stringify("/"),
+    },
     publicDir: path.join(cwd(), "public"),
     plugins: [devEntry(contests)],
   } as InlineConfig);

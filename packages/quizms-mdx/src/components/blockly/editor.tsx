@@ -7,7 +7,7 @@ export function Editor({ ready, ref }: { ready: boolean; ref: Ref<HTMLIFrameElem
     <>
       <iframe
         ref={ref}
-        src="/__blockly_iframe"
+        src={`${process.env.BASE_PATH}__blockly_iframe.html`}
         className="size-full"
         title="Area di lavoro di Blockly"
         loading="lazy"

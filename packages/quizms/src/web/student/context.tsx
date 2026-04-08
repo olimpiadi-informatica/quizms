@@ -12,6 +12,7 @@ export type StudentContextProps = {
   logout?: () => Promise<void> | void;
   enforceFullscreen: boolean;
   terminated: boolean;
+  started: boolean;
   schema?: Schema;
 };
 

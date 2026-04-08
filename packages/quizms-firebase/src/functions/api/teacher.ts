@@ -1,6 +1,6 @@
 import crypto from "node:crypto";
 
-import type { Contest, Student, Venue } from "@olinfo/quizms/models";
+import type { Contest, Venue } from "@olinfo/quizms/models";
 import { randomToken } from "@olinfo/quizms/utils";
 import { TRPCError } from "@trpc/server";
 import { addMinutes, addSeconds, isFuture, isPast, roundToNearestMinutes } from "date-fns";
@@ -10,6 +10,8 @@ import * as logger from "firebase-functions/logger";
 import { defineString } from "firebase-functions/params";
 import { chunk } from "lodash-es";
 import z from "zod";
+
+import type { Student } from "~/models/student";
 
 import { auth, db } from "../common";
 import { getContest, getUser, getVenue, getVenueByToken, getVenueStudents } from "./queries";

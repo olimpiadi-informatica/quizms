@@ -15,6 +15,7 @@ import { buildBaseSchemas } from "./variants/schema";
 import { buildBaseStatements } from "./variants/statement";
 
 export type ExportVariantsOptions = {
+  basePath: string;
   outDir: string;
 };
 
@@ -23,11 +24,12 @@ export default async function variants(options: ExportVariantsOptions) {
   const schemaBuildDir = path.join(cwd(), ".quizms", "schema-build");
   const statementBuildDir = path.join(cwd(), ".quizms", "statement-build");
   const variantsDir = options?.outDir || path.join(cwd(), "variants");
+  const basePath = options.basePath;
 
   const configs = await load("variants", variantsConfigSchema);
 
   await buildBaseSchemas(configs, schemaBuildDir);
-  const baseStatement = await buildBaseStatements(configs, statementBuildDir);
+  const baseStatement = await buildBaseStatements(configs, statementBuildDir, basePath);
 
   await mkdir(cacheDir, { recursive: true });
   await rm(variantsDir, { recursive: true, force: true });
@@ -64,6 +66,7 @@ export default async function variants(options: ExportVariantsOptions) {
       QUIZMS_SHUFFLE_PROBLEMS: config.shuffleProblems ? "true" : undefined,
       QUIZMS_SHUFFLE_ANSWERS: config.shuffleAnswers ? "true" : undefined,
       QUIZMS_CACHE_DIR: cacheDir,
+      BASE_PATH: basePath,
     };
 
     try {

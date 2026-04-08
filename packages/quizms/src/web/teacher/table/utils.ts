@@ -16,6 +16,7 @@ export function isStudentIncomplete(
   if (student.absent || student.disabled) return;
 
   for (const field of contest.userData) {
+    if (field.name === "name" || field.name === "surname") continue;
     if (!student.userData?.[field.name]) {
       return `${field.label} mancante`;
     }
@@ -29,7 +30,7 @@ export function isStudentIncomplete(
 
   const answers = student.answers ?? {};
   for (const id of Object.keys(variant.schema)) {
-    const err = validateAnswerValue(answers[id]?.value, variant.schema[id]);
+    const err = validateAnswerValue(answers[id]?.value ?? null, variant.schema[id]);
     if (err) {
       return err[0];
     }

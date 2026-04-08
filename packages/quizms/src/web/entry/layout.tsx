@@ -41,7 +41,7 @@ function DatePolyfill() {
   globalThis.NativeDate ??= Date;
 
   const { data: timeDelta } = useSWR(
-    "https://time1.olinfo.it",
+    `${process.env.BASE_PATH}api/time`,
     async (url) => {
       const res = await fetch(url);
       const now = globalThis.NativeDate.now();

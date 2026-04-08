@@ -56,6 +56,7 @@ async function main() {
       "The directory to output the bundle.",
       path.join(".quizms", "hosting-build"),
     )
+    .option("-p, --base-path <path>", "The base path for serving the static files.", "/")
     .argument("[preset]", "The preset to use.")
     .action((preset, options) => staticExport({ ...options, preset }));
 
@@ -71,6 +72,7 @@ async function main() {
     .command("variants")
     .description("Generate variants for the contest.")
     .option("-d, --outDir <directory>", "The directory to output the variants.", "variants")
+    .option("-p, --base-path <path>", "The base path to fetch the static files from.", "/")
     .action(variants);
 
   findProjectDirectory();
