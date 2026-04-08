@@ -56,10 +56,10 @@ export default async function importData(options: ImportOptions) {
   if (options.contests) {
     await importContests(api, options);
   }
-  if (options.venues || options.teachers) {
+  if (options.venues || options.teachers || options.venueWindows) {
     await importVenues(api, options);
   }
-  if (options.students || options.tokens || options.venueWindows) {
+  if (options.students || options.tokens) {
     await importStudents(api, options);
   }
   if (options.variants) {
