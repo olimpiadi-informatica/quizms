@@ -15,6 +15,7 @@ import {
 import { Rng, validate } from "@olinfo/quizms/utils";
 import { fatal, load, loadContests, success } from "@olinfo/quizms/utils-node";
 import { SingleBar } from "cli-progress";
+import ky, { HTTPError, type KyInstance } from "ky";
 import { keyBy, uniq, xor } from "lodash-es";
 import picomatch from "picomatch";
 import { glob } from "tinyglobby";
@@ -41,27 +42,38 @@ export default async function importData(options: ImportOptions) {
   if (!existsSync("data")) {
     fatal("Cannot find data directory. Make sure you're inside a QuizMS project.");
   }
+  const api = ky.create({
+    prefixUrl: options.apiUrl,
+    hooks: {
+      beforeRequest: [
+        (request) => {
+          request.headers.set("Cookie", `admin_token=${options.adminToken}`);
+        },
+      ],
+    },
+  });
 
   if (options.contests) {
-    await importContests(options);
+    await importContests(api, options);
   }
   if (options.venues || options.teachers) {
-    await importVenues(options);
+    await importVenues(api, options);
   }
   if (options.students || options.tokens || options.venueWindows) {
-    await importStudents(options);
+    await importStudents(api, options);
   }
   if (options.variants) {
-    await importVariants(options);
+    await importVariants(api, options);
   }
   if (options.statements) {
-    await importStatements(options);
+    await importStatements(api, options);
   }
 }
 
-async function importContests(options: ImportOptions) {
+async function importContests(api: KyInstance, options: ImportOptions) {
   const contests = await load("contests", contestSchema);
   await adminImport(
+    api,
     "contests",
     contests.map((c) => ({
       id: c.id,
@@ -73,12 +85,11 @@ async function importContests(options: ImportOptions) {
   );
 }
 
-async function importStudents(options: ImportOptions) {
+async function importStudents(api: KyInstance, options: ImportOptions) {
   const importStudentSchema = studentSchema
     .omit({
       answers: true,
       participationWindow: true,
-      id: true,
       uid: true,
     })
     .extend({
@@ -88,10 +99,11 @@ async function importStudents(options: ImportOptions) {
       score: studentSchema.shape.score.default(null),
       createdAt: studentSchema.shape.createdAt.default(new Date()),
     })
-    .transform((data) => ({ ...data, id: data.token, uid: null }));
+    .transform((data) => ({ ...data, uid: null }));
   const students = await load("students", importStudentSchema);
   if (options.students) {
     await adminImport(
+      api,
       "students",
       students.map((s) => ({
         id: s.id,
@@ -104,6 +116,7 @@ async function importStudents(options: ImportOptions) {
   }
   if (options.tokens) {
     await adminImport(
+      api,
       "tokens",
       students.map((s) => ({
         id: s.id,
@@ -120,7 +133,7 @@ async function importStudents(options: ImportOptions) {
   }
 }
 
-async function importVenues(options: ImportOptions) {
+async function importVenues(api: KyInstance, options: ImportOptions) {
   const importVenueSchema = z.preprocess(
     (data: any) => ({
       ...data,
@@ -155,6 +168,7 @@ async function importVenues(options: ImportOptions) {
         .map((contest) => `${school.id}-${contest.id}`),
     }));
     await adminImport(
+      api,
       "teacher",
       teachers.map((t) => ({
         id: t.username,
@@ -197,6 +211,7 @@ async function importVenues(options: ImportOptions) {
     }
     if (options.venues) {
       await adminImport(
+        api,
         "venues",
         venues.map((v) => ({
           id: v.id,
@@ -209,6 +224,7 @@ async function importVenues(options: ImportOptions) {
     }
     if (options.venueWindows) {
       await adminImport(
+        api,
         "venueWindows",
         venues.map((v) => ({
           id: v.id,
@@ -222,7 +238,7 @@ async function importVenues(options: ImportOptions) {
   }
 }
 
-async function importVariants(options: ImportOptions) {
+async function importVariants(api: KyInstance, options: ImportOptions) {
   const variantsConfig = await load("variants", variantsConfigSchema);
   const variants = await Promise.all(
     variantsConfig.flatMap((config) => {
@@ -244,6 +260,7 @@ async function importVariants(options: ImportOptions) {
     }),
   );
   await adminImport(
+    api,
     "variants",
     variants.map((v) => ({
       id: v.id,
@@ -255,7 +272,7 @@ async function importVariants(options: ImportOptions) {
   );
 }
 
-async function importStatements(_options: ImportOptions) {
+async function importStatements(api: KyInstance, options: ImportOptions) {
   const contests = await loadContests();
 
   const timestamp = new Date().toISOString().replace(/:/g, "-");
@@ -286,18 +303,36 @@ async function importStatements(_options: ImportOptions) {
     )
   ).flat();
 
-  // TODO: check if statements already exist
+  const { idsToImport } = await checkExisting(
+    api,
+    "statements",
+    statements.map(([_, remote]) => ({
+      id: remote,
+      get: `/admin/file/get/${remote}`,
+    })),
+    options,
+    true,
+  );
+
+  const bar = new SingleBar({
+    format: "  {bar} {percentage}% | {value}/{total}",
+    barCompleteChar: "\u2588",
+    barIncompleteChar: "\u2582",
+  });
+  bar.start(idsToImport.length, 0);
+
   for (const [local, remote] of statements) {
+    if (!idsToImport.includes(remote)) {
+      continue;
+    }
     try {
       const content = await readFile(local);
-      const setUrl = new URL(`/admin/file/set/${remote}`, _options.apiUrl);
-      const res = await fetch(setUrl, {
-        method: "post",
+      const setUrl = new URL(`/admin/file/set/${remote}`, options.apiUrl);
+      const res = await api.post(setUrl, {
+        body: content,
         headers: {
           "content-type": "application/octet-stream",
-          cookie: `admin_token=${_options.adminToken}`,
         },
-        body: content,
       });
       if (!res.ok) {
         fatal(`Got error code while uploading statements: ${res.statusText}`);
@@ -305,7 +340,11 @@ async function importStatements(_options: ImportOptions) {
     } catch (err) {
       fatal(`Got error while uploading statements: ${err}`);
     }
+    bar.increment(1);
   }
+  bar.update(idsToImport.length);
+  bar.stop();
+  success(`${idsToImport.length} statements imported!`);
 }
 
 type importable<T> = {
@@ -315,27 +354,28 @@ type importable<T> = {
   value: T;
 };
 
-async function adminImport<T>(name: string, dataList: importable<T>[], options: ImportOptions) {
+async function checkExisting<T>(
+  api: KyInstance,
+  name: string,
+  dataList: Omit<importable<T>, "cas" | "value">[],
+  options: ImportOptions,
+  raw?: boolean,
+) {
   const data = keyBy(dataList, (d) => d.id);
   const existing: Record<string, T> = {};
   for (const id in data) {
     try {
       const getUrl = new URL(data[id].get, options.apiUrl);
-      const res = await fetch(getUrl, {
-        headers: {
-          cookie: `admin_token=${options.adminToken}`,
-        },
-      });
-      if (!res.ok) {
-        fatal(
-          `Cannot import ${name}, received error code while fetching existing data: ${res.statusText}`,
-        );
-      }
-      const j = await res.json();
-      if (j !== null) {
-        existing[id] = j;
+      const res = await api.get<T>(getUrl);
+      if (raw) existing[id] = res.body! as any;
+      else {
+        const j = await res.json();
+        if (j !== null) {
+          existing[id] = j;
+        }
       }
     } catch (err) {
+      if (raw && err instanceof HTTPError && err.response.status === 404) continue;
       fatal(`Cannot import ${name}, error while fetching existing data: ${err}`);
     }
   }
@@ -364,7 +404,17 @@ async function adminImport<T>(name: string, dataList: importable<T>[], options: 
       fatal("Command aborted.");
     }
   }
+  return { existing, idsToImport };
+}
 
+async function adminImport<T>(
+  api: KyInstance,
+  name: string,
+  dataList: importable<T>[],
+  options: ImportOptions,
+) {
+  const data = keyBy(dataList, (d) => d.id);
+  const { existing, idsToImport } = await checkExisting(api, name, dataList, options);
   const bar = new SingleBar({
     format: "  {bar} {percentage}% | {value}/{total}",
     barCompleteChar: "\u2588",
@@ -375,20 +425,12 @@ async function adminImport<T>(name: string, dataList: importable<T>[], options: 
   for (const id of idsToImport) {
     const casUrl = new URL(data[id].cas, options.apiUrl);
     try {
-      console.log({
-        old: existing[id] ?? null,
-        new: data[id].value,
-      });
-      const res = await fetch(casUrl, {
+      const res = await api.post(casUrl, {
         method: "post",
-        headers: {
-          "content-type": "application/json",
-          cookie: `admin_token=${options.adminToken}`,
-        },
-        body: JSON.stringify({
+        json: {
           old: existing[id] ?? null,
           new: data[id].value,
-        }),
+        },
       });
       if (!res.ok) {
         fatal(`Cannot import ${name}, received while importing: ${res.statusText}`);
