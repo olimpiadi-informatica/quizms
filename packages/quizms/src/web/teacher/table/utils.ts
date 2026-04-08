@@ -16,6 +16,7 @@ export function isStudentIncomplete(
   if (student.absent || student.disabled) return;
 
   for (const field of contest.userData) {
+    if (field.name === "name" || field.name === "surname") continue;
     if (!student.userData?.[field.name]) {
       return `${field.label} mancante`;
     }
