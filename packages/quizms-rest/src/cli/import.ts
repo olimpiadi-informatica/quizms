@@ -327,8 +327,7 @@ async function importStatements(api: KyInstance, options: ImportOptions) {
     }
     try {
       const content = await readFile(local);
-      const setUrl = new URL(`/admin/file/set/${remote}`, options.apiUrl);
-      const res = await api.post(setUrl, {
+      const res = await api.post(`admin/file/set/${remote}`, {
         body: content,
         headers: {
           "content-type": "application/octet-stream",
