@@ -31,11 +31,15 @@ export async function buildBaseSchemas(generationConfigs: VariantsConfig[], outD
         fileName: "base-schema-[name]",
         formats: ["es"],
       },
+      rollupOptions: {
+        external: ["react", "react-dom"],
+      },
     },
     environments: {
       schema: {
         resolve: {
-          conditions: ["schema", "react-server"],
+          conditions: ["schema"],
+          noExternal: true,
         },
       },
     },

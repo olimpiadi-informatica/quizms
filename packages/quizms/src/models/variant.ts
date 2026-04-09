@@ -185,12 +185,12 @@ export function calcScore(student: Student, schema?: Schema) {
 
   const answers = student.answers;
 
-  if (!schema || !answers) return;
+  if (!schema) return;
 
   let score = 0;
   for (const id in schema) {
     const problem = schema[id];
-    const answer = answers[id];
+    const answer = answers?.[id];
 
     const points = calcProblemPoints(problem, answer);
     score += points;
