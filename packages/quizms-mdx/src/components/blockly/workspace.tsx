@@ -92,7 +92,7 @@ export function Blockly<State>({
           results:
             results ||
             (id &&
-            student.answers[id] &&
+            student.answers?.[id] &&
             student.answers[id].type === "blockly" &&
             student.answers[id].value
               ? student.answers[id].value.results
