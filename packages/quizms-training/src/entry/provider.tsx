@@ -1,4 +1,4 @@
-import { type ReactNode, useCallback, useMemo, useState } from "react";
+import { type ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 
 import { TitleProvider } from "@olinfo/quizms/components";
 import {
@@ -12,7 +12,7 @@ import {
 } from "@olinfo/quizms/models";
 import { StudentProvider } from "@olinfo/quizms/student";
 import { Rng, validate } from "@olinfo/quizms/utils";
-import { addMinutes, subSeconds } from "date-fns";
+import { addMinutes, isFuture, subSeconds } from "date-fns";
 import useSWR, { preload } from "swr";
 
 import {
@@ -49,6 +49,26 @@ export function TrainingProvider({
         : { type: "anonymous", student: anonymousStudent },
     [iframeStudent, anonymousStudent],
   );
+
+  useEffect(() => {
+    if (type !== "anonymous") return;
+
+    const isRunning = student.participationWindow && isFuture(student.participationWindow.end);
+
+    if (!isRunning) return;
+
+    const controller = new AbortController();
+
+    window.addEventListener(
+      "beforeunload",
+      (event) => {
+        event.preventDefault();
+      },
+      { signal: controller.signal },
+    );
+
+    return () => controller.abort();
+  }, [type, student.participationWindow]);
 
   const { data: variant } = useSWR(
     student.variantId && ["variant", contest.id, student.variantId],
