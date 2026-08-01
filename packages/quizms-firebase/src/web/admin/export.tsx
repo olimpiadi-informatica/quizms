@@ -152,13 +152,13 @@ export function scoreboardFormatter(
     }
   }
   for (const problemId of contest.problemIds) {
-    if (unshuflledProblems[problemId] !== undefined) {
+    if (unshuflledProblems[problemId] === undefined) {
+      row.push("");
+      row.push("");
+    } else {
       const [answer, points] = unshuflledProblems[problemId];
       row.push(`${answer}`);
       row.push(`${points}`);
-    } else {
-      row.push("");
-      row.push("");
     }
   }
   row.push(`${student.score ?? ""}`);

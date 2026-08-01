@@ -86,7 +86,18 @@ function injectLocalVariables(ast: Program, file: string) {
         ]);
 
         let variant: Statement;
-        if (process.env.NODE_ENV !== "development") {
+        if (process.env.NODE_ENV === "development") {
+          // const [_variant, _setVariant] = useState(0);
+          variant = b.variableDeclaration("const", [
+            b.variableDeclarator(
+              b.arrayPattern([b.identifier("_variant"), b.identifier("_setVariant")]),
+              b.callExpression(
+                b.memberExpression(b.identifier("_react$q"), b.identifier("useState")),
+                [b.literal(0)],
+              ),
+            ),
+          ]);
+        } else {
           const problem = path.dirname(file);
 
           // A prime number smaller than √ MAX_SAFE_INTEGER
@@ -111,17 +122,6 @@ function injectLocalVariables(ast: Program, file: string) {
                   b.literal(hash(problem) % MODULE),
                 ),
                 b.memberExpression(b.identifier("_allVariants"), b.identifier("length")),
-              ),
-            ),
-          ]);
-        } else {
-          // const [_variant, _setVariant] = useState(0);
-          variant = b.variableDeclaration("const", [
-            b.variableDeclarator(
-              b.arrayPattern([b.identifier("_variant"), b.identifier("_setVariant")]),
-              b.callExpression(
-                b.memberExpression(b.identifier("_react$q"), b.identifier("useState")),
-                [b.literal(0)],
               ),
             ),
           ]);
