@@ -87,15 +87,12 @@ async function getResponse<Message extends { type: string }, Data>(
     window.addEventListener(
       "message",
       (ev) => {
-        if (ev.source !== window.parent) return;
-        if (typeof ev.data !== "object" || ev.data === null || !("messageId" in ev.data)) return;
-        if (ev.data.messageId !== messageId) return;
-
         try {
           const response = validate(
             messageSchema,
             cloneDeepWith(ev.data, (value) => (isDate(value) ? new Date(value) : undefined)),
           );
+          if (response.messageId !== messageId) return;
 
           if (response.success) {
             resolve(validate(schema, response.data));
