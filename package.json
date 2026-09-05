@@ -1,0 +1,14 @@
+{
+  "name": "quizms-monorepo",
+  "private": true,
+  "scripts": {
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "pnpm -r build && changeset publish"
+  },
+  "devDependencies": {
+    "@changesets/changelog-github": "^1.0.1",
+    "@changesets/cli": "^3.0.2"
+  }
+}
+

@@ -137,6 +137,15 @@ Format:
 - `docs(intro): update getting started instructions for pnpm`
 - `ci: add PR title verification workflow`
 
+### Generating a Changeset
+
+If your PR introduces a fix or feature to any package under `packages/`, please include a changeset:
+
+```bash
+pnpm changeset
+```
+Follow the interactive prompts to pick the package, select the bump type (`patch` or `minor`), and write a user-facing summary of the change. Commit the generated `.changeset/*.md` file as part of your PR.
+
 ---
 
 ## 7. Documentation
