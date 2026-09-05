@@ -1,6 +1,10 @@
 {
   "name": "quizms-monorepo",
   "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/olimpiadi-informatica/quizms.git"
+  },
   "scripts": {
     "changeset": "changeset",
     "version-packages": "changeset version",

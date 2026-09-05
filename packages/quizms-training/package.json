@@ -4,6 +4,15 @@
   "type": "module",
   "author": "Alessandro Bortolin <bortolin.alessandro@outlook.it>",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/olimpiadi-informatica/quizms.git",
+    "directory": "packages/quizms-training"
+  },
+  "bugs": {
+    "url": "https://github.com/olimpiadi-informatica/quizms/issues"
+  },
+  "homepage": "https://quizms.olinfo.it",
   "scripts": {
     "prebuild": "biome check && tsc --noEmit",
     "build": "vite build",
