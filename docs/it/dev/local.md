@@ -3,24 +3,43 @@
 1. Scarica e compila `quizms`:
 
    ```sh
-   $ git clone git@github.com:olimpiadi-informatica/quizms.git
-   $ pushd quizms
-   $ yarn           # installa le dipendenze
-   $ yarn build     # compila il progetto, puoi usare `yarn watch` per ricompilare automaticamente
-   $ yarn link      # crea un symlink a quizms
-   $ popd
+   git clone git@github.com:olimpiadi-informatica/quizms.git
+   cd quizms
+   pnpm install      # installa le dipendenze in tutto il monorepo
+   pnpm -r build     # compila tutti i pacchetti
    ```
 
-1. Scarica un progetto su cui testare `quizms`:
+   Puoi usare `pnpm -r watch` in un terminale separato per ricompilare automaticamente le modifiche man mano che salvi i file.
+
+2. Collega il pacchetto a un progetto su cui testare `quizms` (come `quizms-demo` o una gara):
+
+   Con le versioni recenti di pnpm, usa il linking diretto specificando il percorso della cartella del pacchetto:
 
    ```sh
-   $ git clone ...
-   $ pushd ...
-   $ yarn           # installa le dipendenze
-   $ yarn link @olinfo/quizms   # installa la versione locale di quizms
+   cd percorso/della/tua-gara
+   pnpm link ../quizms/packages/quizms
+   # Se stai modificando anche mdx o altri pacchetti:
+   pnpm link ../quizms/packages/quizms-mdx
    ```
 
-1. Avvia il server di sviluppo:
+   In alternativa, puoi usare [yalc](https://github.com/wclr/yalc) per un ambiente di test locale isolato:
    ```sh
-   $ yarn dev
+   # In quizms/packages/quizms:
+   npx yalc publish
+   # Nel progetto della gara:
+   npx yalc add @olinfo/quizms
    ```
+
+3. Avvia il server di sviluppo nel progetto della gara:
+
+   ```sh
+   pnpm dev
+   ```
+
+4. Ripristinare le dipendenze al termine:
+
+   ```sh
+   pnpm unlink @olinfo/quizms
+   pnpm install --force
+   ```
+

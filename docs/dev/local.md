@@ -1,27 +1,44 @@
 # Develop QuizMS
 
-1.  Download and compile `quizms`:
+1. Download and build `quizms`:
 
-    ```sh
-    $ git clone git@github.com:olimpiadi-informatica/quizms.git
-    $ pushd quizms
-    $ yarn           # install dependencies
-    $ yarn build     # compile the project, you can use `yarn watch` to automatically recompile
-    $ yarn link      # create a symlink to quizms
-    $ popd
-    ```
+   ```sh
+   git clone git@github.com:olimpiadi-informatica/quizms.git
+   cd quizms
+   pnpm install      # install dependencies across the monorepo
+   pnpm -r build     # compile all packages
+   ```
 
-2.  Download a project to test `quizms` on:
+   You can use `pnpm -r watch` in a separate terminal to automatically recompile packages as you edit them.
 
-    ```sh
-    $ git clone ...
-    $ pushd ...
-    $ yarn           # install dependencies
-    $ yarn link @olinfo/quizms   # install the local version of quizms
-    ```
+2. Link into a project to test `quizms` (such as `quizms-demo` or a contest repo):
 
-3.  Start the development server:
+   In modern pnpm, use direct path linking from the consuming project directory:
 
-    ```sh
-    $ yarn dev
-    ```
+   ```sh
+   cd path/to/your-contest-project
+   pnpm link ../quizms/packages/quizms
+   # If testing mdx or other packages:
+   pnpm link ../quizms/packages/quizms-mdx
+   ```
+
+   Alternatively, you can use [yalc](https://github.com/wclr/yalc) for isolated local testing:
+   ```sh
+   # In quizms/packages/quizms:
+   npx yalc publish
+   # In your contest project:
+   npx yalc add @olinfo/quizms
+   ```
+
+3. Start the development server in your contest project:
+
+   ```sh
+   pnpm dev
+   ```
+
+4. Restoring dependencies when done:
+
+   ```sh
+   pnpm unlink @olinfo/quizms
+   pnpm install --force
+   ```
