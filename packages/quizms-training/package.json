@@ -30,6 +30,9 @@
       "default": "./dist/vite.js"
     }
   },
+  "files": [
+    "dist"
+  ],
   "dependencies": {
     "@olinfo/quizms": "workspace:^",
     "@olinfo/react-components": "^0.12.3",
