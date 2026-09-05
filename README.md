@@ -11,3 +11,7 @@ Check out a sample project at:
 Access the full documentation at:
 
 > [https://quizms.olinfo.it](https://quizms.olinfo.it)
+
+## Contributing
+
+Please read our [Contributing Guide](CONTRIBUTING.md) to learn how to set up the repository, develop packages, and submit pull requests.
