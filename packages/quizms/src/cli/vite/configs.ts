@@ -36,6 +36,7 @@ export default function configs(mode: "development" | "production"): InlineConfi
 
   return {
     configFile: false,
+    base: process.env.BASE_PATH || "/",
     root,
     mode,
     resolve: {
@@ -47,6 +48,7 @@ export default function configs(mode: "development" | "production"): InlineConfi
     },
     define: {
       "process.env.NODE_ENV": JSON.stringify(mode),
+      "process.env.BASE_PATH": JSON.stringify(process.env.BASE_PATH || "/"),
     },
     plugins: [plugins, directives(), images(), inspect(), react(), statementExternals(), entry()],
     build: {
