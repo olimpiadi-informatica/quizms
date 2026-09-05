@@ -1,5 +1,11 @@
 # @olinfo/quizms-training
 
+## 5.0.5
+
+### Patch Changes
+
+- [#54](https://github.com/olimpiadi-informatica/quizms/pull/54) [`aa51a0c`](https://github.com/olimpiadi-informatica/quizms/commit/aa51a0cf196d2242fd52f01a92cf0bade7d3184f) Thanks [@franfill1](https://github.com/franfill1)! - Fixes an issue where evaluating or autosaving a Blockly solution in an embedded contest fails.
+
 ## 5.0.4
 
 ### Patch Changes
