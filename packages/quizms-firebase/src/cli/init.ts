@@ -123,7 +123,7 @@ function hostingConfigs(region: string) {
     ignore: ["firebase.json", "**/.*", "**/node_modules/**"],
     rewrites: [
       {
-        source: "/api",
+        source: "/api/**",
         function: {
           functionId: "api",
           region,
