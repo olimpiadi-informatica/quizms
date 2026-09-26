@@ -85,7 +85,7 @@ export const studentLogin = publicProcedure
       contestId: data.contestId,
       token: data.token,
       participationWindow: venue.participationWindow,
-      variant: variant.id,
+      variantId: variant.id,
       answers: {},
       extraData: data.extraData,
       createdAt: Timestamp.now(),
@@ -96,6 +96,6 @@ export const studentLogin = publicProcedure
       role: "student",
       studentId: studentRef.id,
       venueId: venue.id,
-      variant,
+      variantId: variant.id,
     });
   });
