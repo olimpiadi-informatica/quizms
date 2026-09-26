@@ -213,7 +213,7 @@ async function importStatements(bucket: Bucket, options: ImportOptions) {
       async (id): Promise<[string, string][]> => {
         const localDir = path.join("variants", config.id, id);
         const remoteDir = path.join("statements", config.id, id);
-        const files = await glob("*.{pdf,js,css}", { cwd: localDir });
+        const files = await glob("*.{pdf,css,json,txt,mjs}", { cwd: localDir });
 
         return files.flatMap((file) => {
           const ext = path.extname(file);
