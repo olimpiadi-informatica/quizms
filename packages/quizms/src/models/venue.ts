@@ -13,7 +13,7 @@ export const venueSchema = z.strictObject({
     })
     .optional(),
   finalized: z.boolean().default(false),
-  pdfVariants: z.array(z.coerce.string()),
+  pdfVariants: z.array(z.coerce.string()).default([]),
   disabled: z.boolean().default(false),
 });
 
