@@ -140,7 +140,7 @@ async function importVenues(db: Firestore, options: ImportOptions) {
 
         let pdfVariants: string[] = [];
         if (contest.hasVariants) {
-          if (school.pdfVariants) {
+          if (school.pdfVariants.length > 0) {
             pdfVariants = school.pdfVariants.map((id) => `${contest.id}-${id}`);
           } else {
             const rng = new Rng(`${contest.secret}-${contest.id}-${school.id}-venue`);
