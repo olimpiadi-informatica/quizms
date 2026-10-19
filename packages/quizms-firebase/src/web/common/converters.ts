@@ -40,7 +40,11 @@ function convertFromFirestore(data: object) {
 }
 
 function parse<T>(schema: z.core.$ZodType<T>, snapshot: DocumentSnapshot): T {
-  const data = convertFromFirestore({ ...snapshot.data(), id: snapshot.id });
+  // Pending server timestamps are null in local snapshots unless estimated.
+  const data = convertFromFirestore({
+    ...snapshot.data({ serverTimestamps: "estimate" }),
+    id: snapshot.id,
+  });
   return validate(schema, data);
 }
 

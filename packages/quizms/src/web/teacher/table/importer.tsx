@@ -192,7 +192,10 @@ async function importStudents(
       absent: false,
       disabled: false,
     };
-    student.score = calcScore(student, variants[variantId]?.schema);
+    const score = calcScore(student, variants[variantId]?.schema);
+    if (score !== undefined) {
+      student.score = score;
+    }
     students.push(student);
   }
   await Promise.all(students.map((student) => addStudent(student)));
