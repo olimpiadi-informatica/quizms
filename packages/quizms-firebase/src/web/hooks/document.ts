@@ -52,7 +52,10 @@ export function useDocumentOptional<T>(
     (setData) => {
       const unsubscribe = onSnapshot(
         ref,
+        { includeMetadataChanges: true },
         (snap) => {
+          // Local snapshots have null server timestamps, the optimistic update already covers them.
+          if (snap.metadata.hasPendingWrites) return;
           try {
             setData([snap.data()]);
           } catch (err) {

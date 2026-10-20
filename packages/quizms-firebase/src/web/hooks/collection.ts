@@ -57,7 +57,10 @@ export function useCollection<T extends { id: string }>(
     (setData) => {
       const unsubscribe = onSnapshot(
         q,
+        { includeMetadataChanges: true },
         (snap) => {
+          // Local snapshots have null server timestamps, the optimistic update already covers them.
+          if (snap.metadata.hasPendingWrites) return;
           try {
             setData(snap.docs.map((doc) => doc.data()));
           } catch (err) {
