@@ -62,10 +62,10 @@ export function MultipleResponseAnswer({ children }: { children: ReactNode }) {
   const submitAnswer = useCallback(
     async (checked: boolean) => {
       const value = checked ? [...answerValue, id] : answerValue.filter((v) => v !== id);
-      await setAnswer(problemId!, {
-        type: "multipleResponse",
-        value: value.length === 0 ? undefined : value,
-      });
+      await setAnswer(
+        problemId!,
+        value.length === 0 ? { type: "multipleResponse" } : { type: "multipleResponse", value },
+      );
     },
     [answerValue, id, problemId, setAnswer],
   );
@@ -116,10 +116,10 @@ export function MultipleChoiceAnswer({ children }: { children: ReactNode }) {
     | AnswerValue<"multipleChoice">
     | undefined;
   const submitAnswer = async (value: string | undefined) => {
-    await setAnswer(problemId!, {
-      type: "multipleChoice",
-      value,
-    });
+    await setAnswer(
+      problemId!,
+      value === undefined ? { type: "multipleChoice" } : { type: "multipleChoice", value },
+    );
   };
 
   const answerId = useId();
@@ -183,10 +183,12 @@ export function OpenAnswer({ type = "openText" }: OpenAnswerProps) {
     | undefined;
   const correct = isCorrectAnswer(problemSchema, answerValue);
   const submitAnswer = async (value: string) => {
-    if (type === "openNumber") {
-      await setAnswer(problemId!, { type, value: value ? Number(value) : undefined });
+    if (!value) {
+      await setAnswer(problemId!, { type });
+    } else if (type === "openNumber") {
+      await setAnswer(problemId!, { type, value: Number(value) });
     } else {
-      await setAnswer(problemId!, { type, value: value || undefined });
+      await setAnswer(problemId!, { type, value });
     }
   };
 
