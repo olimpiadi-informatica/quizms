@@ -4,6 +4,7 @@ import { TitleProvider } from "@olinfo/quizms/components";
 import {
   type Answer,
   type Contest,
+  calcScore,
   type Student,
   type Variant,
   type VariantsConfig,
@@ -127,10 +128,11 @@ export function TrainingProvider({
       (student) =>
         ({
           ...student,
+          score: variant ? calcScore(student, variant.schema) : student.score,
           participationWindow: { start: student.participationWindow!.start, end: new Date() },
         }) satisfies Student,
     );
-  }, [updateStudent]);
+  }, [updateStudent, variant]);
 
   const reset = useCallback(async () => {
     await updateStudent(
