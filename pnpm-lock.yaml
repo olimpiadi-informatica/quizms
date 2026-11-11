@@ -133,7 +133,7 @@ importers:
         version: 10.1.0(@types/react@19.2.18)(react@19.2.8)(supports-color@8.1.1)
       react-server-dom-webpack:
         specifier: ^19.2.4
-        version: 19.2.8(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(webpack@5.109.2(@swc/core@1.15.47)(csso@5.0.5)(esbuild@0.28.1)(postcss@8.5.25))
+        version: 19.3.1(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(webpack@5.109.2(@swc/core@1.15.47)(csso@5.0.5)(esbuild@0.28.1)(postcss@8.5.25))
       rehype:
         specifier: ^13.0.2
         version: 13.0.2
@@ -4893,12 +4893,12 @@ packages:
       '@types/react': '>=18'
       react: '>=18'
 
-  react-server-dom-webpack@19.2.8:
-    resolution: {integrity: sha512-rFO1VJZ+cH9ZH6hGy9+qmIsmZHZpCMKJZXhWHqT71UnSfg+w+W+gwrwp58MVzMqdFquG8GF1c6C8q0OGphkEdg==}
+  react-server-dom-webpack@19.3.1:
+    resolution: {integrity: sha512-I1Smf6Yc+389rFWPwyYjvCQVK1XFWpb2M9gvgYgfpbZ+LPqkZtb0tT9Fwdk0K+wknK2E+ns82lC0DCYLnXCVGA==}
     engines: {node: '>=0.10.0'}
     peerDependencies:
-      react: ^19.2.8
-      react-dom: ^19.2.8
+      react: ^19.3.1
+      react-dom: ^19.3.1
       webpack: ^5.59.0
 
   react@19.2.8:
@@ -6226,7 +6226,6 @@ snapshots:
   '@emnapi/runtime@1.11.3':
     dependencies:
       tslib: 2.8.1
-    optional: true
 
   '@esbuild/aix-ppc64@0.21.5':
     optional: true
@@ -6821,96 +6820,72 @@ snapshots:
   '@img/sharp-darwin-arm64@0.34.5':
     optionalDependencies:
       '@img/sharp-libvips-darwin-arm64': 1.2.4
-    optional: true
 
   '@img/sharp-darwin-x64@0.34.5':
     optionalDependencies:
       '@img/sharp-libvips-darwin-x64': 1.2.4
-    optional: true
 
-  '@img/sharp-libvips-darwin-arm64@1.2.4':
-    optional: true
+  '@img/sharp-libvips-darwin-arm64@1.2.4': {}
 
-  '@img/sharp-libvips-darwin-x64@1.2.4':
-    optional: true
+  '@img/sharp-libvips-darwin-x64@1.2.4': {}
 
-  '@img/sharp-libvips-linux-arm64@1.2.4':
-    optional: true
+  '@img/sharp-libvips-linux-arm64@1.2.4': {}
 
-  '@img/sharp-libvips-linux-arm@1.2.4':
-    optional: true
+  '@img/sharp-libvips-linux-arm@1.2.4': {}
 
-  '@img/sharp-libvips-linux-ppc64@1.2.4':
-    optional: true
+  '@img/sharp-libvips-linux-ppc64@1.2.4': {}
 
-  '@img/sharp-libvips-linux-riscv64@1.2.4':
-    optional: true
+  '@img/sharp-libvips-linux-riscv64@1.2.4': {}
 
-  '@img/sharp-libvips-linux-s390x@1.2.4':
-    optional: true
+  '@img/sharp-libvips-linux-s390x@1.2.4': {}
 
-  '@img/sharp-libvips-linux-x64@1.2.4':
-    optional: true
+  '@img/sharp-libvips-linux-x64@1.2.4': {}
 
-  '@img/sharp-libvips-linuxmusl-arm64@1.2.4':
-    optional: true
+  '@img/sharp-libvips-linuxmusl-arm64@1.2.4': {}
 
-  '@img/sharp-libvips-linuxmusl-x64@1.2.4':
-    optional: true
+  '@img/sharp-libvips-linuxmusl-x64@1.2.4': {}
 
   '@img/sharp-linux-arm64@0.34.5':
     optionalDependencies:
       '@img/sharp-libvips-linux-arm64': 1.2.4
-    optional: true
 
   '@img/sharp-linux-arm@0.34.5':
     optionalDependencies:
       '@img/sharp-libvips-linux-arm': 1.2.4
-    optional: true
 
   '@img/sharp-linux-ppc64@0.34.5':
     optionalDependencies:
       '@img/sharp-libvips-linux-ppc64': 1.2.4
-    optional: true
 
   '@img/sharp-linux-riscv64@0.34.5':
     optionalDependencies:
       '@img/sharp-libvips-linux-riscv64': 1.2.4
-    optional: true
 
   '@img/sharp-linux-s390x@0.34.5':
     optionalDependencies:
       '@img/sharp-libvips-linux-s390x': 1.2.4
-    optional: true
 
   '@img/sharp-linux-x64@0.34.5':
     optionalDependencies:
       '@img/sharp-libvips-linux-x64': 1.2.4
-    optional: true
 
   '@img/sharp-linuxmusl-arm64@0.34.5':
     optionalDependencies:
       '@img/sharp-libvips-linuxmusl-arm64': 1.2.4
-    optional: true
 
   '@img/sharp-linuxmusl-x64@0.34.5':
     optionalDependencies:
       '@img/sharp-libvips-linuxmusl-x64': 1.2.4
-    optional: true
 
   '@img/sharp-wasm32@0.34.5':
     dependencies:
       '@emnapi/runtime': 1.11.3
-    optional: true
 
-  '@img/sharp-win32-arm64@0.34.5':
-    optional: true
+  '@img/sharp-win32-arm64@0.34.5': {}
 
-  '@img/sharp-win32-ia32@0.34.5':
-    optional: true
+  '@img/sharp-win32-ia32@0.34.5': {}
 
-  '@img/sharp-win32-x64@0.34.5':
-    optional: true
+  '@img/sharp-win32-x64@0.34.5': {}
 
   '@inquirer/ansi@2.0.7': {}
 
@@ -8405,6 +8380,7 @@ snapshots:
     dependencies:
       mdn-data: 2.0.28
       source-map-js: 1.2.1
+    optional: true
 
   css-tree@3.2.1:
     dependencies:
@@ -8418,6 +8394,7 @@ snapshots:
   csso@5.0.5:
     dependencies:
       css-tree: 2.2.1
+    optional: true
 
   cssstyle@4.6.0:
     dependencies:
@@ -9961,7 +9938,8 @@ snapshots:
     dependencies:
       '@types/mdast': 4.0.4
 
-  mdn-data@2.0.28: {}
+  mdn-data@2.0.28:
+    optional: true
 
   mdn-data@2.27.1: {}
 
@@ -10712,7 +10690,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  react-server-dom-webpack@19.2.8(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(webpack@5.109.2(@swc/core@1.15.47)(csso@5.0.5)(esbuild@0.28.1)(postcss@8.5.25)):
+  react-server-dom-webpack@19.3.1(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(webpack@5.109.2(@swc/core@1.15.47)(csso@5.0.5)(esbuild@0.28.1)(postcss@8.5.25)):
     dependencies:
       acorn-loose: 8.5.2
       neo-async: 2.6.2
