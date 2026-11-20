@@ -31,7 +31,7 @@ export default async function variants(options: ExportVariantsOptions) {
   const cacheDir = path.join(cwd(), ".quizms", "cache");
   const schemaBuildDir = path.join(cwd(), ".quizms", "schema-build");
   const statementBuildDir = path.join(cwd(), ".quizms", "statement-build");
-  const variantsDir = options?.outDir || path.join(cwd(), "variants");
+  const variantsDir = path.resolve(cwd(), options?.outDir || "variants");
 
   const configs = await load("variants", variantsConfigSchema);
   setContestLanguages(configs, options?.languages);
@@ -74,6 +74,7 @@ export default async function variants(options: ExportVariantsOptions) {
       QUIZMS_SHUFFLE_PROBLEMS: config.shuffleProblems ? "true" : undefined,
       QUIZMS_SHUFFLE_ANSWERS: config.shuffleAnswers ? "true" : undefined,
       QUIZMS_CACHE_DIR: cacheDir,
+      QUIZMS_VARIANT_DIR: variantDir,
     };
 
     const multilingual = isMultilingual(config, options?.languages);
