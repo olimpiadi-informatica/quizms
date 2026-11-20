@@ -5,6 +5,7 @@ import { randomToken } from "@olinfo/quizms/utils";
 import { TRPCError } from "@trpc/server";
 import { addMinutes, addSeconds, isFuture, isPast, roundToNearestMinutes } from "date-fns";
 import type { DecodedIdToken } from "firebase-admin/auth";
+import { FieldValue } from "firebase-admin/firestore";
 import { getFunctions } from "firebase-admin/functions";
 import * as logger from "firebase-functions/logger";
 import { defineString } from "firebase-functions/params";
@@ -140,15 +141,16 @@ export const teacherStopContestWindow = publicProcedure
 
     const [venue] = await checkVenue(data.venueId, ctx.claims, true);
 
-    if (venue.participationWindow == null) {
+    const { participationWindow, token } = venue;
+    if (!participationWindow || !token) {
       throw new TRPCError({ code: "FORBIDDEN", message: "Gara non iniziata" });
     }
 
-    if (isPast(venue.participationWindow.start)) {
+    if (isPast(participationWindow.start)) {
       throw new TRPCError({ code: "FORBIDDEN", message: "Gara già iniziata" });
     }
 
-    const students = await getVenueStudents(venue.id, venue.token!);
+    const students = await getVenueStudents(venue.id, token);
     await revokeTokens(students);
 
     for (const studentChunk of chunk(students, 300)) {
@@ -160,8 +162,8 @@ export const teacherStopContestWindow = publicProcedure
     }
 
     await db.doc(`venues/${venue.id}`).update({
-      token: null,
-      participationWindow: null,
+      token: FieldValue.delete(),
+      participationWindow: FieldValue.delete(),
     });
   });
 
