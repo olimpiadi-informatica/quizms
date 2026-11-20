@@ -18,3 +18,18 @@ jobs:
 
       - name: Run biome
         run: biome ci
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        uses: pnpm/action-setup@v4
+        with:
+          version: latest
+          run_install: true
+
+      - name: Run tests
+        run: pnpm test

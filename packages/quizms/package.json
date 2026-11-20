@@ -18,7 +18,8 @@
     "build": "vite build",
     "watch": "vite build --watch",
     "lint": "biome check --write && tsc --noEmit",
-    "prepack": "pnpm build"
+    "prepack": "pnpm build",
+    "test": "vitest run"
   },
   "bin": {
     "quizms": "bin/bin.js"

@@ -57,7 +57,23 @@ QuizMS uses [Biome](https://biomejs.dev/) for formatting and linting, and TypeSc
   pnpm -r lint
   ```
 
-Before opening a pull request, make sure both linting and build pass.
+### Automated tests
+
+Unit tests use [Vitest](https://vitest.dev/) and live next to the code they test as `src/**/*.test.ts`:
+
+- **Run all tests:**
+  ```bash
+  pnpm test
+  ```
+
+- **Run tests in watch mode:**
+  ```bash
+  pnpm test:watch
+  ```
+
+Each package with tests has its own `vitest.config.mjs`, which is picked up by the root `vitest.config.mjs`.
+
+Before opening a pull request, make sure linting, tests and build pass.
 
 ---
 

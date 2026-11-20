@@ -9,11 +9,14 @@
     "changeset": "changeset",
     "version-packages": "changeset version",
     "release": "pnpm -r build && changeset publish",
-    "prepare": "husky"
+    "prepare": "husky",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "devDependencies": {
     "@changesets/changelog-github": "^1.0.1",
     "@changesets/cli": "^3.0.2",
-    "husky": "^9.1.7"
+    "husky": "^9.1.7",
+    "vitest": "^5.1.1"
   }
 }
