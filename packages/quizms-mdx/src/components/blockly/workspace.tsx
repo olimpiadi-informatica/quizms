@@ -12,7 +12,7 @@ import { CircleCheck, MessageSquareOff, TriangleAlert } from "lucide-react";
 import type { CustomBlock, TestcaseResult, VisualizerProps } from "~/blockly-types";
 import { useProblem } from "~/components/client/problem";
 
-import { defaultInitialBlocks, defaultToolbox, localizedDefaultToolbox } from "./defaults";
+import { defaultInitialBlocks, defaultToolbox } from "./defaults";
 import { Editor } from "./editor";
 import { useExecutor } from "./hooks/executor";
 import { BlocklyInterpreter } from "./hooks/interpreter";
@@ -36,7 +36,7 @@ export type BlocklyProps<T> = {
 };
 
 export function Blockly<State>({
-  toolbox = defaultToolbox,
+  toolbox,
   initialBlocks = defaultInitialBlocks,
   debug = {},
   testcases,
@@ -74,7 +74,7 @@ export function Blockly<State>({
     terminated,
     {
       // Custom toolboxes are written by the problem author, in the language of the statement.
-      toolbox: toolbox === defaultToolbox ? localizedDefaultToolbox(language) : toolbox,
+      toolbox: toolbox ?? defaultToolbox(language),
       initialBlocks: savedBlocks ? JSON.parse(savedBlocks) : initialBlocks,
       customBlocks,
       language,
