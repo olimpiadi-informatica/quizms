@@ -3,8 +3,11 @@ import type { ReactNode } from "react";
 import { ClosedAnswer, MultipleChoiceAnswer, MultipleResponseAnswer, OpenAnswer } from "./answer";
 import { Blockly } from "./blockly";
 import { Contest } from "./contest";
+import { Locale, StatementLanguageProvider, useStatementLanguage } from "./language";
 import { Problem, SubProblem } from "./problem";
 import { Section } from "./section";
+
+export { StatementLanguageProvider, useStatementLanguage };
 
 function Empty() {
   return;
@@ -25,11 +28,13 @@ export function useMDXComponents() {
     Equation: Empty,
     Explanation: Empty,
     Image: Empty,
+    Locale,
     MultipleChoiceAnswer,
     MultipleResponseAnswer,
     OpenAnswer,
     Problem,
     Section,
+    StatementLanguageProvider,
     SubProblem,
   };
 }

@@ -30,6 +30,8 @@ export const studentSchema = z
     answers: z.record(z.string(), answerSchema),
     score: z.number(),
     extraData: z.record(z.string(), z.any()),
+    // Lingua del testo scelta dallo studente
+    language: z.string(),
 
     createdAt: z.coerce.date(),
     updatedAt: z.date(),

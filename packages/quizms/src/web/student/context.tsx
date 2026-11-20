@@ -13,6 +13,10 @@ export type StudentContextProps = {
   enforceFullscreen: boolean;
   terminated: boolean;
   schema?: Schema;
+  /** Language of the statement being shown */
+  language: string;
+  /** Function to change the statement language (optional) */
+  setLanguage?: (language: string) => void;
 };
 
 export const StudentContext = createContext<StudentContextProps>({} as StudentContextProps);

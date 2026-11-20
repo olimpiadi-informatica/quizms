@@ -6,6 +6,7 @@ import {
   Equation,
   Image,
   Problem,
+  StatementLanguageProvider,
   SubProblem,
 } from "../client";
 import {
@@ -16,6 +17,7 @@ import {
   OpenAnswer,
 } from "./answers";
 import { Asymptote } from "./asymptote";
+import { Locale, useStatementLanguage } from "./language";
 import { Section } from "./section";
 
 export {
@@ -28,12 +30,15 @@ export {
   Equation,
   Explanation,
   Image,
+  Locale,
   MultipleChoiceAnswer,
   MultipleResponseAnswer,
   OpenAnswer,
   Problem,
   Section,
+  StatementLanguageProvider,
   SubProblem,
+  useStatementLanguage,
 };
 
 export function useMDXComponents() {
@@ -47,11 +52,13 @@ export function useMDXComponents() {
     Equation,
     Explanation,
     Image,
+    Locale,
     MultipleChoiceAnswer,
     MultipleResponseAnswer,
     OpenAnswer,
     Problem,
     Section,
+    StatementLanguageProvider,
     SubProblem,
   };
 }

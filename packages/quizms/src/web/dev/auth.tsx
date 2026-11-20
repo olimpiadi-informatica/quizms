@@ -3,6 +3,7 @@ import { type ReactNode, useCallback, useMemo, useState } from "react";
 import { Link, Route, Switch } from "wouter";
 
 import type { Answer, Contest, Student, Venue } from "~/models";
+import { useStatementLanguageState } from "~/web/student/language";
 import { StudentProvider } from "~/web/student/provider";
 
 export function DevRoutes({ contests, children }: { contests: Contest[]; children: ReactNode }) {
@@ -69,9 +70,13 @@ export function DevProvider({ contest, children }: { contest: Contest; children:
 
   const submit = useCallback(() => {}, []);
 
+  const [language, setLanguage] = useStatementLanguageState(contest);
+
   return (
     <StudentProvider
       contest={contest}
+      language={language}
+      setLanguage={setLanguage}
       venue={mockVenue}
       student={student}
       setAnswer={setAnswer}

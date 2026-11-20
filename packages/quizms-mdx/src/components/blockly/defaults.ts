@@ -1,17 +1,22 @@
+import { statementString } from "@olinfo/quizms/utils";
 import type { utils } from "blockly/core";
 
-export const defaultToolbox: utils.toolbox.ToolboxInfo = {
+/**
+ * The default toolbox, with the category names in the statement language
+ * (`undefined`: single-language contest, Italian).
+ */
+export const defaultToolbox = (language: string | undefined): utils.toolbox.ToolboxInfo => ({
   kind: "categoryToolbox",
   contents: [
     {
       kind: "category",
-      name: "Variabili",
+      name: statementString(language, "blocklyVariables"),
       categorystyle: "variable_category",
       custom: "VARIABLE",
     },
     {
       kind: "category",
-      name: "Matematica",
+      name: statementString(language, "blocklyMath"),
       categorystyle: "math_category",
       contents: [
         {
@@ -40,7 +45,7 @@ export const defaultToolbox: utils.toolbox.ToolboxInfo = {
     },
     {
       kind: "category",
-      name: "Logica",
+      name: statementString(language, "blocklyLogic"),
       categorystyle: "logic_category",
       contents: [
         {
@@ -70,7 +75,7 @@ export const defaultToolbox: utils.toolbox.ToolboxInfo = {
     },
     {
       kind: "category",
-      name: "Cicli",
+      name: statementString(language, "blocklyLoops"),
       categorystyle: "loop_category",
       contents: [
         {
@@ -124,7 +129,7 @@ export const defaultToolbox: utils.toolbox.ToolboxInfo = {
     },
     {
       kind: "category",
-      name: "Liste",
+      name: statementString(language, "blocklyLists"),
       categorystyle: "list_category",
       contents: [
         {
@@ -166,7 +171,7 @@ export const defaultToolbox: utils.toolbox.ToolboxInfo = {
       ],
     },
   ],
-};
+});
 
 export const defaultInitialBlocks = {
   blocks: {

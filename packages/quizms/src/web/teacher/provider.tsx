@@ -3,6 +3,7 @@ import { type ComponentType, lazy } from "react";
 import { Link, Redirect, Route, Switch, useParams } from "wouter";
 
 import type { Announcement, Contest, Student, StudentRestore, Variant, Venue } from "~/models";
+import { contestStatementFile } from "~/utils";
 import { StudentForm } from "~/web/components/student-form";
 import { ImpersonationAuth } from "~/web/student/impersonation-auth";
 
@@ -19,9 +20,11 @@ type TeacherProviderProps = {
   variants: Variant[];
   logout: () => Promise<void>;
   statementComponent: ComponentType<Record<never, never>>;
+  /** `fileName` is the PDF of each variant to fetch, e.g. `statement.en.pdf` (default `statement.pdf`) */
   getPdfStatements: (
     contestId: string,
     variantIds: string[],
+    fileName?: string,
   ) => Promise<Record<string, ArrayBuffer>>;
   useAnnouncements: (contestId: string) => Announcement[];
   useStudents: (venueId: string) => readonly [Student[], (student: Student) => Promise<void>];
@@ -108,7 +111,12 @@ function ProviderInner({
     finalizeVenue,
     variants: contestVariants,
     logout,
-    getPdfStatements: () => getPdfStatements(contest.id, venue.pdfVariants ?? []),
+    getPdfStatements: ({ language }) =>
+      getPdfStatements(
+        contest.id,
+        venue.pdfVariants ?? [],
+        contestStatementFile(contest.languages, language ?? contest.languages?.[0] ?? "it", "pdf"),
+      ),
     useAnnouncements,
     useStudentRestores,
     useStudents,

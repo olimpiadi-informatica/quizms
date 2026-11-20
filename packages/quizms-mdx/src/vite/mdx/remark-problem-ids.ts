@@ -15,6 +15,19 @@ const remarkProblemIds: Plugin<[], Root> = () => {
 export default remarkProblemIds;
 
 function assignProblemIds(tree: Root) {
+  // A `<Problem>` inside `<Locale>` would be counted once per language, shifting the ids of
+  // every following problem.
+  visit(tree, "mdxJsxFlowElement", (locale: MdxJsxFlowElement) => {
+    if (locale.name !== "Locale") return;
+    visit(locale, "mdxJsxFlowElement", (node: MdxJsxFlowElement) => {
+      if (node.name === "Problem" || node.name === "Section") {
+        throw new Error(
+          `\`<${node.name}>\` cannot be inside \`<Locale>\`: use \`<Locale>\` only for text, and translate problems with \`question.<lang>.md\` files.`,
+        );
+      }
+    });
+  });
+
   let problemIndex = 1;
   visit(tree, "mdxJsxFlowElement", (node: MdxJsxFlowElement) => {
     if (node.name === "Problem") {

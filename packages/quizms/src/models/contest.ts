@@ -3,6 +3,7 @@ import { deburr } from "lodash-es";
 import z from "zod";
 
 import type { Student } from "~/models/student";
+import { languageCodeRegex } from "~/utils/languages";
 
 const baseUserData = z.strictObject({
   name: z.string(),
@@ -102,6 +103,9 @@ export const contestSchema = z
 
     // Possibilità per gli insegnanti di vedere il punteggio degli studenti
     scoreVisibility: z.enum(["never", "always", "finalized"]),
+
+    // Lingue dei testi della gara, la prima è quella predefinita
+    languages: z.string().regex(languageCodeRegex).array().nonempty().default(["it"]),
   })
   .superRefine((data, ctx) => {
     // Checks that each field in the matchin rules corresponds to a real item

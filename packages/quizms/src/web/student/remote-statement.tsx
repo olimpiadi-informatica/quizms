@@ -69,7 +69,7 @@ function StatementStylesheet({ stylesheetUrl }: { stylesheetUrl: () => Promise<s
 }
 
 function InnerStatement({ statementUrl }: Pick<Props, "statementUrl">) {
-  const { student } = useStudent();
+  const { student, language } = useStudent();
 
   const fetcher = useCallback(() => {
     const modulesMap = new Proxy(
@@ -94,7 +94,7 @@ function InnerStatement({ statementUrl }: Pick<Props, "statementUrl">) {
   }, [statementUrl]);
 
   const { data } = useSWR(
-    `statement/${student.contestId}/${student.variantId}/statement`,
+    `statement/${student.contestId}/${student.variantId}/${language}/statement`,
     fetcher,
     { suspense: true },
   );

@@ -1,6 +1,7 @@
 export * from "./ag-grid-lazy";
 export * from "./error";
 export * from "./loading";
+export * from "./localized";
 export * from "./metadata";
 export * from "./progress";
 export * from "./prose";

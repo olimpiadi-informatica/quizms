@@ -24,6 +24,7 @@ I contests sono descritti dal file `data/contests.{toml,yaml,csv,json,jsonl}`. I
 | `allow_student_edit`   |                                                                                      | `boolean`  | Opzionale.                                                           |
 | `allow_answer_edit`    |                                                                                      | `boolean`  | Opzionale.                                                           |
 | `instructions`         | Informazioni generali in Markdown che vengono mostrare nella pagina dell'insegnante. | `string`   | Opzionale.                                                           |
+| `languages`            | [Lingue](../task/languages) dei testi, la prima è quella predefinita.               | `string[]` | Opzionale, predefinito `["it"]`. Deve coincidere con `variants.toml`. |
 
 Se `has_online` è `true`, i seguenti campi sono richiesti:
 

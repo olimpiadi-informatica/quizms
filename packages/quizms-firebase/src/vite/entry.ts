@@ -2,7 +2,7 @@ import { readFile } from "node:fs/promises";
 
 import { variantsConfigSchema } from "@olinfo/quizms/models";
 import { reactComponentCase } from "@olinfo/quizms/utils";
-import { load } from "@olinfo/quizms/utils-node";
+import { findHeaderTranslations, load } from "@olinfo/quizms/utils-node";
 import { type PluginOption, transformWithEsbuild } from "vite";
 
 async function getFirebaseRewrite() {
@@ -88,15 +88,38 @@ export default async function firebaseEntry(): Promise<PluginOption> {
       }
       if (id === "\0virtual:quizms-firebase-header") {
         const configs = await load("variants", variantsConfigSchema);
+        // Each contest header with its translations (`header.<lang>.md`), shown in the
+        // statement language chosen by the student.
+        const headers = configs
+          .filter((c) => c.header)
+          .map((c) => {
+            const name = `${reactComponentCase(c.id)}Header`;
+            const { translations } = findHeaderTranslations(c.header!, c.languages, c.languages[0]);
+            const imports = [
+              `const ${name} = lazy(() => import(${JSON.stringify(`~/${c.header}`)}));`,
+              ...Object.entries(translations).map(
+                ([lang, file]) =>
+                  `const ${name}$${lang} = lazy(() => import(${JSON.stringify(`~/${file}`)}));`,
+              ),
+            ];
+            const entries = Object.keys(translations).map(
+              (lang) => `${JSON.stringify(lang)}: ${name}$${lang}`,
+            );
+            const element = `<Localized base={${name}} translations={{ ${entries.join(", ")} }} />`;
+            return { id: c.id, imports, element };
+          });
+
         const header = `
 import { lazy } from "react";
+import { Localized } from "@olinfo/quizms/components";
 
-${configs.map((c) => `const ${reactComponentCase(c.id)}Header = lazy(() => import("~/${c.header}"));`).join("\n")}
+${headers.flatMap((h) => h.imports).join("\n")}
 
 export default function FirebaseHeader({ contestId }) {
   switch (contestId) {
-  ${configs.map((c) => `case "${c.id}": return <${reactComponentCase(c.id)}Header />;`).join("\n")}
+  ${headers.map((h) => `case ${JSON.stringify(h.id)}: return ${h.element};`).join("\n")}
   }
+  return null;
 }`;
 
         return transformWithEsbuild(header, "virtual:quizms-firebase-header.jsx", {

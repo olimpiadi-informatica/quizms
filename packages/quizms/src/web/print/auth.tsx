@@ -66,7 +66,21 @@ function VariantList({ contests }: { contests: (Contest & VariantsConfig)[] }) {
 }
 VariantList.displayName = "VariantList";
 
-export function PrintProvider({ contest, children }: { contest: Contest; children: ReactNode }) {
+export function PrintProvider({
+  contest,
+  statementFiles,
+  children,
+}: {
+  contest: Contest;
+  /** Statement file of each language (e.g. `statement.en.txt`), chosen by `quizms print` */
+  statementFiles?: Record<string, string>;
+  children: ReactNode;
+}) {
+  const params = new URLSearchParams(window.location.search);
+  const requested = params.get("lang");
+  const language =
+    requested && contest.languages.includes(requested) ? requested : contest.languages[0];
+
   const student: Student = {
     id: "",
     userData: {
@@ -75,7 +89,7 @@ export function PrintProvider({ contest, children }: { contest: Contest; childre
     },
     answers: {},
     contestId: contest.id,
-    variantId: new URLSearchParams(window.location.search).get("v") ?? "",
+    variantId: params.get("v") ?? "",
   };
 
   const mockVenue: Venue = {
@@ -97,12 +111,13 @@ export function PrintProvider({ contest, children }: { contest: Contest; childre
       contest={contest}
       venue={mockVenue}
       student={student}
+      language={language}
       setAnswer={() => {}}
       submit={() => {}}
       enforceFullscreen={false}>
       <StudentForm printLayout />
       {children}
-      <PrintStatement />
+      <PrintStatement file={statementFiles?.[language] ?? "statement.txt"} />
     </StudentProvider>
   );
 }

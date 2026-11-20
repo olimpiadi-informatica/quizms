@@ -40,6 +40,7 @@ export default withMermaid(
                 { text: "Images", link: "/task/images" },
                 { text: "Variants", link: "/task/variants" },
                 { text: "Block programming", link: "/task/blockly" },
+                { text: "Languages", link: "/task/languages" },
               ],
             },
             {
@@ -122,6 +123,7 @@ export default withMermaid(
                 { text: "Immagini", link: "/it/task/images" },
                 { text: "Varianti", link: "/it/task/variants" },
                 { text: "Codice a blocchi", link: "/it/task/blockly" },
+                { text: "Lingue", link: "/it/task/languages" },
               ],
             },
             {

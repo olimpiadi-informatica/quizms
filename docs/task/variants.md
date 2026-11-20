@@ -1,5 +1,9 @@
 # Variants
 
+::: tip
+In a contest with several [languages](./languages), all translations of a problem must define the same variants: keep them in a shared file (e.g. `variants.py`).
+:::
+
 It is possible to create multiple variants of a problem; each user will receive a specific variant and will not be able to see the variants of others.
 
 A variant is defined by an object that contains the variables to substitute in the text. To define the variants, you must declare an array of objects, where each element contains the variables for one variant.

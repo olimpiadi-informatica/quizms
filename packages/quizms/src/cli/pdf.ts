@@ -7,17 +7,31 @@ import { type BrowserContext, chromium } from "playwright";
 
 import type { Contest } from "~/models";
 import type { VariantsConfig } from "~/models/variants-config";
+import { statementString } from "~/utils";
 import { withProgress } from "~/utils-node";
+
+/** A contest as printed by `quizms print`, with its languages already resolved. */
+export type PrintContest = Contest &
+  VariantsConfig & {
+    /** Whether variants have one statement per language (`statement.<lang>.txt`) */
+    multilingual: boolean;
+    /** Statement file of each language being printed */
+    statementFiles: Record<string, string>;
+    /** Translated header files (relative to `src`) by language */
+    headerTranslations: Record<string, string>;
+  };
 
 async function generatePdf(
   context: BrowserContext,
-  contest: Contest,
+  contest: PrintContest,
   baseUrl: string,
   variant: string,
+  language: string,
   outDir: string,
 ) {
   const page = await context.newPage();
-  await page.goto(`${baseUrl}/${contest.id}?v=${variant}`, { waitUntil: "load" });
+  const query = new URLSearchParams({ v: variant, lang: language });
+  await page.goto(`${baseUrl}/${contest.id}?${query}`, { waitUntil: "load" });
   await page.waitForLoadState("networkidle");
   await page.waitForTimeout(1000);
   await page.waitForSelector("#loading", { strict: true, state: "detached" });
@@ -49,7 +63,9 @@ async function generatePdf(
     const page = pages[pageNum];
     const { width } = page.getSize();
 
-    page.drawText(contest.hasVariants ? `Variante ${variant}` : contest.name, {
+    // Single-language contests keep the original (Italian) footer.
+    const variantLabel = statementString(contest.multilingual ? language : undefined, "variant");
+    page.drawText(contest.hasVariants ? `${variantLabel} ${variant}` : contest.name, {
       ...fontOptions,
       x: 15,
       y: 13,
@@ -65,12 +81,18 @@ async function generatePdf(
 
   const pdf = await doc.save();
 
-  await mkdir(path.join(outDir, contest.id, variant), { recursive: true });
-  await writeFile(path.join(outDir, contest.id, variant, "statement.pdf"), pdf);
+  const variantDir = path.join(outDir, contest.id, variant);
+  await mkdir(variantDir, { recursive: true });
+  if (contest.multilingual) {
+    await writeFile(path.join(variantDir, `statement.${language}.pdf`), pdf);
+  }
+  if (!contest.multilingual || language === contest.languages[0]) {
+    await writeFile(path.join(variantDir, "statement.pdf"), pdf);
+  }
 }
 
 export default async function generatePdfs(
-  contests: (Contest & VariantsConfig)[],
+  contests: PrintContest[],
   baseUrl: string,
   outDir: string,
 ) {
@@ -78,13 +100,13 @@ export default async function generatePdfs(
   const context = await browser.newContext();
 
   const ids = contests.flatMap((contest) => {
-    return uniq([...contest.variantIds, ...contest.pdfVariantIds]).map(
-      (id) => [contest, id] as const,
+    return uniq([...contest.variantIds, ...contest.pdfVariantIds]).flatMap((id) =>
+      contest.languages.map((language) => [contest, id, language] as const),
     );
   });
 
-  await withProgress(ids, ids.length, ([contest, id]) =>
-    generatePdf(context, contest, baseUrl, id, outDir),
+  await withProgress(ids, ids.length, ([contest, id, language]) =>
+    generatePdf(context, contest, baseUrl, id, language, outDir),
   );
 
   await context.close();

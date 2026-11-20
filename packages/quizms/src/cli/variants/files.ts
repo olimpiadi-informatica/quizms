@@ -18,12 +18,11 @@ const { default: Statement } = await import(\`./\${process.env.QUIZMS_CONTEST_ID
 const manifest = JSON.parse(await readFile("manifest.json", "utf-8"));
 const { pipe } = renderToPipeableStream(createElement(Statement), manifest);
 
+// QUIZMS_VARIANT_DIR is the output folder of the variant (it honours \`--outDir\`).
 const statementPath = path.join(
-  "${cwd()}",
-  "variants",
-  process.env.QUIZMS_CONTEST_ID,
-  process.env.QUIZMS_VARIANT_ID,
-  "statement.txt",
+  process.env.QUIZMS_VARIANT_DIR ??
+    path.join("${cwd()}", "variants", process.env.QUIZMS_CONTEST_ID, process.env.QUIZMS_VARIANT_ID),
+  process.env.QUIZMS_STATEMENT_FILE ?? "statement.txt",
 );
 pipe(createWriteStream(statementPath));`;
 }
