@@ -13,9 +13,13 @@ import {
   TextField,
 } from "@olinfo/react-components";
 import { getAuth, signInWithCustomToken, signOut, type User } from "firebase/auth";
-import { waitForPendingWrites } from "firebase/firestore";
 
-import { setStudentLanguage, studentLogin } from "~/web/common/api";
+import {
+  setStudentLanguage,
+  studentLogin,
+  studentSetAnswer,
+  studentSubmitContest,
+} from "~/web/common/api";
 import { useDb } from "~/web/common/base-login";
 import { contestConverter, studentConverter, venueConverter } from "~/web/common/converters";
 import { useWebsite } from "~/web/common/website";
@@ -140,11 +144,7 @@ function StudentInner({
 }) {
   const db = useDb();
 
-  const [student, setStudent] = useDocument(
-    `venues/${venueId}/students`,
-    studentId,
-    studentConverter,
-  );
+  const [student] = useDocument(`venues/${venueId}/students`, studentId, studentConverter);
   const [venue] = useDocument("venues", venueId, venueConverter);
 
   const contest = useMemo(
@@ -153,15 +153,10 @@ function StudentInner({
   );
 
   const submit = useCallback(async () => {
-    await setStudent({
-      ...student,
-      participationWindow: { start: student.participationWindow!.start, end: new Date() },
-    });
-    await waitForPendingWrites(db);
-  }, [db, student, setStudent]);
+    await studentSubmitContest(user);
+  }, [user]);
 
   const logout = useCallback(async () => {
-    await waitForPendingWrites(db);
     await signOut(getAuth(db.app));
     window.location.reload();
   }, [db]);
@@ -173,10 +168,7 @@ function StudentInner({
   }, [venue.token, student.token, logout]);
 
   const setAnswer = async (problemId: string, answer: Answer) => {
-    await setStudent({
-      ...student,
-      answers: { ...student.answers, [problemId]: answer },
-    });
+    await studentSetAnswer(user, { problemId, answer });
   };
 
   // Students can switch language at any time during the contest; the choice is saved on the

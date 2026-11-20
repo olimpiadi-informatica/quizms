@@ -1,4 +1,4 @@
-import type { Student } from "@olinfo/quizms/models";
+import type { Answer, Student } from "@olinfo/quizms/models";
 import { createTRPCClient, httpLink } from "@trpc/client";
 import { getIdToken, type User } from "firebase/auth";
 import superjson from "superjson";
@@ -43,6 +43,20 @@ export function studentLogin(body: {
 
 export async function setStudentLanguage(user: User, language: string) {
   await trpc.studentSetLanguage.mutate({ language }, { context: { user } });
+}
+
+export async function studentSetAnswer(
+  user: User,
+  body: {
+    problemId: string;
+    answer: Answer;
+  },
+) {
+  await trpc.studentSetAnswer.mutate(body, { context: { user } });
+}
+
+export async function studentSubmitContest(user: User) {
+  await trpc.studentSubmitContest.mutate(undefined, { context: { user } });
 }
 
 export async function startContestWindow(user: User, venueId: string) {
