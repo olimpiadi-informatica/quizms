@@ -3,10 +3,16 @@ import { useCallback } from "react";
 import type { StudentRestore } from "@olinfo/quizms/models";
 import { TeacherProvider } from "@olinfo/quizms/teacher";
 import { getAuth, signOut, type User } from "firebase/auth";
-import { doc, type Firestore, serverTimestamp, writeBatch } from "firebase/firestore";
+import type { Firestore } from "firebase/firestore";
 import { getBytes, getStorage, ref } from "firebase/storage";
 
-import { finalizeVenue, startContestWindow, stopContestWindow } from "~/web/common/api";
+import {
+  finalizeVenue,
+  startContestWindow,
+  stopContestWindow,
+  teacherApproveStudentRestore,
+  teacherRejectStudentRestore,
+} from "~/web/common/api";
 import { useDb } from "~/web/common/base-login";
 import {
   announcementConverter,
@@ -18,7 +24,7 @@ import {
 } from "~/web/common/converters";
 import TokenLogin from "~/web/common/token-login";
 import { useWebsite } from "~/web/common/website";
-import { useCollection, useDocument } from "~/web/hooks";
+import { useAuth, useCollection, useDocument } from "~/web/hooks";
 
 import { FirebaseStatement } from "./student-statement";
 
@@ -108,7 +114,8 @@ function useStudentRestores(
   (request: StudentRestore) => Promise<void>,
   (studentId: string) => Promise<void>,
 ] {
-  const db = useDb();
+  const auth = useAuth("teacher");
+  const user = auth!.user;
 
   const [venue] = useDocument("venues", venueId, venueConverter);
 
@@ -117,29 +124,22 @@ function useStudentRestores(
     orderBy: "createdAt",
   });
 
-  const reject = async (studentId: string, excludeRestoreId?: string) => {
-    const batch = writeBatch(db);
+  const reject = useCallback(
+    async (studentId: string) => {
+      await teacherRejectStudentRestore(user, { venueId, studentId });
+    },
+    [user, venueId],
+  );
 
-    for (const studentRestore of studentRestores) {
-      if (studentRestore.studentId === studentId && studentRestore.id !== excludeRestoreId) {
-        batch.update(doc(db, "studentRestores", studentRestore.id), { status: "revoked" });
-      }
-    }
-
-    await batch.commit();
-  };
-
-  const approve = async (request: StudentRestore) => {
-    const batch = writeBatch(db);
-    batch.update(doc(db, `/venues/${venueId}/students`, request.studentId), {
-      uid: request.id,
-      updatedAt: serverTimestamp(),
-    });
-    batch.delete(doc(db, "studentRestores", request.id));
-    await batch.commit();
-
-    await reject(request.studentId, request.id);
-  };
+  const approve = useCallback(
+    async (request: StudentRestore) => {
+      await teacherApproveStudentRestore(user, {
+        venueId,
+        studentRestoreId: request.id,
+      });
+    },
+    [user, venueId],
+  );
 
   return [studentRestores, approve, reject];
 }

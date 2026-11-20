@@ -5,15 +5,24 @@ import { randomToken } from "@olinfo/quizms/utils";
 import { TRPCError } from "@trpc/server";
 import { addMinutes, addSeconds, isFuture, isPast, roundToNearestMinutes } from "date-fns";
 import type { DecodedIdToken } from "firebase-admin/auth";
-import { FieldValue } from "firebase-admin/firestore";
+import { FieldValue, Timestamp } from "firebase-admin/firestore";
 import { getFunctions } from "firebase-admin/functions";
 import * as logger from "firebase-functions/logger";
 import { defineString } from "firebase-functions/params";
 import { chunk } from "lodash-es";
 import z from "zod";
 
+import { studentRestoreConverter } from "~/cli/utils/converters-admin";
+
 import { auth, db } from "../common";
-import { getContest, getUser, getVenue, getVenueByToken, getVenueStudents } from "./queries";
+import {
+  getContest,
+  getStudent,
+  getUser,
+  getVenue,
+  getVenueByToken,
+  getVenueStudents,
+} from "./queries";
 import { publicProcedure } from "./trpc";
 
 const region = defineString("QUIZMS_REGION");
@@ -52,12 +61,16 @@ async function checkVenue(
   claims: DecodedIdToken | undefined,
   onlineOnly: boolean,
 ): Promise<[Venue, Contest]> {
+  if (claims?.role !== "teacher" || typeof claims.schoolId !== "string") {
+    throw new TRPCError({ code: "UNAUTHORIZED", message: "Non autorizzato" });
+  }
+
   const venue = await getVenue(venueId);
   if (!venue) {
     throw new TRPCError({ code: "BAD_REQUEST", message: "Gara non valida" });
   }
 
-  if (venue.schoolId !== claims?.schoolId) {
+  if (venue.schoolId !== claims.schoolId) {
     throw new TRPCError({ code: "FORBIDDEN", message: "Gara non valida" });
   }
 
@@ -186,4 +199,103 @@ export const teacherFinalizeVenue = publicProcedure
     const [venue] = await checkVenue(data.venueId, ctx.claims, false);
 
     await db.doc(`venues/${venue.id}`).update({ finalized: true });
+  });
+
+export const teacherApproveStudentRestore = publicProcedure
+  .input(
+    z.strictObject({
+      venueId: z.string(),
+      studentRestoreId: z.string(),
+    }),
+  )
+  .mutation(async (opts) => {
+    const { input: data, ctx } = opts;
+    logger.info("Teacher approve student restore received", { data });
+
+    const [venue] = await checkVenue(data.venueId, ctx.claims, false);
+
+    const restoreDoc = await db
+      .doc(`studentRestores/${data.studentRestoreId}`)
+      .withConverter(studentRestoreConverter)
+      .get();
+    const restore = restoreDoc.data();
+    if (!restore || restore.venueId !== venue.id) {
+      throw new TRPCError({ code: "NOT_FOUND", message: "Richiesta non trovata" });
+    }
+
+    if (restore.status !== "pending") {
+      throw new TRPCError({ code: "BAD_REQUEST", message: "Richiesta non più valida" });
+    }
+
+    const student = await getStudent(venue.id, restore.studentId);
+    if (!student) {
+      throw new TRPCError({ code: "NOT_FOUND", message: "Studente non trovato" });
+    }
+
+    if (student.uid) {
+      await auth.revokeRefreshTokens(student.uid).catch(() => {});
+    }
+
+    const otherRestores = await db
+      .collection("studentRestores")
+      .where("venueId", "==", venue.id)
+      .where("studentId", "==", restore.studentId)
+      .withConverter(studentRestoreConverter)
+      .get();
+
+    const batch = db.batch();
+
+    batch.update(db.doc(`venues/${venue.id}/students/${restore.studentId}`), {
+      uid: restore.id,
+      updatedAt: Timestamp.now(),
+    });
+
+    batch.delete(db.doc(`studentRestores/${restore.id}`));
+
+    for (const doc of otherRestores.docs) {
+      if (doc.id !== restore.id && doc.data().status === "pending") {
+        batch.update(doc.ref, { status: "revoked" });
+      }
+    }
+
+    await batch.commit();
+  });
+
+export const teacherRejectStudentRestore = publicProcedure
+  .input(
+    z.strictObject({
+      venueId: z.string(),
+      studentId: z.string(),
+      studentRestoreId: z.string().optional(),
+    }),
+  )
+  .mutation(async (opts) => {
+    const { input: data, ctx } = opts;
+    logger.info("Teacher reject student restore received", { data });
+
+    const [venue] = await checkVenue(data.venueId, ctx.claims, false);
+
+    const restores = await db
+      .collection("studentRestores")
+      .where("venueId", "==", venue.id)
+      .where("studentId", "==", data.studentId)
+      .withConverter(studentRestoreConverter)
+      .get();
+
+    const batch = db.batch();
+    let hasUpdates = false;
+
+    for (const doc of restores.docs) {
+      if (
+        doc.data().status === "pending" &&
+        (!data.studentRestoreId || doc.id === data.studentRestoreId)
+      ) {
+        batch.update(doc.ref, { status: "revoked" });
+        hasUpdates = true;
+      }
+    }
+
+    if (hasUpdates) {
+      await batch.commit();
+    }
   });

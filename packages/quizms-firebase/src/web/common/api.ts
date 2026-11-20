@@ -70,3 +70,24 @@ export async function stopContestWindow(user: User, venueId: string) {
 export async function finalizeVenue(user: User, venueId: string) {
   await trpc.teacherFinalizeVenue.mutate({ venueId }, { context: { user } });
 }
+
+export async function teacherApproveStudentRestore(
+  user: User,
+  body: {
+    venueId: string;
+    studentRestoreId: string;
+  },
+) {
+  await trpc.teacherApproveStudentRestore.mutate(body, { context: { user } });
+}
+
+export async function teacherRejectStudentRestore(
+  user: User,
+  body: {
+    venueId: string;
+    studentId: string;
+    studentRestoreId?: string;
+  },
+) {
+  await trpc.teacherRejectStudentRestore.mutate(body, { context: { user } });
+}

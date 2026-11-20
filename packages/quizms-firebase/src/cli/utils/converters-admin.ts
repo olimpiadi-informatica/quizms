@@ -1,4 +1,10 @@
-import { contestSchema, studentSchema, variantSchema, venueSchema } from "@olinfo/quizms/models";
+import {
+  contestSchema,
+  studentRestoreSchema,
+  studentSchema,
+  variantSchema,
+  venueSchema,
+} from "@olinfo/quizms/models";
 import { validate } from "@olinfo/quizms/utils";
 import {
   type DocumentSnapshot,
@@ -46,6 +52,7 @@ function converter<T extends object>(schema: z.core.$ZodType<T>): FirestoreDataC
 export const contestConverter = converter(contestSchema);
 export const venueConverter = converter(venueSchema);
 export const studentConverter = converter(studentSchema);
+export const studentRestoreConverter = converter(studentRestoreSchema);
 export const submissionConverter = converter(submissionSchema);
 export const userConverter = converter(userSchema);
 export const variantConverter = converter(variantSchema);

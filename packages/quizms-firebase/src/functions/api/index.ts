@@ -10,8 +10,10 @@ import {
   studentSubmitContest,
 } from "./student";
 import {
+  teacherApproveStudentRestore,
   teacherFinalizeVenue,
   teacherLogin,
+  teacherRejectStudentRestore,
   teacherStartContestWindow,
   teacherStopContestWindow,
 } from "./teacher";
@@ -27,6 +29,8 @@ export const appRouter = router({
   teacherStartContestWindow,
   teacherStopContestWindow,
   teacherFinalizeVenue,
+  teacherApproveStudentRestore,
+  teacherRejectStudentRestore,
 });
 
 export type AppRouter = typeof appRouter;
