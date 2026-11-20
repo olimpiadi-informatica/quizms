@@ -127,7 +127,7 @@ describe("training website", () => {
   // and the Firebase entry wrap the header in `<Localized>` (see `headerEntry` and
   // `findHeaderTranslations` in @olinfo/quizms). Fix: build the header with `headerEntry` from
   // `@olinfo/quizms` in the training entry as well.
-  it.fails("translates the contest header", async () => {
+  it("translates the contest header", async () => {
     await start("?lang=en");
     await expect
       .poll(() => page.getByText("Welcome to the test contest.").count(), { timeout: 5_000 })

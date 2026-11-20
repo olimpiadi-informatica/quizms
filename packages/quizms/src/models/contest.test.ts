@@ -126,8 +126,9 @@ describe("validateUserData", () => {
 
   // BUG: the pattern is not anchored, so `RegExp.test` accepts any value containing at least one
   // valid character. The student form is not affected (HTML `pattern` is implicitly anchored), but
-  // the teacher table and CSV importer are. Remove `.fails` once the pattern is anchored.
-  it.fails("rejects text with characters outside the pattern", () => {
+  // the teacher table and CSV importer are. Fix: anchor the pattern,
+  // e.g. `new RegExp(`^(?:${schema.pattern})$`, "u")`.
+  it("rejects text with characters outside the pattern", () => {
     expect(validateUserData("Mario2", field("name"))?.[0]).toContain(
       'Il campo "nome" contiene caratteri non validi.',
     );

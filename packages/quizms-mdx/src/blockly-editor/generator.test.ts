@@ -171,7 +171,7 @@ describe("blockly generator", () => {
   // with the same name as a custom block (e.g. `move`) overwrites the function of the block in
   // the interpreter. Fix: call `javascriptGenerator.addReservedWords(customBlock.type)` also in
   // the first initialization, before `javascriptGenerator.init(workspace)`.
-  it.fails("renames variables named like a custom block", () => {
+  it("renames variables named like a custom block", () => {
     expect(setVariable("move")).toContain("move2 = 1;");
   });
 

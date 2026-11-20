@@ -60,7 +60,7 @@ describe("remarkHighlight", () => {
   // trailing backslash breaks the literal, and `${...}` in any language is evaluated as
   // JavaScript. Fix: build the `TemplateLiteral` node directly (or use `b.literal(code.value)`
   // for languages other than pseudocode) instead of parsing a string.
-  it.fails("supports backticks in code blocks", async () => {
+  it("supports backticks in code blocks", async () => {
     expect(await toJsx("```sh\necho `date`\n```")).toContain("echo `date`");
   });
 });

@@ -71,7 +71,7 @@ There are three suites:
 
 Each package with unit tests has its own `vitest.config.mjs`, which is picked up by the root `vitest.config.mjs`. The emulator tests always run against a `demo-` project, so they never touch a real Firebase project.
 
-Tests that document a known bug are marked `it.fails` with a `// BUG:` comment explaining it. When you fix the bug, the test starts failing: turn it back into a normal `it`.
+Tests marked with a `// BUG:` comment document a known bug and fail until it is fixed.
 
 Before opening a pull request, make sure linting, tests and build pass.
 

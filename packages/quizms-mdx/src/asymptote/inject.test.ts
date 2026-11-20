@@ -42,7 +42,7 @@ describe("createAsymptoteInject", () => {
   // with variants generated in Python, where `1.0` is serialized as `1.0` but parsed by
   // JavaScript as the integer `1`. Fix: use `real` when any element of the array is not an
   // integer (and reject arrays mixing different types).
-  it.fails("declares arrays of reals starting with an integer value", () => {
+  it("declares arrays of reals starting with an integer value", () => {
     expect(createAsymptoteInject({ xs: [1, 2.5] })).toBe("real[] xs = { 1, 2.5 };");
   });
 });

@@ -72,7 +72,7 @@ describe("PointsTable", () => {
   // BUG: `PointsTable` renders `displayAnswer(answer) ?? "-"` (src/web/student/modals.tsx:51), but
   // `displayAnswer` returns `""` (never `null`/`undefined`) for blank answers, so the "-"
   // placeholder is never shown and the "Risposta" cell is empty. Fix: use `||` instead of `??`.
-  it.fails("shows blank and missing answers as a dash", () => {
+  it("shows blank and missing answers as a dash", () => {
     const rows = renderTable(
       makeStudent({ answers: { "1": { type: "multipleChoice", value: undefined } } }),
     );

@@ -88,7 +88,7 @@ describe("studentUpdatedHandler", () => {
   // `ignoreUndefinedProperties`. The submission of e.g. a student disabled by the teacher is lost.
   // Fix: call `db.settings({ ignoreUndefinedProperties: true })` in src/functions/common.ts (or
   // omit `score` when it is undefined in src/functions/submissions.ts:21).
-  it.fails("stores a submission for disabled students", async () => {
+  it("stores a submission for disabled students", async () => {
     await seed(db, {
       students: [makeStudent({ id: "s1", token: "token", participationWindow, disabled: true })],
     });

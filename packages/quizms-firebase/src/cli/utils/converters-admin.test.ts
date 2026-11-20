@@ -229,7 +229,7 @@ describe("converters", () => {
   // fails to parse with "Unrecognized key: id". This breaks `quizms-firebase export --submissions`
   // (src/cli/export.ts), which reads the collection through `submissionConverter`.
   // Fix: add `id: z.string()` to `submissionSchema`.
-  it.fails("parses submissions with an embedded student", () => {
+  it("parses submissions with an embedded student", () => {
     const submission = {
       authType: "unauthenticated",
       studentId: "s1",

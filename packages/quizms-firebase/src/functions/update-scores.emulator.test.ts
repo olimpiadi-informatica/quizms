@@ -103,7 +103,7 @@ describe("updateScoresHandler", () => {
   // `ignoreUndefinedProperties`, so the update throws "Cannot use \"undefined\" as a Firestore
   // value" and the whole task fails, leaving the remaining students without an updated score.
   // Fix (src/functions/update-scores.ts:33): write `score ?? FieldValue.delete()`.
-  it.fails("removes the score of students marked as absent", async () => {
+  it("removes the score of students marked as absent", async () => {
     await seed(db, {
       students: [
         makeStudent({ id: "absent", token: "token", absent: true, answers: correct, score: 8 }),

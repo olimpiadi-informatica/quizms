@@ -132,7 +132,7 @@ describe("remarkAnswers", () => {
     // (reading 'type')" instead of the usual error, because `remark-answers.ts:64` reads
     // `paragraph.type` without optional chaining (closed answers use `list?.type`).
     // Fix: `if (paragraph?.type !== "paragraph")`.
-    it.fails("rejects an empty open answer with a clear error", async () => {
+    it("rejects an empty open answer with a clear error", async () => {
       await expect(toJsx(":::answers{.open}\n:::")).rejects.toThrow("Missing or invalid answers");
     });
   });

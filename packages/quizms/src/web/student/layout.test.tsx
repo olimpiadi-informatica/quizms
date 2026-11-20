@@ -239,7 +239,7 @@ describe("StudentLayout", () => {
     // buttons ("Mostra risultati", "Ricomincia") thus have no accessible name for screen readers.
     // Fix: render native `<button aria-label=...>` elements in `src/web/student/layout.tsx`, or
     // make `Button` forward `aria-*` props upstream.
-    it.fails("icon-only buttons have an accessible name", async () => {
+    it("icon-only buttons have an accessible name", async () => {
       await renderLayout(null, {
         reset: () => {},
         schema,
