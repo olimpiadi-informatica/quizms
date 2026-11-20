@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef } from "react";
 
 import { DisableTopBlocks } from "@blockly/disable-top-blocks";
+import { statementString } from "@olinfo/quizms/utils";
 import "blockly/blocks";
 
 import {
@@ -129,11 +130,11 @@ function onWorkspaceChange(workspace: WorkspaceSvg, config: BlocklyOptions) {
   }
 }
 
-function createConfig({ toolbox, customBlocks, readonly }: InitProps): BlocklyOptions {
+function createConfig({ toolbox, customBlocks, readonly, language }: InitProps): BlocklyOptions {
   if (customBlocks && toolbox.kind === "categoryToolbox") {
     toolbox.contents.unshift({
       kind: "category",
-      name: "Esecuzione",
+      name: statementString(language, "blocklyCustom"),
       colour: "40",
       contents: customBlocks.map((block) => ({
         kind: "block",

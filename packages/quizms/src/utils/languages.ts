@@ -38,6 +38,7 @@ const statementStrings = {
     blocklyLogic: "Logica",
     blocklyLoops: "Cicli",
     blocklyLists: "Liste",
+    blocklyCustom: "Esecuzione",
   },
   en: {
     question: "Question",
@@ -51,6 +52,7 @@ const statementStrings = {
     blocklyLogic: "Logic",
     blocklyLoops: "Loops",
     blocklyLists: "Lists",
+    blocklyCustom: "Execution",
   },
 } satisfies Record<string, Record<string, string>>;
 
