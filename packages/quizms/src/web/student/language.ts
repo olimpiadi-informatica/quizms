@@ -1,4 +1,4 @@
-import { createContext, startTransition, use, useCallback, useState } from "react";
+import { createContext, startTransition, use, useCallback, useEffect, useState } from "react";
 
 import type { Contest } from "~/models";
 
@@ -26,7 +26,7 @@ function languageFromUrl() {
  * `StudentProvider`.
  *
  * The language is, in order: the `?lang=` URL parameter, the saved choice (`saved`), the
- * contest default. Changing it updates the URL, calls `save` (e.g. to store it on the student)
+ * contest default. Changing it updates the URL, then calls `save` (e.g. to store it on the student)
  * and happens in a transition, so the current statement stays visible while the new one loads.
  */
 export function useStatementLanguageState(
@@ -42,20 +42,31 @@ export function useStatementLanguageState(
   const [selected, setSelected] = useState(() => valid(languageFromUrl()));
   const language = selected ?? valid(saved) ?? languages[0];
 
-  const setLanguage = useCallback(
-    (lang: string) => {
-      startTransition(() => setSelected(lang));
+  // Language chosen by the student and not saved yet.
+  const [toSave, setToSave] = useState<string>();
 
-      const url = new URL(window.location.href);
-      url.searchParams.set("lang", lang);
-      window.history.replaceState(window.history.state, "", url);
+  const setLanguage = useCallback((lang: string) => {
+    startTransition(() => {
+      setSelected(lang);
+      setToSave(lang);
+    });
 
-      Promise.resolve(save?.(lang)).catch((err) => {
-        console.warn("Failed to save the statement language:", err);
-      });
-    },
-    [save],
-  );
+    const url = new URL(window.location.href);
+    url.searchParams.set("lang", lang);
+    window.history.replaceState(window.history.state, "", url);
+  }, []);
+
+  // Save only after the transition has committed. Saving updates `saved` with a synchronous
+  // update: done earlier, it would switch the language outside the transition, so the new
+  // header and statement would suspend and show the loading screen instead of the old content.
+  useEffect(() => {
+    if (toSave === undefined) return;
+    setToSave(undefined);
+    if (toSave === saved) return;
+    Promise.resolve(save?.(toSave)).catch((err) => {
+      console.warn("Failed to save the statement language:", err);
+    });
+  }, [toSave, saved, save]);
 
   return [language, setLanguage];
 }
