@@ -59,19 +59,19 @@ QuizMS uses [Biome](https://biomejs.dev/) for formatting and linting, and TypeSc
 
 ### Automated tests
 
-Unit tests use [Vitest](https://vitest.dev/) and live next to the code they test as `src/**/*.test.ts`:
+Tests use [Vitest](https://vitest.dev/) and live next to the code they test as `src/**/*.test.ts` (or `.test.tsx` for React components, which run in `happy-dom`). Some tests import other workspace packages from their `dist/`, so build first (`pnpm -r build`).
 
-- **Run all tests:**
-  ```bash
-  pnpm test
-  ```
+There are three suites:
 
-- **Run tests in watch mode:**
-  ```bash
-  pnpm test:watch
-  ```
+| Suite | Command | Needs |
+| :--- | :--- | :--- |
+| Unit and component tests | `pnpm test` (`pnpm test:watch` to watch) | Nothing else |
+| Firebase integration tests (`*.emulator.test.ts`): tRPC procedures, Cloud Functions handlers, Firestore and Storage rules | `pnpm test:emulator` | Java 21+ and the [Firebase CLI](https://firebase.google.com/docs/cli) (`npm install -g firebase-tools`) |
+| End-to-end smoke tests (`packages/e2e`): runs the CLI and a headless browser against a fixture contest | `pnpm test:e2e` | Chromium for Playwright: `pnpm --filter @olinfo/quizms exec playwright install chromium` |
 
-Each package with tests has its own `vitest.config.mjs`, which is picked up by the root `vitest.config.mjs`.
+Each package with unit tests has its own `vitest.config.mjs`, which is picked up by the root `vitest.config.mjs`. The emulator tests always run against a `demo-` project, so they never touch a real Firebase project.
+
+Tests that document a known bug are marked `it.fails` with a `// BUG:` comment explaining it. When you fix the bug, the test starts failing: turn it back into a normal `it`.
 
 Before opening a pull request, make sure linting, tests and build pass.
 

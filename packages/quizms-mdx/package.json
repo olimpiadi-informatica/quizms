@@ -18,7 +18,8 @@
     "build": "vite build",
     "watch": "vite build --watch",
     "lint": "biome check --write && tsc --noEmit",
-    "prepack": "pnpm lint && pnpm build"
+    "prepack": "pnpm lint && pnpm build",
+    "test": "vitest run"
   },
   "exports": {
     "./blockly-editor": {
@@ -102,6 +103,7 @@
     "@types/mdast": "^4.0.4",
     "@types/node": "^25.9.5",
     "@types/react": "^19.2.18",
+    "@types/react-dom": "~19.2.4",
     "@types/unist": "^3.0.3",
     "mdast-util-directive": "^3.1.0",
     "mdast-util-mdx": "^3.0.0",

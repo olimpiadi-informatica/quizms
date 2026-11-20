@@ -1,0 +1,20 @@
+{
+  "name": "quizms-e2e-fixture",
+  "private": true,
+  "description": "Minimal QuizMS contest used by the e2e smoke tests, copied to a temporary directory by src/project.ts, which links these dependencies from the workspace.",
+  "dependencies": {
+    "@olinfo/quizms": "*",
+    "@olinfo/quizms-mdx": "*",
+    "@olinfo/quizms-training": "*",
+    "@olinfo/react-components": "*",
+    "clsx": "*",
+    "lodash-es": "*",
+    "react": "*",
+    "react-dom": "*",
+    "react-server-dom-webpack": "*",
+    "sharp": "*",
+    "svgo": "*",
+    "vite": "*",
+    "wouter": "*"
+  }
+}

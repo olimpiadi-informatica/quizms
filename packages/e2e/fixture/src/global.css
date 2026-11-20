@@ -1,0 +1,2 @@
+/* Required by the QuizMS entry. Real projects add Tailwind here; the smoke tests do not need it. */
+@import "@olinfo/quizms-mdx/css";

@@ -1,0 +1,10 @@
+[smoke]
+secret = "e2e-secret"
+entry = "contest/contest.mdx"
+header = "header.md"
+shuffle_problems = true
+shuffle_answers = true
+variant_ids = [101, 102, 103]
+pdf_variant_ids = []
+pdf_per_school = 0
+languages = ["it", "en"]

@@ -10,7 +10,10 @@
     }
   ],
   "commit": false,
-  "ignore": ["@olinfo/quizms-docs"],
+  "ignore": [
+    "@olinfo/quizms-docs",
+    "@olinfo/quizms-e2e"
+  ],
   "fixed": [],
   "linked": [],
   "updateInternalDependencies": "patch"
