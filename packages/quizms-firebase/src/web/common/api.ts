@@ -41,6 +41,10 @@ export function studentLogin(body: {
   return trpc.studentLogin.mutate(body);
 }
 
+export async function setStudentLanguage(user: User, language: string) {
+  await trpc.studentSetLanguage.mutate({ language }, { context: { user } });
+}
+
 export async function startContestWindow(user: User, venueId: string) {
   await trpc.teacherStartContestWindow.mutate({ venueId }, { context: { user } });
 }

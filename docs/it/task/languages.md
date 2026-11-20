@@ -98,6 +98,6 @@ Il resto dell'interfaccia (menu, pulsanti, messaggi) resta in italiano, così co
 
 ## Firebase
 
-- La scelta dello studente viene salvata, quindi resta anche dopo aver ricaricato la pagina o cambiato dispositivo. Pubblica le regole di Firestore incluse in QuizMS (`firestore.rules`): con le regole precedenti la scelta non viene salvata.
+- La scelta dello studente viene salvata, quindi resta anche dopo aver ricaricato la pagina o cambiato dispositivo. La scelta viene salvata tramite le Cloud Functions di QuizMS, quindi pubblicale dopo aver aggiornato QuizMS: con le funzioni precedenti la scelta non viene salvata.
 - `quizms firebase import` controlla che ogni lingua di ogni gara abbia i suoi testi (e i suoi PDF, se sono stati generati) prima di caricarli.
 - Gli insegnanti scelgono la lingua dei PDF da scaricare dalla dashboard.

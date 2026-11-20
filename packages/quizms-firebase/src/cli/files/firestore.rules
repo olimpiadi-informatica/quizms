@@ -50,18 +50,11 @@ service cloud.firestore {
                     && request.time <= resource.data.participationWindow.end + duration.value(10, 's');
             }
 
-            // The statement language must be one of the contest's languages.
-            function isValidLanguage() {
-                let contest = get(/databases/$(database)/documents/contests/$(resource.data.contestId));
-                return request.resource.data.language in contest.data.get('languages', ['it']);
-            }
-
             function canStudentUpdate() {
                 let keys = affectedKeys();
                 return isAuthenticated(resource.data.uid)
                     && checkToken()
-                    && keys.hasOnly(['answers', 'updatedAt', 'participationWindow', 'extraData', 'language'])
-                    && (!keys.hasAny(['language']) || isValidLanguage())
+                    && keys.hasOnly(['answers', 'updatedAt', 'participationWindow', 'extraData'])
                     && hasTimestamp('updatedAt');
             }
 

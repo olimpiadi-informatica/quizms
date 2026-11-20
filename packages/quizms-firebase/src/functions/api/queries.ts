@@ -66,3 +66,11 @@ export async function getStudentByHash(venueId: string, userDataHash: string) {
     .get();
   return snapshot.docs[0]?.data();
 }
+
+export async function getStudent(venueId: string, studentId: string) {
+  const snapshot = await db
+    .doc(`venues/${venueId}/students/${studentId}`)
+    .withConverter(studentConverter)
+    .get();
+  return snapshot.data();
+}

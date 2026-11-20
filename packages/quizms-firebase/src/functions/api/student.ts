@@ -12,7 +12,13 @@ import * as logger from "firebase-functions/logger";
 import z from "zod";
 
 import { auth, db } from "../common";
-import { getContest, getRandomVariant, getStudentByHash, getVenueByToken } from "./queries";
+import {
+  getContest,
+  getRandomVariant,
+  getStudent,
+  getStudentByHash,
+  getVenueByToken,
+} from "./queries";
 import { publicProcedure } from "./trpc";
 
 function studentHash(contest: Contest, userData: NonNullable<Student["userData"]>) {
@@ -97,5 +103,35 @@ export const studentLogin = publicProcedure
       studentId: studentRef.id,
       venueId: venue.id,
       variantId: variant.id,
+    });
+  });
+
+export const studentSetLanguage = publicProcedure
+  .input(z.strictObject({ language: z.string() }))
+  .mutation(async (opts) => {
+    const { input: data, ctx } = opts;
+    logger.info("Student set language received", { data, uid: ctx.claims?.uid });
+
+    const claims = ctx.claims;
+    if (claims?.role !== "student" || !claims.venueId || !claims.studentId) {
+      throw new TRPCError({ code: "UNAUTHORIZED", message: "Accesso non valido" });
+    }
+
+    const student = await getStudent(claims.venueId, claims.studentId);
+    if (!student || student.uid !== claims.uid) {
+      throw new TRPCError({ code: "FORBIDDEN", message: "Studente non valido" });
+    }
+
+    // Contests stored before `languages` existed have only the default language.
+    const contest = await getContest(student.contestId!);
+    if (!(contest.languages ?? ["it"]).includes(data.language)) {
+      throw new TRPCError({ code: "BAD_REQUEST", message: "Lingua non valida" });
+    }
+
+    // The language can change at any time, also before the start and after the end of the
+    // contest: it doesn't affect the answers or the score.
+    await db.doc(`venues/${claims.venueId}/students/${claims.studentId}`).update({
+      language: data.language,
+      updatedAt: Timestamp.now(),
     });
   });

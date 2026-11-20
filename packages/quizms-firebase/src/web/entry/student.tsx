@@ -12,10 +12,10 @@ import {
   SubmitButton,
   TextField,
 } from "@olinfo/react-components";
-import { getAuth, signInWithCustomToken, signOut } from "firebase/auth";
+import { getAuth, signInWithCustomToken, signOut, type User } from "firebase/auth";
 import { waitForPendingWrites } from "firebase/firestore";
 
-import { studentLogin } from "~/web/common/api";
+import { setStudentLanguage, studentLogin } from "~/web/common/api";
 import { useDb } from "~/web/common/base-login";
 import { contestConverter, studentConverter, venueConverter } from "~/web/common/converters";
 import { useWebsite } from "~/web/common/website";
@@ -38,6 +38,7 @@ export default function StudentEntry() {
     return (
       <StudentRestoring user={auth.user}>
         <StudentInner
+          user={auth.user}
           contests={contests}
           venueId={auth.claims.venueId}
           studentId={auth.claims.studentId}
@@ -127,10 +128,12 @@ function StudentForm({ contests }: { contests: Contest[] }) {
 }
 
 function StudentInner({
+  user,
   contests,
   venueId,
   studentId,
 }: {
+  user: User;
   contests: Contest[];
   venueId: string;
   studentId: string;
@@ -177,10 +180,11 @@ function StudentInner({
   };
 
   // Students can switch language at any time during the contest; the choice is saved on the
-  // student so that it survives reloads and device changes.
+  // student (through the API) so that it survives reloads and device changes. It is read back
+  // from the student document above.
   const saveLanguage = useCallback(
-    (language: string) => setStudent({ ...student, language }),
-    [student, setStudent],
+    (language: string) => setStudentLanguage(user, language),
+    [user],
   );
   const [language, setLanguage] = useStatementLanguageState(
     contest,

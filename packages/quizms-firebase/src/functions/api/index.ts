@@ -3,7 +3,7 @@ import express from "express";
 import { logger } from "firebase-functions/logger";
 
 import { adminLogin } from "./admin";
-import { studentLogin } from "./student";
+import { studentLogin, studentSetLanguage } from "./student";
 import {
   teacherFinalizeVenue,
   teacherLogin,
@@ -15,6 +15,7 @@ import { createContext, router } from "./trpc";
 const appRouter = router({
   adminLogin,
   studentLogin,
+  studentSetLanguage,
   teacherLogin,
   teacherStartContestWindow,
   teacherStopContestWindow,

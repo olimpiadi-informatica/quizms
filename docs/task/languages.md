@@ -98,6 +98,6 @@ The rest of the interface (menus, buttons, messages) stays in Italian, and so do
 
 ## Firebase
 
-- The student's choice is saved, so it is kept after reloading the page or changing device. Deploy the Firestore rules included in QuizMS (`firestore.rules`): with older rules, the choice is not saved.
+- The student's choice is saved, so it is kept after reloading the page or changing device. The choice is saved through the QuizMS Cloud Functions, so deploy them after updating QuizMS: with older functions, the choice is not saved.
 - `quizms firebase import` checks that every language of each contest has its statements (and its PDFs, if they were generated) before uploading them.
 - Teachers choose the language of the PDFs they download from the dashboard.
