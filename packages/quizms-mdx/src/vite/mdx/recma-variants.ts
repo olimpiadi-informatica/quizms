@@ -10,7 +10,11 @@ const recmaVariants: Plugin<[], Program> = () => {
   return (ast, file) => {
     const found = findVariants(ast);
     if (found) {
-      injectLocalVariables(ast, path.join(path.basename(file.dirname ?? ""), file.basename ?? ""));
+      injectLocalVariables(
+        ast,
+        path.join(path.basename(file.dirname ?? ""), file.basename ?? ""),
+        file.dirname ?? "",
+      );
     } else {
       checkUndefinedVariables(
         ast,
@@ -48,7 +52,11 @@ function findVariants(ast: Program) {
   return variantsFound;
 }
 
-function injectLocalVariables(ast: Program, file: string) {
+/**
+ * @param file problem folder and file name, for error messages (e.g. `p-1-task/question.md`)
+ * @param problemDir absolute problem folder, shared by all translations of the problem
+ */
+function injectLocalVariables(ast: Program, file: string, problemDir: string) {
   traverse(ast, {
     $: { scope: true },
 
@@ -60,12 +68,12 @@ function injectLocalVariables(ast: Program, file: string) {
       const node = nodePath.node!;
       if (node.id?.name === "_createMdxContent") {
         if (process.env.NODE_ENV === "development") {
-          // import React from "react";
-          const importReact = b.importDeclaration(
-            [b.importDefaultSpecifier(b.identifier("_react$q"))],
-            b.literal("react"),
+          // import { useDevVariant as _useDevVariant$q } from "@olinfo/quizms-mdx/components";
+          const importDevVariant = b.importDeclaration(
+            [b.importSpecifier(b.identifier("useDevVariant"), b.identifier("_useDevVariant$q"))],
+            b.literal("@olinfo/quizms-mdx/components"),
           );
-          ast.body.unshift(importReact);
+          ast.body.unshift(importDevVariant);
         }
 
         // const _allVariants = frontmatter?.variants ?? variants;
@@ -87,14 +95,12 @@ function injectLocalVariables(ast: Program, file: string) {
 
         let variant: Statement;
         if (process.env.NODE_ENV === "development") {
-          // const [_variant, _setVariant] = useState(0);
+          // const [_variant, _setVariant] = _useDevVariant$q(problemDir);
+          // Shared by all translations, so switching language keeps the selected variant.
           variant = b.variableDeclaration("const", [
             b.variableDeclarator(
               b.arrayPattern([b.identifier("_variant"), b.identifier("_setVariant")]),
-              b.callExpression(
-                b.memberExpression(b.identifier("_react$q"), b.identifier("useState")),
-                [b.literal(0)],
-              ),
+              b.callExpression(b.identifier("_useDevVariant$q"), [b.literal(problemDir)]),
             ),
           ]);
         } else {

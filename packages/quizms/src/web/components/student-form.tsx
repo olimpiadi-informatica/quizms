@@ -1,11 +1,15 @@
 import { DateField, Form, NumberField, TextField } from "@olinfo/react-components";
 
 import type { Contest } from "~/models";
-import { normalizeName, strip, titleCase } from "~/utils";
+import { normalizeName, statementString, strip, titleCase } from "~/utils";
 import { useStudent } from "~/web/student/context";
+import { useStatementLanguageContext } from "~/web/student/language";
 
 export function StudentForm({ printLayout = false }: { printLayout?: boolean }) {
   const { contest, student } = useStudent();
+  // Printed booklets are in the statement language; the online form is part of the (Italian) UI.
+  const language = useStatementLanguageContext();
+  const variantLabel = printLayout ? statementString(language, "variantCode") : "Codice prova";
 
   return (
     <Form
@@ -20,7 +24,7 @@ export function StudentForm({ printLayout = false }: { printLayout?: boolean }) 
       ))}
       {contest.hasVariants && (
         <div>
-          <TextField field="variant" label="Codice prova" placeholder="" />
+          <TextField field="variant" label={variantLabel} placeholder="" />
         </div>
       )}
     </Form>
@@ -34,10 +38,12 @@ export function StudentFormField({
   field: Contest["userData"][number];
   printLayout?: boolean;
 }) {
+  const language = useStatementLanguageContext();
+  const enter = printLayout ? statementString(language, "enter") : "Inserisci";
   const commonProps = {
     field: field.name,
     label: field.label,
-    placeholder: `Inserisci ${field.label.toLowerCase()}`,
+    placeholder: `${enter} ${field.label.toLowerCase()}`,
   };
   if (printLayout) {
     return <TextField {...commonProps} />;

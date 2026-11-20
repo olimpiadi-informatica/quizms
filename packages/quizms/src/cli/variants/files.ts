@@ -23,7 +23,7 @@ const statementPath = path.join(
   "variants",
   process.env.QUIZMS_CONTEST_ID,
   process.env.QUIZMS_VARIANT_ID,
-  "statement.txt",
+  process.env.QUIZMS_STATEMENT_FILE ?? "statement.txt",
 );
 pipe(createWriteStream(statementPath));`;
 }

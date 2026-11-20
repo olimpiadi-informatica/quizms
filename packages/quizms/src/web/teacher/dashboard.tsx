@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 
 import {
   Button,
@@ -20,6 +20,7 @@ import Markdown from "react-markdown";
 import { Link } from "wouter";
 
 import type { TimeRange } from "~/models";
+import { statementString } from "~/utils";
 import { Timer } from "~/web/components";
 
 import { useTeacher } from "./context";
@@ -169,12 +170,7 @@ export default function TeacherDashboard() {
               .
             </div>
           )}
-          {contest.hasOffline && (
-            <CardActions>
-              <DownloadPdfButton />
-              <DownloadZipButton />
-            </CardActions>
-          )}
+          {contest.hasOffline && <PdfDownloads />}
         </CardBody>
       </Card>
       <Card>
@@ -226,11 +222,44 @@ export default function TeacherDashboard() {
   );
 }
 
-function DownloadPdfButton() {
+function PdfDownloads() {
+  const { contest } = useTeacher();
+  // Contests stored before `languages` existed don't have the field
+  const languages = contest.languages ?? ["it"];
+  const [language, setLanguage] = useState(languages[0]);
+  const multilingual = languages.length > 1;
+
+  return (
+    <CardActions>
+      {multilingual && (
+        <select
+          className="select select-bordered"
+          aria-label="Lingua dei testi"
+          value={language}
+          onChange={(e) => setLanguage(e.target.value)}>
+          {languages.map((lang) => (
+            <option key={lang} value={lang}>
+              Testi in {lang.toUpperCase()}
+            </option>
+          ))}
+        </select>
+      )}
+      <DownloadPdfButton language={multilingual ? language : undefined} />
+      <DownloadZipButton language={multilingual ? language : undefined} />
+    </CardActions>
+  );
+}
+
+/** Name of a downloaded file: `<venue>.pdf`, or `<venue>.<lang>.pdf` for multilingual contests. */
+function downloadName(venueId: string, language: string | undefined, extension: string) {
+  return language ? `${venueId}.${language}.${extension}` : `${venueId}.${extension}`;
+}
+
+function DownloadPdfButton({ language }: { language?: string }) {
   const { venue, getPdfStatements } = useTeacher();
 
   const onClick = async () => {
-    const statements = await getPdfStatements();
+    const statements = await getPdfStatements({ language });
 
     const { PDFDocument } = await import("@cantoo/pdf-lib");
     const pdf = await PDFDocument.create();
@@ -243,7 +272,7 @@ function DownloadPdfButton() {
       }
       if (pages.length % 2) {
         const page = pdf.addPage();
-        page.drawText("Pagina lasciata volontariamente vuota", {
+        page.drawText(statementString(language, "blankPage"), {
           x: 10,
           y: 10,
           size: 17,
@@ -253,7 +282,7 @@ function DownloadPdfButton() {
 
     const data = await pdf.save();
     const blob = new Blob([data as Uint8Array<ArrayBuffer>], { type: "application/pdf" });
-    saveAs(blob, `${venue.id}.pdf`);
+    saveAs(blob, downloadName(venue.id, language, "pdf"));
   };
 
   return (
@@ -263,11 +292,11 @@ function DownloadPdfButton() {
   );
 }
 
-function DownloadZipButton() {
+function DownloadZipButton({ language }: { language?: string }) {
   const { venue, getPdfStatements } = useTeacher();
 
   const onClick = async () => {
-    const statements = await getPdfStatements();
+    const statements = await getPdfStatements({ language });
 
     const files = Object.entries(statements).map(
       ([name, data]) =>
@@ -277,7 +306,7 @@ function DownloadZipButton() {
     );
     const zip = await downloadZip(files).blob();
 
-    saveAs(zip, `${venue.id}.zip`);
+    saveAs(zip, downloadName(venue.id, language, "zip"));
   };
 
   return (

@@ -17,6 +17,7 @@ export function useIframe(
     toolbox: utils.toolbox.ToolboxInfo;
     initialBlocks: object;
     customBlocks: CustomBlock<any>[];
+    language?: string;
   },
   callbacks: {
     onBlockChanges?: (blocks: object) => void;
@@ -94,6 +95,21 @@ export function useIframe(
     (id: string | undefined) => send({ cmd: "highlight", highlightedBlock: id }),
     [send],
   );
+
+  // Changing language re-creates the workspace with Blockly's text in the new language, starting
+  // from the current blocks so that unsaved changes are kept.
+  const prevLanguage = useRef(init.language);
+  useEffect(() => {
+    if (init.language === prevLanguage.current) return;
+    prevLanguage.current = init.language;
+    if (!ready) return;
+    send({
+      cmd: "init",
+      readonly,
+      ...init,
+      initialBlocks: Object.keys(blocks).length > 0 ? blocks : init.initialBlocks,
+    });
+  }, [init, ready, readonly, blocks, send]);
 
   const prevReadonly = useRef(readonly);
   useEffect(() => {

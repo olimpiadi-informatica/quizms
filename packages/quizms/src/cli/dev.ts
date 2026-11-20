@@ -14,9 +14,10 @@ import {
 import type { Contest } from "~/models";
 import type { VariantsConfig } from "~/models/variants-config";
 import { reactComponentCase } from "~/utils";
-import { loadContests } from "~/utils-node";
+import { findHeaderTranslations, loadContests, setContestLanguages } from "~/utils-node";
 
 import configs from "./vite/configs";
+import { headerEntry } from "./vite/header";
 import { generateHtml } from "./vite/html";
 import { getDevImportMap } from "./vite/statement-externals";
 
@@ -26,6 +27,7 @@ export type DevOptions = {
 
 export default async function devServer(options: DevOptions) {
   const contests = await loadContests();
+  setContestLanguages(contests);
 
   const config = mergeConfig(configs("development"), {
     publicDir: path.join(cwd(), "public"),
@@ -57,19 +59,31 @@ function devEntry(contestConfigs: (Contest & VariantsConfig)[]): PluginOption {
     },
     load(id) {
       if (id === "\0virtual:quizms-dev-entry") {
+        // Missing header translations fall back to the default header, like problems in dev.
+        const headers = new Map(
+          contestConfigs
+            .filter((contest) => contest.header)
+            .map((contest) => {
+              const { translations } = findHeaderTranslations(
+                contest.header!,
+                contest.languages,
+                contest.languages[0],
+              );
+              return [contest.id, headerEntry(contest.id, contest.header!, translations)];
+            }),
+        );
+
         const entry = `
 import { createApp } from "@olinfo/quizms/entry";
+import { Localized } from "@olinfo/quizms/components";
 import { DevProvider, DevRoutes } from "@olinfo/quizms/dev";
 import { Route } from "wouter";
 
 ${contestConfigs
-  .flatMap((contest) => {
-    const imports = [`import ${reactComponentCase(contest.id)} from "/${contest.entry}";`];
-    if (contest.header) {
-      imports.push(`import ${reactComponentCase(contest.id)}Header from "/${contest.header}";`);
-    }
-    return imports;
-  })
+  .flatMap((contest) => [
+    `import ${reactComponentCase(contest.id)} from "/${contest.entry}";`,
+    ...(headers.get(contest.id)?.imports ?? []),
+  ])
   .join("\n")}
 
 export default function createDevEntry() {
@@ -80,7 +94,7 @@ export default function createDevEntry() {
           return `
             <Route path="/${contest.id}">
               <DevProvider contest={${JSON.stringify(contest)}}>
-                ${contest.header ? `<${reactComponentCase(contest.id)}Header />` : ""}
+                ${headers.get(contest.id)?.element ?? ""}
                 <${reactComponentCase(contest.id)} />
               </DevProvider>
             </Route>`;
@@ -102,10 +116,12 @@ export default function createDevEntry() {
         const routes: { pathname: string | RegExp; module: string }[] =
           server.config.plugins.flatMap((plugin) => plugin.api?.quizmsDevRoutes ?? []);
 
+        // Match on the path only, so that query parameters (e.g. `?lang=en`) are allowed.
+        const pathname = req.url.split("?")[0];
         for (const route of routes) {
           const match = isString(route.pathname)
-            ? route.pathname === req.url
-            : route.pathname.test(req.url);
+            ? route.pathname === pathname
+            : route.pathname.test(pathname);
           if (match) {
             const tags: HtmlTagDescriptor[] = [
               {

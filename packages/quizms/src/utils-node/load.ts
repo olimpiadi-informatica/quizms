@@ -2,7 +2,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { cwd } from "node:process";
 
-import { camelCase, cloneDeepWith, isPlainObject } from "lodash-es";
+import { camelCase, cloneDeepWith, isEqual, isPlainObject } from "lodash-es";
 import Papa from "papaparse";
 import * as toml from "smol-toml";
 import yaml from "yaml";
@@ -101,6 +101,11 @@ export async function loadContests() {
     const config = variantConfigs.find((c) => c.id === contest.id);
     if (!config) {
       fatal(`Missing variants configuration for contest ${contest.id}.`);
+    }
+    if (!isEqual(contest.languages, config.languages)) {
+      fatal(
+        `Contest ${contest.id} has languages [${contest.languages.join(", ")}] in the contests file but [${config.languages.join(", ")}] in the variants file. They must be the same.`,
+      );
     }
     return { ...contest, ...config };
   });

@@ -1,3 +1,4 @@
+import { type StatementStringKey, statementString } from "@olinfo/quizms/utils";
 import type { utils } from "blockly/core";
 
 export const defaultToolbox: utils.toolbox.ToolboxInfo = {
@@ -182,3 +183,23 @@ export const defaultInitialBlocks = {
   },
   variables: [],
 };
+
+const categoryKeys: Record<string, StatementStringKey> = {
+  Variabili: "blocklyVariables",
+  Matematica: "blocklyMath",
+  Logica: "blocklyLogic",
+  Cicli: "blocklyLoops",
+  Liste: "blocklyLists",
+};
+
+/** The default toolbox, with the category names in the statement language. */
+export function localizedDefaultToolbox(language: string | undefined): utils.toolbox.ToolboxInfo {
+  if (!language) return defaultToolbox;
+  return {
+    ...defaultToolbox,
+    contents: defaultToolbox.contents.map((item) => {
+      const key = "name" in item && typeof item.name === "string" && categoryKeys[item.name];
+      return key ? { ...item, name: statementString(language, key) } : item;
+    }),
+  } as utils.toolbox.ToolboxInfo;
+}

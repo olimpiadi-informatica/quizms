@@ -1,5 +1,5 @@
 import { execFile } from "node:child_process";
-import { cp, mkdir, rm, writeFile } from "node:fs/promises";
+import { copyFile, cp, mkdir, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { cwd } from "node:process";
 import { promisify } from "node:util";
@@ -8,7 +8,14 @@ import { uniq } from "lodash-es";
 
 import { type Variant, variantsConfigSchema } from "~/models";
 import { hash } from "~/utils";
-import { fatal, load, withProgress } from "~/utils-node";
+import {
+  fatal,
+  firstDifference,
+  isMultilingual,
+  load,
+  setContestLanguages,
+  withProgress,
+} from "~/utils-node";
 
 import { buildBaseClientModules } from "./variants/client-module";
 import { buildBaseSchemas } from "./variants/schema";
@@ -16,6 +23,8 @@ import { buildBaseStatements } from "./variants/statement";
 
 export type ExportVariantsOptions = {
   outDir: string;
+  /** Languages from the command line, replacing the configured ones */
+  languages?: string[];
 };
 
 export default async function variants(options: ExportVariantsOptions) {
@@ -25,6 +34,7 @@ export default async function variants(options: ExportVariantsOptions) {
   const variantsDir = options?.outDir || path.join(cwd(), "variants");
 
   const configs = await load("variants", variantsConfigSchema);
+  setContestLanguages(configs, options?.languages);
 
   await buildBaseSchemas(configs, schemaBuildDir);
   const baseStatement = await buildBaseStatements(configs, statementBuildDir);
@@ -66,28 +76,64 @@ export default async function variants(options: ExportVariantsOptions) {
       QUIZMS_CACHE_DIR: cacheDir,
     };
 
-    try {
-      await promisify(execFile)(process.execPath, ["--conditions=react-server", "server.js"], {
-        cwd: statementBuildDir,
-        signal: controller.signal,
-        env,
-      });
-    } catch (err) {
-      controller.abort();
-      fatal(`Failed to build statement for variant ${config.id}/${variant}: ${err}`);
+    const multilingual = isMultilingual(config, options?.languages);
+    const languages = options?.languages ?? config.languages;
+
+    let defaultSchema: unknown;
+    for (const language of languages) {
+      const languageEnv = {
+        ...env,
+        QUIZMS_LANGUAGE: language,
+        QUIZMS_STATEMENT_FILE: multilingual ? `statement.${language}.txt` : "statement.txt",
+      };
+      const label = multilingual
+        ? `${config.id}/${variant} (${language})`
+        : `${config.id}/${variant}`;
+
+      try {
+        await promisify(execFile)(process.execPath, ["--conditions=react-server", "server.js"], {
+          cwd: statementBuildDir,
+          signal: controller.signal,
+          env: languageEnv,
+        });
+      } catch (err) {
+        controller.abort();
+        fatal(`Failed to build statement for variant ${label}: ${err}`);
+      }
+
+      let schema: unknown;
+      try {
+        const { stdout } = await promisify(execFile)(process.execPath, ["server.js"], {
+          cwd: schemaBuildDir,
+          signal: controller.signal,
+          env: languageEnv,
+        });
+        schema = JSON.parse(stdout);
+      } catch (err) {
+        controller.abort();
+        fatal(`Failed to build schema for variant ${label}: ${err}`);
+      }
+
+      if (language === languages[0]) {
+        defaultSchema = schema;
+      } else {
+        // Every language must be graded the same way: same problems, sub-problems, answer
+        // types, option order, correct answers and points.
+        const diff = firstDifference(defaultSchema, schema);
+        if (diff !== undefined) {
+          controller.abort();
+          fatal(
+            `The ${language} statement of variant ${config.id}/${variant} doesn't match the ${languages[0]} statement at ${diff}. All translations of a problem must have the same answers, in the same order, with the same correct answers.`,
+          );
+        }
+      }
     }
 
-    let schema: string;
-    try {
-      const { stdout } = await promisify(execFile)(process.execPath, ["server.js"], {
-        cwd: schemaBuildDir,
-        signal: controller.signal,
-        env,
-      });
-      schema = stdout;
-    } catch (err) {
-      controller.abort();
-      fatal(`Failed to build schema for variant ${config.id}/${variant}: ${err}`);
+    if (multilingual) {
+      await copyFile(
+        path.join(variantDir, `statement.${languages[0]}.txt`),
+        path.join(variantDir, "statement.txt"),
+      );
     }
 
     await writeFile(
@@ -97,7 +143,7 @@ export default async function variants(options: ExportVariantsOptions) {
         isOnline: config.variantIds.includes(variant),
         isPdf: config.pdfVariantIds.includes(variant),
         contestId: config.id,
-        schema: JSON.parse(schema),
+        schema: defaultSchema as Variant["schema"],
       } satisfies Variant),
     );
   });

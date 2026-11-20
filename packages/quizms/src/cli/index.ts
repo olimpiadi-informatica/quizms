@@ -6,6 +6,7 @@ import { chdir, cwd, exit } from "node:process";
 import { InvalidArgumentError, program } from "commander";
 import { version } from "package.json";
 
+import { parseLanguages } from "~/utils";
 import { fatal } from "~/utils-node";
 
 import staticExport from "./build";
@@ -20,6 +21,20 @@ function safeParseInt(value: string): number {
   }
   return parsedValue;
 }
+
+function safeParseLanguages(value: string): string[] {
+  try {
+    return parseLanguages(value);
+  } catch (err) {
+    throw new InvalidArgumentError((err as Error).message);
+  }
+}
+
+const languagesOption = [
+  "-l, --languages <languages>",
+  "Comma-separated languages to build (e.g. it,en), overriding the configured ones. The first one is the default.",
+  safeParseLanguages,
+] as const;
 
 function findProjectDirectory() {
   const home = homedir();
@@ -65,12 +80,14 @@ async function main() {
     .option("-p, --port <port>", "The port to use for the server.", safeParseInt, 1234)
     .option("-d, --outDir <directory>", "The directory to output the PDF.", "variants")
     .option("-s, --server", "Only serve the pages, don't generate the PDF.")
+    .option(...languagesOption)
     .action(print);
 
   program
     .command("variants")
     .description("Generate variants for the contest.")
     .option("-d, --outDir <directory>", "The directory to output the variants.", "variants")
+    .option(...languagesOption)
     .action(variants);
 
   findProjectDirectory();

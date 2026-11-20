@@ -1,5 +1,9 @@
 # Varianti
 
+::: tip
+In una gara con più [lingue](./languages), tutte le traduzioni di un problema devono definire le stesse varianti: tienile in un file condiviso (per esempio `variants.py`).
+:::
+
 È possibile creare più varianti del problema, ogni utente riceverà una variante specifica e non potrà vedere le variante degli altri.
 
 Una variante è definita da un oggetto che contiene le variabili da sostituire nel testo. Per definire le varianti bisogna dichiarare un array di oggetti, dove ogni elemento contiene le variabili di una variante.

@@ -4,7 +4,7 @@ import { type ComponentType, useCallback, useEffect, useRef, useState } from "re
 
 import { ErrorBoundary } from "@olinfo/quizms/components";
 import type { Answer } from "@olinfo/quizms/models";
-import { useStudent } from "@olinfo/quizms/student";
+import { useStatementLanguageContext, useStudent } from "@olinfo/quizms/student";
 import type { utils } from "blockly/core";
 import clsx from "clsx";
 import { CircleCheck, MessageSquareOff, TriangleAlert } from "lucide-react";
@@ -12,7 +12,7 @@ import { CircleCheck, MessageSquareOff, TriangleAlert } from "lucide-react";
 import type { CustomBlock, TestcaseResult, VisualizerProps } from "~/blockly-types";
 import { useProblem } from "~/components/client/problem";
 
-import { defaultInitialBlocks, defaultToolbox } from "./defaults";
+import { defaultInitialBlocks, defaultToolbox, localizedDefaultToolbox } from "./defaults";
 import { Editor } from "./editor";
 import { useExecutor } from "./hooks/executor";
 import { BlocklyInterpreter } from "./hooks/interpreter";
@@ -67,13 +67,17 @@ export function Blockly<State>({
 
   const blocksChangedRef = useRef(false);
 
+  const language = useStatementLanguageContext();
+
   const { ready, blocks, svg, code, variableMappings, highlightBlock } = useIframe(
     iframe,
     terminated,
     {
-      toolbox: toolbox ?? defaultToolbox,
+      // Custom toolboxes are written by the problem author, in the language of the statement.
+      toolbox: toolbox === defaultToolbox ? localizedDefaultToolbox(language) : toolbox,
       initialBlocks: savedBlocks ? JSON.parse(savedBlocks) : initialBlocks,
       customBlocks,
+      language,
     },
     {
       onCodeChanges,
@@ -118,6 +122,16 @@ export function Blockly<State>({
 
     return () => clearInterval(interval);
   }, [saveAnswer, terminated]);
+
+  // Save pending changes when the workspace goes away (e.g. the statement language changes),
+  // instead of losing up to 5 seconds of edits.
+  const pendingSaveRef = useRef<() => void>(undefined);
+  useEffect(() => {
+    pendingSaveRef.current = () => {
+      if (blocksChangedRef.current && !terminated) void saveAnswer();
+    };
+  }, [saveAnswer, terminated]);
+  useEffect(() => () => pendingSaveRef.current?.(), []);
 
   const {
     state,

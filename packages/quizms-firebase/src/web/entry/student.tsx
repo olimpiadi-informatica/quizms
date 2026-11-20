@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo } from "react";
 
 import { StudentFormField, Title } from "@olinfo/quizms/components";
 import type { Answer, Contest, Student } from "@olinfo/quizms/models";
-import { StudentProvider } from "@olinfo/quizms/student";
+import { StudentProvider, useStatementLanguageState } from "@olinfo/quizms/student";
 import { useUserAgent } from "@olinfo/quizms/utils";
 import {
   Form,
@@ -176,11 +176,25 @@ function StudentInner({
     });
   };
 
+  // Students can switch language at any time during the contest; the choice is saved on the
+  // student so that it survives reloads and device changes.
+  const saveLanguage = useCallback(
+    (language: string) => setStudent({ ...student, language }),
+    [student, setStudent],
+  );
+  const [language, setLanguage] = useStatementLanguageState(
+    contest,
+    student.language,
+    saveLanguage,
+  );
+
   return (
     <StudentProvider
       contest={contest}
       venue={venue}
       student={student}
+      language={language}
+      setLanguage={setLanguage}
       setAnswer={setAnswer}
       logout={logout}
       submit={submit}

@@ -77,6 +77,8 @@ export type WorkspaceToIframeMessage =
       toolbox: utils.toolbox.ToolboxInfo;
       initialBlocks: object;
       customBlocks: CustomBlock<any>[];
+      /** Statement language, for Blockly's built-in text (`undefined`: single-language contest) */
+      language?: string;
     }
   | { cmd: "highlight"; highlightedBlock: string | undefined }
   | { cmd: "ready" }

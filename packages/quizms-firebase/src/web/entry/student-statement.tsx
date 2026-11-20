@@ -1,13 +1,14 @@
 import { useCallback } from "react";
 
 import { RemoteStatement, useStudent } from "@olinfo/quizms/student";
+import { contestStatementFile } from "@olinfo/quizms/utils";
 import { getDownloadURL, getStorage, ref } from "firebase/storage";
 
 import { useDb } from "~/web/common/base-login";
 
 export function FirebaseStatement() {
   const db = useDb();
-  const { student } = useStudent();
+  const { student, contest, language } = useStudent();
 
   const storage = getStorage(db.app);
 
@@ -24,7 +25,7 @@ export function FirebaseStatement() {
 
   return (
     <RemoteStatement
-      statementUrl={() => getFileUrl("statement.txt")}
+      statementUrl={() => getFileUrl(contestStatementFile(contest.languages, language))}
       // TODO
       // stylesheetUrl={() => getFileUrl("statement.css")}
       moduleUrl={getFileUrl}

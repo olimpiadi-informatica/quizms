@@ -58,7 +58,9 @@ function TeacherInner({ user, schoolId }: { user: User; schoolId: string }) {
       variants={variants}
       logout={logout}
       statementComponent={() => <FirebaseStatement />}
-      getPdfStatements={(contestId, variantIds) => getPdfStatements(db, contestId, variantIds)}
+      getPdfStatements={(contestId, variantIds, fileName) =>
+        getPdfStatements(db, contestId, variantIds, fileName)
+      }
       useAnnouncements={useAnnouncements}
       useStudents={useStudents}
       useStudentRestores={useStudentRestores}
@@ -70,13 +72,14 @@ async function getPdfStatements(
   db: Firestore,
   contestId: string,
   variantIds: string[],
+  fileName = "statement.pdf",
 ): Promise<Record<string, ArrayBuffer>> {
   const storage = getStorage(db.app);
 
   const files = await Promise.all(
     variantIds.map(
       async (id) =>
-        [id, await getBytes(ref(storage, `statements/${contestId}/${id}/statement.pdf`))] as const,
+        [id, await getBytes(ref(storage, `statements/${contestId}/${id}/${fileName}`))] as const,
     ),
   );
   return Object.fromEntries(files);

@@ -13,7 +13,8 @@ import {
   type WorkspaceSvg,
 } from "blockly/core";
 import { javascriptGenerator } from "blockly/javascript";
-import * as locale from "blockly/msg/it";
+import * as enMessages from "blockly/msg/en";
+import * as itMessages from "blockly/msg/it";
 
 import type {
   CustomBlock,
@@ -25,7 +26,17 @@ import type {
 import { initGenerator, toJS } from "./generator";
 import { BlocklyModal } from "./modal";
 
-setLocale(locale as unknown as Record<string, string>);
+/**
+ * Blockly's built-in text follows the statement language. Like the other fixed strings
+ * (`statementString`), single-language contests stay Italian and languages without messages
+ * use English.
+ */
+function setBlocklyLocale(language: string | undefined) {
+  const messages = !language || language === "it" ? itMessages : enMessages;
+  setLocale(messages as unknown as Record<string, string>);
+}
+
+setBlocklyLocale(undefined);
 
 function send(msg: IframeToWorkspaceMessage) {
   window.parent.postMessage(msg, "*");
@@ -65,9 +76,12 @@ export type InitProps = {
   toolbox: utils.toolbox.ToolboxInfo;
   initialBlocks: object;
   customBlocks: CustomBlock<any>[];
+  language?: string;
 };
 
 function init(id: string, props: InitProps) {
+  // Must happen before creating the workspace: blocks read the messages when they are created.
+  setBlocklyLocale(props.language);
   const config = createConfig(props);
   const workspace = inject(id, config);
   initGenerator(workspace, props.customBlocks as CustomBlockProcessed[]);

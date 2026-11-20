@@ -11,7 +11,7 @@ import {
   variantsConfigSchema,
   venueSchema,
 } from "@olinfo/quizms/models";
-import { Rng, validate } from "@olinfo/quizms/utils";
+import { contestStatementFile, Rng, validate } from "@olinfo/quizms/utils";
 import { fatal, load, loadContests, success, warning } from "@olinfo/quizms/utils-node";
 import { deleteApp } from "firebase-admin/app";
 import type { Firestore } from "firebase-admin/firestore";
@@ -198,6 +198,35 @@ async function importVariants(db: Firestore, options: ImportOptions) {
   await importCollection(db, "variants", variants, variantConverter, options);
 }
 
+/**
+ * Checks that every language of each contest has its statements, so that the language selector
+ * never points to a missing file. `quizms variants --languages` can build only some languages.
+ */
+async function checkStatementLanguages(contests: Awaited<ReturnType<typeof loadContests>>) {
+  const missing: string[] = [];
+  for (const config of contests) {
+    const multilingual = config.languages.length > 1;
+    for (const id of uniq([...config.variantIds, ...config.pdfVariantIds])) {
+      const localDir = path.join("variants", config.id, id);
+      const files = new Set(await glob("statement*.{txt,pdf}", { cwd: localDir }));
+      // PDFs are optional (`quizms print` may not have been run), but must be complete.
+      const hasPdf = [...files].some((file) => file.endsWith(".pdf"));
+      for (const language of config.languages) {
+        const required = [contestStatementFile(config.languages, language)];
+        if (hasPdf) required.push(multilingual ? `statement.${language}.pdf` : "statement.pdf");
+        for (const file of required) {
+          if (!files.has(file)) missing.push(path.join(localDir, file));
+        }
+      }
+    }
+  }
+  if (missing.length > 0) {
+    fatal(
+      `Missing statements for some contest languages, run \`quizms variants\` (and \`quizms print\`) for all languages first:\n${missing.map((f) => `  - ${f}`).join("\n")}`,
+    );
+  }
+}
+
 async function importWebsites(db: Firestore, options: ImportOptions) {
   const websites = await load("websites", websiteSchema);
   await importCollection(db, "websites", websites, websiteConverter, options);
@@ -205,6 +234,7 @@ async function importWebsites(db: Firestore, options: ImportOptions) {
 
 async function importStatements(bucket: Bucket, options: ImportOptions) {
   const contests = await loadContests();
+  await checkStatementLanguages(contests);
 
   const timestamp = new Date().toISOString().replace(/:/g, "-");
 

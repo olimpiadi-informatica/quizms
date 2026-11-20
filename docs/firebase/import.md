@@ -23,6 +23,7 @@ Contests are described by the `data/contests.{toml,yaml,csv,json,jsonl}` file. T
 | `allow_student_edit`   |                                                                      | `boolean`  | Optional.                                                    |
 | `allow_answer_edit`    |                                                                      | `boolean`  | Optional.                                                    |
 | `instructions`         | General Markdown information displayed on the teacher's page.        | `string`   | Optional.                                                    |
+| `languages`            | Statement [languages](../task/languages), the first one is the default. | `string[]` | Optional, default `["it"]`. Must match `variants.toml`. |
 
 If `has_online` is `true`, the following fields are required:
 

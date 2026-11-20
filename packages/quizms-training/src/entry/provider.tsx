@@ -11,7 +11,7 @@ import {
   type Venue,
   variantSchema,
 } from "@olinfo/quizms/models";
-import { StudentProvider } from "@olinfo/quizms/student";
+import { StudentProvider, useStatementLanguageState } from "@olinfo/quizms/student";
 import { Rng, validate } from "@olinfo/quizms/utils";
 import { addMinutes, isFuture, subSeconds } from "date-fns";
 import useSWR, { preload } from "swr";
@@ -168,6 +168,9 @@ export function TrainingProvider({
     );
   }, [contest, updateStudent]);
 
+  // The iframe protocol has no language field: the choice is kept in the page (and `?lang=`).
+  const [language, setLanguage] = useStatementLanguageState(contest);
+
   return (
     <TitleProvider title={title}>
       <TrainingStatementContext.Provider value={{ start }}>
@@ -175,6 +178,8 @@ export function TrainingProvider({
           contest={contest}
           venue={mockVenue}
           student={student}
+          language={language}
+          setLanguage={setLanguage}
           setAnswer={setAnswer}
           submit={submit}
           reset={reset}

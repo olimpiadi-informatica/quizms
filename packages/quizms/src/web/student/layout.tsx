@@ -24,8 +24,18 @@ export function StudentLayout({ children }: { children: ReactNode }) {
   const completedRef = useRef<HTMLDialogElement>(null);
   const submitRef = useRef<HTMLDialogElement>(null);
 
-  const { contest, student, schema, reset, venue, terminated, logout, enforceFullscreen } =
-    useStudent();
+  const {
+    contest,
+    student,
+    schema,
+    reset,
+    venue,
+    terminated,
+    logout,
+    enforceFullscreen,
+    language,
+    setLanguage,
+  } = useStudent();
 
   const answered = sumBy(Object.values(student.answers ?? {}), (s) => Number(s.value != null));
   const total = Math.max(schema ? Object.keys(schema).length : contest.problemIds.length, 1);
@@ -111,6 +121,19 @@ export function StudentLayout({ children }: { children: ReactNode }) {
         </NavbarBrand>
         <NavbarContent>
           <div className="flex items-center gap-2">
+            {setLanguage && (contest.languages?.length ?? 0) > 1 && (
+              <select
+                className="select select-sm select-ghost"
+                aria-label="Lingua / Language"
+                value={language}
+                onChange={(e) => setLanguage(e.target.value)}>
+                {contest.languages.map((lang) => (
+                  <option key={lang} value={lang}>
+                    {lang.toUpperCase()}
+                  </option>
+                ))}
+              </select>
+            )}
             <Progress className="hidden w-20 sm:block" percentage={progress}>
               {progress}%
             </Progress>
