@@ -118,7 +118,8 @@ export const studentSetLanguage = publicProcedure
     }
 
     const student = await getStudent(claims.venueId, claims.studentId);
-    if (!student || student.uid !== claims.uid) {
+    // A disabled student was deleted by the teacher: logging in again creates a new student.
+    if (!student || student.uid !== claims.uid || student.disabled) {
       throw new TRPCError({ code: "FORBIDDEN", message: "Studente non valido" });
     }
 
