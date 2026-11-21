@@ -18,7 +18,7 @@ import { LogOut } from "lucide-react";
 import { Link, useRoute } from "wouter";
 
 import type { Contest, Venue } from "~/models";
-import { ErrorBoundary, Loading, Title } from "~/web/components";
+import { ErrorBoundary, Loading, Title, UiLanguageSelect } from "~/web/components";
 
 type Props = {
   name: string;
@@ -66,7 +66,10 @@ export function TeacherLayout({ name, contests, venues, logout, children }: Prop
           </NavbarMenu>
         )}
         <NavbarContent>
-          <UserDropdown name={name} logout={logout} />
+          <div className="flex items-center gap-2">
+            <UiLanguageSelect />
+            <UserDropdown name={name} logout={logout} />
+          </div>
         </NavbarContent>
       </Navbar>
       <div className="mx-auto flex w-full max-w-screen-xl grow flex-col p-4 pb-8">

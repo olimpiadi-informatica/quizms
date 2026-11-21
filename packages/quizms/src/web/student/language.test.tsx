@@ -1,8 +1,12 @@
 // @vitest-environment happy-dom
+
+import type { ReactNode } from "react";
+
 import { act, render, renderHook, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { Localized } from "~/web/components/localized";
+import { UiLanguageRoot } from "~/web/components/ui-language-provider";
 
 import {
   StatementLanguageContext,
@@ -39,6 +43,18 @@ describe("useStatementLanguageState", () => {
     setUrl("?lang=fr");
     const { result } = renderHook(() => useStatementLanguageState(contest, "en"));
     expect(result.current[0]).toBe("fr");
+  });
+
+  it("uses the UI language chosen by the user over the default", async () => {
+    localStorage.setItem("quizms_ui_language", "fr");
+    const wrapper = ({ children }: { children: ReactNode }) => (
+      <UiLanguageRoot>{children}</UiLanguageRoot>
+    );
+    const { result } = await act(() =>
+      renderHook(() => useStatementLanguageState(contest), { wrapper }),
+    );
+    expect(result.current[0]).toBe("fr");
+    localStorage.clear();
   });
 
   it("ignores languages the contest does not have", () => {

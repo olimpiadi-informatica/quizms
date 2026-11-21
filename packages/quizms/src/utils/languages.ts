@@ -88,6 +88,15 @@ export function contestStatementFile(
 }
 
 /**
+ * Languages of a set of contests, without duplicates, e.g. to choose the UI language on screens
+ * that show several contests. Contests stored before `languages` existed are Italian.
+ */
+export function contestsLanguages(contests: { languages?: readonly string[] }[]): string[] {
+  const languages = [...new Set(contests.flatMap((c) => c.languages ?? ["it"]))];
+  return languages.length > 0 ? languages : ["it"];
+}
+
+/**
  * Returns the name of the translation of a file, e.g. `header.en.md` for `header.md`.
  */
 export function localizedFileName(file: string, language: string): string {

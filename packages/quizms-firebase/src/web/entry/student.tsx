@@ -1,13 +1,19 @@
 import { useCallback, useEffect, useMemo } from "react";
 
-import { StudentFormField, Title } from "@olinfo/quizms/components";
+import {
+  StudentFormField,
+  Title,
+  UiLanguageScope,
+  UiLanguageSelect,
+} from "@olinfo/quizms/components";
 import type { Answer, Contest, Student } from "@olinfo/quizms/models";
 import { StudentProvider, useStatementLanguageState } from "@olinfo/quizms/student";
-import { useUserAgent } from "@olinfo/quizms/utils";
+import { contestsLanguages, useUserAgent } from "@olinfo/quizms/utils";
 import {
   Form,
   Navbar,
   NavbarBrand,
+  NavbarContent,
   SelectField,
   SubmitButton,
   TextField,
@@ -47,7 +53,17 @@ export default function StudentEntry() {
     );
   }
 
-  return <StudentForm contests={contests} />;
+  return <StudentLogin contests={contests} />;
+}
+
+/** The login form is in the languages of the contests of this website. */
+function StudentLogin({ contests }: { contests: Contest[] }) {
+  const languages = useMemo(() => contestsLanguages(contests), [contests]);
+  return (
+    <UiLanguageScope languages={languages}>
+      <StudentForm contests={contests} />
+    </UiLanguageScope>
+  );
 }
 
 type FormStudent = {
@@ -100,6 +116,9 @@ function StudentForm({ contests }: { contests: Contest[] }) {
             <Title />
           </div>
         </NavbarBrand>
+        <NavbarContent>
+          <UiLanguageSelect />
+        </NavbarContent>
       </Navbar>
       <Form defaultValue={defaultValue} onSubmit={submit} className="p-4 pb-8">
         <h1 className="mb-2 text-xl font-bold">Accedi alla gara</h1>

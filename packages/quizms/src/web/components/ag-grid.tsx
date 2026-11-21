@@ -1,4 +1,4 @@
-import { AG_GRID_LOCALE_IT } from "@ag-grid-community/locale";
+import { AG_GRID_LOCALE_EN, AG_GRID_LOCALE_IT } from "@ag-grid-community/locale";
 import {
   CheckboxEditorModule,
   ClientSideRowModelModule,
@@ -17,6 +17,8 @@ import {
   ValidationModule,
 } from "ag-grid-community";
 import { type AgGridReactProps, AgGridReact as UnStyledAgGrid } from "ag-grid-react";
+
+import { useLingui } from "~/i18n";
 
 ModuleRegistry.registerModules([
   CheckboxEditorModule,
@@ -40,10 +42,12 @@ const theme = themeQuartz.withParams({
 });
 
 export default function AgGrid(props: AgGridReactProps) {
+  const { i18n } = useLingui();
+
   return (
     <UnStyledAgGrid
       theme={theme}
-      localeText={AG_GRID_LOCALE_IT}
+      localeText={i18n.locale === "it" ? AG_GRID_LOCALE_IT : AG_GRID_LOCALE_EN}
       rowSelection={{ mode: "singleRow", checkboxes: false }}
       singleClickEdit
       readOnlyEdit

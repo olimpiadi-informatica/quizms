@@ -50,6 +50,8 @@ export function loadUiLocale(language: string | undefined): Promise<I18n> {
     ready: Promise.all(loaders.map((loader) => loadInto(i18n, locale, loader))).then(
       () => {
         entry.loaded = true;
+        // Lets React's `use` read the value synchronously, without suspending again.
+        Object.assign(entry.ready, { status: "fulfilled", value: i18n });
         return i18n;
       },
       (err) => {

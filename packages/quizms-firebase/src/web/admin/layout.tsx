@@ -1,6 +1,6 @@
 import { type ReactNode, Suspense } from "react";
 
-import { ErrorBoundary, Loading, Title } from "@olinfo/quizms/components";
+import { ErrorBoundary, Loading, Title, UiLanguageSelect } from "@olinfo/quizms/components";
 import type { Contest } from "@olinfo/quizms/models";
 import {
   Button,
@@ -62,7 +62,10 @@ export function AdminLayout({ name, contests, logout, children }: Props) {
           </NavbarMenu>
         )}
         <NavbarContent>
-          <UserDropdown name={name} logout={logout} />
+          <div className="flex items-center gap-2">
+            <UiLanguageSelect />
+            <UserDropdown name={name} logout={logout} />
+          </div>
         </NavbarContent>
       </Navbar>
       <div className="mx-auto flex w-full max-w-screen-xl grow flex-col p-4 pb-8">

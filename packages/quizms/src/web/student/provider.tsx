@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { useIsAfter } from "@olinfo/react-components";
 
 import type { Answer, Contest, Schema, Student, Venue } from "~/models";
+import { UiLanguageProvider } from "~/web/components/ui-language-provider";
 
 import { StudentContext, type StudentContextProps } from "./context";
 import { StatementLanguageContext } from "./language";
@@ -56,7 +57,10 @@ export function StudentProvider({
   return (
     <StudentContext.Provider value={value}>
       <StatementLanguageContext.Provider value={value.language}>
-        <StudentLayout>{children}</StudentLayout>
+        {/* The UI is in the language of the statement. */}
+        <UiLanguageProvider language={value.language}>
+          <StudentLayout>{children}</StudentLayout>
+        </UiLanguageProvider>
       </StatementLanguageContext.Provider>
     </StudentContext.Provider>
   );

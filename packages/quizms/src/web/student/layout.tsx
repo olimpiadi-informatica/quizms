@@ -15,7 +15,7 @@ import { sumBy } from "lodash-es";
 import { FileChartColumn, LogOut, RotateCcw } from "lucide-react";
 
 import { useUserAgent } from "~/utils";
-import { ErrorBoundary, Progress, Prose, Timer, Title } from "~/web/components";
+import { ErrorBoundary, LanguageSelect, Progress, Prose, Timer, Title } from "~/web/components";
 
 import { useStudent } from "./context";
 import { CompletedModal, SubmitModal } from "./modals";
@@ -121,18 +121,12 @@ export function StudentLayout({ children }: { children: ReactNode }) {
         </NavbarBrand>
         <NavbarContent>
           <div className="flex items-center gap-2">
-            {setLanguage && (contest.languages?.length ?? 0) > 1 && (
-              <select
-                className="select select-sm select-ghost"
-                aria-label="Lingua / Language"
+            {setLanguage && contest.languages && (
+              <LanguageSelect
+                languages={contest.languages}
                 value={language}
-                onChange={(e) => setLanguage(e.target.value)}>
-                {contest.languages.map((lang) => (
-                  <option key={lang} value={lang}>
-                    {lang.toUpperCase()}
-                  </option>
-                ))}
-              </select>
+                onChange={setLanguage}
+              />
             )}
             <Progress className="hidden w-20 sm:block" percentage={progress}>
               {progress}%
