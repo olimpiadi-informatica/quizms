@@ -93,6 +93,7 @@
     "@google-cloud/storage": "^7.21.0",
     "@types/react": "^19.2.18",
     "@types/wicg-file-system-access": "^2023.10.7",
+    "firebase-tools": "^15.37.0",
     "typescript": "5.9.3",
     "vite-tsconfig-paths": "^6.1.1"
   }

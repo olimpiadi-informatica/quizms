@@ -1,11 +1,16 @@
 import type { DecodedIdToken } from "firebase-admin/auth";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { studentConverter, venueConverter } from "~/cli/utils/converters-admin";
+import {
+  studentConverter,
+  studentRestoreConverter,
+  venueConverter,
+} from "~/cli/utils/converters-admin";
 import {
   clearFirestore,
   makeContest,
   makeStudent,
+  makeStudentRestore,
   makeVariant,
   makeVenue,
   seed,
@@ -13,9 +18,14 @@ import {
 
 import { auth, db } from "../common";
 import {
+  teacherApproveStudentRestore,
   teacherFinalizeVenue,
+  teacherImportStudents,
+  teacherRejectStudentRestore,
+  teacherSetStudentsDisabled,
   teacherStartContestWindow,
   teacherStopContestWindow,
+  teacherUpdateStudent,
 } from "./teacher";
 import { router } from "./trpc";
 
@@ -31,6 +41,11 @@ const appRouter = router({
   teacherStartContestWindow,
   teacherStopContestWindow,
   teacherFinalizeVenue,
+  teacherApproveStudentRestore,
+  teacherRejectStudentRestore,
+  teacherUpdateStudent,
+  teacherSetStudentsDisabled,
+  teacherImportStudents,
 });
 const teacher = appRouter.createCaller({
   claims: { role: "teacher", schoolId: "school" } as unknown as DecodedIdToken,
@@ -61,6 +76,22 @@ async function getStudentIds(venueId = "venue") {
     .withConverter(studentConverter)
     .get();
   return snapshot.docs.map((doc) => doc.id).sort();
+}
+
+async function getStudent(venueId = "venue", id = "s1") {
+  const snapshot = await db
+    .doc(`venues/${venueId}/students/${id}`)
+    .withConverter(studentConverter)
+    .get();
+  return snapshot.data();
+}
+
+async function getStudentRestore(id: string) {
+  const snapshot = await db
+    .doc(`studentRestores/${id}`)
+    .withConverter(studentRestoreConverter)
+    .get();
+  return snapshot.data();
 }
 
 beforeEach(async () => {
@@ -142,7 +173,7 @@ describe.each([
 
   it("rejects unauthenticated requests", async () => {
     await expect(call(anonymous, "venue")).rejects.toThrow(
-      expect.objectContaining({ code: "FORBIDDEN", message: "Gara non valida" }),
+      expect.objectContaining({ code: "UNAUTHORIZED", message: "Non autorizzato" }),
     );
   });
 });
@@ -353,5 +384,576 @@ describe("teacherFinalizeVenue", () => {
   it("does not finalize venues of other schools", async () => {
     await expect(otherTeacher.teacherFinalizeVenue({ venueId: "venue" })).rejects.toThrow();
     expect((await getVenue())?.finalized).toBe(false);
+  });
+});
+
+describe("teacherApproveStudentRestore", () => {
+  it("approves a pending restore and updates student uid", async () => {
+    const revoke = vi.spyOn(auth, "revokeRefreshTokens");
+    await seed(db, {
+      students: [makeStudent({ id: "s1", venueId: "venue", uid: "old-uid" })],
+      studentRestores: [
+        makeStudentRestore({
+          id: "restore-1",
+          studentId: "s1",
+          venueId: "venue",
+          status: "pending",
+        }),
+        makeStudentRestore({
+          id: "restore-2",
+          studentId: "s1",
+          venueId: "venue",
+          status: "pending",
+        }),
+      ],
+    });
+
+    await teacher.teacherApproveStudentRestore({
+      venueId: "venue",
+      studentRestoreId: "restore-1",
+    });
+
+    expect(revoke).toHaveBeenCalledWith("old-uid");
+    const student = await getStudent("venue", "s1");
+    expect(student?.uid).toBe("restore-1");
+    expect(await getStudentRestore("restore-1")).toBeUndefined();
+    expect((await getStudentRestore("restore-2"))?.status).toBe("revoked");
+  });
+
+  it("rejects a non-existing restore", async () => {
+    await expect(
+      teacher.teacherApproveStudentRestore({ venueId: "venue", studentRestoreId: "missing" }),
+    ).rejects.toThrow(
+      expect.objectContaining({ code: "NOT_FOUND", message: "Richiesta non trovata" }),
+    );
+  });
+
+  it("rejects a restore for another venue", async () => {
+    await seed(db, {
+      studentRestores: [
+        makeStudentRestore({ id: "r-other", venueId: "other-school-venue", status: "pending" }),
+      ],
+    });
+    await expect(
+      teacher.teacherApproveStudentRestore({ venueId: "venue", studentRestoreId: "r-other" }),
+    ).rejects.toThrow(
+      expect.objectContaining({ code: "NOT_FOUND", message: "Richiesta non trovata" }),
+    );
+  });
+
+  it("rejects a restore that is not pending", async () => {
+    await seed(db, {
+      studentRestores: [
+        makeStudentRestore({ id: "r-revoked", venueId: "venue", status: "revoked" }),
+      ],
+    });
+    await expect(
+      teacher.teacherApproveStudentRestore({ venueId: "venue", studentRestoreId: "r-revoked" }),
+    ).rejects.toThrow(
+      expect.objectContaining({ code: "BAD_REQUEST", message: "Richiesta non più valida" }),
+    );
+  });
+
+  it("rejects a restore if student does not exist", async () => {
+    await seed(db, {
+      studentRestores: [
+        makeStudentRestore({
+          id: "r-nostudent",
+          studentId: "missing-student",
+          venueId: "venue",
+          status: "pending",
+        }),
+      ],
+    });
+    await expect(
+      teacher.teacherApproveStudentRestore({ venueId: "venue", studentRestoreId: "r-nostudent" }),
+    ).rejects.toThrow(
+      expect.objectContaining({ code: "NOT_FOUND", message: "Studente non trovato" }),
+    );
+  });
+
+  it("rejects unauthorized callers", async () => {
+    await expect(
+      otherTeacher.teacherApproveStudentRestore({ venueId: "venue", studentRestoreId: "r1" }),
+    ).rejects.toThrow();
+    await expect(
+      anonymous.teacherApproveStudentRestore({ venueId: "venue", studentRestoreId: "r1" }),
+    ).rejects.toThrow();
+  });
+});
+
+describe("teacherRejectStudentRestore", () => {
+  it("revokes all pending restores for the student when studentRestoreId is omitted", async () => {
+    await seed(db, {
+      studentRestores: [
+        makeStudentRestore({ id: "r1", studentId: "s1", venueId: "venue", status: "pending" }),
+        makeStudentRestore({ id: "r2", studentId: "s1", venueId: "venue", status: "pending" }),
+        makeStudentRestore({ id: "r3", studentId: "s1", venueId: "venue", status: "approved" }),
+      ],
+    });
+
+    await teacher.teacherRejectStudentRestore({ venueId: "venue", studentId: "s1" });
+
+    expect((await getStudentRestore("r1"))?.status).toBe("revoked");
+    expect((await getStudentRestore("r2"))?.status).toBe("revoked");
+    expect((await getStudentRestore("r3"))?.status).toBe("approved");
+  });
+
+  it("revokes only the specified restore when studentRestoreId is provided", async () => {
+    await seed(db, {
+      studentRestores: [
+        makeStudentRestore({ id: "r1", studentId: "s1", venueId: "venue", status: "pending" }),
+        makeStudentRestore({ id: "r2", studentId: "s1", venueId: "venue", status: "pending" }),
+      ],
+    });
+
+    await teacher.teacherRejectStudentRestore({
+      venueId: "venue",
+      studentId: "s1",
+      studentRestoreId: "r1",
+    });
+
+    expect((await getStudentRestore("r1"))?.status).toBe("revoked");
+    expect((await getStudentRestore("r2"))?.status).toBe("pending");
+  });
+
+  it("rejects unauthorized callers", async () => {
+    await expect(
+      otherTeacher.teacherRejectStudentRestore({ venueId: "venue", studentId: "s1" }),
+    ).rejects.toThrow();
+    await expect(
+      anonymous.teacherRejectStudentRestore({ venueId: "venue", studentId: "s1" }),
+    ).rejects.toThrow();
+  });
+});
+
+describe("teacherUpdateStudent", () => {
+  it("updates an existing student and recalculates score", async () => {
+    await seed(db, {
+      students: [
+        makeStudent({
+          id: "s1",
+          venueId: "venue",
+          variantId: "v1",
+          answers: { "1": { type: "openNumber", value: 10 } },
+        }),
+      ],
+    });
+
+    const res = await teacher.teacherUpdateStudent({
+      venueId: "venue",
+      student: {
+        id: "s1",
+        userData: { name: "Luigi", surname: "Rossi" },
+        answers: { "1": { type: "openNumber", value: 42 } },
+      },
+    });
+
+    // In variant v1, question 1 with value 42 gives 5 points.
+    expect(res).toEqual({ id: "s1", score: 5 });
+    const student = await getStudent("venue", "s1");
+    expect(student?.userData).toEqual({ name: "Luigi", surname: "Rossi" });
+    expect(student?.score).toBe(5);
+    expect(student?.answers).toEqual({ "1": { type: "openNumber", value: 42 } });
+  });
+
+  it("clears score when student is marked absent", async () => {
+    await seed(db, {
+      students: [
+        makeStudent({
+          id: "s1",
+          venueId: "venue",
+          variantId: "v1",
+          answers: { "1": { type: "openNumber", value: 42 } },
+          score: 5,
+        }),
+      ],
+    });
+
+    const res = await teacher.teacherUpdateStudent({
+      venueId: "venue",
+      student: { id: "s1", absent: true },
+    });
+
+    expect(res).toEqual({ id: "s1", score: undefined });
+    const student = await getStudent("venue", "s1");
+    expect(student?.absent).toBe(true);
+    expect(student?.score).toBeUndefined();
+  });
+
+  it("clears score and revokes token when student is disabled", async () => {
+    const revoke = vi.spyOn(auth, "revokeRefreshTokens");
+    await seed(db, {
+      students: [
+        makeStudent({
+          id: "s1",
+          venueId: "venue",
+          uid: "student-uid",
+          variantId: "v1",
+          score: 5,
+        }),
+      ],
+    });
+
+    const res = await teacher.teacherUpdateStudent({
+      venueId: "venue",
+      student: { id: "s1", disabled: true },
+    });
+
+    expect(res).toEqual({ id: "s1", score: undefined });
+    expect(revoke).toHaveBeenCalledWith("student-uid");
+    const student = await getStudent("venue", "s1");
+    expect(student?.disabled).toBe(true);
+    expect(student?.score).toBeUndefined();
+  });
+
+  it("creates a new student when allowStudentImport is true", async () => {
+    const res = await teacher.teacherUpdateStudent({
+      venueId: "venue",
+      student: {
+        id: "new-student",
+        userData: { name: "Giuseppe", surname: "Verdi" },
+      },
+    });
+
+    expect(res).toEqual({ id: "new-student", score: 1 });
+    const student = await getStudent("venue", "new-student");
+    expect(student).toMatchObject({
+      id: "new-student",
+      contestId: "contest",
+      venueId: "venue",
+      userData: { name: "Giuseppe", surname: "Verdi" },
+      variantId: "v1",
+      score: 1,
+      absent: false,
+      disabled: false,
+    });
+  });
+
+  it("rejects creating a new student when allowStudentImport is false", async () => {
+    await seed(db, {
+      contests: [makeContest({ id: "contest", allowStudentImport: false })],
+    });
+
+    await expect(
+      teacher.teacherUpdateStudent({
+        venueId: "venue",
+        student: { id: "new-student", userData: { name: "Test", surname: "User" } },
+      }),
+    ).rejects.toThrow(
+      expect.objectContaining({
+        code: "FORBIDDEN",
+        message: "Aggiunta di studenti non consentita",
+      }),
+    );
+  });
+
+  it("rejects an invalid variantId", async () => {
+    await expect(
+      teacher.teacherUpdateStudent({
+        venueId: "venue",
+        student: { id: "s1", variantId: "non-existing" },
+      }),
+    ).rejects.toThrow(
+      expect.objectContaining({
+        code: "BAD_REQUEST",
+        message: 'Variante "non-existing" non valida',
+      }),
+    );
+  });
+
+  it("rejects when the venue is finalized", async () => {
+    await seed(db, {
+      venues: [makeVenue({ id: "venue", finalized: true })],
+    });
+
+    await expect(
+      teacher.teacherUpdateStudent({
+        venueId: "venue",
+        student: { id: "s1", userData: { name: "Test", surname: "User" } },
+      }),
+    ).rejects.toThrow(
+      expect.objectContaining({ code: "FORBIDDEN", message: "Gara già finalizzata" }),
+    );
+  });
+
+  it("rejects when the contest window is running", async () => {
+    await seed(db, {
+      venues: [
+        makeVenue({
+          id: "venue",
+          participationWindow: {
+            start: new Date("2030-05-10T09:00:00Z"),
+            end: new Date("2030-05-10T11:00:00Z"),
+          },
+        }),
+      ],
+    });
+
+    await expect(
+      teacher.teacherUpdateStudent({
+        venueId: "venue",
+        student: { id: "s1", userData: { name: "Test", surname: "User" } },
+      }),
+    ).rejects.toThrow(
+      expect.objectContaining({
+        code: "FORBIDDEN",
+        message: "Gara in corso, modifiche non consentite",
+      }),
+    );
+  });
+
+  it("rejects unauthorized callers", async () => {
+    await expect(
+      otherTeacher.teacherUpdateStudent({
+        venueId: "venue",
+        student: { id: "s1" },
+      }),
+    ).rejects.toThrow();
+    await expect(
+      anonymous.teacherUpdateStudent({
+        venueId: "venue",
+        student: { id: "s1" },
+      }),
+    ).rejects.toThrow();
+  });
+});
+
+describe("teacherSetStudentsDisabled", () => {
+  it("disables students and removes scores", async () => {
+    await seed(db, {
+      students: [
+        makeStudent({ id: "s1", venueId: "venue", score: 10 }),
+        makeStudent({ id: "s2", venueId: "venue", score: 20 }),
+      ],
+    });
+
+    const res = await teacher.teacherSetStudentsDisabled({
+      venueId: "venue",
+      studentIds: ["s1", "s2"],
+      disabled: true,
+    });
+
+    expect(res).toEqual({ count: 2 });
+    expect((await getStudent("venue", "s1"))?.disabled).toBe(true);
+    expect((await getStudent("venue", "s1"))?.score).toBeUndefined();
+    expect((await getStudent("venue", "s2"))?.disabled).toBe(true);
+    expect((await getStudent("venue", "s2"))?.score).toBeUndefined();
+  });
+
+  it("re-enables students", async () => {
+    await seed(db, {
+      students: [makeStudent({ id: "s1", venueId: "venue", disabled: true })],
+    });
+
+    const res = await teacher.teacherSetStudentsDisabled({
+      venueId: "venue",
+      studentIds: ["s1"],
+      disabled: false,
+    });
+
+    expect(res).toEqual({ count: 1 });
+    expect((await getStudent("venue", "s1"))?.disabled).toBe(false);
+  });
+
+  it("rejects disabling students when allowStudentDelete is false", async () => {
+    await seed(db, {
+      contests: [makeContest({ id: "contest", allowStudentDelete: false })],
+      students: [makeStudent({ id: "s1", venueId: "venue" })],
+    });
+
+    await expect(
+      teacher.teacherSetStudentsDisabled({
+        venueId: "venue",
+        studentIds: ["s1"],
+        disabled: true,
+      }),
+    ).rejects.toThrow(
+      expect.objectContaining({
+        code: "FORBIDDEN",
+        message: "Cancellazione studenti non consentita",
+      }),
+    );
+  });
+
+  it("rejects when venue is finalized", async () => {
+    await seed(db, {
+      venues: [makeVenue({ id: "venue", finalized: true })],
+    });
+
+    await expect(
+      teacher.teacherSetStudentsDisabled({
+        venueId: "venue",
+        studentIds: ["s1"],
+        disabled: true,
+      }),
+    ).rejects.toThrow(
+      expect.objectContaining({ code: "FORBIDDEN", message: "Gara già finalizzata" }),
+    );
+  });
+
+  it("rejects when contest window is running", async () => {
+    await seed(db, {
+      venues: [
+        makeVenue({
+          id: "venue",
+          participationWindow: {
+            start: new Date("2030-05-10T09:00:00Z"),
+            end: new Date("2030-05-10T11:00:00Z"),
+          },
+        }),
+      ],
+    });
+
+    await expect(
+      teacher.teacherSetStudentsDisabled({
+        venueId: "venue",
+        studentIds: ["s1"],
+        disabled: true,
+      }),
+    ).rejects.toThrow(
+      expect.objectContaining({
+        code: "FORBIDDEN",
+        message: "Gara in corso, modifiche non consentite",
+      }),
+    );
+  });
+
+  it("rejects unauthorized callers", async () => {
+    await expect(
+      otherTeacher.teacherSetStudentsDisabled({
+        venueId: "venue",
+        studentIds: ["s1"],
+      }),
+    ).rejects.toThrow();
+    await expect(
+      anonymous.teacherSetStudentsDisabled({
+        venueId: "venue",
+        studentIds: ["s1"],
+      }),
+    ).rejects.toThrow();
+  });
+});
+
+describe("teacherImportStudents", () => {
+  it("imports students with default variant and calculates scores", async () => {
+    const res = await teacher.teacherImportStudents({
+      venueId: "venue",
+      students: [
+        {
+          id: "imp-1",
+          userData: { name: "Anna", surname: "Bianchi" },
+          answers: { "1": { type: "openNumber", value: 42 } },
+        },
+        {
+          userData: { name: "Paolo", surname: "Neri" },
+        },
+      ],
+    });
+
+    expect(res).toEqual({ count: 2 });
+    const s1 = await getStudent("venue", "imp-1");
+    expect(s1).toMatchObject({
+      id: "imp-1",
+      contestId: "contest",
+      venueId: "venue",
+      userData: { name: "Anna", surname: "Bianchi" },
+      variantId: "v1",
+      score: 5,
+      disabled: false,
+      absent: false,
+    });
+
+    const students = await getStudentIds("venue");
+    expect(students).toContain("imp-1");
+    expect(students).toHaveLength(2);
+  });
+
+  it("rejects when allowStudentImport is false", async () => {
+    await seed(db, {
+      contests: [makeContest({ id: "contest", allowStudentImport: false })],
+    });
+
+    await expect(
+      teacher.teacherImportStudents({
+        venueId: "venue",
+        students: [{ userData: { name: "A", surname: "B" } }],
+      }),
+    ).rejects.toThrow(
+      expect.objectContaining({
+        code: "FORBIDDEN",
+        message: "Importazione studenti non consentita",
+      }),
+    );
+  });
+
+  it("rejects an invalid variantId", async () => {
+    await expect(
+      teacher.teacherImportStudents({
+        venueId: "venue",
+        students: [{ userData: { name: "A", surname: "B" }, variantId: "bad-variant" }],
+      }),
+    ).rejects.toThrow(
+      expect.objectContaining({
+        code: "BAD_REQUEST",
+        message: 'Variante "bad-variant" non valida',
+      }),
+    );
+  });
+
+  it("rejects when venue is finalized", async () => {
+    await seed(db, {
+      venues: [makeVenue({ id: "venue", finalized: true })],
+    });
+
+    await expect(
+      teacher.teacherImportStudents({
+        venueId: "venue",
+        students: [{ userData: { name: "A", surname: "B" } }],
+      }),
+    ).rejects.toThrow(
+      expect.objectContaining({ code: "FORBIDDEN", message: "Gara già finalizzata" }),
+    );
+  });
+
+  it("rejects when contest window is running", async () => {
+    await seed(db, {
+      venues: [
+        makeVenue({
+          id: "venue",
+          participationWindow: {
+            start: new Date("2030-05-10T09:00:00Z"),
+            end: new Date("2030-05-10T11:00:00Z"),
+          },
+        }),
+      ],
+    });
+
+    await expect(
+      teacher.teacherImportStudents({
+        venueId: "venue",
+        students: [{ userData: { name: "A", surname: "B" } }],
+      }),
+    ).rejects.toThrow(
+      expect.objectContaining({
+        code: "FORBIDDEN",
+        message: "Gara in corso, modifiche non consentite",
+      }),
+    );
+  });
+
+  it("rejects unauthorized callers", async () => {
+    await expect(
+      otherTeacher.teacherImportStudents({
+        venueId: "venue",
+        students: [{ userData: { name: "A", surname: "B" } }],
+      }),
+    ).rejects.toThrow();
+    await expect(
+      anonymous.teacherImportStudents({
+        venueId: "venue",
+        students: [{ userData: { name: "A", surname: "B" } }],
+      }),
+    ).rejects.toThrow();
   });
 });

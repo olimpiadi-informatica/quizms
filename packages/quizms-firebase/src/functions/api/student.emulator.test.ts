@@ -280,7 +280,7 @@ describe("studentSetLanguage", () => {
   ])("rejects requests %s", async (_, claims) => {
     const caller = claims ? asStudent(claims) : anonymous;
     await expect(caller.studentSetLanguage({ language: "en" })).rejects.toThrow(
-      expect.objectContaining({ code: "UNAUTHORIZED", message: "Accesso non valido" }),
+      expect.objectContaining({ code: "UNAUTHORIZED", message: "Non autorizzato" }),
     );
   });
 
@@ -288,7 +288,7 @@ describe("studentSetLanguage", () => {
     await expect(
       asStudent({ ...claims, studentId: "missing" }).studentSetLanguage({ language: "en" }),
     ).rejects.toThrow(
-      expect.objectContaining({ code: "FORBIDDEN", message: "Studente non valido" }),
+      expect.objectContaining({ code: "NOT_FOUND", message: "Studente non trovato" }),
     );
   });
 
@@ -296,7 +296,7 @@ describe("studentSetLanguage", () => {
     await expect(
       asStudent({ ...claims, uid: "someone-else" }).studentSetLanguage({ language: "en" }),
     ).rejects.toThrow(
-      expect.objectContaining({ code: "FORBIDDEN", message: "Studente non valido" }),
+      expect.objectContaining({ code: "FORBIDDEN", message: "Sessione non valida" }),
     );
     expect((await getStudent())?.language).toBeUndefined();
   });
@@ -304,7 +304,7 @@ describe("studentSetLanguage", () => {
   it("rejects a disabled student", async () => {
     await db.doc("venues/venue/students/s1").update({ disabled: true });
     await expect(asStudent(claims).studentSetLanguage({ language: "en" })).rejects.toThrow(
-      expect.objectContaining({ code: "FORBIDDEN", message: "Studente non valido" }),
+      expect.objectContaining({ code: "FORBIDDEN", message: "Utente disabilitato" }),
     );
   });
 });
