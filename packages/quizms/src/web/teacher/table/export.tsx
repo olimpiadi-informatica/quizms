@@ -5,7 +5,8 @@ import { saveAs } from "file-saver";
 import { unparse as stringifyCSV } from "papaparse";
 
 import { type I18n, useLingui } from "~/i18n";
-import { type Contest, formatUserData, type Student, type Venue } from "~/models";
+import { type Contest, formatUserData, localize, type Student, type Venue } from "~/models";
+import { useContentLanguage } from "~/web/components";
 import { useTeacher, useTeacherStudents } from "~/web/teacher/context";
 
 import { canViewScore } from "./utils";
@@ -14,18 +15,25 @@ export function ExportModal({ ref }: { ref: RefObject<HTMLButtonElement | null> 
   const { contest, venue } = useTeacher();
   const [students] = useTeacherStudents();
   const { i18n } = useLingui();
+  const language = useContentLanguage();
 
   return (
     <button
       ref={ref}
       type="button"
       className="hidden"
-      onClick={() => exportStudents(students, contest, venue, i18n)}
+      onClick={() => exportStudents(students, contest, venue, i18n, language)}
     />
   );
 }
 
-function exportStudents(students: Student[], contest: Contest, venue: Venue, i18n: I18n) {
+function exportStudents(
+  students: Student[],
+  contest: Contest,
+  venue: Venue,
+  i18n: I18n,
+  language: string | undefined,
+) {
   const scoreVisible = canViewScore(contest, venue);
   const flatStudents = students
     .filter((student) => !student.disabled)
@@ -39,7 +47,7 @@ function exportStudents(students: Student[], contest: Contest, venue: Venue, i18
     });
 
   flatStudents.unshift([
-    ...contest.userData.map((field) => field.label),
+    ...contest.userData.map((field) => localize(field.label, language)),
     ...(contest.hasVariants ? [i18n._(msg`Variant`)] : []),
     ...contest.problemIds,
     ...(scoreVisible ? [i18n._(msg`Score`)] : []),

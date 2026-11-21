@@ -8,7 +8,7 @@ import { Download, FileCheck, Trash2, Upload, UserCheck } from "lucide-react";
 
 import { calcScore, type Student } from "~/models";
 import { randomId } from "~/utils";
-import { AgGrid, Loading } from "~/web/components";
+import { AgGrid, Loading, useContentLanguage } from "~/web/components";
 import { useTeacher, useTeacherStudents } from "~/web/teacher/context";
 
 import { columnDefinition } from "./col-def";
@@ -94,11 +94,12 @@ export default function TeacherTable() {
 
 function Counter() {
   const { i18n } = useLingui();
+  const language = useContentLanguage();
   const { contest, variants } = useTeacher();
   const [students] = useTeacherStudents();
 
   return sumBy(students, (s) => {
-    return Number(!s.disabled && !isStudentIncomplete(s, contest, variants, i18n));
+    return Number(!s.disabled && !isStudentIncomplete(s, contest, variants, i18n, language));
   });
 }
 
@@ -106,6 +107,7 @@ function Table({ frozen }: { frozen: boolean }) {
   const { contest, venue, variants } = useTeacher();
   const [students, setStudent] = useTeacherStudents();
   const { i18n } = useLingui();
+  const language = useContentLanguage();
 
   const modalRef = useRef<HTMLDialogElement>(null);
   const [currentStudent, setCurrentStudent] = useState("");
@@ -131,8 +133,8 @@ function Table({ frozen }: { frozen: boolean }) {
   }
 
   const colDefs = useMemo(
-    () => columnDefinition(contest, variants, canViewScore(contest, venue), frozen, i18n),
-    [contest, variants, venue, frozen, i18n],
+    () => columnDefinition(contest, variants, canViewScore(contest, venue), frozen, i18n, language),
+    [contest, variants, venue, frozen, i18n, language],
   );
 
   const onCellEditRequest = async (ev: CellEditRequestEvent) => {

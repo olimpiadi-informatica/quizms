@@ -270,6 +270,10 @@ msgstr "Caricamento in corso..."
 msgid "Log out"
 msgstr "Esci"
 
+#: packages/quizms/src/models/contest.ts
+msgid "Make sure there are no numbers or symbols"
+msgstr "Assicurati che non ci siano numeri o simboli"
+
 #: packages/quizms/src/web/teacher/dashboard.tsx
 msgid "Manage students and answers"
 msgstr "Gestisci studenti e risposte"
@@ -446,6 +450,38 @@ msgstr "La gara inizierà alle ore <0/>."
 #: packages/quizms/src/web/student/base-statement.tsx
 msgid "The contest will start in<0><1/></0>"
 msgstr "La gara inizierà tra<0><1/></0>"
+
+#: packages/quizms/src/models/contest.ts
+msgid "The field {label} cannot be longer than 256 characters."
+msgstr "Il campo {label} non può essere più lungo di 256 caratteri."
+
+#: packages/quizms/src/models/contest.ts
+msgid "The field {label} contains invalid characters. {help} (check also that the encoding is UTF-8)."
+msgstr "Il campo {label} contiene caratteri non validi. {help} (controlla anche che la codifica sia UTF-8)."
+
+#: packages/quizms/src/models/contest.ts
+msgid "The field {label} contains invalid characters. {help}."
+msgstr "Il campo {label} contiene caratteri non validi. {help}."
+
+#: packages/quizms/src/models/contest.ts
+msgid "The field {label} must be an integer."
+msgstr "Il campo {label} deve essere un numero intero."
+
+#: packages/quizms/src/models/contest.ts
+msgid "The field {label} must be greater than or equal to {min}."
+msgstr "Il campo {label} deve essere maggiore o uguale a {min}."
+
+#: packages/quizms/src/models/contest.ts
+msgid "The field {label} must be less than or equal to {max}."
+msgstr "Il campo {label} deve essere minore o uguale a {max}."
+
+#: packages/quizms/src/models/contest.ts
+msgid "The field {label} must contain a date after {date}."
+msgstr "Il campo {label} deve contenere una data successiva al {date}."
+
+#: packages/quizms/src/models/contest.ts
+msgid "The field {label} must contain a date before {date}."
+msgstr "Il campo {label} deve contenere una data precedente al {date}."
 
 #: packages/quizms/src/web/teacher/table/importer.tsx
 msgid "The fields <0>{fields}</0> must be in the <1>dd/mm/yyyy</1> format, for example <2>14/03/{year}</2>."

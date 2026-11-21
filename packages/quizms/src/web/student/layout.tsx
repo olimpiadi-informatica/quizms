@@ -16,7 +16,15 @@ import { sumBy } from "lodash-es";
 import { FileChartColumn, LogOut, RotateCcw } from "lucide-react";
 
 import { useUserAgent } from "~/utils";
-import { ErrorBoundary, LanguageSelect, Progress, Prose, Timer, Title } from "~/web/components";
+import {
+  ErrorBoundary,
+  LanguageSelect,
+  Progress,
+  Prose,
+  Timer,
+  Title,
+  useLocalize,
+} from "~/web/components";
 
 import { useStudent } from "./context";
 import { CompletedModal, SubmitModal } from "./modals";
@@ -39,6 +47,7 @@ export function StudentLayout({ children }: { children: ReactNode }) {
     setLanguage,
   } = useStudent();
 
+  const longName = useLocalize()(contest.longName);
   const answered = sumBy(Object.values(student.answers ?? {}), (s) => Number(s.value != null));
   const total = Math.max(schema ? Object.keys(schema).length : contest.problemIds.length, 1);
   const progress = Math.round((answered / total) * 100);
@@ -187,7 +196,7 @@ export function StudentLayout({ children }: { children: ReactNode }) {
           <CompletedModal ref={completedRef} />
           <SubmitModal ref={submitRef} />
           <Prose>
-            {contest.longName && <h1 className="text-pretty">{contest.longName}</h1>}
+            {longName && <h1 className="text-pretty">{longName}</h1>}
             {children}
           </Prose>
         </ErrorBoundary>

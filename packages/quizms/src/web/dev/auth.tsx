@@ -3,6 +3,7 @@ import { type ReactNode, useCallback, useMemo, useState } from "react";
 import { Link, Route, Switch } from "wouter";
 
 import type { Answer, Contest, Student, Venue } from "~/models";
+import { useLocalize } from "~/web/components/ui-language-provider";
 import { useStatementLanguageState } from "~/web/student/language";
 import { StudentProvider } from "~/web/student/provider";
 
@@ -19,13 +20,14 @@ export function DevRoutes({ contests, children }: { contests: Contest[]; childre
 DevRoutes.displayName = "DevRoutes";
 
 function ContestList({ contests }: { contests: Contest[] }) {
+  const localize = useLocalize();
   return (
     <div className="h-dvh overflow-auto">
       <div className="prose mx-auto p-4 lg:max-w-4xl">
         <ul>
           {contests.map((c) => (
             <li key={c.id}>
-              <Link href={`/${c.id}`}>{c.name}</Link>
+              <Link href={`/${c.id}`}>{localize(c.name)}</Link>
             </li>
           ))}
         </ul>

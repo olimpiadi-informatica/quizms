@@ -5,7 +5,7 @@ import { Link, Redirect, Route, Switch, useParams } from "wouter";
 
 import type { Announcement, Contest, Student, StudentRestore, Variant, Venue } from "~/models";
 import { contestStatementFile, contestsLanguages } from "~/utils";
-import { UiLanguageScope } from "~/web/components";
+import { UiLanguageScope, useLocalize } from "~/web/components";
 import { StudentForm } from "~/web/components/student-form";
 import { ImpersonationAuth } from "~/web/student/impersonation-auth";
 
@@ -65,13 +65,7 @@ export function TeacherProvider({
               <p className="text-2xl">
                 <Trans>Select a contest</Trans>
               </p>
-              <div className="flex flex-wrap justify-center gap-2">
-                {venues.map((p) => (
-                  <Link key={p.id} className="btn btn-primary" href={`/${p.contestId}`}>
-                    {contests.find((c) => c.id === p.contestId)?.name}
-                  </Link>
-                ))}
-              </div>
+              <ContestLinks venues={venues} contests={contests} />
             </div>
           )}
         </Route>
@@ -86,6 +80,20 @@ export function TeacherProvider({
         </Route>
       </TeacherLayout>
     </UiLanguageScope>
+  );
+}
+
+/** Links to the contests of the teacher, in the UI language of the scope. */
+function ContestLinks({ venues, contests }: { venues: Venue[]; contests: Contest[] }) {
+  const localize = useLocalize();
+  return (
+    <div className="flex flex-wrap justify-center gap-2">
+      {venues.map((p) => (
+        <Link key={p.id} className="btn btn-primary" href={`/${p.contestId}`}>
+          {localize(contests.find((c) => c.id === p.contestId)?.name)}
+        </Link>
+      ))}
+    </div>
   );
 }
 

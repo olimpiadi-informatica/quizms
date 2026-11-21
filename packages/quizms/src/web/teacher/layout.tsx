@@ -19,7 +19,7 @@ import { LogOut } from "lucide-react";
 import { Link, useRoute } from "wouter";
 
 import type { Contest, Venue } from "~/models";
-import { ErrorBoundary, Loading, Title, UiLanguageSelect } from "~/web/components";
+import { ErrorBoundary, Loading, Title, UiLanguageSelect, useLocalize } from "~/web/components";
 
 type Props = {
   name: string;
@@ -32,6 +32,7 @@ type Props = {
 export function TeacherLayout({ name, contests, venues, logout, children }: Props) {
   const [, params] = useRoute("/:contestId/*?");
   const contest = contests.find((c) => c.id === params?.contestId);
+  const localize = useLocalize();
 
   return (
     <>
@@ -44,14 +45,14 @@ export function TeacherLayout({ name, contests, venues, logout, children }: Prop
         {contest && (
           <NavbarMenu>
             {venues.length >= 2 && (
-              <NavbarSubmenu title={contest.name}>
+              <NavbarSubmenu title={localize(contest.name)}>
                 {venues.map((p) => {
                   const path = params?.["*"];
                   const href = path ? `/${p.contestId}/${path}` : `/${p.contestId}`;
                   return (
                     <NavbarMenuItem key={p.id}>
                       <Link className={clsx(contest.id === p.contestId && "active")} href={href}>
-                        {contests.find((c) => c.id === p.contestId)?.name}
+                        {localize(contests.find((c) => c.id === p.contestId)?.name)}
                       </Link>
                     </NavbarMenuItem>
                   );

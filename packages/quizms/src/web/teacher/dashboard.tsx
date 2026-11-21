@@ -23,7 +23,7 @@ import { Link } from "wouter";
 
 import { loadUiLocale } from "~/i18n";
 import type { TimeRange } from "~/models";
-import { Timer } from "~/web/components";
+import { Timer, useLocalize } from "~/web/components";
 
 import { useTeacher } from "./context";
 import { Announcements } from "./dashboard-announcements";
@@ -178,6 +178,7 @@ function ContestData({ participationWindow }: { participationWindow: TimeRange }
 
 export default function TeacherDashboard() {
   const { t, i18n } = useLingui();
+  const localize = useLocalize();
   const { contest, venue } = useTeacher();
   const locale = i18n.locale;
 
@@ -191,7 +192,7 @@ export default function TeacherDashboard() {
       <Card>
         <CardBody title={t`Contest information`}>
           <div className="prose prose-a:link-info max-w-none">
-            <Markdown>{contest.instructions}</Markdown>
+            <Markdown>{localize(contest.instructions)}</Markdown>
           </div>
           {contest.onlineSettings && (
             <div className="font-bold">

@@ -11,8 +11,8 @@ Contests are described by the `data/contests.{toml,yaml,csv,json,jsonl}` file. T
 | Field                  | Description                                                                    | Type       | Notes                                                                  |
 |------------------------|--------------------------------------------------------------------------------|------------|------------------------------------------------------------------------|
 | `id`                   | Contest ID.                                                          | `string`   |                                                                        |
-| `name`                 | Contest Name.                                                        | `string`   |                                                                        |
-| `long_name`            | Extended contest name.                                               | `string`   | Optional.                                                    |
+| `name`                 | Contest Name.                                                        | `string` or table |                                                                        |
+| `long_name`            | Extended contest name.                                               | `string` or table | Optional.                                                    |
 | `problem_ids`          | Problem IDs.                                                         | `string[]` |                                                                        |
 | `user_data`            | Personal information requested from students during registration.    | `object[]` |                                                                        |
 | `has_variants`         | If there are multiple text variants.                                 | `boolean`  |                                                                        |
@@ -22,7 +22,7 @@ Contests are described by the `data/contests.{toml,yaml,csv,json,jsonl}` file. T
 | `allow_student_import` | If teachers can import students from a CSV.                          | `boolean`  | Optional.                                                    |
 | `allow_student_edit`   |                                                                      | `boolean`  | Optional.                                                    |
 | `allow_answer_edit`    |                                                                      | `boolean`  | Optional.                                                    |
-| `instructions`         | General Markdown information displayed on the teacher's page.        | `string`   | Optional.                                                    |
+| `instructions`         | General Markdown information displayed on the teacher's page.        | `string` or table | Optional.                                                    |
 | `languages`            | Statement [languages](../task/languages), the first one is the default. | `string[]` | Optional, default `["it"]`. Must match `variants.toml`. |
 
 If `has_online` is `true`, the following fields are required:
@@ -34,12 +34,14 @@ If `has_online` is `true`, the following fields are required:
 | `duration`             | Contest duration in minutes.                 | `number`   |       |
 | `allow_restart`        | If teachers can start the contest multiple times. | `boolean`  |       |
 
+The fields of type "`string` or table" can be [translated](../task/languages#translating-the-configuration) in the languages of the contest.
+
 Personal information in the `user_data` field must have the following format:
 
 | Field    | Description                                                      | Type                            | Notes                                                        |
 |----------|------------------------------------------------------------------|---------------------------------|--------------------------------------------------------------|
 | `name`   | Field name.                                            | `string`                        |                                                              |
-| `label`  | Readable field name.                                   | `string`                        |                                                              |
+| `label`  | Readable field name.                                   | `string` or table |                                                              |
 | `type`   | Field type.                                            | `"text"`, `"number"` or `"date"` |                                                              |
 | `size`   | Field width in the teacher's table.                    | `"xs"`, `"sm"`, `"md"` or `"lg"` | Optional.                                          |
 | `min`    | Minimum field value.                                   | `number` or `date`              | Required for date fields, optional for numeric fields. |

@@ -6,6 +6,7 @@ import { lowerFirst } from "lodash-es";
 import { TriangleAlert } from "lucide-react";
 
 import { userDataMatch } from "~/models";
+import { useContentLanguage, useLocalize } from "~/web/components";
 import { useTeacher, useTeacherStudents } from "~/web/teacher/context";
 
 import { isStudentIncomplete } from "./utils";
@@ -14,6 +15,8 @@ export function FinalizeModal({ ref }: { ref: RefObject<HTMLDialogElement | null
   const { contest, variants, finalizeVenue } = useTeacher();
   const [students] = useTeacherStudents();
   const { t, i18n } = useLingui();
+  const localize = useLocalize();
+  const language = useContentLanguage();
 
   const error = useMemo(() => {
     const prevStudents = [];
@@ -23,7 +26,7 @@ export function FinalizeModal({ ref }: { ref: RefObject<HTMLDialogElement | null
 
       const { name, surname } = student.userData ?? {};
 
-      const incomplete = isStudentIncomplete(student, contest, variants, i18n);
+      const incomplete = isStudentIncomplete(student, contest, variants, i18n, language);
       if (incomplete) {
         if (!name || !surname) return t`At least one student has no name or surname`;
         const reason = lowerFirst(incomplete);
@@ -37,10 +40,10 @@ export function FinalizeModal({ ref }: { ref: RefObject<HTMLDialogElement | null
       }
       prevStudents.push(student);
     }
-  }, [students, contest, variants, t, i18n]);
+  }, [students, contest, variants, t, i18n, language]);
 
   const correctConfirm = t`all the students have been entered correctly`;
-  const contestName = contest?.name;
+  const contestName = localize(contest?.name);
 
   const close = () => {
     ref.current?.close();

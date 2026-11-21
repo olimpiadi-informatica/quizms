@@ -6,6 +6,7 @@ import {
   Title,
   UiLanguageScope,
   UiLanguageSelect,
+  useLocalize,
 } from "@olinfo/quizms/components";
 import type { Answer, Contest, Student } from "@olinfo/quizms/models";
 import { StudentProvider, useStatementLanguageState } from "@olinfo/quizms/student";
@@ -74,6 +75,7 @@ type FormStudent = {
 
 function StudentForm({ contests }: { contests: Contest[] }) {
   const { t } = useLingui();
+  const localize = useLocalize();
   const db = useDb();
   const ua = useUserAgent();
 
@@ -129,7 +131,7 @@ function StudentForm({ contests }: { contests: Contest[] }) {
         <SelectField
           field="contestId"
           label={t`Contest`}
-          options={Object.fromEntries(contests.map((c) => [c.id, c.name]))}
+          options={Object.fromEntries(contests.map((c) => [c.id, localize(c.name)]))}
           placeholder={t`Select a contest`}
         />
         {({ contestId }) => {

@@ -1,7 +1,7 @@
 import { Suspense, useCallback } from "react";
 
 import { Trans, useLingui } from "@lingui/react/macro";
-import { Loading } from "@olinfo/quizms/components";
+import { Loading, useLocalize } from "@olinfo/quizms/components";
 import type { Student, Venue } from "@olinfo/quizms/models";
 import { Card, CardActions, CardBody } from "@olinfo/react-components";
 import { Link } from "wouter";
@@ -17,7 +17,7 @@ import Export, { scoreboardFormatter, scoreboradHeader } from "./export";
 export default function Dashboard() {
   const { t } = useLingui();
   const { contest, variants } = useAdmin();
-  const contestName = contest.name;
+  const contestName = useLocalize()(contest.name);
   const contestScoreboardFormatter = useCallback(
     (student: Student) => scoreboardFormatter(contest, variants, student),
     [contest, variants],

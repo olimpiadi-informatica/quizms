@@ -13,6 +13,7 @@ import {
   UiLanguageRoot,
   UiLanguageScope,
   UiLanguageSelect,
+  useLocalize,
 } from "./ui-language-provider";
 
 /** Shows the active UI locale. */
@@ -163,6 +164,34 @@ describe("StudentProvider", () => {
       contest: makeContest({ languages: ["it", "en"] }),
       language: "en",
     });
+    expect(screen.getByText("locale: en")).toBeInTheDocument();
+  });
+});
+
+describe("useLocalize", () => {
+  function ContestName() {
+    const localize = useLocalize();
+    return <p>name: {localize({ it: "Gara", en: "Contest", de: "Wettbewerb" })}</p>;
+  }
+
+  it("uses the statement language for students", async () => {
+    await renderInStudentProvider(<ContestName />, {
+      contest: makeContest({ languages: ["it", "en"] }),
+      language: "en",
+    });
+    expect(screen.getByText("name: Contest")).toBeInTheDocument();
+  });
+
+  it("uses the language without a UI catalog too", async () => {
+    await act(() =>
+      render(
+        <UiLanguageProvider language="de">
+          <ContestName />
+          <Locale />
+        </UiLanguageProvider>,
+      ),
+    );
+    expect(screen.getByText("name: Wettbewerb")).toBeInTheDocument();
     expect(screen.getByText("locale: en")).toBeInTheDocument();
   });
 });

@@ -12,6 +12,37 @@ import {
 import { I18nProvider } from "@lingui/react";
 
 import { type I18n, loadUiLocale, setActiveUiLocale, uiLocales } from "~/i18n";
+import { type LocalizedString, localize } from "~/models/localized";
+
+/** The language given to the nearest `UiLanguageProvider` (also one without a UI catalog). */
+const LanguageCodeContext = createContext<string | undefined>(undefined);
+LanguageCodeContext.displayName = "UiLanguageCodeContext";
+
+type Localize = {
+  (value: LocalizedString): string;
+  (value: LocalizedString | undefined): string | undefined;
+};
+
+/**
+ * The language of the texts of the configuration (e.g. the contest name): the one given to the
+ * nearest `UiLanguageProvider`, i.e. the statement language for students and the chosen one on the
+ * other screens. Unlike the UI messages, it can be a language without a UI catalog.
+ */
+export function useContentLanguage(): string | undefined {
+  return use(LanguageCodeContext);
+}
+
+/**
+ * Returns a function that picks the text of a translatable value of the configuration (e.g. the
+ * contest name) in the language of the UI (see `useContentLanguage`).
+ */
+export function useLocalize(): Localize {
+  const language = use(LanguageCodeContext);
+  return useCallback(
+    ((value: LocalizedString | undefined) => localize(value, language)) as Localize,
+    [language],
+  );
+}
 
 /** Depth of the enclosing `UiLanguageProvider`s. */
 const DepthContext = createContext(0);
@@ -66,7 +97,9 @@ export function UiLanguageProvider({
 
   return (
     <DepthContext.Provider value={depth}>
-      <I18nProvider i18n={i18n}>{children}</I18nProvider>
+      <LanguageCodeContext.Provider value={language ?? i18n.locale}>
+        <I18nProvider i18n={i18n}>{children}</I18nProvider>
+      </LanguageCodeContext.Provider>
     </DepthContext.Provider>
   );
 }

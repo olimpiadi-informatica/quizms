@@ -1,9 +1,9 @@
 [smoke]
 name = "Smoke test"
-long_name = "Gara di prova end-to-end"
+long_name = { it = "Gara di prova end-to-end", en = "End-to-end test contest" }
 problem_ids = [1, 2, 3, 4]
 user_data = [
-    { name = "surname", label = "Cognome", type = "text" },
+    { name = "surname", label = { it = "Cognome", en = "Surname" }, type = "text" },
     { name = "name", label = "Nome", type = "text" },
 ]
 matching_rules = []

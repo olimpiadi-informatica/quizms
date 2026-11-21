@@ -3,6 +3,7 @@ import { msg } from "@lingui/core/macro";
 import type { I18n } from "~/i18n";
 import {
   type Contest,
+  localize,
   type Student,
   type Variant,
   type Venue,
@@ -16,12 +17,14 @@ export function isStudentIncomplete(
   contest: Contest,
   variants: Record<string, Variant>,
   i18n: I18n,
+  /** Language of the texts of the configuration (see `useContentLanguage`) */
+  language: string | undefined,
 ) {
   if (student.absent || student.disabled) return;
 
   for (const field of contest.userData) {
     if (!student.userData?.[field.name]) {
-      const label = field.label;
+      const label = localize(field.label, language);
       return i18n._(msg`${label} missing`);
     }
   }

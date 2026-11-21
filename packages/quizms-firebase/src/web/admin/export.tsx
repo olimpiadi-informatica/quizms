@@ -6,6 +6,7 @@ import {
   calcProblemPoints,
   displayAnswer,
   formatUserData,
+  localize,
   type Student,
   unshuffleAnswer,
   type Variant,
@@ -96,11 +97,12 @@ function ExportModal({
   );
 }
 
-// The headers are fixed (not in the UI language): scripts read the columns by name.
+// The headers are fixed (not in the UI language, labels in the default language of the contest):
+// scripts read the columns by name.
 export function scoreboradHeader(contest: Contest) {
   const row: string[] = [];
   for (const field of contest.userData) {
-    row.push(field.label);
+    row.push(localize(field.label, contest.languages[0]));
   }
   row.push("Scuola", "Variante");
   for (const problemId of contest.problemIds) {

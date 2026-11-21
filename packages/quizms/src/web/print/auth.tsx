@@ -6,6 +6,7 @@ import { Link, Route, Switch } from "wouter";
 import type { Contest, Student, Venue } from "~/models";
 import type { VariantsConfig } from "~/models/variants-config";
 import { StudentForm } from "~/web/components/student-form";
+import { useLocalize } from "~/web/components/ui-language-provider";
 import { StudentProvider } from "~/web/student/provider";
 
 import { PrintStatement } from "./statement";
@@ -29,12 +30,13 @@ export function PrintRoutes({
 PrintRoutes.displayName = "PrintRoutes";
 
 function VariantList({ contests }: { contests: (Contest & VariantsConfig)[] }) {
+  const localize = useLocalize();
   return (
     <div className="h-dvh overflow-auto">
       <div className="prose mx-auto p-4 lg:max-w-4xl">
         {contests.map((c) => (
           <Fragment key={c.id}>
-            <h3>{c.name}</h3>
+            <h3>{localize(c.name)}</h3>
             {c.variantIds.length > 0 && (
               <>
                 <h4>

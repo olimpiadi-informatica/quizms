@@ -1,7 +1,13 @@
 import { type ReactNode, Suspense } from "react";
 
 import { Trans } from "@lingui/react/macro";
-import { ErrorBoundary, Loading, Title, UiLanguageSelect } from "@olinfo/quizms/components";
+import {
+  ErrorBoundary,
+  Loading,
+  Title,
+  UiLanguageSelect,
+  useLocalize,
+} from "@olinfo/quizms/components";
 import type { Contest } from "@olinfo/quizms/models";
 import {
   Button,
@@ -30,6 +36,7 @@ type Props = {
 export function AdminLayout({ name, contests, logout, children }: Props) {
   const [, params] = useRoute("/:contestId/*?");
   const contest = contests.find((c) => c.id === params?.contestId);
+  const localize = useLocalize();
 
   return (
     <>
@@ -41,14 +48,14 @@ export function AdminLayout({ name, contests, logout, children }: Props) {
         </NavbarBrand>
         {contest && contests.length >= 2 && (
           <NavbarMenu>
-            <NavbarSubmenu title={contest.name}>
+            <NavbarSubmenu title={localize(contest.name)}>
               {contests.map((c) => {
                 const path = params?.["*"];
                 const href = path ? `/${c.id}/${path}` : `/${c.id}`;
                 return (
                   <NavbarMenuItem key={c.id}>
                     <Link className={clsx(contest.id === c.id && "active")} href={href}>
-                      {c.name}
+                      {localize(c.name)}
                     </Link>
                   </NavbarMenuItem>
                 );

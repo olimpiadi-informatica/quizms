@@ -270,6 +270,10 @@ msgstr "Loading..."
 msgid "Log out"
 msgstr "Log out"
 
+#: packages/quizms/src/models/contest.ts
+msgid "Make sure there are no numbers or symbols"
+msgstr "Make sure there are no numbers or symbols"
+
 #: packages/quizms/src/web/teacher/dashboard.tsx
 msgid "Manage students and answers"
 msgstr "Manage students and answers"
@@ -446,6 +450,38 @@ msgstr "The contest will start at <0/>."
 #: packages/quizms/src/web/student/base-statement.tsx
 msgid "The contest will start in<0><1/></0>"
 msgstr "The contest will start in<0><1/></0>"
+
+#: packages/quizms/src/models/contest.ts
+msgid "The field {label} cannot be longer than 256 characters."
+msgstr "The field {label} cannot be longer than 256 characters."
+
+#: packages/quizms/src/models/contest.ts
+msgid "The field {label} contains invalid characters. {help} (check also that the encoding is UTF-8)."
+msgstr "The field {label} contains invalid characters. {help} (check also that the encoding is UTF-8)."
+
+#: packages/quizms/src/models/contest.ts
+msgid "The field {label} contains invalid characters. {help}."
+msgstr "The field {label} contains invalid characters. {help}."
+
+#: packages/quizms/src/models/contest.ts
+msgid "The field {label} must be an integer."
+msgstr "The field {label} must be an integer."
+
+#: packages/quizms/src/models/contest.ts
+msgid "The field {label} must be greater than or equal to {min}."
+msgstr "The field {label} must be greater than or equal to {min}."
+
+#: packages/quizms/src/models/contest.ts
+msgid "The field {label} must be less than or equal to {max}."
+msgstr "The field {label} must be less than or equal to {max}."
+
+#: packages/quizms/src/models/contest.ts
+msgid "The field {label} must contain a date after {date}."
+msgstr "The field {label} must contain a date after {date}."
+
+#: packages/quizms/src/models/contest.ts
+msgid "The field {label} must contain a date before {date}."
+msgstr "The field {label} must contain a date before {date}."
 
 #: packages/quizms/src/web/teacher/table/importer.tsx
 msgid "The fields <0>{fields}</0> must be in the <1>dd/mm/yyyy</1> format, for example <2>14/03/{year}</2>."

@@ -1,7 +1,7 @@
 import { lazy, useMemo } from "react";
 
 import { Trans } from "@lingui/react/macro";
-import { UiLanguageScope } from "@olinfo/quizms/components";
+import { UiLanguageScope, useLocalize } from "@olinfo/quizms/components";
 import type { Contest, Variant } from "@olinfo/quizms/models";
 import { contestsLanguages } from "@olinfo/quizms/utils";
 import { Link, Redirect, Route, Switch, useParams } from "wouter";
@@ -44,13 +44,7 @@ export function AdminProvider({
               <p className="text-2xl">
                 <Trans>Select a contest</Trans>
               </p>
-              <div className="flex flex-wrap justify-center gap-2">
-                {contests.map((c) => (
-                  <Link key={c.id} className="btn btn-primary" href={`/${c.id}`}>
-                    {c.name}
-                  </Link>
-                ))}
-              </div>
+              <ContestLinks contests={contests} />
             </div>
           )}
         </Route>
@@ -65,6 +59,20 @@ export function AdminProvider({
         </Route>
       </AdminLayout>
     </UiLanguageScope>
+  );
+}
+
+/** Links to the contests, in the UI language of the scope. */
+function ContestLinks({ contests }: { contests: Contest[] }) {
+  const localize = useLocalize();
+  return (
+    <div className="flex flex-wrap justify-center gap-2">
+      {contests.map((c) => (
+        <Link key={c.id} className="btn btn-primary" href={`/${c.id}`}>
+          {localize(c.name)}
+        </Link>
+      ))}
+    </div>
   );
 }
 

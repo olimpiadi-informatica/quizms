@@ -14,6 +14,7 @@ import {
   type Contest,
   displayAnswer,
   formatUserData,
+  localize,
   parseAnswer,
   parseUserData,
   type Student,
@@ -30,6 +31,8 @@ export function columnDefinition(
   canViewScore: boolean,
   frozen: boolean,
   i18n: I18n,
+  /** Language of the texts of the configuration (see `useContentLanguage`) */
+  language: string | undefined,
 ): ColDef[] {
   const widths = {
     xs: 100,
@@ -49,7 +52,7 @@ export function columnDefinition(
     ...contest.userData.map(
       (field): ColDef => ({
         field: `userData.${field.name}`,
-        headerName: field.label,
+        headerName: localize(field.label, language),
         pinned: field.pinned,
         cellDataType: field.type,
         width: widths[field.size ?? "md"],
@@ -57,7 +60,7 @@ export function columnDefinition(
         editable: contest.allowStudentEdit && !frozen,
         ...defaultOptions,
         tooltipValueGetter: ({ data }: ITooltipParams<Student>) => {
-          return isStudentIncomplete(data!, contest, variants, i18n);
+          return isStudentIncomplete(data!, contest, variants, i18n, language);
         },
         cellRenderer: ({ api, data, value }: ICellRendererParams<Student>) => {
           value = formatUserData(data, field);
@@ -65,7 +68,7 @@ export function columnDefinition(
             field.pinned &&
             data?.updatedAt &&
             !api.getSelectedRows().some((s: Student) => s.id === data.id) &&
-            isStudentIncomplete(data, contest, variants, i18n)
+            isStudentIncomplete(data, contest, variants, i18n, language)
           ) {
             return (
               <span>
@@ -78,7 +81,7 @@ export function columnDefinition(
         },
         valueParser: (params) => parseUserData(params.newValue, field),
         cellEditorParams: {
-          getValidationErrors: (params) => validateUserData(params.value, field),
+          getValidationErrors: (params) => validateUserData(params.value, field, language),
         } satisfies Partial<ICellEditorParams<Student>>,
       }),
     ),

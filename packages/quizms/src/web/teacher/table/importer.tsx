@@ -10,6 +10,7 @@ import type { I18n } from "~/i18n";
 import {
   type Contest,
   calcScore,
+  localize,
   parseAnswer,
   parseUserData,
   type Student,
@@ -19,13 +20,15 @@ import {
   validateUserData,
 } from "~/models";
 import { randomId } from "~/utils";
+import { useContentLanguage } from "~/web/components";
 import { useTeacher, useTeacherStudents } from "~/web/teacher/context";
 
 export function ImportModal({ ref }: { ref: RefObject<HTMLDialogElement | null> }) {
   const { t, i18n } = useLingui();
   const { contest, venue } = useTeacher();
 
-  const labels = contest.userData.map((field) => field.label);
+  const language = useContentLanguage();
+  const labels = contest.userData.map((field) => localize(field.label, language));
   if (contest.hasVariants) {
     labels.push(t`Variant`);
   }
@@ -33,7 +36,7 @@ export function ImportModal({ ref }: { ref: RefObject<HTMLDialogElement | null> 
 
   const dates = contest.userData
     .filter((field) => field.type === "date")
-    .map((field) => field.label.toLowerCase());
+    .map((field) => localize(field.label, language).toLowerCase());
 
   const { variants } = useTeacher();
   const [, setStudent] = useTeacherStudents();
@@ -47,7 +50,7 @@ export function ImportModal({ ref }: { ref: RefObject<HTMLDialogElement | null> 
     setUploadCount((count) => count + 1);
     try {
       const text = await file.text();
-      await importStudents(text, contest, variants, venue, setStudent, i18n);
+      await importStudents(text, contest, variants, venue, setStudent, i18n, language);
     } finally {
       ref.current?.close();
     }
@@ -146,6 +149,7 @@ async function importStudents(
   venue: Venue,
   addStudent: (student: Student) => Promise<void>,
   i18n: I18n,
+  language: string | undefined,
 ) {
   const records = parseCSV<string[]>(file, {
     skipEmptyLines: "greedy",
@@ -167,7 +171,7 @@ async function importStudents(
       const value = parseUserData(record[i], field, {
         dateFormat: "dd/MM/yyyy",
       });
-      const err = validateUserData(value, field);
+      const err = validateUserData(value, field, language);
       if (err) {
         const error = err[0];
         throw new Error(i18n._(msg`Error on row ${line}: ${error}`));

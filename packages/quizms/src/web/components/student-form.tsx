@@ -5,6 +5,8 @@ import type { Contest } from "~/models";
 import { normalizeName, strip, titleCase } from "~/utils";
 import { useStudent } from "~/web/student/context";
 
+import { useLocalize } from "./ui-language-provider";
+
 export function StudentForm({ printLayout = false }: { printLayout?: boolean }) {
   const { contest, student } = useStudent();
   // In the UI language, which is the statement language (also in printed booklets).
@@ -39,10 +41,11 @@ export function StudentFormField({
   printLayout?: boolean;
 }) {
   const { t } = useLingui();
-  const label = field.label.toLowerCase();
+  const fieldLabel = useLocalize()(field.label);
+  const label = fieldLabel.toLowerCase();
   const commonProps = {
     field: field.name,
-    label: field.label,
+    label: fieldLabel,
     placeholder: t`Enter ${label}`,
   };
   if (printLayout) {

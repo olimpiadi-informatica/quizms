@@ -88,13 +88,36 @@ quizms print --languages=it,en
 
 `quizms print` uses the statements built by `quizms variants`, so run both with the same languages.
 
+## Translating the configuration
+
+Some texts of `contests.toml` are shown to students and teachers: the contest name (`name`) and long name (`long_name`), the `instructions` for teachers, and the `label` and `pattern_help` of the personal data fields (`user_data`). Each of them can be a single text, used in every language, or a table with the text in each language:
+
+```toml
+[my-contest]
+languages = ["it", "en"]
+name = { it = "Gara", en = "Contest" }
+long_name = "Olimpiadi di Informatica"
+user_data = [
+    { name = "surname", label = { it = "Cognome", en = "Surname" }, type = "text" },
+    { name = "name", label = { it = "Nome", en = "Name" }, type = "text" },
+]
+```
+
+A table must have the text in the default language (the first one in `languages`) and only languages of the contest. A language missing from a table uses the default one.
+
+`pattern_mismatch` is not translatable. Without `pattern_help`, a default message in the interface language is shown.
+
+::: warning WARNING
+Tables are only understood by recent versions of QuizMS: deploy the website and the Cloud Functions before running `quizms firebase import` with a configuration that uses them.
+:::
+
 ## What is translated
 
-QuizMS translates the fixed text that is part of the statements: question headings (`Domanda 1` / `Question 1`), the PDF footer (`Variante` / `Variant`), the fields printed on the PDF (`Codice prova` / `Test code`), the blank-page note of the teacher's PDF, and in [block programming](./blockly) problems the built-in blocks and the default toolbox categories. Italian and English are available; other languages use English.
+The whole interface (menus, buttons, messages) is translated, and so is the fixed text that is part of the statements: question headings (`Domanda 1` / `Question 1`), the PDF footer (`Variante` / `Variant`), the fields printed on the PDF (`Codice prova` / `Test code`), the blank-page note of the teacher's PDF, and in [block programming](./blockly) problems the built-in blocks and the default toolbox categories. Italian and English are available; other languages use English.
 
-Text written by the problem author is not translated automatically: custom blocks, custom toolboxes and visualizers can be translated by importing different files in each translation.
+The interface is in the statement language for students. On the other pages (login, teachers, administrators) it can be chosen from the navigation bar, among the languages of the contests.
 
-The rest of the interface (menus, buttons, messages) stays in Italian, and so do the values in the configuration files: contest names and the labels of the personal data fields (`user_data`).
+Text written by the problem author is not translated automatically: custom blocks, custom toolboxes and visualizers can be translated by importing different files in each translation. The texts of the configuration are translated as described [above](#translating-the-configuration).
 
 ## Firebase
 
