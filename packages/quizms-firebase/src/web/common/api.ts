@@ -115,7 +115,7 @@ export async function teacherSetStudentsDisabled(
   body: {
     venueId: string;
     studentIds: string[];
-    disabled?: boolean;
+    disabled: boolean;
   },
 ) {
   return await trpc.teacherSetStudentsDisabled.mutate(body, { context: { user } });

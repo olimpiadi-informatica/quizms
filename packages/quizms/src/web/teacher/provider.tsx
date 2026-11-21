@@ -18,7 +18,11 @@ type TeacherProviderProps = {
   stopContestWindow: (venueId: string) => Promise<void>;
   finalizeVenue: (venueId: string) => Promise<void>;
   importStudents: (venueId: string, students: Student[]) => Promise<any>;
-  setStudentsDisabled: (venueId: string, studentIds: string[], disabled?: boolean) => Promise<any>;
+  setStudentsDisabled: (
+    venueId: string,
+    studentIds: string[],
+    disabled: boolean,
+  ) => Promise<unknown>;
   variants: Variant[];
   logout: () => Promise<void>;
   statementComponent: ComponentType<Record<never, never>>;

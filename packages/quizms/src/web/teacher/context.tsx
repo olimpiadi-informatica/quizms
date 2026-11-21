@@ -22,7 +22,11 @@ export type TeacherContextProps = {
   /** Funzione per importare studenti in blocco */
   importStudents: (venueId: string, students: Student[]) => Promise<any>;
   /** Funzione per disabilitare o riabilitare studenti in blocco */
-  setStudentsDisabled: (venueId: string, studentIds: string[], disabled?: boolean) => Promise<any>;
+  setStudentsDisabled: (
+    venueId: string,
+    studentIds: string[],
+    disabled: boolean,
+  ) => Promise<unknown>;
 
   /** Varianti dei testi */
   variants: Record<string, Variant>;
@@ -71,7 +75,7 @@ export function useTeacher(): Omit<OmitContestParam<TeacherContextProps>, `use${
     stopContestWindow: () => stopContestWindow(venueId),
     finalizeVenue: () => finalizeVenue(venueId),
     importStudents: (students: Student[]) => importStudents(venueId, students),
-    setStudentsDisabled: (studentIds: string[], disabled?: boolean) =>
+    setStudentsDisabled: (studentIds: string[], disabled: boolean) =>
       setStudentsDisabled(venueId, studentIds, disabled),
   };
 }

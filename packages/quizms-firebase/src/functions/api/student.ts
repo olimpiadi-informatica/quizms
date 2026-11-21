@@ -14,6 +14,8 @@ import { FieldPath, Timestamp } from "firebase-admin/firestore";
 import * as logger from "firebase-functions/logger";
 import z from "zod";
 
+import { studentConverter } from "~/cli/utils/converters-admin";
+
 import { auth, db } from "../common";
 import {
   getContest,
@@ -24,6 +26,7 @@ import {
   getVenue,
   getVenueByToken,
 } from "./queries";
+import { docId } from "./schemas";
 import { publicProcedure } from "./trpc";
 
 export function studentHash(contest: Contest, userData: NonNullable<Student["userData"]>) {
@@ -33,7 +36,7 @@ export function studentHash(contest: Contest, userData: NonNullable<Student["use
 export const studentLogin = publicProcedure
   .input(
     z.strictObject({
-      contestId: z.string(),
+      contestId: docId,
       token: z.string(),
       userData: studentSchema.shape.userData.unwrap().required(),
       extraData: studentSchema.shape.extraData.unwrap(),
@@ -214,15 +217,25 @@ export const studentSetAnswer = publicProcedure
 
 export const studentSubmitContest = publicProcedure.mutation(async (opts) => {
   const { ctx } = opts;
-  const student = await checkStudent(ctx.claims, true);
+  const { id } = await checkStudent(ctx.claims, true);
+  const ref = db
+    .doc(`venues/${ctx.claims!.venueId}/students/${id}`)
+    .withConverter(studentConverter);
 
-  // Never extend the window: submitting during the grace period keeps the original end.
-  const now = new Date();
-  const currentEnd = student.participationWindow!.end;
-  const newEnd = currentEnd < now ? currentEnd : now;
+  await db.runTransaction(async (t) => {
+    const student = (await t.get(ref)).data();
+    if (!student?.participationWindow) {
+      throw new TRPCError({ code: "FORBIDDEN", message: "Gara non iniziata" });
+    }
 
-  await db.doc(`venues/${ctx.claims!.venueId}/students/${student.id}`).update({
-    "participationWindow.end": Timestamp.fromDate(newEnd),
-    updatedAt: Timestamp.now(),
+    // Never extend the window: submitting during the grace period keeps the original end.
+    const now = new Date();
+    const currentEnd = student.participationWindow.end;
+    const newEnd = currentEnd < now ? currentEnd : now;
+
+    t.update(ref, {
+      "participationWindow.end": Timestamp.fromDate(newEnd),
+      updatedAt: Timestamp.now(),
+    });
   });
 });

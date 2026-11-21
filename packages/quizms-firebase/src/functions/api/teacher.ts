@@ -12,25 +12,29 @@ import { randomToken } from "@olinfo/quizms/utils";
 import { TRPCError } from "@trpc/server";
 import { addMinutes, addSeconds, isFuture, isPast, roundToNearestMinutes } from "date-fns";
 import type { DecodedIdToken } from "firebase-admin/auth";
-import { FieldValue, Timestamp } from "firebase-admin/firestore";
+import { type DocumentSnapshot, FieldValue, Timestamp } from "firebase-admin/firestore";
 import { getFunctions } from "firebase-admin/functions";
 import * as logger from "firebase-functions/logger";
 import { defineString } from "firebase-functions/params";
-import { chunk } from "lodash-es";
+import { chunk, isEqual, uniq } from "lodash-es";
 import z from "zod";
 
-import { studentConverter, studentRestoreConverter } from "~/cli/utils/converters-admin";
+import {
+  studentConverter,
+  studentRestoreConverter,
+  venueConverter,
+} from "~/cli/utils/converters-admin";
 
 import { auth, db } from "../common";
 import {
   getContest,
   getContestVariants,
-  getStudent,
   getUser,
   getVenue,
   getVenueByToken,
   getVenueStudents,
 } from "./queries";
+import { docId } from "./schemas";
 import { studentHash } from "./student";
 import { publicProcedure } from "./trpc";
 
@@ -109,7 +113,7 @@ async function generateToken() {
 }
 
 export const teacherStartContestWindow = publicProcedure
-  .input(z.strictObject({ venueId: z.string() }))
+  .input(z.strictObject({ venueId: docId }))
   .mutation(async (opts) => {
     const { input: data, ctx } = opts;
     logger.info("Teacher start venue received", { data });
@@ -156,7 +160,7 @@ export const teacherStartContestWindow = publicProcedure
   });
 
 export const teacherStopContestWindow = publicProcedure
-  .input(z.strictObject({ venueId: z.string() }))
+  .input(z.strictObject({ venueId: docId }))
   .mutation(async (opts) => {
     const { input: data, ctx } = opts;
     logger.info("Teacher stop venue received", { data });
@@ -200,7 +204,7 @@ async function revokeTokens(students: Student[]) {
 }
 
 export const teacherFinalizeVenue = publicProcedure
-  .input(z.strictObject({ venueId: z.string() }))
+  .input(z.strictObject({ venueId: docId }))
   .mutation(async (opts) => {
     const { input: data, ctx } = opts;
     logger.info("Teacher finalize venue received", { data });
@@ -210,11 +214,32 @@ export const teacherFinalizeVenue = publicProcedure
     await db.doc(`venues/${venue.id}`).update({ finalized: true });
   });
 
+/**
+ * Students can be edited only before the contest starts or after it ends, and only until the
+ * venue is finalized. This matches the teacher table, which is frozen during the same period.
+ */
+function assertVenueEditable(venue: Venue) {
+  if (venue.finalized) {
+    throw new TRPCError({ code: "FORBIDDEN", message: "Gara già finalizzata" });
+  }
+  if (venue.participationWindow && isFuture(venue.participationWindow.end)) {
+    throw new TRPCError({ code: "FORBIDDEN", message: "Gara in corso, modifiche non consentite" });
+  }
+}
+
+function venueRef(venueId: string) {
+  return db.doc(`venues/${venueId}`).withConverter(venueConverter);
+}
+
+function studentRef(venueId: string, studentId: string) {
+  return db.doc(`venues/${venueId}/students/${studentId}`).withConverter(studentConverter);
+}
+
 export const teacherApproveStudentRestore = publicProcedure
   .input(
     z.strictObject({
-      venueId: z.string(),
-      studentRestoreId: z.string(),
+      venueId: docId,
+      studentRestoreId: docId,
     }),
   )
   .mutation(async (opts) => {
@@ -223,59 +248,55 @@ export const teacherApproveStudentRestore = publicProcedure
 
     const [venue] = await checkVenue(data.venueId, ctx.claims, false);
 
-    const restoreDoc = await db
-      .doc(`studentRestores/${data.studentRestoreId}`)
-      .withConverter(studentRestoreConverter)
-      .get();
-    const restore = restoreDoc.data();
-    if (!restore || restore.venueId !== venue.id) {
-      throw new TRPCError({ code: "NOT_FOUND", message: "Richiesta non trovata" });
-    }
+    const previousUid = await db.runTransaction(async (t) => {
+      const restore = (
+        await t.get(
+          db.doc(`studentRestores/${data.studentRestoreId}`).withConverter(studentRestoreConverter),
+        )
+      ).data();
+      if (!restore || restore.venueId !== venue.id) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Richiesta non trovata" });
+      }
+      if (restore.status !== "pending") {
+        throw new TRPCError({ code: "BAD_REQUEST", message: "Richiesta non più valida" });
+      }
 
-    if (restore.status !== "pending") {
-      throw new TRPCError({ code: "BAD_REQUEST", message: "Richiesta non più valida" });
-    }
+      const ref = studentRef(venue.id, restore.studentId);
+      const student = (await t.get(ref)).data();
+      if (!student) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Studente non trovato" });
+      }
 
-    const student = await getStudent(venue.id, restore.studentId);
-    if (!student) {
-      throw new TRPCError({ code: "NOT_FOUND", message: "Studente non trovato" });
-    }
+      const otherRestores = await t.get(
+        db
+          .collection("studentRestores")
+          .where("venueId", "==", venue.id)
+          .where("studentId", "==", restore.studentId)
+          .withConverter(studentRestoreConverter),
+      );
 
-    if (student.uid) {
-      await auth.revokeRefreshTokens(student.uid).catch(() => {});
-    }
+      t.update(ref, { uid: restore.id, updatedAt: Timestamp.now() });
+      t.delete(db.doc(`studentRestores/${restore.id}`));
+      for (const doc of otherRestores.docs) {
+        if (doc.id !== restore.id && doc.data().status === "pending") {
+          t.update(doc.ref, { status: "revoked" });
+        }
+      }
 
-    const otherRestores = await db
-      .collection("studentRestores")
-      .where("venueId", "==", venue.id)
-      .where("studentId", "==", restore.studentId)
-      .withConverter(studentRestoreConverter)
-      .get();
-
-    const batch = db.batch();
-
-    batch.update(db.doc(`venues/${venue.id}/students/${restore.studentId}`), {
-      uid: restore.id,
-      updatedAt: Timestamp.now(),
+      return student.uid;
     });
 
-    batch.delete(db.doc(`studentRestores/${restore.id}`));
-
-    for (const doc of otherRestores.docs) {
-      if (doc.id !== restore.id && doc.data().status === "pending") {
-        batch.update(doc.ref, { status: "revoked" });
-      }
+    if (previousUid) {
+      await auth.revokeRefreshTokens(previousUid).catch(() => {});
     }
-
-    await batch.commit();
   });
 
 export const teacherRejectStudentRestore = publicProcedure
   .input(
     z.strictObject({
-      venueId: z.string(),
-      studentId: z.string(),
-      studentRestoreId: z.string().optional(),
+      venueId: docId,
+      studentId: docId,
+      studentRestoreId: docId.optional(),
     }),
   )
   .mutation(async (opts) => {
@@ -312,11 +333,11 @@ export const teacherRejectStudentRestore = publicProcedure
 export const teacherUpdateStudent = publicProcedure
   .input(
     z.strictObject({
-      venueId: z.string(),
+      venueId: docId,
       student: z.strictObject({
-        id: z.string(),
+        id: docId,
         userData: studentSchema.shape.userData.unwrap().optional(),
-        variantId: z.string().optional(),
+        variantId: docId.optional(),
         answers: z.record(z.string(), answerSchema).optional(),
         absent: z.boolean().optional(),
         disabled: z.boolean().optional(),
@@ -326,115 +347,109 @@ export const teacherUpdateStudent = publicProcedure
   )
   .mutation(async (opts) => {
     const { input: data, ctx } = opts;
-    logger.info("Teacher update student received", { data });
+    logger.info("Teacher update student received", {
+      venueId: data.venueId,
+      studentId: data.student.id,
+    });
 
-    const [venue, contest] = await checkVenue(data.venueId, ctx.claims, false);
-
-    if (venue.finalized) {
-      throw new TRPCError({ code: "FORBIDDEN", message: "Gara già finalizzata" });
-    }
-
-    if (
-      venue.participationWindow &&
-      isPast(venue.participationWindow.start) &&
-      isFuture(venue.participationWindow.end)
-    ) {
-      throw new TRPCError({
-        code: "FORBIDDEN",
-        message: "Gara in corso, modifiche non consentite",
-      });
-    }
-
-    const studentRef = db
-      .doc(`venues/${venue.id}/students/${data.student.id}`)
-      .withConverter(studentConverter);
-    const existingDoc = await studentRef.get();
-    const existingStudent = existingDoc.data();
-
-    if (!existingStudent && !contest.allowStudentImport) {
-      throw new TRPCError({
-        code: "FORBIDDEN",
-        message: "Aggiunta di studenti non consentita",
-      });
-    }
-
+    const [{ id: venueId }, contest] = await checkVenue(data.venueId, ctx.claims, false);
     const variants = await getContestVariants(contest.id);
-    const variantId =
-      data.student.variantId ?? existingStudent?.variantId ?? Object.keys(variants)[0];
 
-    if (contest.hasVariants && variantId && !variants[variantId]) {
-      throw new TRPCError({
-        code: "BAD_REQUEST",
-        message: `Variante "${variantId}" non valida`,
-      });
-    }
+    const { score, revokeUid } = await db.runTransaction(async (t) => {
+      assertVenueEditable((await t.get(venueRef(venueId))).data()!);
 
-    const newUserData = data.student.userData ?? existingStudent?.userData;
-    const userDataHash = newUserData ? studentHash(contest, newUserData) : undefined;
+      const ref = studentRef(venueId, data.student.id);
+      const existing = (await t.get(ref)).data();
 
-    const isAbsent = data.student.absent ?? existingStudent?.absent ?? false;
-    const isDisabled = data.student.disabled ?? existingStudent?.disabled ?? false;
-    const newAnswers = data.student.answers ?? existingStudent?.answers ?? {};
+      // The client sends the whole student: only the fields that actually change are checked
+      // against the permissions of the contest.
+      const changes = (field: "answers" | "absent" | "disabled", fallback: unknown) =>
+        data.student[field] !== undefined &&
+        !isEqual(data.student[field], existing?.[field] ?? fallback);
 
-    const variant = variantId ? variants[variantId] : undefined;
-    const score =
-      !isAbsent && !isDisabled && variant
-        ? calcScore(
-            { answers: newAnswers, absent: isAbsent, disabled: isDisabled } as Student,
-            variant.schema,
-          )
-        : undefined;
+      if (!existing && !contest.allowStudentImport) {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Aggiunta di studenti non consentita" });
+      }
+      if (
+        existing &&
+        data.student.userData !== undefined &&
+        !isEqual(data.student.userData, existing.userData) &&
+        !contest.allowStudentEdit
+      ) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Modifica dei dati degli studenti non consentita",
+        });
+      }
+      if ((changes("answers", {}) || changes("absent", false)) && !contest.allowAnswerEdit) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Modifica delle risposte non consentita",
+        });
+      }
+      if (data.student.disabled && changes("disabled", false) && !contest.allowStudentDelete) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Cancellazione studenti non consentita",
+        });
+      }
 
-    if (data.student.disabled && existingStudent?.uid) {
-      await auth.revokeRefreshTokens(existingStudent.uid).catch(() => {});
-    }
+      const variantId = data.student.variantId ?? existing?.variantId ?? Object.keys(variants)[0];
+      if (contest.hasVariants && variantId && !variants[variantId]) {
+        throw new TRPCError({ code: "BAD_REQUEST", message: `Variante "${variantId}" non valida` });
+      }
 
-    if (existingStudent) {
-      const updateData: Record<string, any> = {
-        updatedAt: Timestamp.now(),
-      };
-      if (data.student.userData !== undefined) {
-        updateData.userData = data.student.userData;
-        if (userDataHash) updateData.userDataHash = userDataHash;
-      }
-      if (data.student.variantId !== undefined) {
-        updateData.variantId = data.student.variantId;
-      }
-      if (data.student.answers !== undefined) {
-        updateData.answers = data.student.answers;
-      }
-      if (data.student.absent !== undefined) {
-        updateData.absent = data.student.absent;
-      }
-      if (data.student.disabled !== undefined) {
-        updateData.disabled = data.student.disabled;
-      }
-      if (data.student.extraData !== undefined) {
-        updateData.extraData = data.student.extraData;
-      }
-      if (score === undefined) {
-        updateData.score = FieldValue.delete();
+      const absent = data.student.absent ?? existing?.absent ?? false;
+      const disabled = data.student.disabled ?? existing?.disabled ?? false;
+      const answers = data.student.answers ?? existing?.answers ?? {};
+      const variant = variantId ? variants[variantId] : undefined;
+      const score = calcScore({ id: data.student.id, answers, absent, disabled }, variant?.schema);
+
+      if (existing) {
+        const updateData: Record<string, any> = {
+          updatedAt: Timestamp.now(),
+          score: score ?? FieldValue.delete(),
+        };
+        if (data.student.userData !== undefined) {
+          updateData.userData = data.student.userData;
+          // Only students that logged in online have a hash, used to detect duplicate logins:
+          // keep it in sync, but never add one to students created by the teacher.
+          if (existing.userDataHash) {
+            updateData.userDataHash = studentHash(contest, data.student.userData);
+          }
+        }
+        if (data.student.variantId !== undefined) updateData.variantId = data.student.variantId;
+        if (data.student.answers !== undefined) updateData.answers = data.student.answers;
+        if (data.student.absent !== undefined) updateData.absent = data.student.absent;
+        if (data.student.disabled !== undefined) updateData.disabled = data.student.disabled;
+        if (data.student.extraData !== undefined) updateData.extraData = data.student.extraData;
+        t.update(ref, updateData);
       } else {
-        updateData.score = score;
+        const now = new Date();
+        const student: Student = {
+          id: data.student.id,
+          contestId: contest.id,
+          venueId,
+          userData: data.student.userData ?? {},
+          answers,
+          absent,
+          disabled,
+          createdAt: now,
+          updatedAt: now,
+        };
+        if (variantId) student.variantId = variantId;
+        if (data.student.extraData) student.extraData = data.student.extraData;
+        if (score !== undefined) student.score = score;
+        t.set(ref, student);
       }
 
-      await db.doc(`venues/${venue.id}/students/${data.student.id}`).update(updateData);
-    } else {
-      await studentRef.set({
-        id: data.student.id,
-        contestId: contest.id,
-        venueId: venue.id,
-        userData: data.student.userData ?? {},
-        ...(userDataHash ? { userDataHash } : {}),
-        ...(variantId ? { variantId } : {}),
-        answers: newAnswers,
-        absent: isAbsent,
-        disabled: isDisabled,
-        ...(data.student.extraData ? { extraData: data.student.extraData } : {}),
-        ...(score === undefined ? {} : { score }),
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      } as Student);
+      const revokeUid =
+        data.student.disabled && changes("disabled", false) ? existing?.uid : undefined;
+      return { score, revokeUid };
+    });
+
+    if (revokeUid) {
+      await auth.revokeRefreshTokens(revokeUid).catch(() => {});
     }
 
     return { id: data.student.id, score };
@@ -443,65 +458,74 @@ export const teacherUpdateStudent = publicProcedure
 export const teacherSetStudentsDisabled = publicProcedure
   .input(
     z.strictObject({
-      venueId: z.string(),
-      studentIds: z.array(z.string()).min(1),
-      disabled: z.boolean().default(true),
+      venueId: docId,
+      studentIds: z.array(docId).min(1).max(2000),
+      disabled: z.boolean(),
     }),
   )
   .mutation(async (opts) => {
     const { input: data, ctx } = opts;
-    logger.info("Teacher set students disabled received", { data });
+    logger.info("Teacher set students disabled received", {
+      venueId: data.venueId,
+      count: data.studentIds.length,
+      disabled: data.disabled,
+    });
 
     const [venue, contest] = await checkVenue(data.venueId, ctx.claims, false);
-
-    if (venue.finalized) {
-      throw new TRPCError({ code: "FORBIDDEN", message: "Gara già finalizzata" });
-    }
-
-    if (
-      venue.participationWindow &&
-      isPast(venue.participationWindow.start) &&
-      isFuture(venue.participationWindow.end)
-    ) {
-      throw new TRPCError({
-        code: "FORBIDDEN",
-        message: "Gara in corso, modifiche non consentite",
-      });
-    }
+    assertVenueEditable(venue);
 
     if (data.disabled && !contest.allowStudentDelete) {
-      throw new TRPCError({
-        code: "FORBIDDEN",
-        message: "Cancellazione studenti non consentita",
-      });
+      throw new TRPCError({ code: "FORBIDDEN", message: "Cancellazione studenti non consentita" });
     }
 
-    for (const studentChunk of chunk(data.studentIds, 500)) {
+    // Check every student before writing anything, so that a wrong id doesn't leave the
+    // operation half done.
+    const refs = uniq(data.studentIds).map((id) => studentRef(venue.id, id));
+    const snapshots = (await db.getAll(...refs)) as DocumentSnapshot<Student>[];
+    const missing = snapshots.filter((snap) => !snap.exists).map((snap) => snap.id);
+    if (missing.length > 0) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: `Studenti non trovati: ${missing.join(", ")}`,
+      });
+    }
+    const students = snapshots.map((snap) => snap.data()!);
+
+    const variants = data.disabled ? {} : await getContestVariants(contest.id);
+
+    for (const studentChunk of chunk(students, 500)) {
       const batch = db.batch();
-      for (const studentId of studentChunk) {
-        const ref = db.doc(`venues/${venue.id}/students/${studentId}`);
-        batch.update(ref, {
+      for (const student of studentChunk) {
+        // Re-enabled students get their score back.
+        const score = data.disabled
+          ? undefined
+          : calcScore({ ...student, disabled: false }, variants[student.variantId!]?.schema);
+        batch.update(studentRef(venue.id, student.id), {
           disabled: data.disabled,
           updatedAt: Timestamp.now(),
-          ...(data.disabled ? { score: FieldValue.delete() } : {}),
+          score: score ?? FieldValue.delete(),
         });
       }
       await batch.commit();
     }
 
-    return { count: data.studentIds.length };
+    if (data.disabled) {
+      await revokeTokens(students);
+    }
+
+    return { count: students.length };
   });
 
 export const teacherImportStudents = publicProcedure
   .input(
     z.strictObject({
-      venueId: z.string(),
+      venueId: docId,
       students: z
         .array(
           z.strictObject({
-            id: z.string().optional(),
+            id: docId.optional(),
             userData: studentSchema.shape.userData.unwrap().required(),
-            variantId: z.string().optional(),
+            variantId: docId.optional(),
             answers: z.record(z.string(), answerSchema).optional().default({}),
             absent: z.boolean().optional().default(false),
             extraData: z.record(z.string(), z.any()).optional().default({ imported: true }),
@@ -519,76 +543,76 @@ export const teacherImportStudents = publicProcedure
     });
 
     const [venue, contest] = await checkVenue(data.venueId, ctx.claims, false);
+    assertVenueEditable(venue);
 
-    if (venue.finalized) {
-      throw new TRPCError({ code: "FORBIDDEN", message: "Gara già finalizzata" });
+    if (!contest.allowStudentImport) {
+      throw new TRPCError({ code: "FORBIDDEN", message: "Importazione studenti non consentita" });
     }
-
     if (
-      venue.participationWindow &&
-      isPast(venue.participationWindow.start) &&
-      isFuture(venue.participationWindow.end)
+      !contest.allowAnswerEdit &&
+      data.students.some((student) => Object.keys(student.answers).length > 0 || student.absent)
     ) {
       throw new TRPCError({
         code: "FORBIDDEN",
-        message: "Gara in corso, modifiche non consentite",
-      });
-    }
-
-    if (!contest.allowStudentImport) {
-      throw new TRPCError({
-        code: "FORBIDDEN",
-        message: "Importazione studenti non consentita",
+        message: "Importazione delle risposte non consentita",
       });
     }
 
     const variants = await getContestVariants(contest.id);
     const defaultVariantId = Object.keys(variants)[0];
 
-    const preparedStudents = data.students.map((student) => {
+    const now = new Date();
+    const preparedStudents = data.students.map((student): Student => {
       const variantId = student.variantId ?? defaultVariantId;
       if (contest.hasVariants && (!variantId || !variants[variantId])) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: `Variante "${variantId}" non valida`,
-        });
+        throw new TRPCError({ code: "BAD_REQUEST", message: `Variante "${variantId}" non valida` });
       }
 
       const id = student.id ?? crypto.randomUUID();
       const variant = variantId ? variants[variantId] : undefined;
-      const score =
-        !student.absent && variant
-          ? calcScore(
-              { answers: student.answers, absent: student.absent, disabled: false } as Student,
-              variant.schema,
-            )
-          : undefined;
-      const userDataHash = studentHash(contest, student.userData);
+      const score = calcScore(
+        { id, answers: student.answers, absent: student.absent, disabled: false },
+        variant?.schema,
+      );
 
-      return {
+      // Imported students don't get a `userDataHash`: it is only used to detect students that
+      // log in online more than once.
+      const prepared: Student = {
         id,
         contestId: contest.id,
         venueId: venue.id,
         userData: student.userData,
-        userDataHash,
-        ...(variantId ? { variantId } : {}),
         answers: student.answers,
         absent: student.absent,
         disabled: false,
         extraData: student.extraData,
-        ...(score === undefined ? {} : { score }),
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      } as Student;
+        createdAt: now,
+        updatedAt: now,
+      };
+      if (variantId) prepared.variantId = variantId;
+      if (score !== undefined) prepared.score = score;
+      return prepared;
     });
+
+    // Never overwrite existing students: check every id before writing anything.
+    const ids = preparedStudents.map((student) => student.id);
+    if (uniq(ids).length !== ids.length) {
+      throw new TRPCError({ code: "BAD_REQUEST", message: "Id degli studenti duplicati" });
+    }
+    const existing = (await db.getAll(...ids.map((id) => studentRef(venue.id, id)))).filter(
+      (snap) => snap.exists,
+    );
+    if (existing.length > 0) {
+      throw new TRPCError({
+        code: "CONFLICT",
+        message: `Studenti già esistenti: ${existing.map((snap) => snap.id).join(", ")}`,
+      });
+    }
 
     for (const studentChunk of chunk(preparedStudents, 500)) {
       const batch = db.batch();
       for (const student of studentChunk) {
-        const ref = db
-          .doc(`venues/${venue.id}/students/${student.id}`)
-          .withConverter(studentConverter);
-        batch.set(ref, student);
+        batch.create(studentRef(venue.id, student.id), student);
       }
       await batch.commit();
     }

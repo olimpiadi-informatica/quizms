@@ -11,6 +11,7 @@ import { announcementConverter } from "~/cli/utils/converters-admin";
 
 import { auth, db } from "../common";
 import { getContest, getUser, getVenue } from "./queries";
+import { docId } from "./schemas";
 import { publicProcedure } from "./trpc";
 
 export const adminLogin = publicProcedure
@@ -41,7 +42,7 @@ export const adminLogin = publicProcedure
 export const adminUpdateContestSettings = publicProcedure
   .input(
     z.strictObject({
-      contestId: z.string(),
+      contestId: docId,
       settings: z.strictObject({
         scoreVisibility: contestSchema.shape.scoreVisibility,
         instructions: contestSchema.shape.instructions.nullish(),
@@ -74,7 +75,7 @@ export const adminUpdateContestSettings = publicProcedure
 export const adminSetVenueFinalized = publicProcedure
   .input(
     z.strictObject({
-      venueId: z.string(),
+      venueId: docId,
       finalized: z.boolean(),
     }),
   )
@@ -97,7 +98,7 @@ export const adminSetVenueFinalized = publicProcedure
 export const adminCreateAnnouncement = publicProcedure
   .input(
     z.strictObject({
-      contestId: z.string(),
+      contestId: docId,
       level: announcementSchema.shape.level,
       title: z.string(),
       body: z.string(),

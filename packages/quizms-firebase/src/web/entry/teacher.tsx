@@ -124,26 +124,31 @@ function useStudents(venueId: string) {
   const auth = useAuth("teacher");
   const user = auth!.user;
 
-  const [students] = useCollection(`venues/${venueId}/students`, studentConverter, {
-    orderBy: "createdAt",
-  });
+  const [students, setStudentOptimistic] = useCollection(
+    `venues/${venueId}/students`,
+    studentConverter,
+    { orderBy: "createdAt" },
+  );
 
+  // The edit is shown immediately (with the score computed by the table) and rolled back if the
+  // API rejects it; the snapshot listener then brings the data saved by the server.
   const setStudent = useCallback(
-    async (student: Student) => {
-      await teacherUpdateStudent(user, {
-        venueId,
-        student: {
-          id: student.id,
-          userData: student.userData,
-          variantId: student.variantId,
-          answers: student.answers,
-          absent: student.absent,
-          disabled: student.disabled,
-          extraData: student.extraData,
-        },
-      });
-    },
-    [user, venueId],
+    (student: Student) =>
+      setStudentOptimistic(student, () =>
+        teacherUpdateStudent(user, {
+          venueId,
+          student: {
+            id: student.id,
+            userData: student.userData,
+            variantId: student.variantId,
+            answers: student.answers,
+            absent: student.absent,
+            disabled: student.disabled,
+            extraData: student.extraData,
+          },
+        }),
+      ),
+    [setStudentOptimistic, user, venueId],
   );
 
   return [students, setStudent] as const;
