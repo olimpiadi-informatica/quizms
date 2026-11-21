@@ -171,7 +171,7 @@ async function importStudents(
       const value = parseUserData(record[i], field, {
         dateFormat: "dd/MM/yyyy",
       });
-      const err = validateUserData(value, field, language);
+      const err = validateUserData(value, field, language, i18n);
       if (err) {
         const error = err[0];
         throw new Error(i18n._(msg`Error on row ${line}: ${error}`));
@@ -195,7 +195,7 @@ async function importStudents(
         contest.problemIds
           .map((id, i) => {
             const answer = parseAnswer(rawAnswers[i], variant.schema[id]);
-            const err = validateAnswerValue(answer?.value, variant.schema[id]);
+            const err = validateAnswerValue(answer?.value, variant.schema[id], i18n);
             if (err) {
               const error = err[0];
               throw new Error(i18n._(msg`Error on row ${line}: ${error}`));

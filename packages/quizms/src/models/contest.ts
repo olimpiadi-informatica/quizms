@@ -1,8 +1,9 @@
-import { t } from "@lingui/core/macro";
+import { msg } from "@lingui/core/macro";
 import { intlFormat, parse as parseDate, subMinutes } from "date-fns";
 import { deburr } from "lodash-es";
 import z from "zod";
 
+import { i18n as globalI18n, type I18n } from "~/i18n";
 import {
   completeLocalizedString,
   type LocalizedString,
@@ -201,6 +202,9 @@ export function parseUserData(
   }
 }
 
+/** Default `pattern_help` stored by older versions. */
+const legacyPatternHelp = "Assicurati che non ci siano numeri o simboli";
+
 /**
  * Validates a personal data field. The messages are in the UI language, with the texts of the
  * configuration in `language` (see `localize`).
@@ -209,6 +213,8 @@ export function validateUserData(
   rawValue: string | number | Date | undefined,
   schema: Contest["userData"][number],
   language?: string,
+  /** Instance for the messages; by default the one of the page (see `i18n`) */
+  i18n: I18n = globalI18n,
 ): [string] | null {
   if (rawValue == null) return null;
   const label = `"${localize(schema.label, language)}"`.toLowerCase();
@@ -218,17 +224,23 @@ export function validateUserData(
       // Anchored like the HTML `pattern` attribute, which must match the whole value.
       const re = new RegExp(`^(?:${schema.pattern})$`, "u");
       if (!re.test(value)) {
+        const custom = localize(schema.patternHelp, language);
+        // Contests imported by older versions have the old (Italian) default stored.
         const help =
-          localize(schema.patternHelp, language) ?? t`Make sure there are no numbers or symbols`;
+          custom && custom !== legacyPatternHelp
+            ? custom
+            : i18n._(msg`Make sure there are no numbers or symbols`);
         if (/[^\p{ASCII}]/u.test(value)) {
           return [
-            t`The field ${label} contains invalid characters. ${help} (check also that the encoding is UTF-8).`,
+            i18n._(
+              msg`The field ${label} contains invalid characters. ${help} (check also that the encoding is UTF-8).`,
+            ),
           ];
         }
-        return [t`The field ${label} contains invalid characters. ${help}.`];
+        return [i18n._(msg`The field ${label} contains invalid characters. ${help}.`)];
       }
       if (value.length > 256) {
-        return [t`The field ${label} cannot be longer than 256 characters.`];
+        return [i18n._(msg`The field ${label} cannot be longer than 256 characters.`)];
       }
       return null;
     }
@@ -236,13 +248,13 @@ export function validateUserData(
       const value = rawValue as number;
       const { min, max } = schema;
       if (!Number.isInteger(value)) {
-        return [t`The field ${label} must be an integer.`];
+        return [i18n._(msg`The field ${label} must be an integer.`)];
       }
       if (min !== undefined && value < min) {
-        return [t`The field ${label} must be greater than or equal to ${min}.`];
+        return [i18n._(msg`The field ${label} must be greater than or equal to ${min}.`)];
       }
       if (max !== undefined && value > max) {
-        return [t`The field ${label} must be less than or equal to ${max}.`];
+        return [i18n._(msg`The field ${label} must be less than or equal to ${max}.`)];
       }
       return null;
     }
@@ -250,11 +262,11 @@ export function validateUserData(
       const value = rawValue as Date;
       if (schema.min && value < schema.min) {
         const date = formatDate(schema.min);
-        return [t`The field ${label} must contain a date after ${date}.`];
+        return [i18n._(msg`The field ${label} must contain a date after ${date}.`)];
       }
       if (schema.max && value > schema.max) {
         const date = formatDate(schema.max);
-        return [t`The field ${label} must contain a date before ${date}.`];
+        return [i18n._(msg`The field ${label} must contain a date before ${date}.`)];
       }
       return null;
     }

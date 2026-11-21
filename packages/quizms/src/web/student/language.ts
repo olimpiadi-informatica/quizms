@@ -35,7 +35,12 @@ export function useStatementLanguageState(
   contest: Pick<Contest, "languages">,
   saved?: string,
   save?: (language: string) => Promise<void> | void,
+  options: {
+    /** Whether a change also becomes the UI language preference of the user (default `true`) */
+    rememberChoice?: boolean;
+  } = {},
 ): [string, (language: string) => void] {
+  const rememberChoice = options.rememberChoice ?? true;
   // Contests stored before `languages` existed don't have the field
   const languages = contest.languages ?? ["it"];
   const valid = (lang: string | null | undefined) =>
@@ -54,13 +59,13 @@ export function useStatementLanguageState(
         setSelected(lang);
         setToSave(lang);
       });
-      setPreferred(lang);
+      if (rememberChoice) setPreferred(lang);
 
       const url = new URL(window.location.href);
       url.searchParams.set("lang", lang);
       window.history.replaceState(window.history.state, "", url);
     },
-    [setPreferred],
+    [setPreferred, rememberChoice],
   );
 
   // Save only after the transition has committed. Saving updates `saved` with a synchronous

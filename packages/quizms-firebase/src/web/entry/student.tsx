@@ -42,28 +42,24 @@ export default function StudentEntry() {
     constraints: { id: website.contests },
   });
 
-  if (auth) {
-    return (
-      <StudentRestoring user={auth.user}>
-        <StudentInner
-          user={auth.user}
-          contests={contests}
-          venueId={auth.claims.venueId}
-          studentId={auth.claims.studentId}
-        />
-      </StudentRestoring>
-    );
-  }
-
-  return <StudentLogin contests={contests} />;
-}
-
-/** The login form is in the languages of the contests of this website. */
-function StudentLogin({ contests }: { contests: Contest[] }) {
+  // The login form and the restore screen are in the languages of the contests of this website;
+  // the contest itself is in the statement language (see `StudentProvider`).
   const languages = useMemo(() => contestsLanguages(contests), [contests]);
+
   return (
     <UiLanguageScope languages={languages}>
-      <StudentForm contests={contests} />
+      {auth ? (
+        <StudentRestoring user={auth.user}>
+          <StudentInner
+            user={auth.user}
+            contests={contests}
+            venueId={auth.claims.venueId}
+            studentId={auth.claims.studentId}
+          />
+        </StudentRestoring>
+      ) : (
+        <StudentForm contests={contests} />
+      )}
     </UiLanguageScope>
   );
 }

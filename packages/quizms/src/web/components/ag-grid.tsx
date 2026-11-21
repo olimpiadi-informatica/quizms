@@ -46,6 +46,8 @@ export default function AgGrid(props: AgGridReactProps) {
 
   return (
     <UnStyledAgGrid
+      // `localeText` is only read when the grid is created.
+      key={i18n.locale}
       theme={theme}
       localeText={i18n.locale === "it" ? AG_GRID_LOCALE_IT : AG_GRID_LOCALE_EN}
       rowSelection={{ mode: "singleRow", checkboxes: false }}

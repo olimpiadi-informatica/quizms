@@ -14,8 +14,11 @@ export function ImpersonationAuth({ children }: { children: ReactNode }) {
   const { studentId } = useParams();
   const student = students.find((s) => s.id === studentId);
 
-  // Opens in the student's language; the teacher can switch without saving it.
-  const [language, setLanguage] = useStatementLanguageState(contest, student?.language);
+  // Opens in the student's language; the teacher can switch without saving it, neither on the
+  // student nor as the teacher's own UI language.
+  const [language, setLanguage] = useStatementLanguageState(contest, student?.language, undefined, {
+    rememberChoice: false,
+  });
 
   if (!student) {
     return <Redirect to="/student" />;

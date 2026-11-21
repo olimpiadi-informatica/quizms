@@ -57,6 +57,21 @@ describe("useStatementLanguageState", () => {
     localStorage.clear();
   });
 
+  it("can leave the UI language preference alone", async () => {
+    const wrapper = ({ children }: { children: ReactNode }) => (
+      <UiLanguageRoot>{children}</UiLanguageRoot>
+    );
+    const { result } = await act(() =>
+      renderHook(
+        () => useStatementLanguageState(contest, undefined, undefined, { rememberChoice: false }),
+        { wrapper },
+      ),
+    );
+    act(() => result.current[1]("fr"));
+    expect(result.current[0]).toBe("fr");
+    expect(localStorage.getItem("quizms_ui_language")).toBeNull();
+  });
+
   it("ignores languages the contest does not have", () => {
     setUrl("?lang=de");
     const { result } = renderHook(() => useStatementLanguageState(contest, "es"));

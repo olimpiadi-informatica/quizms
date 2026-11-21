@@ -1,6 +1,6 @@
 import { beforeAll, describe, expect, it } from "vitest";
 
-import { activateUiLocale } from "~/i18n";
+import { activateUiLocale, loadUiLocale } from "~/i18n";
 import {
   type Contest,
   contestSchema,
@@ -328,6 +328,26 @@ describe("translatable texts", () => {
     expect(localize(parsed.name, undefined)).toBe("Gara");
     expect(localize(parsed.longName, "en")).toBe("Gara di prova");
     expect(localize(undefined, "en")).toBeUndefined();
+  });
+
+  it("ignores the Italian default of pattern_help stored by older versions", async () => {
+    const en = await loadUiLocale("en");
+    const parsed = contestSchema.parse({
+      ...baseContest,
+      userData: [
+        {
+          name: "surname",
+          label: "Cognome",
+          type: "text",
+          patternHelp: "Assicurati che non ci siano numeri o simboli",
+        },
+        { name: "name", label: "Nome", type: "text" },
+      ],
+      matchingRules: [],
+    });
+    expect(validateUserData("123", parsed.userData[0], "it", en)?.[0]).toMatch(
+      /Make sure there are no numbers or symbols\.$/,
+    );
   });
 
   it("validates personal data with the texts in the given language", () => {

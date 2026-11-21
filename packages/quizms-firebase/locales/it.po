@@ -35,6 +35,10 @@ msgstr "Gara"
 msgid "Contest instructions"
 msgstr "Istruzioni gara"
 
+#: packages/quizms-firebase/src/web/admin/contest-settings.tsx
+msgid "Contest instructions ({language})"
+msgstr "Istruzioni della gara ({language})"
+
 #: packages/quizms-firebase/src/web/admin/layout.tsx
 msgid "Contest management"
 msgstr "Gestione gara"

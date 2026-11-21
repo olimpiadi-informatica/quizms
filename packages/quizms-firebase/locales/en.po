@@ -35,6 +35,10 @@ msgstr "Contest"
 msgid "Contest instructions"
 msgstr "Contest instructions"
 
+#: packages/quizms-firebase/src/web/admin/contest-settings.tsx
+msgid "Contest instructions ({language})"
+msgstr "Contest instructions ({language})"
+
 #: packages/quizms-firebase/src/web/admin/layout.tsx
 msgid "Contest management"
 msgstr "Contest management"

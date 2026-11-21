@@ -1,7 +1,8 @@
-import { t } from "@lingui/core/macro";
+import { msg } from "@lingui/core/macro";
 import { xor } from "lodash-es";
 import z from "zod";
 
+import { i18n as globalI18n, type I18n } from "~/i18n";
 import type { Student } from "~/models/student";
 
 export const answerValues = {
@@ -141,19 +142,21 @@ export function displayAnswer(answer?: Answer): string {
 export function validateAnswerValue(
   answer: AnswerValue | undefined,
   schema: Schema[string],
+  /** Instance for the messages; by default the one of the page (see `i18n`) */
+  i18n: I18n = globalI18n,
 ): [string] | null {
   if (answer == null || answer === "") return null;
 
   switch (schema.type) {
     case "openNumber": {
       if (!Number.isInteger(answer as AnswerValue<"openNumber">)) {
-        return [t`The answer must be an integer`];
+        return [i18n._(msg`The answer must be an integer`)];
       }
       return null;
     }
     case "openText": {
       if ((answer as AnswerValue<"openText">).length > 256) {
-        return [t`The answer cannot be longer than 256 characters`];
+        return [i18n._(msg`The answer cannot be longer than 256 characters`)];
       }
       return null;
     }
@@ -162,7 +165,7 @@ export function validateAnswerValue(
         !schema.options.map((option) => option.id).includes(answer as AnswerValue<"multipleChoice">)
       ) {
         const option = String(answer);
-        return [t`Invalid option: ${option}`];
+        return [i18n._(msg`Invalid option: ${option}`)];
       }
       return null;
     }
@@ -172,11 +175,11 @@ export function validateAnswerValue(
       const wrong = mrAnswer.filter((value) => !optionValues.includes(value));
       if (wrong.length >= 1) {
         const options = wrong.join("");
-        return [t`Invalid options: ${options}`];
+        return [i18n._(msg`Invalid options: ${options}`)];
       }
       if (new Set(mrAnswer).size !== mrAnswer.length) {
         const options = mrAnswer.join("");
-        return [t`Repeated options: ${options}`];
+        return [i18n._(msg`Repeated options: ${options}`)];
       }
       return null;
     }

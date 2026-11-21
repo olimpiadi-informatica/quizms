@@ -8,7 +8,17 @@ import mdx from "./mdx";
 import python from "./python";
 import resolveMdxComponents from "./resolve-mdx-components";
 
+/**
+ * Registers the UI messages of this package in the app entries, so they load with the others:
+ * the statement components that use them are loaded only later.
+ */
+const i18n = {
+  name: "quizms-mdx:i18n",
+  api: { quizmsEntryImports: ["@olinfo/quizms-mdx/i18n"] },
+};
+
 export default [
+  i18n,
   asymptote(),
   blocklyBlocks(),
   blocklyEditor(),

@@ -49,11 +49,11 @@ export function ExecutionButtons({ evaluate, evaluated, selectedEvaluated, step,
             <SkipForward className="size-6" />
           </button>
         </div>
-        <div className="join-item tooltip" data-tip={t`Restart`}>
+        <div className="join-item tooltip" data-tip={t`Run from the start`}>
           <button
             type="button"
             className="btn btn-info rounded-[inherit]"
-            aria-label={t`Restart`}
+            aria-label={t`Run from the start`}
             disabled={!evaluated}
             onClick={() => {
               reset();

@@ -38,7 +38,7 @@ export function isStudentIncomplete(
 
   const answers = student.answers ?? {};
   for (const id of Object.keys(variant.schema)) {
-    const err = validateAnswerValue(answers[id]?.value, variant.schema[id]);
+    const err = validateAnswerValue(answers[id]?.value, variant.schema[id], i18n);
     if (err) {
       return err[0];
     }

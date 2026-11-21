@@ -76,7 +76,7 @@ msgid "Question {newId}"
 msgstr "Domanda {newId}"
 
 #: packages/quizms-mdx/src/components/blockly/toolbar/execution.tsx
-msgid "Restart"
+msgid "Run from the start"
 msgstr "Esegui da capo"
 
 #: packages/quizms-mdx/src/components/blockly/toolbar/execution.tsx

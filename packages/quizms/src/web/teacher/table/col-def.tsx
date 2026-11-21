@@ -81,7 +81,7 @@ export function columnDefinition(
         },
         valueParser: (params) => parseUserData(params.newValue, field),
         cellEditorParams: {
-          getValidationErrors: (params) => validateUserData(params.value, field, language),
+          getValidationErrors: (params) => validateUserData(params.value, field, language, i18n),
         } satisfies Partial<ICellEditorParams<Student>>,
       }),
     ),
@@ -141,7 +141,7 @@ export function columnDefinition(
         cellEditorParams: {
           getValidationErrors: (params) => {
             const schema = variants[params.cellEditorParams.data.variantId!].schema;
-            return validateAnswerValue(params.value, schema[id]);
+            return validateAnswerValue(params.value, schema[id], i18n);
           },
         } satisfies Partial<ICellEditorParams<Student>>,
       };

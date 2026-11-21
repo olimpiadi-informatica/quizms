@@ -16,6 +16,7 @@ export default defineConfig({
         "components-client": "src/components/client/index.ts",
         "components-schema": "src/components/schema/index.ts",
         "components-server": "src/components/server/index.ts",
+        i18n: "src/i18n.ts",
         "jsx-schema": "src/schema/jsx-runtime.ts",
         schema: "src/schema/parse.ts",
         vite: "src/vite/index.ts",

@@ -37,6 +37,7 @@
       "default": "./dist/components-client.js"
     },
     "./css": "./dist/quizms-mdx.css",
+    "./i18n": "./dist/i18n.js",
     "./jsx-schema": {
       "types": "./dist/jsx-schema.d.ts",
       "default": "./dist/jsx-schema.js"

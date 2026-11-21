@@ -2,6 +2,7 @@ import { useEffect, useId, useRef, useState } from "react";
 
 import { DisableTopBlocks } from "@blockly/disable-top-blocks";
 import { UiLanguageProvider } from "@olinfo/quizms/components";
+import { loadUiLocale } from "@olinfo/quizms/i18n";
 import "blockly/blocks";
 
 import {
@@ -44,7 +45,8 @@ export function BlocklyEditor() {
       if (data.cmd === "init") {
         // Loading the messages is asynchronous: only the latest `init` creates the workspace.
         const current = ++lastInit.current;
-        setBlocklyLanguage(data.language)
+        // The iframe's own UI messages too, so that switching doesn't suspend.
+        Promise.all([setBlocklyLanguage(data.language), loadUiLocale(data.language)])
           .then(() => {
             if (current !== lastInit.current) return;
             workspace.current?.dispose();
