@@ -1,38 +1,36 @@
 import { describe, expect, it } from "vitest";
 
+import enMessages from "../../../locales/blockly/en.po?blockly";
+import itMessages from "../../../locales/blockly/it.po?blockly";
 import { defaultInitialBlocks, defaultToolbox } from "./defaults";
 
-const categoryNames = (language: string | undefined) =>
-  defaultToolbox(language).contents.map((category) => ("name" in category ? category.name : ""));
+const categoryNames = () =>
+  defaultToolbox().contents.map((category) => ("name" in category ? category.name : ""));
+
+/** Resolves `%{BKY_KEY}` references like Blockly does. */
+const resolve = (messages: Record<string, string>, name: string) =>
+  name.replace(/%\{BKY_(\w+)\}/g, (_, key: string) => messages[key] ?? `<missing ${key}>`);
 
 describe("defaultToolbox", () => {
-  it("uses Italian names in single-language contests", () => {
-    expect(categoryNames(undefined)).toEqual([
+  it("names the categories with Blockly messages", () => {
+    expect(categoryNames().map((name) => resolve(itMessages, name))).toEqual([
       "Variabili",
       "Matematica",
       "Logica",
       "Cicli",
       "Liste",
     ]);
-  });
-
-  it("translates the category names", () => {
-    expect(categoryNames("it")).toEqual(categoryNames(undefined));
-    expect(categoryNames("en")).toEqual(["Variables", "Math", "Logic", "Loops", "Lists"]);
-  });
-
-  it("falls back to English for other languages", () => {
-    expect(categoryNames("de")).toEqual(categoryNames("en"));
-  });
-
-  it("has the same blocks in every language", () => {
-    const withoutNames = (language: string | undefined) =>
-      defaultToolbox(language).contents.map((category) => ({ ...category, name: undefined }));
-    expect(withoutNames("en")).toEqual(withoutNames("it"));
+    expect(categoryNames().map((name) => resolve(enMessages, name))).toEqual([
+      "Variables",
+      "Math",
+      "Logic",
+      "Loops",
+      "Lists",
+    ]);
   });
 
   it("contains the built-in categories", () => {
-    const toolbox = defaultToolbox("en");
+    const toolbox = defaultToolbox();
     expect(toolbox.kind).toBe("categoryToolbox");
     expect(toolbox.contents).toMatchObject([
       { kind: "category", categorystyle: "variable_category", custom: "VARIABLE" },
@@ -45,8 +43,8 @@ describe("defaultToolbox", () => {
 
   it("returns a new toolbox every time", () => {
     // The editor adds the custom blocks category to the toolbox it receives.
-    expect(defaultToolbox("en")).not.toBe(defaultToolbox("en"));
-    expect(defaultToolbox("en").contents).not.toBe(defaultToolbox("en").contents);
+    expect(defaultToolbox()).not.toBe(defaultToolbox());
+    expect(defaultToolbox().contents).not.toBe(defaultToolbox().contents);
   });
 });
 

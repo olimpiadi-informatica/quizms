@@ -27,6 +27,10 @@ msgstr "Check the solution"
 msgid "Clear answer"
 msgstr "Clear answer"
 
+#: packages/quizms-mdx/src/blockly-editor/modal.tsx
+msgid "Confirm"
+msgstr "Confirm"
+
 #: packages/quizms-mdx/src/components/blockly/toolbar/debug.tsx
 msgid "Copied!"
 msgstr "Copied!"

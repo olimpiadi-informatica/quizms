@@ -4,3 +4,9 @@ declare module "*.po" {
 
   export const messages: Messages;
 }
+
+// Blockly's messages, compiled by `scripts/blockly-po-plugin.mjs`.
+declare module "*.po?blockly" {
+  const messages: Record<string, string>;
+  export default messages;
+}

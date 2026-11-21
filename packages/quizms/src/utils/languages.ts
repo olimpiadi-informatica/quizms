@@ -25,43 +25,6 @@ export function parseLanguages(value: string): string[] {
   return languages;
 }
 
-const statementStrings = {
-  it: {
-    blocklyVariables: "Variabili",
-    blocklyMath: "Matematica",
-    blocklyLogic: "Logica",
-    blocklyLoops: "Cicli",
-    blocklyLists: "Liste",
-    blocklyCustom: "Esecuzione",
-  },
-  en: {
-    blocklyVariables: "Variables",
-    blocklyMath: "Math",
-    blocklyLogic: "Logic",
-    blocklyLoops: "Loops",
-    blocklyLists: "Lists",
-    blocklyCustom: "Execution",
-  },
-} satisfies Record<string, Record<string, string>>;
-
-export type StatementStringKey = keyof (typeof statementStrings)["it"];
-
-/** Languages that have an entry in the fixed-string dictionary. */
-export const statementStringLanguages = Object.keys(statementStrings);
-
-/**
- * Returns a fixed string of Blockly (toolbox categories) in the statement language.
- * TODO: move to the `.po` catalogs with the rest of Blockly's messages.
- *
- * - No language (single-language contests): Italian, for backward compatibility.
- * - A language without a dictionary entry: English.
- */
-export function statementString(language: string | undefined, key: StatementStringKey): string {
-  if (!language) return statementStrings.it[key];
-  const strings = statementStrings[language as keyof typeof statementStrings];
-  return (strings ?? statementStrings.en)[key];
-}
-
 /**
  * Name of the statement file of a language, as published by `quizms variants`: contests with
  * more than one language have one file per language.

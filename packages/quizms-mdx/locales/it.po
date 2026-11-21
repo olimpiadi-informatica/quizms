@@ -27,6 +27,10 @@ msgstr "Correggi la soluzione"
 msgid "Clear answer"
 msgstr "Cancella risposta"
 
+#: packages/quizms-mdx/src/blockly-editor/modal.tsx
+msgid "Confirm"
+msgstr "Conferma"
+
 #: packages/quizms-mdx/src/components/blockly/toolbar/debug.tsx
 msgid "Copied!"
 msgstr "Copiato!"

@@ -14,8 +14,8 @@
     "test:watch": "vitest",
     "test:emulator": "pnpm --filter @olinfo/quizms-firebase test:emulator",
     "test:e2e": "pnpm --filter @olinfo/quizms-e2e test:e2e",
-    "i18n:extract": "lingui extract --clean",
-    "i18n:check": "lingui extract --clean && git status --porcelain --untracked-files=all -- 'packages/*/locales/*.po' | (! grep .) || (echo 'The message catalogs are out of date: run `pnpm i18n:extract` and commit them.' && exit 1)"
+    "i18n:extract": "lingui extract --clean && pnpm --filter @olinfo/quizms-mdx blockly:po",
+    "i18n:check": "lingui extract --clean && pnpm --filter @olinfo/quizms-mdx blockly:po --check && git status --porcelain --untracked-files=all -- 'packages/*/locales' | (! grep .) || (echo 'The message catalogs are out of date: run `pnpm i18n:extract` and commit them.' && exit 1)"
   },
   "devDependencies": {
     "@changesets/changelog-github": "^1.0.1",

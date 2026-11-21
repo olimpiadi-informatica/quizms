@@ -5,6 +5,8 @@ import { defineConfig } from "vite";
 import dts from "vite-plugin-dts";
 import tsconfigPaths from "vite-tsconfig-paths";
 
+import blocklyPo from "./scripts/blockly-po-plugin.mjs";
+
 export default defineConfig({
   build: {
     lib: {
@@ -31,6 +33,8 @@ export default defineConfig({
     },
   },
   plugins: [
+    // Blockly's messages (`locales/blockly`); fails on untranslated messages.
+    blocklyPo({ failOnMissing: true }),
     // Compiles the macros and the `.po` catalogs; fails on untranslated messages.
     lingui({
       macroTransform: true,

@@ -76,7 +76,7 @@ export function Blockly<State>({
     terminated,
     {
       // Custom toolboxes are written by the problem author, in the language of the statement.
-      toolbox: toolbox ?? defaultToolbox(language),
+      toolbox: toolbox ?? defaultToolbox(),
       initialBlocks: savedBlocks ? JSON.parse(savedBlocks) : initialBlocks,
       customBlocks,
       language,
