@@ -37,12 +37,15 @@ describe("createAsymptoteInject", () => {
     expect(() => createAsymptoteInject(variant)).toThrow();
   });
 
-  // BUG: the type of an array is taken from its first element only (`inject.ts:36`), so
-  // `[1, 2.5]` becomes `int[] xs = { 1, 2.5 };`, which Asymptote rejects. This is easy to hit
-  // with variants generated in Python, where `1.0` is serialized as `1.0` but parsed by
-  // JavaScript as the integer `1`. Fix: use `real` when any element of the array is not an
-  // integer (and reject arrays mixing different types).
   it("declares arrays of reals starting with an integer value", () => {
     expect(createAsymptoteInject({ xs: [1, 2.5] })).toBe("real[] xs = { 1, 2.5 };");
+    expect(createAsymptoteInject({ xs: [[1], [2.5, 3]] })).toBe(
+      "real[][] xs = { { 1 }, { 2.5, 3 } };",
+    );
+  });
+
+  it("rejects arrays mixing different types", () => {
+    expect(() => createAsymptoteInject({ xs: [1, "a"] })).toThrow("same type");
+    expect(() => createAsymptoteInject({ xs: [[1], 2] })).toThrow("same type");
   });
 });

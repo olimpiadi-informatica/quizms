@@ -41,11 +41,13 @@ export function initGenerator(workspace: Workspace, customBlocks: CustomBlockPro
           "javascriptGenerator was initialized multiple times with different custom blocks",
         );
       }
-      javascriptGenerator.addReservedWords(customBlock.type);
     }
     return;
   }
 
+  // The custom blocks are functions in the interpreter: variables must not shadow them. Reserved
+  // words are kept by every later `init`, including the one done by `workspaceToCode`.
+  javascriptGenerator.addReservedWords(customBlocks.map((block) => block.type).join(","));
   javascriptGenerator.init(workspace);
   defineBlocksWithJsonArray(customBlocks);
 
