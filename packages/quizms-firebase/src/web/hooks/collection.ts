@@ -1,15 +1,6 @@
 import { useCallback } from "react";
 
-import {
-  type CollectionReference,
-  collection,
-  doc,
-  type FirestoreDataConverter,
-  getDocs,
-  onSnapshot,
-  type Query,
-  setDoc,
-} from "firebase/firestore";
+import { type FirestoreDataConverter, getDocs, onSnapshot, type Query } from "firebase/firestore";
 import { sortBy } from "lodash-es";
 import { useErrorBoundary } from "react-error-boundary";
 import useSWR, { type KeyedMutator, type MutatorOptions, type SWRConfiguration } from "swr";
@@ -33,7 +24,6 @@ export function useCollection<T extends { id: string }>(
   const db = useDb();
   const { showBoundary } = useErrorBoundary();
 
-  const ref = collection(db, path).withConverter(converter);
   const q = query(db, path, converter, options);
 
   const swrConfig: SWRConfiguration = {
@@ -47,9 +37,13 @@ export function useCollection<T extends { id: string }>(
   const key = `${path}?${JSON.stringify(options)}`;
   const { data, mutate } = useSWR<T[]>(key, () => fetcher(q), swrConfig);
 
+  /**
+   * Shows `newDoc` in the collection immediately and saves it with `save` (clients can't write to
+   * Firestore directly, writes go through the API). The change is rolled back if `save` fails.
+   */
   const setData = useCallback(
-    (newDoc: T) => setDocument(ref, newDoc, mutate, options),
-    [ref, mutate, options],
+    (newDoc: T, save: (doc: T) => Promise<unknown>) => setDocument(newDoc, save, mutate, options),
+    [mutate, options],
   );
 
   useSubscriptionListener<T[]>(
@@ -78,15 +72,14 @@ export function useCollection<T extends { id: string }>(
 }
 
 async function setDocument<T extends { id: string }>(
-  ref: CollectionReference<T>,
   newDoc: T,
+  save: (doc: T) => Promise<unknown>,
   mutator: KeyedMutator<T[]>,
   options?: QueryOption<T>,
 ): Promise<void> {
   await mutator(
     async (prev) => {
-      const docRef = doc(ref, newDoc.id);
-      await setDoc(docRef, newDoc);
+      await save(newDoc);
       return merge(prev, newDoc, options);
     },
     {

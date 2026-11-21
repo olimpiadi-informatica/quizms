@@ -4,6 +4,7 @@ import { Trans } from "@lingui/react/macro";
 import { UiLanguageScope, useLocalize } from "@olinfo/quizms/components";
 import type { Contest, Variant } from "@olinfo/quizms/models";
 import { contestsLanguages } from "@olinfo/quizms/utils";
+import type { User } from "firebase/auth";
 import { Link, Redirect, Route, Switch, useParams } from "wouter";
 
 import { AdminContext } from "./context";
@@ -11,23 +12,16 @@ import { AdminLayout } from "./layout";
 import { SchoolTable } from "./school-table";
 
 type AdminProviderProps = {
+  user: User;
   name: string;
   contests: Contest[];
   variants: Variant[];
-  setContest: (contest: Contest) => Promise<void>;
   logout: () => Promise<void>;
 };
 
-export function AdminProvider({
-  name,
-  contests,
-  setContest,
-  logout,
-  ...props
-}: AdminProviderProps) {
+export function AdminProvider({ name, contests, logout, ...props }: AdminProviderProps) {
   // The UI can be in any language of the contests.
   const languages = useMemo(() => contestsLanguages(contests), [contests]);
-
   return (
     <UiLanguageScope languages={languages}>
       <AdminLayout name={name} contests={contests} logout={logout}>
@@ -49,13 +43,7 @@ export function AdminProvider({
           )}
         </Route>
         <Route path="/:contestId" nest>
-          <ProviderInner
-            name={name}
-            contests={contests}
-            setContest={setContest}
-            logout={logout}
-            {...props}
-          />
+          <ProviderInner name={name} contests={contests} logout={logout} {...props} />
         </Route>
       </AdminLayout>
     </UiLanguageScope>

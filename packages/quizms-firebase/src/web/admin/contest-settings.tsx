@@ -2,6 +2,8 @@ import { Trans, useLingui } from "@lingui/react/macro";
 import { type Contest, localize } from "@olinfo/quizms/models";
 import { Form, SelectField, SubmitButton, TextAreaField } from "@olinfo/react-components";
 
+import { adminUpdateContestSettings } from "~/web/common/api";
+
 import { useAdmin } from "./context";
 
 type Values = { scoreVisibility: Contest["scoreVisibility"] } & Record<string, string | undefined>;
@@ -11,7 +13,7 @@ const instructionsField = (language: string) => `instructions-${language}`;
 
 export default function ContestSettings() {
   const { t } = useLingui();
-  const { contest, setContest } = useAdmin();
+  const { contest, user } = useAdmin();
 
   // The instructions can be translated: multilingual contests have one text per language.
   const languages = contest.languages ?? ["it"];
@@ -27,13 +29,23 @@ export default function ContestSettings() {
   };
 
   const save = async (values: Values) => {
-    const instructions = multilingual
-      ? Object.fromEntries(languages.map((lang) => [lang, values[instructionsField(lang)] ?? ""]))
-      : values.instructions;
-    await setContest({
-      ...contest,
-      scoreVisibility: values.scoreVisibility,
-      ...(instructions !== undefined && { instructions }),
+    let instructions: Contest["instructions"] | null = null;
+    if (multilingual) {
+      const entries = languages.map((lang) => [
+        lang,
+        values[instructionsField(lang)]?.trim() ?? "",
+      ]);
+      const hasAny = entries.some(([, val]) => val.length > 0);
+      instructions = hasAny ? Object.fromEntries(entries) : null;
+    } else {
+      instructions = values.instructions?.trim() || null;
+    }
+    await adminUpdateContestSettings(user, {
+      contestId: contest.id,
+      settings: {
+        scoreVisibility: values.scoreVisibility,
+        instructions,
+      },
     });
   };
 

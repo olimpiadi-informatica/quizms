@@ -7,6 +7,7 @@ allowBuilds:
   '@swc/core': false
   esbuild: false
   protobufjs: false
+  re2: false
   sharp: true
 
 linkWorkspacePackages: true

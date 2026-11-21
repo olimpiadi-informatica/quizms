@@ -1,12 +1,14 @@
 import { msg } from "@lingui/core/macro";
 import { i18n, type MessageDescriptor } from "@olinfo/quizms/i18n";
-import type { Student } from "@olinfo/quizms/models";
 import { createTRPCClient, httpLink, TRPCClientError } from "@trpc/client";
+import type { inferRouterInputs } from "@trpc/server";
 import { getIdToken, type User } from "firebase/auth";
 import superjson from "superjson";
 
 import type { AppRouter } from "~/functions/api";
 import type { ApiErrorReason } from "~/functions/api/errors";
+
+type Inputs = inferRouterInputs<AppRouter>;
 
 const trpc = createTRPCClient<AppRouter>({
   links: [
@@ -62,25 +64,28 @@ async function translateErrors<T>(promise: Promise<T>): Promise<T> {
   }
 }
 
-export function teacherLogin(body: { username: string; password: string }) {
+export function teacherLogin(body: Inputs["teacherLogin"]) {
   return translateErrors(trpc.teacherLogin.mutate(body));
 }
 
-export function adminLogin(body: { username: string; password: string }) {
+export function adminLogin(body: Inputs["adminLogin"]) {
   return translateErrors(trpc.adminLogin.mutate(body));
 }
 
-export function studentLogin(body: {
-  contestId: string;
-  token: string;
-  userData: Required<NonNullable<Student["userData"]>>;
-  extraData: Record<string, any>;
-}) {
+export function studentLogin(body: Inputs["studentLogin"]) {
   return translateErrors(trpc.studentLogin.mutate(body));
 }
 
 export async function setStudentLanguage(user: User, language: string) {
   await translateErrors(trpc.studentSetLanguage.mutate({ language }, { context: { user } }));
+}
+
+export async function studentSetAnswer(user: User, body: Inputs["studentSetAnswer"]) {
+  await trpc.studentSetAnswer.mutate(body, { context: { user } });
+}
+
+export async function studentSubmitContest(user: User) {
+  await trpc.studentSubmitContest.mutate(undefined, { context: { user } });
 }
 
 export async function startContestWindow(user: User, venueId: string) {
@@ -93,4 +98,48 @@ export async function stopContestWindow(user: User, venueId: string) {
 
 export async function finalizeVenue(user: User, venueId: string) {
   await translateErrors(trpc.teacherFinalizeVenue.mutate({ venueId }, { context: { user } }));
+}
+
+export async function teacherApproveStudentRestore(
+  user: User,
+  body: Inputs["teacherApproveStudentRestore"],
+) {
+  await trpc.teacherApproveStudentRestore.mutate(body, { context: { user } });
+}
+
+export async function teacherRejectStudentRestore(
+  user: User,
+  body: Inputs["teacherRejectStudentRestore"],
+) {
+  await trpc.teacherRejectStudentRestore.mutate(body, { context: { user } });
+}
+
+export async function teacherUpdateStudent(user: User, body: Inputs["teacherUpdateStudent"]) {
+  return await trpc.teacherUpdateStudent.mutate(body, { context: { user } });
+}
+
+export async function teacherSetStudentsDisabled(
+  user: User,
+  body: Inputs["teacherSetStudentsDisabled"],
+) {
+  return await trpc.teacherSetStudentsDisabled.mutate(body, { context: { user } });
+}
+
+export async function teacherImportStudents(user: User, body: Inputs["teacherImportStudents"]) {
+  return await trpc.teacherImportStudents.mutate(body, { context: { user } });
+}
+
+export async function adminUpdateContestSettings(
+  user: User,
+  body: Inputs["adminUpdateContestSettings"],
+) {
+  await trpc.adminUpdateContestSettings.mutate(body, { context: { user } });
+}
+
+export async function adminSetVenueFinalized(user: User, body: Inputs["adminSetVenueFinalized"]) {
+  await trpc.adminSetVenueFinalized.mutate(body, { context: { user } });
+}
+
+export async function adminCreateAnnouncement(user: User, body: Inputs["adminCreateAnnouncement"]) {
+  return await trpc.adminCreateAnnouncement.mutate(body, { context: { user } });
 }

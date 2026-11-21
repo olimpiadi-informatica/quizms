@@ -32,7 +32,6 @@ let env: RulesTestEnvironment;
 // windows are relative to the current time, with margins of several minutes.
 const now = new Date();
 const runningWindow = { start: subMinutes(now, 30), end: addMinutes(now, 30) };
-const endedWindow = { start: subMinutes(now, 90), end: subMinutes(now, 1) };
 
 const venue = {
   schoolId: "school",
@@ -209,30 +208,13 @@ describe("students", () => {
   });
 
   describe("create", () => {
-    it("is allowed to the teacher of the venue", async () => {
-      await assertSucceeds(setDoc(doc(asTeacher(), "venues/venue/students/new"), student));
-    });
-
-    it("requires the venueId to match the path", async () => {
-      await assertFails(
-        setDoc(doc(asTeacher(), "venues/venue/students/new"), {
-          ...student,
-          venueId: "other-venue",
-        }),
-      );
-    });
-
-    it("is denied to other teachers and students", async () => {
+    it("is denied to all clients", async () => {
+      await assertFails(setDoc(doc(asTeacher(), "venues/venue/students/new"), student));
       await assertFails(
         setDoc(doc(asTeacher("other-school"), "venues/venue/students/new"), student),
       );
-      await assertFails(
-        setDoc(doc(asTeacher(), "venues/other-venue/students/new"), {
-          ...student,
-          venueId: "other-venue",
-        }),
-      );
       await assertFails(setDoc(doc(asStudent(), "venues/venue/students/new"), student));
+      await assertFails(setDoc(doc(asAdmin(), "venues/venue/students/new"), student));
       await assertFails(setDoc(doc(unauthenticated(), "venues/venue/students/new"), student));
     });
   });
@@ -240,32 +222,19 @@ describe("students", () => {
   describe("update by the student", () => {
     const answers = { "1": { type: "openNumber", value: 42 } };
 
-    it("allows updating answers and extra data", async () => {
-      await assertSucceeds(
+    it("is denied to students", async () => {
+      await assertFails(
         updateDoc(doc(asStudent(), STUDENT_PATH), {
           answers,
           extraData: { tab: 1 },
           updatedAt: serverTimestamp(),
         }),
       );
-    });
-
-    it("allows setting the participation window of the venue", async () => {
-      // e.g. the student logged in before the window was extended by the admin.
-      const shorterWindow = { start: runningWindow.start, end: addMinutes(now, 10) };
-      await seed({ [STUDENT_PATH]: { ...student, participationWindow: shorterWindow } });
-      await assertSucceeds(
+      await assertFails(
         updateDoc(doc(asStudent(), STUDENT_PATH), {
           participationWindow: runningWindow,
           updatedAt: serverTimestamp(),
         }),
-      );
-    });
-
-    it("requires `updatedAt` to be the server time", async () => {
-      await assertFails(updateDoc(doc(asStudent(), STUDENT_PATH), { answers }));
-      await assertFails(
-        updateDoc(doc(asStudent(), STUDENT_PATH), { answers, updatedAt: new Date() }),
       );
     });
 
@@ -282,79 +251,11 @@ describe("students", () => {
         updateDoc(doc(asStudent(), STUDENT_PATH), { [key]: value, updatedAt: serverTimestamp() }),
       );
     });
-
-    it("denies changing token, contest and venue", async () => {
-      for (const data of [
-        { token: "other-token" },
-        { contestId: "other-contest" },
-        { venueId: "other-venue" },
-      ]) {
-        await assertFails(
-          updateDoc(doc(asStudent(), STUDENT_PATH), { ...data, updatedAt: serverTimestamp() }),
-        );
-      }
-    });
-
-    it("denies extending the participation window", async () => {
-      await assertFails(
-        updateDoc(doc(asStudent(), STUDENT_PATH), {
-          participationWindow: {
-            start: runningWindow.start,
-            end: addMinutes(runningWindow.end, 5),
-          },
-          updatedAt: serverTimestamp(),
-        }),
-      );
-      await assertFails(
-        updateDoc(doc(asStudent(), STUDENT_PATH), {
-          participationWindow: {
-            start: subMinutes(runningWindow.start, 5),
-            end: runningWindow.end,
-          },
-          updatedAt: serverTimestamp(),
-        }),
-      );
-    });
-
-    it("denies other students", async () => {
-      await assertFails(
-        updateDoc(doc(asStudent("other-uid"), STUDENT_PATH), {
-          answers,
-          updatedAt: serverTimestamp(),
-        }),
-      );
-    });
-
-    it("denies updates after the end of the participation window", async () => {
-      await seed({
-        "venues/venue": { ...venue, participationWindow: endedWindow },
-        [STUDENT_PATH]: { ...student, participationWindow: endedWindow },
-      });
-      await assertFails(
-        updateDoc(doc(asStudent(), STUDENT_PATH), { answers, updatedAt: serverTimestamp() }),
-      );
-    });
-
-    it("denies updates if the venue token changed", async () => {
-      // e.g. the teacher restarted the contest window: the old students cannot submit anymore.
-      await seed({ "venues/venue": { ...venue, token: "new-token" } });
-      await assertFails(
-        updateDoc(doc(asStudent(), STUDENT_PATH), { answers, updatedAt: serverTimestamp() }),
-      );
-    });
-
-    it("denies updates if the venue has no token", async () => {
-      const { token: _, ...venueWithoutToken } = venue;
-      await seed({ "venues/venue": venueWithoutToken });
-      await assertFails(
-        updateDoc(doc(asStudent(), STUDENT_PATH), { answers, updatedAt: serverTimestamp() }),
-      );
-    });
   });
 
   describe("update by the teacher", () => {
-    it("allows updating the student", async () => {
-      await assertSucceeds(
+    it("is denied to teachers", async () => {
+      await assertFails(
         updateDoc(doc(asTeacher(), STUDENT_PATH), {
           userData: { name: "Luigi", surname: "Rossi" },
           absent: true,
@@ -362,34 +263,8 @@ describe("students", () => {
           updatedAt: serverTimestamp(),
         }),
       );
-    });
-
-    it("allows updating after the end of the participation window", async () => {
-      await seed({ [STUDENT_PATH]: { ...student, participationWindow: endedWindow } });
-      await assertSucceeds(
+      await assertFails(
         updateDoc(doc(asTeacher(), STUDENT_PATH), { disabled: true, updatedAt: serverTimestamp() }),
-      );
-    });
-
-    it("requires `updatedAt` to be the server time", async () => {
-      await assertFails(updateDoc(doc(asTeacher(), STUDENT_PATH), { absent: true }));
-      await assertFails(
-        updateDoc(doc(asTeacher(), STUDENT_PATH), { absent: true, updatedAt: new Date() }),
-      );
-    });
-
-    it("denies updating `venueId` and `createdAt`", async () => {
-      await assertFails(
-        updateDoc(doc(asTeacher(), STUDENT_PATH), {
-          venueId: "other-venue",
-          updatedAt: serverTimestamp(),
-        }),
-      );
-      await assertFails(
-        updateDoc(doc(asTeacher(), STUDENT_PATH), {
-          createdAt: new Date(),
-          updatedAt: serverTimestamp(),
-        }),
       );
     });
 
@@ -404,13 +279,11 @@ describe("students", () => {
   });
 
   describe("delete", () => {
-    it("is allowed to the teacher of the venue", async () => {
-      await assertSucceeds(deleteDoc(doc(asTeacher(), STUDENT_PATH)));
-    });
-
-    it("is denied to others", async () => {
+    it("is denied to all clients", async () => {
+      await assertFails(deleteDoc(doc(asTeacher(), STUDENT_PATH)));
       await assertFails(deleteDoc(doc(asTeacher("other-school"), STUDENT_PATH)));
       await assertFails(deleteDoc(doc(asStudent(), STUDENT_PATH)));
+      await assertFails(deleteDoc(doc(asAdmin(), STUDENT_PATH)));
       await assertFails(deleteDoc(doc(unauthenticated(), STUDENT_PATH)));
     });
   });
@@ -424,14 +297,13 @@ describe("studentRestores", () => {
     await assertFails(getDoc(doc(asStudent(), RESTORE_PATH)));
   });
 
-  it("can be managed by the teacher of the venue", async () => {
+  it("are readable by the teacher of the venue", async () => {
     await assertSucceeds(getDoc(doc(asTeacher(), RESTORE_PATH)));
-    await assertSucceeds(updateDoc(doc(asTeacher(), RESTORE_PATH), { status: "approved" }));
-    await assertSucceeds(deleteDoc(doc(asTeacher(), RESTORE_PATH)));
   });
 
-  it("cannot be managed by other teachers", async () => {
-    await assertFails(getDoc(doc(asTeacher("other-school"), RESTORE_PATH)));
+  it("cannot be updated or deleted by teachers or other clients", async () => {
+    await assertFails(updateDoc(doc(asTeacher(), RESTORE_PATH), { status: "approved" }));
+    await assertFails(deleteDoc(doc(asTeacher(), RESTORE_PATH)));
     await assertFails(
       updateDoc(doc(asTeacher("other-school"), RESTORE_PATH), { status: "approved" }),
     );
@@ -467,14 +339,14 @@ describe("other collections", () => {
     }
   });
 
-  it("are fully accessible by admins", async () => {
+  it("are readable by admins, but not directly writable", async () => {
     const admin = asAdmin();
     await assertSucceeds(getDocs(collection(admin, "users")));
     await assertSucceeds(getDoc(doc(admin, "submissions/sub1")));
-    await assertSucceeds(updateDoc(doc(admin, "venues/venue"), { finalized: true }));
-    await assertSucceeds(updateDoc(doc(admin, STUDENT_PATH), { score: 10 }));
     await assertSucceeds(getDocs(collection(admin, "variants")));
-    await assertSucceeds(setDoc(doc(admin, "contests/new"), { name: "New" }));
-    await assertSucceeds(deleteDoc(doc(admin, "studentRestores/restore-uid")));
+    await assertFails(updateDoc(doc(admin, "venues/venue"), { finalized: true }));
+    await assertFails(updateDoc(doc(admin, STUDENT_PATH), { score: 10 }));
+    await assertFails(setDoc(doc(admin, "contests/new"), { name: "New" }));
+    await assertFails(deleteDoc(doc(admin, "studentRestores/restore-uid")));
   });
 });

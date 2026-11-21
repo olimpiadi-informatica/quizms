@@ -50,6 +50,8 @@ function makeTeacherContext({
     startContestWindow: vi.fn(),
     stopContestWindow: vi.fn(),
     finalizeVenue: vi.fn(),
+    importStudents: vi.fn(),
+    setStudentsDisabled: vi.fn(),
     logout: vi.fn(),
     getPdfStatements: vi.fn().mockResolvedValue({}),
     useAnnouncements: () => announcements,

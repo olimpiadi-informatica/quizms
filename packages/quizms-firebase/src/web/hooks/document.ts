@@ -1,15 +1,12 @@
-import { useCallback } from "react";
-
 import {
   type DocumentReference,
   doc,
   type FirestoreDataConverter,
   getDoc,
   onSnapshot,
-  setDoc,
 } from "firebase/firestore";
 import { useErrorBoundary } from "react-error-boundary";
-import useSWR, { type KeyedMutator, type MutatorOptions, type SWRConfiguration } from "swr";
+import useSWR, { type MutatorOptions, type SWRConfiguration } from "swr";
 
 import { useDb } from "~/web/common/base-login";
 
@@ -22,9 +19,9 @@ const mutationConfig: MutatorOptions = {
 };
 
 export function useDocument<T>(path: string, id: string, converter: FirestoreDataConverter<T>) {
-  const [data, setData] = useDocumentOptional<T>(path, id, converter);
+  const [data] = useDocumentOptional<T>(path, id, converter);
   if (!data) throw new Error(`Document ${path}/${id} not found`);
-  return [data, setData] as const;
+  return [data] as const;
 }
 
 export function useDocumentOptional<T>(
@@ -69,18 +66,8 @@ export function useDocumentOptional<T>(
     (data) => mutate(data, mutationConfig),
   );
 
-  const setData = useCallback((newData: T) => setDocument<T>(ref, newData, mutate), [mutate, ref]);
-  return [data![0], setData] as const;
-}
-
-async function setDocument<T>(ref: DocumentReference<T>, newDoc: T, mutator: KeyedMutator<[T?]>) {
-  await mutator(
-    async () => {
-      await setDoc(ref, newDoc);
-      return [newDoc];
-    },
-    { ...mutationConfig, optimisticData: [newDoc] },
-  );
+  // Clients can't write to Firestore directly: writes go through the API.
+  return [data![0]] as const;
 }
 
 async function fetcher<T>(ref: DocumentReference<T>): Promise<[T?]> {

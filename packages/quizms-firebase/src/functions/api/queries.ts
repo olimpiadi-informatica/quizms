@@ -48,6 +48,20 @@ export async function getUser(username: string) {
   return snapshot.docs[0]?.data();
 }
 
+export async function getVariant(variantId: string) {
+  const snapshot = await db.doc(`variants/${variantId}`).withConverter(variantConverter).get();
+  return snapshot.data();
+}
+
+export async function getContestVariants(contestId: string) {
+  const snapshot = await db
+    .collection("variants")
+    .withConverter(variantConverter)
+    .where("contestId", "==", contestId)
+    .get();
+  return Object.fromEntries(snapshot.docs.map((doc) => [doc.id, doc.data()]));
+}
+
 export async function getRandomVariant(contestId: string) {
   const snapshot = await db
     .collection("variants")

@@ -1,8 +1,12 @@
 // Helpers shared by the `*.emulator.test.ts` files. Not part of the build.
 import {
+  type Announcement,
+  announcementSchema,
   type Contest,
   contestSchema,
   type Student,
+  type StudentRestore,
+  studentRestoreSchema,
   studentSchema,
   type Variant,
   type Venue,
@@ -12,8 +16,10 @@ import {
 import type { Firestore } from "firebase-admin/firestore";
 
 import {
+  announcementConverter,
   contestConverter,
   studentConverter,
+  studentRestoreConverter,
   userConverter,
   variantConverter,
   venueConverter,
@@ -128,6 +134,31 @@ export function makeUser(data: Partial<User> & { id: string }): User {
   });
 }
 
+export function makeAnnouncement(data: Partial<Announcement> & { id: string }): Announcement {
+  return announcementSchema.parse({
+    contestIds: ["contest"],
+    level: "info",
+    title: "Title",
+    body: "Body",
+    createdAt: new Date(),
+    ...data,
+  });
+}
+
+export function makeStudentRestore(data: Partial<StudentRestore> & { id: string }): StudentRestore {
+  return studentRestoreSchema.parse({
+    studentId: "s1",
+    venueId: "venue",
+    token: "token",
+    name: "Mario",
+    surname: "Rossi",
+    approvalCode: 1234,
+    status: "pending",
+    createdAt: new Date(),
+    ...data,
+  });
+}
+
 export async function seed(
   db: Firestore,
   data: {
@@ -136,6 +167,8 @@ export async function seed(
     variants?: Variant[];
     students?: Student[];
     users?: User[];
+    announcements?: Announcement[];
+    studentRestores?: StudentRestore[];
   },
 ) {
   const batch = db.batch();
@@ -156,6 +189,18 @@ export async function seed(
   }
   for (const user of data.users ?? []) {
     batch.set(db.doc(`users/${user.id}`).withConverter(userConverter), user);
+  }
+  for (const announcement of data.announcements ?? []) {
+    batch.set(
+      db.doc(`announcements/${announcement.id}`).withConverter(announcementConverter),
+      announcement,
+    );
+  }
+  for (const restore of data.studentRestores ?? []) {
+    batch.set(
+      db.doc(`studentRestores/${restore.id}`).withConverter(studentRestoreConverter),
+      restore,
+    );
   }
   await batch.commit();
 }

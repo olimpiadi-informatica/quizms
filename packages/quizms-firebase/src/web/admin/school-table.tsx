@@ -5,6 +5,7 @@ import { AgGrid, Loading } from "@olinfo/quizms/components";
 import type { Student, Venue } from "@olinfo/quizms/models";
 import type { CellEditRequestEvent, ColDef, ICellRendererParams } from "ag-grid-community";
 
+import { adminSetVenueFinalized } from "~/web/common/api";
 import { venueConverter } from "~/web/common/converters";
 import { useCollection } from "~/web/hooks";
 import { useCount } from "~/web/hooks/count";
@@ -13,9 +14,9 @@ import { useAdmin } from "./context";
 
 export function SchoolTable() {
   const { t } = useLingui();
-  const { contest } = useAdmin();
+  const { contest, user } = useAdmin();
 
-  const [venues, setVenue] = useCollection("venues", venueConverter, {
+  const [venues] = useCollection("venues", venueConverter, {
     constraints: { contestId: contest.id },
   });
 
@@ -63,7 +64,7 @@ export function SchoolTable() {
   const onCellEditRequest = async (ev: CellEditRequestEvent) => {
     const venue = ev.data as Venue;
     if (ev.colDef.field === "finalized") {
-      await setVenue({ ...venue, finalized: ev.newValue });
+      await adminSetVenueFinalized(user, { venueId: venue.id, finalized: ev.newValue });
     }
     ev.api.refreshCells({ force: true });
   };

@@ -21,11 +21,11 @@ import {
 } from "~/models";
 import { randomId } from "~/utils";
 import { useContentLanguage } from "~/web/components";
-import { useTeacher, useTeacherStudents } from "~/web/teacher/context";
+import { useTeacher } from "~/web/teacher/context";
 
 export function ImportModal({ ref }: { ref: RefObject<HTMLDialogElement | null> }) {
   const { t, i18n } = useLingui();
-  const { contest, venue } = useTeacher();
+  const { contest, venue, variants, importStudents } = useTeacher();
 
   const language = useContentLanguage();
   const labels = contest.userData.map((field) => localize(field.label, language));
@@ -38,9 +38,6 @@ export function ImportModal({ ref }: { ref: RefObject<HTMLDialogElement | null> 
     .filter((field) => field.type === "date")
     .map((field) => localize(field.label, language).toLowerCase());
 
-  const { variants } = useTeacher();
-  const [, setStudent] = useTeacherStudents();
-
   const [uploadCount, setUploadCount] = useState(0);
 
   const fields = dates.join(", ");
@@ -50,7 +47,7 @@ export function ImportModal({ ref }: { ref: RefObject<HTMLDialogElement | null> 
     setUploadCount((count) => count + 1);
     try {
       const text = await file.text();
-      await importStudents(text, contest, variants, venue, setStudent, i18n, language);
+      await parseAndImportStudents(text, contest, variants, venue, importStudents, i18n, language);
     } finally {
       ref.current?.close();
     }
@@ -142,12 +139,12 @@ function columnName(index: number): string {
   return columnName(Math.floor(index / 26) - 1) + name;
 }
 
-async function importStudents(
+async function parseAndImportStudents(
   file: string,
   contest: Contest,
   variants: Record<string, Variant>,
   venue: Venue,
-  addStudent: (student: Student) => Promise<void>,
+  importStudents: (students: Student[]) => Promise<unknown>,
   i18n: I18n,
   language: string | undefined,
 ) {
@@ -226,5 +223,5 @@ async function importStudents(
     }
     students.push(student);
   }
-  await Promise.all(students.map((student) => addStudent(student)));
+  await importStudents(students);
 }

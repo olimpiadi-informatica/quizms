@@ -78,6 +78,9 @@ const onlineContestSettings = z.strictObject({
   allowRestart: z.boolean(),
 });
 
+export const scoreVisibilitySchema = z.enum(["never", "always", "finalized"]);
+export type ScoreVisibility = z.infer<typeof scoreVisibilitySchema>;
+
 export const contestSchema = z
   .strictObject({
     // Identificativo univoco della gara
@@ -113,7 +116,7 @@ export const contestSchema = z
     instructions: localizedStringSchema.optional(),
 
     // Possibilità per gli insegnanti di vedere il punteggio degli studenti
-    scoreVisibility: z.enum(["never", "always", "finalized"]),
+    scoreVisibility: scoreVisibilitySchema,
 
     // Lingue dei testi della gara, la prima è quella predefinita
     languages: z.string().regex(languageCodeRegex).array().nonempty().default(["it"]),
