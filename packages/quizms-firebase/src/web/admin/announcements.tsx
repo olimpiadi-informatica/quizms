@@ -1,7 +1,6 @@
 import { Fragment, type RefObject, useReducer, useRef } from "react";
 
 import type { Announcement } from "@olinfo/quizms/models";
-import { randomId } from "@olinfo/quizms/utils";
 import {
   Button,
   CardActions,
@@ -16,6 +15,7 @@ import {
 import { CircleX, Info, TriangleAlert } from "lucide-react";
 import Markdown from "react-markdown";
 
+import { adminCreateAnnouncement } from "~/web/common/api";
 import { announcementConverter } from "~/web/common/converters";
 import { useCollection } from "~/web/hooks";
 
@@ -25,7 +25,7 @@ export default function Announcements() {
   const { contest } = useAdmin();
   const ref = useRef<HTMLDialogElement>(null);
 
-  const [announcements, addAnnouncement] = useCollection("announcements", announcementConverter, {
+  const [announcements] = useCollection("announcements", announcementConverter, {
     arrayConstraints: {
       contestIds: contest.id,
     },
@@ -58,19 +58,13 @@ export default function Announcements() {
           Aggiungi comunicazione
         </Button>
       </CardActions>
-      <AnnouncementModal ref={ref} addAnnouncement={addAnnouncement} />
+      <AnnouncementModal ref={ref} />
     </>
   );
 }
 
-function AnnouncementModal({
-  addAnnouncement,
-  ref,
-}: {
-  addAnnouncement: (announcement: Announcement) => Promise<void>;
-  ref: RefObject<HTMLDialogElement | null>;
-}) {
-  const { contest } = useAdmin();
+function AnnouncementModal({ ref }: { ref: RefObject<HTMLDialogElement | null> }) {
+  const { contest, user } = useAdmin();
   const [id, nextId] = useReducer((prev) => prev + 1, 0);
 
   const finalize = async ({
@@ -79,10 +73,8 @@ function AnnouncementModal({
     body,
   }: Pick<Announcement, "level" | "title" | "body">) => {
     try {
-      await addAnnouncement({
-        id: randomId(),
-        createdAt: new Date(),
-        contestIds: [contest.id],
+      await adminCreateAnnouncement(user, {
+        contestId: contest.id,
         level,
         title,
         body,

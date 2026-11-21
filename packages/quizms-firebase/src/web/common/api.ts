@@ -91,3 +91,38 @@ export async function teacherRejectStudentRestore(
 ) {
   await trpc.teacherRejectStudentRestore.mutate(body, { context: { user } });
 }
+
+export async function adminUpdateContestSettings(
+  user: User,
+  body: {
+    contestId: string;
+    settings: {
+      scoreVisibility: "never" | "always" | "finalized";
+      instructions?: string | null;
+    };
+  },
+) {
+  await trpc.adminUpdateContestSettings.mutate(body, { context: { user } });
+}
+
+export async function adminSetVenueFinalized(
+  user: User,
+  body: {
+    venueId: string;
+    finalized: boolean;
+  },
+) {
+  await trpc.adminSetVenueFinalized.mutate(body, { context: { user } });
+}
+
+export async function adminCreateAnnouncement(
+  user: User,
+  body: {
+    contestId: string;
+    level: "info" | "warning" | "error";
+    title: string;
+    body: string;
+  },
+) {
+  return await trpc.adminCreateAnnouncement.mutate(body, { context: { user } });
+}

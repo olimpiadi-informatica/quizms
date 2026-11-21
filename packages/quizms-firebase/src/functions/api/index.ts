@@ -2,7 +2,12 @@ import * as trpcExpress from "@trpc/server/adapters/express";
 import express from "express";
 import { logger } from "firebase-functions/logger";
 
-import { adminLogin } from "./admin";
+import {
+  adminCreateAnnouncement,
+  adminLogin,
+  adminSetVenueFinalized,
+  adminUpdateContestSettings,
+} from "./admin";
 import {
   studentLogin,
   studentSetAnswer,
@@ -21,6 +26,9 @@ import { createCallerFactory, createContext, router } from "./trpc";
 
 export const appRouter = router({
   adminLogin,
+  adminUpdateContestSettings,
+  adminSetVenueFinalized,
+  adminCreateAnnouncement,
   studentLogin,
   studentSetAnswer,
   studentSetLanguage,

@@ -16,7 +16,7 @@ function AdminInner({ user }: { user: User }) {
   const db = useDb();
   const name = user.displayName ?? "Utente anonimo";
 
-  const [contests, setContest] = useCollection("contests", contestConverter);
+  const [contests] = useCollection("contests", contestConverter);
 
   const [variants] = useCollection("variants", variantConverter);
 
@@ -27,9 +27,9 @@ function AdminInner({ user }: { user: User }) {
 
   return (
     <AdminProvider
+      user={user}
       name={name}
       contests={contests}
-      setContest={setContest}
       logout={logout}
       variants={variants}
     />

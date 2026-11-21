@@ -1,4 +1,5 @@
 import {
+  announcementSchema,
   contestSchema,
   studentRestoreSchema,
   studentSchema,
@@ -49,6 +50,7 @@ function converter<T extends object>(schema: z.core.$ZodType<T>): FirestoreDataC
   };
 }
 
+export const announcementConverter = converter(announcementSchema);
 export const contestConverter = converter(contestSchema);
 export const venueConverter = converter(venueSchema);
 export const studentConverter = converter(studentSchema);

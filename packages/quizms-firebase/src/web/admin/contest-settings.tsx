@@ -1,13 +1,18 @@
 import type { Contest } from "@olinfo/quizms/models";
 import { Form, SelectField, SubmitButton, TextAreaField } from "@olinfo/react-components";
 
+import { adminUpdateContestSettings } from "~/web/common/api";
+
 import { useAdmin } from "./context";
 
 export default function ContestSettings() {
-  const { contest, setContest } = useAdmin();
+  const { contest, user } = useAdmin();
 
   const save = async (newContest: Pick<Contest, "instructions" | "scoreVisibility">) => {
-    await setContest({ ...contest, ...newContest });
+    await adminUpdateContestSettings(user, {
+      contestId: contest.id,
+      settings: newContest,
+    });
   };
 
   return (
