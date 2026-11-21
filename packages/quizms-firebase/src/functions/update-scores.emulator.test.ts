@@ -97,12 +97,6 @@ describe("updateScoresHandler", () => {
     expect(await getScores()).toEqual({ s1: undefined });
   });
 
-  // BUG: `calcScore` returns `undefined` for absent or disabled students, and the handler then
-  // calls `t.update(ref, { score: undefined })` whenever the student had a score. The functions'
-  // Firestore instance (src/functions/common.ts) is not configured with
-  // `ignoreUndefinedProperties`, so the update throws "Cannot use \"undefined\" as a Firestore
-  // value" and the whole task fails, leaving the remaining students without an updated score.
-  // Fix (src/functions/update-scores.ts:33): write `score ?? FieldValue.delete()`.
   it("removes the score of students marked as absent", async () => {
     await seed(db, {
       students: [
