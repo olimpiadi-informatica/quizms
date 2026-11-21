@@ -1,16 +1,8 @@
 rules_version = '2';
 service cloud.firestore {
     match /databases/{database}/documents {
-        function hasTimestamp(field) {
-            return request.resource.data[field] == request.time;
-        }
-
         function isAuthenticated(id) {
             return request.auth != null && request.auth.uid == id;
-        }
-
-        function affectedKeys() {
-            return request.resource.data.diff(resource.data).affectedKeys();
         }
 
         function isTeacher() {
@@ -39,33 +31,11 @@ service cloud.firestore {
         }
 
         match /venues/{venueId}/students/{student} {
-            function checkToken() {
-                let venue = getVenue(venueId);
-                return venue != null
-                    && venue.data.token != null
-                    && venue.data.token == request.resource.data.token
-                    && venue.data.participationWindow.start == request.resource.data.participationWindow.start
-                    && venue.data.participationWindow.end >= request.resource.data.participationWindow.end
-                    && venue.data.contestId == request.resource.data.contestId
-                    && request.time <= resource.data.participationWindow.end + duration.value(10, 's');
-            }
-
-            function canStudentUpdate() {
-                let keys = affectedKeys();
-                return isAuthenticated(resource.data.uid)
-                    && checkToken()
-                    && keys.hasOnly(['answers', 'updatedAt', 'participationWindow', 'extraData'])
-                    && hasTimestamp('updatedAt');
-            }
-
             allow read: if isAuthenticated(resource.data.uid) || isTeacherVenue(venueId);
-            allow update: if canStudentUpdate();
         }
 
         match /studentRestores/{uid} {
             allow read: if isAuthenticated(uid) || isTeacherVenue(resource.data.venueId);
-            allow update: if isTeacherVenue(resource.data.venueId);
-            allow delete: if isTeacherVenue(resource.data.venueId);
         }
 
         match /variants/{variant} {
@@ -77,7 +47,8 @@ service cloud.firestore {
         }
 
         match /{document=**} {
-            allow read, write: if request.auth.token.role == 'admin';
+            allow read: if request.auth.token.role == 'admin';
+            allow write: if false;
         }
     }
 }
