@@ -158,7 +158,8 @@ export function validateUserData(
   switch (schema.type) {
     case "text": {
       const value = rawValue as string;
-      const re = new RegExp(schema.pattern, "u");
+      // Anchored like the HTML `pattern` attribute, which must match the whole value.
+      const re = new RegExp(`^(?:${schema.pattern})$`, "u");
       if (!re.test(value)) {
         const helpUtf8 = /[^\p{ASCII}]/u.test(value) ? " e che la codifica sia UTF-8" : "";
         return [

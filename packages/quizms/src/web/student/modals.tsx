@@ -48,7 +48,7 @@ export function PointsTable({ schema }: { schema: Schema }) {
             return (
               <tr key={problem}>
                 <td>{problem}</td>
-                <td>{displayAnswer(answer) ?? "-"}</td>
+                <td>{displayAnswer(answer) || "-"}</td>
                 <td>{getCorrectOptions(problemSchema)}</td>
                 <td>{calcProblemPoints(problemSchema, answer)}</td>
               </tr>
