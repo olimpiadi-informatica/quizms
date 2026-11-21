@@ -1,3 +1,4 @@
+import { Trans } from "@lingui/react/macro";
 import clsx from "clsx";
 import { CircleCheck, CircleHelp, CircleX } from "lucide-react";
 
@@ -12,7 +13,9 @@ type Props = {
 export function TestcaseSelector({ results, selectedTestcase, setSelectedTestcase }: Props) {
   return (
     <>
-      <div className="pl-2 text-xl font-bold max-sm:hidden lg:max-xl:hidden">Livello</div>
+      <div className="pl-2 text-xl font-bold max-sm:hidden lg:max-xl:hidden">
+        <Trans>Level</Trans>
+      </div>
       <div className="join">
         {results.map((result, index) => (
           <button

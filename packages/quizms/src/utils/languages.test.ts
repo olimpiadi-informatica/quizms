@@ -1,12 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import {
-  contestStatementFile,
-  localizedFileName,
-  parseLanguages,
-  statementString,
-  statementStringLanguages,
-} from "~/utils/languages";
+import { contestStatementFile, localizedFileName, parseLanguages } from "~/utils/languages";
 
 describe("parseLanguages", () => {
   it("parses a comma-separated list, trimming whitespace", () => {
@@ -27,25 +21,6 @@ describe("parseLanguages", () => {
 
   it("rejects duplicates", () => {
     expect(() => parseLanguages("it,en,it")).toThrow("Duplicate language code `it`");
-  });
-});
-
-describe("statementString", () => {
-  it("uses Italian when no language is given", () => {
-    expect(statementString(undefined, "question")).toBe("Domanda");
-  });
-
-  it("uses the requested language", () => {
-    expect(statementString("it", "question")).toBe("Domanda");
-    expect(statementString("en", "question")).toBe("Question");
-  });
-
-  it("falls back to English for unknown languages", () => {
-    expect(statementString("fr", "variant")).toBe("Variant");
-  });
-
-  it("lists the languages with a dictionary", () => {
-    expect(statementStringLanguages).toEqual(["it", "en"]);
   });
 });
 

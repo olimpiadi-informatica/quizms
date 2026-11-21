@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
+import { Trans, useLingui } from "@lingui/react/macro";
 import { Button, Code, Modal } from "@olinfo/react-components";
 import clsx from "clsx";
 import { Copy, Download } from "lucide-react";
@@ -12,20 +13,23 @@ type Props = {
 
 const formats = {
   json: {
-    label: "Blocchi",
     mime: "application/json;charset=utf-8",
   },
   js: {
-    label: "JavaScript",
     mime: "text/javascript;charset=utf-8",
   },
-  svg: {
-    label: "Immagine",
-  },
+  svg: {},
 };
 
 export function Debug({ blocks, js, svg }: Props) {
+  const { t } = useLingui();
   const ref = useRef<HTMLDialogElement>(null);
+
+  const labels: Record<keyof typeof formats, string> = {
+    json: t`Blocks`,
+    js: "JavaScript",
+    svg: t`Image`,
+  };
 
   const [format, setFormat] = useState<keyof typeof formats>("json");
 
@@ -54,10 +58,10 @@ export function Debug({ blocks, js, svg }: Props) {
       <Button className="btn-error" onClick={() => ref.current?.showModal()}>
         Debug
       </Button>
-      <Modal ref={ref} title="Opzioni di debug" className="max-w-3xl">
+      <Modal ref={ref} title={t`Debug options`} className="max-w-3xl">
         <div className="not-prose flex items-stretch justify-between gap-4 h-12">
           <div role="tablist" className="tabs-boxed tabs">
-            {Object.entries(formats).map(([f, { label }]) => (
+            {Object.entries(labels).map(([f, label]) => (
               <button
                 key={f}
                 role="tab"
@@ -70,9 +74,9 @@ export function Debug({ blocks, js, svg }: Props) {
           </div>
           {format !== "svg" && (
             <div className="flex gap-2">
-              <div className={clsx("tooltip-open", copyTooltip && "tooltip")} data-tip="Copiato!">
+              <div className={clsx("tooltip-open", copyTooltip && "tooltip")} data-tip={t`Copied!`}>
                 <Button className="btn-error" icon={Copy} onClick={copy}>
-                  Copia
+                  <Trans>Copy</Trans>
                 </Button>
               </div>
               <Button
@@ -82,7 +86,7 @@ export function Debug({ blocks, js, svg }: Props) {
                   const { saveAs } = await import("file-saver");
                   saveAs(new Blob([code], { type: formats[format].mime }), `blocks.${format}`);
                 }}>
-                Salva
+                <Trans>Save</Trans>
               </Button>
             </div>
           )}

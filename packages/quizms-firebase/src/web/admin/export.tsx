@@ -1,10 +1,12 @@
-import { type RefObject, useRef } from "react";
+import { type ReactNode, type RefObject, useRef } from "react";
 
+import { Trans } from "@lingui/react/macro";
 import {
   type Contest,
   calcProblemPoints,
   displayAnswer,
   formatUserData,
+  localize,
   type Student,
   unshuffleAnswer,
   type Variant,
@@ -22,11 +24,11 @@ import { TriangleAlert } from "lucide-react";
 import { useDb } from "~/web/common/base-login";
 import query, { type QueryOption } from "~/web/common/query";
 
-import { useAdmin } from "./context";
-
 type Props<T> = {
+  /** Text of the button and title of the modal, e.g. "Export schools". */
   label: string;
-  description: string;
+  /** Sentence describing what is going to be exported. */
+  description: ReactNode;
   collection: string;
   converter: FirestoreDataConverter<T>;
   options: QueryOption<T>;
@@ -41,7 +43,7 @@ export default function Export<T>(props: Props<T>) {
   return (
     <>
       <Button className="btn-primary" onClick={() => ref.current?.showModal()}>
-        Esporta {props.label}
+        {props.label}
       </Button>
       <ExportModal ref={ref} {...props} />
     </>
@@ -59,7 +61,6 @@ function ExportModal({
   header,
   ref,
 }: Props<any> & { ref: RefObject<HTMLDialogElement | null> }) {
-  const { contest } = useAdmin();
   const db = useDb();
 
   const onExport = async () => {
@@ -68,24 +69,26 @@ function ExportModal({
   };
 
   return (
-    <Modal ref={ref} title={`Esporta ${label}`}>
+    <Modal ref={ref} title={label}>
       {window.showSaveFilePicker === undefined ? (
         <div className="flex items-center gap-3">
           <TriangleAlert size={20} className="flex-none text-warning" />
           <span>
-            Il tuo browser non supporta l&apos;esportazione dei dati. Usa un browser Chrome o Edge.
+            <Trans>Your browser does not support data export. Use Chrome or Edge.</Trans>
           </span>
         </div>
       ) : (
         <>
           <div>
-            Stai per esportare {description} della gara <b>{contest.name}</b>. Questa operazione
-            esegue un grande numero di query al database che richiederà del tempo e potrà incidere
-            sulla fatturazione del progetto.
+            {description}{" "}
+            <Trans>
+              This operation performs a large number of database queries, which will take some time
+              and may affect the billing of the project.
+            </Trans>
           </div>
           <div className="mt-4 flex flex-wrap justify-center gap-2">
             <Button className="btn-primary" onClick={onExport}>
-              Esporta
+              <Trans>Export</Trans>
             </Button>
           </div>
         </>
@@ -94,10 +97,12 @@ function ExportModal({
   );
 }
 
+// The headers are fixed (not in the UI language, labels in the default language of the contest):
+// scripts read the columns by name.
 export function scoreboradHeader(contest: Contest) {
   const row: string[] = [];
   for (const field of contest.userData) {
-    row.push(field.label);
+    row.push(localize(field.label, contest.languages[0]));
   }
   row.push("Scuola", "Variante");
   for (const problemId of contest.problemIds) {

@@ -1,3 +1,4 @@
+import { msg } from "@lingui/core/macro";
 import type {
   ColDef,
   ICellEditorParams,
@@ -8,10 +9,12 @@ import type {
 import { isEqual as isEqualDate } from "date-fns";
 import { TriangleAlert } from "lucide-react";
 
+import type { I18n } from "~/i18n";
 import {
   type Contest,
   displayAnswer,
   formatUserData,
+  localize,
   parseAnswer,
   parseUserData,
   type Student,
@@ -27,6 +30,9 @@ export function columnDefinition(
   variants: Record<string, Variant>,
   canViewScore: boolean,
   frozen: boolean,
+  i18n: I18n,
+  /** Language of the texts of the configuration (see `useContentLanguage`) */
+  language: string | undefined,
 ): ColDef[] {
   const widths = {
     xs: 100,
@@ -46,7 +52,7 @@ export function columnDefinition(
     ...contest.userData.map(
       (field): ColDef => ({
         field: `userData.${field.name}`,
-        headerName: field.label,
+        headerName: localize(field.label, language),
         pinned: field.pinned,
         cellDataType: field.type,
         width: widths[field.size ?? "md"],
@@ -54,7 +60,7 @@ export function columnDefinition(
         editable: contest.allowStudentEdit && !frozen,
         ...defaultOptions,
         tooltipValueGetter: ({ data }: ITooltipParams<Student>) => {
-          return isStudentIncomplete(data!, contest, variants);
+          return isStudentIncomplete(data!, contest, variants, i18n, language);
         },
         cellRenderer: ({ api, data, value }: ICellRendererParams<Student>) => {
           value = formatUserData(data, field);
@@ -62,7 +68,7 @@ export function columnDefinition(
             field.pinned &&
             data?.updatedAt &&
             !api.getSelectedRows().some((s: Student) => s.id === data.id) &&
-            isStudentIncomplete(data, contest, variants)
+            isStudentIncomplete(data, contest, variants, i18n, language)
           ) {
             return (
               <span>
@@ -75,13 +81,13 @@ export function columnDefinition(
         },
         valueParser: (params) => parseUserData(params.newValue, field),
         cellEditorParams: {
-          getValidationErrors: (params) => validateUserData(params.value, field),
+          getValidationErrors: (params) => validateUserData(params.value, field, language, i18n),
         } satisfies Partial<ICellEditorParams<Student>>,
       }),
     ),
     {
       field: "variant",
-      headerName: "Variante",
+      headerName: i18n._(msg`Variant`),
       width: 100,
       editable: !frozen,
       ...defaultOptions,
@@ -89,14 +95,14 @@ export function columnDefinition(
       cellEditorParams: {
         getValidationErrors: (params) => {
           if (params.value && !variants[params.value]) {
-            return ["Variante non è valida"];
+            return [i18n._(msg`Invalid variant`)];
           }
           return null;
         },
       } satisfies Partial<ICellEditorParams<Student>>,
     },
     {
-      headerName: "Vedi Prova",
+      headerName: i18n._(msg`View test`),
       width: 100,
       cellRenderer: ({ data }: ICellRendererParams<Student>) => {
         if (data?.absent || data?.disabled || !data?.variantId) return;
@@ -106,7 +112,7 @@ export function columnDefinition(
             href={`./students/${data.id}`}
             target="_blank"
             rel="noreferrer">
-            apri
+            {i18n._(msg`open`)}
           </a>
         );
       },
@@ -135,14 +141,14 @@ export function columnDefinition(
         cellEditorParams: {
           getValidationErrors: (params) => {
             const schema = variants[params.cellEditorParams.data.variantId!].schema;
-            return validateAnswerValue(params.value, schema[id]);
+            return validateAnswerValue(params.value, schema[id], i18n);
           },
         } satisfies Partial<ICellEditorParams<Student>>,
       };
     }),
     {
       field: "score",
-      headerName: "Punti",
+      headerName: i18n._(msg`Points`),
       pinned: "right",
       width: 100,
       ...defaultOptions,
@@ -150,7 +156,7 @@ export function columnDefinition(
     },
     {
       field: "absent",
-      headerName: "Assente",
+      headerName: i18n._(msg`Absent`),
       cellDataType: "boolean",
       width: 120,
       valueGetter: ({ data }) => data.absent ?? false,
@@ -162,19 +168,19 @@ export function columnDefinition(
         filterOptions: [
           {
             displayKey: "all",
-            displayName: "Seleziona tutti",
+            displayName: i18n._(msg`Select all`),
             predicate: () => true,
             numberOfInputs: 0,
           },
           {
             displayKey: "absent",
-            displayName: "Assenti",
+            displayName: i18n._(msg`Absent students`),
             predicate: (_filter: any[], absent: boolean) => absent,
             numberOfInputs: 0,
           },
           {
             displayKey: "present",
-            displayName: "Presenti",
+            displayName: i18n._(msg`Present students`),
             predicate: (_filter: any[], absent: boolean) => !absent,
             numberOfInputs: 0,
           },
@@ -183,7 +189,7 @@ export function columnDefinition(
     },
     {
       field: "disabled",
-      headerName: "Cancella",
+      headerName: i18n._(msg`Delete`),
       cellDataType: "boolean",
       width: 120,
       valueGetter: ({ data }) => data.disabled ?? false,
@@ -196,19 +202,19 @@ export function columnDefinition(
         filterOptions: [
           {
             displayKey: "all",
-            displayName: "Seleziona tutti",
+            displayName: i18n._(msg`Select all`),
             predicate: () => true,
             numberOfInputs: 0,
           },
           {
             displayKey: "disabled",
-            displayName: "Cancellati",
+            displayName: i18n._(msg`Deleted students`),
             predicate: (_filter: any[], disabled: boolean) => disabled,
             numberOfInputs: 0,
           },
           {
             displayKey: "enabled",
-            displayName: "Non cancellati",
+            displayName: i18n._(msg`Students not deleted`),
             predicate: (_filter: any[], disabled: boolean) => !disabled,
             numberOfInputs: 0,
           },

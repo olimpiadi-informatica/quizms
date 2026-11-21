@@ -1,3 +1,4 @@
+import { lingui } from "@lingui/vite-plugin";
 import tsconfigPaths from "vite-tsconfig-paths";
 import { defineProject } from "vitest/config";
 
@@ -6,7 +7,20 @@ import { defineProject } from "vitest/config";
 process.env.TZ = "Europe/Rome";
 
 export default defineProject({
-  plugins: [tsconfigPaths()],
+  plugins: [
+    lingui({
+      macroTransform: {
+        macro: {
+          runtimeModules: {
+            i18n: ["~/i18n", "i18n"],
+            Trans: ["~/i18n", "Trans"],
+            useLingui: ["~/i18n", "useLingui"],
+          },
+        },
+      },
+    }),
+    tsconfigPaths(),
+  ],
   test: {
     name: "quizms",
     // `.ts` tests run in Node; `.tsx` component tests opt into `happy-dom` with a

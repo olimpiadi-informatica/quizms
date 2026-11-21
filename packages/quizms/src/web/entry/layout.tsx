@@ -4,7 +4,7 @@ import { Layout, useNotifications } from "@olinfo/react-components";
 import useSWR, { SWRConfig } from "swr";
 import { type BaseLocationHook, Router, useLocation } from "wouter";
 
-import { Loading } from "~/web/components";
+import { Loading, UiLanguageRoot } from "~/web/components";
 import { BrowserCheck } from "~/web/entry/browser-check";
 
 export function BaseLayout({ children }: { children: ReactNode }) {
@@ -17,11 +17,16 @@ export function BaseLayout({ children }: { children: ReactNode }) {
     <StrictMode>
       <Layout>
         <LayoutInner>
-          <Suspense fallback={<Loading />}>
-            <BrowserCheck>
-              <Router hook={hook}>{children}</Router>
-            </BrowserCheck>
-            <DatePolyfill />
+          {/* No text in this fallback: it is shown while the UI messages load. */}
+          <Suspense fallback={null}>
+            <UiLanguageRoot>
+              <Suspense fallback={<Loading />}>
+                <BrowserCheck>
+                  <Router hook={hook}>{children}</Router>
+                </BrowserCheck>
+                <DatePolyfill />
+              </Suspense>
+            </UiLanguageRoot>
           </Suspense>
         </LayoutInner>
       </Layout>

@@ -1,0 +1,603 @@
+msgid ""
+msgstr ""
+"POT-Creation-Date: 2026-11-21 12:46+0100\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: @lingui/cli\n"
+"Language: en\n"
+
+#: packages/quizms/src/web/teacher/table/utils.ts
+msgid "{label} missing"
+msgstr "{label} missing"
+
+#: packages/quizms/src/web/teacher/dashboard-student-restore.tsx
+msgid "{name} {surname} is trying to access the contest. To approve the request, enter the confirmation code they were shown."
+msgstr "{name} {surname} is trying to access the contest. To approve the request, enter the confirmation code they were shown."
+
+#: packages/quizms/src/web/teacher/dashboard.tsx
+msgid "<0>Code:</0> <1>{token}</1>"
+msgstr "<0>Code:</0> <1>{token}</1>"
+
+#: packages/quizms/src/web/entry/browser-check.tsx
+msgid "<0>Warning:</0> {message}"
+msgstr "<0>Warning:</0> {message}"
+
+#: packages/quizms/src/web/teacher/table/finalize.tsx
+msgid "<0>Warning:</0> this operation cannot be undone and must be done only once <1>after all the contest rounds</1>."
+msgstr "<0>Warning:</0> this operation cannot be undone and must be done only once <1>after all the contest rounds</1>."
+
+#: packages/quizms/src/web/teacher/table/finalize.tsx
+msgid "<0>Warning:</0> this operation cannot be undone."
+msgstr "<0>Warning:</0> this operation cannot be undone."
+
+#: packages/quizms/src/web/teacher/table/col-def.tsx
+msgid "Absent"
+msgstr "Absent"
+
+#: packages/quizms/src/web/teacher/table/col-def.tsx
+msgid "Absent students"
+msgstr "Absent students"
+
+#: packages/quizms/src/web/teacher/dashboard.tsx
+msgid "Access requests"
+msgstr "Access requests"
+
+#: packages/quizms/src/web/teacher/table/finalize.tsx
+msgid "all the students have been entered correctly"
+msgstr "all the students have been entered correctly"
+
+#: packages/quizms/src/web/teacher/table/finalize.tsx
+msgid "all the students..."
+msgstr "all the students..."
+
+#: packages/quizms/src/web/components/error/index.tsx
+msgid "An error occurred in the application."
+msgstr "An error occurred in the application."
+
+#: packages/quizms/src/web/student/modals.tsx
+msgid "and"
+msgstr "and"
+
+#: packages/quizms/src/web/teacher/dashboard.tsx
+msgid "Announcements"
+msgstr "Announcements"
+
+#: packages/quizms/src/web/student/modals.tsx
+msgid "Answer"
+msgstr "Answer"
+
+#: packages/quizms/src/web/teacher/dashboard-student-restore.tsx
+msgid "Approve"
+msgstr "Approve"
+
+#: packages/quizms/src/web/teacher/dashboard.tsx
+msgid "Are you sure you want to cancel the start of the contest?"
+msgstr "Are you sure you want to cancel the start of the contest?"
+
+#: packages/quizms/src/web/student/modals.tsx
+msgid "Are you sure you want to finish?"
+msgstr "Are you sure you want to finish?"
+
+#: packages/quizms/src/web/teacher/dashboard.tsx
+msgid "Are you sure you want to start the contest?"
+msgstr "Are you sure you want to start the contest?"
+
+#: packages/quizms/src/web/teacher/table/finalize.tsx
+msgid "At least one student has no name or surname"
+msgstr "At least one student has no name or surname"
+
+#: packages/quizms/src/web/teacher/dashboard.tsx
+msgid "Back"
+msgstr "Back"
+
+#: packages/quizms/src/web/student/layout.tsx
+msgid "Back to full screen"
+msgstr "Back to full screen"
+
+#: packages/quizms/src/web/student/modals.tsx
+#: packages/quizms/src/web/teacher/dashboard.tsx
+#: packages/quizms/src/web/teacher/table/delete-all.tsx
+#: packages/quizms/src/web/teacher/table/delete.tsx
+#: packages/quizms/src/web/teacher/table/finalize.tsx
+msgid "Cancel"
+msgstr "Cancel"
+
+#: packages/quizms/src/web/teacher/dashboard.tsx
+msgid "Cancel contest start"
+msgstr "Cancel contest start"
+
+#: packages/quizms/src/web/student/modals.tsx
+#: packages/quizms/src/web/teacher/dashboard-student-restore.tsx
+#: packages/quizms/src/web/teacher/dashboard.tsx
+#: packages/quizms/src/web/teacher/table/finalize.tsx
+msgid "Confirm"
+msgstr "Confirm"
+
+#: packages/quizms/src/web/teacher/dashboard-student-restore.tsx
+msgid "Confirmation code"
+msgstr "Confirmation code"
+
+#: packages/quizms/src/web/teacher/dashboard.tsx
+msgid "Contest information"
+msgstr "Contest information"
+
+#: packages/quizms/src/web/teacher/dashboard.tsx
+#: packages/quizms/src/web/teacher/layout.tsx
+msgid "Contest management"
+msgstr "Contest management"
+
+#: packages/quizms/src/web/teacher/dashboard.tsx
+msgid "Contest started at <0/>."
+msgstr "Contest started at <0/>."
+
+#: packages/quizms/src/web/teacher/table/delete-all.tsx
+#: packages/quizms/src/web/teacher/table/delete.tsx
+msgid "Continue"
+msgstr "Continue"
+
+#: packages/quizms/src/web/teacher/table/importer.tsx
+msgid "CSV file"
+msgstr "CSV file"
+
+#: packages/quizms/src/web/teacher/table/col-def.tsx
+msgid "Delete"
+msgstr "Delete"
+
+#: packages/quizms/src/web/teacher/table/index.tsx
+msgid "Delete all"
+msgstr "Delete all"
+
+#: packages/quizms/src/web/teacher/table/delete-all.tsx
+msgid "Delete all students"
+msgstr "Delete all students"
+
+#: packages/quizms/src/web/teacher/table/delete.tsx
+msgid "Delete student"
+msgstr "Delete student"
+
+#: packages/quizms/src/web/teacher/table/col-def.tsx
+msgid "Deleted students"
+msgstr "Deleted students"
+
+#: packages/quizms/src/web/teacher/table/delete.tsx
+msgid "Don't show this pop-up again"
+msgstr "Don't show this pop-up again"
+
+#: packages/quizms/src/web/teacher/dashboard.tsx
+msgid "Download PDF with all statements"
+msgstr "Download PDF with all statements"
+
+#: packages/quizms/src/web/teacher/dashboard.tsx
+msgid "Download ZIP with all statements"
+msgstr "Download ZIP with all statements"
+
+#: packages/quizms/src/web/components/student-form.tsx
+msgid "Enter {label}"
+msgstr "Enter {label}"
+
+#: packages/quizms/src/web/teacher/dashboard-student-restore.tsx
+msgid "Enter code"
+msgstr "Enter code"
+
+#: packages/quizms/src/web/components/error/index.tsx
+msgid "Error"
+msgstr "Error"
+
+#: packages/quizms/src/web/teacher/table/importer.tsx
+msgid "Error on row {line}: {error}"
+msgstr "Error on row {line}: {error}"
+
+#: packages/quizms/src/web/teacher/table/importer.tsx
+msgid "Error on row {line}: Missing variant"
+msgstr "Error on row {line}: Missing variant"
+
+#: packages/quizms/src/web/teacher/table/importer.tsx
+msgid "Error on row {line}: Too few fields"
+msgstr "Error on row {line}: Too few fields"
+
+#: packages/quizms/src/web/teacher/table/importer.tsx
+msgid "Error on row {line}: Variant \"{variantId}\" is not valid"
+msgstr "Error on row {line}: Variant \"{variantId}\" is not valid"
+
+#: packages/quizms/src/web/teacher/table/index.tsx
+msgid "Export"
+msgstr "Export"
+
+#: packages/quizms/src/web/teacher/table/index.tsx
+msgid "Finalize"
+msgstr "Finalize"
+
+#: packages/quizms/src/web/teacher/table/finalize.tsx
+msgid "Finalize school"
+msgstr "Finalize school"
+
+#: packages/quizms/src/web/student/layout.tsx
+msgid "Finish"
+msgstr "Finish"
+
+#: packages/quizms/src/web/entry/browser-check.tsx
+msgid "For a better experience, we recommend switching to the app you usually use to browse the internet"
+msgstr "For a better experience, we recommend switching to the app you usually use to browse the internet"
+
+#: packages/quizms/src/web/teacher/table/finalize.tsx
+msgid "If this student was added by mistake and you want to remove them, you can use the <0>Delete</0> button in the last column."
+msgstr "If this student was added by mistake and you want to remove them, you can use the <0>Delete</0> button in the last column."
+
+#: packages/quizms/src/web/teacher/table/importer.tsx
+msgid "If you are using Excel, you can create a CSV file by going to “<0>Save As</0>” and choosing “<1>CSV (Comma delimited) (*.csv)</1>” as the file format."
+msgstr "If you are using Excel, you can create a CSV file by going to “<0>Save As</0>” and choosing “<1>CSV (Comma delimited) (*.csv)</1>” as the file format."
+
+#: packages/quizms/src/web/teacher/dashboard.tsx
+msgid "If you started by mistake, you can still cancel the contest up to one minute before it starts."
+msgstr "If you started by mistake, you can still cancel the contest up to one minute before it starts."
+
+#: packages/quizms/src/web/teacher/table/finalize.tsx
+msgid "If you understand and agree, type “<0>{correctConfirm}</0>”."
+msgstr "If you understand and agree, type “<0>{correctConfirm}</0>”."
+
+#: packages/quizms/src/web/teacher/table/importer.tsx
+msgid "Import"
+msgstr "Import"
+
+#: packages/quizms/src/web/teacher/table/importer.tsx
+#: packages/quizms/src/web/teacher/table/index.tsx
+msgid "Import students"
+msgstr "Import students"
+
+#: packages/quizms/src/web/teacher/table/importer.tsx
+msgid "Import the students from a file. The file must be in <0>CSV</0> format, and the first row must contain the header. <1>Do not</1> leave empty rows before the header or empty columns before the data."
+msgstr "Import the students from a file. The file must be in <0>CSV</0> format, and the first row must contain the header. <1>Do not</1> leave empty rows before the header or empty columns before the data."
+
+#: packages/quizms/src/models/variant.ts
+msgid "Invalid option: {option}"
+msgstr "Invalid option: {option}"
+
+#: packages/quizms/src/models/variant.ts
+msgid "Invalid options: {options}"
+msgstr "Invalid options: {options}"
+
+#: packages/quizms/src/web/teacher/table/col-def.tsx
+msgid "Invalid variant"
+msgstr "Invalid variant"
+
+#: packages/quizms/src/web/components/loading.tsx
+msgid "Loading..."
+msgstr "Loading..."
+
+#: packages/quizms/src/web/student/layout.tsx
+#: packages/quizms/src/web/teacher/layout.tsx
+msgid "Log out"
+msgstr "Log out"
+
+#: packages/quizms/src/models/contest.ts
+msgid "Make sure there are no numbers or symbols"
+msgstr "Make sure there are no numbers or symbols"
+
+#: packages/quizms/src/web/teacher/dashboard.tsx
+msgid "Manage students and answers"
+msgstr "Manage students and answers"
+
+#: packages/quizms/src/web/teacher/table/utils.ts
+msgid "Missing variant"
+msgstr "Missing variant"
+
+#: packages/quizms/src/web/teacher/dashboard-student-restore.tsx
+msgid "Name"
+msgstr "Name"
+
+#: packages/quizms/src/web/teacher/dashboard-announcements.tsx
+msgid "No announcements."
+msgstr "No announcements."
+
+#: packages/quizms/src/web/teacher/dashboard-student-restore.tsx
+msgid "No requests."
+msgstr "No requests."
+
+#: packages/quizms/src/web/teacher/table/finalize.tsx
+msgid "Once finalized, you will <0>no longer</0> be able to <1>add</1> new students or <2>edit</2> the data of the students in this school for the contest <3>{contestName}</3>."
+msgstr "Once finalized, you will <0>no longer</0> be able to <1>add</1> new students or <2>edit</2> the data of the students in this school for the contest <3>{contestName}</3>."
+
+#: packages/quizms/src/web/teacher/table/finalize.tsx
+msgid "Once finalized, you will <0>no longer</0> be able to <1>edit</1> the data of the students in this school for the contest <2>{contestName}</2>."
+msgstr "Once finalized, you will <0>no longer</0> be able to <1>edit</1> the data of the students in this school for the contest <2>{contestName}</2>."
+
+#: packages/quizms/src/web/student/modals.tsx
+msgid "Once you confirm, you will no longer be able to change your answers."
+msgstr "Once you confirm, you will no longer be able to change your answers."
+
+#: packages/quizms/src/web/print/auth.tsx
+msgid "Online variants"
+msgstr "Online variants"
+
+#: packages/quizms/src/web/teacher/table/col-def.tsx
+msgid "open"
+msgstr "open"
+
+#: packages/quizms/src/web/student/modals.tsx
+msgid "or"
+msgstr "or"
+
+#: packages/quizms/src/web/print/auth.tsx
+msgid "Paper variants"
+msgstr "Paper variants"
+
+#: packages/quizms/src/web/teacher/table/col-def.tsx
+msgid "Points"
+msgstr "Points"
+
+#: packages/quizms/src/web/teacher/table/col-def.tsx
+msgid "Present students"
+msgstr "Present students"
+
+#: packages/quizms/src/web/student/modals.tsx
+msgid "Question"
+msgstr "Question"
+
+#: packages/quizms/src/web/teacher/dashboard-student-restore.tsx
+msgid "Reject"
+msgstr "Reject"
+
+#: packages/quizms/src/web/components/error/index.tsx
+msgid "Reload"
+msgstr "Reload"
+
+#: packages/quizms/src/models/variant.ts
+msgid "Repeated options: {options}"
+msgstr "Repeated options: {options}"
+
+#: packages/quizms/src/web/student/layout.tsx
+msgid "Restart"
+msgstr "Restart"
+
+#: packages/quizms/src/web/student/modals.tsx
+#: packages/quizms/src/web/teacher/table/export.tsx
+msgid "Score"
+msgstr "Score"
+
+#: packages/quizms/src/web/teacher/provider.tsx
+msgid "Select a contest"
+msgstr "Select a contest"
+
+#: packages/quizms/src/web/teacher/table/col-def.tsx
+msgid "Select all"
+msgstr "Select all"
+
+#: packages/quizms/src/web/student/layout.tsx
+msgid "Show results"
+msgstr "Show results"
+
+#: packages/quizms/src/web/student/modals.tsx
+msgid "Solution"
+msgstr "Solution"
+
+#: packages/quizms/src/web/teacher/dashboard.tsx
+msgid "Start online test"
+msgstr "Start online test"
+
+#: packages/quizms/src/web/teacher/dashboard.tsx
+msgid "Statement language"
+msgstr "Statement language"
+
+#: packages/quizms/src/web/teacher/dashboard.tsx
+msgid "Statements in {code}"
+msgstr "Statements in {code}"
+
+#: packages/quizms/src/web/teacher/layout.tsx
+msgid "Student management"
+msgstr "Student management"
+
+#: packages/quizms/src/web/teacher/table/index.tsx
+msgid "students"
+msgstr "students"
+
+#: packages/quizms/src/web/teacher/table/col-def.tsx
+msgid "Students not deleted"
+msgstr "Students not deleted"
+
+#: packages/quizms/src/web/teacher/table/export.tsx
+msgid "students-{contestId}.csv"
+msgstr "students-{contestId}.csv"
+
+#: packages/quizms/src/web/teacher/dashboard-student-restore.tsx
+msgid "Surname"
+msgstr "Surname"
+
+#: packages/quizms/src/web/components/student-form.tsx
+msgid "Test code"
+msgstr "Test code"
+
+#: packages/quizms/src/web/student/modals.tsx
+msgid "Test finished"
+msgstr "Test finished"
+
+#: packages/quizms/src/models/variant.ts
+msgid "The answer cannot be longer than 256 characters"
+msgstr "The answer cannot be longer than 256 characters"
+
+#: packages/quizms/src/models/variant.ts
+msgid "The answer must be an integer"
+msgstr "The answer must be an integer"
+
+#: packages/quizms/src/web/teacher/table/importer.tsx
+msgid "The columns must be in the following order:"
+msgstr "The columns must be in the following order:"
+
+#: packages/quizms/src/web/teacher/dashboard.tsx
+msgid "The contest can be taken from <0/> to <1/>."
+msgstr "The contest can be taken from <0/> to <1/>."
+
+#: packages/quizms/src/web/teacher/dashboard.tsx
+msgid "The contest can be taken from <0/> until <1/>."
+msgstr "The contest can be taken from <0/> until <1/>."
+
+#: packages/quizms/src/web/teacher/dashboard.tsx
+msgid "The contest has not started yet!"
+msgstr "The contest has not started yet!"
+
+#: packages/quizms/src/web/teacher/dashboard.tsx
+msgid "The contest is over."
+msgstr "The contest is over."
+
+#: packages/quizms/src/web/teacher/dashboard.tsx
+msgid "The contest will end at <0/>."
+msgstr "The contest will end at <0/>."
+
+#: packages/quizms/src/web/teacher/dashboard.tsx
+msgid "The contest will start at <0/>."
+msgstr "The contest will start at <0/>."
+
+#: packages/quizms/src/web/student/base-statement.tsx
+msgid "The contest will start in<0><1/></0>"
+msgstr "The contest will start in<0><1/></0>"
+
+#: packages/quizms/src/models/contest.ts
+msgid "The field {label} cannot be longer than 256 characters."
+msgstr "The field {label} cannot be longer than 256 characters."
+
+#: packages/quizms/src/models/contest.ts
+msgid "The field {label} contains invalid characters. {help} (check also that the encoding is UTF-8)."
+msgstr "The field {label} contains invalid characters. {help} (check also that the encoding is UTF-8)."
+
+#: packages/quizms/src/models/contest.ts
+msgid "The field {label} contains invalid characters. {help}."
+msgstr "The field {label} contains invalid characters. {help}."
+
+#: packages/quizms/src/models/contest.ts
+msgid "The field {label} must be an integer."
+msgstr "The field {label} must be an integer."
+
+#: packages/quizms/src/models/contest.ts
+msgid "The field {label} must be greater than or equal to {min}."
+msgstr "The field {label} must be greater than or equal to {min}."
+
+#: packages/quizms/src/models/contest.ts
+msgid "The field {label} must be less than or equal to {max}."
+msgstr "The field {label} must be less than or equal to {max}."
+
+#: packages/quizms/src/models/contest.ts
+msgid "The field {label} must contain a date after {date}."
+msgstr "The field {label} must contain a date after {date}."
+
+#: packages/quizms/src/models/contest.ts
+msgid "The field {label} must contain a date before {date}."
+msgstr "The field {label} must contain a date before {date}."
+
+#: packages/quizms/src/web/teacher/table/importer.tsx
+msgid "The fields <0>{fields}</0> must be in the <1>dd/mm/yyyy</1> format, for example <2>14/03/{year}</2>."
+msgstr "The fields <0>{fields}</0> must be in the <1>dd/mm/yyyy</1> format, for example <2>14/03/{year}</2>."
+
+#: packages/quizms/src/web/entry/browser-check.tsx
+msgid "The platform may not work properly, we recommend updating {browserName} to the latest version."
+msgstr "The platform may not work properly, we recommend updating {browserName} to the latest version."
+
+#: packages/quizms/src/web/entry/browser-check.tsx
+msgid "The platform may not work properly, we recommend using Chrome, Safari or Firefox"
+msgstr "The platform may not work properly, we recommend using Chrome, Safari or Firefox"
+
+#: packages/quizms/src/web/teacher/table/finalize.tsx
+msgid "The school cannot be finalized because of the following error:"
+msgstr "The school cannot be finalized because of the following error:"
+
+#: packages/quizms/src/web/teacher/table/finalize.tsx
+msgid "The student {name} {surname} cannot be finalized: {reason}."
+msgstr "The student {name} {surname} cannot be finalized: {reason}."
+
+#: packages/quizms/src/web/teacher/table/finalize.tsx
+msgid "The student {name} {surname} has been entered more than once"
+msgstr "The student {name} {surname} has been entered more than once"
+
+#: packages/quizms/src/web/student/modals.tsx
+msgid "The test is over."
+msgstr "The test is over."
+
+#: packages/quizms/src/web/teacher/dashboard.tsx
+msgid "This page intentionally left blank"
+msgstr "This page intentionally left blank"
+
+#: packages/quizms/src/web/teacher/dashboard.tsx
+msgid "Time left until the start: <0/>"
+msgstr "Time left until the start: <0/>"
+
+#: packages/quizms/src/web/teacher/dashboard.tsx
+msgid "Time left: <0/>"
+msgstr "Time left: <0/>"
+
+#: packages/quizms/src/web/teacher/table/importer.tsx
+msgid "To allow entering the personal data before the contest, the <0>Variant</0> column and the answer columns can be left blank. They will still have to be filled in to finalize."
+msgstr "To allow entering the personal data before the contest, the <0>Variant</0> column and the answer columns can be left blank. They will still have to be filled in to finalize."
+
+#: packages/quizms/src/web/teacher/table/importer.tsx
+msgid "To allow entering the personal data before the contest, the answer columns can be left blank. They will still have to be filled in to finalize."
+msgstr "To allow entering the personal data before the contest, the answer columns can be left blank. They will still have to be filled in to finalize."
+
+#: packages/quizms/src/web/entry/browser-check.tsx
+msgid "To keep using the platform, you need to update {browserName} to the latest version."
+msgstr "To keep using the platform, you need to update {browserName} to the latest version."
+
+#: packages/quizms/src/web/components/error/index.tsx
+msgid "Unknown error"
+msgstr "Unknown error"
+
+#: packages/quizms/src/web/entry/browser-check.tsx
+msgid "Unsupported browser"
+msgstr "Unsupported browser"
+
+#: packages/quizms/src/cli/pdf.ts
+#: packages/quizms/src/web/teacher/table/col-def.tsx
+#: packages/quizms/src/web/teacher/table/export.tsx
+#: packages/quizms/src/web/teacher/table/importer.tsx
+msgid "Variant"
+msgstr "Variant"
+
+#: packages/quizms/src/web/teacher/table/utils.ts
+msgid "Variant {variantId} is not valid"
+msgstr "Variant {variantId} is not valid"
+
+#: packages/quizms/src/web/teacher/table/col-def.tsx
+msgid "View test"
+msgstr "View test"
+
+#: packages/quizms/src/web/student/layout.tsx
+msgid "Warning!"
+msgstr "Warning!"
+
+#: packages/quizms/src/web/teacher/table/delete-all.tsx
+msgid "You are about to delete <0>all</0> the students entered. You can see the deleted students and undo the deletions by clicking on the header of the “<1>Delete</1>” column and choosing “<2>Select all</2>” as the filter."
+msgstr "You are about to delete <0>all</0> the students entered. You can see the deleted students and undo the deletions by clicking on the header of the “<1>Delete</1>” column and choosing “<2>Select all</2>” as the filter."
+
+#: packages/quizms/src/web/teacher/table/delete.tsx
+msgid "You are about to delete a student. You can see the deleted students and undo the deletion by clicking on the header of the “<0>Delete</0>” column and choosing “<1>Select all</1>” as the filter."
+msgstr "You are about to delete a student. You can see the deleted students and undo the deletion by clicking on the header of the “<0>Delete</0>” column and choosing “<1>Select all</1>” as the filter."
+
+#: packages/quizms/src/web/teacher/table/delete.tsx
+msgid "You are about to delete the student <0>{studentName}</0>. You can see the deleted students and undo the deletion by clicking on the header of the “<1>Delete</1>” column and choosing “<2>Select all</2>” as the filter."
+msgstr "You are about to delete the student <0>{studentName}</0>. You can see the deleted students and undo the deletion by clicking on the header of the “<1>Delete</1>” column and choosing “<2>Select all</2>” as the filter."
+
+#: packages/quizms/src/web/teacher/provider.tsx
+msgid "You are not registered for any contest, please contact support"
+msgstr "You are not registered for any contest, please contact support"
+
+#: packages/quizms/src/web/entry/browser-check.tsx
+msgid "You are using {browser} {version}{device}."
+msgstr "You are using {browser} {version}{device}."
+
+#: packages/quizms/src/web/entry/browser-check.tsx
+msgid "you are using a limited version of the browser."
+msgstr "you are using a limited version of the browser."
+
+#: packages/quizms/src/web/entry/browser-check.tsx
+msgid "you are using an unsupported browser!"
+msgstr "you are using an unsupported browser!"
+
+#: packages/quizms/src/web/entry/browser-check.tsx
+msgid "you are using an unsupported version of {browserName}!"
+msgstr "you are using an unsupported version of {browserName}!"
+
+#: packages/quizms/src/web/student/layout.tsx
+msgid "You cannot leave this page or exit full-screen mode."
+msgstr "You cannot leave this page or exit full-screen mode."
+
+#: packages/quizms/src/web/student/modals.tsx
+msgid "You scored <0>{score}</0> out of <1>{pointsCorrect}</1>."
+msgstr "You scored <0>{score}</0> out of <1>{pointsCorrect}</1>."

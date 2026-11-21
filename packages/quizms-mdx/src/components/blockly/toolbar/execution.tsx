@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 
+import { Trans, useLingui } from "@lingui/react/macro";
 import { Pause, Play, RotateCcw, Send, SkipForward } from "lucide-react";
 
 type Props = {
@@ -11,6 +12,7 @@ type Props = {
 };
 
 export function ExecutionButtons({ evaluate, evaluated, selectedEvaluated, step, reset }: Props) {
+  const { t } = useLingui();
   const [playing, setPlaying] = useState(false);
   const [speed, setSpeed] = useState(3);
   useEffect(() => {
@@ -27,31 +29,31 @@ export function ExecutionButtons({ evaluate, evaluated, selectedEvaluated, step,
   return (
     <>
       <div className="join join-horizontal">
-        <div className="join-item tooltip" data-tip="Esegui/pausa">
+        <div className="join-item tooltip" data-tip={t`Run/pause`}>
           <button
             type="button"
             className="btn btn-info rounded-[inherit]"
             disabled={selectedEvaluated || !evaluated}
             onClick={() => setPlaying(!playing)}
-            aria-label="Esegui un blocco">
+            aria-label={t`Run/pause`}>
             {playing ? <Pause className="size-6" /> : <Play className="size-6" />}
           </button>
         </div>
-        <div className="join-item tooltip" data-tip="Esegui un blocco">
+        <div className="join-item tooltip" data-tip={t`Run one block`}>
           <button
             type="button"
             className="btn btn-info rounded-[inherit]"
             disabled={selectedEvaluated || !evaluated}
             onClick={step}
-            aria-label="Esegui un blocco">
+            aria-label={t`Run one block`}>
             <SkipForward className="size-6" />
           </button>
         </div>
-        <div className="join-item tooltip" data-tip="Esegui da capo">
+        <div className="join-item tooltip" data-tip={t`Run from the start`}>
           <button
             type="button"
             className="btn btn-info rounded-[inherit]"
-            aria-label="Esegui da capo"
+            aria-label={t`Run from the start`}
             disabled={!evaluated}
             onClick={() => {
               reset();
@@ -61,11 +63,11 @@ export function ExecutionButtons({ evaluate, evaluated, selectedEvaluated, step,
           </button>
         </div>
       </div>
-      <div className="tooltip" data-tip="Correggi la soluzione">
+      <div className="tooltip" data-tip={t`Check the solution`}>
         <button
           type="button"
           className="btn btn-success"
-          aria-label="Correggi la soluzione"
+          aria-label={t`Check the solution`}
           disabled={evaluated}
           onClick={evaluate}>
           <Send className="size-6" />
@@ -79,11 +81,15 @@ export function ExecutionButtons({ evaluate, evaluated, selectedEvaluated, step,
           max="6"
           value={speed}
           onChange={(e) => setSpeed(e.target.valueAsNumber)}
-          aria-label="Velocità di esecuzione"
+          aria-label={t`Execution speed`}
         />
         <div className="flex w-full justify-between px-2 text-xs">
-          <span>Lento</span>
-          <span>Veloce</span>
+          <span>
+            <Trans>Slow</Trans>
+          </span>
+          <span>
+            <Trans>Fast</Trans>
+          </span>
         </div>
       </div>
     </>

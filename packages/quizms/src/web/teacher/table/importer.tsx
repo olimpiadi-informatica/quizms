@@ -1,12 +1,16 @@
 import { type CSSProperties, type RefObject, useState } from "react";
 
+import { msg } from "@lingui/core/macro";
+import { Trans, useLingui } from "@lingui/react/macro";
 import { Form, Modal, SingleFileField, SubmitButton } from "@olinfo/react-components";
 import { Upload } from "lucide-react";
 import { parse as parseCSV } from "papaparse";
 
+import type { I18n } from "~/i18n";
 import {
   type Contest,
   calcScore,
+  localize,
   parseAnswer,
   parseUserData,
   type Student,
@@ -16,47 +20,58 @@ import {
   validateUserData,
 } from "~/models";
 import { randomId } from "~/utils";
+import { useContentLanguage } from "~/web/components";
 import { useTeacher } from "~/web/teacher/context";
 
 export function ImportModal({ ref }: { ref: RefObject<HTMLDialogElement | null> }) {
+  const { t, i18n } = useLingui();
   const { contest, venue, variants, importStudents } = useTeacher();
 
-  const labels = contest.userData.map((field) => field.label);
+  const language = useContentLanguage();
+  const labels = contest.userData.map((field) => localize(field.label, language));
   if (contest.hasVariants) {
-    labels.push("Variante");
+    labels.push(t`Variant`);
   }
   labels.push(...contest.problemIds);
 
   const dates = contest.userData
     .filter((field) => field.type === "date")
-    .map((field) => field.label.toLowerCase());
+    .map((field) => localize(field.label, language).toLowerCase());
 
   const [uploadCount, setUploadCount] = useState(0);
+
+  const fields = dates.join(", ");
+  const year = new Date().getFullYear();
 
   const submit = async ({ file }: { file: File }) => {
     setUploadCount((count) => count + 1);
     try {
       const text = await file.text();
-      await parseAndImportStudents(text, contest, variants, venue, importStudents);
+      await parseAndImportStudents(text, contest, variants, venue, importStudents, i18n, language);
     } finally {
       ref.current?.close();
     }
   };
 
   return (
-    <Modal ref={ref} title="Importa studenti">
+    <Modal ref={ref} title={t`Import students`}>
       <div className="prose">
         <p>
-          Importa gli studenti da un file. Il file deve essere in formato <b>CSV</b>, la prima riga
-          deve contenere l&apos;intestazione. <b>Non</b> lasciare righe vuote prima
-          dell&apos;intestazione o colonne vuote prima dei dati.
+          <Trans>
+            Import the students from a file. The file must be in <b>CSV</b> format, and the first
+            row must contain the header. <b>Do not</b> leave empty rows before the header or empty
+            columns before the data.
+          </Trans>
         </p>
         <p>
-          Se stai usando Excel, puoi creare un file CSV andando su &ldquo;<i>Salva con nome</i>
-          &rdquo; e scegliendo come formato di file &ldquo;
-          <i>Valori separati da una virgola (.csv)</i>&rdquo;.
+          <Trans>
+            If you are using Excel, you can create a CSV file by going to “<i>Save As</i>” and
+            choosing “<i>CSV (Comma delimited) (*.csv)</i>” as the file format.
+          </Trans>
         </p>
-        <p>Le colonne devono essere nel seguente ordine:</p>
+        <p>
+          <Trans>The columns must be in the following order:</Trans>
+        </p>
         <div className="overflow-auto bg-base-content">
           <div
             className="grid grid-cols-[auto_repeat(var(--cols1),auto)_repeat(var(--cols2),1fr)] grid-rows-[auto_1fr_1fr] w-min border-2 border-base-content gap-0.5 *:p-1 *:bg-base-100"
@@ -83,25 +98,33 @@ export function ImportModal({ ref }: { ref: RefObject<HTMLDialogElement | null> 
           </div>
         </div>
         <p>
-          Per consentire l&apos;inserimento dei dati personali prima della gara,{" "}
-          {contest.hasVariants && (
-            <>
-              la colonna <b>Variante</b> e
-            </>
-          )}{" "}
-          le colonne per le risposte possono essere lasciate in bianco. Per la finalizzazione sarà
-          comunque necessario compilarle.
+          {contest.hasVariants ? (
+            <Trans>
+              To allow entering the personal data before the contest, the <b>Variant</b> column and
+              the answer columns can be left blank. They will still have to be filled in to
+              finalize.
+            </Trans>
+          ) : (
+            <Trans>
+              To allow entering the personal data before the contest, the answer columns can be left
+              blank. They will still have to be filled in to finalize.
+            </Trans>
+          )}
         </p>
         {dates.length > 0 && (
           <p>
-            I campi <b>{dates.join(", ")}</b> devono essere nel formato{" "}
-            <span className="whitespace-nowrap font-bold">dd/mm/yyyy</span>, ad esempio{" "}
-            <span className="whitespace-nowrap">14/03/{new Date().getFullYear()}</span>.
+            <Trans>
+              The fields <b>{fields}</b> must be in the{" "}
+              <span className="whitespace-nowrap font-bold">dd/mm/yyyy</span> format, for example{" "}
+              <span className="whitespace-nowrap">14/03/{year}</span>.
+            </Trans>
           </p>
         )}
         <Form onSubmit={submit} className="!max-w-full">
-          <SingleFileField key={uploadCount} field="file" label="File CSV" accept="text/csv" />
-          <SubmitButton icon={Upload}>Importa</SubmitButton>
+          <SingleFileField key={uploadCount} field="file" label={t`CSV file`} accept="text/csv" />
+          <SubmitButton icon={Upload}>
+            <Trans>Import</Trans>
+          </SubmitButton>
         </Form>
       </div>
     </Modal>
@@ -122,6 +145,8 @@ async function parseAndImportStudents(
   variants: Record<string, Variant>,
   venue: Venue,
   importStudents: (students: Student[]) => Promise<unknown>,
+  i18n: I18n,
+  language: string | undefined,
 ) {
   const records = parseCSV<string[]>(file, {
     skipEmptyLines: "greedy",
@@ -133,8 +158,9 @@ async function parseAndImportStudents(
   const students: Student[] = [];
   for (let row = 1; row < records.data.length; row++) {
     const record = records.data[row];
+    const line = row + 1;
     if (record.length < contest.userData.length) {
-      throw new Error(`Errore nella riga ${row + 1}: Troppi pochi campi`);
+      throw new Error(i18n._(msg`Error on row ${line}: Too few fields`));
     }
 
     const userData: Student["userData"] = {};
@@ -142,9 +168,10 @@ async function parseAndImportStudents(
       const value = parseUserData(record[i], field, {
         dateFormat: "dd/MM/yyyy",
       });
-      const err = validateUserData(value, field);
+      const err = validateUserData(value, field, language, i18n);
       if (err) {
-        throw new Error(`Errore nella riga ${row + 1}: ${err[0]}`);
+        const error = err[0];
+        throw new Error(i18n._(msg`Error on row ${line}: ${error}`));
       }
       if (value != null) {
         userData[field.name] = value;
@@ -159,22 +186,23 @@ async function parseAndImportStudents(
     if (variantId) {
       const variant = variants[variantId];
       if (!variant) {
-        throw new Error(`Errore nella riga ${row + 1}: La variante "${variantId}" non è valida`);
+        throw new Error(i18n._(msg`Error on row ${line}: Variant "${variantId}" is not valid`));
       }
       answers = Object.fromEntries(
         contest.problemIds
           .map((id, i) => {
             const answer = parseAnswer(rawAnswers[i], variant.schema[id]);
-            const err = validateAnswerValue(answer?.value, variant.schema[id]);
+            const err = validateAnswerValue(answer?.value, variant.schema[id], i18n);
             if (err) {
-              throw new Error(`Errore nella riga ${row + 1}: ${err[0]}`);
+              const error = err[0];
+              throw new Error(i18n._(msg`Error on row ${line}: ${error}`));
             }
             return [id, answer];
           })
           .filter(([_, answer]) => answer !== undefined),
       );
     } else if (rawAnswers.some(Boolean)) {
-      throw new Error(`Errore nella riga ${row + 1}: Variante mancante`);
+      throw new Error(i18n._(msg`Error on row ${line}: Missing variant`));
     }
 
     const student: Student = {

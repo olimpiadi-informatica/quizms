@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { Trans } from "@lingui/react/macro";
 import { Form, Modal, SubmitButton, TextField } from "@olinfo/react-components";
 import { dialog } from "blockly/core";
 
@@ -35,7 +36,9 @@ export function BlocklyModal() {
       <Form key={id} defaultValue={{ value: defaultValue }} onSubmit={submit}>
         <TextField field="value" label={message} placeholder="" autoFocus={ref.current?.open} />
         <div className="flex flex-wrap justify-center gap-2">
-          <SubmitButton className="btn-primary">Conferma</SubmitButton>
+          <SubmitButton className="btn-primary">
+            <Trans>Confirm</Trans>
+          </SubmitButton>
         </div>
       </Form>
     </Modal>

@@ -5,6 +5,7 @@ import { type ComponentProps, type ReactNode, Suspense } from "react";
 import { act, render, screen, waitFor } from "@testing-library/react";
 
 import type { Contest, Schema, Student, Venue } from "~/models";
+import { UiLanguageProvider } from "~/web/components/ui-language-provider";
 import { StudentProvider } from "~/web/student/provider";
 
 export function makeContest(overrides: Partial<Contest> = {}): Contest {
@@ -130,9 +131,16 @@ export function studentProviderProps(overrides: Partial<ProviderProps> = {}): Pr
   };
 }
 
-/** Suspense boundary for components that suspend (the layout loads the user agent with SWR). */
+/**
+ * Suspense boundary for components that suspend (the layout loads the user agent with SWR), with
+ * the UI in Italian.
+ */
 export function TestShell({ children }: { children: ReactNode }) {
-  return <Suspense fallback={<div>test-loading</div>}>{children}</Suspense>;
+  return (
+    <Suspense fallback={<div>test-loading</div>}>
+      <UiLanguageProvider language="it">{children}</UiLanguageProvider>
+    </Suspense>
+  );
 }
 
 /**

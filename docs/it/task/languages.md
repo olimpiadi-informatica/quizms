@@ -88,13 +88,36 @@ quizms print --languages=it,en
 
 `quizms print` usa i testi generati da `quizms variants`, quindi esegui entrambi con le stesse lingue.
 
+## Tradurre la configurazione
+
+Alcuni testi di `contests.toml` sono mostrati a studenti e insegnanti: il nome della gara (`name`) e il nome esteso (`long_name`), le istruzioni per gli insegnanti (`instructions`) e i campi `label` e `pattern_help` dei dati personali (`user_data`). Ognuno di questi può essere un testo unico, usato in tutte le lingue, oppure una tabella con il testo in ogni lingua:
+
+```toml
+[my-contest]
+languages = ["it", "en"]
+name = { it = "Gara", en = "Contest" }
+long_name = "Olimpiadi di Informatica"
+user_data = [
+    { name = "surname", label = { it = "Cognome", en = "Surname" }, type = "text" },
+    { name = "name", label = { it = "Nome", en = "Name" }, type = "text" },
+]
+```
+
+Una tabella deve avere il testo nella lingua predefinita (la prima di `languages`) e solo lingue della gara. Una lingua che manca in una tabella usa quella predefinita.
+
+`pattern_mismatch` non si può tradurre. Senza `pattern_help` viene mostrato un messaggio predefinito nella lingua dell'interfaccia.
+
+::: warning ATTENZIONE
+Le tabelle sono comprese solo dalle versioni recenti di QuizMS: pubblica il sito e le Cloud Functions prima di eseguire `quizms firebase import` con una configurazione che le usa.
+:::
+
 ## Cosa viene tradotto
 
-QuizMS traduce il testo fisso che fa parte dei testi: i titoli delle domande (`Domanda 1` / `Question 1`), il piè di pagina dei PDF (`Variante` / `Variant`), i campi stampati sul PDF (`Codice prova` / `Test code`), la nota delle pagine vuote nel PDF dell'insegnante e, nei problemi di [codice a blocchi](./blockly), i blocchi predefiniti e le categorie della barra degli strumenti predefinita. Sono disponibili italiano e inglese; le altre lingue usano l'inglese.
+Tutta l'interfaccia (menu, pulsanti, messaggi) è tradotta, così come il testo fisso che fa parte dei testi: i titoli delle domande (`Domanda 1` / `Question 1`), il piè di pagina dei PDF (`Variante` / `Variant`), i campi stampati sul PDF (`Codice prova` / `Test code`), la nota delle pagine vuote nel PDF dell'insegnante e, nei problemi di [codice a blocchi](./blockly), i blocchi predefiniti e le categorie della barra degli strumenti predefinita. Sono disponibili italiano e inglese; le altre lingue usano l'inglese.
 
-Il testo scritto dall'autore del problema non viene tradotto automaticamente: blocchi personalizzati, barre degli strumenti personalizzate e visualizzatori si possono tradurre importando file diversi in ogni traduzione.
+Per gli studenti l'interfaccia è nella lingua del testo. Nelle altre pagine (accesso, insegnanti, amministratori) si può scegliere dalla barra di navigazione, tra le lingue delle gare.
 
-Il resto dell'interfaccia (menu, pulsanti, messaggi) resta in italiano, così come i valori nei file di configurazione: i nomi delle gare e le etichette dei dati personali (`user_data`).
+Il testo scritto dall'autore del problema non viene tradotto automaticamente: blocchi personalizzati, barre degli strumenti personalizzate e visualizzatori si possono tradurre importando file diversi in ogni traduzione. I testi della configurazione si traducono come descritto [sopra](#tradurre-la-configurazione).
 
 ## Firebase
 

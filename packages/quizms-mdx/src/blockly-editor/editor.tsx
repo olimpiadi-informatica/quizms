@@ -1,7 +1,8 @@
-import { useEffect, useId, useRef } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 
 import { DisableTopBlocks } from "@blockly/disable-top-blocks";
-import { statementString } from "@olinfo/quizms/utils";
+import { UiLanguageProvider } from "@olinfo/quizms/components";
+import { loadUiLocale } from "@olinfo/quizms/i18n";
 import "blockly/blocks";
 
 import {
@@ -9,13 +10,10 @@ import {
   Events,
   inject,
   serialization,
-  setLocale,
   type utils,
   type WorkspaceSvg,
 } from "blockly/core";
 import { javascriptGenerator } from "blockly/javascript";
-import * as enMessages from "blockly/msg/en";
-import * as itMessages from "blockly/msg/it";
 
 import type {
   CustomBlock,
@@ -25,19 +23,8 @@ import type {
 } from "~/blockly-types";
 
 import { initGenerator, toJS } from "./generator";
+import { setBlocklyLanguage } from "./messages";
 import { BlocklyModal } from "./modal";
-
-/**
- * Blockly's built-in text follows the statement language. Like the other fixed strings
- * (`statementString`), single-language contests stay Italian and languages without messages
- * use English.
- */
-function setBlocklyLocale(language: string | undefined) {
-  const messages = !language || language === "it" ? itMessages : enMessages;
-  setLocale(messages as unknown as Record<string, string>);
-}
-
-setBlocklyLocale(undefined);
 
 function send(msg: IframeToWorkspaceMessage) {
   window.parent.postMessage(msg, "*");
@@ -46,6 +33,9 @@ function send(msg: IframeToWorkspaceMessage) {
 export function BlocklyEditor() {
   const id = useId();
   const workspace = useRef<WorkspaceSvg>(null);
+  const lastInit = useRef(0);
+  // The iframe's own UI (e.g. the prompt dialog) is in the statement language too.
+  const [language, setLanguage] = useState<string>();
 
   useEffect(() => {
     window.addEventListener("message", onMessage);
@@ -53,8 +43,20 @@ export function BlocklyEditor() {
 
     function onMessage({ data }: MessageEvent<WorkspaceToIframeMessage>) {
       if (data.cmd === "init") {
-        workspace.current?.dispose();
-        workspace.current = init(id, data);
+        // Loading the messages is asynchronous: only the latest `init` creates the workspace.
+        const current = ++lastInit.current;
+        // The iframe's own UI messages too, so that switching doesn't suspend.
+        Promise.all([setBlocklyLanguage(data.language), loadUiLocale(data.language)])
+          .then(() => {
+            if (current !== lastInit.current) return;
+            workspace.current?.dispose();
+            workspace.current = init(id, data);
+            setLanguage(data.language);
+          })
+          .catch((err) => {
+            console.error(err);
+            send({ cmd: "error", message: (err as Error).message });
+          });
       } else if (data.cmd === "highlight") {
         workspace.current?.highlightBlock(data.highlightedBlock ?? null);
       }
@@ -67,7 +69,9 @@ export function BlocklyEditor() {
   return (
     <>
       <div className="!fixed !inset-0 [all:initial]" id={id} />
-      <BlocklyModal />
+      <UiLanguageProvider language={language}>
+        <BlocklyModal />
+      </UiLanguageProvider>
     </>
   );
 }
@@ -80,9 +84,8 @@ export type InitProps = {
   language?: string;
 };
 
+/** Creates the workspace; the messages must be set already (see `setBlocklyLanguage`). */
 function init(id: string, props: InitProps) {
-  // Must happen before creating the workspace: blocks read the messages when they are created.
-  setBlocklyLocale(props.language);
   const config = createConfig(props);
   const workspace = inject(id, config);
   initGenerator(workspace, props.customBlocks as CustomBlockProcessed[]);
@@ -130,11 +133,11 @@ function onWorkspaceChange(workspace: WorkspaceSvg, config: BlocklyOptions) {
   }
 }
 
-function createConfig({ toolbox, customBlocks, readonly, language }: InitProps): BlocklyOptions {
+function createConfig({ toolbox, customBlocks, readonly }: InitProps): BlocklyOptions {
   if (customBlocks && toolbox.kind === "categoryToolbox") {
     toolbox.contents.unshift({
       kind: "category",
-      name: statementString(language, "blocklyCustom"),
+      name: "%{BKY_QUIZMS_CATEGORY_CUSTOM}",
       colour: "40",
       contents: customBlocks.map((block) => ({
         kind: "block",

@@ -158,7 +158,12 @@ describe.each([
 ] as const)("%s venue checks", (_, call) => {
   it("rejects a non-existing venue", async () => {
     await expect(call(teacher, "missing")).rejects.toThrow(
-      expect.objectContaining({ code: "BAD_REQUEST", message: "Gara non valida" }),
+      expect.objectContaining({
+        code: "BAD_REQUEST",
+        message: "Gara non valida",
+        // The client shows the error in the UI language by its reason.
+        cause: expect.objectContaining({ reason: "invalidContest" }),
+      }),
     );
   });
 
@@ -196,7 +201,11 @@ describe.each([
 
   it("rejects contests whose window has not started", async () => {
     await expect(call("future-venue")).rejects.toThrow(
-      expect.objectContaining({ code: "FORBIDDEN", message: "Gara non iniziata" }),
+      expect.objectContaining({
+        code: "FORBIDDEN",
+        message: "Gara non iniziata",
+        cause: expect.objectContaining({ reason: "contestNotStarted" }),
+      }),
     );
   });
 

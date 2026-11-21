@@ -1,13 +1,23 @@
+import { msg } from "@lingui/core/macro";
 import { intlFormat, parse as parseDate, subMinutes } from "date-fns";
 import { deburr } from "lodash-es";
 import z from "zod";
 
+import { i18n as globalI18n, type I18n } from "~/i18n";
+import {
+  completeLocalizedString,
+  type LocalizedString,
+  localize,
+  localizedStringIssues,
+  localizedStringSchema,
+} from "~/models/localized";
 import type { Student } from "~/models/student";
 import { languageCodeRegex } from "~/utils/languages";
 
 const baseUserData = z.strictObject({
   name: z.string(),
-  label: z.string(),
+  // Translatable: a text or a table with the text in each language
+  label: localizedStringSchema,
   size: z.enum(["xs", "sm", "md", "lg", "xl"]).optional(),
   pinned: z.boolean().optional(),
   excludeFromUniqueCheck: z.boolean().optional(),
@@ -17,7 +27,8 @@ const userDataText = baseUserData.extend({
   type: z.literal("text"),
   pattern: z.string().default("[\\-'\\s\\p{Alpha}]+"),
   patternMismatch: z.string().default("Il campo non può contenere numeri o simboli."),
-  patternHelp: z.string().default("Assicurati che non ci siano numeri o simboli"),
+  // Translatable; without it, a default message in the UI language is shown
+  patternHelp: localizedStringSchema.optional(),
   title: z.boolean().default(false),
 });
 
@@ -67,14 +78,17 @@ const onlineContestSettings = z.strictObject({
   allowRestart: z.boolean(),
 });
 
+export const scoreVisibilitySchema = z.enum(["never", "always", "finalized"]);
+export type ScoreVisibility = z.infer<typeof scoreVisibilitySchema>;
+
 export const contestSchema = z
   .strictObject({
     // Identificativo univoco della gara
     id: z.string(),
-    // Nome corto della gara
-    name: z.string(),
-    // Nome lungo della gara
-    longName: z.string(),
+    // Nome corto della gara (traducibile)
+    name: localizedStringSchema,
+    // Nome lungo della gara (traducibile)
+    longName: localizedStringSchema,
     // ID dei problemi della gara
     problemIds: z.coerce.string().array(),
 
@@ -99,10 +113,10 @@ export const contestSchema = z
     allowStudentDelete: z.boolean().default(true),
 
     // Testo delle istruzioni per la gara da mostrare agli insegnanti
-    instructions: z.string().optional(),
+    instructions: localizedStringSchema.optional(),
 
     // Possibilità per gli insegnanti di vedere il punteggio degli studenti
-    scoreVisibility: z.enum(["never", "always", "finalized"]),
+    scoreVisibility: scoreVisibilitySchema,
 
     // Lingue dei testi della gara, la prima è quella predefinita
     languages: z.string().regex(languageCodeRegex).array().nonempty().default(["it"]),
@@ -120,7 +134,49 @@ export const contestSchema = z
         }
       });
     });
-  });
+
+    // Translated texts must be in the languages of the contest
+    for (const [path, value] of localizedFields(data)) {
+      for (const message of localizedStringIssues(value, data.languages)) {
+        ctx.addIssue({ code: "custom", message, path });
+      }
+    }
+  })
+  .transform((data) => ({
+    ...data,
+    name: completeLocalizedString(data.name, data.languages),
+    longName: completeLocalizedString(data.longName, data.languages),
+    ...(data.instructions !== undefined && {
+      instructions: completeLocalizedString(data.instructions, data.languages),
+    }),
+    userData: data.userData.map((field) => ({
+      ...field,
+      label: completeLocalizedString(field.label, data.languages),
+      // Only when set: Firestore rejects `undefined` values.
+      ...(field.type === "text" &&
+        field.patternHelp !== undefined && {
+          patternHelp: completeLocalizedString(field.patternHelp, data.languages),
+        }),
+    })),
+  }));
+
+/** The translatable texts of a contest, with their path in the configuration. */
+function localizedFields(data: {
+  name: LocalizedString;
+  longName: LocalizedString;
+  instructions?: LocalizedString;
+  userData: { label: LocalizedString; patternHelp?: LocalizedString }[];
+}): [(string | number)[], LocalizedString | undefined][] {
+  return [
+    [["name"], data.name],
+    [["longName"], data.longName],
+    [["instructions"], data.instructions],
+    ...data.userData.flatMap((field, i): [(string | number)[], LocalizedString | undefined][] => [
+      [["userData", i, "label"], field.label],
+      [["userData", i, "patternHelp"], field.patternHelp],
+    ]),
+  ];
+}
 
 export type Contest = z.infer<typeof contestSchema>;
 
@@ -149,52 +205,71 @@ export function parseUserData(
   }
 }
 
+/** Default `pattern_help` stored by older versions. */
+const legacyPatternHelp = "Assicurati che non ci siano numeri o simboli";
+
+/**
+ * Validates a personal data field. The messages are in the UI language, with the texts of the
+ * configuration in `language` (see `localize`).
+ */
 export function validateUserData(
   rawValue: string | number | Date | undefined,
   schema: Contest["userData"][number],
+  language?: string,
+  /** Instance for the messages; by default the one of the page (see `i18n`) */
+  i18n: I18n = globalI18n,
 ): [string] | null {
   if (rawValue == null) return null;
-  const label = `"${schema.label}"`.toLowerCase();
+  const label = `"${localize(schema.label, language)}"`.toLowerCase();
   switch (schema.type) {
     case "text": {
       const value = rawValue as string;
       // Anchored like the HTML `pattern` attribute, which must match the whole value.
       const re = new RegExp(`^(?:${schema.pattern})$`, "u");
       if (!re.test(value)) {
-        const helpUtf8 = /[^\p{ASCII}]/u.test(value) ? " e che la codifica sia UTF-8" : "";
-        return [
-          `Il campo ${label} contiene caratteri non validi. ${schema.patternHelp}${helpUtf8}.`,
-        ];
+        const custom = localize(schema.patternHelp, language);
+        // Contests imported by older versions have the old (Italian) default stored.
+        const help =
+          custom && custom !== legacyPatternHelp
+            ? custom
+            : i18n._(msg`Make sure there are no numbers or symbols`);
+        if (/[^\p{ASCII}]/u.test(value)) {
+          return [
+            i18n._(
+              msg`The field ${label} contains invalid characters. ${help} (check also that the encoding is UTF-8).`,
+            ),
+          ];
+        }
+        return [i18n._(msg`The field ${label} contains invalid characters. ${help}.`)];
       }
       if (value.length > 256) {
-        return [`Il campo ${label} non può essere più lungo di 256 caratteri.`];
+        return [i18n._(msg`The field ${label} cannot be longer than 256 characters.`)];
       }
       return null;
     }
     case "number": {
       const value = rawValue as number;
+      const { min, max } = schema;
       if (!Number.isInteger(value)) {
-        return [`Il campo ${label} deve essere un numero intero.`];
+        return [i18n._(msg`The field ${label} must be an integer.`)];
       }
-      if (schema?.min !== undefined && value < schema.min) {
-        return [`Il campo ${label} deve essere maggiore o uguale a ${schema.min}.`];
+      if (min !== undefined && value < min) {
+        return [i18n._(msg`The field ${label} must be greater than or equal to ${min}.`)];
       }
-      if (schema?.max !== undefined && value > schema.max) {
-        return [`Il campo ${label} deve essere minore o uguale a ${schema.max}.`];
+      if (max !== undefined && value > max) {
+        return [i18n._(msg`The field ${label} must be less than or equal to ${max}.`)];
       }
       return null;
     }
     case "date": {
       const value = rawValue as Date;
       if (schema.min && value < schema.min) {
-        return [
-          `Il campo ${label} deve contenere una data successiva al ${formatDate(schema.min)}.`,
-        ];
+        const date = formatDate(schema.min);
+        return [i18n._(msg`The field ${label} must contain a date after ${date}.`)];
       }
       if (schema.max && value > schema.max) {
-        return [
-          `Il campo ${label} deve contenere una data precedente al ${formatDate(schema.max)}.`,
-        ];
+        const date = formatDate(schema.max);
+        return [i18n._(msg`The field ${label} must contain a date before ${date}.`)];
       }
       return null;
     }

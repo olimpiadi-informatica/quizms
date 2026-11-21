@@ -1,5 +1,6 @@
 import { Fragment } from "react";
 
+import { Trans, useLingui } from "@lingui/react/macro";
 import { DateTime } from "@olinfo/react-components";
 import { CircleX, Info, TriangleAlert } from "lucide-react";
 import Markdown from "react-markdown";
@@ -7,6 +8,7 @@ import Markdown from "react-markdown";
 import { useTeacherAnnouncements } from "./context";
 
 export function Announcements() {
+  const { i18n } = useLingui();
   const announcements = useTeacherAnnouncements();
 
   return (
@@ -22,13 +24,17 @@ export function Announcements() {
             {announcement.title}
           </h4>
           <small>
-            <DateTime date={announcement.createdAt} />
+            <DateTime date={announcement.createdAt} locale={i18n.locale} />
           </small>
           <Markdown>{announcement.body}</Markdown>
           <hr className="my-5 last:hidden" />
         </Fragment>
       ))}
-      {announcements.length === 0 && <div>Nessuna comunicazione.</div>}
+      {announcements.length === 0 && (
+        <div>
+          <Trans>No announcements.</Trans>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,0 +1,260 @@
+msgid ""
+msgstr ""
+"POT-Creation-Date: 2026-11-21 12:46+0100\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: @lingui/cli\n"
+"Language: en\n"
+
+#: packages/quizms-firebase/src/web/admin/announcements.tsx
+msgid "Add"
+msgstr "Add"
+
+#: packages/quizms-firebase/src/web/admin/announcements.tsx
+msgid "Add announcement"
+msgstr "Add announcement"
+
+#: packages/quizms-firebase/src/web/admin/contest-settings.tsx
+msgid "Always"
+msgstr "Always"
+
+#: packages/quizms-firebase/src/web/admin/dashboard.tsx
+msgid "Announcements"
+msgstr "Announcements"
+
+#: packages/quizms-firebase/src/web/entry/admin.tsx
+msgid "Anonymous user"
+msgstr "Anonymous user"
+
+#: packages/quizms-firebase/src/web/entry/student.tsx
+msgid "Contest"
+msgstr "Contest"
+
+#: packages/quizms-firebase/src/web/admin/contest-settings.tsx
+msgid "Contest instructions"
+msgstr "Contest instructions"
+
+#: packages/quizms-firebase/src/web/admin/contest-settings.tsx
+msgid "Contest instructions ({language})"
+msgstr "Contest instructions ({language})"
+
+#: packages/quizms-firebase/src/web/admin/layout.tsx
+msgid "Contest management"
+msgstr "Contest management"
+
+#: packages/quizms-firebase/src/web/admin/dashboard.tsx
+msgid "Contest settings"
+msgstr "Contest settings"
+
+#: packages/quizms-firebase/src/web/admin/announcements.tsx
+msgid "Enter the message"
+msgstr "Enter the message"
+
+#: packages/quizms-firebase/src/web/admin/announcements.tsx
+msgid "Enter the title"
+msgstr "Enter the title"
+
+#: packages/quizms-firebase/src/web/admin/dashboard.tsx
+#: packages/quizms-firebase/src/web/admin/export.tsx
+msgid "Export"
+msgstr "Export"
+
+#: packages/quizms-firebase/src/web/admin/dashboard.tsx
+msgid "Export schools"
+msgstr "Export schools"
+
+#: packages/quizms-firebase/src/web/admin/dashboard.tsx
+msgid "Export scoreboard"
+msgstr "Export scoreboard"
+
+#: packages/quizms-firebase/src/web/admin/dashboard.tsx
+msgid "Export students"
+msgstr "Export students"
+
+#: packages/quizms-firebase/src/web/admin/school-table.tsx
+msgid "Finalized"
+msgstr "Finalized"
+
+#: packages/quizms-firebase/src/web/admin/dashboard.tsx
+msgid "Finalized schools: {finalizedSchools}"
+msgstr "Finalized schools: {finalizedSchools}"
+
+#: packages/quizms-firebase/src/web/admin/announcements.tsx
+msgid "High"
+msgstr "High"
+
+#: packages/quizms-firebase/src/web/admin/school-table.tsx
+msgid "ID"
+msgstr "ID"
+
+#: packages/quizms-firebase/src/web/common/api.ts
+msgid "Invalid contest"
+msgstr "Invalid contest"
+
+#: packages/quizms-firebase/src/web/common/api.ts
+msgid "Invalid language"
+msgstr "Invalid language"
+
+#: packages/quizms-firebase/src/web/common/api.ts
+msgid "Invalid login"
+msgstr "Invalid login"
+
+#: packages/quizms-firebase/src/web/common/api.ts
+msgid "Invalid student"
+msgstr "Invalid student"
+
+#: packages/quizms-firebase/src/web/common/api.ts
+msgid "Invalid test code"
+msgstr "Invalid test code"
+
+#: packages/quizms-firebase/src/web/common/token-login.tsx
+msgid "Log in"
+msgstr "Log in"
+
+#: packages/quizms-firebase/src/web/common/token-login.tsx
+msgid "Log in to contest management"
+msgstr "Log in to contest management"
+
+#: packages/quizms-firebase/src/web/entry/student.tsx
+msgid "Log in to the contest"
+msgstr "Log in to the contest"
+
+#: packages/quizms-firebase/src/web/admin/layout.tsx
+#: packages/quizms-firebase/src/web/entry/student-restoring.tsx
+msgid "Log out"
+msgstr "Log out"
+
+#: packages/quizms-firebase/src/web/admin/announcements.tsx
+msgid "Message"
+msgstr "Message"
+
+#: packages/quizms-firebase/src/web/admin/school-table.tsx
+msgid "Name"
+msgstr "Name"
+
+#: packages/quizms-firebase/src/web/admin/contest-settings.tsx
+msgid "Never"
+msgstr "Never"
+
+#: packages/quizms-firebase/src/web/admin/provider.tsx
+msgid "No contests found"
+msgstr "No contests found"
+
+#: packages/quizms-firebase/src/web/admin/announcements.tsx
+msgid "Normal"
+msgstr "Normal"
+
+#: packages/quizms-firebase/src/web/admin/contest-settings.tsx
+msgid "Only to finalized schools"
+msgstr "Only to finalized schools"
+
+#: packages/quizms-firebase/src/web/admin/announcements.tsx
+msgid "Priority"
+msgstr "Priority"
+
+#: packages/quizms-firebase/src/web/admin/contest-settings.tsx
+msgid "Save"
+msgstr "Save"
+
+#: packages/quizms-firebase/src/web/admin/dashboard.tsx
+#: packages/quizms-firebase/src/web/admin/layout.tsx
+msgid "School management"
+msgstr "School management"
+
+#: packages/quizms-firebase/src/web/admin/dashboard.tsx
+msgid "Schools"
+msgstr "Schools"
+
+#: packages/quizms-firebase/src/web/admin/provider.tsx
+#: packages/quizms-firebase/src/web/entry/student.tsx
+msgid "Select a contest"
+msgstr "Select a contest"
+
+#: packages/quizms-firebase/src/web/admin/announcements.tsx
+msgid "Select the priority"
+msgstr "Select the priority"
+
+#: packages/quizms-firebase/src/web/admin/contest-settings.tsx
+msgid "Show scores"
+msgstr "Show scores"
+
+#: packages/quizms-firebase/src/web/entry/student.tsx
+msgid "Start the test"
+msgstr "Start the test"
+
+#: packages/quizms-firebase/src/web/admin/school-table.tsx
+msgid "Students"
+msgstr "Students"
+
+#: packages/quizms-firebase/src/web/entry/student.tsx
+msgid "Test code"
+msgstr "Test code"
+
+#: packages/quizms-firebase/src/web/common/api.ts
+msgid "The contest has already ended"
+msgstr "The contest has already ended"
+
+#: packages/quizms-firebase/src/web/common/api.ts
+msgid "The contest has already started"
+msgstr "The contest has already started"
+
+#: packages/quizms-firebase/src/web/common/api.ts
+msgid "The contest has not started"
+msgstr "The contest has not started"
+
+#: packages/quizms-firebase/src/web/common/api.ts
+msgid "This account is not enabled"
+msgstr "This account is not enabled"
+
+#: packages/quizms-firebase/src/web/common/api.ts
+msgid "This contest cannot be taken online"
+msgstr "This contest cannot be taken online"
+
+#: packages/quizms-firebase/src/web/admin/export.tsx
+msgid "This operation performs a large number of database queries, which will take some time and may affect the billing of the project."
+msgstr "This operation performs a large number of database queries, which will take some time and may affect the billing of the project."
+
+#: packages/quizms-firebase/src/web/admin/announcements.tsx
+msgid "Title"
+msgstr "Title"
+
+#: packages/quizms-firebase/src/web/admin/dashboard.tsx
+msgid "Total schools: {totalSchools}"
+msgstr "Total schools: {totalSchools}"
+
+#: packages/quizms-firebase/src/web/admin/dashboard.tsx
+msgid "Total students: {totalStudents}"
+msgstr "Total students: {totalStudents}"
+
+#: packages/quizms-firebase/src/web/common/api.ts
+msgid "Username does not exist"
+msgstr "Username does not exist"
+
+#: packages/quizms-firebase/src/web/common/api.ts
+msgid "Wrong password"
+msgstr "Wrong password"
+
+#: packages/quizms-firebase/src/web/admin/dashboard.tsx
+msgid "You are about to export the data of all the schools of the contest <0>{contestName}</0>."
+msgstr "You are about to export the data of all the schools of the contest <0>{contestName}</0>."
+
+#: packages/quizms-firebase/src/web/admin/dashboard.tsx
+msgid "You are about to export the data of all the students of the contest <0>{contestName}</0>."
+msgstr "You are about to export the data of all the students of the contest <0>{contestName}</0>."
+
+#: packages/quizms-firebase/src/web/admin/dashboard.tsx
+msgid "You are about to export the scoreboard of the contest <0>{contestName}</0>."
+msgstr "You are about to export the scoreboard of the contest <0>{contestName}</0>."
+
+#: packages/quizms-firebase/src/web/common/api.ts
+msgid "You have already taken part in this contest"
+msgstr "You have already taken part in this contest"
+
+#: packages/quizms-firebase/src/web/entry/student-restoring.tsx
+msgid "Your account is already in use on another device. To move the access to this device, ask your teacher to enter the following code at the bottom of the contest management page, in the \"access requests\" section:"
+msgstr "Your account is already in use on another device. To move the access to this device, ask your teacher to enter the following code at the bottom of the contest management page, in the \"access requests\" section:"
+
+#: packages/quizms-firebase/src/web/admin/export.tsx
+msgid "Your browser does not support data export. Use Chrome or Edge."
+msgstr "Your browser does not support data export. Use Chrome or Edge."

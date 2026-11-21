@@ -1,0 +1,1773 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=utf-8\n"
+"Language: it\n"
+"X-Generator: quizms-mdx/scripts/blockly-po.mjs\n"
+
+msgctxt "ADD_COMMENT"
+msgid "Add Comment"
+msgstr "Aggiungi commento"
+
+msgctxt "ALT_KEY"
+msgid "Alt"
+msgstr "Alt"
+
+msgctxt "CANNOT_DELETE_VARIABLE_PROCEDURE"
+msgid "Can't delete the variable '%1' because it's part of the definition of the function '%2'"
+msgstr "Non si può cancellare la variabile '%1' perché è parte della definizione della funzione '%2'"
+
+msgctxt "CHANGE_VALUE_TITLE"
+msgid "Change value:"
+msgstr "Modifica valore:"
+
+msgctxt "CHROME_OS"
+msgid "ChromeOS"
+msgstr "ChromeOS"
+
+msgctxt "CLEAN_UP"
+msgid "Clean up Blocks"
+msgstr "Pulisci i blocchi"
+
+msgctxt "CLOSE"
+msgid "Close"
+msgstr "Close"
+
+msgctxt "COLLAPSED_WARNINGS_WARNING"
+msgid "Collapsed blocks contain warnings."
+msgstr "I blocchi compressi contengono avvertimenti."
+
+msgctxt "COLLAPSE_ALL"
+msgid "Collapse Blocks"
+msgstr "Comprimi blocchi"
+
+msgctxt "COLLAPSE_BLOCK"
+msgid "Collapse Block"
+msgstr "Comprimi blocco"
+
+msgctxt "COLOUR_BLEND_COLOUR1"
+msgid "colour 1"
+msgstr "colore 1"
+
+msgctxt "COLOUR_BLEND_COLOUR2"
+msgid "colour 2"
+msgstr "colore 2"
+
+msgctxt "COLOUR_BLEND_HELPURL"
+msgid "https://meyerweb.com/eric/tools/color-blend/#:::rgbp"
+msgstr "https://meyerweb.com/eric/tools/color-blend/#:::rgbp"
+
+msgctxt "COLOUR_BLEND_RATIO"
+msgid "ratio"
+msgstr "rapporto"
+
+msgctxt "COLOUR_BLEND_TITLE"
+msgid "blend"
+msgstr "miscela"
+
+msgctxt "COLOUR_BLEND_TOOLTIP"
+msgid "Blends two colours together with a given ratio (0.0 - 1.0)."
+msgstr "Mescola due colori insieme con un determinato rapporto (0.0 - 1.0)."
+
+msgctxt "COLOUR_PICKER_HELPURL"
+msgid "https://en.wikipedia.org/wiki/Color"
+msgstr "https://it.wikipedia.org/wiki/Colore"
+
+msgctxt "COLOUR_PICKER_TOOLTIP"
+msgid "Choose a colour from the palette."
+msgstr "Scegli un colore dalla tavolozza."
+
+msgctxt "COLOUR_RANDOM_HELPURL"
+msgid "http://randomcolour.com"
+msgstr "http://randomcolour.com"
+
+msgctxt "COLOUR_RANDOM_TITLE"
+msgid "random colour"
+msgstr "colore casuale"
+
+msgctxt "COLOUR_RANDOM_TOOLTIP"
+msgid "Choose a colour at random."
+msgstr "Scegli un colore a caso."
+
+msgctxt "COLOUR_RGB_BLUE"
+msgid "blue"
+msgstr "blu"
+
+msgctxt "COLOUR_RGB_GREEN"
+msgid "green"
+msgstr "verde"
+
+msgctxt "COLOUR_RGB_HELPURL"
+msgid "https://www.december.com/html/spec/colorpercompact.html"
+msgstr "https://www.december.com/html/spec/colorpercompact.html"
+
+msgctxt "COLOUR_RGB_RED"
+msgid "red"
+msgstr "rosso"
+
+msgctxt "COLOUR_RGB_TITLE"
+msgid "colour with"
+msgstr "colora con"
+
+msgctxt "COLOUR_RGB_TOOLTIP"
+msgid "Create a colour with the specified amount of red, green, and blue. All values must be between 0 and 100."
+msgstr "Crea un colore con la quantità specificata di rosso, verde e blu. Tutti i valori devono essere compresi tra 0 e 100."
+
+msgctxt "COMMAND_KEY"
+msgid "⌘ Command"
+msgstr "⌘ Command"
+
+msgctxt "CONTROLS_FLOW_STATEMENTS_HELPURL"
+msgid "https://github.com/RaspberryPiFoundation/blockly/wiki/Loops#loop-termination-blocks"
+msgstr "https://github.com/RaspberryPiFoundation/blockly/wiki/Loops#loop-termination-blocks"
+
+msgctxt "CONTROLS_FLOW_STATEMENTS_OPERATOR_BREAK"
+msgid "break out of loop"
+msgstr "esce dal ciclo"
+
+msgctxt "CONTROLS_FLOW_STATEMENTS_OPERATOR_CONTINUE"
+msgid "continue with next iteration of loop"
+msgstr "prosegui con la successiva iterazione del ciclo"
+
+msgctxt "CONTROLS_FLOW_STATEMENTS_TOOLTIP_BREAK"
+msgid "Break out of the containing loop."
+msgstr "Esce dal ciclo."
+
+msgctxt "CONTROLS_FLOW_STATEMENTS_TOOLTIP_CONTINUE"
+msgid "Skip the rest of this loop, and continue with the next iteration."
+msgstr "Salta il resto di questo ciclo e prosegue con la successiva iterazione."
+
+msgctxt "CONTROLS_FLOW_STATEMENTS_WARNING"
+msgid "Warning: This block may only be used within a loop."
+msgstr "Attenzioneː Questo blocco può essere usato solo in un ciclo."
+
+msgctxt "CONTROLS_FOREACH_HELPURL"
+msgid "https://github.com/RaspberryPiFoundation/blockly/wiki/Loops#for-each"
+msgstr "https://github.com/RaspberryPiFoundation/blockly/wiki/Loops#for-each"
+
+msgctxt "CONTROLS_FOREACH_TITLE"
+msgid "for each item %1 in list %2"
+msgstr "per ogni elemento %1 nella lista %2"
+
+msgctxt "CONTROLS_FOREACH_TOOLTIP"
+msgid "For each item in a list, set the variable '%1' to the item, and then do some statements."
+msgstr "Per ogni elemento in una lista, imposta la variabile '%1' pari all'elemento e quindi esegue alcune istruzioni."
+
+msgctxt "CONTROLS_FOR_HELPURL"
+msgid "https://github.com/RaspberryPiFoundation/blockly/wiki/Loops#count-with"
+msgstr "https://github.com/RaspberryPiFoundation/blockly/wiki/Loops#count-with"
+
+msgctxt "CONTROLS_FOR_TITLE"
+msgid "count with %1 from %2 to %3 by %4"
+msgstr "conta con %1 da %2 a %3 per %4"
+
+msgctxt "CONTROLS_FOR_TOOLTIP"
+msgid "Have the variable '%1' take on the values from the start number to the end number, counting by the specified interval, and do the specified blocks."
+msgstr "Fa sì che la variabile '%1' prenda tutti i valori a partire dal numero di partenza fino a quello di arrivo, con passo pari all'intervallo specificato, ed esegue il blocco indicato."
+
+msgctxt "CONTROLS_IF_ELSEIF_TOOLTIP"
+msgid "Add a condition to the if block."
+msgstr "Aggiungi una condizione al blocco se."
+
+msgctxt "CONTROLS_IF_ELSE_TOOLTIP"
+msgid "Add a final, catch-all condition to the if block."
+msgstr "Aggiungi una condizione finale pigliatutto al blocco se."
+
+msgctxt "CONTROLS_IF_HELPURL"
+msgid "https://github.com/RaspberryPiFoundation/blockly/wiki/IfElse"
+msgstr "https://github.com/RaspberryPiFoundation/blockly/wiki/IfElse"
+
+msgctxt "CONTROLS_IF_IF_TOOLTIP"
+msgid "Add, remove, or reorder sections to reconfigure this if block."
+msgstr "Aggiungi, elimina o riordina le sezioni per riconfigurare questo blocco se."
+
+msgctxt "CONTROLS_IF_MSG_ELSE"
+msgid "else"
+msgstr "altrimenti"
+
+msgctxt "CONTROLS_IF_MSG_ELSEIF"
+msgid "else if"
+msgstr "altrimenti se"
+
+msgctxt "CONTROLS_IF_MSG_IF"
+msgid "if"
+msgstr "se"
+
+msgctxt "CONTROLS_IF_TOOLTIP_1"
+msgid "If a value is true, then do some statements."
+msgstr "Se un valore è vero allora esegue alcune istruzioni."
+
+msgctxt "CONTROLS_IF_TOOLTIP_2"
+msgid "If a value is true, then do the first block of statements. Otherwise, do the second block of statements."
+msgstr "Se un valore è vero allora esegue il primo blocco di istruzioni. Altrimenti esegue il secondo blocco di istruzioni."
+
+msgctxt "CONTROLS_IF_TOOLTIP_3"
+msgid "If the first value is true, then do the first block of statements. Otherwise, if the second value is true, do the second block of statements."
+msgstr "Se il primo valore è vero allora esegue un primo blocco di istruzioni. Altrimenti, se il secondo valore è vero, esegue un secondo blocco di istruzioni."
+
+msgctxt "CONTROLS_IF_TOOLTIP_4"
+msgid "If the first value is true, then do the first block of statements. Otherwise, if the second value is true, do the second block of statements. If none of the values are true, do the last block of statements."
+msgstr "Se il primo valore è vero allora esegue un primo blocco di istruzioni. Altrimenti, se il secondo valore è vero, esegue un secondo blocco di istruzioni. Se nessuno dei valori è vero esegue l'ultimo blocco di istruzioni."
+
+msgctxt "CONTROLS_REPEAT_HELPURL"
+msgid "https://en.wikipedia.org/wiki/For_loop"
+msgstr "https://it.wikipedia.org/wiki/Ciclo_for"
+
+msgctxt "CONTROLS_REPEAT_INPUT_DO"
+msgid "do"
+msgstr "fai"
+
+msgctxt "CONTROLS_REPEAT_TITLE"
+msgid "repeat %1 times"
+msgstr "ripeti %1 volte"
+
+msgctxt "CONTROLS_REPEAT_TOOLTIP"
+msgid "Do some statements several times."
+msgstr "Esegue alcune istruzione diverse volte."
+
+msgctxt "CONTROLS_WHILEUNTIL_HELPURL"
+msgid "https://github.com/RaspberryPiFoundation/blockly/wiki/Loops#repeat"
+msgstr "https://github.com/RaspberryPiFoundation/blockly/wiki/Loops#repeat"
+
+msgctxt "CONTROLS_WHILEUNTIL_OPERATOR_UNTIL"
+msgid "repeat until"
+msgstr "ripeti fino a che"
+
+msgctxt "CONTROLS_WHILEUNTIL_OPERATOR_WHILE"
+msgid "repeat while"
+msgstr "ripeti mentre"
+
+msgctxt "CONTROLS_WHILEUNTIL_TOOLTIP_UNTIL"
+msgid "While a value is false, then do some statements."
+msgstr "Finché un valore è falso, esegue alcune istruzioni."
+
+msgctxt "CONTROLS_WHILEUNTIL_TOOLTIP_WHILE"
+msgid "While a value is true, then do some statements."
+msgstr "Finché un valore è vero, esegue alcune istruzioni."
+
+msgctxt "CONTROL_KEY"
+msgid "Ctrl"
+msgstr "Ctrl"
+
+msgctxt "COPY_SHORTCUT"
+msgid "Copy"
+msgstr "Copy"
+
+msgctxt "CUT_SHORTCUT"
+msgid "Cut"
+msgstr "Cut"
+
+msgctxt "DELETE_ALL_BLOCKS"
+msgid "Delete all %1 blocks?"
+msgstr "Cancellare tutti i %1 blocchi?"
+
+msgctxt "DELETE_BLOCK"
+msgid "Delete Block"
+msgstr "Cancella blocco"
+
+msgctxt "DELETE_VARIABLE"
+msgid "Delete the '%1' variable"
+msgstr "Cancella la variabile '%1'"
+
+msgctxt "DELETE_VARIABLE_CONFIRMATION"
+msgid "Delete %1 uses of the '%2' variable?"
+msgstr "Cancella %1 usi della variabile '%2'?"
+
+msgctxt "DELETE_X_BLOCKS"
+msgid "Delete %1 Blocks"
+msgstr "Cancella %1 blocchi"
+
+msgctxt "DIALOG_CANCEL"
+msgid "Cancel"
+msgstr "Annulla"
+
+msgctxt "DIALOG_OK"
+msgid "OK"
+msgstr "OK"
+
+msgctxt "DISABLE_BLOCK"
+msgid "Disable Block"
+msgstr "Disattiva blocco"
+
+msgctxt "DUPLICATE_BLOCK"
+msgid "Duplicate"
+msgstr "Duplica"
+
+msgctxt "DUPLICATE_COMMENT"
+msgid "Duplicate Comment"
+msgstr "Duplica commento"
+
+msgctxt "EDIT_BLOCK_CONTENTS"
+msgid "Edit Block contents"
+msgstr "Edit Block contents"
+
+msgctxt "ENABLE_BLOCK"
+msgid "Enable Block"
+msgstr "Attiva blocco"
+
+msgctxt "EXPAND_ALL"
+msgid "Expand Blocks"
+msgstr "Espandi blocchi"
+
+msgctxt "EXPAND_BLOCK"
+msgid "Expand Block"
+msgstr "Espandi blocco"
+
+msgctxt "EXTERNAL_INPUTS"
+msgid "External Inputs"
+msgstr "Ingressi esterni"
+
+msgctxt "HELP"
+msgid "Help"
+msgstr "Aiuto"
+
+msgctxt "HELP_PROMPT"
+msgid "Press %1 for help on keyboard controls"
+msgstr "Press %1 for help on keyboard controls"
+
+msgctxt "INLINE_INPUTS"
+msgid "Inline Inputs"
+msgstr "Ingressi in linea"
+
+msgctxt "KEYBOARD_NAV_CONSTRAINED_MOVE_HINT"
+msgid "Use the arrow keys to move, then %1 to accept the position"
+msgstr "Use the arrow keys to move, then %1 to accept the position"
+
+msgctxt "KEYBOARD_NAV_COPIED_HINT"
+msgid "Copied. Press %1 to paste."
+msgstr "Copied. Press %1 to paste."
+
+msgctxt "KEYBOARD_NAV_CUT_HINT"
+msgid "Cut. Press %1 to paste."
+msgstr "Cut. Press %1 to paste."
+
+msgctxt "KEYBOARD_NAV_UNCONSTRAINED_MOVE_HINT"
+msgid "Hold %1 and use arrow keys to move freely, then %2 to accept the position"
+msgstr "Hold %1 and use arrow keys to move freely, then %2 to accept the position"
+
+msgctxt "LINUX"
+msgid "Linux"
+msgstr "Linux"
+
+msgctxt "LISTS_CREATE_EMPTY_HELPURL"
+msgid "https://github.com/RaspberryPiFoundation/blockly/wiki/Lists#create-empty-list"
+msgstr "https://github.com/RaspberryPiFoundation/blockly/wiki/Lists#create-empty-list"
+
+msgctxt "LISTS_CREATE_EMPTY_TITLE"
+msgid "create empty list"
+msgstr "crea lista vuota"
+
+msgctxt "LISTS_CREATE_EMPTY_TOOLTIP"
+msgid "Returns a list, of length 0, containing no data records"
+msgstr "Restituisce una lista, di lunghezza 0, contenente nessun record di dati"
+
+msgctxt "LISTS_CREATE_WITH_CONTAINER_TITLE_ADD"
+msgid "list"
+msgstr "lista"
+
+msgctxt "LISTS_CREATE_WITH_CONTAINER_TOOLTIP"
+msgid "Add, remove, or reorder sections to reconfigure this list block."
+msgstr "Aggiungi, rimuovi o riordina le sezioni per riconfigurare il blocco lista."
+
+msgctxt "LISTS_CREATE_WITH_HELPURL"
+msgid "https://github.com/RaspberryPiFoundation/blockly/wiki/Lists#create-list-with"
+msgstr "https://github.com/RaspberryPiFoundation/blockly/wiki/Lists#create-list-with"
+
+msgctxt "LISTS_CREATE_WITH_INPUT_WITH"
+msgid "create list with"
+msgstr "crea lista con"
+
+msgctxt "LISTS_CREATE_WITH_ITEM_TOOLTIP"
+msgid "Add an item to the list."
+msgstr "Aggiunge un elemento alla lista."
+
+msgctxt "LISTS_CREATE_WITH_TOOLTIP"
+msgid "Create a list with any number of items."
+msgstr "Crea una lista con un certo numero di elementi."
+
+msgctxt "LISTS_GET_INDEX_FIRST"
+msgid "first"
+msgstr "primo"
+
+msgctxt "LISTS_GET_INDEX_FROM_END"
+msgid "# from end"
+msgstr "# dalla fine"
+
+msgctxt "LISTS_GET_INDEX_FROM_START"
+msgid "#"
+msgstr "#"
+
+msgctxt "LISTS_GET_INDEX_GET"
+msgid "get"
+msgstr "prendi"
+
+msgctxt "LISTS_GET_INDEX_GET_REMOVE"
+msgid "get and remove"
+msgstr "prendi e rimuovi"
+
+msgctxt "LISTS_GET_INDEX_HELPURL"
+msgid "https://github.com/RaspberryPiFoundation/blockly/wiki/Lists#getting-items-from-a-list"
+msgstr "https://github.com/RaspberryPiFoundation/blockly/wiki/Lists#getting-items-from-a-list"
+
+msgctxt "LISTS_GET_INDEX_LAST"
+msgid "last"
+msgstr "ultimo"
+
+msgctxt "LISTS_GET_INDEX_RANDOM"
+msgid "random"
+msgstr "casuale"
+
+msgctxt "LISTS_GET_INDEX_REMOVE"
+msgid "remove"
+msgstr "rimuovi"
+
+msgctxt "LISTS_GET_INDEX_TAIL"
+msgid ""
+msgstr ""
+
+msgctxt "LISTS_GET_INDEX_TOOLTIP_GET_FIRST"
+msgid "Returns the first item in a list."
+msgstr "Restituisce il primo elemento in una lista."
+
+msgctxt "LISTS_GET_INDEX_TOOLTIP_GET_FROM"
+msgid "Returns the item at the specified position in a list."
+msgstr "Restituisce l'elemento nella posizione indicata della lista."
+
+msgctxt "LISTS_GET_INDEX_TOOLTIP_GET_LAST"
+msgid "Returns the last item in a list."
+msgstr "Restituisce l'ultimo elemento in una lista."
+
+msgctxt "LISTS_GET_INDEX_TOOLTIP_GET_RANDOM"
+msgid "Returns a random item in a list."
+msgstr "Restituisce un elemento casuale in una lista."
+
+msgctxt "LISTS_GET_INDEX_TOOLTIP_GET_REMOVE_FIRST"
+msgid "Removes and returns the first item in a list."
+msgstr "Rimuove e restituisce il primo elemento in una lista."
+
+msgctxt "LISTS_GET_INDEX_TOOLTIP_GET_REMOVE_FROM"
+msgid "Removes and returns the item at the specified position in a list."
+msgstr "Rimuove e restituisce l'elemento nella posizione indicata in una lista."
+
+msgctxt "LISTS_GET_INDEX_TOOLTIP_GET_REMOVE_LAST"
+msgid "Removes and returns the last item in a list."
+msgstr "Restituisce e rimuove l'ultimo elemento in una lista."
+
+msgctxt "LISTS_GET_INDEX_TOOLTIP_GET_REMOVE_RANDOM"
+msgid "Removes and returns a random item in a list."
+msgstr "Restituisce e rimuove un elemento casuale in una lista."
+
+msgctxt "LISTS_GET_INDEX_TOOLTIP_REMOVE_FIRST"
+msgid "Removes the first item in a list."
+msgstr "Rimuove il primo elemento in una lista."
+
+msgctxt "LISTS_GET_INDEX_TOOLTIP_REMOVE_FROM"
+msgid "Removes the item at the specified position in a list."
+msgstr "Rimuove l'elemento nella posizione indicata in una lista."
+
+msgctxt "LISTS_GET_INDEX_TOOLTIP_REMOVE_LAST"
+msgid "Removes the last item in a list."
+msgstr "Rimuove l'ultimo elemento in una lista."
+
+msgctxt "LISTS_GET_INDEX_TOOLTIP_REMOVE_RANDOM"
+msgid "Removes a random item in a list."
+msgstr "Rimuove un elemento casuale in una lista."
+
+msgctxt "LISTS_GET_SUBLIST_END_FROM_END"
+msgid "to # from end"
+msgstr "da # dalla fine"
+
+msgctxt "LISTS_GET_SUBLIST_END_FROM_START"
+msgid "to #"
+msgstr "fino a #"
+
+msgctxt "LISTS_GET_SUBLIST_END_LAST"
+msgid "to last"
+msgstr "dagli ultimi"
+
+msgctxt "LISTS_GET_SUBLIST_HELPURL"
+msgid "https://github.com/RaspberryPiFoundation/blockly/wiki/Lists#getting-a-sublist"
+msgstr "https://github.com/RaspberryPiFoundation/blockly/wiki/Lists#getting-a-sublist"
+
+msgctxt "LISTS_GET_SUBLIST_START_FIRST"
+msgid "get sub-list from first"
+msgstr "prendi sotto-lista dall'inizio"
+
+msgctxt "LISTS_GET_SUBLIST_START_FROM_END"
+msgid "get sub-list from # from end"
+msgstr "prendi sotto-lista da # dalla fine"
+
+msgctxt "LISTS_GET_SUBLIST_START_FROM_START"
+msgid "get sub-list from #"
+msgstr "prendi sotto-lista da #"
+
+msgctxt "LISTS_GET_SUBLIST_TAIL"
+msgid ""
+msgstr ""
+
+msgctxt "LISTS_GET_SUBLIST_TOOLTIP"
+msgid "Creates a copy of the specified portion of a list."
+msgstr "Crea una copia della porzione specificata di una lista."
+
+msgctxt "LISTS_INDEX_FROM_END_TOOLTIP"
+msgid "%1 is the last item."
+msgstr "%1 corrisponde all'ultimo elemento."
+
+msgctxt "LISTS_INDEX_FROM_START_TOOLTIP"
+msgid "%1 is the first item."
+msgstr "%1 corrisponde al primo elemento."
+
+msgctxt "LISTS_INDEX_OF_FIRST"
+msgid "find first occurrence of item"
+msgstr "trova la prima occorrenza dell'elemento"
+
+msgctxt "LISTS_INDEX_OF_HELPURL"
+msgid "https://github.com/RaspberryPiFoundation/blockly/wiki/Lists#finding-items-in-a-list"
+msgstr "https://github.com/RaspberryPiFoundation/blockly/wiki/Lists#finding-items-in-a-list"
+
+msgctxt "LISTS_INDEX_OF_LAST"
+msgid "find last occurrence of item"
+msgstr "trova l'ultima occorrenza dell'elemento"
+
+msgctxt "LISTS_INDEX_OF_TOOLTIP"
+msgid "Returns the index of the first/last occurrence of the item in the list. Returns %1 if item is not found."
+msgstr "Restituisce l'indice della prima/ultima occorrenza dell'elemento nella lista. Restituisce %1 se l'elemento non viene trovato."
+
+msgctxt "LISTS_INLIST"
+msgid "in list"
+msgstr "nella lista"
+
+msgctxt "LISTS_ISEMPTY_HELPURL"
+msgid "https://github.com/RaspberryPiFoundation/blockly/wiki/Lists#is-empty"
+msgstr "https://github.com/RaspberryPiFoundation/blockly/wiki/Lists#is-empty"
+
+msgctxt "LISTS_ISEMPTY_TITLE"
+msgid "%1 is empty"
+msgstr "%1 è vuota"
+
+msgctxt "LISTS_ISEMPTY_TOOLTIP"
+msgid "Returns true if the list is empty."
+msgstr "Restituisce vero se la lista è vuota."
+
+msgctxt "LISTS_LENGTH_HELPURL"
+msgid "https://github.com/RaspberryPiFoundation/blockly/wiki/Lists#length-of"
+msgstr "https://github.com/RaspberryPiFoundation/blockly/wiki/Lists#length-of"
+
+msgctxt "LISTS_LENGTH_TITLE"
+msgid "length of %1"
+msgstr "lunghezza di %1"
+
+msgctxt "LISTS_LENGTH_TOOLTIP"
+msgid "Returns the length of a list."
+msgstr "Restituisce la lunghezza della lista"
+
+msgctxt "LISTS_REPEAT_HELPURL"
+msgid "https://github.com/RaspberryPiFoundation/blockly/wiki/Lists#create-list-with"
+msgstr "https://github.com/RaspberryPiFoundation/blockly/wiki/Lists#create-list-with"
+
+msgctxt "LISTS_REPEAT_TITLE"
+msgid "create list with item %1 repeated %2 times"
+msgstr "crea una lista con l'elemento %1 ripetuto %2 volte"
+
+msgctxt "LISTS_REPEAT_TOOLTIP"
+msgid "Creates a list consisting of the given value repeated the specified number of times."
+msgstr "Crea una lista costituita dal valore indicato ripetuto per il numero di volte specificato."
+
+msgctxt "LISTS_REVERSE_HELPURL"
+msgid "https://github.com/RaspberryPiFoundation/blockly/wiki/Lists#reversing-a-list"
+msgstr "https://github.com/RaspberryPiFoundation/blockly/wiki/Lists#reversing-a-list"
+
+msgctxt "LISTS_REVERSE_MESSAGE0"
+msgid "reverse %1"
+msgstr "inverti %1"
+
+msgctxt "LISTS_REVERSE_TOOLTIP"
+msgid "Reverse a copy of a list."
+msgstr "Inverti una copia di un elenco."
+
+msgctxt "LISTS_SET_INDEX_HELPURL"
+msgid "https://github.com/RaspberryPiFoundation/blockly/wiki/Lists#in-list--set"
+msgstr "https://github.com/RaspberryPiFoundation/blockly/wiki/Lists#in-list--set"
+
+msgctxt "LISTS_SET_INDEX_INPUT_TO"
+msgid "as"
+msgstr "come"
+
+msgctxt "LISTS_SET_INDEX_INSERT"
+msgid "insert at"
+msgstr "inserisci in"
+
+msgctxt "LISTS_SET_INDEX_SET"
+msgid "set"
+msgstr "imposta"
+
+msgctxt "LISTS_SET_INDEX_TOOLTIP_INSERT_FIRST"
+msgid "Inserts the item at the start of a list."
+msgstr "Inserisci l'elemento all'inizio della lista."
+
+msgctxt "LISTS_SET_INDEX_TOOLTIP_INSERT_FROM"
+msgid "Inserts the item at the specified position in a list."
+msgstr "Inserisci un elemento nella posizione indicata in una lista."
+
+msgctxt "LISTS_SET_INDEX_TOOLTIP_INSERT_LAST"
+msgid "Append the item to the end of a list."
+msgstr "Aggiungi un elemento alla fine di una lista"
+
+msgctxt "LISTS_SET_INDEX_TOOLTIP_INSERT_RANDOM"
+msgid "Inserts the item randomly in a list."
+msgstr "Inserisce l'elemento casualmente in una lista."
+
+msgctxt "LISTS_SET_INDEX_TOOLTIP_SET_FIRST"
+msgid "Sets the first item in a list."
+msgstr "Imposta il primo elemento in una lista."
+
+msgctxt "LISTS_SET_INDEX_TOOLTIP_SET_FROM"
+msgid "Sets the item at the specified position in a list."
+msgstr "Imposta l'elemento nella posizione indicata di una lista."
+
+msgctxt "LISTS_SET_INDEX_TOOLTIP_SET_LAST"
+msgid "Sets the last item in a list."
+msgstr "Imposta l'ultimo elemento in una lista."
+
+msgctxt "LISTS_SET_INDEX_TOOLTIP_SET_RANDOM"
+msgid "Sets a random item in a list."
+msgstr "Imposta un elemento casuale in una lista."
+
+msgctxt "LISTS_SORT_HELPURL"
+msgid "https://github.com/RaspberryPiFoundation/blockly/wiki/Lists#sorting-a-list"
+msgstr "https://github.com/RaspberryPiFoundation/blockly/wiki/Lists#sorting-a-list"
+
+msgctxt "LISTS_SORT_ORDER_ASCENDING"
+msgid "ascending"
+msgstr "crescente"
+
+msgctxt "LISTS_SORT_ORDER_DESCENDING"
+msgid "descending"
+msgstr "decrescente"
+
+msgctxt "LISTS_SORT_TITLE"
+msgid "sort %1 %2 %3"
+msgstr "ordinamento %1 %2 %3"
+
+msgctxt "LISTS_SORT_TOOLTIP"
+msgid "Sort a copy of a list."
+msgstr "Ordina una copia di un elenco."
+
+msgctxt "LISTS_SORT_TYPE_IGNORECASE"
+msgid "alphabetic, ignore case"
+msgstr "alfabetico, ignorare differenze maiuscole e minuscole"
+
+msgctxt "LISTS_SORT_TYPE_NUMERIC"
+msgid "numeric"
+msgstr "numerico"
+
+msgctxt "LISTS_SORT_TYPE_TEXT"
+msgid "alphabetic"
+msgstr "alfabetico"
+
+msgctxt "LISTS_SPLIT_HELPURL"
+msgid "https://github.com/RaspberryPiFoundation/blockly/wiki/Lists#splitting-strings-and-joining-lists"
+msgstr "https://github.com/RaspberryPiFoundation/blockly/wiki/Lists#splitting-strings-and-joining-lists"
+
+msgctxt "LISTS_SPLIT_LIST_FROM_TEXT"
+msgid "make list from text"
+msgstr "crea lista da testo"
+
+msgctxt "LISTS_SPLIT_TEXT_FROM_LIST"
+msgid "make text from list"
+msgstr "crea testo da lista"
+
+msgctxt "LISTS_SPLIT_TOOLTIP_JOIN"
+msgid "Join a list of texts into one text, separated by a delimiter."
+msgstr "Unisci una lista di testi in un unico testo, separato da un delimitatore."
+
+msgctxt "LISTS_SPLIT_TOOLTIP_SPLIT"
+msgid "Split text into a list of texts, breaking at each delimiter."
+msgstr "Dividi il testo in un elenco di testi, interrompendo ad ogni delimitatore."
+
+msgctxt "LISTS_SPLIT_WITH_DELIMITER"
+msgid "with delimiter"
+msgstr "con delimitatore"
+
+msgctxt "LOGIC_BOOLEAN_FALSE"
+msgid "false"
+msgstr "falso"
+
+msgctxt "LOGIC_BOOLEAN_HELPURL"
+msgid "https://github.com/RaspberryPiFoundation/blockly/wiki/Logic#values"
+msgstr "https://github.com/RaspberryPiFoundation/blockly/wiki/Logic#values"
+
+msgctxt "LOGIC_BOOLEAN_TOOLTIP"
+msgid "Returns either true or false."
+msgstr "Restituisce vero o falso."
+
+msgctxt "LOGIC_BOOLEAN_TRUE"
+msgid "true"
+msgstr "vero"
+
+msgctxt "LOGIC_COMPARE_HELPURL"
+msgid "https://en.wikipedia.org/wiki/Inequality_(mathematics)"
+msgstr "https://it.wikipedia.org/wiki/Disuguaglianza"
+
+msgctxt "LOGIC_COMPARE_TOOLTIP_EQ"
+msgid "Return true if both inputs equal each other."
+msgstr "Restituisce vero se gli input sono uno uguale all'altro."
+
+msgctxt "LOGIC_COMPARE_TOOLTIP_GT"
+msgid "Return true if the first input is greater than the second input."
+msgstr "Restituisce vero se il primo input è maggiore o uguale al secondo."
+
+msgctxt "LOGIC_COMPARE_TOOLTIP_GTE"
+msgid "Return true if the first input is greater than or equal to the second input."
+msgstr "Restituisce uguale se il primo input è maggiore o uguale al secondo input."
+
+msgctxt "LOGIC_COMPARE_TOOLTIP_LT"
+msgid "Return true if the first input is smaller than the second input."
+msgstr "Restituisce vero se il primo input è minore del secondo."
+
+msgctxt "LOGIC_COMPARE_TOOLTIP_LTE"
+msgid "Return true if the first input is smaller than or equal to the second input."
+msgstr "Restituisce vero se il primo input è minore o uguale al secondo."
+
+msgctxt "LOGIC_COMPARE_TOOLTIP_NEQ"
+msgid "Return true if both inputs are not equal to each other."
+msgstr "Restituisce vero se gli input non sono uno uguale all'altro."
+
+msgctxt "LOGIC_NEGATE_HELPURL"
+msgid "https://github.com/RaspberryPiFoundation/blockly/wiki/Logic#not"
+msgstr "https://github.com/RaspberryPiFoundation/blockly/wiki/Logic#not"
+
+msgctxt "LOGIC_NEGATE_TITLE"
+msgid "not %1"
+msgstr "non %1"
+
+msgctxt "LOGIC_NEGATE_TOOLTIP"
+msgid "Returns true if the input is false. Returns false if the input is true."
+msgstr "Restituisce vero se l'input è falso. Restituisce falso se l'input è vero."
+
+msgctxt "LOGIC_NULL"
+msgid "null"
+msgstr "nullo"
+
+msgctxt "LOGIC_NULL_HELPURL"
+msgid "https://en.wikipedia.org/wiki/Nullable_type"
+msgstr "https://en.wikipedia.org/wiki/Nullable_type"
+
+msgctxt "LOGIC_NULL_TOOLTIP"
+msgid "Returns null."
+msgstr "Restituisce valore nullo."
+
+msgctxt "LOGIC_OPERATION_AND"
+msgid "and"
+msgstr "e"
+
+msgctxt "LOGIC_OPERATION_HELPURL"
+msgid "https://github.com/RaspberryPiFoundation/blockly/wiki/Logic#logical-operations"
+msgstr "https://github.com/RaspberryPiFoundation/blockly/wiki/Logic#logical-operations"
+
+msgctxt "LOGIC_OPERATION_OR"
+msgid "or"
+msgstr "o"
+
+msgctxt "LOGIC_OPERATION_TOOLTIP_AND"
+msgid "Return true if both inputs are true."
+msgstr "Restituisce vero se entrambi gli input sono veri."
+
+msgctxt "LOGIC_OPERATION_TOOLTIP_OR"
+msgid "Return true if at least one of the inputs is true."
+msgstr "Restituisce vero se almeno uno degli input è vero."
+
+msgctxt "LOGIC_TERNARY_CONDITION"
+msgid "test"
+msgstr "test"
+
+msgctxt "LOGIC_TERNARY_HELPURL"
+msgid "https://en.wikipedia.org/wiki/%3F:"
+msgstr "https://en.wikipedia.org/wiki/%3F:"
+
+msgctxt "LOGIC_TERNARY_IF_FALSE"
+msgid "if false"
+msgstr "se falso"
+
+msgctxt "LOGIC_TERNARY_IF_TRUE"
+msgid "if true"
+msgstr "se vero"
+
+msgctxt "LOGIC_TERNARY_TOOLTIP"
+msgid "Check the condition in 'test'. If the condition is true, returns the 'if true' value; otherwise returns the 'if false' value."
+msgstr "Verifica la condizione in 'test'. Se questa è vera restituisce il valore 'se vero' altrimenti restituisce il valore 'se falso'."
+
+msgctxt "MAC_OS"
+msgid "macOS"
+msgstr "macOS"
+
+msgctxt "MATH_ADDITION_SYMBOL"
+msgid "+"
+msgstr "+"
+
+msgctxt "MATH_ARITHMETIC_HELPURL"
+msgid "https://en.wikipedia.org/wiki/Arithmetic"
+msgstr "https://it.wikipedia.org/wiki/Aritmetica"
+
+msgctxt "MATH_ARITHMETIC_TOOLTIP_ADD"
+msgid "Return the sum of the two numbers."
+msgstr "Restituisce la somma dei due numeri."
+
+msgctxt "MATH_ARITHMETIC_TOOLTIP_DIVIDE"
+msgid "Return the quotient of the two numbers."
+msgstr "Restituisce il quoziente dei due numeri."
+
+msgctxt "MATH_ARITHMETIC_TOOLTIP_MINUS"
+msgid "Return the difference of the two numbers."
+msgstr "Restituisce la differenza dei due numeri."
+
+msgctxt "MATH_ARITHMETIC_TOOLTIP_MULTIPLY"
+msgid "Return the product of the two numbers."
+msgstr "Restituisce il prodotto dei due numeri."
+
+msgctxt "MATH_ARITHMETIC_TOOLTIP_POWER"
+msgid "Return the first number raised to the power of the second number."
+msgstr "Restituisce il primo numero elevato alla potenza del secondo numero."
+
+msgctxt "MATH_ATAN2_HELPURL"
+msgid "https://en.wikipedia.org/wiki/Atan2"
+msgstr "https://it.wikipedia.org/wiki/Arcotangente2"
+
+msgctxt "MATH_ATAN2_TITLE"
+msgid "atan2 of X:%1 Y:%2"
+msgstr "atan2 di X:%1 Y:%2"
+
+msgctxt "MATH_ATAN2_TOOLTIP"
+msgid "Return the arctangent of point (X, Y) in degrees from -180 to 180."
+msgstr "Restituisce l'arcotangente del punto (X, Y) in gradi da -180 a 180."
+
+msgctxt "MATH_CHANGE_HELPURL"
+msgid "https://en.wikipedia.org/wiki/Programming_idiom#Incrementing_a_counter"
+msgstr "https://it.wikipedia.org/wiki/Addizione"
+
+msgctxt "MATH_CHANGE_TITLE"
+msgid "change %1 by %2"
+msgstr "cambia %1 di %2"
+
+msgctxt "MATH_CHANGE_TOOLTIP"
+msgid "Add a number to variable '%1'."
+msgstr "Aggiunge un numero alla variabile '%1'."
+
+msgctxt "MATH_CONSTANT_HELPURL"
+msgid "https://en.wikipedia.org/wiki/Mathematical_constant"
+msgstr "https://it.wikipedia.org/wiki/Costante_matematica"
+
+msgctxt "MATH_CONSTANT_TOOLTIP"
+msgid "Return one of the common constants: π (3.141…), e (2.718…), φ (1.618…), sqrt(2) (1.414…), sqrt(½) (0.707…), or ∞ (infinity)."
+msgstr "Restituisce una delle costanti comuniː π (3.141…), e (2.718…), φ (1.618…), radq(2) (1.414…), radq(½) (0.707…) o ∞ (infinito)."
+
+msgctxt "MATH_CONSTRAIN_HELPURL"
+msgid "https://en.wikipedia.org/wiki/Clamping_(graphics)"
+msgstr "https://en.wikipedia.org/wiki/Clamping_(graphics)"
+
+msgctxt "MATH_CONSTRAIN_TITLE"
+msgid "constrain %1 low %2 high %3"
+msgstr "costringi %1 da %2 a %3"
+
+msgctxt "MATH_CONSTRAIN_TOOLTIP"
+msgid "Constrain a number to be between the specified limits (inclusive)."
+msgstr "Costringe un numero all'interno dei limiti indicati (compresi)."
+
+msgctxt "MATH_DIVISION_SYMBOL"
+msgid "÷"
+msgstr "÷"
+
+msgctxt "MATH_IS_DIVISIBLE_BY"
+msgid "is divisible by"
+msgstr "è divisibile per"
+
+msgctxt "MATH_IS_EVEN"
+msgid "is even"
+msgstr "è pari"
+
+msgctxt "MATH_IS_NEGATIVE"
+msgid "is negative"
+msgstr "è negativo"
+
+msgctxt "MATH_IS_ODD"
+msgid "is odd"
+msgstr "è dispari"
+
+msgctxt "MATH_IS_POSITIVE"
+msgid "is positive"
+msgstr "è positivo"
+
+msgctxt "MATH_IS_PRIME"
+msgid "is prime"
+msgstr "è primo"
+
+msgctxt "MATH_IS_TOOLTIP"
+msgid "Check if a number is an even, odd, prime, whole, positive, negative, or if it is divisible by certain number. Returns true or false."
+msgstr "Verifica se un numero è pari, dispari, primo, intero, positivo, negativo o se è divisibile per un certo numero. Restituisce vero o falso."
+
+msgctxt "MATH_IS_WHOLE"
+msgid "is whole"
+msgstr "è intero"
+
+msgctxt "MATH_MODULO_HELPURL"
+msgid "https://en.wikipedia.org/wiki/Modulo_operation"
+msgstr "https://it.wikipedia.org/wiki/Resto"
+
+msgctxt "MATH_MODULO_TITLE"
+msgid "remainder of %1 ÷ %2"
+msgstr "resto di %1 ÷ %2"
+
+msgctxt "MATH_MODULO_TOOLTIP"
+msgid "Return the remainder from dividing the two numbers."
+msgstr "Restituisce il resto della divisione di due numeri."
+
+msgctxt "MATH_MULTIPLICATION_SYMBOL"
+msgid "×"
+msgstr "×"
+
+msgctxt "MATH_NUMBER_HELPURL"
+msgid "https://en.wikipedia.org/wiki/Number"
+msgstr "https://it.wikipedia.org/wiki/Numero"
+
+msgctxt "MATH_NUMBER_TOOLTIP"
+msgid "A number."
+msgstr "Un numero."
+
+msgctxt "MATH_ONLIST_HELPURL"
+msgid ""
+msgstr ""
+
+msgctxt "MATH_ONLIST_OPERATOR_AVERAGE"
+msgid "average of list"
+msgstr "media della lista"
+
+msgctxt "MATH_ONLIST_OPERATOR_MAX"
+msgid "max of list"
+msgstr "massimo della lista"
+
+msgctxt "MATH_ONLIST_OPERATOR_MEDIAN"
+msgid "median of list"
+msgstr "mediana della lista"
+
+msgctxt "MATH_ONLIST_OPERATOR_MIN"
+msgid "min of list"
+msgstr "minimo della lista"
+
+msgctxt "MATH_ONLIST_OPERATOR_MODE"
+msgid "modes of list"
+msgstr "mode della lista"
+
+msgctxt "MATH_ONLIST_OPERATOR_RANDOM"
+msgid "random item of list"
+msgstr "elemento casuale della lista"
+
+msgctxt "MATH_ONLIST_OPERATOR_STD_DEV"
+msgid "standard deviation of list"
+msgstr "deviazione standard della lista"
+
+msgctxt "MATH_ONLIST_OPERATOR_SUM"
+msgid "sum of list"
+msgstr "somma la lista"
+
+msgctxt "MATH_ONLIST_TOOLTIP_AVERAGE"
+msgid "Return the average (arithmetic mean) of the numeric values in the list."
+msgstr "Restituisce la media (media aritmetica) dei valori numerici nella lista."
+
+msgctxt "MATH_ONLIST_TOOLTIP_MAX"
+msgid "Return the largest number in the list."
+msgstr "Restituisce il più grande numero della lista."
+
+msgctxt "MATH_ONLIST_TOOLTIP_MEDIAN"
+msgid "Return the median number in the list."
+msgstr "Restituisce il valore mediano della lista."
+
+msgctxt "MATH_ONLIST_TOOLTIP_MIN"
+msgid "Return the smallest number in the list."
+msgstr "Restituisce il più piccolo numero della lista."
+
+msgctxt "MATH_ONLIST_TOOLTIP_MODE"
+msgid "Return a list of the most common item(s) in the list."
+msgstr "Restituisce una lista degli elementi più frequenti nella lista."
+
+msgctxt "MATH_ONLIST_TOOLTIP_RANDOM"
+msgid "Return a random element from the list."
+msgstr "Restituisce un elemento casuale della lista."
+
+msgctxt "MATH_ONLIST_TOOLTIP_STD_DEV"
+msgid "Return the standard deviation of the list."
+msgstr "Restituisce la deviazione standard della lista."
+
+msgctxt "MATH_ONLIST_TOOLTIP_SUM"
+msgid "Return the sum of all the numbers in the list."
+msgstr "Restituisce la somma si tutti i numeri nella lista."
+
+msgctxt "MATH_POWER_SYMBOL"
+msgid "^"
+msgstr "^"
+
+msgctxt "MATH_RANDOM_FLOAT_HELPURL"
+msgid "https://en.wikipedia.org/wiki/Random_number_generation"
+msgstr "https://it.wikipedia.org/wiki/Numeri_pseudo-casuali"
+
+msgctxt "MATH_RANDOM_FLOAT_TITLE_RANDOM"
+msgid "random fraction"
+msgstr "frazione casuale"
+
+msgctxt "MATH_RANDOM_FLOAT_TOOLTIP"
+msgid "Return a random fraction between 0.0 (inclusive) and 1.0 (exclusive)."
+msgstr "Restituisce una frazione compresa fra 0.0 (incluso) e 1.0 (escluso)."
+
+msgctxt "MATH_RANDOM_INT_HELPURL"
+msgid "https://en.wikipedia.org/wiki/Random_number_generation"
+msgstr "https://it.wikipedia.org/wiki/Numeri_pseudo-casuali"
+
+msgctxt "MATH_RANDOM_INT_TITLE"
+msgid "random integer from %1 to %2"
+msgstr "intero casuale da %1 a %2"
+
+msgctxt "MATH_RANDOM_INT_TOOLTIP"
+msgid "Return a random integer between the two specified limits, inclusive."
+msgstr "Restituisce un numero intero casuale compreso tra i due limiti indicati (inclusi)."
+
+msgctxt "MATH_ROUND_HELPURL"
+msgid "https://en.wikipedia.org/wiki/Rounding"
+msgstr "https://it.wikipedia.org/wiki/Arrotondamento"
+
+msgctxt "MATH_ROUND_OPERATOR_ROUND"
+msgid "round"
+msgstr "arrotonda"
+
+msgctxt "MATH_ROUND_OPERATOR_ROUNDDOWN"
+msgid "round down"
+msgstr "arrotonda verso il basso"
+
+msgctxt "MATH_ROUND_OPERATOR_ROUNDUP"
+msgid "round up"
+msgstr "arrotonda verso l'alto"
+
+msgctxt "MATH_ROUND_TOOLTIP"
+msgid "Round a number up or down."
+msgstr "Arrotonda un numero verso l'alto o verso il basso."
+
+msgctxt "MATH_SINGLE_HELPURL"
+msgid "https://en.wikipedia.org/wiki/Square_root"
+msgstr "https://it.wikipedia.org/wiki/Radice_quadrata"
+
+msgctxt "MATH_SINGLE_OP_ABSOLUTE"
+msgid "absolute"
+msgstr "assoluto"
+
+msgctxt "MATH_SINGLE_OP_ROOT"
+msgid "square root"
+msgstr "radice quadrata"
+
+msgctxt "MATH_SINGLE_TOOLTIP_ABS"
+msgid "Return the absolute value of a number."
+msgstr "Restituisce il valore assoluto del numero."
+
+msgctxt "MATH_SINGLE_TOOLTIP_EXP"
+msgid "Return e to the power of a number."
+msgstr "Restituisce e elevato alla potenza del numero."
+
+msgctxt "MATH_SINGLE_TOOLTIP_LN"
+msgid "Return the natural logarithm of a number."
+msgstr "Restituisce il logaritmo naturale del numero."
+
+msgctxt "MATH_SINGLE_TOOLTIP_LOG10"
+msgid "Return the base 10 logarithm of a number."
+msgstr "Restituisce il logaritmo in base 10 del numero."
+
+msgctxt "MATH_SINGLE_TOOLTIP_NEG"
+msgid "Return the negation of a number."
+msgstr "Restituisce l'opposto del numero."
+
+msgctxt "MATH_SINGLE_TOOLTIP_POW10"
+msgid "Return 10 to the power of a number."
+msgstr "Restituisce 10 elevato alla potenza del numero."
+
+msgctxt "MATH_SINGLE_TOOLTIP_ROOT"
+msgid "Return the square root of a number."
+msgstr "Restituisce la radice quadrata del numero."
+
+msgctxt "MATH_SUBTRACTION_SYMBOL"
+msgid "-"
+msgstr "-"
+
+msgctxt "MATH_TRIG_ACOS"
+msgid "acos"
+msgstr "acos"
+
+msgctxt "MATH_TRIG_ASIN"
+msgid "asin"
+msgstr "asin"
+
+msgctxt "MATH_TRIG_ATAN"
+msgid "atan"
+msgstr "atan"
+
+msgctxt "MATH_TRIG_COS"
+msgid "cos"
+msgstr "cos"
+
+msgctxt "MATH_TRIG_HELPURL"
+msgid "https://en.wikipedia.org/wiki/Trigonometric_functions"
+msgstr "https://it.wikipedia.org/wiki/Funzione_trigonometrica"
+
+msgctxt "MATH_TRIG_SIN"
+msgid "sin"
+msgstr "sin"
+
+msgctxt "MATH_TRIG_TAN"
+msgid "tan"
+msgstr "tan"
+
+msgctxt "MATH_TRIG_TOOLTIP_ACOS"
+msgid "Return the arccosine of a number."
+msgstr "Restituisce l'arco-coseno di un numero."
+
+msgctxt "MATH_TRIG_TOOLTIP_ASIN"
+msgid "Return the arcsine of a number."
+msgstr "Restituisce l'arco-seno di un numero."
+
+msgctxt "MATH_TRIG_TOOLTIP_ATAN"
+msgid "Return the arctangent of a number."
+msgstr "Restituisce l'arco-tangente di un numero."
+
+msgctxt "MATH_TRIG_TOOLTIP_COS"
+msgid "Return the cosine of a degree (not radian)."
+msgstr "Restituisce il coseno di un angolo espresso in gradi (non radianti)."
+
+msgctxt "MATH_TRIG_TOOLTIP_SIN"
+msgid "Return the sine of a degree (not radian)."
+msgstr "Restituisce il seno di un angolo espresso in gradi (non radianti)."
+
+msgctxt "MATH_TRIG_TOOLTIP_TAN"
+msgid "Return the tangent of a degree (not radian)."
+msgstr "Restituisce la tangente di un angolo espresso in gradi (non radianti)."
+
+msgctxt "MOVE_BLOCK"
+msgid "Move Block"
+msgstr "Move Block"
+
+msgctxt "NEW_COLOUR_VARIABLE"
+msgid "Create colour variable..."
+msgstr "Crea variabile colore..."
+
+msgctxt "NEW_NUMBER_VARIABLE"
+msgid "Create number variable..."
+msgstr "Crea variabile numero..."
+
+msgctxt "NEW_STRING_VARIABLE"
+msgid "Create string variable..."
+msgstr "Crea variabile stringa..."
+
+msgctxt "NEW_VARIABLE"
+msgid "Create variable..."
+msgstr "Crea variabile..."
+
+msgctxt "NEW_VARIABLE_TITLE"
+msgid "New variable name:"
+msgstr "Nome della nuova variabile:"
+
+msgctxt "NEW_VARIABLE_TYPE_TITLE"
+msgid "New variable type:"
+msgstr "Tipo della nuova variabile:"
+
+msgctxt "OPTION_KEY"
+msgid "⌥ Option"
+msgstr "⌥ Option"
+
+msgctxt "ORDINAL_NUMBER_SUFFIX"
+msgid ""
+msgstr ""
+
+msgctxt "PASTE_SHORTCUT"
+msgid "Paste"
+msgstr "Paste"
+
+msgctxt "PROCEDURES_ALLOW_STATEMENTS"
+msgid "allow statements"
+msgstr "consenti dichiarazioni"
+
+msgctxt "PROCEDURES_BEFORE_PARAMS"
+msgid "with:"
+msgstr "conː"
+
+msgctxt "PROCEDURES_CALLNORETURN_HELPURL"
+msgid "https://en.wikipedia.org/wiki/Subroutine"
+msgstr "https://it.wikipedia.org/wiki/Funzione (informatica)"
+
+msgctxt "PROCEDURES_CALLNORETURN_TOOLTIP"
+msgid "Run the user-defined function '%1'."
+msgstr "Esegue la funzione definita dall'utente '%1'."
+
+msgctxt "PROCEDURES_CALLRETURN_HELPURL"
+msgid "https://en.wikipedia.org/wiki/Subroutine"
+msgstr "https://it.wikipedia.org/wiki/Funzione (informatica)"
+
+msgctxt "PROCEDURES_CALLRETURN_TOOLTIP"
+msgid "Run the user-defined function '%1' and use its output."
+msgstr "Esegue la funzione definita dall'utente '%1' ed usa il suo output."
+
+msgctxt "PROCEDURES_CALL_BEFORE_PARAMS"
+msgid "with:"
+msgstr "conː"
+
+msgctxt "PROCEDURES_CALL_DISABLED_DEF_WARNING"
+msgid "Can't run the user-defined function '%1' because the definition block is disabled."
+msgstr "Can't run the user-defined function '%1' because the definition block is disabled."
+
+msgctxt "PROCEDURES_CREATE_DO"
+msgid "Create '%1'"
+msgstr "Crea '%1'"
+
+msgctxt "PROCEDURES_DEFNORETURN_COMMENT"
+msgid "Describe this function..."
+msgstr "Descrivi questa funzione..."
+
+msgctxt "PROCEDURES_DEFNORETURN_DO"
+msgid ""
+msgstr ""
+
+msgctxt "PROCEDURES_DEFNORETURN_HELPURL"
+msgid "https://en.wikipedia.org/wiki/Subroutine"
+msgstr "https://en.wikipedia.org/wiki/Subroutine"
+
+msgctxt "PROCEDURES_DEFNORETURN_PROCEDURE"
+msgid "do something"
+msgstr "fai qualcosa"
+
+msgctxt "PROCEDURES_DEFNORETURN_TITLE"
+msgid "to"
+msgstr "per"
+
+msgctxt "PROCEDURES_DEFNORETURN_TOOLTIP"
+msgid "Creates a function with no output."
+msgstr "Crea una funzione senza output."
+
+msgctxt "PROCEDURES_DEFRETURN_HELPURL"
+msgid "https://en.wikipedia.org/wiki/Subroutine"
+msgstr "https://en.wikipedia.org/wiki/Subroutine"
+
+msgctxt "PROCEDURES_DEFRETURN_RETURN"
+msgid "return"
+msgstr "ritorna"
+
+msgctxt "PROCEDURES_DEFRETURN_TOOLTIP"
+msgid "Creates a function with an output."
+msgstr "Crea una funzione con un output."
+
+msgctxt "PROCEDURES_DEF_DUPLICATE_WARNING"
+msgid "Warning: This function has duplicate parameters."
+msgstr "Attenzioneː Questa funzione ha parametri duplicati."
+
+msgctxt "PROCEDURES_HIGHLIGHT_DEF"
+msgid "Highlight function definition"
+msgstr "Evidenzia definizione di funzione"
+
+msgctxt "PROCEDURES_IFRETURN_HELPURL"
+msgid "https://c2.com/cgi/wiki?GuardClause"
+msgstr "https://c2.com/cgi/wiki?GuardClause"
+
+msgctxt "PROCEDURES_IFRETURN_TOOLTIP"
+msgid "If a value is true, then return a second value."
+msgstr "Se un valore è vero allora restituisce un secondo valore."
+
+msgctxt "PROCEDURES_IFRETURN_WARNING"
+msgid "Warning: This block may be used only within a function definition."
+msgstr "Attenzioneː Questo blocco può essere usato solo all'interno di una definizione di funzione."
+
+msgctxt "PROCEDURES_MUTATORARG_TITLE"
+msgid "input name:"
+msgstr "nome inputː"
+
+msgctxt "PROCEDURES_MUTATORARG_TOOLTIP"
+msgid "Add an input to the function."
+msgstr "Aggiungi un input alla funzione."
+
+msgctxt "PROCEDURES_MUTATORCONTAINER_TITLE"
+msgid "inputs"
+msgstr "input"
+
+msgctxt "PROCEDURES_MUTATORCONTAINER_TOOLTIP"
+msgid "Add, remove, or reorder inputs to this function."
+msgstr "Aggiungi, rimuovi o riordina input alla funzione."
+
+msgctxt "REDO"
+msgid "Redo"
+msgstr "Ripeti"
+
+msgctxt "REMOVE_COMMENT"
+msgid "Remove Comment"
+msgstr "Rimuovi commento"
+
+msgctxt "RENAME_VARIABLE"
+msgid "Rename variable..."
+msgstr "Rinomina variabile..."
+
+msgctxt "RENAME_VARIABLE_TITLE"
+msgid "Rename all '%1' variables to:"
+msgstr "Rinomina tutte le variabili '%1' in:"
+
+msgctxt "SHORTCUTS_CODE_NAVIGATION"
+msgid "Code navigation"
+msgstr "Code navigation"
+
+msgctxt "SHORTCUTS_EDITING"
+msgid "Editing"
+msgstr "Editing"
+
+msgctxt "SHORTCUTS_GENERAL"
+msgid "General"
+msgstr "General"
+
+msgctxt "TEXT_APPEND_HELPURL"
+msgid "https://github.com/RaspberryPiFoundation/blockly/wiki/Text#text-modification"
+msgstr "https://github.com/RaspberryPiFoundation/blockly/wiki/Text#text-modification"
+
+msgctxt "TEXT_APPEND_TITLE"
+msgid "to %1 append text %2"
+msgstr "a %1 aggiungi il testo %2"
+
+msgctxt "TEXT_APPEND_TOOLTIP"
+msgid "Append some text to variable '%1'."
+msgstr "Aggiunge del testo alla variabile '%1'."
+
+msgctxt "TEXT_CHANGECASE_HELPURL"
+msgid "https://github.com/RaspberryPiFoundation/blockly/wiki/Text#adjusting-text-case"
+msgstr "https://github.com/RaspberryPiFoundation/blockly/wiki/Text#adjusting-text-case"
+
+msgctxt "TEXT_CHANGECASE_OPERATOR_LOWERCASE"
+msgid "to lower case"
+msgstr "in minuscolo"
+
+msgctxt "TEXT_CHANGECASE_OPERATOR_TITLECASE"
+msgid "to Title Case"
+msgstr "con Iniziali Maiuscole"
+
+msgctxt "TEXT_CHANGECASE_OPERATOR_UPPERCASE"
+msgid "to UPPER CASE"
+msgstr "in MAIUSCOLO"
+
+msgctxt "TEXT_CHANGECASE_TOOLTIP"
+msgid "Return a copy of the text in a different case."
+msgstr "Restituisce una copia del testo in un diverso formato maiuscole/minuscole."
+
+msgctxt "TEXT_CHARAT_FIRST"
+msgid "get first letter"
+msgstr "prendi la prima lettera"
+
+msgctxt "TEXT_CHARAT_FROM_END"
+msgid "get letter # from end"
+msgstr "prendi la lettera # dalla fine"
+
+msgctxt "TEXT_CHARAT_FROM_START"
+msgid "get letter #"
+msgstr "prendi la lettera #"
+
+msgctxt "TEXT_CHARAT_HELPURL"
+msgid "https://github.com/RaspberryPiFoundation/blockly/wiki/Text#extracting-text"
+msgstr "https://github.com/RaspberryPiFoundation/blockly/wiki/Text#extracting-text"
+
+msgctxt "TEXT_CHARAT_LAST"
+msgid "get last letter"
+msgstr "prendi l'ultima lettera"
+
+msgctxt "TEXT_CHARAT_RANDOM"
+msgid "get random letter"
+msgstr "prendi lettera casuale"
+
+msgctxt "TEXT_CHARAT_TAIL"
+msgid ""
+msgstr ""
+
+msgctxt "TEXT_CHARAT_TITLE"
+msgid "in text %1 %2"
+msgstr "nel testo %1 %2"
+
+msgctxt "TEXT_CHARAT_TOOLTIP"
+msgid "Returns the letter at the specified position."
+msgstr "Restituisce la lettera nella posizione indicata."
+
+msgctxt "TEXT_COUNT_HELPURL"
+msgid "https://github.com/RaspberryPiFoundation/blockly/wiki/Text#counting-substrings"
+msgstr "https://github.com/RaspberryPiFoundation/blockly/wiki/Text#counting-substrings"
+
+msgctxt "TEXT_COUNT_MESSAGE0"
+msgid "count %1 in %2"
+msgstr "conta %1 in %2"
+
+msgctxt "TEXT_COUNT_TOOLTIP"
+msgid "Count how many times some text occurs within some other text."
+msgstr "Contare quante volte una parte di testo si ripete all'interno di qualche altro testo."
+
+msgctxt "TEXT_CREATE_JOIN_ITEM_TOOLTIP"
+msgid "Add an item to the text."
+msgstr "Aggiungi un elemento al testo."
+
+msgctxt "TEXT_CREATE_JOIN_TITLE_JOIN"
+msgid "join"
+msgstr "unisci"
+
+msgctxt "TEXT_CREATE_JOIN_TOOLTIP"
+msgid "Add, remove, or reorder sections to reconfigure this text block."
+msgstr "Aggiungi, rimuovi o riordina le sezioni per riconfigurare questo blocco testo."
+
+msgctxt "TEXT_GET_SUBSTRING_END_FROM_END"
+msgid "to letter # from end"
+msgstr "alla lettera # dalla fine"
+
+msgctxt "TEXT_GET_SUBSTRING_END_FROM_START"
+msgid "to letter #"
+msgstr "alla lettera #"
+
+msgctxt "TEXT_GET_SUBSTRING_END_LAST"
+msgid "to last letter"
+msgstr "all'ultima lettera"
+
+msgctxt "TEXT_GET_SUBSTRING_HELPURL"
+msgid "https://github.com/RaspberryPiFoundation/blockly/wiki/Text#extracting-a-region-of-text"
+msgstr "https://github.com/RaspberryPiFoundation/blockly/wiki/Text#extracting-a-region-of-text"
+
+msgctxt "TEXT_GET_SUBSTRING_INPUT_IN_TEXT"
+msgid "in text"
+msgstr "nel testo"
+
+msgctxt "TEXT_GET_SUBSTRING_START_FIRST"
+msgid "get substring from first letter"
+msgstr "prendi sotto-stringa dalla prima lettera"
+
+msgctxt "TEXT_GET_SUBSTRING_START_FROM_END"
+msgid "get substring from letter # from end"
+msgstr "prendi sotto-stringa dalla lettera # dalla fine"
+
+msgctxt "TEXT_GET_SUBSTRING_START_FROM_START"
+msgid "get substring from letter #"
+msgstr "prendi sotto-stringa dalla lettera #"
+
+msgctxt "TEXT_GET_SUBSTRING_TAIL"
+msgid ""
+msgstr ""
+
+msgctxt "TEXT_GET_SUBSTRING_TOOLTIP"
+msgid "Returns a specified portion of the text."
+msgstr "Restituisce la porzione di testo indicata."
+
+msgctxt "TEXT_INDEXOF_HELPURL"
+msgid "https://github.com/RaspberryPiFoundation/blockly/wiki/Text#finding-text"
+msgstr "https://github.com/RaspberryPiFoundation/blockly/wiki/Text#finding-text"
+
+msgctxt "TEXT_INDEXOF_OPERATOR_FIRST"
+msgid "find first occurrence of text"
+msgstr "trova la prima occorrenza del testo"
+
+msgctxt "TEXT_INDEXOF_OPERATOR_LAST"
+msgid "find last occurrence of text"
+msgstr "trova l'ultima occorrenza del testo"
+
+msgctxt "TEXT_INDEXOF_TITLE"
+msgid "in text %1 %2 %3"
+msgstr "nel testo %1 %2 %3"
+
+msgctxt "TEXT_INDEXOF_TOOLTIP"
+msgid "Returns the index of the first/last occurrence of the first text in the second text. Returns %1 if text is not found."
+msgstr "Restituisce l'indice della prima occorrenza del primo testo all'interno del secondo testo. Restituisce %1 se il testo non viene trovato."
+
+msgctxt "TEXT_ISEMPTY_HELPURL"
+msgid "https://github.com/RaspberryPiFoundation/blockly/wiki/Text#checking-for-empty-text"
+msgstr "https://github.com/RaspberryPiFoundation/blockly/wiki/Text#checking-for-empty-text"
+
+msgctxt "TEXT_ISEMPTY_TITLE"
+msgid "%1 is empty"
+msgstr "%1 è vuoto"
+
+msgctxt "TEXT_ISEMPTY_TOOLTIP"
+msgid "Returns true if the provided text is empty."
+msgstr "Restituisce vero se il testo fornito è vuoto."
+
+msgctxt "TEXT_JOIN_HELPURL"
+msgid "https://github.com/RaspberryPiFoundation/blockly/wiki/Text#text-creation"
+msgstr "https://github.com/RaspberryPiFoundation/blockly/wiki/Text#text-creation"
+
+msgctxt "TEXT_JOIN_TITLE_CREATEWITH"
+msgid "create text with"
+msgstr "crea testo con"
+
+msgctxt "TEXT_JOIN_TOOLTIP"
+msgid "Create a piece of text by joining together any number of items."
+msgstr "Crea un blocco di testo unendo un certo numero di elementi."
+
+msgctxt "TEXT_LENGTH_HELPURL"
+msgid "https://github.com/RaspberryPiFoundation/blockly/wiki/Text#text-modification"
+msgstr "https://github.com/RaspberryPiFoundation/blockly/wiki/Text#text-modification"
+
+msgctxt "TEXT_LENGTH_TITLE"
+msgid "length of %1"
+msgstr "lunghezza di %1"
+
+msgctxt "TEXT_LENGTH_TOOLTIP"
+msgid "Returns the number of letters (including spaces) in the provided text."
+msgstr "Restituisce il numero di lettere (inclusi gli spazi) nel testo fornito."
+
+msgctxt "TEXT_PRINT_HELPURL"
+msgid "https://github.com/RaspberryPiFoundation/blockly/wiki/Text#printing-text"
+msgstr "https://github.com/RaspberryPiFoundation/blockly/wiki/Text#printing-text"
+
+msgctxt "TEXT_PRINT_TITLE"
+msgid "print %1"
+msgstr "scrivi %1"
+
+msgctxt "TEXT_PRINT_TOOLTIP"
+msgid "Print the specified text, number or other value."
+msgstr "Scrive il testo, numero o altro valore indicato."
+
+msgctxt "TEXT_PROMPT_HELPURL"
+msgid "https://github.com/RaspberryPiFoundation/blockly/wiki/Text#getting-input-from-the-user"
+msgstr "https://github.com/RaspberryPiFoundation/blockly/wiki/Text#getting-input-from-the-user"
+
+msgctxt "TEXT_PROMPT_TOOLTIP_NUMBER"
+msgid "Prompt for user for a number."
+msgstr "Richiedi un numero all'utente."
+
+msgctxt "TEXT_PROMPT_TOOLTIP_TEXT"
+msgid "Prompt for user for some text."
+msgstr "Richiede del testo da parte dell'utente."
+
+msgctxt "TEXT_PROMPT_TYPE_NUMBER"
+msgid "prompt for number with message"
+msgstr "richiedi numero con messaggio"
+
+msgctxt "TEXT_PROMPT_TYPE_TEXT"
+msgid "prompt for text with message"
+msgstr "richiedi testo con messaggio"
+
+msgctxt "TEXT_REPLACE_HELPURL"
+msgid "https://github.com/RaspberryPiFoundation/blockly/wiki/Text#replacing-substrings"
+msgstr "https://github.com/RaspberryPiFoundation/blockly/wiki/Text#replacing-substrings"
+
+msgctxt "TEXT_REPLACE_MESSAGE0"
+msgid "replace %1 with %2 in %3"
+msgstr "sostituisci %1 con %2 in %3"
+
+msgctxt "TEXT_REPLACE_TOOLTIP"
+msgid "Replace all occurances of some text within some other text."
+msgstr "sostituisci tutte le occorrenze di un certo testo con qualche altro testo."
+
+msgctxt "TEXT_REVERSE_HELPURL"
+msgid "https://github.com/RaspberryPiFoundation/blockly/wiki/Text#reversing-text"
+msgstr "https://github.com/RaspberryPiFoundation/blockly/wiki/Text#reversing-text"
+
+msgctxt "TEXT_REVERSE_MESSAGE0"
+msgid "reverse %1"
+msgstr "inverti %1"
+
+msgctxt "TEXT_REVERSE_TOOLTIP"
+msgid "Reverses the order of the characters in the text."
+msgstr "Inverte l'ordine dei caratteri nel testo."
+
+msgctxt "TEXT_TEXT_HELPURL"
+msgid "https://en.wikipedia.org/wiki/String_(computer_science)"
+msgstr "https://it.wikipedia.org/wiki/Stringa_(informatica)"
+
+msgctxt "TEXT_TEXT_TOOLTIP"
+msgid "A letter, word, or line of text."
+msgstr "Una lettera, una parola o una linea di testo."
+
+msgctxt "TEXT_TRIM_HELPURL"
+msgid "https://github.com/RaspberryPiFoundation/blockly/wiki/Text#trimming-removing-spaces"
+msgstr "https://github.com/RaspberryPiFoundation/blockly/wiki/Text#trimming-removing-spaces"
+
+msgctxt "TEXT_TRIM_OPERATOR_BOTH"
+msgid "trim spaces from both sides of"
+msgstr "rimuovi spazi da entrambi gli estremi"
+
+msgctxt "TEXT_TRIM_OPERATOR_LEFT"
+msgid "trim spaces from left side of"
+msgstr "rimuovi spazi a sinistra"
+
+msgctxt "TEXT_TRIM_OPERATOR_RIGHT"
+msgid "trim spaces from right side of"
+msgstr "rimuovi spazi a destra"
+
+msgctxt "TEXT_TRIM_TOOLTIP"
+msgid "Return a copy of the text with spaces removed from one or both ends."
+msgstr "Restituisce una copia del testo con gli spazi rimossi ad uno o entrambe le estremità."
+
+msgctxt "TODAY"
+msgid "Today"
+msgstr "Oggi"
+
+msgctxt "UNDO"
+msgid "Undo"
+msgstr "Annulla"
+
+msgctxt "UNKNOWN"
+msgid "Unknown"
+msgstr "Unknown"
+
+msgctxt "UNNAMED_KEY"
+msgid "unnamed"
+msgstr "senza nome"
+
+msgctxt "VARIABLES_DEFAULT_NAME"
+msgid "item"
+msgstr "elemento"
+
+msgctxt "VARIABLES_GET_CREATE_SET"
+msgid "Create 'set %1'"
+msgstr "Crea 'imposta %1'"
+
+msgctxt "VARIABLES_GET_HELPURL"
+msgid "https://github.com/RaspberryPiFoundation/blockly/wiki/Variables#get"
+msgstr "https://github.com/RaspberryPiFoundation/blockly/wiki/Variables#get"
+
+msgctxt "VARIABLES_GET_TOOLTIP"
+msgid "Returns the value of this variable."
+msgstr "Restituisce il valore di una variabile."
+
+msgctxt "VARIABLES_SET"
+msgid "set %1 to %2"
+msgstr "imposta %1 a %2"
+
+msgctxt "VARIABLES_SET_CREATE_GET"
+msgid "Create 'get %1'"
+msgstr "Crea 'prendi %1'"
+
+msgctxt "VARIABLES_SET_HELPURL"
+msgid "https://github.com/RaspberryPiFoundation/blockly/wiki/Variables#set"
+msgstr "https://github.com/RaspberryPiFoundation/blockly/wiki/Variables#set"
+
+msgctxt "VARIABLES_SET_TOOLTIP"
+msgid "Sets this variable to be equal to the input."
+msgstr "Imposta questa variabile ad essere pari all'input."
+
+msgctxt "VARIABLE_ALREADY_EXISTS"
+msgid "A variable named '%1' already exists."
+msgstr "Una variabile denominata '%1' esiste già."
+
+msgctxt "VARIABLE_ALREADY_EXISTS_FOR_ANOTHER_TYPE"
+msgid "A variable named '%1' already exists for another type: '%2'."
+msgstr "Una variabile nominata '%1' esiste già per un altro tipo: '%2'."
+
+msgctxt "VARIABLE_ALREADY_EXISTS_FOR_A_PARAMETER"
+msgid "A variable named '%1' already exists as a parameter in the procedure '%2'."
+msgstr "A variable named '%1' already exists as a parameter in the procedure '%2'."
+
+msgctxt "WINDOWS"
+msgid "Windows"
+msgstr "Windows"
+
+msgctxt "WORKSPACE_ARIA_LABEL"
+msgid "Blockly Workspace"
+msgstr "Area di lavoro di Blockly"
+
+msgctxt "WORKSPACE_COMMENT_DEFAULT_TEXT"
+msgid "Say something..."
+msgstr "Scrivi qualcosa..."
+
+msgctxt "CONTROLS_FOREACH_INPUT_DO"
+msgid "do"
+msgstr "fai"
+
+msgctxt "CONTROLS_FOR_INPUT_DO"
+msgid "do"
+msgstr "fai"
+
+msgctxt "CONTROLS_IF_ELSEIF_TITLE_ELSEIF"
+msgid "else if"
+msgstr "altrimenti se"
+
+msgctxt "CONTROLS_IF_ELSE_TITLE_ELSE"
+msgid "else"
+msgstr "altrimenti"
+
+msgctxt "CONTROLS_IF_IF_TITLE_IF"
+msgid "if"
+msgstr "se"
+
+msgctxt "CONTROLS_IF_MSG_THEN"
+msgid "do"
+msgstr "fai"
+
+msgctxt "CONTROLS_WHILEUNTIL_INPUT_DO"
+msgid "do"
+msgstr "fai"
+
+msgctxt "LISTS_CREATE_WITH_ITEM_TITLE"
+msgid "item"
+msgstr "elemento"
+
+msgctxt "LISTS_GET_INDEX_INPUT_IN_LIST"
+msgid "in list"
+msgstr "nella lista"
+
+msgctxt "LISTS_GET_SUBLIST_INPUT_IN_LIST"
+msgid "in list"
+msgstr "nella lista"
+
+msgctxt "LISTS_INDEX_OF_INPUT_IN_LIST"
+msgid "in list"
+msgstr "nella lista"
+
+msgctxt "LISTS_SET_INDEX_INPUT_IN_LIST"
+msgid "in list"
+msgstr "nella lista"
+
+msgctxt "MATH_CHANGE_TITLE_ITEM"
+msgid "item"
+msgstr "elemento"
+
+msgctxt "PROCEDURES_DEFRETURN_COMMENT"
+msgid "Describe this function..."
+msgstr "Descrivi questa funzione..."
+
+msgctxt "PROCEDURES_DEFRETURN_DO"
+msgid ""
+msgstr ""
+
+msgctxt "PROCEDURES_DEFRETURN_PROCEDURE"
+msgid "do something"
+msgstr "fai qualcosa"
+
+msgctxt "PROCEDURES_DEFRETURN_TITLE"
+msgid "to"
+msgstr "per"
+
+msgctxt "TEXT_APPEND_VARIABLE"
+msgid "item"
+msgstr "elemento"
+
+msgctxt "TEXT_CREATE_JOIN_ITEM_TITLE_ITEM"
+msgid "item"
+msgstr "elemento"
+
+msgctxt "QUIZMS_CATEGORY_VARIABLES"
+msgid "Variables"
+msgstr "Variabili"
+
+msgctxt "QUIZMS_CATEGORY_MATH"
+msgid "Math"
+msgstr "Matematica"
+
+msgctxt "QUIZMS_CATEGORY_LOGIC"
+msgid "Logic"
+msgstr "Logica"
+
+msgctxt "QUIZMS_CATEGORY_LOOPS"
+msgid "Loops"
+msgstr "Cicli"
+
+msgctxt "QUIZMS_CATEGORY_LISTS"
+msgid "Lists"
+msgstr "Liste"
+
+msgctxt "QUIZMS_CATEGORY_CUSTOM"
+msgid "Execution"
+msgstr "Esecuzione"
+
+msgctxt "QUIZMS_INFINITE_LOOP"
+msgid "Infinite loop"
+msgstr "Ciclo infinito"
+
+msgctxt "QUIZMS_MISSING_PARAMETER"
+msgid "The block needs a parameter"
+msgstr "Il blocco ha bisogno di un parametro"

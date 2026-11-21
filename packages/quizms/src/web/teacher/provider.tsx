@@ -1,9 +1,11 @@
-import { type ComponentType, lazy } from "react";
+import { type ComponentType, lazy, useMemo } from "react";
 
+import { Trans } from "@lingui/react/macro";
 import { Link, Redirect, Route, Switch, useParams } from "wouter";
 
 import type { Announcement, Contest, Student, StudentRestore, Variant, Venue } from "~/models";
-import { contestStatementFile } from "~/utils";
+import { contestStatementFile, contestsLanguages } from "~/utils";
+import { UiLanguageScope, useLocalize } from "~/web/components";
 import { StudentForm } from "~/web/components/student-form";
 import { ImpersonationAuth } from "~/web/student/impersonation-auth";
 
@@ -50,31 +52,54 @@ export function TeacherProvider({
   logout,
   ...props
 }: TeacherProviderProps) {
+  // The UI can be in any language of the contests of the teacher.
+  const languages = useMemo(() => contestsLanguages(contests), [contests]);
+
   return (
-    <TeacherLayout name={name} venues={venues} contests={contests} logout={logout}>
-      <Route path="/">
-        {venues.length === 1 && <Redirect to={`/${venues[0].contestId}`} />}
-        {venues.length === 0 ? (
-          <div className="flex w-full grow flex-col items-center justify-center gap-4">
-            <p className="text-2xl">Non sei iscritto a nessuna gara, contatta l&apos;assistenza</p>
-          </div>
-        ) : (
-          <div className="flex w-full grow flex-col items-center justify-center gap-4">
-            <p className="text-2xl">Seleziona una gara</p>
-            <div className="flex flex-wrap justify-center gap-2">
-              {venues.map((p) => (
-                <Link key={p.id} className="btn btn-primary" href={`/${p.contestId}`}>
-                  {contests.find((c) => c.id === p.contestId)?.name}
-                </Link>
-              ))}
+    <UiLanguageScope languages={languages}>
+      <TeacherLayout name={name} venues={venues} contests={contests} logout={logout}>
+        <Route path="/">
+          {venues.length === 1 && <Redirect to={`/${venues[0].contestId}`} />}
+          {venues.length === 0 ? (
+            <div className="flex w-full grow flex-col items-center justify-center gap-4">
+              <p className="text-2xl">
+                <Trans>You are not registered for any contest, please contact support</Trans>
+              </p>
             </div>
-          </div>
-        )}
-      </Route>
-      <Route path="/:contestId" nest>
-        <ProviderInner name={name} venues={venues} contests={contests} logout={logout} {...props} />
-      </Route>
-    </TeacherLayout>
+          ) : (
+            <div className="flex w-full grow flex-col items-center justify-center gap-4">
+              <p className="text-2xl">
+                <Trans>Select a contest</Trans>
+              </p>
+              <ContestLinks venues={venues} contests={contests} />
+            </div>
+          )}
+        </Route>
+        <Route path="/:contestId" nest>
+          <ProviderInner
+            name={name}
+            venues={venues}
+            contests={contests}
+            logout={logout}
+            {...props}
+          />
+        </Route>
+      </TeacherLayout>
+    </UiLanguageScope>
+  );
+}
+
+/** Links to the contests of the teacher, in the UI language of the scope. */
+function ContestLinks({ venues, contests }: { venues: Venue[]; contests: Contest[] }) {
+  const localize = useLocalize();
+  return (
+    <div className="flex flex-wrap justify-center gap-2">
+      {venues.map((p) => (
+        <Link key={p.id} className="btn btn-primary" href={`/${p.contestId}`}>
+          {localize(contests.find((c) => c.id === p.contestId)?.name)}
+        </Link>
+      ))}
+    </div>
   );
 }
 

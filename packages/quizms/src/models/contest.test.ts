@@ -1,5 +1,6 @@
-import { describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 
+import { activateUiLocale, loadUiLocale } from "~/i18n";
 import {
   type Contest,
   contestSchema,
@@ -9,6 +10,7 @@ import {
   userDataMatch,
   validateUserData,
 } from "~/models/contest";
+import { localize } from "~/models/localized";
 
 const baseContest = {
   id: "test",
@@ -115,6 +117,9 @@ describe("parseUserData", () => {
 });
 
 describe("validateUserData", () => {
+  // The messages are in the UI language.
+  beforeAll(() => activateUiLocale("it"));
+
   it("accepts missing values", () => {
     expect(validateUserData(undefined, field("name"))).toBeNull();
   });
@@ -252,5 +257,104 @@ describe("userDataMatch", () => {
     const oneWrong = student({ surname: "Rossi", name: "Luigi", birthDate });
     expect(userDataMatch(partial, mario, swapped)).toBe(false);
     expect(userDataMatch(partial, mario, oneWrong)).toBe(true);
+  });
+});
+
+describe("translatable texts", () => {
+  const multilingual = {
+    ...baseContest,
+    languages: ["it", "en", "fr"],
+    name: { it: "Gara", en: "Contest" },
+    longName: "Gara di prova",
+    instructions: { en: "Read carefully", it: "Leggi bene" },
+    userData: [
+      { name: "surname", label: { it: "Cognome", en: "Surname" }, type: "text" },
+      {
+        name: "name",
+        label: "Nome",
+        type: "text",
+        patternHelp: { it: "Solo lettere", en: "Only letters" },
+      },
+    ],
+    matchingRules: [],
+  };
+
+  it("fills tables with every language, the default one first", () => {
+    const parsed = contestSchema.parse(multilingual);
+    expect(parsed.name).toEqual({ it: "Gara", en: "Contest", fr: "Gara" });
+    expect(Object.keys(parsed.instructions!)).toEqual(["it", "en", "fr"]);
+    expect(parsed.longName).toBe("Gara di prova");
+    expect(parsed.userData[0].label).toEqual({ it: "Cognome", en: "Surname", fr: "Cognome" });
+    expect(parsed.userData[1]).toMatchObject({
+      label: "Nome",
+      patternHelp: { it: "Solo lettere", en: "Only letters", fr: "Solo lettere" },
+    });
+  });
+
+  it("does not add undefined values (Firestore rejects them)", () => {
+    const parsed = contestSchema.parse(baseContest);
+    expect("instructions" in parsed).toBe(false);
+    expect(parsed.userData.some((field) => "patternHelp" in field)).toBe(false);
+  });
+
+  it("parses its own output again", () => {
+    const parsed = contestSchema.parse(multilingual);
+    expect(contestSchema.parse(parsed)).toEqual(parsed);
+  });
+
+  it("rejects tables without the default language", () => {
+    const result = contestSchema.safeParse({ ...multilingual, name: { en: "Contest" } });
+    expect(result.success).toBe(false);
+    expect(result.error?.issues[0]).toMatchObject({ path: ["name"] });
+  });
+
+  it("rejects languages that are not of the contest", () => {
+    const result = contestSchema.safeParse({
+      ...multilingual,
+      userData: [
+        { name: "surname", label: { it: "Cognome", de: "Nachname" }, type: "text" },
+        { name: "name", label: "Nome", type: "text" },
+      ],
+    });
+    expect(result.success).toBe(false);
+    expect(result.error?.issues[0]).toMatchObject({ path: ["userData", 0, "label"] });
+  });
+
+  it("picks the text of a language", () => {
+    const parsed = contestSchema.parse(multilingual);
+    expect(localize(parsed.name, "en")).toBe("Contest");
+    expect(localize(parsed.name, "fr")).toBe("Gara");
+    expect(localize(parsed.name, "de")).toBe("Gara");
+    expect(localize(parsed.name, undefined)).toBe("Gara");
+    expect(localize(parsed.longName, "en")).toBe("Gara di prova");
+    expect(localize(undefined, "en")).toBeUndefined();
+  });
+
+  it("ignores the Italian default of pattern_help stored by older versions", async () => {
+    const en = await loadUiLocale("en");
+    const parsed = contestSchema.parse({
+      ...baseContest,
+      userData: [
+        {
+          name: "surname",
+          label: "Cognome",
+          type: "text",
+          patternHelp: "Assicurati che non ci siano numeri o simboli",
+        },
+        { name: "name", label: "Nome", type: "text" },
+      ],
+      matchingRules: [],
+    });
+    expect(validateUserData("123", parsed.userData[0], "it", en)?.[0]).toMatch(
+      /Make sure there are no numbers or symbols\.$/,
+    );
+  });
+
+  it("validates personal data with the texts in the given language", () => {
+    const parsed = contestSchema.parse(multilingual);
+    const [surname, name] = parsed.userData;
+    expect(validateUserData("123", surname, "en")?.[0]).toMatch(/"surname"/);
+    expect(validateUserData("123", surname, "it")?.[0]).toMatch(/"cognome"/);
+    expect(validateUserData("123", name, "en")?.[0]).toMatch(/Only letters/);
   });
 });

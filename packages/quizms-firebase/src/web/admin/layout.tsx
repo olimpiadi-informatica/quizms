@@ -1,6 +1,13 @@
 import { type ReactNode, Suspense } from "react";
 
-import { ErrorBoundary, Loading, Title } from "@olinfo/quizms/components";
+import { Trans } from "@lingui/react/macro";
+import {
+  ErrorBoundary,
+  Loading,
+  Title,
+  UiLanguageSelect,
+  useLocalize,
+} from "@olinfo/quizms/components";
 import type { Contest } from "@olinfo/quizms/models";
 import {
   Button,
@@ -29,6 +36,7 @@ type Props = {
 export function AdminLayout({ name, contests, logout, children }: Props) {
   const [, params] = useRoute("/:contestId/*?");
   const contest = contests.find((c) => c.id === params?.contestId);
+  const localize = useLocalize();
 
   return (
     <>
@@ -40,29 +48,36 @@ export function AdminLayout({ name, contests, logout, children }: Props) {
         </NavbarBrand>
         {contest && contests.length >= 2 && (
           <NavbarMenu>
-            <NavbarSubmenu title={contest.name}>
+            <NavbarSubmenu title={localize(contest.name)}>
               {contests.map((c) => {
                 const path = params?.["*"];
                 const href = path ? `/${c.id}/${path}` : `/${c.id}`;
                 return (
                   <NavbarMenuItem key={c.id}>
                     <Link className={clsx(contest.id === c.id && "active")} href={href}>
-                      {c.name}
+                      {localize(c.name)}
                     </Link>
                   </NavbarMenuItem>
                 );
               })}
             </NavbarSubmenu>
             <NavbarMenuItem>
-              <Link href={`/${contest.id}`}>Gestione gara</Link>
+              <Link href={`/${contest.id}`}>
+                <Trans>Contest management</Trans>
+              </Link>
             </NavbarMenuItem>
             <NavbarMenuItem>
-              <Link href={`/${contest.id}/schools`}>Gestione scuole</Link>
+              <Link href={`/${contest.id}/schools`}>
+                <Trans>School management</Trans>
+              </Link>
             </NavbarMenuItem>
           </NavbarMenu>
         )}
         <NavbarContent>
-          <UserDropdown name={name} logout={logout} />
+          <div className="flex items-center gap-2">
+            <UiLanguageSelect />
+            <UserDropdown name={name} logout={logout} />
+          </div>
         </NavbarContent>
       </Navbar>
       <div className="mx-auto flex w-full max-w-screen-xl grow flex-col p-4 pb-8">
@@ -83,7 +98,7 @@ function UserDropdown({ name, logout }: { name: string; logout: () => Promise<vo
       <DropdownMenu>
         <DropdownItem>
           <Button className="flex justify-between gap-4" onClick={logout}>
-            Esci <LogOut size={20} />
+            <Trans>Log out</Trans> <LogOut size={20} />
           </Button>
         </DropdownItem>
       </DropdownMenu>
