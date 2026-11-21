@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useSyncExternalStore } from "react";
 
 import { StudentFormField, Title } from "@olinfo/quizms/components";
 import type { Answer, Contest, Student } from "@olinfo/quizms/models";
@@ -14,6 +14,7 @@ import {
 } from "@olinfo/react-components";
 import { getAuth, signInWithCustomToken, signOut, type User } from "firebase/auth";
 
+import { AnswerQueue, type AnswerQueueStatus } from "~/web/common/answer-queue";
 import {
   setStudentLanguage,
   studentLogin,
@@ -144,8 +145,21 @@ function StudentInner({
 }) {
   const db = useDb();
 
-  const [student] = useDocument(`venues/${venueId}/students`, studentId, studentConverter);
+  const [serverStudent] = useDocument(`venues/${venueId}/students`, studentId, studentConverter);
   const [venue] = useDocument("venues", venueId, venueConverter);
+
+  // Answers are saved through the API one at a time, retried while offline, and shown
+  // immediately on top of the server data.
+  const answerQueue = useMemo(
+    () => new AnswerQueue((problemId, answer) => studentSetAnswer(user, { problemId, answer })),
+    [user],
+  );
+  const queueVersion = useSyncExternalStore(answerQueue.subscribe, answerQueue.getVersion);
+  // biome-ignore lint/correctness/useExhaustiveDependencies: recompute when the queue changes
+  const student = useMemo(
+    () => ({ ...serverStudent, answers: answerQueue.merge(serverStudent.answers) }),
+    [serverStudent, answerQueue, queueVersion],
+  );
 
   const contest = useMemo(
     () => contests.find((c) => c.id === student.contestId)!,
@@ -153,13 +167,16 @@ function StudentInner({
   );
 
   const submit = useCallback(async () => {
+    await answerQueue.flush(20_000);
     await studentSubmitContest(user);
-  }, [user]);
+  }, [answerQueue, user]);
 
   const logout = useCallback(async () => {
+    // Give pending answers a chance to be saved, but never block the logout.
+    await answerQueue.flush(5000).catch(() => {});
     await signOut(getAuth(db.app));
     window.location.reload();
-  }, [db]);
+  }, [answerQueue, db]);
 
   useEffect(() => {
     if (venue.token !== student.token) {
@@ -167,9 +184,10 @@ function StudentInner({
     }
   }, [venue.token, student.token, logout]);
 
-  const setAnswer = async (problemId: string, answer: Answer) => {
-    await studentSetAnswer(user, { problemId, answer });
-  };
+  const setAnswer = useCallback(
+    (problemId: string, answer: Answer) => answerQueue.set(problemId, answer),
+    [answerQueue],
+  );
 
   // Students can switch language at any time during the contest; the choice is saved on the
   // student (through the API) so that it survives reloads and device changes. It is read back
@@ -197,6 +215,25 @@ function StudentInner({
       enforceFullscreen={true}>
       <Header contestId={contest.id} />
       <FirebaseStatement />
+      <SaveStatus status={answerQueue.status} />
     </StudentProvider>
   );
+}
+
+function SaveStatus({ status }: { status: AnswerQueueStatus }) {
+  if (status.error) {
+    return (
+      <div role="alert" className="alert alert-error fixed inset-x-4 bottom-4 z-50 w-auto">
+        Risposta non salvata: {status.error}
+      </div>
+    );
+  }
+  if (status.failing) {
+    return (
+      <div role="alert" className="alert alert-warning fixed inset-x-4 bottom-4 z-50 w-auto">
+        Connessione assente: le risposte non sono ancora state salvate, nuovo tentativo in corso...
+      </div>
+    );
+  }
+  return null;
 }

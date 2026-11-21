@@ -10,7 +10,7 @@ import {
 import { TRPCError } from "@trpc/server";
 import { addSeconds, isFuture, isPast } from "date-fns";
 import type { DecodedIdToken } from "firebase-admin/auth";
-import { Timestamp } from "firebase-admin/firestore";
+import { FieldPath, Timestamp } from "firebase-admin/firestore";
 import * as logger from "firebase-functions/logger";
 import z from "zod";
 
@@ -20,6 +20,7 @@ import {
   getRandomVariant,
   getStudent,
   getStudentByHash,
+  getVariant,
   getVenue,
   getVenueByToken,
 } from "./queries";
@@ -180,36 +181,47 @@ export const studentSetLanguage = publicProcedure
 export const studentSetAnswer = publicProcedure
   .input(
     z.strictObject({
-      problemId: z.string(),
+      problemId: z.string().min(1),
       answer: answerSchema,
     }),
   )
   .mutation(async (opts) => {
     const { input: data, ctx } = opts;
-    const claims = ctx.claims;
-    await checkStudent(claims, true);
+    const student = await checkStudent(ctx.claims, true);
+
+    // Validate the problem against the student's variant: this rejects unknown ids and answers
+    // of the wrong type, which would otherwise be stored and silently ignored by the scoring.
+    const variant = student.variantId ? await getVariant(student.variantId) : undefined;
+    const problem = variant?.schema[data.problemId];
+    if (!problem) {
+      throw new TRPCError({ code: "BAD_REQUEST", message: "Domanda non valida" });
+    }
+    if (problem.type !== data.answer.type) {
+      throw new TRPCError({ code: "BAD_REQUEST", message: "Tipo di risposta non valido" });
+    }
 
     const answer = { ...data.answer };
     if (answer.value === undefined) {
       delete answer.value;
     }
 
-    await db.doc(`venues/${claims!.venueId}/students/${claims!.studentId}`).update({
-      [`answers.${data.problemId}`]: answer,
-      updatedAt: Timestamp.now(),
-    });
+    // Problem ids of sub-problems contain a dot (e.g. "3.1"): an explicit `FieldPath` keeps the id
+    // as a single key, while a dotted string would be split into nested fields.
+    await db
+      .doc(`venues/${ctx.claims!.venueId}/students/${student.id}`)
+      .update(new FieldPath("answers", data.problemId), answer, "updatedAt", Timestamp.now());
   });
 
 export const studentSubmitContest = publicProcedure.mutation(async (opts) => {
   const { ctx } = opts;
-  const claims = ctx.claims;
-  const student = await checkStudent(claims, true);
+  const student = await checkStudent(ctx.claims, true);
 
+  // Never extend the window: submitting during the grace period keeps the original end.
   const now = new Date();
   const currentEnd = student.participationWindow!.end;
   const newEnd = currentEnd < now ? currentEnd : now;
 
-  await db.doc(`venues/${claims!.venueId}/students/${claims!.studentId}`).update({
+  await db.doc(`venues/${ctx.claims!.venueId}/students/${student.id}`).update({
     "participationWindow.end": Timestamp.fromDate(newEnd),
     updatedAt: Timestamp.now(),
   });

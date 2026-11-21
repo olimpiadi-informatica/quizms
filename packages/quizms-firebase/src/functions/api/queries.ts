@@ -48,6 +48,11 @@ export async function getUser(username: string) {
   return snapshot.docs[0]?.data();
 }
 
+export async function getVariant(variantId: string) {
+  const snapshot = await db.doc(`variants/${variantId}`).withConverter(variantConverter).get();
+  return snapshot.data();
+}
+
 export async function getContestVariants(contestId: string) {
   const snapshot = await db
     .collection("variants")
