@@ -19,6 +19,10 @@ export type TeacherContextProps = {
   stopContestWindow: (venueId: string) => Promise<void>;
   /** Funzione per finalizzare i risultati della gara */
   finalizeVenue: (venueId: string) => Promise<void>;
+  /** Funzione per importare studenti in blocco */
+  importStudents: (venueId: string, students: Student[]) => Promise<any>;
+  /** Funzione per disabilitare o riabilitare studenti in blocco */
+  setStudentsDisabled: (venueId: string, studentIds: string[], disabled?: boolean) => Promise<any>;
 
   /** Varianti dei testi */
   variants: Record<string, Variant>;
@@ -51,7 +55,14 @@ export type OmitContestParam<T> = {
 };
 
 export function useTeacher(): Omit<OmitContestParam<TeacherContextProps>, `use${string}`> {
-  const { startContestWindow, stopContestWindow, finalizeVenue, ...ctx } = use(TeacherContext);
+  const {
+    startContestWindow,
+    stopContestWindow,
+    finalizeVenue,
+    importStudents,
+    setStudentsDisabled,
+    ...ctx
+  } = use(TeacherContext);
   const venueId = ctx.venue.id;
 
   return {
@@ -59,6 +70,9 @@ export function useTeacher(): Omit<OmitContestParam<TeacherContextProps>, `use${
     startContestWindow: () => startContestWindow(venueId),
     stopContestWindow: () => stopContestWindow(venueId),
     finalizeVenue: () => finalizeVenue(venueId),
+    importStudents: (students: Student[]) => importStudents(venueId, students),
+    setStudentsDisabled: (studentIds: string[], disabled?: boolean) =>
+      setStudentsDisabled(venueId, studentIds, disabled),
   };
 }
 

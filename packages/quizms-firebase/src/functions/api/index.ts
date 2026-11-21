@@ -17,10 +17,13 @@ import {
 import {
   teacherApproveStudentRestore,
   teacherFinalizeVenue,
+  teacherImportStudents,
   teacherLogin,
   teacherRejectStudentRestore,
+  teacherSetStudentsDisabled,
   teacherStartContestWindow,
   teacherStopContestWindow,
+  teacherUpdateStudent,
 } from "./teacher";
 import { createCallerFactory, createContext, router } from "./trpc";
 
@@ -39,6 +42,9 @@ export const appRouter = router({
   teacherFinalizeVenue,
   teacherApproveStudentRestore,
   teacherRejectStudentRestore,
+  teacherUpdateStudent,
+  teacherSetStudentsDisabled,
+  teacherImportStudents,
 });
 
 export type AppRouter = typeof appRouter;

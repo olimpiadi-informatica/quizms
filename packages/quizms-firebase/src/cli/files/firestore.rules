@@ -58,17 +58,8 @@ service cloud.firestore {
                     && hasTimestamp('updatedAt');
             }
 
-            function canTeacherUpdate() {
-                let keys = affectedKeys();
-                return isTeacherVenue(venueId)
-                    && !keys.hasAny(['venueId', 'createdAt'])
-                    && hasTimestamp('updatedAt');
-            }
-
             allow read: if isAuthenticated(resource.data.uid) || isTeacherVenue(venueId);
-            allow create: if isTeacherVenue(venueId) && request.resource.data.venueId == venueId;
-            allow update: if canStudentUpdate() || canTeacherUpdate();
-            allow delete: if isTeacherVenue(venueId);
+            allow update: if canStudentUpdate();
         }
 
         match /studentRestores/{uid} {

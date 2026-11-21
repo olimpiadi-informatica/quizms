@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 
-import type { StudentRestore } from "@olinfo/quizms/models";
+import type { Student, StudentRestore } from "@olinfo/quizms/models";
 import { TeacherProvider } from "@olinfo/quizms/teacher";
 import { getAuth, signOut, type User } from "firebase/auth";
 import type { Firestore } from "firebase/firestore";
@@ -11,7 +11,10 @@ import {
   startContestWindow,
   stopContestWindow,
   teacherApproveStudentRestore,
+  teacherImportStudents,
   teacherRejectStudentRestore,
+  teacherSetStudentsDisabled,
+  teacherUpdateStudent,
 } from "~/web/common/api";
 import { useDb } from "~/web/common/base-login";
 import {
@@ -61,6 +64,22 @@ function TeacherInner({ user, schoolId }: { user: User; schoolId: string }) {
       startContestWindow={(...args) => startContestWindow(user, ...args)}
       stopContestWindow={(...args) => stopContestWindow(user, ...args)}
       finalizeVenue={(...args) => finalizeVenue(user, ...args)}
+      importStudents={(venueId, students) =>
+        teacherImportStudents(user, {
+          venueId,
+          students: students.map((s) => ({
+            id: s.id,
+            userData: s.userData as any,
+            variantId: s.variantId,
+            answers: s.answers,
+            absent: s.absent,
+            extraData: s.extraData,
+          })),
+        })
+      }
+      setStudentsDisabled={(venueId, studentIds, disabled) =>
+        teacherSetStudentsDisabled(user, { venueId, studentIds, disabled })
+      }
       variants={variants}
       logout={logout}
       statementComponent={() => <FirebaseStatement />}
@@ -102,9 +121,32 @@ function useAnnouncements(contestId: string) {
 }
 
 function useStudents(venueId: string) {
-  return useCollection(`venues/${venueId}/students`, studentConverter, {
+  const auth = useAuth("teacher");
+  const user = auth!.user;
+
+  const [students] = useCollection(`venues/${venueId}/students`, studentConverter, {
     orderBy: "createdAt",
   });
+
+  const setStudent = useCallback(
+    async (student: Student) => {
+      await teacherUpdateStudent(user, {
+        venueId,
+        student: {
+          id: student.id,
+          userData: student.userData,
+          variantId: student.variantId,
+          answers: student.answers,
+          absent: student.absent,
+          disabled: student.disabled,
+          extraData: student.extraData,
+        },
+      });
+    },
+    [user, venueId],
+  );
+
+  return [students, setStudent] as const;
 }
 
 function useStudentRestores(

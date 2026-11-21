@@ -25,7 +25,7 @@ import {
 } from "./queries";
 import { publicProcedure } from "./trpc";
 
-function studentHash(contest: Contest, userData: NonNullable<Student["userData"]>) {
+export function studentHash(contest: Contest, userData: NonNullable<Student["userData"]>) {
   return hash("sha256", getNormalizedUserData(contest, { userData }));
 }
 

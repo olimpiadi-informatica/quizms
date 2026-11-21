@@ -92,6 +92,52 @@ export async function teacherRejectStudentRestore(
   await trpc.teacherRejectStudentRestore.mutate(body, { context: { user } });
 }
 
+export async function teacherUpdateStudent(
+  user: User,
+  body: {
+    venueId: string;
+    student: {
+      id: string;
+      userData?: Student["userData"];
+      variantId?: string;
+      answers?: Student["answers"];
+      absent?: boolean;
+      disabled?: boolean;
+      extraData?: Record<string, any>;
+    };
+  },
+) {
+  return await trpc.teacherUpdateStudent.mutate(body, { context: { user } });
+}
+
+export async function teacherSetStudentsDisabled(
+  user: User,
+  body: {
+    venueId: string;
+    studentIds: string[];
+    disabled?: boolean;
+  },
+) {
+  return await trpc.teacherSetStudentsDisabled.mutate(body, { context: { user } });
+}
+
+export async function teacherImportStudents(
+  user: User,
+  body: {
+    venueId: string;
+    students: Array<{
+      id?: string;
+      userData: Required<NonNullable<Student["userData"]>>;
+      variantId?: string;
+      answers?: Student["answers"];
+      absent?: boolean;
+      extraData?: Record<string, any>;
+    }>;
+  },
+) {
+  return await trpc.teacherImportStudents.mutate(body, { context: { user } });
+}
+
 export async function adminUpdateContestSettings(
   user: User,
   body: {

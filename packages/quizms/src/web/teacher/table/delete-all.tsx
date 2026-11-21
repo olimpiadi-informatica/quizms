@@ -2,17 +2,21 @@ import type { RefObject } from "react";
 
 import { Form, FormButton, Modal, SubmitButton } from "@olinfo/react-components";
 
-import { useTeacherStudents } from "~/web/teacher/context";
+import { useTeacher, useTeacherStudents } from "~/web/teacher/context";
 
 export function DeleteAllModal({ ref }: { ref: RefObject<HTMLDialogElement | null> }) {
-  const [students, setStudent] = useTeacherStudents();
+  const [students] = useTeacherStudents();
+  const { setStudentsDisabled } = useTeacher();
 
   const close = () => {
     ref.current?.close();
   };
 
   const confirm = async () => {
-    await Promise.all(students.map((student) => setStudent({ ...student, disabled: true })));
+    await setStudentsDisabled(
+      students.map((student) => student.id),
+      true,
+    );
     close();
   };
 
