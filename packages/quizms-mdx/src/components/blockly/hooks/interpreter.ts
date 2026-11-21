@@ -1,8 +1,12 @@
+import { msg } from "@lingui/core/macro";
+import { i18n as globalI18n, type I18n } from "@olinfo/quizms/i18n";
 import Interpreter from "js-interpreter";
 
 import type { Context, CustomBlock, TestcaseResult } from "~/blockly-types";
 
 const MAX_LOOP_ITERATIONS = 50_000;
+
+const incompleteLevelMessage = msg`The program ended without completing the level`;
 
 class ExitError extends Error {
   constructor(
@@ -24,7 +28,16 @@ export class BlocklyInterpreter<State> {
   public highlightedBlock: string | undefined;
   public result: TestcaseResult | undefined;
 
-  constructor(code: string, customBlocks: CustomBlock<State>[], initialState: State) {
+  /**
+   * @param i18n Lingui instance used to translate the messages of the interpreter, usually the
+   * one of the UI (from `useLingui`). Defaults to the global instance.
+   */
+  constructor(
+    code: string,
+    customBlocks: CustomBlock<State>[],
+    initialState: State,
+    private i18n: I18n = globalI18n,
+  ) {
     this.state = structuredClone(initialState);
     this.interpreter = new Interpreter(code, (interpreter: Interpreter, global: any) => {
       interpreter.setProperty(
@@ -89,7 +102,7 @@ export class BlocklyInterpreter<State> {
         if (!this.interpreter.step()) {
           this.result = {
             success: false,
-            message: "Il programma è terminato senza completare il livello",
+            message: this.i18n._(incompleteLevelMessage),
           };
         }
         if (this.interpreter.paused_) {

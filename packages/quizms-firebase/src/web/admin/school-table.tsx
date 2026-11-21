@@ -1,5 +1,6 @@
 import { Suspense, useMemo } from "react";
 
+import { useLingui } from "@lingui/react/macro";
 import { AgGrid, Loading } from "@olinfo/quizms/components";
 import type { Student, Venue } from "@olinfo/quizms/models";
 import type { CellEditRequestEvent, ColDef, ICellRendererParams } from "ag-grid-community";
@@ -12,13 +13,53 @@ import { useCount } from "~/web/hooks/count";
 import { useAdmin } from "./context";
 
 export function SchoolTable() {
+  const { t } = useLingui();
   const { contest, user } = useAdmin();
 
   const [venues] = useCollection("venues", venueConverter, {
     constraints: { contestId: contest.id },
   });
 
-  const colDefs = useMemo(() => columnDefinition(), []);
+  const colDefs = useMemo(
+    (): ColDef[] => [
+      {
+        field: "schoolId",
+        headerName: t`ID`,
+        width: 150,
+        filter: true,
+      },
+      {
+        field: "name",
+        headerName: t`Name`,
+        minWidth: 200,
+        flex: 1,
+        filter: true,
+      },
+      {
+        field: "count",
+        headerName: t`Students`,
+        width: 100,
+        sortable: false,
+        cellRenderer: ({ data }: ICellRendererParams<Venue>) => {
+          if (!data) return;
+          return (
+            <Suspense>
+              <Count venueId={data.id} />
+            </Suspense>
+          );
+        },
+      },
+      {
+        field: "finalized",
+        headerName: t`Finalized`,
+        width: 100,
+        filter: true,
+        cellDataType: "boolean",
+        editable: true,
+      },
+    ],
+    [t],
+  );
 
   const onCellEditRequest = async (ev: CellEditRequestEvent) => {
     const venue = ev.data as Venue;
@@ -42,46 +83,6 @@ export function SchoolTable() {
       </div>
     </Suspense>
   );
-}
-
-function columnDefinition(): ColDef[] {
-  return [
-    {
-      field: "schoolId",
-      headerName: "ID",
-      width: 150,
-      filter: true,
-    },
-    {
-      field: "name",
-      headerName: "Nome",
-      minWidth: 200,
-      flex: 1,
-      filter: true,
-    },
-    {
-      field: "count",
-      headerName: "Studenti",
-      width: 100,
-      sortable: false,
-      cellRenderer: ({ data }: ICellRendererParams<Venue>) => {
-        if (!data) return;
-        return (
-          <Suspense>
-            <Count venueId={data.id} />
-          </Suspense>
-        );
-      },
-    },
-    {
-      field: "finalized",
-      headerName: "Finalizzato",
-      width: 100,
-      filter: true,
-      cellDataType: "boolean",
-      editable: true,
-    },
-  ];
 }
 
 function Count({ venueId }: { venueId: string }) {

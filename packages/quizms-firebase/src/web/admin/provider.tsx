@@ -1,6 +1,9 @@
-import { lazy } from "react";
+import { lazy, useMemo } from "react";
 
+import { Trans } from "@lingui/react/macro";
+import { UiLanguageScope, useLocalize } from "@olinfo/quizms/components";
 import type { Contest, Variant } from "@olinfo/quizms/models";
+import { contestsLanguages } from "@olinfo/quizms/utils";
 import type { User } from "firebase/auth";
 import { Link, Redirect, Route, Switch, useParams } from "wouter";
 
@@ -17,31 +20,47 @@ type AdminProviderProps = {
 };
 
 export function AdminProvider({ name, contests, logout, ...props }: AdminProviderProps) {
+  // The UI can be in any language of the contests.
+  const languages = useMemo(() => contestsLanguages(contests), [contests]);
   return (
-    <AdminLayout name={name} contests={contests} logout={logout}>
-      <Route path="/">
-        {contests.length === 1 && <Redirect to={`/${contests[0].id}`} />}
-        {contests.length === 0 ? (
-          <div className="flex w-full grow flex-col items-center justify-center gap-4">
-            <p className="text-2xl">Non sono state trovate gare</p>
-          </div>
-        ) : (
-          <div className="flex w-full grow flex-col items-center justify-center gap-4">
-            <p className="text-2xl">Seleziona una gara</p>
-            <div className="flex flex-wrap justify-center gap-2">
-              {contests.map((c) => (
-                <Link key={c.id} className="btn btn-primary" href={`/${c.id}`}>
-                  {c.name}
-                </Link>
-              ))}
+    <UiLanguageScope languages={languages}>
+      <AdminLayout name={name} contests={contests} logout={logout}>
+        <Route path="/">
+          {contests.length === 1 && <Redirect to={`/${contests[0].id}`} />}
+          {contests.length === 0 ? (
+            <div className="flex w-full grow flex-col items-center justify-center gap-4">
+              <p className="text-2xl">
+                <Trans>No contests found</Trans>
+              </p>
             </div>
-          </div>
-        )}
-      </Route>
-      <Route path="/:contestId" nest>
-        <ProviderInner name={name} contests={contests} logout={logout} {...props} />
-      </Route>
-    </AdminLayout>
+          ) : (
+            <div className="flex w-full grow flex-col items-center justify-center gap-4">
+              <p className="text-2xl">
+                <Trans>Select a contest</Trans>
+              </p>
+              <ContestLinks contests={contests} />
+            </div>
+          )}
+        </Route>
+        <Route path="/:contestId" nest>
+          <ProviderInner name={name} contests={contests} logout={logout} {...props} />
+        </Route>
+      </AdminLayout>
+    </UiLanguageScope>
+  );
+}
+
+/** Links to the contests, in the UI language of the scope. */
+function ContestLinks({ contests }: { contests: Contest[] }) {
+  const localize = useLocalize();
+  return (
+    <div className="flex flex-wrap justify-center gap-2">
+      {contests.map((c) => (
+        <Link key={c.id} className="btn btn-primary" href={`/${c.id}`}>
+          {localize(c.name)}
+        </Link>
+      ))}
+    </div>
   );
 }
 

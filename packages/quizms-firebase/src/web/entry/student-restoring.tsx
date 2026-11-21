@@ -1,5 +1,6 @@
 import { type ReactNode, useEffect } from "react";
 
+import { Trans } from "@lingui/react/macro";
 import { Loading, Title } from "@olinfo/quizms/components";
 import {
   Dropdown,
@@ -50,9 +51,11 @@ export function StudentRestoring({ user, children }: { user: User; children: Rea
       </Navbar>
       <div className="flex flex-col justify-center items-center grow text-center m-4">
         <p className="text-lg max-w-3xl">
-          Il tuo account è già presente su un&apos;altro dispositivo. Per trasferire l&apos;accesso
-          al dispositivo corrente comunica al tuo insegnante di inserire il codice seguente in fondo
-          alla pagina di gestione gara, sezione &quot;richieste di accesso&quot;:
+          <Trans>
+            Your account is already in use on another device. To move the access to this device, ask
+            your teacher to enter the following code at the bottom of the contest management page,
+            in the &quot;access requests&quot; section:
+          </Trans>
         </p>
         <div className="flex justify-center pt-3">
           <span className="pt-1 font-mono text-3xl">
@@ -80,7 +83,7 @@ function UserDropdown({ name }: { name: ReactNode }) {
       <DropdownMenu>
         <DropdownItem>
           <button type="button" className="flex justify-between gap-4" onClick={logout}>
-            Esci <LogOut size={20} />
+            <Trans>Log out</Trans> <LogOut size={20} />
           </button>
         </DropdownItem>
       </DropdownMenu>

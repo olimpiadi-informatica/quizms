@@ -5,6 +5,7 @@ import { pathToFileURL } from "node:url";
 import type { OutputAsset, RollupOutput } from "rollup";
 import { createBuilder, type InlineConfig, mergeConfig } from "vite";
 
+import clientExportNames from "~/cli/vite/client-export-names";
 import configs from "~/cli/vite/configs";
 import { externalLibs } from "~/cli/vite/statement-externals";
 import type { VariantsConfig } from "~/models";
@@ -67,6 +68,7 @@ export async function buildBaseStatements(
         external: [...externalLibs, "sharp", "svgo"],
       },
     },
+    plugins: [clientExportNames()],
     environments: {
       rsc: {
         resolve: {

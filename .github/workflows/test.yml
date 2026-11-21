@@ -33,6 +33,10 @@ jobs:
           run_install: true
 
       # quizms-mdx and quizms-firebase import @olinfo/quizms from its built `dist/`.
+      # Untranslated messages already fail the build; this checks the catalogs are up to date.
+      - name: Check message catalogs
+        run: pnpm i18n:check
+
       - name: Build
         run: pnpm -r --filter "./packages/*" build
 

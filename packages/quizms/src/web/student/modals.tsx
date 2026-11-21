@@ -1,5 +1,6 @@
 import type { RefObject } from "react";
 
+import { Trans, useLingui } from "@lingui/react/macro";
 import { Form, FormButton, Modal, SubmitButton } from "@olinfo/react-components";
 import { sumBy } from "lodash-es";
 
@@ -8,11 +9,14 @@ import { calcProblemPoints, displayAnswer, type Schema } from "~/models";
 import { useStudent } from "./context";
 
 export function CompletedModal({ ref }: { ref: RefObject<HTMLDialogElement | null> }) {
+  const { t } = useLingui();
   const { schema } = useStudent();
 
   return (
-    <Modal ref={ref} title="Prova terminata">
-      <p>La prova è terminata.</p>
+    <Modal ref={ref} title={t`Test finished`}>
+      <p>
+        <Trans>The test is over.</Trans>
+      </p>
       {schema && <PointsTable schema={schema} />}
     </Modal>
   );
@@ -20,25 +24,37 @@ export function CompletedModal({ ref }: { ref: RefObject<HTMLDialogElement | nul
 CompletedModal.displayName = "CompletedModal";
 
 export function PointsTable({ schema }: { schema: Schema }) {
+  const { t } = useLingui();
   const { student } = useStudent();
 
   const problems = Object.keys(schema);
   problems.sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
 
   const pointsCorrect = sumBy(Object.values(schema), "pointsCorrect");
+  const score = student.score;
 
   return (
     <>
       <p>
-        Hai ottenuto un punteggio di <b>{student.score}</b> su <b>{pointsCorrect}</b>.
+        <Trans>
+          You scored <b>{score}</b> out of <b>{pointsCorrect}</b>.
+        </Trans>
       </p>
       <table className="table table-sm text-center mt-4">
         <thead>
           <tr>
-            <th scope="col">Domanda</th>
-            <th scope="col">Risposta</th>
-            <th scope="col">Soluzione</th>
-            <th scope="col">Punteggio</th>
+            <th scope="col">
+              <Trans>Question</Trans>
+            </th>
+            <th scope="col">
+              <Trans>Answer</Trans>
+            </th>
+            <th scope="col">
+              <Trans>Solution</Trans>
+            </th>
+            <th scope="col">
+              <Trans>Score</Trans>
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -49,7 +65,7 @@ export function PointsTable({ schema }: { schema: Schema }) {
               <tr key={problem}>
                 <td>{problem}</td>
                 <td>{displayAnswer(answer) || "-"}</td>
-                <td>{getCorrectOptions(problemSchema)}</td>
+                <td>{getCorrectOptions(problemSchema, t`or`, t`and`)}</td>
                 <td>{calcProblemPoints(problemSchema, answer)}</td>
               </tr>
             );
@@ -61,6 +77,7 @@ export function PointsTable({ schema }: { schema: Schema }) {
 }
 
 export function SubmitModal({ ref }: { ref: RefObject<HTMLDialogElement | null> }) {
+  const { t } = useLingui();
   const { submit } = useStudent();
 
   const close = () => {
@@ -79,12 +96,18 @@ export function SubmitModal({ ref }: { ref: RefObject<HTMLDialogElement | null> 
   };
 
   return (
-    <Modal ref={ref} title="Confermi di voler terminare?">
-      <p>Confermando non potrai più modificare le tue risposte.</p>
+    <Modal ref={ref} title={t`Are you sure you want to finish?`}>
+      <p>
+        <Trans>Once you confirm, you will no longer be able to change your answers.</Trans>
+      </p>
       <Form onSubmit={confirm} className="!max-w-full">
         <div className="flex flex-wrap justify-center gap-2">
-          <FormButton onClick={close}>Annulla</FormButton>
-          <SubmitButton className="btn-error">Conferma</SubmitButton>
+          <FormButton onClick={close}>
+            <Trans>Cancel</Trans>
+          </FormButton>
+          <SubmitButton className="btn-error">
+            <Trans>Confirm</Trans>
+          </SubmitButton>
         </div>
       </Form>
     </Modal>
@@ -92,18 +115,18 @@ export function SubmitModal({ ref }: { ref: RefObject<HTMLDialogElement | null> 
 }
 SubmitModal.displayName = "SubmitModal";
 
-function getCorrectOptions(problem: Schema[string]): string {
+function getCorrectOptions(problem: Schema[string], or: string, and: string): string {
   switch (problem.type) {
     case "openNumber":
     case "openText":
-      return joinOptions(problem.correct, " oppure ");
+      return joinOptions(problem.correct, ` ${or} `);
     case "multipleResponse": {
       const correct = problem.options.filter((option) => option.correct).map((option) => option.id);
-      return joinOptions(correct, " e ");
+      return joinOptions(correct, ` ${and} `);
     }
     case "multipleChoice": {
       const correct = problem.options.filter((option) => option.correct).map((option) => option.id);
-      return joinOptions(correct, " oppure ");
+      return joinOptions(correct, ` ${or} `);
     }
     case "blockly":
       return "";

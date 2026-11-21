@@ -7,3 +7,4 @@ export * from "./progress";
 export * from "./prose";
 export * from "./student-form";
 export * from "./timer";
+export * from "./ui-language-provider";

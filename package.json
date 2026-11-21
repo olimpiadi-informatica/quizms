@@ -13,11 +13,16 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:emulator": "pnpm --filter @olinfo/quizms-firebase test:emulator",
-    "test:e2e": "pnpm --filter @olinfo/quizms-e2e test:e2e"
+    "test:e2e": "pnpm --filter @olinfo/quizms-e2e test:e2e",
+    "i18n:extract": "lingui extract --clean && pnpm --filter @olinfo/quizms-mdx blockly:po",
+    "i18n:check": "lingui extract --clean && pnpm --filter @olinfo/quizms-mdx blockly:po --check && node scripts/check-catalogs.mjs && git status --porcelain --untracked-files=all -- 'packages/*/locales' | (! grep .) || (echo 'The message catalogs are out of date: run `pnpm i18n:extract` and commit them.' && exit 1)"
   },
   "devDependencies": {
     "@changesets/changelog-github": "^1.0.1",
     "@changesets/cli": "^3.0.2",
+    "@lingui/cli": "^6.12.0",
+    "@lingui/conf": "^6.12.0",
+    "@lingui/format-po": "^6.12.0",
     "husky": "^9.1.7",
     "vitest": "^5.1.1"
   }

@@ -1,5 +1,6 @@
 import type { RefObject } from "react";
 
+import { Trans, useLingui } from "@lingui/react/macro";
 import { CheckboxField, Form, FormButton, Modal, SubmitButton } from "@olinfo/react-components";
 
 import { deleteConfirmStorageKey } from "./utils";
@@ -11,6 +12,8 @@ export function DeleteModal({
   studentName: string;
   ref: RefObject<HTMLDialogElement | null>;
 }) {
+  const { t } = useLingui();
+
   const close = (value: string) => {
     if (ref.current) {
       ref.current.returnValue = value;
@@ -24,26 +27,32 @@ export function DeleteModal({
   };
 
   return (
-    <Modal ref={ref} title="Cancella studente">
+    <Modal ref={ref} title={t`Delete student`}>
       <div className="prose break-words">
         <p>
-          Stai per cancellare{" "}
           {studentName ? (
-            <>
-              lo studente <b>{studentName}</b>
-            </>
+            <Trans>
+              You are about to delete the student <b>{studentName}</b>. You can see the deleted
+              students and undo the deletion by clicking on the header of the “<i>Delete</i>” column
+              and choosing “<i>Select all</i>” as the filter.
+            </Trans>
           ) : (
-            "uno studente"
+            <Trans>
+              You are about to delete a student. You can see the deleted students and undo the
+              deletion by clicking on the header of the “<i>Delete</i>” column and choosing “
+              <i>Select all</i>” as the filter.
+            </Trans>
           )}
-          . Puoi vedere gli studenti cancellati e annullarne la cancellazione cliccando sulla
-          testata della colonna &ldquo;<i>Cancella</i>&rdquo; e scegliendo &ldquo;
-          <i>Seleziona tutti</i>&rdquo; come filtro.
         </p>
         <Form onSubmit={confirm} className="!max-w-full">
-          <CheckboxField field="notAgain" label="Non mostrare più questo pop-up" optional />
+          <CheckboxField field="notAgain" label={t`Don't show this pop-up again`} optional />
           <div className="flex flex-wrap justify-center gap-2">
-            <FormButton onClick={() => close("0")}>Annulla</FormButton>
-            <SubmitButton className="btn-warning">Continua</SubmitButton>
+            <FormButton onClick={() => close("0")}>
+              <Trans>Cancel</Trans>
+            </FormButton>
+            <SubmitButton className="btn-warning">
+              <Trans>Continue</Trans>
+            </SubmitButton>
           </div>
         </Form>
       </div>

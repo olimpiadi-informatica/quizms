@@ -1,22 +1,21 @@
-import { statementString } from "@olinfo/quizms/utils";
 import type { utils } from "blockly/core";
 
 /**
- * The default toolbox, with the category names in the statement language
- * (`undefined`: single-language contest, Italian).
+ * The default toolbox. The category names are references to Blockly messages
+ * (`locales/blockly`), so they are in the language of Blockly's messages, i.e. of the statement.
  */
-export const defaultToolbox = (language: string | undefined): utils.toolbox.ToolboxInfo => ({
+export const defaultToolbox = (): utils.toolbox.ToolboxInfo => ({
   kind: "categoryToolbox",
   contents: [
     {
       kind: "category",
-      name: statementString(language, "blocklyVariables"),
+      name: "%{BKY_QUIZMS_CATEGORY_VARIABLES}",
       categorystyle: "variable_category",
       custom: "VARIABLE",
     },
     {
       kind: "category",
-      name: statementString(language, "blocklyMath"),
+      name: "%{BKY_QUIZMS_CATEGORY_MATH}",
       categorystyle: "math_category",
       contents: [
         {
@@ -45,7 +44,7 @@ export const defaultToolbox = (language: string | undefined): utils.toolbox.Tool
     },
     {
       kind: "category",
-      name: statementString(language, "blocklyLogic"),
+      name: "%{BKY_QUIZMS_CATEGORY_LOGIC}",
       categorystyle: "logic_category",
       contents: [
         {
@@ -75,7 +74,7 @@ export const defaultToolbox = (language: string | undefined): utils.toolbox.Tool
     },
     {
       kind: "category",
-      name: statementString(language, "blocklyLoops"),
+      name: "%{BKY_QUIZMS_CATEGORY_LOOPS}",
       categorystyle: "loop_category",
       contents: [
         {
@@ -129,7 +128,7 @@ export const defaultToolbox = (language: string | undefined): utils.toolbox.Tool
     },
     {
       kind: "category",
-      name: statementString(language, "blocklyLists"),
+      name: "%{BKY_QUIZMS_CATEGORY_LISTS}",
       categorystyle: "list_category",
       contents: [
         {

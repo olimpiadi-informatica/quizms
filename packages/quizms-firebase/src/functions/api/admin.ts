@@ -1,6 +1,11 @@
 import crypto from "node:crypto";
 
-import { type Announcement, announcementSchema, contestSchema } from "@olinfo/quizms/models";
+import {
+  type Announcement,
+  announcementSchema,
+  localizedStringSchema,
+  scoreVisibilitySchema,
+} from "@olinfo/quizms/models";
 import { randomId } from "@olinfo/quizms/utils";
 import { TRPCError } from "@trpc/server";
 import { FieldValue } from "firebase-admin/firestore";
@@ -10,6 +15,7 @@ import z from "zod";
 import { announcementConverter } from "~/cli/utils/converters-admin";
 
 import { auth, db } from "../common";
+import { apiError } from "./errors";
 import { getContest, getUser, getVenue } from "./queries";
 import { docId } from "./schemas";
 import { adminProcedure, publicProcedure } from "./trpc";
@@ -27,14 +33,14 @@ export const adminLogin = publicProcedure
 
     const user = await getUser(data.username);
     if (!user) {
-      throw new TRPCError({ code: "BAD_REQUEST", message: "Username non esistente" });
+      throw apiError("BAD_REQUEST", "unknownUsername");
     }
 
     if (user.password !== data.password) {
-      throw new TRPCError({ code: "BAD_REQUEST", message: "Password non corretta" });
+      throw apiError("BAD_REQUEST", "wrongPassword");
     }
     if (user.role !== "admin") {
-      throw new TRPCError({ code: "FORBIDDEN", message: "Utenza non abilitata" });
+      throw apiError("FORBIDDEN", "userDisabled");
     }
     return auth.createCustomToken(crypto.randomUUID(), { role: "admin" });
   });
@@ -44,8 +50,8 @@ export const adminUpdateContestSettings = adminProcedure
     z.strictObject({
       contestId: docId,
       settings: z.strictObject({
-        scoreVisibility: contestSchema.shape.scoreVisibility,
-        instructions: contestSchema.shape.instructions.nullish(),
+        scoreVisibility: scoreVisibilitySchema,
+        instructions: localizedStringSchema.nullish(),
       }),
     }),
   )

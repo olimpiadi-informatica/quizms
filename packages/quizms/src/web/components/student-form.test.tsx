@@ -10,6 +10,7 @@ import { StatementLanguageContext } from "~/web/student/language";
 
 import { makeContest, makeStudent, studentProviderProps } from "../test-utils";
 import { StudentForm } from "./student-form";
+import { UiLanguageProvider } from "./ui-language-provider";
 
 function renderForm({
   contest = makeContest(),
@@ -31,7 +32,7 @@ function renderForm({
   const Wrapper = ({ children }: { children: ReactNode }) => (
     <StudentContext.Provider value={value}>
       <StatementLanguageContext.Provider value={language}>
-        {children}
+        <UiLanguageProvider language={language ?? "it"}>{children}</UiLanguageProvider>
       </StatementLanguageContext.Provider>
     </StudentContext.Provider>
   );
@@ -73,10 +74,10 @@ describe("StudentForm", () => {
     expect(screen.queryByLabelText(/Codice prova/)).not.toBeInTheDocument();
   });
 
-  it("keeps the online form in Italian whatever the statement language", () => {
+  it("uses the statement language online", () => {
     renderForm({ language: "en" });
-    expect(screen.getByLabelText(/Codice prova/)).toBeInTheDocument();
-    expect(screen.getByLabelText(/Nome/)).toHaveAttribute("placeholder", "Inserisci nome");
+    expect(screen.getByLabelText(/Test code/)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Nome/)).toHaveAttribute("placeholder", "Enter nome");
   });
 
   it("uses the statement language in printed booklets", () => {

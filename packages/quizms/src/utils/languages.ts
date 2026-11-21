@@ -25,54 +25,6 @@ export function parseLanguages(value: string): string[] {
   return languages;
 }
 
-const statementStrings = {
-  it: {
-    question: "Domanda",
-    variant: "Variante",
-    missingTranslation: "Traduzione mancante",
-    variantCode: "Codice prova",
-    enter: "Inserisci",
-    blankPage: "Pagina lasciata volontariamente vuota",
-    blocklyVariables: "Variabili",
-    blocklyMath: "Matematica",
-    blocklyLogic: "Logica",
-    blocklyLoops: "Cicli",
-    blocklyLists: "Liste",
-    blocklyCustom: "Esecuzione",
-  },
-  en: {
-    question: "Question",
-    variant: "Variant",
-    missingTranslation: "Missing translation",
-    variantCode: "Test code",
-    enter: "Enter",
-    blankPage: "This page intentionally left blank",
-    blocklyVariables: "Variables",
-    blocklyMath: "Math",
-    blocklyLogic: "Logic",
-    blocklyLoops: "Loops",
-    blocklyLists: "Lists",
-    blocklyCustom: "Execution",
-  },
-} satisfies Record<string, Record<string, string>>;
-
-export type StatementStringKey = keyof (typeof statementStrings)["it"];
-
-/** Languages that have an entry in the fixed-string dictionary. */
-export const statementStringLanguages = Object.keys(statementStrings);
-
-/**
- * Returns a fixed string rendered inside statements (headings, PDF footer, ...).
- *
- * - No language (single-language contests): Italian, for backward compatibility.
- * - A language without a dictionary entry: English.
- */
-export function statementString(language: string | undefined, key: StatementStringKey): string {
-  if (!language) return statementStrings.it[key];
-  const strings = statementStrings[language as keyof typeof statementStrings];
-  return (strings ?? statementStrings.en)[key];
-}
-
 /**
  * Name of the statement file of a language, as published by `quizms variants`: contests with
  * more than one language have one file per language.
@@ -85,6 +37,15 @@ export function contestStatementFile(
   return (languages?.length ?? 0) > 1
     ? `statement.${language}.${extension}`
     : `statement.${extension}`;
+}
+
+/**
+ * Languages of a set of contests, without duplicates, e.g. to choose the UI language on screens
+ * that show several contests. Contests stored before `languages` existed are Italian.
+ */
+export function contestsLanguages(contests: { languages?: readonly string[] }[]): string[] {
+  const languages = [...new Set(contests.flatMap((c) => c.languages ?? ["it"]))];
+  return languages.length > 0 ? languages : ["it"];
 }
 
 /**

@@ -25,6 +25,7 @@ import {
 } from "~/cli/utils/converters-admin";
 
 import { auth, db } from "../common";
+import { apiError } from "./errors";
 import {
   getContest,
   getContestVariants,
@@ -52,14 +53,14 @@ export const teacherLogin = publicProcedure
 
     const user = await getUser(data.username);
     if (!user) {
-      throw new TRPCError({ code: "BAD_REQUEST", message: "Username non esistente" });
+      throw apiError("BAD_REQUEST", "unknownUsername");
     }
 
     if (user.password !== data.password) {
-      throw new TRPCError({ code: "BAD_REQUEST", message: "Password non corretta" });
+      throw apiError("BAD_REQUEST", "wrongPassword");
     }
     if (user.role !== "teacher") {
-      throw new TRPCError({ code: "FORBIDDEN", message: "Utenza non abilitata" });
+      throw apiError("FORBIDDEN", "userDisabled");
     }
 
     return auth.createCustomToken(crypto.randomUUID(), {
@@ -75,23 +76,23 @@ async function checkVenue(
 ): Promise<[Venue, Contest]> {
   const venue = await getVenue(venueId);
   if (!venue) {
-    throw new TRPCError({ code: "BAD_REQUEST", message: "Gara non valida" });
+    throw apiError("BAD_REQUEST", "invalidContest");
   }
 
   if (venue.schoolId !== schoolId) {
-    throw new TRPCError({ code: "FORBIDDEN", message: "Gara non valida" });
+    throw apiError("FORBIDDEN", "invalidContest");
   }
 
   const contest = await getContest(venue.contestId);
   if (onlineOnly) {
     if (!contest.onlineSettings) {
-      throw new TRPCError({ code: "FORBIDDEN", message: "Gara non abilitata per prove online" });
+      throw apiError("FORBIDDEN", "contestNotOnline");
     }
     if (isFuture(contest.onlineSettings.contestWindow.start)) {
-      throw new TRPCError({ code: "FORBIDDEN", message: "Gara non iniziata" });
+      throw apiError("FORBIDDEN", "contestNotStarted");
     }
     if (isPast(contest.onlineSettings.contestWindow.end)) {
-      throw new TRPCError({ code: "FORBIDDEN", message: "Gara già terminata" });
+      throw apiError("FORBIDDEN", "contestEnded");
     }
   }
 
@@ -120,7 +121,7 @@ export const teacherStartContestWindow = teacherProcedure
       contest.onlineSettings &&
       (isFuture(venue.participationWindow.end) || !contest.onlineSettings.allowRestart)
     ) {
-      throw new TRPCError({ code: "FORBIDDEN", message: "Gara già iniziata" });
+      throw apiError("FORBIDDEN", "contestAlreadyStarted");
     }
 
     if (venue.token) {
@@ -164,11 +165,11 @@ export const teacherStopContestWindow = teacherProcedure
 
     const { participationWindow, token } = venue;
     if (!participationWindow || !token) {
-      throw new TRPCError({ code: "FORBIDDEN", message: "Gara non iniziata" });
+      throw apiError("FORBIDDEN", "contestNotStarted");
     }
 
     if (isPast(participationWindow.start)) {
-      throw new TRPCError({ code: "FORBIDDEN", message: "Gara già iniziata" });
+      throw apiError("FORBIDDEN", "contestAlreadyStarted");
     }
 
     const students = await getVenueStudents(venue.id, token);

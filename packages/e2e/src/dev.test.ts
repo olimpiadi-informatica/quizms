@@ -112,7 +112,8 @@ describe("quizms dev", () => {
     await problem("What is six times seven?").waitFor();
     expect(await page.getByText("Benvenuti alla gara di prova.").count()).toBe(0);
     expect(await page.getByRole("heading", { name: "Only section" }).isVisible()).toBe(true);
-    expect(await problem("six times seven").getByLabel("Risposta").inputValue()).toBe("42");
+    // The UI follows the statement language.
+    expect(await problem("six times seven").getByLabel("Answer").inputValue()).toBe("42");
     expect(new URL(page.url()).searchParams.get("lang")).toBe("en");
     expect(pageErrors).toEqual([]);
   });

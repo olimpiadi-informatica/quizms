@@ -1,6 +1,7 @@
 import { Suspense, useCallback } from "react";
 
-import { Loading } from "@olinfo/quizms/components";
+import { Trans, useLingui } from "@lingui/react/macro";
+import { Loading, useLocalize } from "@olinfo/quizms/components";
 import type { Student, Venue } from "@olinfo/quizms/models";
 import { Card, CardActions, CardBody } from "@olinfo/react-components";
 import { Link } from "wouter";
@@ -14,7 +15,9 @@ import { useAdmin } from "./context";
 import Export, { scoreboardFormatter, scoreboradHeader } from "./export";
 
 export default function Dashboard() {
+  const { t } = useLingui();
   const { contest, variants } = useAdmin();
+  const contestName = useLocalize()(contest.name);
   const contestScoreboardFormatter = useCallback(
     (student: Student) => scoreboardFormatter(contest, variants, student),
     [contest, variants],
@@ -23,41 +26,51 @@ export default function Dashboard() {
   return (
     <div className="flex flex-col gap-4">
       <Card>
-        <CardBody title="Impostazioni gara">
+        <CardBody title={t`Contest settings`}>
           <ContestSettings />
         </CardBody>
       </Card>
       <Card>
-        <CardBody title="Comunicazioni">
+        <CardBody title={t`Announcements`}>
           <Announcements />
         </CardBody>
       </Card>
       <Card>
-        <CardBody title="Scuole">
+        <CardBody title={t`Schools`}>
           <Suspense fallback={<Loading />}>
             <ContestInformation />
           </Suspense>
           <CardActions>
             <Link href="/schools" className="btn btn-primary">
-              Gestione scuole
+              <Trans>School management</Trans>
             </Link>
           </CardActions>
         </CardBody>
       </Card>
       <Card>
-        <CardBody title="Esportazione">
+        <CardBody title={t`Export`}>
           <CardActions>
             <Export
-              label="scuole"
-              description="i dati di tutte le scuole"
+              label={t`Export schools`}
+              description={
+                <Trans>
+                  You are about to export the data of all the schools of the contest{" "}
+                  <b>{contestName}</b>.
+                </Trans>
+              }
               collection="venues"
               converter={venueConverter}
               options={{ constraints: { contestId: contest.id, disabled: false } }}
               formatter={(data: Venue) => JSON.stringify(data)}
             />
             <Export
-              label="studenti"
-              description="i dati di tutti gli studenti"
+              label={t`Export students`}
+              description={
+                <Trans>
+                  You are about to export the data of all the students of the contest{" "}
+                  <b>{contestName}</b>.
+                </Trans>
+              }
               collection="students"
               converter={studentConverter}
               options={{
@@ -67,8 +80,12 @@ export default function Dashboard() {
               formatter={(data: Student) => JSON.stringify(data)}
             />
             <Export
-              label="classifica"
-              description="la classifica"
+              label={t`Export scoreboard`}
+              description={
+                <Trans>
+                  You are about to export the scoreboard of the contest <b>{contestName}</b>.
+                </Trans>
+              }
               collection="students"
               suggestedName={`scoreboard-${contest.id}.csv`}
               converter={studentConverter}
@@ -114,9 +131,15 @@ function ContestInformation() {
 
   return (
     <div>
-      <div>Scuole totali: {totalSchools}</div>
-      <div>Scuole finalizzate: {finalizedSchools}</div>
-      <div>Studenti totali: {totalStudents}</div>
+      <div>
+        <Trans>Total schools: {totalSchools}</Trans>
+      </div>
+      <div>
+        <Trans>Finalized schools: {finalizedSchools}</Trans>
+      </div>
+      <div>
+        <Trans>Total students: {totalStudents}</Trans>
+      </div>
     </div>
   );
 }

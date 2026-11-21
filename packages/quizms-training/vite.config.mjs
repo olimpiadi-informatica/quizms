@@ -1,3 +1,4 @@
+import { lingui } from "@lingui/vite-plugin";
 import nodeExternals from "rollup-plugin-node-externals";
 import preserveDirectives from "rollup-preserve-directives";
 import { defineConfig } from "vite";
@@ -22,5 +23,16 @@ export default defineConfig({
       },
     },
   },
-  plugins: [dts({ rollupTypes: true }), nodeExternals(), preserveDirectives(), tsconfigPaths()],
+  plugins: [
+    // Compiles the macros and the `.po` catalogs; fails on untranslated messages.
+    lingui({
+      macroTransform: true,
+      failOnMissing: true,
+      failOnCompileError: true,
+    }),
+    dts({ rollupTypes: true }),
+    nodeExternals(),
+    preserveDirectives(),
+    tsconfigPaths(),
+  ],
 });

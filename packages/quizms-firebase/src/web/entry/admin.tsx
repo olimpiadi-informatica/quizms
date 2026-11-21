@@ -1,5 +1,6 @@
 import { useCallback } from "react";
 
+import { useLingui } from "@lingui/react/macro";
 import { getAuth, signOut, type User } from "firebase/auth";
 
 import { AdminProvider } from "~/web/admin/provider";
@@ -13,8 +14,9 @@ export default function AdminEntry() {
 }
 
 function AdminInner({ user }: { user: User }) {
+  const { t } = useLingui();
   const db = useDb();
-  const name = user.displayName ?? "Utente anonimo";
+  const name = user.displayName ?? t`Anonymous user`;
 
   const [contests] = useCollection("contests", contestConverter);
 

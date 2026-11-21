@@ -1,5 +1,6 @@
 import { Fragment, type RefObject, useReducer, useRef } from "react";
 
+import { Trans, useLingui } from "@lingui/react/macro";
 import type { Announcement } from "@olinfo/quizms/models";
 import {
   Button,
@@ -22,6 +23,7 @@ import { useCollection } from "~/web/hooks";
 import { useAdmin } from "./context";
 
 export default function Announcements() {
+  const { i18n } = useLingui();
   const { contest } = useAdmin();
   const ref = useRef<HTMLDialogElement>(null);
 
@@ -46,7 +48,7 @@ export default function Announcements() {
               {announcement.title}
             </h4>
             <small>
-              <DateTime date={announcement.createdAt} />
+              <DateTime date={announcement.createdAt} locale={i18n.locale} />
             </small>
             <Markdown>{announcement.body}</Markdown>
             <hr className="my-5 last:hidden" />
@@ -55,7 +57,7 @@ export default function Announcements() {
       </div>
       <CardActions>
         <Button className="btn-primary" onClick={() => ref.current?.showModal()}>
-          Aggiungi comunicazione
+          <Trans>Add announcement</Trans>
         </Button>
       </CardActions>
       <AnnouncementModal ref={ref} />
@@ -64,6 +66,7 @@ export default function Announcements() {
 }
 
 function AnnouncementModal({ ref }: { ref: RefObject<HTMLDialogElement | null> }) {
+  const { t } = useLingui();
   const { contest, user } = useAdmin();
   const [id, nextId] = useReducer((prev) => prev + 1, 0);
 
@@ -86,22 +89,24 @@ function AnnouncementModal({ ref }: { ref: RefObject<HTMLDialogElement | null> }
   };
 
   return (
-    <Modal ref={ref} title="Aggiungi comunicazione">
+    <Modal ref={ref} title={t`Add announcement`}>
       <Form key={id} onSubmit={finalize} className="!max-w-full">
         <SelectField
           field="level"
-          label="Priorità"
-          options={{ info: "Normale", warning: "Alta" }}
-          placeholder="Seleziona la priorità"
+          label={t`Priority`}
+          options={{ info: t`Normal`, warning: t`High` }}
+          placeholder={t`Select the priority`}
         />
-        <TextField field="title" label="Titolo" placeholder="Inserisci il titolo" />
+        <TextField field="title" label={t`Title`} placeholder={t`Enter the title`} />
         <TextAreaField
           field="body"
-          label="Messaggio"
-          placeholder="Inserisci il messaggio"
+          label={t`Message`}
+          placeholder={t`Enter the message`}
           rows={5}
         />
-        <SubmitButton>Aggiungi</SubmitButton>
+        <SubmitButton>
+          <Trans>Add</Trans>
+        </SubmitButton>
       </Form>
     </Modal>
   );

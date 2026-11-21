@@ -12,8 +12,8 @@ I contests sono descritti dal file `data/contests.{toml,yaml,csv,json,jsonl}`. I
 | Campo                  | Descrizione                                                                          | Tipo       | Note                                                                 |
 |------------------------|--------------------------------------------------------------------------------------|------------|----------------------------------------------------------------------|
 | `id`                   | ID della gara.                                                                       | `string`   |                                                                      |
-| `name`                 | Nome della gara.                                                                     | `string`   |                                                                      |
-| `long_name`            | Nome esteso della gara.                                                              | `string`   | Opzionale.                                                           |
+| `name`                 | Nome della gara.                                                                     | `string` o tabella |                                                                      |
+| `long_name`            | Nome esteso della gara.                                                              | `string` o tabella | Opzionale.                                                           |
 | `problem_ids`          | ID dei problemi.                                                                     | `string[]` |                                                                      |
 | `user_data`            | Informazioni personali richieste agli studenti durante la registrazione.             | `object[]` |                                                                      |
 | `has_variants`         | Se ci sono più varianti dei testi.                                                   | `boolean`  |                                                                      |
@@ -23,7 +23,7 @@ I contests sono descritti dal file `data/contests.{toml,yaml,csv,json,jsonl}`. I
 | `allow_student_import` | Se gli insegnanti possono possono importare gli studenti da un CSV.                  | `boolean`  | Opzionale.                                                           |
 | `allow_student_edit`   |                                                                                      | `boolean`  | Opzionale.                                                           |
 | `allow_answer_edit`    |                                                                                      | `boolean`  | Opzionale.                                                           |
-| `instructions`         | Informazioni generali in Markdown che vengono mostrare nella pagina dell'insegnante. | `string`   | Opzionale.                                                           |
+| `instructions`         | Informazioni generali in Markdown che vengono mostrare nella pagina dell'insegnante. | `string` o tabella | Opzionale.                                                           |
 | `languages`            | [Lingue](../task/languages) dei testi, la prima è quella predefinita.               | `string[]` | Opzionale, predefinito `["it"]`. Deve coincidere con `variants.toml`. |
 
 Se `has_online` è `true`, i seguenti campi sono richiesti:
@@ -35,12 +35,14 @@ Se `has_online` è `true`, i seguenti campi sono richiesti:
 | `duration`             | Durata della gara in minuti.                             | `number`   |      |
 | `allow_restart`        | Se gli insegnanti possono far partire la gara più volte. | `boolean`  |      |
 
+I campi di tipo "`string` o tabella" si possono [tradurre](../task/languages#tradurre-la-configurazione) nelle lingue della gara.
+
 Le informazioni personali nel campo `user_data` devono avere il seguente formato:
 
 | Campo    | Descrizione                                                      | Tipo                            | Note                                                        |
 |----------|------------------------------------------------------------------|---------------------------------|-------------------------------------------------------------|
 | `name`   | Nome del campo.                                                  | `string`                        |                                                             |
-| `label`  | Nome leggibile del campo.                                        | `string`                        |                                                             |
+| `label`  | Nome leggibile del campo.                                        | `string` o tabella |                                                             |
 | `type`   | Tipo del campo.                                                  | `"text"`, `"number"` o `"date"` |                                                             |
 | `size`   | Larghezza del campo nella tabella degli insegnanti.              | `"xs"`, `"sm"`, `"md"` o `"lg"` | Opzionale.                                                  |
 | `min`    | Valore minimo del campo.                                         | `number` o `date`               | Richiesto per i campi data, opzionale per i campi numerici. |

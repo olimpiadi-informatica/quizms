@@ -1,13 +1,21 @@
 import { useCallback, useEffect, useMemo, useSyncExternalStore } from "react";
 
-import { StudentFormField, Title } from "@olinfo/quizms/components";
+import { Trans, useLingui } from "@lingui/react/macro";
+import {
+  StudentFormField,
+  Title,
+  UiLanguageScope,
+  UiLanguageSelect,
+  useLocalize,
+} from "@olinfo/quizms/components";
 import type { Answer, Contest, Student } from "@olinfo/quizms/models";
 import { StudentProvider, useStatementLanguageState } from "@olinfo/quizms/student";
-import { useUserAgent } from "@olinfo/quizms/utils";
+import { contestsLanguages, useUserAgent } from "@olinfo/quizms/utils";
 import {
   Form,
   Navbar,
   NavbarBrand,
+  NavbarContent,
   SelectField,
   SubmitButton,
   TextField,
@@ -39,20 +47,26 @@ export default function StudentEntry() {
     constraints: { id: website.contests },
   });
 
-  if (auth) {
-    return (
-      <StudentRestoring user={auth.user}>
-        <StudentInner
-          user={auth.user}
-          contests={contests}
-          venueId={auth.claims.venueId}
-          studentId={auth.claims.studentId}
-        />
-      </StudentRestoring>
-    );
-  }
+  // The login form and the restore screen are in the languages of the contests of this website;
+  // the contest itself is in the statement language (see `StudentProvider`).
+  const languages = useMemo(() => contestsLanguages(contests), [contests]);
 
-  return <StudentForm contests={contests} />;
+  return (
+    <UiLanguageScope languages={languages}>
+      {auth ? (
+        <StudentRestoring user={auth.user}>
+          <StudentInner
+            user={auth.user}
+            contests={contests}
+            venueId={auth.claims.venueId}
+            studentId={auth.claims.studentId}
+          />
+        </StudentRestoring>
+      ) : (
+        <StudentForm contests={contests} />
+      )}
+    </UiLanguageScope>
+  );
 }
 
 type FormStudent = {
@@ -61,6 +75,8 @@ type FormStudent = {
 } & Required<NonNullable<Student["userData"]>>;
 
 function StudentForm({ contests }: { contests: Contest[] }) {
+  const { t } = useLingui();
+  const localize = useLocalize();
   const db = useDb();
   const ua = useUserAgent();
 
@@ -105,14 +121,19 @@ function StudentForm({ contests }: { contests: Contest[] }) {
             <Title />
           </div>
         </NavbarBrand>
+        <NavbarContent>
+          <UiLanguageSelect />
+        </NavbarContent>
       </Navbar>
       <Form defaultValue={defaultValue} onSubmit={submit} className="p-4 pb-8">
-        <h1 className="mb-2 text-xl font-bold">Accedi alla gara</h1>
+        <h1 className="mb-2 text-xl font-bold">
+          <Trans>Log in to the contest</Trans>
+        </h1>
         <SelectField
           field="contestId"
-          label="Gara"
-          options={Object.fromEntries(contests.map((c) => [c.id, c.name]))}
-          placeholder="Seleziona una gara"
+          label={t`Contest`}
+          options={Object.fromEntries(contests.map((c) => [c.id, localize(c.name)]))}
+          placeholder={t`Select a contest`}
         />
         {({ contestId }) => {
           const contest = contests.find((c) => c.id === contestId);
@@ -122,8 +143,10 @@ function StudentForm({ contests }: { contests: Contest[] }) {
               {contest.userData.map((field) => (
                 <StudentFormField key={field.name} field={field} />
               ))}
-              <TextField field="token" label="Codice prova" placeholder="aaaaa-bbbbb-ccccc" />
-              <SubmitButton>Inizia la prova</SubmitButton>
+              <TextField field="token" label={t`Test code`} placeholder="aaaaa-bbbbb-ccccc" />
+              <SubmitButton>
+                <Trans>Start the test</Trans>
+              </SubmitButton>
             </>
           );
         }}

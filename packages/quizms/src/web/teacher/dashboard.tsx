@@ -1,5 +1,7 @@
 import { useRef, useState } from "react";
 
+import { msg } from "@lingui/core/macro";
+import { Trans, useLingui } from "@lingui/react/macro";
 import {
   Button,
   Card,
@@ -19,15 +21,16 @@ import { range } from "lodash-es";
 import Markdown from "react-markdown";
 import { Link } from "wouter";
 
+import { loadUiLocale } from "~/i18n";
 import type { TimeRange } from "~/models";
-import { statementString } from "~/utils";
-import { Timer } from "~/web/components";
+import { Timer, useLocalize } from "~/web/components";
 
 import { useTeacher } from "./context";
 import { Announcements } from "./dashboard-announcements";
 import { StudentRestoreList } from "./dashboard-student-restore";
 
 function StartContestButton() {
+  const { t } = useLingui();
   const { startContestWindow } = useTeacher();
 
   const modalRef = useRef<HTMLDialogElement>(null);
@@ -42,14 +45,20 @@ function StartContestButton() {
   return (
     <>
       <Button className="btn-success" onClick={() => modalRef.current?.showModal()}>
-        Inizia prova online
+        <Trans>Start online test</Trans>
       </Button>
-      <Modal ref={modalRef} title="Conferma">
-        <p>Sei sicuro di voler iniziare la gara?</p>
+      <Modal ref={modalRef} title={t`Confirm`}>
+        <p>
+          <Trans>Are you sure you want to start the contest?</Trans>
+        </p>
         <Form onSubmit={start} className="!max-w-full">
           <div className="flex flex-wrap justify-center gap-2">
-            <FormButton onClick={close}>Annulla</FormButton>
-            <SubmitButton className="btn-warning">Conferma</SubmitButton>
+            <FormButton onClick={close}>
+              <Trans>Cancel</Trans>
+            </FormButton>
+            <SubmitButton className="btn-warning">
+              <Trans>Confirm</Trans>
+            </SubmitButton>
           </div>
         </Form>
       </Modal>
@@ -58,6 +67,7 @@ function StartContestButton() {
 }
 
 function StopContestButton() {
+  const { t } = useLingui();
   const { stopContestWindow } = useTeacher();
   const modalRef = useRef<HTMLDialogElement>(null);
 
@@ -71,14 +81,20 @@ function StopContestButton() {
   return (
     <>
       <Button className="btn-error" onClick={() => modalRef.current?.showModal()}>
-        Annulla inizio gara
+        <Trans>Cancel contest start</Trans>
       </Button>
-      <Modal ref={modalRef} title="Conferma">
-        <p>Sei sicuro di voler annullare l&apos;inizio della gara?</p>
+      <Modal ref={modalRef} title={t`Confirm`}>
+        <p>
+          <Trans>Are you sure you want to cancel the start of the contest?</Trans>
+        </p>
         <Form onSubmit={undoContestStart} className="!max-w-full">
           <div className="flex flex-wrap justify-center gap-2">
-            <FormButton onClick={close}>Indietro</FormButton>
-            <SubmitButton className="btn-warning">Conferma</SubmitButton>
+            <FormButton onClick={close}>
+              <Trans>Back</Trans>
+            </FormButton>
+            <SubmitButton className="btn-warning">
+              <Trans>Confirm</Trans>
+            </SubmitButton>
           </div>
         </Form>
       </Modal>
@@ -87,8 +103,11 @@ function StopContestButton() {
 }
 
 function ContestData({ participationWindow }: { participationWindow: TimeRange }) {
+  const { i18n } = useLingui();
   const { venue } = useTeacher();
   const { start: startingTime, end: endingTime } = participationWindow;
+  const token = venue.token;
+  const locale = i18n.locale;
 
   const undoEnd = subMinutes(startingTime!, 1);
 
@@ -96,91 +115,138 @@ function ContestData({ participationWindow }: { participationWindow: TimeRange }
     <div className="flex flex-col gap-2">
       <WithinTimeRange end={startingTime}>
         <p className="my-2 text-lg">
-          <b>Codice:</b> <span className="font-mono">{venue.token}</span>
+          <Trans>
+            <b>Code:</b> <span className="font-mono">{token}</span>
+          </Trans>
         </p>
         <p>
-          La gara inizierà alle ore <DateTime date={startingTime} dateStyle="hidden" />.
+          <Trans>
+            The contest will start at{" "}
+            <DateTime date={startingTime} dateStyle="hidden" locale={locale} />.
+          </Trans>
         </p>
         <p>
-          Tempo rimanente all&apos;inizio: <Timer endTime={startingTime} />
+          <Trans>
+            Time left until the start: <Timer endTime={startingTime} />
+          </Trans>
         </p>
         <WithinTimeRange end={undoEnd}>
           <p>
-            Se hai iniziato per sbaglio, puoi ancora annullare la gara fino a un minuto prima
-            dell&apos;inizio.
+            <Trans>
+              If you started by mistake, you can still cancel the contest up to one minute before it
+              starts.
+            </Trans>
           </p>
         </WithinTimeRange>
       </WithinTimeRange>
       <WithinTimeRange start={startingTime} end={endingTime}>
         <p>
-          <b>Codice:</b> <span className="font-mono">{venue.token}</span>
+          <Trans>
+            <b>Code:</b> <span className="font-mono">{token}</span>
+          </Trans>
         </p>
         <p>
-          La gara terminerà alle <DateTime date={endingTime} dateStyle="hidden" />.
+          <Trans>
+            The contest will end at{" "}
+            <DateTime date={endingTime} dateStyle="hidden" locale={locale} />.
+          </Trans>
         </p>
         <p>
-          Tempo rimanente: <Timer endTime={endingTime} />
+          <Trans>
+            Time left: <Timer endTime={endingTime} />
+          </Trans>
         </p>
         <p className="text-center text-2xl">
-          Gara iniziata alle ore <DateTime date={startingTime} dateStyle="hidden" />.
+          <Trans>
+            Contest started at <DateTime date={startingTime} dateStyle="hidden" locale={locale} />.
+          </Trans>
         </p>
       </WithinTimeRange>
       <WithinTimeRange start={endingTime}>
         <p>
-          Gara iniziata alle ore <DateTime date={startingTime} dateStyle="hidden" />.
+          <Trans>
+            Contest started at <DateTime date={startingTime} dateStyle="hidden" locale={locale} />.
+          </Trans>
         </p>
-        <p>La gara è terminata.</p>
+        <p>
+          <Trans>The contest is over.</Trans>
+        </p>
       </WithinTimeRange>
     </div>
   );
 }
 
 export default function TeacherDashboard() {
+  const { t, i18n } = useLingui();
+  const localize = useLocalize();
   const { contest, venue } = useTeacher();
+  const locale = i18n.locale;
 
   return (
     <div className="flex flex-col gap-4">
       <Card>
-        <CardBody title="Comunicazioni">
+        <CardBody title={t`Announcements`}>
           <Announcements />
         </CardBody>
       </Card>
       <Card>
-        <CardBody title="Informazioni Gara">
+        <CardBody title={t`Contest information`}>
           <div className="prose prose-a:link-info max-w-none">
-            <Markdown>{contest.instructions}</Markdown>
+            <Markdown>{localize(contest.instructions)}</Markdown>
           </div>
           {contest.onlineSettings && (
             <div className="font-bold">
-              La gara si potrà svolgere dal{" "}
-              <DateTime date={contest.onlineSettings.contestWindow.start} dateStyle="long" />{" "}
               {isSameDay(
                 contest.onlineSettings.contestWindow.start,
                 contest.onlineSettings.contestWindow.end,
               ) ? (
-                <>
-                  alle{" "}
-                  <DateTime date={contest.onlineSettings.contestWindow.end} dateStyle="hidden" />
-                </>
+                <Trans>
+                  The contest can be taken from{" "}
+                  <DateTime
+                    date={contest.onlineSettings.contestWindow.start}
+                    dateStyle="long"
+                    locale={locale}
+                  />{" "}
+                  until{" "}
+                  <DateTime
+                    date={contest.onlineSettings.contestWindow.end}
+                    dateStyle="hidden"
+                    locale={locale}
+                  />
+                  .
+                </Trans>
               ) : (
-                <>
-                  al <DateTime date={contest.onlineSettings.contestWindow.end} dateStyle="long" />
-                </>
+                <Trans>
+                  The contest can be taken from{" "}
+                  <DateTime
+                    date={contest.onlineSettings.contestWindow.start}
+                    dateStyle="long"
+                    locale={locale}
+                  />{" "}
+                  to{" "}
+                  <DateTime
+                    date={contest.onlineSettings.contestWindow.end}
+                    dateStyle="long"
+                    locale={locale}
+                  />
+                  .
+                </Trans>
               )}
-              .
             </div>
           )}
           {contest.hasOffline && <PdfDownloads />}
         </CardBody>
       </Card>
       <Card>
-        <CardBody title="Gestione Gara">
+        <CardBody title={t`Contest management`}>
           {/* contest data */}
           {contest.onlineSettings &&
             (venue.participationWindow ? (
               <ContestData participationWindow={venue.participationWindow} />
             ) : (
-              <p>La gara non è ancora iniziata!</p>
+              <p>
+                <Trans>The contest has not started yet!</Trans>
+              </p>
             ))}
           <CardActions>
             {contest.onlineSettings && (
@@ -204,14 +270,14 @@ export default function TeacherDashboard() {
               </WithinTimeRange>
             )}
             <Link className="btn btn-primary" href="/students">
-              Gestisci studenti e risposte
+              <Trans>Manage students and answers</Trans>
             </Link>
           </CardActions>
         </CardBody>
       </Card>
       {contest.onlineSettings && (
         <Card>
-          <CardBody title="Richieste di accesso">
+          <CardBody title={t`Access requests`}>
             <div className="h-96 max-h-screen">
               <StudentRestoreList isStarted={!!venue.token} />
             </div>
@@ -223,6 +289,7 @@ export default function TeacherDashboard() {
 }
 
 function PdfDownloads() {
+  const { t } = useLingui();
   const { contest } = useTeacher();
   // Contests stored before `languages` existed don't have the field
   const languages = contest.languages ?? ["it"];
@@ -234,14 +301,17 @@ function PdfDownloads() {
       {multilingual && (
         <select
           className="select select-bordered"
-          aria-label="Lingua dei testi"
+          aria-label={t`Statement language`}
           value={language}
           onChange={(e) => setLanguage(e.target.value)}>
-          {languages.map((lang) => (
-            <option key={lang} value={lang}>
-              Testi in {lang.toUpperCase()}
-            </option>
-          ))}
+          {languages.map((lang) => {
+            const code = lang.toUpperCase();
+            return (
+              <option key={lang} value={lang}>
+                {t`Statements in ${code}`}
+              </option>
+            );
+          })}
         </select>
       )}
       <DownloadPdfButton language={multilingual ? language : undefined} />
@@ -260,6 +330,8 @@ function DownloadPdfButton({ language }: { language?: string }) {
 
   const onClick = async () => {
     const statements = await getPdfStatements({ language });
+    // In the language of the statements (Italian for single-language contests).
+    const pdfI18n = await loadUiLocale(language);
 
     const { PDFDocument } = await import("@cantoo/pdf-lib");
     const pdf = await PDFDocument.create();
@@ -272,7 +344,7 @@ function DownloadPdfButton({ language }: { language?: string }) {
       }
       if (pages.length % 2) {
         const page = pdf.addPage();
-        page.drawText(statementString(language, "blankPage"), {
+        page.drawText(pdfI18n._(msg`This page intentionally left blank`), {
           x: 10,
           y: 10,
           size: 17,
@@ -287,7 +359,7 @@ function DownloadPdfButton({ language }: { language?: string }) {
 
   return (
     <Button className="btn-warning" onClick={onClick}>
-      Scarica PDF con tutti i testi
+      <Trans>Download PDF with all statements</Trans>
     </Button>
   );
 }
@@ -311,7 +383,7 @@ function DownloadZipButton({ language }: { language?: string }) {
 
   return (
     <Button className="btn-warning" onClick={onClick}>
-      Scarica ZIP con tutti i testi
+      <Trans>Download ZIP with all statements</Trans>
     </Button>
   );
 }

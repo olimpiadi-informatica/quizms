@@ -1,5 +1,6 @@
 import { createContext, useContext } from "react";
 
+import { Trans } from "@lingui/react/macro";
 import { RemoteStatement, useStudent } from "@olinfo/quizms/student";
 import { contestStatementFile } from "@olinfo/quizms/utils";
 import { Button } from "@olinfo/react-components";
@@ -16,7 +17,7 @@ export function TrainingStatement() {
     return (
       <div className="flex h-[50vh] flex-col items-center justify-center">
         <Button className="btn-success btn-lg" onClick={start}>
-          Inizia
+          <Trans>Start</Trans>
         </Button>
       </div>
     );

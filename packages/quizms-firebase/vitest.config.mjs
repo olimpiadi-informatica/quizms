@@ -1,3 +1,4 @@
+import { lingui } from "@lingui/vite-plugin";
 import tsconfigPaths from "vite-tsconfig-paths";
 import { defineProject } from "vitest/config";
 
@@ -6,7 +7,7 @@ import { defineProject } from "vitest/config";
 process.env.TZ = "Europe/Rome";
 
 export default defineProject({
-  plugins: [tsconfigPaths()],
+  plugins: [lingui({ macroTransform: true }), tsconfigPaths()],
   test: {
     name: "quizms-firebase",
     environment: "node",

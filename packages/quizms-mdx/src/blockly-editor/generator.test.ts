@@ -1,15 +1,16 @@
 import "blockly/blocks";
 
-import { serialization, setLocale, Workspace, type WorkspaceSvg } from "blockly/core";
+import { serialization, Workspace, type WorkspaceSvg } from "blockly/core";
 import { javascriptGenerator } from "blockly/javascript";
-import * as enMessages from "blockly/msg/en";
 import { describe, expect, it, vi } from "vitest";
 
 import type { CustomBlockProcessed } from "~/blockly-types";
 
 vi.spyOn(console, "info").mockImplementation(() => {});
-// The built-in blocks need the messages, as in the editor.
-setLocale(enMessages as unknown as Record<string, string>);
+// The built-in blocks need the messages, as in the editor. In Italian: the errors of the
+// generated code are in the statement language.
+const { setBlocklyLanguage } = await import("./messages");
+await setBlocklyLanguage("it");
 const { initGenerator, toJS } = await import("./generator");
 
 // Custom blocks as produced by the `.blocks.yaml` loader.

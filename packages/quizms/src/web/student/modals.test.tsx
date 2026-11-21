@@ -5,6 +5,7 @@ import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import type { Student } from "~/models";
+import { UiLanguageProvider } from "~/web/components/ui-language-provider";
 
 import { makeStudent, schema, studentProviderProps } from "../test-utils";
 import { StudentContext, type StudentContextProps } from "./context";
@@ -17,7 +18,11 @@ function StudentContextWrapper({ student, children }: { student: Student; childr
     terminated: true,
     language: "it",
   };
-  return <StudentContext.Provider value={value}>{children}</StudentContext.Provider>;
+  return (
+    <UiLanguageProvider language="it">
+      <StudentContext.Provider value={value}>{children}</StudentContext.Provider>
+    </UiLanguageProvider>
+  );
 }
 
 function renderTable(student: Student) {

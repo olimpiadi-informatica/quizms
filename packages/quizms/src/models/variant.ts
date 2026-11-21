@@ -1,6 +1,8 @@
+import { msg } from "@lingui/core/macro";
 import { xor } from "lodash-es";
 import z from "zod";
 
+import { i18n as globalI18n, type I18n } from "~/i18n";
 import type { Student } from "~/models/student";
 
 export const answerValues = {
@@ -140,19 +142,21 @@ export function displayAnswer(answer?: Answer): string {
 export function validateAnswerValue(
   answer: AnswerValue | undefined,
   schema: Schema[string],
+  /** Instance for the messages; by default the one of the page (see `i18n`) */
+  i18n: I18n = globalI18n,
 ): [string] | null {
   if (answer == null || answer === "") return null;
 
   switch (schema.type) {
     case "openNumber": {
       if (!Number.isInteger(answer as AnswerValue<"openNumber">)) {
-        return ["La risposta deve essere un numero intero"];
+        return [i18n._(msg`The answer must be an integer`)];
       }
       return null;
     }
     case "openText": {
       if ((answer as AnswerValue<"openText">).length > 256) {
-        return ["La risposta non può essere più lunga di 256 caratteri"];
+        return [i18n._(msg`The answer cannot be longer than 256 characters`)];
       }
       return null;
     }
@@ -160,7 +164,8 @@ export function validateAnswerValue(
       if (
         !schema.options.map((option) => option.id).includes(answer as AnswerValue<"multipleChoice">)
       ) {
-        return [`Opzione non valida: ${answer}`];
+        const option = String(answer);
+        return [i18n._(msg`Invalid option: ${option}`)];
       }
       return null;
     }
@@ -169,10 +174,12 @@ export function validateAnswerValue(
       const optionValues = schema.options.map((option) => option.id);
       const wrong = mrAnswer.filter((value) => !optionValues.includes(value));
       if (wrong.length >= 1) {
-        return [`Opzioni non valide: ${wrong.join("")}`];
+        const options = wrong.join("");
+        return [i18n._(msg`Invalid options: ${options}`)];
       }
       if (new Set(mrAnswer).size !== mrAnswer.length) {
-        return [`Opzioni ripetute: ${mrAnswer.join("")}`];
+        const options = mrAnswer.join("");
+        return [i18n._(msg`Repeated options: ${options}`)];
       }
       return null;
     }

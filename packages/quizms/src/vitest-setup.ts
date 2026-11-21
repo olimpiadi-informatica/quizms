@@ -7,6 +7,11 @@ import "@testing-library/jest-dom/vitest";
 import { cleanup } from "@testing-library/react";
 import { afterEach } from "vitest";
 
+import { loadUiLocale, uiLocales } from "~/i18n";
+
+// Load the UI messages up front, so components don't suspend on them in tests.
+await Promise.all(uiLocales.map((locale) => loadUiLocale(locale)));
+
 // Tell React that updates are wrapped in `act` (Testing Library does it only with Vitest globals).
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 

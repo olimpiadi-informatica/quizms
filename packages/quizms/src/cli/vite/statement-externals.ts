@@ -5,6 +5,8 @@ import { fatal } from "~/utils-node";
 
 export const externalLibs = [
   "@olinfo/quizms/components",
+  // Shared with the page, so statements use its UI language (and a single Lingui context).
+  "@olinfo/quizms/i18n",
   "@olinfo/quizms/student",
   "@olinfo/quizms/models",
   "@olinfo/react-components",

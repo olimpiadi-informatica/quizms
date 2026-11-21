@@ -1,5 +1,6 @@
 import { type ReactNode, useEffect, useRef, useState } from "react";
 
+import { Trans, useLingui } from "@lingui/react/macro";
 import {
   Button,
   Dropdown,
@@ -15,12 +16,21 @@ import { sumBy } from "lodash-es";
 import { FileChartColumn, LogOut, RotateCcw } from "lucide-react";
 
 import { useUserAgent } from "~/utils";
-import { ErrorBoundary, Progress, Prose, Timer, Title } from "~/web/components";
+import {
+  ErrorBoundary,
+  LanguageSelect,
+  Progress,
+  Prose,
+  Timer,
+  Title,
+  useLocalize,
+} from "~/web/components";
 
 import { useStudent } from "./context";
 import { CompletedModal, SubmitModal } from "./modals";
 
 export function StudentLayout({ children }: { children: ReactNode }) {
+  const { t } = useLingui();
   const completedRef = useRef<HTMLDialogElement>(null);
   const submitRef = useRef<HTMLDialogElement>(null);
 
@@ -37,6 +47,7 @@ export function StudentLayout({ children }: { children: ReactNode }) {
     setLanguage,
   } = useStudent();
 
+  const longName = useLocalize()(contest.longName);
   const answered = sumBy(Object.values(student.answers ?? {}), (s) => Number(s.value != null));
   const total = Math.max(schema ? Object.keys(schema).length : contest.problemIds.length, 1);
   const progress = Math.round((answered / total) * 100);
@@ -92,9 +103,11 @@ export function StudentLayout({ children }: { children: ReactNode }) {
     return (
       <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-base-100 p-4 text-center">
         <div className="flex max-w-lg flex-col items-center gap-6">
-          <h2 className="text-3xl font-bold">Attenzione!</h2>
+          <h2 className="text-3xl font-bold">
+            <Trans>Warning!</Trans>
+          </h2>
           <p className="text-xl">
-            Non puoi perdere il focus o uscire dalla modalità a schermo intero.
+            <Trans>You cannot leave this page or exit full-screen mode.</Trans>
           </p>
           <div className="text-7xl font-black font-mono p-4">
             <Timer endTime={warningDeadline} hideMinutes />
@@ -103,7 +116,7 @@ export function StudentLayout({ children }: { children: ReactNode }) {
             <Button
               className="btn-warning btn-lg font-bold"
               onClick={() => document.documentElement.requestFullscreen()}>
-              Torna a schermo intero
+              <Trans>Back to full screen</Trans>
             </Button>
           )}
         </div>
@@ -121,18 +134,12 @@ export function StudentLayout({ children }: { children: ReactNode }) {
         </NavbarBrand>
         <NavbarContent>
           <div className="flex items-center gap-2">
-            {setLanguage && (contest.languages?.length ?? 0) > 1 && (
-              <select
-                className="select select-sm select-ghost"
-                aria-label="Lingua / Language"
+            {setLanguage && contest.languages && (
+              <LanguageSelect
+                languages={contest.languages}
                 value={language}
-                onChange={(e) => setLanguage(e.target.value)}>
-                {contest.languages.map((lang) => (
-                  <option key={lang} value={lang}>
-                    {lang.toUpperCase()}
-                  </option>
-                ))}
-              </select>
+                onChange={setLanguage}
+              />
             )}
             <Progress className="hidden w-20 sm:block" percentage={progress}>
               {progress}%
@@ -147,20 +154,24 @@ export function StudentLayout({ children }: { children: ReactNode }) {
             {terminated && reset ? (
               <>
                 {schema && (
-                  <div className="tooltip tooltip-bottom h-full" data-tip="Mostra risultati">
+                  <div className="tooltip tooltip-bottom h-full" data-tip={t`Show results`}>
                     <Button
                       className="btn-primary btn-sm h-full"
                       onClick={() => completedRef.current?.showModal()}>
                       <FileChartColumn />
-                      <span className="sr-only">Mostra risultati</span>
+                      <span className="sr-only">
+                        <Trans>Show results</Trans>
+                      </span>
                     </Button>
                   </div>
                 )}
                 {reset && (
-                  <div className="tooltip tooltip-bottom h-full" data-tip="Ricomincia">
+                  <div className="tooltip tooltip-bottom h-full" data-tip={t`Restart`}>
                     <Button className="btn-primary btn-sm h-full" onClick={reset}>
                       <RotateCcw />
-                      <span className="sr-only">Ricomincia</span>
+                      <span className="sr-only">
+                        <Trans>Restart</Trans>
+                      </span>
                     </Button>
                   </div>
                 )}
@@ -173,7 +184,7 @@ export function StudentLayout({ children }: { children: ReactNode }) {
                   (process.env.NODE_ENV === "production" && !venue.participationWindow)
                 }
                 onClick={submit}>
-                Termina
+                <Trans>Finish</Trans>
               </Button>
             )}
             <UserDropdown />
@@ -185,7 +196,7 @@ export function StudentLayout({ children }: { children: ReactNode }) {
           <CompletedModal ref={completedRef} />
           <SubmitModal ref={submitRef} />
           <Prose>
-            {contest.longName && <h1 className="text-pretty">{contest.longName}</h1>}
+            {longName && <h1 className="text-pretty">{longName}</h1>}
             {children}
           </Prose>
         </ErrorBoundary>
@@ -211,7 +222,7 @@ function UserDropdown() {
       <DropdownMenu>
         <DropdownItem>
           <button type="button" className="flex justify-between gap-4" onClick={logout}>
-            Esci <LogOut size={20} />
+            <Trans>Log out</Trans> <LogOut size={20} />
           </button>
         </DropdownItem>
       </DropdownMenu>

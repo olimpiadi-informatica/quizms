@@ -2,6 +2,7 @@ import {
   type Block,
   VERSION as BlocklyVersion,
   defineBlocksWithJsonArray,
+  Msg,
   type Workspace,
   type WorkspaceSvg,
 } from "blockly/core";
@@ -10,9 +11,17 @@ import { type JavascriptGenerator, javascriptGenerator, Order } from "blockly/ja
 import type { CustomBlockArg, CustomBlockProcessed } from "~/blockly-types";
 
 javascriptGenerator.STATEMENT_PREFIX = "highlightBlock(%1);\n";
-javascriptGenerator.INFINITE_LOOP_TRAP = 'if(--loopTrap === 0) error("Ciclo infinito");\n';
 javascriptGenerator.addReservedWords("error,highlightBlock,loopTrap");
 console.info("Blockly version:", BlocklyVersion);
+
+/**
+ * Uses the current Blockly messages (see `setBlocklyLanguage`) for the errors that the generated
+ * code shows to the student.
+ */
+export function setGeneratorMessages() {
+  const message = JSON.stringify(Msg.QUIZMS_INFINITE_LOOP);
+  javascriptGenerator.INFINITE_LOOP_TRAP = `if(--loopTrap === 0) error(${message});\n`;
+}
 
 function replaceArgs(block: Block, generator: JavascriptGenerator, args: CustomBlockArg[]) {
   const generatedArgs = args.map((arg): string => {
@@ -20,7 +29,7 @@ function replaceArgs(block: Block, generator: JavascriptGenerator, args: CustomB
       case "input_value":
         return (
           generator.valueToCode(block, arg.name, Order.NONE) ||
-          'error("Il blocco ha bisogno di un parametro")'
+          `error(${JSON.stringify(Msg.QUIZMS_MISSING_PARAMETER)})`
         );
 
       case "field_dropdown":

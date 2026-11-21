@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 
+import { useLingui } from "@lingui/react/macro";
+
 import type { CustomBlock, TestcaseResult } from "~/blockly-types";
 
 import { BlocklyInterpreter } from "./interpreter";
@@ -11,6 +13,7 @@ export function useExecutor<State>(
   variableMappings: object,
   highlightBlock: (id: string | undefined) => void,
 ) {
+  const { i18n } = useLingui();
   const [interpreter, setInterpreter] = useState<BlocklyInterpreter<State>>();
   const [state, setState] = useState<State>(initialState);
   const [result, setResult] = useState<TestcaseResult | undefined>(undefined);
@@ -29,7 +32,7 @@ export function useExecutor<State>(
   const reset = useCallback(() => {
     let interpreter: BlocklyInterpreter<State>;
     try {
-      interpreter = new BlocklyInterpreter(code, customBlocks, initialState);
+      interpreter = new BlocklyInterpreter(code, customBlocks, initialState, i18n);
     } catch (err) {
       if (err instanceof SyntaxError) {
         const file = URL.createObjectURL(new Blob([code]));
@@ -50,7 +53,7 @@ export function useExecutor<State>(
     setResult(interpreter.result);
     highlightBlock(interpreter.highlightedBlock);
     updateVariables(interpreter);
-  }, [code, customBlocks, initialState, highlightBlock, updateVariables]);
+  }, [code, customBlocks, initialState, highlightBlock, updateVariables, i18n]);
 
   useEffect(() => reset(), [reset]);
 

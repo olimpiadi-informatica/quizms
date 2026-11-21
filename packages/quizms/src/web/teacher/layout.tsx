@@ -1,5 +1,6 @@
 import { type ReactNode, Suspense } from "react";
 
+import { Trans } from "@lingui/react/macro";
 import {
   Button,
   Dropdown,
@@ -18,7 +19,7 @@ import { LogOut } from "lucide-react";
 import { Link, useRoute } from "wouter";
 
 import type { Contest, Venue } from "~/models";
-import { ErrorBoundary, Loading, Title } from "~/web/components";
+import { ErrorBoundary, Loading, Title, UiLanguageSelect, useLocalize } from "~/web/components";
 
 type Props = {
   name: string;
@@ -31,6 +32,7 @@ type Props = {
 export function TeacherLayout({ name, contests, venues, logout, children }: Props) {
   const [, params] = useRoute("/:contestId/*?");
   const contest = contests.find((c) => c.id === params?.contestId);
+  const localize = useLocalize();
 
   return (
     <>
@@ -43,14 +45,14 @@ export function TeacherLayout({ name, contests, venues, logout, children }: Prop
         {contest && (
           <NavbarMenu>
             {venues.length >= 2 && (
-              <NavbarSubmenu title={contest.name}>
+              <NavbarSubmenu title={localize(contest.name)}>
                 {venues.map((p) => {
                   const path = params?.["*"];
                   const href = path ? `/${p.contestId}/${path}` : `/${p.contestId}`;
                   return (
                     <NavbarMenuItem key={p.id}>
                       <Link className={clsx(contest.id === p.contestId && "active")} href={href}>
-                        {contests.find((c) => c.id === p.contestId)?.name}
+                        {localize(contests.find((c) => c.id === p.contestId)?.name)}
                       </Link>
                     </NavbarMenuItem>
                   );
@@ -58,15 +60,22 @@ export function TeacherLayout({ name, contests, venues, logout, children }: Prop
               </NavbarSubmenu>
             )}
             <NavbarMenuItem>
-              <Link href={`/${contest.id}`}>Gestione gara</Link>
+              <Link href={`/${contest.id}`}>
+                <Trans>Contest management</Trans>
+              </Link>
             </NavbarMenuItem>
             <NavbarMenuItem>
-              <Link href={`/${contest.id}/students`}>Gestione studenti</Link>
+              <Link href={`/${contest.id}/students`}>
+                <Trans>Student management</Trans>
+              </Link>
             </NavbarMenuItem>
           </NavbarMenu>
         )}
         <NavbarContent>
-          <UserDropdown name={name} logout={logout} />
+          <div className="flex items-center gap-2">
+            <UiLanguageSelect />
+            <UserDropdown name={name} logout={logout} />
+          </div>
         </NavbarContent>
       </Navbar>
       <div className="mx-auto flex w-full max-w-screen-xl grow flex-col p-4 pb-8">
@@ -93,7 +102,7 @@ function UserDropdown({ name, logout }: DropdownProps) {
       <DropdownMenu>
         <DropdownItem>
           <Button className="flex justify-between gap-4" onClick={logout}>
-            Esci <LogOut size={20} />
+            <Trans>Log out</Trans> <LogOut size={20} />
           </Button>
         </DropdownItem>
       </DropdownMenu>

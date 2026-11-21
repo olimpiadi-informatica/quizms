@@ -1,3 +1,5 @@
+import "~/i18n";
+
 import { createApp } from "@olinfo/quizms/entry";
 
 import { BlocklyEditor } from "./editor";

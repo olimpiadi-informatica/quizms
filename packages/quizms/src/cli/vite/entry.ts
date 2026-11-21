@@ -9,11 +9,16 @@ import { generateHtmlFromBundle } from "./html";
 
 export default function entry(): PluginOption {
   let root = "";
+  let entryImports: string[] = [];
 
   return {
     name: "quizms:entry",
     configResolved(config) {
       root = config.root;
+      // Modules that the plugins want in every app, e.g. to register their UI messages.
+      entryImports = config.plugins.flatMap(
+        (plugin) => (plugin.api?.quizmsEntryImports as string[] | undefined) ?? [],
+      );
     },
     resolveId(id) {
       const [pathname] = id.split("?");
@@ -30,6 +35,7 @@ export default function entry(): PluginOption {
 
         const params = new URLSearchParams(query);
         return `\
+${entryImports.map((module) => `import ${JSON.stringify(module)};`).join("\n")}
 import createApp from "${params.get("id")}";
 import "@olinfo/quizms/css";
 import "~/global.css";
