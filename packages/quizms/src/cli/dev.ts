@@ -14,10 +14,14 @@ import {
 import type { Contest } from "~/models";
 import type { VariantsConfig } from "~/models/variants-config";
 import { reactComponentCase } from "~/utils";
-import { findHeaderTranslations, loadContests, setContestLanguages } from "~/utils-node";
+import {
+  findHeaderTranslations,
+  headerEntry,
+  loadContests,
+  setContestLanguages,
+} from "~/utils-node";
 
 import configs from "./vite/configs";
-import { headerEntry } from "./vite/header";
 import { generateHtml } from "./vite/html";
 import { getDevImportMap } from "./vite/statement-externals";
 

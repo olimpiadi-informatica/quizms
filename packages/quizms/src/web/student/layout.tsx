@@ -150,19 +150,17 @@ export function StudentLayout({ children }: { children: ReactNode }) {
                   <div className="tooltip tooltip-bottom h-full" data-tip="Mostra risultati">
                     <Button
                       className="btn-primary btn-sm h-full"
-                      onClick={() => completedRef.current?.showModal()}
-                      aria-label="Mostra risultati">
+                      onClick={() => completedRef.current?.showModal()}>
                       <FileChartColumn />
+                      <span className="sr-only">Mostra risultati</span>
                     </Button>
                   </div>
                 )}
                 {reset && (
                   <div className="tooltip tooltip-bottom h-full" data-tip="Ricomincia">
-                    <Button
-                      className="btn-primary btn-sm h-full"
-                      onClick={reset}
-                      aria-label="Ricomincia">
+                    <Button className="btn-primary btn-sm h-full" onClick={reset}>
                       <RotateCcw />
+                      <span className="sr-only">Ricomincia</span>
                     </Button>
                   </div>
                 )}

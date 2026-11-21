@@ -6,6 +6,7 @@ import { isEqual } from "lodash-es";
 
 import type { VariantsConfig } from "~/models";
 import { localizedFileName } from "~/utils/languages";
+import { reactComponentCase } from "~/utils/strings";
 
 /** Name of the statement file of a language in `variants/<contest>/<variant>/`. */
 export function statementFileName(multilingual: boolean, language: string) {
@@ -30,6 +31,32 @@ export function findHeaderTranslations(header: string, languages: string[], base
     }
   }
   return { translations, missing };
+}
+
+/**
+ * Code for the virtual entries rendering a contest header in the current statement language.
+ * The entry must import `Localized` from `@olinfo/quizms/components`.
+ *
+ * @param translations translated header files (relative to `src`) by language
+ */
+export function headerEntry(
+  contestId: string,
+  header: string,
+  translations: Record<string, string>,
+) {
+  const name = `${reactComponentCase(contestId)}Header`;
+  const imports = [`import ${name} from ${JSON.stringify(`/${header}`)};`];
+  const entries: string[] = [];
+  for (const [language, file] of Object.entries(translations)) {
+    imports.push(`import ${name}$${language} from ${JSON.stringify(`/${file}`)};`);
+    entries.push(`${JSON.stringify(language)}: ${name}$${language}`);
+  }
+
+  const element =
+    entries.length > 0
+      ? `<Localized base={${name}} translations={{ ${entries.join(", ")} }} />`
+      : `<${name} />`;
+  return { imports, element };
 }
 
 /**

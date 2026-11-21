@@ -1,7 +1,7 @@
 import { pipeline } from "node:stream/promises";
 
 import { calcScore, type Student } from "@olinfo/quizms/models";
-import type { QueryDocumentSnapshot } from "firebase-admin/firestore";
+import { FieldValue, type QueryDocumentSnapshot } from "firebase-admin/firestore";
 import type { Request } from "firebase-functions/tasks";
 
 import { studentConverter, variantConverter } from "~/cli/utils/converters-admin";
@@ -30,7 +30,8 @@ export async function updateScoresHandler(request: Request) {
         if (!student?.variantId) return;
         const score = calcScore(student, variants[student.variantId]?.schema);
         if (score !== student.score) {
-          t.update(ref, { score });
+          // `calcScore` returns `undefined` for absent or disabled students: remove their score.
+          t.update(ref, { score: score ?? FieldValue.delete() });
         }
       });
     }

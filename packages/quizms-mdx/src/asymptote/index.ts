@@ -35,7 +35,7 @@ export async function findAsymptoteDependencies(ctx: PluginContext, asyPath: str
     hash.update(content);
 
     const matches = content.matchAll(
-      /^(?:access|from|import|include)\s+(?:"([^\n"]+)"|([^\s"]+);)/gm,
+      /^(?:access|from|import|include)\s+(?:"([^\n"]+)"|([^\s";]+))/gm,
     );
     for (const match of matches) {
       const matchPath = match[1] ?? match[2];

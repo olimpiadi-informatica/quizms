@@ -103,5 +103,17 @@
         }
       }
     }
-  }
+  },
+  "overrides": [
+    {
+      "includes": ["packages/*/src/**/*.test.ts", "packages/*/src/**/*.test.tsx"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noTemplateCurlyInString": "off"
+          }
+        }
+      }
+    }
+  ]
 }

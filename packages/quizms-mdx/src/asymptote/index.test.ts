@@ -67,12 +67,14 @@ describe("findAsymptoteDependencies", () => {
     expect((await dependencies("fig.asy")).watched).toEqual(new Set(["fig.asy"]));
   });
 
-  // BUG: the regex in `index.ts:38` only accepts an unquoted module name directly followed by `;`,
-  // so `from shapes access square;` (the usual Asymptote syntax) is not recognised: `shapes.asy`
-  // is not watched and changing it does not invalidate the cached SVG. Fix: match the module name
-  // with `([^\s";]+)` without requiring the `;` right after it.
   it("watches modules imported with `from ... access`", async () => {
     await write("fig.asy", "from shapes access square;\nunravel shapes;");
+    await write("shapes.asy", "path square;");
+    expect((await dependencies("fig.asy")).watched).toEqual(new Set(["fig.asy", "shapes.asy"]));
+  });
+
+  it("watches modules imported with an alias", async () => {
+    await write("fig.asy", "import shapes as s;");
     await write("shapes.asy", "path square;");
     expect((await dependencies("fig.asy")).watched).toEqual(new Set(["fig.asy", "shapes.asy"]));
   });

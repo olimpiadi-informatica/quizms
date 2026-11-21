@@ -207,6 +207,7 @@ describe("converters", () => {
 
   it("writes submissions", () => {
     const data = submissionConverter.toFirestore({
+      id: "sub",
       authType: "unauthenticated",
       studentId: "s1",
       student: { id: "s1", participationWindow: { start, end } },
@@ -215,7 +216,7 @@ describe("converters", () => {
     expect(data).toEqual({
       authType: "unauthenticated",
       studentId: "s1",
-      // The embedded student keeps its id: only the top-level one is removed.
+      // The top-level id is removed, but the embedded student keeps its own.
       student: {
         id: "s1",
         participationWindow: { start: Timestamp.fromDate(start), end: Timestamp.fromDate(end) },
@@ -224,11 +225,6 @@ describe("converters", () => {
     });
   });
 
-  // BUG: `parseSnapshot` always adds the document `id` to the parsed data, but `submissionSchema`
-  // (src/models/submission.ts) is a `strictObject` without an `id` field, so every submission
-  // fails to parse with "Unrecognized key: id". This breaks `quizms-firebase export --submissions`
-  // (src/cli/export.ts), which reads the collection through `submissionConverter`.
-  // Fix: add `id: z.string()` to `submissionSchema`.
   it("parses submissions with an embedded student", () => {
     const submission = {
       authType: "unauthenticated",
@@ -240,6 +236,7 @@ describe("converters", () => {
       submittedAt: "2025-03-30T09:00:00.000Z",
     };
     expect(submissionConverter.fromFirestore(fakeSnapshot("sub", submission) as any)).toEqual({
+      id: "sub",
       ...submission,
       student: { id: "s1", participationWindow: { start, end } },
     });

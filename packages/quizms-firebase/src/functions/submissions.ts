@@ -18,11 +18,19 @@ export async function studentUpdatedHandler(
     .doc(`variants/${student.variantId}`)
     .withConverter(variantConverter)
     .get();
-  student.score = calcScore(student, variant.data()?.schema);
+  // Firestore rejects `undefined` values: leave out the fields that are not set.
+  const score = calcScore(student, variant.data()?.schema);
+  if (score === undefined) {
+    delete student.score;
+  } else {
+    student.score = score;
+  }
 
-  await db.collection("submissions").withConverter(submissionConverter).add({
+  const ref = db.collection("submissions").doc().withConverter(submissionConverter);
+  await ref.set({
+    id: ref.id,
     authType: event.authType,
-    authId: event.authId,
+    ...(event.authId !== undefined && { authId: event.authId }),
     studentId: data.id,
     student,
     submittedAt: event.time,

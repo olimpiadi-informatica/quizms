@@ -165,12 +165,6 @@ describe("blockly generator", () => {
     expect(setVariable(name)).toBe(`var ${name}2;\n\n\nhighlightBlock('set');\n${name}2 = 1;\n`);
   });
 
-  // BUG: the names of the custom blocks are added to the reserved words only when `initGenerator`
-  // is called while the generator is already initialized (`generator.ts:44`), but
-  // `workspaceToCode` resets `isInitialized`, so in practice they are never reserved. A variable
-  // with the same name as a custom block (e.g. `move`) overwrites the function of the block in
-  // the interpreter. Fix: call `javascriptGenerator.addReservedWords(customBlock.type)` also in
-  // the first initialization, before `javascriptGenerator.init(workspace)`.
   it("renames variables named like a custom block", () => {
     expect(setVariable("move")).toContain("move2 = 1;");
   });

@@ -1,9 +1,8 @@
-import { studentSchema } from "@olinfo/quizms/models";
 import type { DocumentSnapshot } from "firebase-admin/firestore";
 import type { Change, FirestoreAuthEvent } from "firebase-functions/firestore";
 import { beforeEach, describe, expect, it } from "vitest";
 
-import { parseSnapshot } from "~/cli/utils/converters-admin";
+import { submissionConverter } from "~/cli/utils/converters-admin";
 import { clearFirestore, makeStudent, makeVariant, seed } from "~/test-utils/emulator";
 
 import { db } from "./common";
@@ -15,26 +14,25 @@ const participationWindow = {
 };
 const TIME = "2030-05-10T10:15:00.000Z";
 
-async function trigger(studentPath: string) {
+async function trigger(
+  studentPath: string,
+  auth: { authType: string; authId?: string } = { authType: "unknown", authId: "uid-s1" },
+) {
   const after = await db.doc(studentPath).get();
   const event = {
     data: { before: after, after },
-    authType: "unknown",
-    authId: "uid-s1",
+    ...auth,
     time: TIME,
   } as unknown as FirestoreAuthEvent<Change<DocumentSnapshot>>;
   await studentUpdatedHandler(event);
 }
 
 async function getSubmissions() {
-  const snapshot = await db.collection("submissions").get();
-  // `submissionConverter.fromFirestore` cannot be used: see the bug in converters-admin.test.ts.
+  const snapshot = await db.collection("submissions").withConverter(submissionConverter).get();
   return snapshot.docs.map((doc) => {
-    const { student, ...data } = doc.data();
-    return {
-      ...data,
-      student: parseSnapshot(studentSchema, { id: student.id, data: () => student } as any),
-    };
+    const { id, ...data } = doc.data();
+    expect(id).toBe(doc.id);
+    return data;
   });
 }
 
@@ -81,18 +79,22 @@ describe("studentUpdatedHandler", () => {
     expect(await getSubmissions()).toHaveLength(2);
   });
 
-  // BUG: `calcScore` returns `undefined` when the student is absent/disabled or the variant does
-  // not exist, so `student.score` is `undefined` and the submission write fails with
-  // "Cannot use \"undefined\" as a Firestore value (found in field \"student.score\")" because
-  // the functions' Firestore instance (src/functions/common.ts) does not set
-  // `ignoreUndefinedProperties`. The submission of e.g. a student disabled by the teacher is lost.
-  // Fix: call `db.settings({ ignoreUndefinedProperties: true })` in src/functions/common.ts (or
-  // omit `score` when it is undefined in src/functions/submissions.ts:21).
   it("stores a submission for disabled students", async () => {
     await seed(db, {
       students: [makeStudent({ id: "s1", token: "token", participationWindow, disabled: true })],
     });
     await trigger("venues/venue/students/s1");
-    expect(await getSubmissions()).toHaveLength(1);
+    const submissions = await getSubmissions();
+    expect(submissions).toHaveLength(1);
+    expect(submissions[0].student.disabled).toBe(true);
+    expect(submissions[0].student).not.toHaveProperty("score");
+  });
+
+  it("stores a submission for unauthenticated updates", async () => {
+    await seed(db, { students: [makeStudent({ id: "s1", token: "token", participationWindow })] });
+    await trigger("venues/venue/students/s1", { authType: "unauthenticated" });
+    const [submission] = await getSubmissions();
+    expect(submission.authType).toBe("unauthenticated");
+    expect(submission).not.toHaveProperty("authId");
   });
 });

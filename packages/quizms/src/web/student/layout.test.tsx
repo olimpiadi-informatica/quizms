@@ -24,15 +24,6 @@ function getDialog(title: string) {
   return dialog!;
 }
 
-/**
- * The icon-only buttons of terminated contests, found through their tooltip (see the BUG note in
- * "icon-only buttons have an accessible name").
- */
-function getTooltipButton(tip: string) {
-  const tooltip = document.querySelector(`[data-tip="${tip}"]`);
-  return tooltip ? within(tooltip as HTMLElement).getByRole("button") : null;
-}
-
 function progressText() {
   return screen.getByText(/^\d+%$/).textContent;
 }
@@ -213,14 +204,14 @@ describe("StudentLayout", () => {
 
       expect(screen.queryByRole("button", { name: "Termina" })).not.toBeInTheDocument();
 
-      await user.click(getTooltipButton("Mostra risultati")!);
+      await user.click(screen.getByRole("button", { name: "Mostra risultati" }));
       const completed = getDialog("Prova terminata");
       expect(completed).toHaveAttribute("open");
       expect(within(completed).getByText(/Hai ottenuto/)).toHaveTextContent(
         "Hai ottenuto un punteggio di 3 su 20.",
       );
 
-      await user.click(getTooltipButton("Ricomincia")!);
+      await user.click(screen.getByRole("button", { name: "Ricomincia" }));
       expect(reset).toHaveBeenCalledOnce();
     });
 
@@ -229,16 +220,10 @@ describe("StudentLayout", () => {
         reset: () => {},
         student: makeStudent({ participationWindow: ended() }),
       });
-      expect(getTooltipButton("Mostra risultati")).toBeNull();
-      expect(getTooltipButton("Ricomincia")).toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: "Mostra risultati" })).toBeNull();
+      expect(screen.getByRole("button", { name: "Ricomincia" })).toBeInTheDocument();
     });
 
-    // BUG: `StudentLayout` passes `aria-label` to `Button` from `@olinfo/react-components`, which
-    // only forwards `onClick`, `icon`, `disabled`, `className` and `children` (TypeScript does not
-    // flag it because hyphenated JSX attributes skip excess property checks). The two icon-only
-    // buttons ("Mostra risultati", "Ricomincia") thus have no accessible name for screen readers.
-    // Fix: render native `<button aria-label=...>` elements in `src/web/student/layout.tsx`, or
-    // make `Button` forward `aria-*` props upstream.
     it("icon-only buttons have an accessible name", async () => {
       await renderLayout(null, {
         reset: () => {},

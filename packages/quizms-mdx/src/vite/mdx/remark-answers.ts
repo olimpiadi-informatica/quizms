@@ -1,7 +1,6 @@
 import path from "node:path";
 
-import { Parser } from "acorn";
-import type { Directive } from "estree";
+import type { Expression } from "estree";
 import { upperFirst } from "lodash-es";
 import type { Blockquote, Root } from "mdast";
 import type { ContainerDirective } from "mdast-util-directive";
@@ -10,7 +9,7 @@ import type { Plugin } from "unified";
 import { visit } from "unist-util-visit";
 import type { VFile } from "vfile";
 
-import { jsxAttribute } from "./utils";
+import { jsxAttribute, parseExpressionAt, templateLiteral } from "./utils";
 
 const remarkAnswers: Plugin<[], Root> = () => {
   return (tree: Root, file) => {
@@ -61,7 +60,7 @@ function parseAnswers(tree: Root, file: VFile) {
         } as MdxJsxFlowElement;
       } else {
         const paragraph = containerDirective.children[0];
-        if (paragraph.type !== "paragraph") {
+        if (paragraph?.type !== "paragraph") {
           throw new Error("Missing or invalid answers");
         }
 
@@ -71,24 +70,23 @@ function parseAnswers(tree: Root, file: VFile) {
 
         text.value = text.value.slice(3);
 
-        let templateLiteral = "String.raw`";
+        // The solution is plain text, with `{expr}` interpolating a JavaScript expression.
+        const parts: (string | Expression)[] = [];
         for (const child of paragraph.children) {
           if (child.type === "text") {
-            templateLiteral += child.value;
+            parts.push(child.value);
           } else if (child.type === "mdxTextExpression") {
-            templateLiteral += `\${${child.value}}`;
+            const [expression, end] = parseExpressionAt(child.value);
+            if (child.value.slice(end).trim()) {
+              throw new Error(`Invalid expression in open answer solution: {${child.value}}`);
+            }
+            parts.push(expression);
           } else {
             throw new Error("Open answer solution must be in plain text");
           }
         }
-        templateLiteral += "`";
 
-        const template = Parser.parse(templateLiteral, {
-          ecmaVersion: "latest",
-          sourceType: "module",
-        });
-
-        const attributes = [jsxAttribute("correct", (template.body[0] as Directive).expression)];
+        const attributes = [jsxAttribute("correct", templateLiteral(parts))];
 
         parent!.children[index!] = {
           type: "mdxJsxFlowElement",

@@ -1,11 +1,10 @@
-import { Parser } from "acorn";
-import type { Directive } from "estree";
+import type { Expression } from "estree";
 import type { Code, InlineCode, Root } from "mdast";
 import type { MdxJsxFlowElement } from "mdast-util-mdx";
 import type { Plugin } from "unified";
 import { visit } from "unist-util-visit";
 
-import { jsxAttribute } from "./utils";
+import { jsxAttribute, parseExpressionAt, templateLiteral } from "./utils";
 
 const remarkHighlight: Plugin<[], Root> = () => {
   return (tree: Root) => {
@@ -15,30 +14,14 @@ const remarkHighlight: Plugin<[], Root> = () => {
 
       lang ||= /[(+[{]/.test(code.value) ? "srs" : "text"; // guess language
 
-      const value =
-        lang === "srs"
-          ? code.value
-              .replaceAll("{", "${")
-              .replaceAll("<-", "←")
-              .replaceAll("->", "→")
-              .replaceAll("<=", "≤")
-              .replaceAll(">=", "≥")
-              .replaceAll("!=", "≠")
-              .replaceAll("*", "×")
-              .replaceAll("...", "…")
-          : code.value;
-
-      const templateLiteral = `String.raw\`${value}\``;
-      const template = Parser.parse(templateLiteral, {
-        ecmaVersion: "latest",
-        sourceType: "module",
-      });
+      // In pseudocode, `{expr}` interpolates a JavaScript expression (e.g. a variant variable).
+      const value = lang === "srs" ? pseudocode(code.value) : code.value;
 
       parent!.children[index!] = {
         type: "mdxJsxFlowElement",
         name: "Code",
         attributes: [
-          jsxAttribute("code", (template.body[0] as Directive).expression),
+          jsxAttribute("code", value),
           jsxAttribute("inline", code.type === "inlineCode"),
           jsxAttribute("lang", lang),
           jsxAttribute(
@@ -52,5 +35,34 @@ const remarkHighlight: Plugin<[], Root> = () => {
     });
   };
 };
+
+function pseudocode(code: string) {
+  const parts: (string | Expression)[] = [];
+  let pos = 0;
+  for (let start = code.indexOf("{"); start !== -1; start = code.indexOf("{", pos)) {
+    parts.push(replaceOperators(code.slice(pos, start)));
+    const [expression, end] = parseExpressionAt(code, start + 1);
+    pos = end;
+    while (/\s/.test(code[pos])) pos++;
+    if (code[pos] !== "}") {
+      throw new Error(`Invalid expression in pseudocode: ${code.slice(start, pos + 1)}`);
+    }
+    pos++;
+    parts.push(expression);
+  }
+  parts.push(replaceOperators(code.slice(pos)));
+  return templateLiteral(parts);
+}
+
+function replaceOperators(text: string) {
+  return text
+    .replaceAll("<-", "←")
+    .replaceAll("->", "→")
+    .replaceAll("<=", "≤")
+    .replaceAll(">=", "≥")
+    .replaceAll("!=", "≠")
+    .replaceAll("*", "×")
+    .replaceAll("...", "…");
+}
 
 export default remarkHighlight;

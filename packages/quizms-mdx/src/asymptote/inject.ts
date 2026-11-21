@@ -33,7 +33,15 @@ function getAsyTypeName(val: VariantVariable): string {
   if (typeof val === "string") {
     return "string";
   }
-  return `${getAsyTypeName(val[0])}[]`;
+  const types = new Set(val.map(getAsyTypeName));
+  // Integers are promoted to reals, e.g. in `[1, 2.5]` (Python's `1.0` is parsed as `1`).
+  for (const type of types) {
+    if (type.startsWith("int") && types.has(`real${type.slice(3)}`)) types.delete(type);
+  }
+  if (types.size !== 1) {
+    throw new Error(`Array elements must all have the same type: ${JSON.stringify(val)}`);
+  }
+  return `${[...types][0]}[]`;
 }
 
 function getAsyValue(val: VariantVariable): string {

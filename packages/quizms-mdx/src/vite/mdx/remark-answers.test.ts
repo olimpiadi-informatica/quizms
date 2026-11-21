@@ -84,30 +84,31 @@ describe("remarkAnswers", () => {
   });
 
   describe("open answers", () => {
-    it("converts the solution to a raw template literal", async () => {
+    it("converts the solution to a template literal", async () => {
       expect(await toJsx(":::answers{.open}\n?> 42\n:::")).toMatchInlineSnapshot(`
         "<AnswerGroup>
-          <OpenAnswer correct={(String.raw)\`42\`} />
+          <OpenAnswer correct={\`42\`} />
         </AnswerGroup>"
       `);
     });
 
-    it("keeps backslashes in the solution", async () => {
-      expect(await toJsx(":::answers{.open}\n?> a\\b\n:::")).toContain(
-        "<OpenAnswer correct={(String.raw)`a\\b`} />",
+    it("keeps backslashes and backticks in the solution", async () => {
+      expect(await toJsx(":::answers{.open}\n?> a\\\\b\n:::")).toContain(
+        "<OpenAnswer correct={`a\\\\b`} />",
+      );
+      expect(await toJsx(":::answers{.open}\n?> a\\`b\n:::")).toContain(
+        "<OpenAnswer correct={`a\\`b`} />",
       );
     });
 
     it("interpolates expressions (variants) in the solution", async () => {
-      expect(await toJsx(":::answers{.open}\n?> {x + 1}0\n:::")).toMatch(
-        /<OpenAnswer correct=\{\(String\.raw\)`\$\{x \+ 1\}0`\} \/>/,
+      expect(await toJsx(":::answers{.open}\n?> {x + 1}0\n:::")).toContain(
+        "<OpenAnswer correct={`${x + 1}0`} />",
       );
     });
 
     it("treats answers without a type as open answers", async () => {
-      expect(await toJsx(":::answers\n?> ABC\n:::")).toContain(
-        "<OpenAnswer correct={(String.raw)`ABC`} />",
-      );
+      expect(await toJsx(":::answers\n?> ABC\n:::")).toContain("<OpenAnswer correct={`ABC`} />");
     });
 
     it("rejects formatted solutions", async () => {
@@ -128,10 +129,6 @@ describe("remarkAnswers", () => {
       expect(jsx).toContain('{"42"}');
     });
 
-    // BUG: an empty open answer directive crashes with "Cannot read properties of undefined
-    // (reading 'type')" instead of the usual error, because `remark-answers.ts:64` reads
-    // `paragraph.type` without optional chaining (closed answers use `list?.type`).
-    // Fix: `if (paragraph?.type !== "paragraph")`.
     it("rejects an empty open answer with a clear error", async () => {
       await expect(toJsx(":::answers{.open}\n:::")).rejects.toThrow("Missing or invalid answers");
     });
