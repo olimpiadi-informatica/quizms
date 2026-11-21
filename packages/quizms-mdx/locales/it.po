@@ -6,3 +6,95 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: @lingui/cli\n"
 "Language: it\n"
+
+#: packages/quizms-mdx/src/components/client/answers.tsx
+msgid "Answer"
+msgstr "Risposta"
+
+#: packages/quizms-mdx/src/components/blockly/editor.tsx
+msgid "Blockly workspace"
+msgstr "Area di lavoro di Blockly"
+
+#: packages/quizms-mdx/src/components/blockly/toolbar/debug.tsx
+msgid "Blocks"
+msgstr "Blocchi"
+
+#: packages/quizms-mdx/src/components/blockly/toolbar/execution.tsx
+msgid "Check the solution"
+msgstr "Correggi la soluzione"
+
+#: packages/quizms-mdx/src/components/client/answers.tsx
+msgid "Clear answer"
+msgstr "Cancella risposta"
+
+#: packages/quizms-mdx/src/components/blockly/toolbar/debug.tsx
+msgid "Copied!"
+msgstr "Copiato!"
+
+#: packages/quizms-mdx/src/components/blockly/toolbar/debug.tsx
+msgid "Copy"
+msgstr "Copia"
+
+#: packages/quizms-mdx/src/components/blockly/toolbar/debug.tsx
+msgid "Debug options"
+msgstr "Opzioni di debug"
+
+#: packages/quizms-mdx/src/components/client/answers.tsx
+msgid "Enter your answer"
+msgstr "Inserisci la risposta"
+
+#: packages/quizms-mdx/src/components/blockly/toolbar/execution.tsx
+msgid "Execution speed"
+msgstr "Velocità di esecuzione"
+
+#: packages/quizms-mdx/src/components/blockly/workspace.tsx
+msgid "Failed to display the level"
+msgstr "Visualizzazione del livello fallita"
+
+#: packages/quizms-mdx/src/components/blockly/toolbar/execution.tsx
+msgid "Fast"
+msgstr "Veloce"
+
+#: packages/quizms-mdx/src/components/blockly/workspace.tsx
+msgid "Hide message"
+msgstr "Nascondi messaggio"
+
+#: packages/quizms-mdx/src/components/blockly/toolbar/debug.tsx
+msgid "Image"
+msgstr "Immagine"
+
+#: packages/quizms-mdx/src/components/blockly/toolbar/testcases.tsx
+msgid "Level"
+msgstr "Livello"
+
+#: packages/quizms-mdx/src/components/client/problem.tsx
+msgid "Question {newId}"
+msgstr "Domanda {newId}"
+
+#: packages/quizms-mdx/src/components/blockly/toolbar/execution.tsx
+msgid "Restart"
+msgstr "Esegui da capo"
+
+#: packages/quizms-mdx/src/components/blockly/toolbar/execution.tsx
+msgid "Run one block"
+msgstr "Esegui un blocco"
+
+#: packages/quizms-mdx/src/components/blockly/toolbar/execution.tsx
+msgid "Run/pause"
+msgstr "Esegui/pausa"
+
+#: packages/quizms-mdx/src/components/blockly/toolbar/debug.tsx
+msgid "Save"
+msgstr "Salva"
+
+#: packages/quizms-mdx/src/components/client/answers.tsx
+msgid "Show solution"
+msgstr "Mostra soluzione"
+
+#: packages/quizms-mdx/src/components/blockly/toolbar/execution.tsx
+msgid "Slow"
+msgstr "Lento"
+
+#: packages/quizms-mdx/src/components/blockly/hooks/interpreter.ts
+msgid "The program ended without completing the level"
+msgstr "Il programma è terminato senza completare il livello"

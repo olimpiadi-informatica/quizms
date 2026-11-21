@@ -1,8 +1,10 @@
 import type { RefObject } from "react";
 
+import { msg } from "@lingui/core/macro";
 import { saveAs } from "file-saver";
 import { unparse as stringifyCSV } from "papaparse";
 
+import { type I18n, useLingui } from "~/i18n";
 import { type Contest, formatUserData, type Student, type Venue } from "~/models";
 import { useTeacher, useTeacherStudents } from "~/web/teacher/context";
 
@@ -11,18 +13,19 @@ import { canViewScore } from "./utils";
 export function ExportModal({ ref }: { ref: RefObject<HTMLButtonElement | null> | null }) {
   const { contest, venue } = useTeacher();
   const [students] = useTeacherStudents();
+  const { i18n } = useLingui();
 
   return (
     <button
       ref={ref}
       type="button"
       className="hidden"
-      onClick={() => exportStudents(students, contest, venue)}
+      onClick={() => exportStudents(students, contest, venue, i18n)}
     />
   );
 }
 
-function exportStudents(students: Student[], contest: Contest, venue: Venue) {
+function exportStudents(students: Student[], contest: Contest, venue: Venue, i18n: I18n) {
   const scoreVisible = canViewScore(contest, venue);
   const flatStudents = students
     .filter((student) => !student.disabled)
@@ -37,9 +40,9 @@ function exportStudents(students: Student[], contest: Contest, venue: Venue) {
 
   flatStudents.unshift([
     ...contest.userData.map((field) => field.label),
-    ...(contest.hasVariants ? ["Variante"] : []),
+    ...(contest.hasVariants ? [i18n._(msg`Variant`)] : []),
     ...contest.problemIds,
-    ...(scoreVisible ? ["Punteggio"] : []),
+    ...(scoreVisible ? [i18n._(msg`Score`)] : []),
   ]);
 
   const csv = stringifyCSV(flatStudents, {
@@ -47,5 +50,9 @@ function exportStudents(students: Student[], contest: Contest, venue: Venue) {
     escapeFormulae: true,
   });
 
-  saveAs(new Blob([csv], { type: "text/csv;charset=utf-8" }), `studenti-${contest.id}.csv`);
+  const contestId = contest.id;
+  saveAs(
+    new Blob([csv], { type: "text/csv;charset=utf-8" }),
+    i18n._(msg`students-${contestId}.csv`),
+  );
 }

@@ -72,15 +72,20 @@ export function getLoadedUiLocale(language: string | undefined): I18n | undefine
 }
 
 /**
- * Instance used by the `t` macro outside of React components, e.g. in the CLI.
- * Set it with `activateUiLocale`. React components use `useLingui` and `<Trans>` instead, which
- * follow the nearest `UiLanguageProvider` (in `@olinfo/quizms/components`).
+ * Instance used by the `t` macro outside of React components (e.g. in the CLI, or for errors
+ * thrown by API calls). In the browser it follows the UI language of the page: the language of
+ * the innermost `UiLanguageProvider`. Elsewhere, set it with `activateUiLocale`.
  */
-export let i18n: I18n = setupI18n();
+export let i18n: I18n = fallbackI18n();
+
+/** Makes `instance` the one used by `i18n` (and the `t` macro). */
+export function setActiveUiLocale(instance: I18n) {
+  i18n = instance;
+}
 
 /** Loads a language and makes it the one used by `i18n` (and the `t` macro). */
 export async function activateUiLocale(language: string | undefined) {
-  i18n = await loadUiLocale(language);
+  setActiveUiLocale(await loadUiLocale(language));
   return i18n;
 }
 
@@ -88,5 +93,10 @@ export async function activateUiLocale(language: string | undefined) {
 export function resetUiLocalesForTests() {
   loaders.length = 0;
   entries.clear();
-  i18n = setupI18n();
+  i18n = fallbackI18n();
+}
+
+/** Until a language is active, messages are shown untranslated (in English). */
+function fallbackI18n() {
+  return setupI18n({ locale: "en", messages: { en: {} } });
 }

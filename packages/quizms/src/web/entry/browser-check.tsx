@@ -1,5 +1,6 @@
 import { type ReactNode, useEffect, useMemo, useRef } from "react";
 
+import { Trans, useLingui } from "@lingui/react/macro";
 import { Modal } from "@olinfo/react-components";
 import type { IResult } from "ua-parser-js";
 import { BrowserName, BrowserType, EngineName } from "ua-parser-js/enums";
@@ -8,16 +9,15 @@ import { hash, useUserAgent } from "~/utils";
 
 export function BrowserCheck({ children }: { children: ReactNode }) {
   const ua = useUserAgent();
+  const { t } = useLingui();
 
   if (ua.browser.type === BrowserType.INAPP) {
     return (
       <>
         {children}
         <BrowserModal
-          message="stai usando una versione limitata del browser."
-          description={
-            "Per un'esperienza migliore ti consigliamo di passare all'app che usi di solito per navigare su internet"
-          }
+          message={t`you are using a limited version of the browser.`}
+          description={t`For a better experience, we recommend switching to the app you usually use to browse the internet`}
           ua={ua}
         />
       </>
@@ -37,10 +37,8 @@ export function BrowserCheck({ children }: { children: ReactNode }) {
       <>
         {children}
         <BrowserModal
-          message="stai usando un browser non supportato!"
-          description={
-            "La piattaforma potrebbe non funzionare correttamente, è consigliato usare Chrome, Safari o Firefox"
-          }
+          message={t`you are using an unsupported browser!`}
+          description={t`The platform may not work properly, we recommend using Chrome, Safari or Firefox`}
           ua={ua}
         />
       </>
@@ -51,8 +49,8 @@ export function BrowserCheck({ children }: { children: ReactNode }) {
     return (
       <div className="flex grow items-center justify-center m-6 text-center">
         <BrowserWarning
-          message={`stai usando una versione di ${browserName} non supportata!`}
-          description={`Per continuare a usare la piattaforma è necessario aggiornare ${browserName} alla versione più recente.`}
+          message={t`you are using an unsupported version of ${browserName}!`}
+          description={t`To keep using the platform, you need to update ${browserName} to the latest version.`}
           ua={ua}
         />
       </div>
@@ -64,8 +62,8 @@ export function BrowserCheck({ children }: { children: ReactNode }) {
       <>
         {children}
         <BrowserModal
-          message={`stai usando una versione di ${browserName} non supportata!`}
-          description={`La piattaforma potrebbe non funzionare correttamente, è consigliato aggiornare ${browserName} alla versione più recente.`}
+          message={t`you are using an unsupported version of ${browserName}!`}
+          description={t`The platform may not work properly, we recommend updating ${browserName} to the latest version.`}
           ua={ua}
         />
       </>
@@ -85,6 +83,7 @@ function BrowserModal({
   description: string;
   ua: IResult;
 }) {
+  const { t } = useLingui();
   const ref = useRef<HTMLDialogElement>(null);
   const uaHash = useMemo(() => hash(JSON.stringify(ua)), [ua]);
 
@@ -96,7 +95,7 @@ function BrowserModal({
   }, [uaHash]);
 
   return (
-    <Modal ref={ref} title="Browser non supportato">
+    <Modal ref={ref} title={t`Unsupported browser`}>
       <BrowserWarning message={message} description={description} ua={ua} />
     </Modal>
   );
@@ -112,15 +111,23 @@ function BrowserWarning({
   description: string;
   ua: IResult;
 }) {
+  const browser = ua.browser.name || "???";
+  const version = ua.browser.version || "???";
+  const device = ua.device.model ? ` (${ua.device.model})` : "";
+
   return (
     <div className="prose">
       <p>
-        <strong className="text-error">Attenzione:</strong> {message}
+        <Trans>
+          <strong className="text-error">Warning:</strong> {message}
+        </Trans>
       </p>
       <p>{description}</p>
       <p className="text-base-content/50">
-        Stai usando {ua.browser.name || "???"} {ua.browser.version || "???"}
-        {ua.device.model && ` (${ua.device.model})`}.
+        <Trans>
+          You are using {browser} {version}
+          {device}.
+        </Trans>
       </p>
     </div>
   );

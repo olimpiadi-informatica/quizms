@@ -1,5 +1,6 @@
 import { type ReactNode, useEffect, useRef, useState } from "react";
 
+import { Trans, useLingui } from "@lingui/react/macro";
 import {
   Button,
   Dropdown,
@@ -21,6 +22,7 @@ import { useStudent } from "./context";
 import { CompletedModal, SubmitModal } from "./modals";
 
 export function StudentLayout({ children }: { children: ReactNode }) {
+  const { t } = useLingui();
   const completedRef = useRef<HTMLDialogElement>(null);
   const submitRef = useRef<HTMLDialogElement>(null);
 
@@ -92,9 +94,11 @@ export function StudentLayout({ children }: { children: ReactNode }) {
     return (
       <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-base-100 p-4 text-center">
         <div className="flex max-w-lg flex-col items-center gap-6">
-          <h2 className="text-3xl font-bold">Attenzione!</h2>
+          <h2 className="text-3xl font-bold">
+            <Trans>Warning!</Trans>
+          </h2>
           <p className="text-xl">
-            Non puoi perdere il focus o uscire dalla modalità a schermo intero.
+            <Trans>You cannot leave this page or exit full-screen mode.</Trans>
           </p>
           <div className="text-7xl font-black font-mono p-4">
             <Timer endTime={warningDeadline} hideMinutes />
@@ -103,7 +107,7 @@ export function StudentLayout({ children }: { children: ReactNode }) {
             <Button
               className="btn-warning btn-lg font-bold"
               onClick={() => document.documentElement.requestFullscreen()}>
-              Torna a schermo intero
+              <Trans>Back to full screen</Trans>
             </Button>
           )}
         </div>
@@ -141,20 +145,24 @@ export function StudentLayout({ children }: { children: ReactNode }) {
             {terminated && reset ? (
               <>
                 {schema && (
-                  <div className="tooltip tooltip-bottom h-full" data-tip="Mostra risultati">
+                  <div className="tooltip tooltip-bottom h-full" data-tip={t`Show results`}>
                     <Button
                       className="btn-primary btn-sm h-full"
                       onClick={() => completedRef.current?.showModal()}>
                       <FileChartColumn />
-                      <span className="sr-only">Mostra risultati</span>
+                      <span className="sr-only">
+                        <Trans>Show results</Trans>
+                      </span>
                     </Button>
                   </div>
                 )}
                 {reset && (
-                  <div className="tooltip tooltip-bottom h-full" data-tip="Ricomincia">
+                  <div className="tooltip tooltip-bottom h-full" data-tip={t`Restart`}>
                     <Button className="btn-primary btn-sm h-full" onClick={reset}>
                       <RotateCcw />
-                      <span className="sr-only">Ricomincia</span>
+                      <span className="sr-only">
+                        <Trans>Restart</Trans>
+                      </span>
                     </Button>
                   </div>
                 )}
@@ -167,7 +175,7 @@ export function StudentLayout({ children }: { children: ReactNode }) {
                   (process.env.NODE_ENV === "production" && !venue.participationWindow)
                 }
                 onClick={submit}>
-                Termina
+                <Trans>Finish</Trans>
               </Button>
             )}
             <UserDropdown />
@@ -205,7 +213,7 @@ function UserDropdown() {
       <DropdownMenu>
         <DropdownItem>
           <button type="button" className="flex justify-between gap-4" onClick={logout}>
-            Esci <LogOut size={20} />
+            <Trans>Log out</Trans> <LogOut size={20} />
           </button>
         </DropdownItem>
       </DropdownMenu>

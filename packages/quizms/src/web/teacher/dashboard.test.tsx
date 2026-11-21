@@ -7,6 +7,7 @@ import { saveAs } from "file-saver";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { Announcement, Contest, StudentRestore, Venue } from "~/models";
+import { UiLanguageProvider } from "~/web/components/ui-language-provider";
 
 import { makeContest, makeVenue } from "../test-utils";
 import { TeacherContext, type TeacherContextProps } from "./context";
@@ -62,7 +63,9 @@ function makeTeacherContext({
 function renderDashboard(overrides: Overrides = {}) {
   const ctx = makeTeacherContext(overrides);
   const Wrapper = ({ children }: { children: ReactNode }) => (
-    <TeacherContext.Provider value={ctx.value}>{children}</TeacherContext.Provider>
+    <UiLanguageProvider language="it">
+      <TeacherContext.Provider value={ctx.value}>{children}</TeacherContext.Provider>
+    </UiLanguageProvider>
   );
   render(<TeacherDashboard />, { wrapper: Wrapper });
   return ctx;

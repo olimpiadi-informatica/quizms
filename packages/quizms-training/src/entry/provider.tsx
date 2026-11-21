@@ -1,5 +1,6 @@
 import { type ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 
+import { useLingui } from "@lingui/react/macro";
 import { TitleProvider } from "@olinfo/quizms/components";
 import {
   type Answer,
@@ -34,6 +35,7 @@ export function TrainingProvider({
   contest: Contest & VariantsConfig;
   children: ReactNode;
 }) {
+  const { t } = useLingui();
   const { data: title } = useSWR("getTitle", getTitleIframe, { suspense: true });
 
   const { data: iframeStudent, mutate } = useSWR(["student", contest.id], getStudentIframe, {
@@ -47,8 +49,12 @@ export function TrainingProvider({
     () =>
       iframeStudent
         ? { type: "iframe", student: iframeStudent }
-        : { type: "anonymous", student: anonymousStudent },
-    [iframeStudent, anonymousStudent],
+        : {
+            type: "anonymous",
+            // Shown as "<name> <surname>": the whole label is in the name, in the UI language.
+            student: { ...anonymousStudent, userData: { name: t`Anonymous user`, surname: "" } },
+          },
+    [iframeStudent, anonymousStudent, t],
   );
 
   useEffect(() => {
@@ -197,10 +203,7 @@ TrainingProvider.displayName = "TrainingProvider";
 function createAnonymousStudent(contest: VariantsConfig): Student {
   return {
     id: "",
-    userData: {
-      name: "Utente",
-      surname: "anonimo",
-    },
+    userData: {},
     answers: {},
     contestId: contest.id,
   };

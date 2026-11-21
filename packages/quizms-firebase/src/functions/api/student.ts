@@ -6,12 +6,12 @@ import {
   type Student,
   studentSchema,
 } from "@olinfo/quizms/models";
-import { TRPCError } from "@trpc/server";
 import { Timestamp } from "firebase-admin/firestore";
 import * as logger from "firebase-functions/logger";
 import z from "zod";
 
 import { auth, db } from "../common";
+import { apiError } from "./errors";
 import {
   getContest,
   getRandomVariant,
@@ -40,10 +40,10 @@ export const studentLogin = publicProcedure
 
     const venue = await getVenueByToken(data.token);
     if (!venue) {
-      throw new TRPCError({ code: "BAD_REQUEST", message: "Codice prova non valido" });
+      throw apiError("BAD_REQUEST", "invalidToken");
     }
     if (venue.contestId !== data.contestId) {
-      throw new TRPCError({ code: "FORBIDDEN", message: "Codice prova non valido" });
+      throw apiError("FORBIDDEN", "invalidToken");
     }
 
     const contest = await getContest(venue.contestId);
@@ -54,10 +54,7 @@ export const studentLogin = publicProcedure
     const duplicated = await getStudentByHash(venue.id, userDataHash);
     if (duplicated) {
       if (duplicated.token !== data.token) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Hai già partecipato a questa gara",
-        });
+        throw apiError("FORBIDDEN", "alreadyParticipated");
       }
 
       await db.doc(`studentRestores/${uid}`).set({
@@ -114,19 +111,19 @@ export const studentSetLanguage = publicProcedure
 
     const claims = ctx.claims;
     if (claims?.role !== "student" || !claims.venueId || !claims.studentId) {
-      throw new TRPCError({ code: "UNAUTHORIZED", message: "Accesso non valido" });
+      throw apiError("UNAUTHORIZED", "invalidLogin");
     }
 
     const student = await getStudent(claims.venueId, claims.studentId);
     // A disabled student was deleted by the teacher: logging in again creates a new student.
     if (!student || student.uid !== claims.uid || student.disabled) {
-      throw new TRPCError({ code: "FORBIDDEN", message: "Studente non valido" });
+      throw apiError("FORBIDDEN", "invalidStudent");
     }
 
     // Contests stored before `languages` existed have only the default language.
     const contest = await getContest(student.contestId!);
     if (!(contest.languages ?? ["it"]).includes(data.language)) {
-      throw new TRPCError({ code: "BAD_REQUEST", message: "Lingua non valida" });
+      throw apiError("BAD_REQUEST", "invalidLanguage");
     }
 
     // The language can change at any time, also before the start and after the end of the

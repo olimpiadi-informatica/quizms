@@ -6,3 +6,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: @lingui/cli\n"
 "Language: it\n"
+
+#: packages/quizms-training/src/entry/provider.tsx
+msgid "Anonymous user"
+msgstr "Utente anonimo"
+
+#: packages/quizms-training/src/entry/statement.tsx
+msgid "Start"
+msgstr "Inizia"

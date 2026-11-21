@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo } from "react";
 
+import { Trans, useLingui } from "@lingui/react/macro";
 import {
   StudentFormField,
   Title,
@@ -72,6 +73,7 @@ type FormStudent = {
 } & Required<NonNullable<Student["userData"]>>;
 
 function StudentForm({ contests }: { contests: Contest[] }) {
+  const { t } = useLingui();
   const db = useDb();
   const ua = useUserAgent();
 
@@ -121,12 +123,14 @@ function StudentForm({ contests }: { contests: Contest[] }) {
         </NavbarContent>
       </Navbar>
       <Form defaultValue={defaultValue} onSubmit={submit} className="p-4 pb-8">
-        <h1 className="mb-2 text-xl font-bold">Accedi alla gara</h1>
+        <h1 className="mb-2 text-xl font-bold">
+          <Trans>Log in to the contest</Trans>
+        </h1>
         <SelectField
           field="contestId"
-          label="Gara"
+          label={t`Contest`}
           options={Object.fromEntries(contests.map((c) => [c.id, c.name]))}
-          placeholder="Seleziona una gara"
+          placeholder={t`Select a contest`}
         />
         {({ contestId }) => {
           const contest = contests.find((c) => c.id === contestId);
@@ -136,8 +140,10 @@ function StudentForm({ contests }: { contests: Contest[] }) {
               {contest.userData.map((field) => (
                 <StudentFormField key={field.name} field={field} />
               ))}
-              <TextField field="token" label="Codice prova" placeholder="aaaaa-bbbbb-ccccc" />
-              <SubmitButton>Inizia la prova</SubmitButton>
+              <TextField field="token" label={t`Test code`} placeholder="aaaaa-bbbbb-ccccc" />
+              <SubmitButton>
+                <Trans>Start the test</Trans>
+              </SubmitButton>
             </>
           );
         }}

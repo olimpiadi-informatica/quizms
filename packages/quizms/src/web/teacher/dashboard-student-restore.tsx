@@ -1,5 +1,6 @@
 import { Suspense, useMemo, useRef } from "react";
 
+import { Trans, useLingui } from "@lingui/react/macro";
 import { Form, Modal, NumberField, SubmitButton } from "@olinfo/react-components";
 import { groupBy, sortBy } from "lodash-es";
 import { Check, X } from "lucide-react";
@@ -17,7 +18,10 @@ function StudentRestoreEntry({
   approve: (studentRestore: StudentRestore) => Promise<void>;
   reject: (studentId: string) => Promise<void>;
 }) {
+  const { t } = useLingui();
   const modalRef = useRef<HTMLDialogElement>(null);
+  const name = studentRestore[0].name;
+  const surname = studentRestore[0].surname;
 
   const targetCodes = useMemo(
     () => new Set(studentRestore.map((request) => request.approvalCode)),
@@ -37,8 +41,8 @@ function StudentRestoreEntry({
 
   return (
     <tr>
-      <td>{studentRestore[0].surname}</td>
-      <td>{studentRestore[0].name}</td>
+      <td>{surname}</td>
+      <td>{name}</td>
       <td>
         <button type="button" className="btn btn-square btn-error btn-sm" onClick={rejectRequest}>
           <X />
@@ -51,19 +55,23 @@ function StudentRestoreEntry({
           onClick={() => modalRef.current?.showModal()}>
           <Check />
         </button>
-        <Modal ref={modalRef} title="Conferma">
+        <Modal ref={modalRef} title={t`Confirm`}>
           <p>
-            {studentRestore[0].name} {studentRestore[0].surname} sta cercando di accedere alla gara.
-            Per approvarlo, inserisci il codice di conferma che gli è stato mostrato.
+            <Trans>
+              {name} {surname} is trying to access the contest. To approve the request, enter the
+              confirmation code they were shown.
+            </Trans>
           </p>
           <Form onSubmit={approveRequest} className="!max-w-full">
             <NumberField
               field="approvalCode"
-              label="Codice di conferma"
-              placeholder="Inserisci codice"
+              label={t`Confirmation code`}
+              placeholder={t`Enter code`}
             />
             {({ approvalCode }) => (
-              <SubmitButton disabled={!targetCodes.has(approvalCode ?? -1)}>Approva</SubmitButton>
+              <SubmitButton disabled={!targetCodes.has(approvalCode ?? -1)}>
+                <Trans>Approve</Trans>
+              </SubmitButton>
             )}
           </Form>
         </Modal>
@@ -78,7 +86,9 @@ function StudentRestoreListInner() {
   if (!studentRestores?.length) {
     return (
       <tr>
-        <td>Nessuna richiesta.</td>
+        <td>
+          <Trans>No requests.</Trans>
+        </td>
       </tr>
     );
   }
@@ -100,24 +110,36 @@ export function StudentRestoreList({ isStarted }: { isStarted: boolean }) {
       <table className="table table-pin-rows">
         <thead>
           <tr>
-            <th>Cognome</th>
-            <th>Nome</th>
-            <th className="w-12">Rifiuta</th>
-            <th className="w-12">Approva</th>
+            <th>
+              <Trans>Surname</Trans>
+            </th>
+            <th>
+              <Trans>Name</Trans>
+            </th>
+            <th className="w-12">
+              <Trans>Reject</Trans>
+            </th>
+            <th className="w-12">
+              <Trans>Approve</Trans>
+            </th>
           </tr>
         </thead>
         <tbody>
           <Suspense
             fallback={
               <tr>
-                <td>Nessuna richiesta.</td>
+                <td>
+                  <Trans>No requests.</Trans>
+                </td>
               </tr>
             }>
             {isStarted ? (
               <StudentRestoreListInner />
             ) : (
               <tr>
-                <td>Nessuna richiesta.</td>
+                <td>
+                  <Trans>No requests.</Trans>
+                </td>
               </tr>
             )}
           </Suspense>

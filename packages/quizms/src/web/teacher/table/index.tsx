@@ -1,5 +1,6 @@
 import { Suspense, useMemo, useRef, useState } from "react";
 
+import { Trans, useLingui } from "@lingui/react/macro";
 import { Button, useIsAfter } from "@olinfo/react-components";
 import type { CellEditRequestEvent } from "ag-grid-community";
 import { cloneDeep, omit, setWith, sumBy } from "lodash-es";
@@ -36,7 +37,9 @@ export default function TeacherTable() {
           <div className="flex h-10 items-center gap-2 rounded-btn bg-primary px-3 text-primary-content">
             <UserCheck />
             <Counter />
-            <div className="hidden md:block"> studenti</div>
+            <div className="hidden md:block">
+              <Trans>students</Trans>
+            </div>
           </div>
         </Suspense>
         {contest.allowStudentImport && !frozen && (
@@ -44,21 +47,27 @@ export default function TeacherTable() {
             className="btn-primary btn-sm h-10"
             icon={Upload}
             onClick={() => importRef.current?.showModal()}>
-            <div className="hidden md:block">Importa studenti</div>
+            <div className="hidden md:block">
+              <Trans>Import students</Trans>
+            </div>
           </Button>
         )}
         <Button
           className="btn-primary btn-sm h-10"
           icon={Download}
           onClick={() => exportRef.current?.click()}>
-          <div className="hidden md:block">Esporta</div>
+          <div className="hidden md:block">
+            <Trans>Export</Trans>
+          </div>
         </Button>
         {!frozen && (
           <Button
             className="btn-primary btn-sm h-10"
             icon={FileCheck}
             onClick={() => finalizeRef.current?.showModal()}>
-            <div className="hidden md:block">Finalizza</div>
+            <div className="hidden md:block">
+              <Trans>Finalize</Trans>
+            </div>
           </Button>
         )}
         <FinalizeModal key={venue.id} ref={finalizeRef} />
@@ -67,7 +76,9 @@ export default function TeacherTable() {
             className="btn-primary btn-sm h-10"
             icon={Trash2}
             onClick={() => deleterRef.current?.showModal()}>
-            <div className="hidden md:block">Svuota</div>
+            <div className="hidden md:block">
+              <Trans>Delete all</Trans>
+            </div>
           </Button>
         )}
       </div>
@@ -82,17 +93,19 @@ export default function TeacherTable() {
 }
 
 function Counter() {
+  const { i18n } = useLingui();
   const { contest, variants } = useTeacher();
   const [students] = useTeacherStudents();
 
   return sumBy(students, (s) => {
-    return Number(!s.disabled && !isStudentIncomplete(s, contest, variants));
+    return Number(!s.disabled && !isStudentIncomplete(s, contest, variants, i18n));
   });
 }
 
 function Table({ frozen }: { frozen: boolean }) {
   const { contest, venue, variants } = useTeacher();
   const [students, setStudent] = useTeacherStudents();
+  const { i18n } = useLingui();
 
   const modalRef = useRef<HTMLDialogElement>(null);
   const [currentStudent, setCurrentStudent] = useState("");
@@ -118,8 +131,8 @@ function Table({ frozen }: { frozen: boolean }) {
   }
 
   const colDefs = useMemo(
-    () => columnDefinition(contest, variants, canViewScore(contest, venue), frozen),
-    [contest, variants, venue, frozen],
+    () => columnDefinition(contest, variants, canViewScore(contest, venue), frozen, i18n),
+    [contest, variants, venue, frozen, i18n],
   );
 
   const onCellEditRequest = async (ev: CellEditRequestEvent) => {

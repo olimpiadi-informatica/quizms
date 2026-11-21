@@ -3,12 +3,13 @@ import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { useLingui } from "~/i18n";
+import { i18n, useLingui } from "~/i18n";
 import { contestsLanguages } from "~/utils";
 import { makeContest, renderInStudentProvider } from "~/web/test-utils";
 
 import {
   pickUiLanguage,
+  UiLanguageProvider,
   UiLanguageRoot,
   UiLanguageScope,
   UiLanguageSelect,
@@ -86,6 +87,32 @@ describe("UiLanguageRoot", () => {
     localStorage.setItem("quizms_ui_language", "en");
     await act(() => render(<UiLanguageRoot>{<Locale />}</UiLanguageRoot>));
     expect(screen.getByText("locale: en")).toBeInTheDocument();
+  });
+});
+
+describe("UiLanguageProvider", () => {
+  it("gives the page the language of the innermost provider", async () => {
+    const { rerender } = await act(() =>
+      render(
+        <UiLanguageProvider language="it">
+          <UiLanguageProvider language="en">
+            <Locale />
+          </UiLanguageProvider>
+        </UiLanguageProvider>,
+      ),
+    );
+    expect(document.documentElement.lang).toBe("en");
+    expect(i18n.locale).toBe("en");
+
+    await act(() =>
+      rerender(
+        <UiLanguageProvider language="it">
+          <Locale />
+        </UiLanguageProvider>,
+      ),
+    );
+    expect(document.documentElement.lang).toBe("it");
+    expect(i18n.locale).toBe("it");
   });
 });
 

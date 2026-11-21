@@ -32,16 +32,16 @@ describe("parseLanguages", () => {
 
 describe("statementString", () => {
   it("uses Italian when no language is given", () => {
-    expect(statementString(undefined, "question")).toBe("Domanda");
+    expect(statementString(undefined, "blocklyMath")).toBe("Matematica");
   });
 
   it("uses the requested language", () => {
-    expect(statementString("it", "question")).toBe("Domanda");
-    expect(statementString("en", "question")).toBe("Question");
+    expect(statementString("it", "blocklyMath")).toBe("Matematica");
+    expect(statementString("en", "blocklyMath")).toBe("Math");
   });
 
   it("falls back to English for unknown languages", () => {
-    expect(statementString("fr", "variant")).toBe("Variant");
+    expect(statementString("fr", "blocklyLoops")).toBe("Loops");
   });
 
   it("lists the languages with a dictionary", () => {

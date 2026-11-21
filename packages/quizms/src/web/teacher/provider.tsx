@@ -1,5 +1,6 @@
 import { type ComponentType, lazy, useMemo } from "react";
 
+import { Trans } from "@lingui/react/macro";
 import { Link, Redirect, Route, Switch, useParams } from "wouter";
 
 import type { Announcement, Contest, Student, StudentRestore, Variant, Venue } from "~/models";
@@ -56,12 +57,14 @@ export function TeacherProvider({
           {venues.length === 0 ? (
             <div className="flex w-full grow flex-col items-center justify-center gap-4">
               <p className="text-2xl">
-                Non sei iscritto a nessuna gara, contatta l&apos;assistenza
+                <Trans>You are not registered for any contest, please contact support</Trans>
               </p>
             </div>
           ) : (
             <div className="flex w-full grow flex-col items-center justify-center gap-4">
-              <p className="text-2xl">Seleziona una gara</p>
+              <p className="text-2xl">
+                <Trans>Select a contest</Trans>
+              </p>
               <div className="flex flex-wrap justify-center gap-2">
                 {venues.map((p) => (
                   <Link key={p.id} className="btn btn-primary" href={`/${p.contestId}`}>

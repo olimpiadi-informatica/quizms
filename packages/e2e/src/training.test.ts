@@ -56,7 +56,9 @@ function problem(text: string) {
 
 async function start(query = "") {
   await page.goto(`${server!.url}/smoke${query}`);
-  await page.getByRole("button", { name: "Inizia" }).click();
+  // The UI is in the statement language.
+  const label = query.includes("lang=en") ? "Start" : "Inizia";
+  await page.getByRole("button", { name: label }).click();
 }
 
 describe("training website", () => {
@@ -110,7 +112,8 @@ describe("training website", () => {
 
     await expect.poll(() => problem("What is six times seven?").count()).toBe(1);
     expect(await page.getByText("Quanto fa sei per sette?").count()).toBe(0);
-    expect(await problem("six times seven").getByLabel("Risposta").inputValue()).toBe("42");
+    // The UI follows the statement language.
+    expect(await problem("six times seven").getByLabel("Answer").inputValue()).toBe("42");
     expect(new URL(page.url()).searchParams.get("lang")).toBe("en");
     // Fixed strings of the statement are translated too.
     expect(await page.getByRole("heading", { name: /^Question \d$/ }).count()).toBe(4);

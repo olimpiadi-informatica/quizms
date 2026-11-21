@@ -1,5 +1,6 @@
-import { describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 
+import { activateUiLocale } from "~/i18n";
 import type { Student } from "~/models/student";
 import {
   type Answer,
@@ -167,6 +168,9 @@ describe("displayAnswer", () => {
 });
 
 describe("validateAnswerValue", () => {
+  // The messages are in the UI language.
+  beforeAll(() => activateUiLocale("it"));
+
   it("accepts empty answers", () => {
     expect(validateAnswerValue(undefined, openNumber)).toBeNull();
     expect(validateAnswerValue("", openText)).toBeNull();

@@ -2,6 +2,7 @@
 
 import { type ComponentType, useCallback, useEffect, useRef, useState } from "react";
 
+import { useLingui } from "@lingui/react/macro";
 import { ErrorBoundary } from "@olinfo/quizms/components";
 import type { Answer } from "@olinfo/quizms/models";
 import { useStatementLanguageContext, useStudent } from "@olinfo/quizms/student";
@@ -47,6 +48,7 @@ export function Blockly<State>({
   if (!customBlocks) throw new Error("No custom blocks specified");
   if (!Visualizer) throw new Error("No visualizer specified");
 
+  const { t, i18n } = useLingui();
   const { student, setAnswer, terminated } = useStudent();
   const { id } = useProblem();
 
@@ -152,7 +154,7 @@ export function Blockly<State>({
   const evaluate = useCallback(async () => {
     const results = await Promise.all(
       testcases.map(async (testcase) => {
-        const interpreter = new BlocklyInterpreter<State>(code, customBlocks, testcase);
+        const interpreter = new BlocklyInterpreter<State>(code, customBlocks, testcase, i18n);
         for (let i = 0; await interpreter.step(); i++) {
           if (i % 64 === 0) {
             // wait 5 milliseconds to avoid blocking the main thread for too long
@@ -166,7 +168,7 @@ export function Blockly<State>({
     setTestcaseResults(results);
     setEvaluated(true);
     if (!terminated) await saveAnswer(results.map((r) => r.success));
-  }, [code, customBlocks, testcases, saveAnswer, terminated]);
+  }, [code, customBlocks, testcases, saveAnswer, terminated, i18n]);
 
   return (
     <div className={clsx(style.workspace, "not-prose")}>
@@ -181,7 +183,7 @@ export function Blockly<State>({
         <ErrorBoundary
           onError={(err: Error) => {
             if (process.env.NODE_ENV === "production") {
-              err.message = "Visualizzazione del livello fallita";
+              err.message = t`Failed to display the level`;
             }
           }}
           onReset={resetSelected}>
@@ -200,10 +202,7 @@ export function Blockly<State>({
             className={clsx("alert", selectedResult?.success ? "alert-success" : "alert-error")}>
             {selectedResult?.success ? <CircleCheck /> : <TriangleAlert />}
             <span>{alert}</span>
-            <button
-              type="button"
-              onClick={() => setAlert(undefined)}
-              aria-label="Nascondi messaggio">
+            <button type="button" onClick={() => setAlert(undefined)} aria-label={t`Hide message`}>
               <MessageSquareOff />
             </button>
           </div>

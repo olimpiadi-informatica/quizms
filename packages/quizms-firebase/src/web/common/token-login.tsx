@@ -1,5 +1,6 @@
 import { type ReactNode, useEffect, useMemo } from "react";
 
+import { Trans } from "@lingui/react/macro";
 import { Title, UiLanguageScope, UiLanguageSelect } from "@olinfo/quizms/components";
 import { contestsLanguages } from "@olinfo/quizms/utils";
 import {
@@ -70,10 +71,14 @@ export default function TokenLogin({ allowedRole, children }: Props) {
         </NavbarContent>
       </Navbar>
       <Form defaultValue={defaultCredential} onSubmit={signIn} className="p-4 pb-8">
-        <h1 className="mb-2 text-xl font-bold">Accedi alla gestione gara</h1>
+        <h1 className="mb-2 text-xl font-bold">
+          <Trans>Log in to contest management</Trans>
+        </h1>
         <UsernameField field="username" />
         <CurrentPasswordField field="password" />
-        <SubmitButton>Accedi</SubmitButton>
+        <SubmitButton>
+          <Trans>Log in</Trans>
+        </SubmitButton>
       </Form>
     </Scope>
   );

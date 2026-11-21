@@ -2,6 +2,7 @@
 
 import { Children, createContext, type ReactNode, use, useCallback, useId, useMemo } from "react";
 
+import { Trans, useLingui } from "@lingui/react/macro";
 import type { AnswerValue, Schema } from "@olinfo/quizms/models";
 import { useStudent } from "@olinfo/quizms/student";
 import clsx from "clsx";
@@ -106,6 +107,7 @@ export function MultipleResponseAnswer({ children }: { children: ReactNode }) {
 MultipleResponseAnswer.displayName = "MultipleResponseAnswer";
 
 export function MultipleChoiceAnswer({ children }: { children: ReactNode }) {
+  const { t } = useLingui();
   const { id } = useAnswer();
   const { id: problemId } = useProblem();
   const { student, setAnswer, terminated, schema } = useStudent();
@@ -160,7 +162,7 @@ export function MultipleChoiceAnswer({ children }: { children: ReactNode }) {
           )}
           type="button"
           onClick={() => submitAnswer(undefined)}
-          aria-label="Cancella risposta">
+          aria-label={t`Clear answer`}>
           <Trash2 size={20} />
         </button>
       </div>
@@ -174,6 +176,7 @@ export type OpenAnswerProps = {
 };
 
 export function OpenAnswer({ type = "openText" }: OpenAnswerProps) {
+  const { t } = useLingui();
   const { id: problemId } = useProblem();
   const { student, setAnswer, terminated, schema } = useStudent();
   const problemSchema = schema?.[problemId!];
@@ -205,12 +208,12 @@ export function OpenAnswer({ type = "openText" }: OpenAnswerProps) {
         )}
         onChange={(e) => submitAnswer(e.target.value.trim())}
         onWheel={(e) => e.currentTarget.blur()}
-        placeholder="Inserisci la risposta"
+        placeholder={t`Enter your answer`}
         maxLength={100}
         type={type}
         value={answerValue ?? ""}
         disabled={terminated}
-        aria-label="Risposta"
+        aria-label={t`Answer`}
       />
     </div>
   );
@@ -225,7 +228,9 @@ export function Explanation({ children }: { children: ReactNode }) {
     <div className="my-5 rounded-xl bg-base-200 print:hidden">
       <div className="collapse">
         <input type="checkbox" name={`show-solution-${id}`} />
-        <div className="collapse-title text-xl font-medium">Mostra soluzione</div>
+        <div className="collapse-title text-xl font-medium">
+          <Trans>Show solution</Trans>
+        </div>
         <div className="collapse-content">{children}</div>
       </div>
     </div>

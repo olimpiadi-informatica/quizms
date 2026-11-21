@@ -1,5 +1,6 @@
 import { type ReactNode, Suspense } from "react";
 
+import { Trans } from "@lingui/react/macro";
 import { ErrorBoundary, Loading, Title, UiLanguageSelect } from "@olinfo/quizms/components";
 import type { Contest } from "@olinfo/quizms/models";
 import {
@@ -54,10 +55,14 @@ export function AdminLayout({ name, contests, logout, children }: Props) {
               })}
             </NavbarSubmenu>
             <NavbarMenuItem>
-              <Link href={`/${contest.id}`}>Gestione gara</Link>
+              <Link href={`/${contest.id}`}>
+                <Trans>Contest management</Trans>
+              </Link>
             </NavbarMenuItem>
             <NavbarMenuItem>
-              <Link href={`/${contest.id}/schools`}>Gestione scuole</Link>
+              <Link href={`/${contest.id}/schools`}>
+                <Trans>School management</Trans>
+              </Link>
             </NavbarMenuItem>
           </NavbarMenu>
         )}
@@ -86,7 +91,7 @@ function UserDropdown({ name, logout }: { name: string; logout: () => Promise<vo
       <DropdownMenu>
         <DropdownItem>
           <Button className="flex justify-between gap-4" onClick={logout}>
-            Esci <LogOut size={20} />
+            <Trans>Log out</Trans> <LogOut size={20} />
           </Button>
         </DropdownItem>
       </DropdownMenu>

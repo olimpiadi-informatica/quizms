@@ -80,7 +80,8 @@ describe("BlocklyInterpreter", () => {
     const interpreter = await run(create("move([3]);"));
     expect(interpreter.result).toEqual({
       success: false,
-      message: "Il programma è terminato senza completare il livello",
+      // No UI language is active in this test: the message is the English source.
+      message: "The program ended without completing the level",
     });
   });
 

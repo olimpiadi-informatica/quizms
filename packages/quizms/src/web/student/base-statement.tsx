@@ -1,5 +1,6 @@
 import { type ReactNode, Suspense, useMemo } from "react";
 
+import { Trans } from "@lingui/react/macro";
 import { WithinTimeRange } from "@olinfo/react-components";
 import { addMilliseconds } from "date-fns";
 
@@ -17,10 +18,12 @@ export function BaseStatement({ children }: { children: ReactNode }) {
     <>
       <WithinTimeRange end={startingTime}>
         <div className="flex h-[50vh] items-center justify-center text-2xl">
-          La gara inizierà tra
-          <span className="px-2">
-            <Timer endTime={venue.participationWindow!.start} />
-          </span>
+          <Trans>
+            The contest will start in
+            <span className="px-2">
+              <Timer endTime={venue.participationWindow!.start} />
+            </span>
+          </Trans>
         </div>
       </WithinTimeRange>
       <WithinTimeRange start={startingTime}>

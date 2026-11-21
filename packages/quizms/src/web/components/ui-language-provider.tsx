@@ -11,13 +11,37 @@ import {
 
 import { I18nProvider } from "@lingui/react";
 
-import { loadUiLocale, uiLocales } from "~/i18n";
+import { type I18n, loadUiLocale, setActiveUiLocale, uiLocales } from "~/i18n";
+
+/** Depth of the enclosing `UiLanguageProvider`s. */
+const DepthContext = createContext(0);
+DepthContext.displayName = "UiLanguageDepthContext";
+
+type Mounted = { depth: number; i18n: I18n };
+const mounted = new Set<Mounted>();
+
+/**
+ * The page is in the language of the innermost mounted provider (effects run children first, so
+ * the last one to run is not necessarily the right one).
+ */
+function applyPageLanguage() {
+  let active: Mounted | undefined;
+  for (const entry of mounted) {
+    if (!active || entry.depth >= active.depth) active = entry;
+  }
+  if (!active) return;
+  document.documentElement.lang = active.i18n.locale;
+  setActiveUiLocale(active.i18n);
+}
 
 /**
  * Renders its children with the UI in `language` (a language of the contest).
  *
  * The first time a language is used it suspends while its messages load: change the language in
  * a transition to keep showing the current UI meanwhile.
+ *
+ * The innermost provider also sets the language of the page (`<html lang>`) and of the `t` macro
+ * used outside React.
  */
 export function UiLanguageProvider({
   language,
@@ -28,12 +52,23 @@ export function UiLanguageProvider({
 }) {
   // Suspends only the first time: the cached promise is then marked as fulfilled.
   const i18n = use(loadUiLocale(language));
+  const depth = use(DepthContext) + 1;
 
   useEffect(() => {
-    document.documentElement.lang = i18n.locale;
-  }, [i18n]);
+    const entry = { depth, i18n };
+    mounted.add(entry);
+    applyPageLanguage();
+    return () => {
+      mounted.delete(entry);
+      applyPageLanguage();
+    };
+  }, [depth, i18n]);
 
-  return <I18nProvider i18n={i18n}>{children}</I18nProvider>;
+  return (
+    <DepthContext.Provider value={depth}>
+      <I18nProvider i18n={i18n}>{children}</I18nProvider>
+    </DepthContext.Provider>
+  );
 }
 UiLanguageProvider.displayName = "UiLanguageProvider";
 

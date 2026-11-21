@@ -27,12 +27,6 @@ export function parseLanguages(value: string): string[] {
 
 const statementStrings = {
   it: {
-    question: "Domanda",
-    variant: "Variante",
-    missingTranslation: "Traduzione mancante",
-    variantCode: "Codice prova",
-    enter: "Inserisci",
-    blankPage: "Pagina lasciata volontariamente vuota",
     blocklyVariables: "Variabili",
     blocklyMath: "Matematica",
     blocklyLogic: "Logica",
@@ -41,12 +35,6 @@ const statementStrings = {
     blocklyCustom: "Esecuzione",
   },
   en: {
-    question: "Question",
-    variant: "Variant",
-    missingTranslation: "Missing translation",
-    variantCode: "Test code",
-    enter: "Enter",
-    blankPage: "This page intentionally left blank",
     blocklyVariables: "Variables",
     blocklyMath: "Math",
     blocklyLogic: "Logic",
@@ -62,7 +50,8 @@ export type StatementStringKey = keyof (typeof statementStrings)["it"];
 export const statementStringLanguages = Object.keys(statementStrings);
 
 /**
- * Returns a fixed string rendered inside statements (headings, PDF footer, ...).
+ * Returns a fixed string of Blockly (toolbox categories) in the statement language.
+ * TODO: move to the `.po` catalogs with the rest of Blockly's messages.
  *
  * - No language (single-language contests): Italian, for backward compatibility.
  * - A language without a dictionary entry: English.

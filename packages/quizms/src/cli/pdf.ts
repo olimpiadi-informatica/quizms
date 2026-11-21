@@ -2,12 +2,13 @@ import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 import { PDFDocument, type PDFPageDrawTextOptions, StandardFonts } from "@cantoo/pdf-lib";
+import { msg } from "@lingui/core/macro";
 import { range, uniq } from "lodash-es";
 import { type BrowserContext, chromium } from "playwright";
 
+import { loadUiLocale } from "~/i18n";
 import type { Contest } from "~/models";
 import type { VariantsConfig } from "~/models/variants-config";
-import { statementString } from "~/utils";
 import { withProgress } from "~/utils-node";
 
 /** A contest as printed by `quizms print`, with its languages already resolved. */
@@ -63,8 +64,9 @@ async function generatePdf(
     const page = pages[pageNum];
     const { width } = page.getSize();
 
-    // Single-language contests keep the original (Italian) footer.
-    const variantLabel = statementString(contest.multilingual ? language : undefined, "variant");
+    // In the statement language; single-language contests keep the original (Italian) footer.
+    const i18n = await loadUiLocale(contest.multilingual ? language : undefined);
+    const variantLabel = i18n._(msg`Variant`);
     page.drawText(contest.hasVariants ? `${variantLabel} ${variant}` : contest.name, {
       ...fontOptions,
       x: 15,

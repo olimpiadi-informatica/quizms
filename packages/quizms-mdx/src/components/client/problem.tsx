@@ -2,8 +2,7 @@
 
 import { createContext, type ReactNode, use } from "react";
 
-import { useStatementLanguageContext } from "@olinfo/quizms/student";
-import { statementString } from "@olinfo/quizms/utils";
+import { Trans } from "@lingui/react/macro";
 
 type ProblemContextProps = {
   id?: string;
@@ -29,14 +28,13 @@ Problem.displayName = "Problem";
 
 export function SubProblem({ subId, children }: { subId: number; children: ReactNode }) {
   const { id } = use(ProblemContext);
-  const language = useStatementLanguageContext();
   const newId = subId ? `${id}.${subId}` : `${id}`;
 
   return (
     <ProblemProvider id={newId}>
       <div className="break-inside-avoid">
         <h3>
-          {statementString(language, "question")} {newId}
+          <Trans>Question {newId}</Trans>
         </h3>
         {children}
       </div>

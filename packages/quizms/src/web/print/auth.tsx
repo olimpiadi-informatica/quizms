@@ -1,5 +1,6 @@
 import { Fragment, type ReactNode } from "react";
 
+import { Trans } from "@lingui/react/macro";
 import { Link, Route, Switch } from "wouter";
 
 import type { Contest, Student, Venue } from "~/models";
@@ -36,7 +37,9 @@ function VariantList({ contests }: { contests: (Contest & VariantsConfig)[] }) {
             <h3>{c.name}</h3>
             {c.variantIds.length > 0 && (
               <>
-                <h4>Varianti online</h4>
+                <h4>
+                  <Trans>Online variants</Trans>
+                </h4>
                 <ul className="columns-3 first:*:mt-0 lg:columns-4">
                   {c.variantIds.map((v) => (
                     <li key={v}>
@@ -48,7 +51,9 @@ function VariantList({ contests }: { contests: (Contest & VariantsConfig)[] }) {
             )}
             {c.pdfVariantIds.length > 0 && (
               <>
-                <h4>Varianti su carta</h4>
+                <h4>
+                  <Trans>Paper variants</Trans>
+                </h4>
                 <ul className="columns-3 first:*:mt-0 lg:columns-4">
                   {c.pdfVariantIds.map((v) => (
                     <li key={v}>

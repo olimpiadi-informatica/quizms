@@ -1,15 +1,15 @@
+import { useLingui } from "@lingui/react/macro";
 import { DateField, Form, NumberField, TextField } from "@olinfo/react-components";
 
 import type { Contest } from "~/models";
-import { normalizeName, statementString, strip, titleCase } from "~/utils";
+import { normalizeName, strip, titleCase } from "~/utils";
 import { useStudent } from "~/web/student/context";
-import { useStatementLanguageContext } from "~/web/student/language";
 
 export function StudentForm({ printLayout = false }: { printLayout?: boolean }) {
   const { contest, student } = useStudent();
-  // Printed booklets are in the statement language; the online form is part of the (Italian) UI.
-  const language = useStatementLanguageContext();
-  const variantLabel = printLayout ? statementString(language, "variantCode") : "Codice prova";
+  // In the UI language, which is the statement language (also in printed booklets).
+  const { t } = useLingui();
+  const variantLabel = t`Test code`;
 
   return (
     <Form
@@ -38,12 +38,12 @@ export function StudentFormField({
   field: Contest["userData"][number];
   printLayout?: boolean;
 }) {
-  const language = useStatementLanguageContext();
-  const enter = printLayout ? statementString(language, "enter") : "Inserisci";
+  const { t } = useLingui();
+  const label = field.label.toLowerCase();
   const commonProps = {
     field: field.name,
     label: field.label,
-    placeholder: `${enter} ${field.label.toLowerCase()}`,
+    placeholder: t`Enter ${label}`,
   };
   if (printLayout) {
     return <TextField {...commonProps} />;
