@@ -122,11 +122,6 @@ describe("training website", () => {
     await expect.poll(() => problem("Which of these numbers are even?").count()).toBe(1);
   });
 
-  // BUG: the training entry (packages/quizms-training/src/vite/entry.ts:30,35) always imports and
-  // renders the default `header.md`, ignoring `header.<lang>.md` translations, while `quizms dev`
-  // and the Firebase entry wrap the header in `<Localized>` (see `headerEntry` and
-  // `findHeaderTranslations` in @olinfo/quizms). Fix: build the header with `headerEntry` from
-  // `@olinfo/quizms` in the training entry as well.
   it("translates the contest header", async () => {
     await start("?lang=en");
     await expect

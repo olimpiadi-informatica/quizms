@@ -21,6 +21,7 @@ import { localizedFileName } from "~/utils";
 import {
   fatal,
   findHeaderTranslations,
+  headerEntry,
   info,
   isMultilingual,
   loadContests,
@@ -31,7 +32,6 @@ import {
 
 import generatePdfs, { type PrintContest } from "./pdf";
 import configs from "./vite/configs";
-import { headerEntry } from "./vite/header";
 
 export type PrintOptions = {
   port: number;
