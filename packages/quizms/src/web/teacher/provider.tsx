@@ -17,6 +17,12 @@ type TeacherProviderProps = {
   startContestWindow: (venueId: string) => Promise<void>;
   stopContestWindow: (venueId: string) => Promise<void>;
   finalizeVenue: (venueId: string) => Promise<void>;
+  importStudents: (venueId: string, students: Student[]) => Promise<unknown>;
+  setStudentsDisabled: (
+    venueId: string,
+    studentIds: string[],
+    disabled: boolean,
+  ) => Promise<unknown>;
   variants: Variant[];
   logout: () => Promise<void>;
   statementComponent: ComponentType<Record<never, never>>;
@@ -81,6 +87,8 @@ function ProviderInner({
   startContestWindow,
   stopContestWindow,
   finalizeVenue,
+  importStudents,
+  setStudentsDisabled,
   variants,
   logout,
   statementComponent: Statement,
@@ -109,6 +117,8 @@ function ProviderInner({
     startContestWindow,
     stopContestWindow,
     finalizeVenue,
+    importStudents,
+    setStudentsDisabled,
     variants: contestVariants,
     logout,
     getPdfStatements: ({ language }) =>

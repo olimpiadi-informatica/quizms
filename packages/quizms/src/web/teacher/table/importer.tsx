@@ -16,10 +16,10 @@ import {
   validateUserData,
 } from "~/models";
 import { randomId } from "~/utils";
-import { useTeacher, useTeacherStudents } from "~/web/teacher/context";
+import { useTeacher } from "~/web/teacher/context";
 
 export function ImportModal({ ref }: { ref: RefObject<HTMLDialogElement | null> }) {
-  const { contest, venue } = useTeacher();
+  const { contest, venue, variants, importStudents } = useTeacher();
 
   const labels = contest.userData.map((field) => field.label);
   if (contest.hasVariants) {
@@ -31,16 +31,13 @@ export function ImportModal({ ref }: { ref: RefObject<HTMLDialogElement | null> 
     .filter((field) => field.type === "date")
     .map((field) => field.label.toLowerCase());
 
-  const { variants } = useTeacher();
-  const [, setStudent] = useTeacherStudents();
-
   const [uploadCount, setUploadCount] = useState(0);
 
   const submit = async ({ file }: { file: File }) => {
     setUploadCount((count) => count + 1);
     try {
       const text = await file.text();
-      await importStudents(text, contest, variants, venue, setStudent);
+      await parseAndImportStudents(text, contest, variants, venue, importStudents);
     } finally {
       ref.current?.close();
     }
@@ -119,12 +116,12 @@ function columnName(index: number): string {
   return columnName(Math.floor(index / 26) - 1) + name;
 }
 
-async function importStudents(
+async function parseAndImportStudents(
   file: string,
   contest: Contest,
   variants: Record<string, Variant>,
   venue: Venue,
-  addStudent: (student: Student) => Promise<void>,
+  importStudents: (students: Student[]) => Promise<unknown>,
 ) {
   const records = parseCSV<string[]>(file, {
     skipEmptyLines: "greedy",
@@ -198,5 +195,5 @@ async function importStudents(
     }
     students.push(student);
   }
-  await Promise.all(students.map((student) => addStudent(student)));
+  await importStudents(students);
 }

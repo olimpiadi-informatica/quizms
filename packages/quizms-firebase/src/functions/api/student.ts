@@ -1,15 +1,20 @@
 import crypto, { hash } from "node:crypto";
 
 import {
+  answerSchema,
   type Contest,
   getNormalizedUserData,
   type Student,
   studentSchema,
 } from "@olinfo/quizms/models";
 import { TRPCError } from "@trpc/server";
-import { Timestamp } from "firebase-admin/firestore";
+import { addSeconds, isFuture, isPast } from "date-fns";
+import type { DecodedIdToken } from "firebase-admin/auth";
+import { FieldPath, Timestamp } from "firebase-admin/firestore";
 import * as logger from "firebase-functions/logger";
 import z from "zod";
+
+import { studentConverter } from "~/cli/utils/converters-admin";
 
 import { auth, db } from "../common";
 import {
@@ -17,18 +22,21 @@ import {
   getRandomVariant,
   getStudent,
   getStudentByHash,
+  getVariant,
+  getVenue,
   getVenueByToken,
 } from "./queries";
-import { publicProcedure } from "./trpc";
+import { docId } from "./schemas";
+import { publicProcedure, studentProcedure } from "./trpc";
 
-function studentHash(contest: Contest, userData: NonNullable<Student["userData"]>) {
+export function studentHash(contest: Contest, userData: NonNullable<Student["userData"]>) {
   return hash("sha256", getNormalizedUserData(contest, { userData }));
 }
 
 export const studentLogin = publicProcedure
   .input(
     z.strictObject({
-      contestId: z.string(),
+      contestId: docId,
       token: z.string(),
       userData: studentSchema.shape.userData.unwrap().required(),
       extraData: studentSchema.shape.extraData.unwrap(),
@@ -36,7 +44,7 @@ export const studentLogin = publicProcedure
   )
   .mutation(async (opts) => {
     const { input: data } = opts;
-    logger.info("Student login request received", { data });
+    logger.info("Student login request received", { contestId: data.contestId });
 
     const venue = await getVenueByToken(data.token);
     if (!venue) {
@@ -81,7 +89,7 @@ export const studentLogin = publicProcedure
 
     const variant = await getRandomVariant(data.contestId);
 
-    const studentRef = await db.collection(`venues/${venue.id}/students`).add({
+    const newStudent = await db.collection(`venues/${venue.id}/students`).add({
       uid,
       userData: data.userData,
       userDataHash,
@@ -100,28 +108,63 @@ export const studentLogin = publicProcedure
 
     return auth.createCustomToken(uid, {
       role: "student",
-      studentId: studentRef.id,
+      studentId: newStudent.id,
       venueId: venue.id,
       variantId: variant.id,
     });
   });
 
-export const studentSetLanguage = publicProcedure
+type StudentClaims = DecodedIdToken & { studentId: string; venueId: string };
+
+function studentRef(claims: StudentClaims) {
+  return db
+    .doc(`venues/${claims.venueId}/students/${claims.studentId}`)
+    .withConverter(studentConverter);
+}
+
+async function checkStudent(claims: StudentClaims, ongoing: boolean): Promise<Student> {
+  const student = await getStudent(claims.venueId, claims.studentId);
+  if (!student) {
+    throw new TRPCError({ code: "NOT_FOUND", message: "Studente non trovato" });
+  }
+
+  if (student.uid !== claims.uid) {
+    throw new TRPCError({ code: "FORBIDDEN", message: "Sessione non valida" });
+  }
+
+  if (student.disabled) {
+    throw new TRPCError({ code: "FORBIDDEN", message: "Utente disabilitato" });
+  }
+
+  if (ongoing) {
+    if (!student.participationWindow) {
+      throw new TRPCError({ code: "FORBIDDEN", message: "Gara non iniziata" });
+    }
+
+    if (isFuture(student.participationWindow.start)) {
+      throw new TRPCError({ code: "FORBIDDEN", message: "Gara non iniziata" });
+    }
+
+    if (isPast(addSeconds(student.participationWindow.end, 10))) {
+      throw new TRPCError({ code: "FORBIDDEN", message: "Gara già terminata" });
+    }
+
+    const venue = await getVenue(claims.venueId);
+    if (!venue?.token || venue.token !== student.token) {
+      throw new TRPCError({ code: "FORBIDDEN", message: "Gara non valida o terminata" });
+    }
+  }
+
+  return student;
+}
+
+export const studentSetLanguage = studentProcedure
   .input(z.strictObject({ language: z.string() }))
   .mutation(async (opts) => {
     const { input: data, ctx } = opts;
-    logger.info("Student set language received", { data, uid: ctx.claims?.uid });
+    logger.info("Student set language received", { data, uid: ctx.claims.uid });
 
-    const claims = ctx.claims;
-    if (claims?.role !== "student" || !claims.venueId || !claims.studentId) {
-      throw new TRPCError({ code: "UNAUTHORIZED", message: "Accesso non valido" });
-    }
-
-    const student = await getStudent(claims.venueId, claims.studentId);
-    // A disabled student was deleted by the teacher: logging in again creates a new student.
-    if (!student || student.uid !== claims.uid || student.disabled) {
-      throw new TRPCError({ code: "FORBIDDEN", message: "Studente non valido" });
-    }
+    const student = await checkStudent(ctx.claims, false);
 
     // Contests stored before `languages` existed have only the default language.
     const contest = await getContest(student.contestId!);
@@ -131,8 +174,68 @@ export const studentSetLanguage = publicProcedure
 
     // The language can change at any time, also before the start and after the end of the
     // contest: it doesn't affect the answers or the score.
-    await db.doc(`venues/${claims.venueId}/students/${claims.studentId}`).update({
+    await studentRef(ctx.claims).update({
       language: data.language,
       updatedAt: Timestamp.now(),
     });
   });
+
+export const studentSetAnswer = studentProcedure
+  .input(
+    z.strictObject({
+      problemId: z.string().min(1),
+      answer: answerSchema,
+    }),
+  )
+  .mutation(async (opts) => {
+    const { input: data, ctx } = opts;
+    const student = await checkStudent(ctx.claims, true);
+
+    // Validate the problem against the student's variant: this rejects unknown ids and answers
+    // of the wrong type, which would otherwise be stored and silently ignored by the scoring.
+    const variant = student.variantId ? await getVariant(student.variantId) : undefined;
+    const problem = variant?.schema[data.problemId];
+    if (!problem) {
+      throw new TRPCError({ code: "BAD_REQUEST", message: "Domanda non valida" });
+    }
+    if (problem.type !== data.answer.type) {
+      throw new TRPCError({ code: "BAD_REQUEST", message: "Tipo di risposta non valido" });
+    }
+
+    const answer = { ...data.answer };
+    if (answer.value === undefined) {
+      delete answer.value;
+    }
+
+    // Problem ids of sub-problems contain a dot (e.g. "3.1"): an explicit `FieldPath` keeps the id
+    // as a single key, while a dotted string would be split into nested fields.
+    await studentRef(ctx.claims).update(
+      new FieldPath("answers", data.problemId),
+      answer,
+      "updatedAt",
+      Timestamp.now(),
+    );
+  });
+
+export const studentSubmitContest = studentProcedure.mutation(async (opts) => {
+  const { ctx } = opts;
+  await checkStudent(ctx.claims, true);
+  const ref = studentRef(ctx.claims);
+
+  await db.runTransaction(async (t) => {
+    const student = (await t.get(ref)).data();
+    if (!student?.participationWindow) {
+      throw new TRPCError({ code: "FORBIDDEN", message: "Gara non iniziata" });
+    }
+
+    // Never extend the window: submitting during the grace period keeps the original end.
+    const now = new Date();
+    const currentEnd = student.participationWindow.end;
+    const newEnd = currentEnd < now ? currentEnd : now;
+
+    t.update(ref, {
+      "participationWindow.end": Timestamp.fromDate(newEnd),
+      updatedAt: Timestamp.now(),
+    });
+  });
+});
