@@ -113,7 +113,9 @@ describe("AnswerQueue", () => {
       .mockRejectedValueOnce(new TypeError("Failed to fetch"))
       .mockRejectedValueOnce(new TypeError("Failed to fetch"))
       .mockResolvedValueOnce(undefined);
-    const queue = new AnswerQueue(send, { isRetryable, baseDelay: 100, failingAfter: 2 });
+    const queue = new AnswerQueue(send, { isRetryable, baseDelay: 100, failingAfter: 250 });
+    const listener = vi.fn();
+    queue.subscribe(listener);
 
     queue.set("1", a(1));
     await vi.advanceTimersByTimeAsync(0);
@@ -122,16 +124,45 @@ describe("AnswerQueue", () => {
 
     await vi.advanceTimersByTimeAsync(100);
     expect(send).toHaveBeenCalledTimes(2);
-    expect(queue.status).toMatchObject({ saving: true, failing: true });
+    expect(queue.status).toMatchObject({ saving: true, failing: false });
 
-    await vi.advanceTimersByTimeAsync(199);
-    expect(send).toHaveBeenCalledTimes(2);
+    // Reported only once the failures have lasted `failingAfter`, with a notification.
+    await vi.advanceTimersByTimeAsync(149);
+    expect(queue.status.failing).toBe(false);
+    listener.mockClear();
     await vi.advanceTimersByTimeAsync(1);
+    expect(queue.status.failing).toBe(true);
+    expect(listener).toHaveBeenCalled();
+    expect(send).toHaveBeenCalledTimes(2);
+
+    await vi.advanceTimersByTimeAsync(50);
     expect(send).toHaveBeenCalledTimes(3);
 
     await queue.flush(1000);
     expect(queue.status).toEqual({ saving: false, failing: false, error: undefined });
     expect(queue.merge({})).toEqual({ "1": a(1) });
+  });
+
+  it("does not report short connection drops", async () => {
+    const send = vi
+      .fn()
+      .mockRejectedValueOnce(new TypeError("Failed to fetch"))
+      .mockResolvedValue(undefined);
+    const queue = new AnswerQueue(send, { isRetryable, baseDelay: 100, failingAfter: 250 });
+
+    queue.set("1", a(1));
+    await vi.advanceTimersByTimeAsync(100);
+    expect(send).toHaveBeenCalledTimes(2);
+
+    // The timer of the resolved streak must not report anything.
+    await vi.advanceTimersByTimeAsync(1000);
+    expect(queue.status.failing).toBe(false);
+
+    // A new streak starts counting from zero.
+    send.mockRejectedValueOnce(new TypeError("Failed to fetch"));
+    queue.set("1", a(2));
+    await vi.advanceTimersByTimeAsync(0);
+    expect(queue.status).toMatchObject({ saving: true, failing: false });
   });
 
   it("retries the newest answer if it changed while offline", async () => {

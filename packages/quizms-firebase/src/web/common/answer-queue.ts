@@ -9,7 +9,10 @@ type Options = {
   baseDelay?: number;
   /** Upper bound for the retry delay. */
   maxDelay?: number;
-  /** Number of consecutive failures after which `status.failing` becomes true. */
+  /**
+   * Milliseconds of consecutive transient failures after which `status.failing` becomes true, so
+   * that short connection drops are retried silently.
+   */
   failingAfter?: number;
   /** Whether a failed request should be retried. */
   isRetryable?: (err: unknown) => boolean;
@@ -18,7 +21,7 @@ type Options = {
 export type AnswerQueueStatus = {
   /** Some answers have not been saved yet. */
   saving: boolean;
-  /** The last requests failed with a transient error and are being retried. */
+  /** Requests have been failing with transient errors for a while and are being retried. */
   failing: boolean;
   /** An answer was rejected by the server and has been discarded. */
   error?: string;
@@ -62,6 +65,9 @@ export class AnswerQueue {
   private readonly unsent = new Map<string, Answer>();
   private running?: Promise<void>;
   private failures = 0;
+  /** When the current streak of transient failures started. */
+  private failingSince?: number;
+  private failingTimer?: ReturnType<typeof setTimeout>;
   private error?: string;
 
   private version = 0;
@@ -78,7 +84,7 @@ export class AnswerQueue {
   ) {
     this.baseDelay = options.baseDelay ?? 500;
     this.maxDelay = options.maxDelay ?? 10_000;
-    this.failingAfter = options.failingAfter ?? 2;
+    this.failingAfter = options.failingAfter ?? 15_000;
     this.isRetryable = options.isRetryable ?? isRetryableError;
   }
 
@@ -131,7 +137,8 @@ export class AnswerQueue {
   get status(): AnswerQueueStatus {
     return {
       saving: this.unsent.size > 0 || this.running !== undefined,
-      failing: this.failures >= this.failingAfter,
+      failing:
+        this.failingSince !== undefined && Date.now() - this.failingSince >= this.failingAfter,
       error: this.error,
     };
   }
@@ -148,6 +155,19 @@ export class AnswerQueue {
     for (const listener of this.listeners) listener();
   }
 
+  private startFailing() {
+    if (this.failingSince !== undefined) return;
+    this.failingSince = Date.now();
+    // Re-render when the failure becomes visible, even if no retry happens at that moment.
+    this.failingTimer = setTimeout(() => this.notify(), this.failingAfter);
+  }
+
+  private stopFailing() {
+    this.failures = 0;
+    this.failingSince = undefined;
+    clearTimeout(this.failingTimer);
+  }
+
   private async loop() {
     while (this.unsent.size > 0) {
       const [problemId, answer] = this.unsent.entries().next().value!;
@@ -155,7 +175,7 @@ export class AnswerQueue {
 
       try {
         await this.send(problemId, answer);
-        this.failures = 0;
+        this.stopFailing();
         const current = this.pending.get(problemId);
         if (current?.answer === answer) current.sent = true;
       } catch (err) {
@@ -163,6 +183,7 @@ export class AnswerQueue {
           // Put it back unless a newer answer to the same problem is already waiting.
           if (!this.unsent.has(problemId)) this.unsent.set(problemId, answer);
           this.failures++;
+          this.startFailing();
           this.notify();
           const delay = Math.min(this.baseDelay * 2 ** (this.failures - 1), this.maxDelay);
           await new Promise((resolve) => setTimeout(resolve, delay));
@@ -170,7 +191,7 @@ export class AnswerQueue {
         }
 
         // Rejected by the server (e.g. contest ended): show the server value again.
-        this.failures = 0;
+        this.stopFailing();
         if (this.pending.get(problemId)?.answer === answer) this.pending.delete(problemId);
         this.error = err instanceof Error ? err.message : String(err);
       }
