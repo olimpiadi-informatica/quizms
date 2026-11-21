@@ -4,6 +4,7 @@ import { createApp } from "@olinfo/quizms/entry";
 import { Route, Router, Switch } from "wouter";
 
 import "~/i18n";
+
 import { FirebaseLogin } from "~/web/common/base-login";
 
 import { FirebaseTitleProvider } from "./title";

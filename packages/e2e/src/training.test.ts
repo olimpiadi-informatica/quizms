@@ -124,9 +124,8 @@ describe("training website", () => {
     await start("?lang=en");
     await expect.poll(() => problem("Which of these numbers are even?").count()).toBe(1);
     // Texts of the configuration are translated too.
-    expect(
-      await page.getByRole("heading", { name: "End-to-end test contest" }).isVisible(),
-    ).toBe(true);
+    const heading = page.getByRole("heading", { name: "End-to-end test contest" });
+    expect(await heading.isVisible()).toBe(true);
   });
 
   it("translates the contest header", async () => {
