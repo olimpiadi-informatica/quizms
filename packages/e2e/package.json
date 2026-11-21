@@ -1,0 +1,14 @@
+{
+  "name": "@olinfo/quizms-e2e",
+  "private": true,
+  "type": "module",
+  "description": "End-to-end smoke tests for QuizMS, run against a fixture contest.",
+  "scripts": {
+    "test:e2e": "vitest run --config vitest.e2e.config.mjs"
+  },
+  "devDependencies": {
+    "@olinfo/quizms": "workspace:*",
+    "@olinfo/quizms-mdx": "workspace:*",
+    "@olinfo/quizms-training": "workspace:*"
+  }
+}

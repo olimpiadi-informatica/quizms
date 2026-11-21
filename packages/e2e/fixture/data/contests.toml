@@ -1,0 +1,18 @@
+[smoke]
+name = "Smoke test"
+long_name = "Gara di prova end-to-end"
+problem_ids = [1, 2, 3, 4]
+user_data = [
+    { name = "surname", label = "Cognome", type = "text" },
+    { name = "name", label = "Nome", type = "text" },
+]
+matching_rules = []
+score_visibility = "always"
+has_variants = true
+online_settings = {
+    contest_window = { start = 2025-01-01T00:00:00, end = 2099-01-01T00:00:00 },
+    duration = 30,
+    allow_restart = true,
+}
+has_offline = false
+languages = ["it", "en"]

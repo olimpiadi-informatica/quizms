@@ -18,7 +18,9 @@
     "build": "vite build",
     "watch": "vite build --watch",
     "lint": "biome check --write && tsc --noEmit",
-    "prepack": "pnpm build"
+    "prepack": "pnpm build",
+    "test": "vitest run",
+    "test:emulator": "firebase emulators:exec --config firebase.emulator.json --project demo-quizms --only firestore,auth,storage \"vitest run --config vitest.emulator.config.mjs\""
   },
   "bin": {
     "quizms-firebase": "bin/bin.js"
@@ -87,6 +89,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.6",
+    "@firebase/rules-unit-testing": "^5.0.2",
     "@google-cloud/storage": "^7.21.0",
     "@types/react": "^19.2.18",
     "@types/wicg-file-system-access": "^2023.10.7",

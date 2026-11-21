@@ -1,0 +1,6 @@
+node_modules/
+# Temporary copies of the fixture contest created by the tests
+.tmp/
+# Output of the QuizMS CLI, if run by hand inside the fixture
+fixture/.quizms/
+fixture/variants/

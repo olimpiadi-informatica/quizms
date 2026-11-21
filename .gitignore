@@ -143,3 +143,6 @@ dist
 
 # MacOS hidden files
 .DS_Store
+
+# Vitest
+.vitest/
