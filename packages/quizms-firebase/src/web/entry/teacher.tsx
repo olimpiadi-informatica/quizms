@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { createContext, use, useCallback } from "react";
 
 import type { Student, StudentRestore } from "@olinfo/quizms/models";
 import { TeacherProvider } from "@olinfo/quizms/teacher";
@@ -27,9 +27,13 @@ import {
 } from "~/web/common/converters";
 import TokenLogin from "~/web/common/token-login";
 import { useWebsite } from "~/web/common/website";
-import { useAuth, useCollection, useDocument } from "~/web/hooks";
+import { useCollection, useDocument } from "~/web/hooks";
 
 import { FirebaseStatement } from "./student-statement";
+
+// `useStudents` and `useStudentRestores` are called by `TeacherProvider` with the venue only:
+// they get the logged in teacher from this context.
+const TeacherUserContext = createContext<User>(null as unknown as User);
 
 export default function TeacherEntry() {
   return (
@@ -57,39 +61,42 @@ function TeacherInner({ user, schoolId }: { user: User; schoolId: string }) {
   }, [db]);
 
   return (
-    <TeacherProvider
-      name={venues[0]?.name ?? schoolId}
-      venues={venues}
-      contests={contests}
-      startContestWindow={(...args) => startContestWindow(user, ...args)}
-      stopContestWindow={(...args) => stopContestWindow(user, ...args)}
-      finalizeVenue={(...args) => finalizeVenue(user, ...args)}
-      importStudents={(venueId, students) =>
-        teacherImportStudents(user, {
-          venueId,
-          students: students.map((s) => ({
-            id: s.id,
-            userData: s.userData as any,
-            variantId: s.variantId,
-            answers: s.answers,
-            absent: s.absent,
-            extraData: s.extraData,
-          })),
-        })
-      }
-      setStudentsDisabled={(venueId, studentIds, disabled) =>
-        teacherSetStudentsDisabled(user, { venueId, studentIds, disabled })
-      }
-      variants={variants}
-      logout={logout}
-      statementComponent={() => <FirebaseStatement />}
-      getPdfStatements={(contestId, variantIds, fileName) =>
-        getPdfStatements(db, contestId, variantIds, fileName)
-      }
-      useAnnouncements={useAnnouncements}
-      useStudents={useStudents}
-      useStudentRestores={useStudentRestores}
-    />
+    <TeacherUserContext value={user}>
+      <TeacherProvider
+        name={venues[0]?.name ?? schoolId}
+        venues={venues}
+        contests={contests}
+        startContestWindow={(...args) => startContestWindow(user, ...args)}
+        stopContestWindow={(...args) => stopContestWindow(user, ...args)}
+        finalizeVenue={(...args) => finalizeVenue(user, ...args)}
+        importStudents={(venueId, students) =>
+          teacherImportStudents(user, {
+            venueId,
+            students: students.map((s) => ({
+              id: s.id,
+              // Rows without a name or surname are rejected by the API.
+              userData: s.userData as Required<NonNullable<Student["userData"]>>,
+              variantId: s.variantId,
+              answers: s.answers,
+              absent: s.absent,
+              extraData: s.extraData,
+            })),
+          })
+        }
+        setStudentsDisabled={(venueId, studentIds, disabled) =>
+          teacherSetStudentsDisabled(user, { venueId, studentIds, disabled })
+        }
+        variants={variants}
+        logout={logout}
+        statementComponent={() => <FirebaseStatement />}
+        getPdfStatements={(contestId, variantIds, fileName) =>
+          getPdfStatements(db, contestId, variantIds, fileName)
+        }
+        useAnnouncements={useAnnouncements}
+        useStudents={useStudents}
+        useStudentRestores={useStudentRestores}
+      />
+    </TeacherUserContext>
   );
 }
 
@@ -121,8 +128,7 @@ function useAnnouncements(contestId: string) {
 }
 
 function useStudents(venueId: string) {
-  const auth = useAuth("teacher");
-  const user = auth!.user;
+  const user = use(TeacherUserContext);
 
   const [students, setStudentOptimistic] = useCollection(
     `venues/${venueId}/students`,
@@ -161,8 +167,7 @@ function useStudentRestores(
   (request: StudentRestore) => Promise<void>,
   (studentId: string) => Promise<void>,
 ] {
-  const auth = useAuth("teacher");
-  const user = auth!.user;
+  const user = use(TeacherUserContext);
 
   const [venue] = useDocument("venues", venueId, venueConverter);
 

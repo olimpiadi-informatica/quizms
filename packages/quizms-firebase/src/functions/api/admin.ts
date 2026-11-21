@@ -12,7 +12,7 @@ import { announcementConverter } from "~/cli/utils/converters-admin";
 import { auth, db } from "../common";
 import { getContest, getUser, getVenue } from "./queries";
 import { docId } from "./schemas";
-import { publicProcedure } from "./trpc";
+import { adminProcedure, publicProcedure } from "./trpc";
 
 export const adminLogin = publicProcedure
   .input(
@@ -23,7 +23,7 @@ export const adminLogin = publicProcedure
   )
   .mutation(async (opts) => {
     const { input: data } = opts;
-    logger.info("Admin login request received", { data });
+    logger.info("Admin login request received", { username: data.username });
 
     const user = await getUser(data.username);
     if (!user) {
@@ -39,7 +39,7 @@ export const adminLogin = publicProcedure
     return auth.createCustomToken(crypto.randomUUID(), { role: "admin" });
   });
 
-export const adminUpdateContestSettings = publicProcedure
+export const adminUpdateContestSettings = adminProcedure
   .input(
     z.strictObject({
       contestId: docId,
@@ -50,12 +50,8 @@ export const adminUpdateContestSettings = publicProcedure
     }),
   )
   .mutation(async (opts) => {
-    const { input: data, ctx } = opts;
+    const { input: data } = opts;
     logger.info("Admin update contest settings received", { data });
-
-    if (ctx.claims?.role !== "admin") {
-      throw new TRPCError({ code: "UNAUTHORIZED", message: "Non autorizzato" });
-    }
 
     const contest = await getContest(data.contestId);
     if (!contest) {
@@ -72,7 +68,7 @@ export const adminUpdateContestSettings = publicProcedure
     await db.doc(`contests/${data.contestId}`).update(updateData);
   });
 
-export const adminSetVenueFinalized = publicProcedure
+export const adminSetVenueFinalized = adminProcedure
   .input(
     z.strictObject({
       venueId: docId,
@@ -80,12 +76,8 @@ export const adminSetVenueFinalized = publicProcedure
     }),
   )
   .mutation(async (opts) => {
-    const { input: data, ctx } = opts;
+    const { input: data } = opts;
     logger.info("Admin set venue finalized received", { data });
-
-    if (ctx.claims?.role !== "admin") {
-      throw new TRPCError({ code: "UNAUTHORIZED", message: "Non autorizzato" });
-    }
 
     const venue = await getVenue(data.venueId);
     if (!venue) {
@@ -95,7 +87,7 @@ export const adminSetVenueFinalized = publicProcedure
     await db.doc(`venues/${data.venueId}`).update({ finalized: data.finalized });
   });
 
-export const adminCreateAnnouncement = publicProcedure
+export const adminCreateAnnouncement = adminProcedure
   .input(
     z.strictObject({
       contestId: docId,
@@ -105,12 +97,8 @@ export const adminCreateAnnouncement = publicProcedure
     }),
   )
   .mutation(async (opts) => {
-    const { input: data, ctx } = opts;
+    const { input: data } = opts;
     logger.info("Admin create announcement received", { data });
-
-    if (ctx.claims?.role !== "admin") {
-      throw new TRPCError({ code: "UNAUTHORIZED", message: "Non autorizzato" });
-    }
 
     const contest = await getContest(data.contestId);
     if (!contest) {

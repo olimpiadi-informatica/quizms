@@ -27,7 +27,7 @@ import {
   getVenueByToken,
 } from "./queries";
 import { docId } from "./schemas";
-import { publicProcedure } from "./trpc";
+import { publicProcedure, studentProcedure } from "./trpc";
 
 export function studentHash(contest: Contest, userData: NonNullable<Student["userData"]>) {
   return hash("sha256", getNormalizedUserData(contest, { userData }));
@@ -44,7 +44,7 @@ export const studentLogin = publicProcedure
   )
   .mutation(async (opts) => {
     const { input: data } = opts;
-    logger.info("Student login request received", { data });
+    logger.info("Student login request received", { contestId: data.contestId });
 
     const venue = await getVenueByToken(data.token);
     if (!venue) {
@@ -89,7 +89,7 @@ export const studentLogin = publicProcedure
 
     const variant = await getRandomVariant(data.contestId);
 
-    const studentRef = await db.collection(`venues/${venue.id}/students`).add({
+    const newStudent = await db.collection(`venues/${venue.id}/students`).add({
       uid,
       userData: data.userData,
       userDataHash,
@@ -108,21 +108,21 @@ export const studentLogin = publicProcedure
 
     return auth.createCustomToken(uid, {
       role: "student",
-      studentId: studentRef.id,
+      studentId: newStudent.id,
       venueId: venue.id,
       variantId: variant.id,
     });
   });
 
-async function checkStudent(claims: DecodedIdToken | undefined, ongoing = true): Promise<Student> {
-  if (
-    claims?.role !== "student" ||
-    typeof claims.studentId !== "string" ||
-    typeof claims.venueId !== "string"
-  ) {
-    throw new TRPCError({ code: "UNAUTHORIZED", message: "Non autorizzato" });
-  }
+type StudentClaims = DecodedIdToken & { studentId: string; venueId: string };
 
+function studentRef(claims: StudentClaims) {
+  return db
+    .doc(`venues/${claims.venueId}/students/${claims.studentId}`)
+    .withConverter(studentConverter);
+}
+
+async function checkStudent(claims: StudentClaims, ongoing: boolean): Promise<Student> {
   const student = await getStudent(claims.venueId, claims.studentId);
   if (!student) {
     throw new TRPCError({ code: "NOT_FOUND", message: "Studente non trovato" });
@@ -158,14 +158,13 @@ async function checkStudent(claims: DecodedIdToken | undefined, ongoing = true):
   return student;
 }
 
-export const studentSetLanguage = publicProcedure
+export const studentSetLanguage = studentProcedure
   .input(z.strictObject({ language: z.string() }))
   .mutation(async (opts) => {
     const { input: data, ctx } = opts;
-    logger.info("Student set language received", { data, uid: ctx.claims?.uid });
+    logger.info("Student set language received", { data, uid: ctx.claims.uid });
 
-    const claims = ctx.claims;
-    const student = await checkStudent(claims, false);
+    const student = await checkStudent(ctx.claims, false);
 
     // Contests stored before `languages` existed have only the default language.
     const contest = await getContest(student.contestId!);
@@ -175,13 +174,13 @@ export const studentSetLanguage = publicProcedure
 
     // The language can change at any time, also before the start and after the end of the
     // contest: it doesn't affect the answers or the score.
-    await db.doc(`venues/${claims!.venueId}/students/${claims!.studentId}`).update({
+    await studentRef(ctx.claims).update({
       language: data.language,
       updatedAt: Timestamp.now(),
     });
   });
 
-export const studentSetAnswer = publicProcedure
+export const studentSetAnswer = studentProcedure
   .input(
     z.strictObject({
       problemId: z.string().min(1),
@@ -210,17 +209,18 @@ export const studentSetAnswer = publicProcedure
 
     // Problem ids of sub-problems contain a dot (e.g. "3.1"): an explicit `FieldPath` keeps the id
     // as a single key, while a dotted string would be split into nested fields.
-    await db
-      .doc(`venues/${ctx.claims!.venueId}/students/${student.id}`)
-      .update(new FieldPath("answers", data.problemId), answer, "updatedAt", Timestamp.now());
+    await studentRef(ctx.claims).update(
+      new FieldPath("answers", data.problemId),
+      answer,
+      "updatedAt",
+      Timestamp.now(),
+    );
   });
 
-export const studentSubmitContest = publicProcedure.mutation(async (opts) => {
+export const studentSubmitContest = studentProcedure.mutation(async (opts) => {
   const { ctx } = opts;
-  const { id } = await checkStudent(ctx.claims, true);
-  const ref = db
-    .doc(`venues/${ctx.claims!.venueId}/students/${id}`)
-    .withConverter(studentConverter);
+  await checkStudent(ctx.claims, true);
+  const ref = studentRef(ctx.claims);
 
   await db.runTransaction(async (t) => {
     const student = (await t.get(ref)).data();

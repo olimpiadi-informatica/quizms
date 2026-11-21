@@ -121,7 +121,7 @@ async function parseAndImportStudents(
   contest: Contest,
   variants: Record<string, Variant>,
   venue: Venue,
-  importStudents: (students: Student[]) => Promise<any>,
+  importStudents: (students: Student[]) => Promise<unknown>,
 ) {
   const records = parseCSV<string[]>(file, {
     skipEmptyLines: "greedy",

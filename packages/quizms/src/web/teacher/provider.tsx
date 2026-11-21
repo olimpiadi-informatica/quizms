@@ -17,7 +17,7 @@ type TeacherProviderProps = {
   startContestWindow: (venueId: string) => Promise<void>;
   stopContestWindow: (venueId: string) => Promise<void>;
   finalizeVenue: (venueId: string) => Promise<void>;
-  importStudents: (venueId: string, students: Student[]) => Promise<any>;
+  importStudents: (venueId: string, students: Student[]) => Promise<unknown>;
   setStudentsDisabled: (
     venueId: string,
     studentIds: string[],

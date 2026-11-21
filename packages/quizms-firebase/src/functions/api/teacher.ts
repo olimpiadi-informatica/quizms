@@ -11,7 +11,6 @@ import {
 import { randomToken } from "@olinfo/quizms/utils";
 import { TRPCError } from "@trpc/server";
 import { addMinutes, addSeconds, isFuture, isPast, roundToNearestMinutes } from "date-fns";
-import type { DecodedIdToken } from "firebase-admin/auth";
 import { type DocumentSnapshot, FieldValue, Timestamp } from "firebase-admin/firestore";
 import { getFunctions } from "firebase-admin/functions";
 import * as logger from "firebase-functions/logger";
@@ -36,7 +35,7 @@ import {
 } from "./queries";
 import { docId } from "./schemas";
 import { studentHash } from "./student";
-import { publicProcedure } from "./trpc";
+import { publicProcedure, teacherProcedure } from "./trpc";
 
 const region = defineString("QUIZMS_REGION");
 
@@ -49,7 +48,7 @@ export const teacherLogin = publicProcedure
   )
   .mutation(async (opts) => {
     const { input: data } = opts;
-    logger.info("Teacher login request received", { data });
+    logger.info("Teacher login request received", { username: data.username });
 
     const user = await getUser(data.username);
     if (!user) {
@@ -71,19 +70,15 @@ export const teacherLogin = publicProcedure
 
 async function checkVenue(
   venueId: string,
-  claims: DecodedIdToken | undefined,
+  schoolId: string,
   onlineOnly: boolean,
 ): Promise<[Venue, Contest]> {
-  if (claims?.role !== "teacher" || typeof claims.schoolId !== "string") {
-    throw new TRPCError({ code: "UNAUTHORIZED", message: "Non autorizzato" });
-  }
-
   const venue = await getVenue(venueId);
   if (!venue) {
     throw new TRPCError({ code: "BAD_REQUEST", message: "Gara non valida" });
   }
 
-  if (venue.schoolId !== claims.schoolId) {
+  if (venue.schoolId !== schoolId) {
     throw new TRPCError({ code: "FORBIDDEN", message: "Gara non valida" });
   }
 
@@ -112,13 +107,13 @@ async function generateToken() {
   }
 }
 
-export const teacherStartContestWindow = publicProcedure
+export const teacherStartContestWindow = teacherProcedure
   .input(z.strictObject({ venueId: docId }))
   .mutation(async (opts) => {
     const { input: data, ctx } = opts;
     logger.info("Teacher start venue received", { data });
 
-    const [venue, contest] = await checkVenue(data.venueId, ctx.claims, true);
+    const [venue, contest] = await checkVenue(data.venueId, ctx.claims.schoolId, true);
 
     if (
       venue.participationWindow &&
@@ -159,13 +154,13 @@ export const teacherStartContestWindow = publicProcedure
     }
   });
 
-export const teacherStopContestWindow = publicProcedure
+export const teacherStopContestWindow = teacherProcedure
   .input(z.strictObject({ venueId: docId }))
   .mutation(async (opts) => {
     const { input: data, ctx } = opts;
     logger.info("Teacher stop venue received", { data });
 
-    const [venue] = await checkVenue(data.venueId, ctx.claims, true);
+    const [venue] = await checkVenue(data.venueId, ctx.claims.schoolId, true);
 
     const { participationWindow, token } = venue;
     if (!participationWindow || !token) {
@@ -203,13 +198,13 @@ async function revokeTokens(students: Student[]) {
   );
 }
 
-export const teacherFinalizeVenue = publicProcedure
+export const teacherFinalizeVenue = teacherProcedure
   .input(z.strictObject({ venueId: docId }))
   .mutation(async (opts) => {
     const { input: data, ctx } = opts;
     logger.info("Teacher finalize venue received", { data });
 
-    const [venue] = await checkVenue(data.venueId, ctx.claims, false);
+    const [venue] = await checkVenue(data.venueId, ctx.claims.schoolId, false);
 
     await db.doc(`venues/${venue.id}`).update({ finalized: true });
   });
@@ -235,7 +230,7 @@ function studentRef(venueId: string, studentId: string) {
   return db.doc(`venues/${venueId}/students/${studentId}`).withConverter(studentConverter);
 }
 
-export const teacherApproveStudentRestore = publicProcedure
+export const teacherApproveStudentRestore = teacherProcedure
   .input(
     z.strictObject({
       venueId: docId,
@@ -246,7 +241,7 @@ export const teacherApproveStudentRestore = publicProcedure
     const { input: data, ctx } = opts;
     logger.info("Teacher approve student restore received", { data });
 
-    const [venue] = await checkVenue(data.venueId, ctx.claims, false);
+    const [venue] = await checkVenue(data.venueId, ctx.claims.schoolId, false);
 
     const previousUid = await db.runTransaction(async (t) => {
       const restore = (
@@ -291,19 +286,18 @@ export const teacherApproveStudentRestore = publicProcedure
     }
   });
 
-export const teacherRejectStudentRestore = publicProcedure
+export const teacherRejectStudentRestore = teacherProcedure
   .input(
     z.strictObject({
       venueId: docId,
       studentId: docId,
-      studentRestoreId: docId.optional(),
     }),
   )
   .mutation(async (opts) => {
     const { input: data, ctx } = opts;
     logger.info("Teacher reject student restore received", { data });
 
-    const [venue] = await checkVenue(data.venueId, ctx.claims, false);
+    const [venue] = await checkVenue(data.venueId, ctx.claims.schoolId, false);
 
     const restores = await db
       .collection("studentRestores")
@@ -316,10 +310,7 @@ export const teacherRejectStudentRestore = publicProcedure
     let hasUpdates = false;
 
     for (const doc of restores.docs) {
-      if (
-        doc.data().status === "pending" &&
-        (!data.studentRestoreId || doc.id === data.studentRestoreId)
-      ) {
+      if (doc.data().status === "pending") {
         batch.update(doc.ref, { status: "revoked" });
         hasUpdates = true;
       }
@@ -330,7 +321,7 @@ export const teacherRejectStudentRestore = publicProcedure
     }
   });
 
-export const teacherUpdateStudent = publicProcedure
+export const teacherUpdateStudent = teacherProcedure
   .input(
     z.strictObject({
       venueId: docId,
@@ -352,7 +343,7 @@ export const teacherUpdateStudent = publicProcedure
       studentId: data.student.id,
     });
 
-    const [{ id: venueId }, contest] = await checkVenue(data.venueId, ctx.claims, false);
+    const [{ id: venueId }, contest] = await checkVenue(data.venueId, ctx.claims.schoolId, false);
     const variants = await getContestVariants(contest.id);
 
     const { score, revokeUid } = await db.runTransaction(async (t) => {
@@ -455,7 +446,7 @@ export const teacherUpdateStudent = publicProcedure
     return { id: data.student.id, score };
   });
 
-export const teacherSetStudentsDisabled = publicProcedure
+export const teacherSetStudentsDisabled = teacherProcedure
   .input(
     z.strictObject({
       venueId: docId,
@@ -471,7 +462,7 @@ export const teacherSetStudentsDisabled = publicProcedure
       disabled: data.disabled,
     });
 
-    const [venue, contest] = await checkVenue(data.venueId, ctx.claims, false);
+    const [venue, contest] = await checkVenue(data.venueId, ctx.claims.schoolId, false);
     assertVenueEditable(venue);
 
     if (data.disabled && !contest.allowStudentDelete) {
@@ -516,7 +507,7 @@ export const teacherSetStudentsDisabled = publicProcedure
     return { count: students.length };
   });
 
-export const teacherImportStudents = publicProcedure
+export const teacherImportStudents = teacherProcedure
   .input(
     z.strictObject({
       venueId: docId,
@@ -542,7 +533,7 @@ export const teacherImportStudents = publicProcedure
       count: data.students.length,
     });
 
-    const [venue, contest] = await checkVenue(data.venueId, ctx.claims, false);
+    const [venue, contest] = await checkVenue(data.venueId, ctx.claims.schoolId, false);
     assertVenueEditable(venue);
 
     if (!contest.allowStudentImport) {

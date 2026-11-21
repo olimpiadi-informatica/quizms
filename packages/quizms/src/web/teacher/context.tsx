@@ -20,7 +20,7 @@ export type TeacherContextProps = {
   /** Funzione per finalizzare i risultati della gara */
   finalizeVenue: (venueId: string) => Promise<void>;
   /** Funzione per importare studenti in blocco */
-  importStudents: (venueId: string, students: Student[]) => Promise<any>;
+  importStudents: (venueId: string, students: Student[]) => Promise<unknown>;
   /** Funzione per disabilitare o riabilitare studenti in blocco */
   setStudentsDisabled: (
     venueId: string,

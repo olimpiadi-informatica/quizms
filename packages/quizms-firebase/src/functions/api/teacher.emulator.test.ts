@@ -483,7 +483,7 @@ describe("teacherApproveStudentRestore", () => {
 });
 
 describe("teacherRejectStudentRestore", () => {
-  it("revokes all pending restores for the student when studentRestoreId is omitted", async () => {
+  it("revokes all pending restores for the student", async () => {
     await seed(db, {
       studentRestores: [
         makeStudentRestore({ id: "r1", studentId: "s1", venueId: "venue", status: "pending" }),
@@ -497,24 +497,6 @@ describe("teacherRejectStudentRestore", () => {
     expect((await getStudentRestore("r1"))?.status).toBe("revoked");
     expect((await getStudentRestore("r2"))?.status).toBe("revoked");
     expect((await getStudentRestore("r3"))?.status).toBe("approved");
-  });
-
-  it("revokes only the specified restore when studentRestoreId is provided", async () => {
-    await seed(db, {
-      studentRestores: [
-        makeStudentRestore({ id: "r1", studentId: "s1", venueId: "venue", status: "pending" }),
-        makeStudentRestore({ id: "r2", studentId: "s1", venueId: "venue", status: "pending" }),
-      ],
-    });
-
-    await teacher.teacherRejectStudentRestore({
-      venueId: "venue",
-      studentId: "s1",
-      studentRestoreId: "r1",
-    });
-
-    expect((await getStudentRestore("r1"))?.status).toBe("revoked");
-    expect((await getStudentRestore("r2"))?.status).toBe("pending");
   });
 
   it("rejects unauthorized callers", async () => {
