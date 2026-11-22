@@ -77,7 +77,7 @@ L'intestazione della gara (`header` in `variants.toml`, per esempio `header.md`)
 
 ## Generare i testi
 
-`quizms variants` genera tutte le lingue. Per ogni variante scrive `statement.<lingua>.txt`, più `statement.txt` per la lingua predefinita. `quizms print` scrive `statement.<lingua>.pdf`, più `statement.pdf` per la lingua predefinita.
+`quizms variants` genera tutte le lingue. Per ogni variante scrive `statement.<lingua>.txt`. `quizms print` scrive `statement.<lingua>.pdf` solo per le varianti PDF.
 
 Entrambi i comandi accettano `--languages` per generare solo alcune lingue, al posto di quelle configurate. La prima è la lingua predefinita di quell'esecuzione:
 

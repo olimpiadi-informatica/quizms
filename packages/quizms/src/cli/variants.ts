@@ -1,5 +1,5 @@
 import { execFile } from "node:child_process";
-import { copyFile, cp, mkdir, rm, writeFile } from "node:fs/promises";
+import { cp, mkdir, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { cwd } from "node:process";
 import { promisify } from "node:util";
@@ -128,13 +128,6 @@ export default async function variants(options: ExportVariantsOptions) {
           );
         }
       }
-    }
-
-    if (multilingual) {
-      await copyFile(
-        path.join(variantDir, `statement.${languages[0]}.txt`),
-        path.join(variantDir, "statement.txt"),
-      );
     }
 
     await writeFile(

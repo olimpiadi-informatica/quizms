@@ -77,7 +77,7 @@ The contest header (`header` in `variants.toml`, e.g. `header.md`) is translated
 
 ## Building
 
-`quizms variants` builds every language. For each variant it writes `statement.<lang>.txt`, plus `statement.txt` for the default language. `quizms print` writes `statement.<lang>.pdf`, plus `statement.pdf` for the default language.
+`quizms variants` builds every language. For each variant it writes `statement.<lang>.txt`. `quizms print` writes `statement.<lang>.pdf` for PDF variants only.
 
 Both commands accept `--languages` to build only some languages, overriding the configuration. The first one is the default language of that run:
 
