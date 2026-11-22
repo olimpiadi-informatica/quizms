@@ -11,6 +11,8 @@ import { TriangleAlert } from "lucide-react";
 
 import type { I18n } from "~/i18n";
 import {
+  type Answer,
+  type AnswerValue,
   type Contest,
   displayAnswer,
   formatUserData,
@@ -120,8 +122,12 @@ export function columnDefinition(
       hide: !contest.onlineSettings,
     },
     ...contest.problemIds.map((id): ColDef => {
-      const getProblem = (student?: Student) =>
-        student?.variantId ? variants[student.variantId]?.schema[id] : undefined;
+      const getProblem = (student?: Student) => {
+        const variant =
+          (student?.variantId ? variants[student.variantId] : undefined) ??
+          (contest.hasVariants ? undefined : Object.values(variants)[0]);
+        return variant?.schema[id];
+      };
       return {
         field: `answers[${id}]`,
         headerName: id,
@@ -145,14 +151,37 @@ export function columnDefinition(
             !frozen
           );
         },
-        valueParser: (params) =>
-          parseAnswer(String(params.newValue ?? ""), getProblem(params.data)!),
+        valueParser: (params) => {
+          const problem = getProblem(params.data);
+          if (!problem || problem.type === "blockly") return undefined;
+          if (
+            typeof params.newValue === "object" &&
+            params.newValue !== null &&
+            "type" in params.newValue
+          ) {
+            return params.newValue as Answer;
+          }
+          return parseAnswer(String(params.newValue ?? ""), problem);
+        },
         cellEditorParams: {
           getValidationErrors: (params) => {
-            const problem = getProblem(params.cellEditorParams.data);
+            const problem = getProblem(params.cellEditorParams?.data);
             if (!problem) return null;
-            const answer = parseAnswer(String(params.value ?? ""), problem);
-            return validateAnswerValue(answer?.value, problem, i18n);
+            const raw = params.value;
+            let answerValue: AnswerValue | undefined;
+            if (typeof raw === "object" && raw !== null) {
+              answerValue = (raw as Answer).value;
+            } else if (typeof raw === "string") {
+              answerValue = parseAnswer(raw, problem)?.value;
+            } else {
+              answerValue = raw as AnswerValue | undefined;
+            }
+            if (typeof answerValue === "string") {
+              answerValue = answerValue.toUpperCase();
+            } else if (Array.isArray(answerValue)) {
+              answerValue = answerValue.map((v) => String(v).toUpperCase());
+            }
+            return validateAnswerValue(answerValue, problem, i18n);
           },
         } satisfies Partial<ICellEditorParams<Student>>,
       };
