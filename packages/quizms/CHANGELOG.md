@@ -1,5 +1,16 @@
 # @olinfo/quizms
 
+## 5.2.1
+
+### Patch Changes
+
+- [#96](https://github.com/olimpiadi-informatica/quizms/pull/96) [`9e81a05`](https://github.com/olimpiadi-informatica/quizms/commit/9e81a05a3b7a5d13d3efac570e32a89c10a512d1) Thanks [@Alenygam](https://github.com/Alenygam)! - Fixed the students table and CSV export in the teacher portal ([#95](https://github.com/olimpiadi-informatica/quizms/issues/95)):
+  
+  - Answers are shown again in the students table and can be edited. The variant column shows the student's variant, and changing it recalculates the score with the new variant.
+  - Numeric answers entered in the table are no longer always rejected as invalid, and answer tooltips show the answer instead of `[object Object]`.
+  - Blockly answers are read-only in the table.
+  - The CSV export contains the answers instead of `[object Object]`, in the same format accepted by the import.
+
 ## 5.2.0
 
 ### Minor Changes
