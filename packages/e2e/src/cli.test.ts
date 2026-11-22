@@ -39,26 +39,24 @@ describe("quizms variants", () => {
     expect((await readdir(variantsDir)).sort()).toEqual(variantIds);
   });
 
-  it("writes the statement of each language, the default one and the client module", async () => {
+  it("writes the statement of each language and the client module", async () => {
     for (const variant of variantIds) {
       const files = await readdir(path.join(variantsDir, variant));
       expect(files).toEqual(
         expect.arrayContaining([
           "answers.json",
-          "statement.txt",
           "statement.it.txt",
           "statement.en.txt",
         ]),
       );
+      expect(files).not.toContain("statement.txt");
       expect(files.filter((f) => f.endsWith(".mjs"))).toHaveLength(1);
 
       const read = (file: string) => readFile(path.join(variantsDir, variant, file), "utf8");
-      const [defaultStatement, it, en] = await Promise.all([
-        read("statement.txt"),
+      const [it, en] = await Promise.all([
         read("statement.it.txt"),
         read("statement.en.txt"),
       ]);
-      expect(defaultStatement).toBe(it);
 
       expect(it).toContain("Sezione unica");
       expect(it).toContain("Quanto fa sei per sette?");
@@ -126,7 +124,8 @@ describe("quizms variants", () => {
     const files = await readdir(dir);
     expect(files).toContain("statement.en.txt");
     expect(files).not.toContain("statement.it.txt");
-    expect(await readFile(path.join(dir, "statement.txt"), "utf8")).toContain(
+    expect(files).not.toContain("statement.txt");
+    expect(await readFile(path.join(dir, "statement.en.txt"), "utf8")).toContain(
       "What is six times seven?",
     );
   });
