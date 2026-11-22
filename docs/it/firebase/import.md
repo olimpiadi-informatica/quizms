@@ -191,6 +191,12 @@ Per importare i contests usa il comando:
 $ npx quizms firebase import --contests
 ```
 
+Per importare una sola gara, aggiungi `--filter-contest` insieme alle opzioni di importazione relative alla gara:
+
+```sh
+$ npx quizms firebase import --filter-contest oii-scolastiche --contests --schools --students --variants --statements
+```
+
 ## Importare le scuole e gli insegnanti
 
 Le scuole e gli insegnanti sono descritti dal file `data/schools.{toml,yaml,csv,json,jsonl}`. Il formato è il seguente:
