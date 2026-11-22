@@ -1,5 +1,11 @@
 # @olinfo/quizms-firebase
 
+## 5.3.0
+
+### Minor Changes
+
+- [#98](https://github.com/olimpiadi-informatica/quizms/pull/98) [`b7deaf7`](https://github.com/olimpiadi-informatica/quizms/commit/b7deaf742c3536b90e523c21ce2cd31df1ba6c80) Thanks [@OgradL](https://github.com/OgradL)! - Add `--filter-contest <contest>` to `quizms-firebase import` to import contest-dependent data only for the selected contest.
+
 ## 5.2.0
 
 ### Minor Changes
