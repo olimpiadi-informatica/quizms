@@ -91,8 +91,7 @@ async function generatePdf(
   await mkdir(variantDir, { recursive: true });
   if (contest.multilingual) {
     await writeFile(path.join(variantDir, `statement.${language}.pdf`), pdf);
-  }
-  if (!contest.multilingual || language === contest.languages[0]) {
+  } else {
     await writeFile(path.join(variantDir, "statement.pdf"), pdf);
   }
 }
@@ -106,7 +105,7 @@ export default async function generatePdfs(
   const context = await browser.newContext();
 
   const ids = contests.flatMap((contest) => {
-    return uniq([...contest.variantIds, ...contest.pdfVariantIds]).flatMap((id) =>
+    return uniq(contest.pdfVariantIds).flatMap((id) =>
       contest.languages.map((language) => [contest, id, language] as const),
     );
   });

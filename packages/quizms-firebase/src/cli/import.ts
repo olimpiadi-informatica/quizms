@@ -254,8 +254,10 @@ async function checkStatementLanguages(contests: Awaited<ReturnType<typeof loadC
     for (const id of uniq([...config.variantIds, ...config.pdfVariantIds])) {
       const localDir = path.join("variants", config.id, id);
       const files = new Set(await glob("statement*.{txt,pdf}", { cwd: localDir }));
-      // PDFs are optional (`quizms print` may not have been run), but must be complete.
-      const hasPdf = [...files].some((file) => file.endsWith(".pdf"));
+      // PDFs are optional for PDF variants (`quizms print` may not have been run), but must be complete.
+      // Online-only variants do not require or import PDF statements.
+      const hasPdf =
+        config.pdfVariantIds.includes(id) && [...files].some((file) => file.endsWith(".pdf"));
       for (const language of config.languages) {
         const required = [contestStatementFile(config.languages, language)];
         if (hasPdf) required.push(multilingual ? `statement.${language}.pdf` : "statement.pdf");
@@ -292,9 +294,14 @@ async function importStatements(bucket: Bucket, options: ImportOptions) {
         const localDir = path.join("variants", config.id, id);
         const remoteDir = path.join("statements", config.id, id);
         const files = await glob("*.{pdf,css,txt,mjs}", { cwd: localDir });
+        const multilingual = config.languages.length > 1;
+        const isPdfVariant = config.pdfVariantIds.includes(id);
 
         return files.flatMap((file) => {
           const ext = path.extname(file);
+          if (ext === ".pdf" && !isPdfVariant) return [];
+          if (multilingual && file === "statement.txt") return [];
+          if (multilingual && file === "statement.pdf") return [];
           return [
             [
               path.join(localDir, file),
