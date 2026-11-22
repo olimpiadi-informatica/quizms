@@ -86,7 +86,7 @@ export function columnDefinition(
       }),
     ),
     {
-      field: "variant",
+      field: "variantId",
       headerName: i18n._(msg`Variant`),
       width: 100,
       editable: !frozen,
@@ -120,6 +120,8 @@ export function columnDefinition(
       hide: !contest.onlineSettings,
     },
     ...contest.problemIds.map((id): ColDef => {
+      const getProblem = (student?: Student) =>
+        student?.variantId ? variants[student.variantId]?.schema[id] : undefined;
       return {
         field: `answers[${id}]`,
         headerName: id,
@@ -128,20 +130,29 @@ export function columnDefinition(
         valueGetter: ({ data }) => {
           if (data.absent || data.disabled) return "";
           if (!(id in (data.answers ?? {}))) return "";
-          if (variants[data.variant] == null) return "";
+          if (!getProblem(data)) return "";
           return displayAnswer(data.answers[id]);
         },
-        tooltipValueGetter: ({ data }) => data.answers?.[id],
-        editable: ({ data }) =>
-          contest.allowAnswerEdit && data.variant && !data.absent && !data.disabled && !frozen,
-        valueParser: (params) => {
-          const schema = variants[params.data.variant!].schema;
-          return parseAnswer(params.newValue, schema[id]);
+        tooltipValueGetter: ({ data }) => displayAnswer(data?.answers?.[id]),
+        editable: ({ data }) => {
+          const problem = getProblem(data);
+          return (
+            !!contest.allowAnswerEdit &&
+            !!problem &&
+            problem.type !== "blockly" &&
+            !data?.absent &&
+            !data?.disabled &&
+            !frozen
+          );
         },
+        valueParser: (params) =>
+          parseAnswer(String(params.newValue ?? ""), getProblem(params.data)!),
         cellEditorParams: {
           getValidationErrors: (params) => {
-            const schema = variants[params.cellEditorParams.data.variantId!].schema;
-            return validateAnswerValue(params.value, schema[id], i18n);
+            const problem = getProblem(params.cellEditorParams.data);
+            if (!problem) return null;
+            const answer = parseAnswer(String(params.value ?? ""), problem);
+            return validateAnswerValue(answer?.value, problem, i18n);
           },
         } satisfies Partial<ICellEditorParams<Student>>,
       };
