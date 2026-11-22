@@ -13,6 +13,8 @@ import { userConverter } from "./converters-admin";
 
 type ImportOptions = {
   delete?: true;
+  deleteIds?: string[];
+  filterContest?: string;
   skipExisting?: true;
   force?: true;
 };
@@ -24,20 +26,37 @@ export async function importUsers(
   options: ImportOptions,
 ) {
   if (options.delete) {
-    const confirmed = await confirm({
-      message: `You are about to delete all ${styleText(
-        "bold",
-        role,
-      )} users. Any previous data will be lost, this operation cannot be undone. Are you really sure?`,
-      default: false,
-    });
-    if (!confirmed) {
-      fatal("Command aborted.");
-    }
+    if (options.deleteIds) {
+      const confirmed = await confirm({
+        message: `You are about to delete ${options.deleteIds.length} selected ${styleText(
+          "bold",
+          role,
+        )} users. Any previous data will be lost, this operation cannot be undone. Are you really sure?`,
+        default: false,
+      });
+      if (!confirmed) {
+        fatal("Command aborted.");
+      }
+      for (const id of options.deleteIds) {
+        await db.recursiveDelete(db.doc(`users/${id}`));
+      }
+      info(`${options.deleteIds.length} ${upperFirst(role)} users deleted!`);
+    } else {
+      const confirmed = await confirm({
+        message: `You are about to delete all ${styleText(
+          "bold",
+          role,
+        )} users. Any previous data will be lost, this operation cannot be undone. Are you really sure?`,
+        default: false,
+      });
+      if (!confirmed) {
+        fatal("Command aborted.");
+      }
 
-    const ref = db.collection("users");
-    await db.recursiveDelete(ref);
-    info(`${upperFirst(role)} users deleted!`);
+      const ref = db.collection("users");
+      await db.recursiveDelete(ref);
+      info(`${upperFirst(role)} users deleted!`);
+    }
   }
 
   await importCollection(

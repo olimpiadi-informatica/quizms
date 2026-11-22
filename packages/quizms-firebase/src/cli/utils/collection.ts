@@ -8,6 +8,8 @@ import { partition, upperFirst } from "lodash-es";
 
 type ImportOptions = {
   delete?: true;
+  deleteIds?: string[];
+  filterContest?: string;
   skipExisting?: true;
   force?: true;
 };
@@ -28,20 +30,39 @@ export async function importCollection<T extends { id: string }>(
   }
 
   if (options.delete) {
-    const confirmed = await confirm({
-      message: `You are about to delete all ${styleText(
-        "bold",
-        collection,
-      )}. Any previous data will be lost, this operation cannot be undone. Are you really sure?`,
-      default: false,
-    });
-    if (!confirmed) {
-      fatal("Command aborted.");
-    }
+    const deleteIds = options.deleteIds;
+    if (deleteIds) {
+      const confirmed = await confirm({
+        message: `You are about to delete ${deleteIds.length} selected ${styleText(
+          "bold",
+          collection,
+        )} documents. Any previous data will be lost, this operation cannot be undone. Are you really sure?`,
+        default: false,
+      });
+      if (!confirmed) {
+        fatal("Command aborted.");
+      }
 
-    const ref = db.collection(collection);
-    await db.recursiveDelete(ref);
-    info(`${upperFirst(collection)} deleted!`);
+      for (const id of deleteIds) {
+        await db.recursiveDelete(db.doc(`${collection}/${id}`));
+      }
+      info(`${deleteIds.length} ${upperFirst(collection)} deleted!`);
+    } else {
+      const confirmed = await confirm({
+        message: `You are about to delete all ${styleText(
+          "bold",
+          collection,
+        )}. Any previous data will be lost, this operation cannot be undone. Are you really sure?`,
+        default: false,
+      });
+      if (!confirmed) {
+        fatal("Command aborted.");
+      }
+
+      const ref = db.collection(collection);
+      await db.recursiveDelete(ref);
+      info(`${upperFirst(collection)} deleted!`);
+    }
   }
 
   const existingIds = new Set<string>();

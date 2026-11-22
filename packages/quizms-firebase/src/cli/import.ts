@@ -37,6 +37,7 @@ import { importUsers } from "./utils/users";
 
 type ImportOptions = {
   config: string;
+  filterContest?: string;
   skipExisting?: true;
   delete?: true;
   force?: true;
@@ -69,6 +70,13 @@ export default async function importData(options: ImportOptions) {
   if (collections.every((key) => !options[key])) {
     warning("`Nothing to import. Use `--help` for usage.`");
     return;
+  }
+
+  if (options.filterContest) {
+    const contests = await load("contests", contestSchema);
+    if (!contests.some((contest) => contest.id === options.filterContest)) {
+      fatal(`Cannot find contest with id \`${options.filterContest}\`.`);
+    }
   }
 
   const { app, bucket, db } = await initializeFirebase();
@@ -105,8 +113,15 @@ async function importAdmins(db: Firestore, options: ImportOptions) {
 }
 
 async function importContests(db: Firestore, options: ImportOptions) {
-  const contests = await load("contests", contestSchema);
-  await importCollection(db, "contests", contests, contestConverter, options);
+  let contests = await load("contests", contestSchema);
+  if (options.filterContest) {
+    contests = contests.filter((contest) => contest.id === options.filterContest);
+  }
+  await importCollection(db, "contests", contests, contestConverter, {
+    ...options,
+    deleteIds:
+      options.delete && options.filterContest ? contests.map((contest) => contest.id) : undefined,
+  });
 }
 
 async function importVenues(db: Firestore, options: ImportOptions) {
@@ -120,22 +135,32 @@ async function importVenues(db: Firestore, options: ImportOptions) {
       password: z.string(),
     });
   const schools = await load("schools", schoolSchema);
-  const contests = await loadContests();
+  let contests = await loadContests();
+  if (options.filterContest) {
+    contests = contests.filter((contest) => contest.id === options.filterContest);
+  }
+
+  const matchingSchools = options.filterContest
+    ? schools.filter((school) => picomatch.isMatch(options.filterContest!, school.contestIds))
+    : schools;
 
   if (options.teachers) {
-    const teachers = schools.map((school) => ({
+    const teachers = matchingSchools.map((school) => ({
       name: school.name,
       username: school.id,
       password: school.password,
     }));
-    await importUsers(db, "teacher", teachers, options);
+    await importUsers(db, "teacher", teachers, {
+      ...options,
+      deleteIds: options.delete ? matchingSchools.map((school) => school.id) : undefined,
+    });
   }
 
   if (options.schools) {
     const venues: Venue[] = [];
 
     for (const contest of contests) {
-      for (const school of schools) {
+      for (const school of matchingSchools) {
         if (!picomatch.isMatch(contest.id, school.contestIds)) continue;
 
         let pdfVariants: string[] = [];
@@ -160,22 +185,38 @@ async function importVenues(db: Firestore, options: ImportOptions) {
       }
     }
 
-    await importCollection(db, "venues", venues, venueConverter, options);
+    await importCollection(db, "venues", venues, venueConverter, {
+      ...options,
+      deleteIds:
+        options.delete && options.filterContest ? venues.map((venue) => venue.id) : undefined,
+    });
   }
 }
 
 async function importStudents(db: Firestore, options: ImportOptions) {
-  const students = await load("students", studentSchema);
+  let students = await load("students", studentSchema);
+  if (options.filterContest) {
+    students = students.filter((student) => student.contestId === options.filterContest);
+  }
   const venues = groupBy(students, "venueId");
   await Promise.all(
     Object.entries(venues).map(([venueId, students]) =>
-      importCollection(db, `venues/${venueId}/students`, students, studentConverter, options),
+      importCollection(db, `venues/${venueId}/students`, students, studentConverter, {
+        ...options,
+        deleteIds:
+          options.delete && options.filterContest
+            ? students.map((student) => student.id)
+            : undefined,
+      }),
     ),
   );
 }
 
 async function importVariants(db: Firestore, options: ImportOptions) {
-  const variantsConfig = await load("variants", variantsConfigSchema);
+  let variantsConfig = await load("variants", variantsConfigSchema);
+  if (options.filterContest) {
+    variantsConfig = variantsConfig.filter((config) => config.id === options.filterContest);
+  }
   const variants = await Promise.all(
     variantsConfig.flatMap((config) => {
       const ids = uniq([...config.variantIds, ...config.pdfVariantIds]);
@@ -195,7 +236,11 @@ async function importVariants(db: Firestore, options: ImportOptions) {
       });
     }),
   );
-  await importCollection(db, "variants", variants, variantConverter, options);
+  await importCollection(db, "variants", variants, variantConverter, {
+    ...options,
+    deleteIds:
+      options.delete && options.filterContest ? variants.map((variant) => variant.id) : undefined,
+  });
 }
 
 /**
@@ -233,7 +278,10 @@ async function importWebsites(db: Firestore, options: ImportOptions) {
 }
 
 async function importStatements(bucket: Bucket, options: ImportOptions) {
-  const contests = await loadContests();
+  let contests = await loadContests();
+  if (options.filterContest) {
+    contests = contests.filter((contest) => contest.id === options.filterContest);
+  }
   await checkStatementLanguages(contests);
 
   const timestamp = new Date().toISOString().replace(/:/g, "-");

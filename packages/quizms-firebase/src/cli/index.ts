@@ -54,6 +54,7 @@ async function main() {
     .command("import")
     .description("Import the contests data.")
     .option("-c, --config <config>", "The contests config file.")
+    .option("--filter-contest <contest>", "Import only the selected contest.")
     .option("--admins", "Import the admins.")
     .option("--contests", "Import the contests.")
     .option("--schools", "Import the schools.")
