@@ -5,7 +5,14 @@ import { saveAs } from "file-saver";
 import { unparse as stringifyCSV } from "papaparse";
 
 import { type I18n, useLingui } from "~/i18n";
-import { type Contest, formatUserData, localize, type Student, type Venue } from "~/models";
+import {
+  type Contest,
+  displayAnswer,
+  formatUserData,
+  localize,
+  type Student,
+  type Venue,
+} from "~/models";
 import { useContentLanguage } from "~/web/components";
 import { useTeacher, useTeacherStudents } from "~/web/teacher/context";
 
@@ -41,7 +48,7 @@ function exportStudents(
       return [
         ...contest.userData.map((field) => formatUserData(student, field)),
         ...(contest.hasVariants ? [student.variantId] : []),
-        ...contest.problemIds.map((id) => student.answers?.[id]),
+        ...contest.problemIds.map((id) => displayAnswer(student.answers?.[id])),
         ...(scoreVisible ? [student.score] : []),
       ];
     });
