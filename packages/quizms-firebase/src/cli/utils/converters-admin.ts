@@ -18,6 +18,7 @@ import type z from "zod";
 import { submissionSchema } from "~/models/submission";
 import { userSchema } from "~/models/user";
 import { websiteSchema } from "~/models/website";
+import { convertFromFirestore } from "~/utils/firestore";
 
 function convertToFirestore(data: object) {
   return cloneDeepWith(omit(data, "id"), (value) => {
@@ -26,26 +27,6 @@ function convertToFirestore(data: object) {
     }
     if (isString(value)) {
       return value.trim();
-    }
-  });
-}
-
-// Duck-typed instead of `instanceof Timestamp`: the snapshots passed to Firestore triggers are
-// created by the `firebase-admin` copy used by `firebase-functions`, which can differ from ours.
-function isTimestamp(value: unknown): value is Timestamp {
-  return (
-    typeof value === "object" &&
-    value !== null &&
-    typeof (value as Timestamp).toDate === "function" &&
-    typeof (value as Timestamp).seconds === "number" &&
-    typeof (value as Timestamp).nanoseconds === "number"
-  );
-}
-
-function convertFromFirestore(data: object) {
-  return cloneDeepWith(data, (value) => {
-    if (isTimestamp(value)) {
-      return value.toDate();
     }
   });
 }
