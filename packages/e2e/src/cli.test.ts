@@ -43,20 +43,13 @@ describe("quizms variants", () => {
     for (const variant of variantIds) {
       const files = await readdir(path.join(variantsDir, variant));
       expect(files).toEqual(
-        expect.arrayContaining([
-          "answers.json",
-          "statement.it.txt",
-          "statement.en.txt",
-        ]),
+        expect.arrayContaining(["answers.json", "statement.it.txt", "statement.en.txt"]),
       );
       expect(files).not.toContain("statement.txt");
       expect(files.filter((f) => f.endsWith(".mjs"))).toHaveLength(1);
 
       const read = (file: string) => readFile(path.join(variantsDir, variant, file), "utf8");
-      const [it, en] = await Promise.all([
-        read("statement.it.txt"),
-        read("statement.en.txt"),
-      ]);
+      const [it, en] = await Promise.all([read("statement.it.txt"), read("statement.en.txt")]);
 
       expect(it).toContain("Sezione unica");
       expect(it).toContain("Quanto fa sei per sette?");
