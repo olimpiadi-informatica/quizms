@@ -1,5 +1,13 @@
 # @olinfo/quizms-firebase
 
+## 5.3.2
+
+### Patch Changes
+
+- [#102](https://github.com/olimpiadi-informatica/quizms/pull/102) [`700d071`](https://github.com/olimpiadi-informatica/quizms/commit/700d071cbbb99183b8787f39b1b0617d59e93116) Thanks [@OgradL](https://github.com/OgradL)! - Generated only language-specific statement text and PDF files for multilingual contests, and limited PDF statement generation and Firebase imports to PDF variants.
+- Updated dependencies [[`700d071`](https://github.com/olimpiadi-informatica/quizms/commit/700d071cbbb99183b8787f39b1b0617d59e93116)]:
+  - @olinfo/quizms@5.2.2
+
 ## 5.3.1
 
 ### Patch Changes
