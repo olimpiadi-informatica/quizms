@@ -18,6 +18,7 @@ import type z from "zod";
 import { submissionSchema } from "~/models/submission";
 import { userSchema } from "~/models/user";
 import { websiteSchema } from "~/models/website";
+import { convertFromFirestore } from "~/utils/firestore";
 
 function convertToFirestore(data: object) {
   return cloneDeepWith(omit(data, "id"), (value) => {
@@ -26,14 +27,6 @@ function convertToFirestore(data: object) {
     }
     if (isString(value)) {
       return value.trim();
-    }
-  });
-}
-
-function convertFromFirestore(data: object) {
-  return cloneDeepWith(data, (value) => {
-    if (value instanceof Timestamp) {
-      return value.toDate();
     }
   });
 }

@@ -67,6 +67,33 @@ describe("parseSnapshot", () => {
     expect(student.updatedAt).toEqual(new Date(1234));
   });
 
+  it("converts Timestamps from another firebase-admin copy", () => {
+    // Simulates a Timestamp whose class is not the one imported by the converter.
+    class ForeignTimestamp {
+      constructor(
+        readonly seconds: number,
+        readonly nanoseconds: number,
+      ) {}
+      toDate() {
+        return new Date(this.seconds * 1000 + this.nanoseconds / 1e6);
+      }
+      valueOf() {
+        return "not a number";
+      }
+    }
+    const student = parseSnapshot(
+      studentSchema,
+      fakeSnapshot("s1", {
+        createdAt: new ForeignTimestamp(1, 0),
+        updatedAt: new ForeignTimestamp(2, 0),
+        participationWindow: { start: new ForeignTimestamp(3, 0), end: new ForeignTimestamp(4, 0) },
+      }),
+    );
+    expect(student.createdAt).toEqual(new Date(1000));
+    expect(student.updatedAt).toEqual(new Date(2000));
+    expect(student.participationWindow).toEqual({ start: new Date(3000), end: new Date(4000) });
+  });
+
   it("does not modify the snapshot data", () => {
     const data = { updatedAt: Timestamp.fromDate(start) };
     parseSnapshot(studentSchema, fakeSnapshot("s1", data));

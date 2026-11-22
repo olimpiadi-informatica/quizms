@@ -7,19 +7,11 @@ import {
   venueSchema,
 } from "@olinfo/quizms/models";
 import { validate } from "@olinfo/quizms/utils";
-import { type DocumentSnapshot, type FirestoreDataConverter, Timestamp } from "firebase/firestore";
-import { cloneDeepWith } from "lodash-es";
+import type { DocumentSnapshot, FirestoreDataConverter } from "firebase/firestore";
 import type z from "zod";
 
 import { websiteSchema } from "~/models/website";
-
-function convertFromFirestore(data: object) {
-  return cloneDeepWith(data, (value) => {
-    if (value instanceof Timestamp) {
-      return value.toDate();
-    }
-  });
-}
+import { convertFromFirestore } from "~/utils/firestore";
 
 function parse<T>(schema: z.core.$ZodType<T>, snapshot: DocumentSnapshot): T {
   const data = convertFromFirestore({ ...snapshot.data(), id: snapshot.id });
