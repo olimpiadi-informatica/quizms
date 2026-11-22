@@ -1,5 +1,11 @@
 # @olinfo/quizms-firebase
 
+## 5.3.1
+
+### Patch Changes
+
+- [#100](https://github.com/olimpiadi-informatica/quizms/pull/100) [`176ca4f`](https://github.com/olimpiadi-informatica/quizms/commit/176ca4ff63d64b656dc79ec916e12b959f297235) Thanks [@Alenygam](https://github.com/Alenygam)! - Fixed the `submissions` Cloud Function failing with `expected date, received Timestamp`. Firestore Timestamps are now converted to dates even when they come from a different copy of `firebase-admin`, and the generated functions `package.json` now pins `firebase-admin` so only one copy is installed.
+
 ## 5.3.0
 
 ### Minor Changes
