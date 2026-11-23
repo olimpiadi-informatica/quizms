@@ -25,6 +25,8 @@ type TeacherProviderProps = {
     studentIds: string[],
     disabled: boolean,
   ) => Promise<unknown>;
+  /** Reopens the contest of a student who submitted before the end of their window (optional) */
+  reopenStudent?: (venueId: string, studentId: string) => Promise<void>;
   variants: Variant[];
   logout: () => Promise<void>;
   statementComponent: ComponentType<Record<never, never>>;
@@ -114,6 +116,7 @@ function ProviderInner({
   finalizeVenue,
   importStudents,
   setStudentsDisabled,
+  reopenStudent,
   variants,
   logout,
   statementComponent: Statement,
@@ -144,6 +147,7 @@ function ProviderInner({
     finalizeVenue,
     importStudents,
     setStudentsDisabled,
+    reopenStudent,
     variants: contestVariants,
     logout,
     getPdfStatements: ({ language }) =>

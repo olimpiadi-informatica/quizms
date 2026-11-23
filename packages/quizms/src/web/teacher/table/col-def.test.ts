@@ -237,4 +237,42 @@ describe("columnDefinition", () => {
       });
     });
   });
+
+  describe("status column", () => {
+    const onlineContest = makeContest({
+      ...contest,
+      onlineSettings: {
+        contestWindow: { start: new Date(0), end: new Date(8.64e15) },
+        duration: 60,
+        allowRestart: false,
+      },
+    });
+    const hour = 3_600_000;
+    const ongoing = () => ({
+      start: new Date(Date.now() - hour),
+      end: new Date(Date.now() + hour),
+    });
+
+    it("is hidden for offline contests", () => {
+      const cols = columnDefinition(contest, variants, true, false, i18n, "it");
+      expect(cols.find((c) => c.colId === "status")?.hide).toBe(true);
+    });
+
+    it("gives the phase of the student, also when the table is frozen", () => {
+      const cols = columnDefinition(onlineContest, variants, true, true, i18n, "it");
+      const col = cols.find((c) => c.colId === "status");
+      expect(col?.hide).toBe(false);
+
+      const valueGetter = col?.valueGetter as any;
+      expect(valueGetter({ data: makeStudent({ participationWindow: undefined }) })).toBe("");
+      expect(valueGetter({ data: makeStudent({ participationWindow: ongoing() }) })).toBe(
+        "ongoing",
+      );
+      expect(
+        valueGetter({
+          data: makeStudent({ participationWindow: ongoing(), status: "submitted" }),
+        }),
+      ).toBe("submitted");
+    });
+  });
 });

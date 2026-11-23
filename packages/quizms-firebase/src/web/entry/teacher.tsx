@@ -13,6 +13,7 @@ import {
   teacherApproveStudentRestore,
   teacherImportStudents,
   teacherRejectStudentRestore,
+  teacherReopenStudent,
   teacherSetStudentsDisabled,
   teacherUpdateStudent,
 } from "~/web/common/api";
@@ -86,6 +87,7 @@ function TeacherInner({ user, schoolId }: { user: User; schoolId: string }) {
         setStudentsDisabled={(venueId, studentIds, disabled) =>
           teacherSetStudentsDisabled(user, { venueId, studentIds, disabled })
         }
+        reopenStudent={(venueId, studentId) => teacherReopenStudent(user, { venueId, studentId })}
         variants={variants}
         logout={logout}
         statementComponent={() => <FirebaseStatement />}

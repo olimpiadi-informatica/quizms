@@ -26,6 +26,7 @@ function renderForm({
   const value: StudentContextProps = {
     ...studentProviderProps({ contest, student }),
     student,
+    phase: "ongoing",
     terminated: false,
     language: language ?? "it",
   };

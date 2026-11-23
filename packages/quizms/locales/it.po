@@ -100,6 +100,7 @@ msgstr "Torna a schermo intero"
 #: packages/quizms/src/web/teacher/table/delete-all.tsx
 #: packages/quizms/src/web/teacher/table/delete.tsx
 #: packages/quizms/src/web/teacher/table/finalize.tsx
+#: packages/quizms/src/web/teacher/table/status-cell.tsx
 msgid "Cancel"
 msgstr "Annulla"
 
@@ -249,6 +250,10 @@ msgstr "Importa studenti"
 msgid "Import the students from a file. The file must be in <0>CSV</0> format, and the first row must contain the header. <1>Do not</1> leave empty rows before the header or empty columns before the data."
 msgstr "Importa gli studenti da un file. Il file deve essere in formato <0>CSV</0>, la prima riga deve contenere l'intestazione. <1>Non</1> lasciare righe vuote prima dell'intestazione o colonne vuote prima dei dati."
 
+#: packages/quizms/src/web/teacher/table/status-cell.tsx
+msgid "In progress"
+msgstr "In corso"
+
 #: packages/quizms/src/models/variant.ts
 msgid "Invalid option: {option}"
 msgstr "Opzione non valida: {option}"
@@ -293,6 +298,10 @@ msgstr "Nessuna comunicazione."
 #: packages/quizms/src/web/teacher/dashboard-student-restore.tsx
 msgid "No requests."
 msgstr "Nessuna richiesta."
+
+#: packages/quizms/src/web/teacher/table/status-cell.tsx
+msgid "Not started"
+msgstr "Non iniziata"
 
 #: packages/quizms/src/web/teacher/table/finalize.tsx
 msgid "Once finalized, you will <0>no longer</0> be able to <1>add</1> new students or <2>edit</2> the data of the students in this school for the contest <3>{contestName}</3>."
@@ -342,6 +351,14 @@ msgstr "Rifiuta"
 msgid "Reload"
 msgstr "Ricarica"
 
+#: packages/quizms/src/web/teacher/table/status-cell.tsx
+msgid "Reopen"
+msgstr "Riapri"
+
+#: packages/quizms/src/web/teacher/table/status-cell.tsx
+msgid "Reopen contest"
+msgstr "Riapri la gara"
+
 #: packages/quizms/src/models/variant.ts
 msgid "Repeated options: {options}"
 msgstr "Opzioni ripetute: {options}"
@@ -383,6 +400,11 @@ msgstr "Lingua dei testi"
 msgid "Statements in {code}"
 msgstr "Testi in {code}"
 
+#: packages/quizms/src/web/teacher/table/col-def.tsx
+#: packages/quizms/src/web/teacher/table/export.tsx
+msgid "Status"
+msgstr "Stato"
+
 #: packages/quizms/src/web/teacher/layout.tsx
 msgid "Student management"
 msgstr "Gestione studenti"
@@ -398,6 +420,26 @@ msgstr "Non cancellati"
 #: packages/quizms/src/web/teacher/table/export.tsx
 msgid "students-{contestId}.csv"
 msgstr "studenti-{contestId}.csv"
+
+#: packages/quizms/src/web/teacher/table/status-cell.tsx
+msgid "Submitted"
+msgstr "Consegnata"
+
+#: packages/quizms/src/web/teacher/table/export.tsx
+msgid "Submitted at"
+msgstr "Consegnata alle"
+
+#: packages/quizms/src/web/teacher/table/export.tsx
+msgid "Submitted by"
+msgstr "Consegnata da"
+
+#: packages/quizms/src/web/teacher/table/status-cell.tsx
+msgid "Submitted by the student at {submittedAt}"
+msgstr "Consegnata dallo studente alle {submittedAt}"
+
+#: packages/quizms/src/web/teacher/table/status-cell.tsx
+msgid "Submitted by the teacher at {submittedAt}"
+msgstr "Consegnata dal docente alle {submittedAt}"
 
 #: packages/quizms/src/web/teacher/dashboard-student-restore.tsx
 msgid "Surname"
@@ -507,6 +549,10 @@ msgstr "Lo studente {name} {surname} non può essere finalizzato: {reason}."
 msgid "The student {name} {surname} has been entered more than once"
 msgstr "Lo studente {name} {surname} è stato inserito più volte"
 
+#: packages/quizms/src/web/teacher/table/status-cell.tsx
+msgid "The student <0>{name}</0> will be able to keep answering until the end of their time. The answers already given are kept."
+msgstr "Lo studente <0>{name}</0> potrà continuare a rispondere fino allo scadere del suo tempo. Le risposte già date vengono mantenute."
+
 #: packages/quizms/src/web/student/modals.tsx
 msgid "The test is over."
 msgstr "La prova è terminata."
@@ -514,6 +560,10 @@ msgstr "La prova è terminata."
 #: packages/quizms/src/web/teacher/dashboard.tsx
 msgid "This page intentionally left blank"
 msgstr "Pagina lasciata volontariamente vuota"
+
+#: packages/quizms/src/web/teacher/table/status-cell.tsx
+msgid "Time expired"
+msgstr "Tempo scaduto"
 
 #: packages/quizms/src/web/teacher/dashboard.tsx
 msgid "Time left until the start: <0/>"

@@ -322,6 +322,51 @@ export const teacherRejectStudentRestore = teacherProcedure
     }
   });
 
+/**
+ * Reopens the contest of a student who submitted before the end of the participation window, e.g.
+ * by mistake. Unlike the other student edits this happens while the contest is running, so it does
+ * not use `assertVenueEditable`.
+ */
+export const teacherReopenStudent = teacherProcedure
+  .input(
+    z.strictObject({
+      venueId: docId,
+      studentId: docId,
+    }),
+  )
+  .mutation(async (opts) => {
+    const { input: data, ctx } = opts;
+    logger.info("Teacher reopen student received", { data });
+
+    const [{ id: venueId }] = await checkVenue(data.venueId, ctx.claims.schoolId, false);
+
+    await db.runTransaction(async (t) => {
+      const venue = (await t.get(venueRef(venueId))).data()!;
+      if (venue.finalized) {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Gara già finalizzata" });
+      }
+
+      const ref = studentRef(venueId, data.studentId);
+      const student = (await t.get(ref)).data();
+      if (!student || !venue.token || student.token !== venue.token) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Studente non trovato" });
+      }
+      if (student.status !== "submitted") {
+        throw new TRPCError({ code: "BAD_REQUEST", message: "Lo studente non ha consegnato" });
+      }
+      if (!student.participationWindow || isPast(student.participationWindow.end)) {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Tempo dello studente esaurito" });
+      }
+
+      t.update(ref, {
+        status: "ongoing",
+        submittedAt: FieldValue.delete(),
+        submittedBy: FieldValue.delete(),
+        updatedAt: Timestamp.now(),
+      });
+    });
+  });
+
 export const teacherUpdateStudent = teacherProcedure
   .input(
     z.strictObject({

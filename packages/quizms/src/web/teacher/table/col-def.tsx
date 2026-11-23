@@ -16,6 +16,7 @@ import {
   type Contest,
   displayAnswer,
   formatUserData,
+  getStudentPhase,
   localize,
   parseAnswer,
   parseUserData,
@@ -25,6 +26,7 @@ import {
   validateUserData,
 } from "~/models";
 
+import { StudentStatusCell } from "./status-cell";
 import { isStudentIncomplete } from "./utils";
 
 export function columnDefinition(
@@ -119,6 +121,18 @@ export function columnDefinition(
         );
       },
       sortable: false,
+      hide: !contest.onlineSettings,
+    },
+    {
+      colId: "status",
+      headerName: i18n._(msg`Status`),
+      width: 150,
+      ...defaultOptions,
+      // Used for sorting and filtering; the cell shows the live phase.
+      valueGetter: ({ data }) => (data?.participationWindow ? getStudentPhase(data) : ""),
+      cellRenderer: StudentStatusCell,
+      // Not affected by `frozen`: the status changes and can be acted upon during the contest.
+      editable: false,
       hide: !contest.onlineSettings,
     },
     ...contest.problemIds.map((id): ColDef => {

@@ -188,6 +188,9 @@ export const studentSetAnswer = studentProcedure
   .mutation(async (opts) => {
     const { input: data, ctx } = opts;
     const student = await checkStudent(ctx.claims, true);
+    if (student.status === "submitted") {
+      throw new TRPCError({ code: "FORBIDDEN", message: "Gara già terminata" });
+    }
 
     // Validate the problem against the student's variant: this rejects unknown ids and answers
     // of the wrong type, which would otherwise be stored and silently ignored by the scoring.
@@ -225,14 +228,14 @@ export const studentSubmitContest = studentProcedure.mutation(async (opts) => {
     if (!student?.participationWindow) {
       throw new TRPCError({ code: "FORBIDDEN", message: "Gara non iniziata" });
     }
+    if (student.status === "submitted") return;
 
-    // Never extend the window: submitting during the grace period keeps the original end.
-    const now = new Date();
-    const currentEnd = student.participationWindow.end;
-    const newEnd = currentEnd < now ? currentEnd : now;
-
+    // The participation window is left untouched: it keeps the time allotted to the student, so
+    // that the teacher can reopen the contest if the student submitted by mistake.
     t.update(ref, {
-      "participationWindow.end": Timestamp.fromDate(newEnd),
+      status: "submitted",
+      submittedAt: Timestamp.now(),
+      submittedBy: "student",
       updatedAt: Timestamp.now(),
     });
   });

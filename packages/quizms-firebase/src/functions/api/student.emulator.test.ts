@@ -489,27 +489,39 @@ describe("studentSubmitContest", () => {
     });
   });
 
-  async function getWindow() {
+  async function getStudent() {
     const snapshot = await db.doc("venues/venue/students/s1").withConverter(studentConverter).get();
-    return snapshot.data()?.participationWindow;
+    return snapshot.data();
   }
 
-  it("ends the participation window now", async () => {
+  async function getWindow() {
+    return (await getStudent())?.participationWindow;
+  }
+
+  it("marks the student as submitted and keeps the participation window", async () => {
     await asStudent(claims).studentSubmitContest();
-    expect(await getWindow()).toEqual({ start: studentWindow.start, end: NOW });
+    const student = await getStudent();
+    expect(student?.participationWindow).toEqual(studentWindow);
+    expect(student?.status).toBe("submitted");
+    expect(student?.submittedAt).toEqual(NOW);
+    expect(student?.submittedBy).toBe("student");
   });
 
-  it("does not extend the window when submitting during the grace period", async () => {
+  it("accepts submissions during the grace period", async () => {
     vi.setSystemTime(new Date("2030-05-10T10:30:05Z"));
     await asStudent(claims).studentSubmitContest();
-    expect(await getWindow()).toEqual(studentWindow);
+    const student = await getStudent();
+    expect(student?.participationWindow).toEqual(studentWindow);
+    expect(student?.status).toBe("submitted");
   });
 
   it("is idempotent", async () => {
     await asStudent(claims).studentSubmitContest();
     vi.setSystemTime(new Date("2030-05-10T10:00:05Z"));
     await asStudent(claims).studentSubmitContest();
-    expect(await getWindow()).toEqual({ start: studentWindow.start, end: NOW });
+    const student = await getStudent();
+    expect(student?.participationWindow).toEqual(studentWindow);
+    expect(student?.submittedAt).toEqual(NOW);
   });
 
   it("rejects answers after submitting", async () => {
@@ -534,6 +546,7 @@ describe("studentSubmitContest", () => {
       expect.objectContaining({ code: "FORBIDDEN", message }),
     );
     expect(await getWindow()).toEqual(studentWindow);
+    expect((await getStudent())?.status).toBeUndefined();
   });
 
   it("rejects requests without student claims", async () => {

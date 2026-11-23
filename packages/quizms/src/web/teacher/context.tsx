@@ -27,6 +27,8 @@ export type TeacherContextProps = {
     studentIds: string[],
     disabled: boolean,
   ) => Promise<unknown>;
+  /** Funzione per riaprire la gara di uno studente che ha consegnato (opzionale) */
+  reopenStudent?: (venueId: string, studentId: string) => Promise<void>;
 
   /** Varianti dei testi */
   variants: Record<string, Variant>;
@@ -55,7 +57,9 @@ TeacherContext.displayName = "TeacherContext";
 export type OmitContestParam<T> = {
   [K in keyof T]: T[K] extends (contestId: string, ...args: infer Args) => infer Ret
     ? (...args: Args) => Ret
-    : T[K];
+    : NonNullable<T[K]> extends (contestId: string, ...args: infer Args) => infer Ret
+      ? ((...args: Args) => Ret) | undefined
+      : T[K];
 };
 
 export function useTeacher(): Omit<OmitContestParam<TeacherContextProps>, `use${string}`> {
@@ -65,6 +69,7 @@ export function useTeacher(): Omit<OmitContestParam<TeacherContextProps>, `use${
     finalizeVenue,
     importStudents,
     setStudentsDisabled,
+    reopenStudent,
     ...ctx
   } = use(TeacherContext);
   const venueId = ctx.venue.id;
@@ -77,6 +82,7 @@ export function useTeacher(): Omit<OmitContestParam<TeacherContextProps>, `use${
     importStudents: (students: Student[]) => importStudents(venueId, students),
     setStudentsDisabled: (studentIds: string[], disabled: boolean) =>
       setStudentsDisabled(venueId, studentIds, disabled),
+    reopenStudent: reopenStudent && ((studentId: string) => reopenStudent(venueId, studentId)),
   };
 }
 

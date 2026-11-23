@@ -114,6 +114,10 @@ export async function teacherRejectStudentRestore(
   await trpc.teacherRejectStudentRestore.mutate(body, { context: { user } });
 }
 
+export async function teacherReopenStudent(user: User, body: Inputs["teacherReopenStudent"]) {
+  await translateErrors(trpc.teacherReopenStudent.mutate(body, { context: { user } }));
+}
+
 export async function teacherUpdateStudent(user: User, body: Inputs["teacherUpdateStudent"]) {
   return await trpc.teacherUpdateStudent.mutate(body, { context: { user } });
 }

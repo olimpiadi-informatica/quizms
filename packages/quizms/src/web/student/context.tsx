@@ -1,6 +1,6 @@
 import { createContext, use } from "react";
 
-import type { Answer, Contest, Schema, Student, Venue } from "~/models";
+import type { Answer, Contest, Schema, Student, StudentPhase, Venue } from "~/models";
 
 export type StudentContextProps = {
   student: Student;
@@ -11,6 +11,7 @@ export type StudentContextProps = {
   submit: () => Promise<void> | void;
   logout?: () => Promise<void> | void;
   enforceFullscreen: boolean;
+  phase: StudentPhase;
   terminated: boolean;
   schema?: Schema;
   /** Language of the statement being shown */

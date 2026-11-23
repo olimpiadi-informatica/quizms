@@ -193,6 +193,22 @@ describe("StudentLayout", () => {
       expect(screen.getByText("00:00")).toBeInTheDocument();
     });
 
+    it("treats a submitted student as terminated while the window is still open", async () => {
+      await renderLayout(null, {
+        student: makeStudent({ participationWindow: ongoing(), status: "submitted" }),
+      });
+      expect(screen.getByRole("button", { name: "Termina" })).toBeDisabled();
+      expect(screen.getByText("00:00")).toBeInTheDocument();
+    });
+
+    it("is not terminated after the teacher reopens the student", async () => {
+      await renderLayout(null, {
+        student: makeStudent({ participationWindow: ongoing(), status: "ongoing" }),
+        venue: makeVenue({ participationWindow: ongoing() }),
+      });
+      expect(screen.getByRole("button", { name: "Termina" })).toBeEnabled();
+    });
+
     it("offers results and restart when the contest can be restarted", async () => {
       const user = userEvent.setup();
       const reset = vi.fn();
