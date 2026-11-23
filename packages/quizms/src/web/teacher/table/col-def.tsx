@@ -126,7 +126,7 @@ export function columnDefinition(
     {
       colId: "status",
       headerName: i18n._(msg`Status`),
-      width: 150,
+      width: 200,
       ...defaultOptions,
       // Used for sorting and filtering; the cell shows the live phase.
       valueGetter: ({ data }) => (data?.participationWindow ? getStudentPhase(data) : ""),

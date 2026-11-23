@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import { act, screen, waitFor, within } from "@testing-library/react";
+import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -9,7 +9,11 @@ import {
   makeVenue,
   renderInStudentProvider,
   schema,
+  studentProviderProps,
+  TestShell,
+  waitForSuspense,
 } from "../test-utils";
+import { StudentProvider } from "./provider";
 
 const hour = 3_600_000;
 const ongoing = () => ({ start: new Date(Date.now() - hour), end: new Date(Date.now() + hour) });
@@ -183,6 +187,83 @@ describe("StudentLayout", () => {
       await renderLayout(null, { logout });
       await user.click(screen.getByRole("button", { name: /Esci/ }));
       expect(logout).toHaveBeenCalledOnce();
+    });
+  });
+
+  describe("teacher approval", () => {
+    const approvalContest = () =>
+      makeContest({
+        onlineSettings: {
+          contestWindow: { start: new Date(0), end: new Date(8.64e15) },
+          duration: 120,
+          allowRestart: false,
+          terminationMode: "teacher_approval",
+        },
+      });
+
+    it("does not show the results after requesting the submission", async () => {
+      const user = userEvent.setup();
+      const submit = vi.fn();
+      await renderLayout(null, {
+        contest: approvalContest(),
+        schema,
+        submit,
+        student: makeStudent({ participationWindow: ongoing() }),
+        venue: makeVenue({ participationWindow: ongoing() }),
+      });
+
+      await user.click(screen.getByRole("button", { name: "Termina" }));
+      const confirmDialog = getDialog("Confermi di voler terminare?");
+      await user.click(within(confirmDialog).getByRole("button", { name: "Conferma" }));
+      expect(submit).toHaveBeenCalledOnce();
+
+      await waitFor(() => expect(confirmDialog).not.toHaveAttribute("open"));
+      await act(() => Promise.resolve());
+      expect(getDialog("Prova terminata")).not.toHaveAttribute("open");
+    });
+
+    it("shows the waiting state while the request is pending", async () => {
+      await renderLayout(null, {
+        contest: approvalContest(),
+        student: makeStudent({ participationWindow: ongoing(), status: "pending_approval" }),
+        venue: makeVenue({ participationWindow: ongoing() }),
+      });
+
+      expect(screen.getByRole("alert")).toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: "Termina" })).not.toBeInTheDocument();
+      // The time keeps running: the teacher can send the test back.
+      expect(screen.queryByText("00:00")).not.toBeInTheDocument();
+    });
+
+    it("shows the end of the test when the teacher approves", async () => {
+      const studentWindow = ongoing();
+      const props = (status: "pending_approval" | "submitted") =>
+        studentProviderProps({
+          contest: approvalContest(),
+          schema,
+          student: makeStudent({ participationWindow: studentWindow, status, score: 7 }),
+          venue: makeVenue({ participationWindow: studentWindow }),
+        });
+
+      const { rerender } = await act(() =>
+        render(
+          <TestShell>
+            <StudentProvider {...props("pending_approval")}>{null}</StudentProvider>
+          </TestShell>,
+        ),
+      );
+      await waitForSuspense();
+      expect(getDialog("Prova terminata")).not.toHaveAttribute("open");
+
+      await act(() =>
+        rerender(
+          <TestShell>
+            <StudentProvider {...props("submitted")}>{null}</StudentProvider>
+          </TestShell>,
+        ),
+      );
+      await waitFor(() => expect(getDialog("Prova terminata")).toHaveAttribute("open"));
+      expect(screen.queryByRole("alert")).not.toBeInTheDocument();
     });
   });
 

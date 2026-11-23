@@ -12,7 +12,10 @@ export type StudentContextProps = {
   logout?: () => Promise<void> | void;
   enforceFullscreen: boolean;
   phase: StudentPhase;
+  /** Whether the test is completed (submitted or expired) */
   terminated: boolean;
+  /** Whether the answers can no longer be changed (terminated or waiting for approval) */
+  locked: boolean;
   schema?: Schema;
   /** Language of the statement being shown */
   language: string;

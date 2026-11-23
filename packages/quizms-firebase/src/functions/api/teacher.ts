@@ -322,48 +322,105 @@ export const teacherRejectStudentRestore = teacherProcedure
     }
   });
 
+const runningStudentInput = z.strictObject({
+  venueId: docId,
+  studentId: docId,
+});
+
 /**
- * Reopens the contest of a student who submitted before the end of the participation window, e.g.
- * by mistake. Unlike the other student edits this happens while the contest is running, so it does
- * not use `assertVenueEditable`.
+ * Changes the status of a student of the current run of the venue. Unlike the other student edits
+ * this happens while the contest is running, so it does not use `assertVenueEditable`.
  */
+async function updateRunningStudent(
+  schoolId: string,
+  data: z.infer<typeof runningStudentInput>,
+  update: (student: Student) => Record<string, unknown>,
+) {
+  const [{ id: venueId }] = await checkVenue(data.venueId, schoolId, false);
+
+  await db.runTransaction(async (t) => {
+    const venue = (await t.get(venueRef(venueId))).data()!;
+    if (venue.finalized) {
+      throw new TRPCError({ code: "FORBIDDEN", message: "Gara già finalizzata" });
+    }
+
+    const ref = studentRef(venueId, data.studentId);
+    const student = (await t.get(ref)).data();
+    if (!student || !venue.token || student.token !== venue.token) {
+      throw new TRPCError({ code: "NOT_FOUND", message: "Studente non trovato" });
+    }
+
+    t.update(ref, { ...update(student), updatedAt: Timestamp.now() });
+  });
+}
+
+function assertTimeLeft(student: Student) {
+  if (!student.participationWindow || isPast(student.participationWindow.end)) {
+    throw new TRPCError({ code: "FORBIDDEN", message: "Tempo dello studente esaurito" });
+  }
+}
+
+function assertPendingApproval(student: Student) {
+  if (student.status !== "pending_approval") {
+    throw new TRPCError({ code: "BAD_REQUEST", message: "Nessuna richiesta di consegna" });
+  }
+}
+
+/** Reopens the contest of a student who submitted before the end of their window, e.g. by mistake. */
 export const teacherReopenStudent = teacherProcedure
-  .input(
-    z.strictObject({
-      venueId: docId,
-      studentId: docId,
-    }),
-  )
+  .input(runningStudentInput)
   .mutation(async (opts) => {
     const { input: data, ctx } = opts;
     logger.info("Teacher reopen student received", { data });
 
-    const [{ id: venueId }] = await checkVenue(data.venueId, ctx.claims.schoolId, false);
-
-    await db.runTransaction(async (t) => {
-      const venue = (await t.get(venueRef(venueId))).data()!;
-      if (venue.finalized) {
-        throw new TRPCError({ code: "FORBIDDEN", message: "Gara già finalizzata" });
-      }
-
-      const ref = studentRef(venueId, data.studentId);
-      const student = (await t.get(ref)).data();
-      if (!student || !venue.token || student.token !== venue.token) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "Studente non trovato" });
-      }
+    await updateRunningStudent(ctx.claims.schoolId, data, (student) => {
       if (student.status !== "submitted") {
         throw new TRPCError({ code: "BAD_REQUEST", message: "Lo studente non ha consegnato" });
       }
-      if (!student.participationWindow || isPast(student.participationWindow.end)) {
-        throw new TRPCError({ code: "FORBIDDEN", message: "Tempo dello studente esaurito" });
-      }
-
-      t.update(ref, {
+      assertTimeLeft(student);
+      return {
         status: "ongoing",
         submittedAt: FieldValue.delete(),
         submittedBy: FieldValue.delete(),
-        updatedAt: Timestamp.now(),
-      });
+        terminationRequestedAt: FieldValue.delete(),
+      };
+    });
+  });
+
+/**
+ * Approves the submission request of a student (`teacher_approval` mode). Also allowed after the
+ * end of the window: it only records the submission.
+ */
+export const teacherApproveSubmission = teacherProcedure
+  .input(runningStudentInput)
+  .mutation(async (opts) => {
+    const { input: data, ctx } = opts;
+    logger.info("Teacher approve submission received", { data });
+
+    await updateRunningStudent(ctx.claims.schoolId, data, (student) => {
+      assertPendingApproval(student);
+      return {
+        status: "submitted",
+        submittedAt: Timestamp.now(),
+        submittedBy: "student",
+      };
+    });
+  });
+
+/** Rejects the submission request of a student, who can keep answering until the end of their time. */
+export const teacherRejectSubmission = teacherProcedure
+  .input(runningStudentInput)
+  .mutation(async (opts) => {
+    const { input: data, ctx } = opts;
+    logger.info("Teacher reject submission received", { data });
+
+    await updateRunningStudent(ctx.claims.schoolId, data, (student) => {
+      assertPendingApproval(student);
+      assertTimeLeft(student);
+      return {
+        status: "ongoing",
+        terminationRequestedAt: FieldValue.delete(),
+      };
     });
   });
 

@@ -71,6 +71,10 @@ msgstr "Answer"
 msgid "Approve"
 msgstr "Approve"
 
+#: packages/quizms/src/web/teacher/dashboard-submission-requests.tsx
+msgid "Approve submission"
+msgstr "Approve submission"
+
 #: packages/quizms/src/web/teacher/dashboard.tsx
 msgid "Are you sure you want to cancel the start of the contest?"
 msgstr "Are you sure you want to cancel the start of the contest?"
@@ -288,6 +292,7 @@ msgid "Missing variant"
 msgstr "Missing variant"
 
 #: packages/quizms/src/web/teacher/dashboard-student-restore.tsx
+#: packages/quizms/src/web/teacher/dashboard-submission-requests.tsx
 msgid "Name"
 msgstr "Name"
 
@@ -296,6 +301,7 @@ msgid "No announcements."
 msgstr "No announcements."
 
 #: packages/quizms/src/web/teacher/dashboard-student-restore.tsx
+#: packages/quizms/src/web/teacher/dashboard-submission-requests.tsx
 msgid "No requests."
 msgstr "No requests."
 
@@ -310,6 +316,10 @@ msgstr "Once finalized, you will <0>no longer</0> be able to <1>add</1> new stud
 #: packages/quizms/src/web/teacher/table/finalize.tsx
 msgid "Once finalized, you will <0>no longer</0> be able to <1>edit</1> the data of the students in this school for the contest <2>{contestName}</2>."
 msgstr "Once finalized, you will <0>no longer</0> be able to <1>edit</1> the data of the students in this school for the contest <2>{contestName}</2>."
+
+#: packages/quizms/src/web/student/modals.tsx
+msgid "Once you confirm, you will no longer be able to change your answers, unless your teacher sends the test back to you."
+msgstr "Once you confirm, you will no longer be able to change your answers, unless your teacher sends the test back to you."
 
 #: packages/quizms/src/web/student/modals.tsx
 msgid "Once you confirm, you will no longer be able to change your answers."
@@ -363,6 +373,10 @@ msgstr "Reopen contest"
 msgid "Repeated options: {options}"
 msgstr "Repeated options: {options}"
 
+#: packages/quizms/src/web/teacher/dashboard-submission-requests.tsx
+msgid "Requested at"
+msgstr "Requested at"
+
 #: packages/quizms/src/web/student/layout.tsx
 msgid "Restart"
 msgstr "Restart"
@@ -379,6 +393,10 @@ msgstr "Select a contest"
 #: packages/quizms/src/web/teacher/table/col-def.tsx
 msgid "Select all"
 msgstr "Select all"
+
+#: packages/quizms/src/web/teacher/dashboard-submission-requests.tsx
+msgid "Send back"
+msgstr "Send back"
 
 #: packages/quizms/src/web/student/layout.tsx
 msgid "Show results"
@@ -422,6 +440,14 @@ msgid "students-{contestId}.csv"
 msgstr "students-{contestId}.csv"
 
 #: packages/quizms/src/web/teacher/table/status-cell.tsx
+msgid "Submission requested"
+msgstr "Submission requested"
+
+#: packages/quizms/src/web/teacher/dashboard.tsx
+msgid "Submission requests"
+msgstr "Submission requests"
+
+#: packages/quizms/src/web/teacher/table/status-cell.tsx
 msgid "Submitted"
 msgstr "Submitted"
 
@@ -442,6 +468,7 @@ msgid "Submitted by the teacher at {submittedAt}"
 msgstr "Submitted by the teacher at {submittedAt}"
 
 #: packages/quizms/src/web/teacher/dashboard-student-restore.tsx
+#: packages/quizms/src/web/teacher/dashboard-submission-requests.tsx
 msgid "Surname"
 msgstr "Surname"
 
@@ -609,6 +636,10 @@ msgid "View test"
 msgstr "View test"
 
 #: packages/quizms/src/web/student/layout.tsx
+msgid "Waiting for the teacher"
+msgstr "Waiting for the teacher"
+
+#: packages/quizms/src/web/student/layout.tsx
 msgid "Warning!"
 msgstr "Warning!"
 
@@ -643,6 +674,10 @@ msgstr "you are using an unsupported browser!"
 #: packages/quizms/src/web/entry/browser-check.tsx
 msgid "you are using an unsupported version of {browserName}!"
 msgstr "you are using an unsupported version of {browserName}!"
+
+#: packages/quizms/src/web/student/layout.tsx
+msgid "You asked to finish the test: tell your teacher so they can confirm it. In the meantime you can no longer change your answers. If the teacher sends the test back, you can keep answering until the end of your time."
+msgstr "You asked to finish the test: tell your teacher so they can confirm it. In the meantime you can no longer change your answers. If the teacher sends the test back, you can keep answering until the end of your time."
 
 #: packages/quizms/src/web/student/layout.tsx
 msgid "You cannot leave this page or exit full-screen mode."

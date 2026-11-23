@@ -11,8 +11,10 @@ import {
   startContestWindow,
   stopContestWindow,
   teacherApproveStudentRestore,
+  teacherApproveSubmission,
   teacherImportStudents,
   teacherRejectStudentRestore,
+  teacherRejectSubmission,
   teacherReopenStudent,
   teacherSetStudentsDisabled,
   teacherUpdateStudent,
@@ -88,6 +90,12 @@ function TeacherInner({ user, schoolId }: { user: User; schoolId: string }) {
           teacherSetStudentsDisabled(user, { venueId, studentIds, disabled })
         }
         reopenStudent={(venueId, studentId) => teacherReopenStudent(user, { venueId, studentId })}
+        approveSubmission={(venueId, studentId) =>
+          teacherApproveSubmission(user, { venueId, studentId })
+        }
+        rejectSubmission={(venueId, studentId) =>
+          teacherRejectSubmission(user, { venueId, studentId })
+        }
         variants={variants}
         logout={logout}
         statementComponent={() => <FirebaseStatement />}

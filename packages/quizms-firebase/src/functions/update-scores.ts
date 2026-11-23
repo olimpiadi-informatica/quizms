@@ -1,7 +1,7 @@
 import { pipeline } from "node:stream/promises";
 
 import { calcScore, type Student } from "@olinfo/quizms/models";
-import { FieldValue, type QueryDocumentSnapshot } from "firebase-admin/firestore";
+import { FieldValue, type QueryDocumentSnapshot, Timestamp } from "firebase-admin/firestore";
 import type { Request } from "firebase-functions/tasks";
 
 import { studentConverter, variantConverter } from "~/cli/utils/converters-admin";
@@ -28,10 +28,24 @@ export async function updateScoresHandler(request: Request) {
         const studentSnap = await t.get(ref);
         const student = studentSnap.data();
         if (!student?.variantId) return;
+        const update: Record<string, unknown> = {};
+
         const score = calcScore(student, variants[student.variantId]?.schema);
         if (score !== student.score) {
           // `calcScore` returns `undefined` for absent or disabled students: remove their score.
-          t.update(ref, { score: score ?? FieldValue.delete() });
+          update.score = score ?? FieldValue.delete();
+        }
+
+        // A submission request still waiting for the teacher at the end of the contest counts as
+        // a submission made when it was requested.
+        if (student.status === "pending_approval") {
+          update.status = "submitted";
+          update.submittedAt = student.terminationRequestedAt ?? Timestamp.now();
+          update.submittedBy = "student";
+        }
+
+        if (Object.keys(update).length > 0) {
+          t.update(ref, update);
         }
       });
     }

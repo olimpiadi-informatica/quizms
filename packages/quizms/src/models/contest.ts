@@ -66,6 +66,13 @@ const matchingRules = z.array(
     }),
 );
 
+/**
+ * - `immediate`: the student's test ends as soon as they submit.
+ * - `teacher_approval`: the student requests the submission, the teacher approves or rejects it.
+ */
+export const contestTerminationModeSchema = z.enum(["immediate", "teacher_approval"]);
+export type ContestTerminationMode = z.infer<typeof contestTerminationModeSchema>;
+
 const onlineContestSettings = z.strictObject({
   // Finestra di tempo durante la quale è possibile far partire la gara
   contestWindow: z.strictObject({
@@ -76,6 +83,8 @@ const onlineContestSettings = z.strictObject({
   duration: z.coerce.number().positive(),
   // Se la gara può essere svolta su più turni
   allowRestart: z.boolean(),
+  // Come termina la prova dello studente (se assente, "immediate")
+  terminationMode: contestTerminationModeSchema.optional(),
 });
 
 export const scoreVisibilitySchema = z.enum(["never", "always", "finalized"]);

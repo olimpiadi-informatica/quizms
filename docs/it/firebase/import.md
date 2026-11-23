@@ -34,6 +34,7 @@ Se `has_online` è `true`, i seguenti campi sono richiesti:
 | `contest_window_end`   | Data di fine della finestra di svolgimento della gara.   | `date`     |      |
 | `duration`             | Durata della gara in minuti.                             | `number`   |      |
 | `allow_restart`        | Se gli insegnanti possono far partire la gara più volte. | `boolean`  |      |
+| `termination_mode`     | Come termina la prova dello studente: `"immediate"` quando lo studente consegna, oppure `"teacher_approval"` se l'insegnante deve confermare la consegna. | `string` | Opzionale, predefinito `"immediate"`. |
 
 I campi di tipo "`string` o tabella" si possono [tradurre](../task/languages#tradurre-la-configurazione) nelle lingue della gara.
 

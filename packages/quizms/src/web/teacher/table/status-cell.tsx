@@ -9,6 +9,7 @@ import { RotateCcw } from "lucide-react";
 import type { Student, StudentPhase } from "~/models";
 import { useStudentPhase } from "~/web/student/phase";
 import { useTeacher } from "~/web/teacher/context";
+import { SubmissionRequestActions } from "~/web/teacher/dashboard-submission-requests";
 
 export function StudentStatusCell({ data }: ICellRendererParams<Student>) {
   if (!data?.participationWindow) return null;
@@ -23,12 +24,14 @@ function StudentStatus({ student }: { student: Student }) {
   const labels: Record<StudentPhase, string> = {
     not_started: t`Not started`,
     ongoing: t`In progress`,
+    pending_approval: t`Submission requested`,
     submitted: t`Submitted`,
     expired: t`Time expired`,
   };
   const badges: Record<StudentPhase, string> = {
     not_started: "badge-ghost",
     ongoing: "badge-success",
+    pending_approval: "badge-warning",
     submitted: "badge-neutral",
     expired: "badge-neutral",
   };
@@ -59,6 +62,9 @@ function StudentStatus({ student }: { student: Student }) {
         {phase === "submitted" && submittedAt && ` ${submittedAt}`}
       </span>
       {canReopen && <ReopenButton student={student} reopen={reopenStudent} />}
+      {phase === "pending_approval" && !venue.finalized && (
+        <SubmissionRequestActions student={student} />
+      )}
     </div>
   );
 }

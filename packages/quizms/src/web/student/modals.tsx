@@ -78,7 +78,8 @@ export function PointsTable({ schema }: { schema: Schema }) {
 
 export function SubmitModal({ ref }: { ref: RefObject<HTMLDialogElement | null> }) {
   const { t } = useLingui();
-  const { submit } = useStudent();
+  const { submit, contest } = useStudent();
+  const needsApproval = contest.onlineSettings?.terminationMode === "teacher_approval";
 
   const close = () => {
     ref.current?.close();
@@ -98,7 +99,14 @@ export function SubmitModal({ ref }: { ref: RefObject<HTMLDialogElement | null> 
   return (
     <Modal ref={ref} title={t`Are you sure you want to finish?`}>
       <p>
-        <Trans>Once you confirm, you will no longer be able to change your answers.</Trans>
+        {needsApproval ? (
+          <Trans>
+            Once you confirm, you will no longer be able to change your answers, unless your teacher
+            sends the test back to you.
+          </Trans>
+        ) : (
+          <Trans>Once you confirm, you will no longer be able to change your answers.</Trans>
+        )}
       </p>
       <Form onSubmit={confirm} className="!max-w-full">
         <div className="flex flex-wrap justify-center gap-2">

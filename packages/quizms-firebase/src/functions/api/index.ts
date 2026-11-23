@@ -16,10 +16,12 @@ import {
 } from "./student";
 import {
   teacherApproveStudentRestore,
+  teacherApproveSubmission,
   teacherFinalizeVenue,
   teacherImportStudents,
   teacherLogin,
   teacherRejectStudentRestore,
+  teacherRejectSubmission,
   teacherReopenStudent,
   teacherSetStudentsDisabled,
   teacherStartContestWindow,
@@ -44,6 +46,8 @@ export const appRouter = router({
   teacherApproveStudentRestore,
   teacherRejectStudentRestore,
   teacherReopenStudent,
+  teacherApproveSubmission,
+  teacherRejectSubmission,
   teacherUpdateStudent,
   teacherSetStudentsDisabled,
   teacherImportStudents,

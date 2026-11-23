@@ -17,6 +17,7 @@ function StudentContextWrapper({ student, children }: { student: Student; childr
     student,
     phase: "expired",
     terminated: true,
+    locked: true,
     language: "it",
   };
   return (

@@ -29,6 +29,10 @@ export type TeacherContextProps = {
   ) => Promise<unknown>;
   /** Funzione per riaprire la gara di uno studente che ha consegnato (opzionale) */
   reopenStudent?: (venueId: string, studentId: string) => Promise<void>;
+  /** Funzione per approvare la richiesta di consegna di uno studente (opzionale) */
+  approveSubmission?: (venueId: string, studentId: string) => Promise<void>;
+  /** Funzione per rifiutare la richiesta di consegna di uno studente (opzionale) */
+  rejectSubmission?: (venueId: string, studentId: string) => Promise<void>;
 
   /** Varianti dei testi */
   variants: Record<string, Variant>;
@@ -70,6 +74,8 @@ export function useTeacher(): Omit<OmitContestParam<TeacherContextProps>, `use${
     importStudents,
     setStudentsDisabled,
     reopenStudent,
+    approveSubmission,
+    rejectSubmission,
     ...ctx
   } = use(TeacherContext);
   const venueId = ctx.venue.id;
@@ -83,6 +89,10 @@ export function useTeacher(): Omit<OmitContestParam<TeacherContextProps>, `use${
     setStudentsDisabled: (studentIds: string[], disabled: boolean) =>
       setStudentsDisabled(venueId, studentIds, disabled),
     reopenStudent: reopenStudent && ((studentId: string) => reopenStudent(venueId, studentId)),
+    approveSubmission:
+      approveSubmission && ((studentId: string) => approveSubmission(venueId, studentId)),
+    rejectSubmission:
+      rejectSubmission && ((studentId: string) => rejectSubmission(venueId, studentId)),
   };
 }
 

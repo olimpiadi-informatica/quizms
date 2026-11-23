@@ -118,6 +118,17 @@ export async function teacherReopenStudent(user: User, body: Inputs["teacherReop
   await translateErrors(trpc.teacherReopenStudent.mutate(body, { context: { user } }));
 }
 
+export async function teacherApproveSubmission(
+  user: User,
+  body: Inputs["teacherApproveSubmission"],
+) {
+  await translateErrors(trpc.teacherApproveSubmission.mutate(body, { context: { user } }));
+}
+
+export async function teacherRejectSubmission(user: User, body: Inputs["teacherRejectSubmission"]) {
+  await translateErrors(trpc.teacherRejectSubmission.mutate(body, { context: { user } }));
+}
+
 export async function teacherUpdateStudent(user: User, body: Inputs["teacherUpdateStudent"]) {
   return await trpc.teacherUpdateStudent.mutate(body, { context: { user } });
 }

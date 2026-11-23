@@ -49,7 +49,7 @@ export function Blockly<State>({
   if (!Visualizer) throw new Error("No visualizer specified");
 
   const { t, i18n } = useLingui();
-  const { student, setAnswer, terminated } = useStudent();
+  const { student, setAnswer, locked } = useStudent();
   const { id } = useProblem();
 
   const [iframe, setIframe] = useState<HTMLIFrameElement | null>(null);
@@ -73,7 +73,7 @@ export function Blockly<State>({
 
   const { ready, blocks, svg, code, variableMappings, highlightBlock } = useIframe(
     iframe,
-    terminated,
+    locked,
     {
       // Custom toolboxes are written by the problem author, in the language of the statement.
       toolbox: toolbox ?? defaultToolbox(),
@@ -118,21 +118,21 @@ export function Blockly<State>({
   useEffect(() => {
     const interval = setInterval(async () => {
       if (blocksChangedRef.current) {
-        if (!terminated) await saveAnswer();
+        if (!locked) await saveAnswer();
       }
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [saveAnswer, terminated]);
+  }, [saveAnswer, locked]);
 
   // Save pending changes when the workspace goes away (e.g. the statement language changes),
   // instead of losing up to 5 seconds of edits.
   const pendingSaveRef = useRef<() => void>(undefined);
   useEffect(() => {
     pendingSaveRef.current = () => {
-      if (blocksChangedRef.current && !terminated) void saveAnswer();
+      if (blocksChangedRef.current && !locked) void saveAnswer();
     };
-  }, [saveAnswer, terminated]);
+  }, [saveAnswer, locked]);
   useEffect(() => () => pendingSaveRef.current?.(), []);
 
   const {
@@ -167,8 +167,8 @@ export function Blockly<State>({
 
     setTestcaseResults(results);
     setEvaluated(true);
-    if (!terminated) await saveAnswer(results.map((r) => r.success));
-  }, [code, customBlocks, testcases, saveAnswer, terminated, i18n]);
+    if (!locked) await saveAnswer(results.map((r) => r.success));
+  }, [code, customBlocks, testcases, saveAnswer, locked, i18n]);
 
   return (
     <div className={clsx(style.workspace, "not-prose")}>

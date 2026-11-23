@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { getStudentPhase, isStudentTerminated, type Student } from "~/models/student";
+import {
+  getStudentPhase,
+  isStudentLocked,
+  isStudentTerminated,
+  type Student,
+} from "~/models/student";
 
 const start = new Date("2030-01-01T10:00:00Z");
 const end = new Date("2030-01-01T11:00:00Z");
@@ -45,10 +50,37 @@ describe("getStudentPhase", () => {
   });
 });
 
+describe("getStudentPhase with teacher approval", () => {
+  it("is pending while the request waits for the teacher", () => {
+    expect(getStudentPhase(student({ status: "pending_approval" }), during)).toBe(
+      "pending_approval",
+    );
+  });
+
+  it("is expired when the window ends with a pending request", () => {
+    expect(getStudentPhase(student({ status: "pending_approval" }), after)).toBe("expired");
+  });
+
+  it("is not started before the window, even with a pending status", () => {
+    expect(getStudentPhase(student({ status: "pending_approval" }), before)).toBe("not_started");
+  });
+});
+
+describe("isStudentLocked", () => {
+  it("locks the answers of pending, submitted and expired students", () => {
+    expect(isStudentLocked("not_started")).toBe(false);
+    expect(isStudentLocked("ongoing")).toBe(false);
+    expect(isStudentLocked("pending_approval")).toBe(true);
+    expect(isStudentLocked("submitted")).toBe(true);
+    expect(isStudentLocked("expired")).toBe(true);
+  });
+});
+
 describe("isStudentTerminated", () => {
   it("is true only for submitted and expired students", () => {
     expect(isStudentTerminated("not_started")).toBe(false);
     expect(isStudentTerminated("ongoing")).toBe(false);
+    expect(isStudentTerminated("pending_approval")).toBe(false);
     expect(isStudentTerminated("submitted")).toBe(true);
     expect(isStudentTerminated("expired")).toBe(true);
   });

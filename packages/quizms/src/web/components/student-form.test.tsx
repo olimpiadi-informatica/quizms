@@ -28,6 +28,7 @@ function renderForm({
     student,
     phase: "ongoing",
     terminated: false,
+    locked: false,
     language: language ?? "it",
   };
   const Wrapper = ({ children }: { children: ReactNode }) => (

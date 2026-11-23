@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import {
   type Answer,
   type Contest,
+  isStudentLocked,
   isStudentTerminated,
   type Schema,
   type Student,
@@ -37,6 +38,8 @@ type StudentProviderProps = {
   phase: StudentPhase;
   /** Whether the test is completed (submitted or expired) */
   terminated: boolean;
+  /** Whether the answers can no longer be changed (terminated or waiting for approval) */
+  locked: boolean;
   /** Correct answers */
   schema?: Schema;
   /** Language of the statement being shown (defaults to the contest default language) */
@@ -50,17 +53,19 @@ export function StudentProvider({
   student,
   language,
   ...props
-}: Omit<StudentProviderProps, "terminated" | "phase"> & {
+}: Omit<StudentProviderProps, "terminated" | "locked" | "phase"> & {
   children: ReactNode;
 }) {
   const phase = useStudentPhase(student);
   const terminated = isStudentTerminated(phase);
+  const locked = isStudentLocked(phase);
 
   const value: StudentContextProps = {
     ...props,
     student,
     phase,
     terminated,
+    locked,
     // Contests stored before `languages` existed don't have the field
     language: language ?? props.contest.languages?.[0] ?? "it",
   };

@@ -27,6 +27,10 @@ type TeacherProviderProps = {
   ) => Promise<unknown>;
   /** Reopens the contest of a student who submitted before the end of their window (optional) */
   reopenStudent?: (venueId: string, studentId: string) => Promise<void>;
+  /** Approves the submission request of a student (`teacher_approval` mode, optional) */
+  approveSubmission?: (venueId: string, studentId: string) => Promise<void>;
+  /** Rejects the submission request of a student (`teacher_approval` mode, optional) */
+  rejectSubmission?: (venueId: string, studentId: string) => Promise<void>;
   variants: Variant[];
   logout: () => Promise<void>;
   statementComponent: ComponentType<Record<never, never>>;
@@ -117,6 +121,8 @@ function ProviderInner({
   importStudents,
   setStudentsDisabled,
   reopenStudent,
+  approveSubmission,
+  rejectSubmission,
   variants,
   logout,
   statementComponent: Statement,
@@ -148,6 +154,8 @@ function ProviderInner({
     importStudents,
     setStudentsDisabled,
     reopenStudent,
+    approveSubmission,
+    rejectSubmission,
     variants: contestVariants,
     logout,
     getPdfStatements: ({ language }) =>

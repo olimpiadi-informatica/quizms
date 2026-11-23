@@ -4,9 +4,10 @@ import { answerSchema } from "~/models/variant";
 
 /**
  * Lifecycle of the student, independent of the participation window. A missing status means
- * `"ongoing"` (students stored before this field existed).
+ * `"ongoing"` (students stored before this field existed). `pending_approval` is used only in
+ * contests whose `terminationMode` is `teacher_approval`.
  */
-export const studentStatusSchema = z.enum(["ongoing", "submitted"]);
+export const studentStatusSchema = z.enum(["ongoing", "pending_approval", "submitted"]);
 export type StudentStatus = z.infer<typeof studentStatusSchema>;
 
 export const studentSchema = z
@@ -38,6 +39,8 @@ export const studentSchema = z
     submittedAt: z.date(),
     /** Who submitted the student */
     submittedBy: z.enum(["student", "teacher"]),
+    /** When the student requested the submission (`teacher_approval` mode) */
+    terminationRequestedAt: z.date(),
 
     variantId: z.string(),
     answers: z.record(z.string(), answerSchema),
@@ -60,6 +63,8 @@ export type StudentPhase =
   /** No participation window yet, or the window has not started */
   | "not_started"
   | "ongoing"
+  /** Waiting for the teacher to approve the submission: the answers are locked */
+  | "pending_approval"
   /** Explicitly submitted, by the student or by the teacher */
   | "submitted"
   /** The participation window ended without an explicit submission */
@@ -76,7 +81,9 @@ export function studentPhase(
 ): StudentPhase {
   if (!student.participationWindow || !started) return "not_started";
   if (student.status === "submitted") return "submitted";
+  // A request still pending when the window ends is just a finished student.
   if (ended) return "expired";
+  if (student.status === "pending_approval") return "pending_approval";
   return "ongoing";
 }
 
@@ -86,6 +93,11 @@ export function getStudentPhase(
 ): StudentPhase {
   const window = student.participationWindow;
   return studentPhase(student, !!window && now >= window.start, !!window && now >= window.end);
+}
+
+/** Whether the student can no longer change the answers (finished or waiting for approval). */
+export function isStudentLocked(phase: StudentPhase) {
+  return isStudentTerminated(phase) || phase === "pending_approval";
 }
 
 export function isStudentTerminated(phase: StudentPhase) {

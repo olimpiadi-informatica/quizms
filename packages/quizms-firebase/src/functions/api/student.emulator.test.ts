@@ -524,6 +524,57 @@ describe("studentSubmitContest", () => {
     expect(student?.submittedAt).toEqual(NOW);
   });
 
+  describe("with teacher approval", () => {
+    beforeEach(async () => {
+      await seed(db, {
+        contests: [
+          makeContest({
+            id: "contest",
+            languages: ["it", "en"],
+            onlineSettings: {
+              contestWindow: {
+                start: new Date("2030-05-10T08:00:00Z"),
+                end: new Date("2030-05-10T18:00:00Z"),
+              },
+              duration: 60,
+              allowRestart: false,
+              terminationMode: "teacher_approval",
+            },
+          }),
+        ],
+      });
+    });
+
+    it("requests the submission instead of submitting", async () => {
+      await asStudent(claims).studentSubmitContest();
+      const student = await getStudent();
+      expect(student?.status).toBe("pending_approval");
+      expect(student?.terminationRequestedAt).toEqual(NOW);
+      expect(student?.submittedAt).toBeUndefined();
+      expect(student?.participationWindow).toEqual(studentWindow);
+    });
+
+    it("keeps the first request time when submitting again", async () => {
+      await asStudent(claims).studentSubmitContest();
+      vi.setSystemTime(new Date("2030-05-10T10:00:05Z"));
+      await asStudent(claims).studentSubmitContest();
+      expect((await getStudent())?.terminationRequestedAt).toEqual(NOW);
+    });
+
+    it("rejects answers while waiting for the teacher", async () => {
+      await asStudent(claims).studentSubmitContest();
+      await expect(
+        asStudent(claims).studentSetAnswer({
+          problemId: "1",
+          answer: { type: "openNumber", value: 42 },
+        }),
+      ).rejects.toThrow(
+        expect.objectContaining({ code: "FORBIDDEN", message: "Consegna in attesa di conferma" }),
+      );
+      expect((await getStudent())?.answers?.["1"]).toBeUndefined();
+    });
+  });
+
   it("rejects answers after submitting", async () => {
     await asStudent(claims).studentSubmitContest();
     vi.setSystemTime(new Date("2030-05-10T10:00:11Z"));
