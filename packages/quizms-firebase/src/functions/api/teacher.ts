@@ -329,7 +329,7 @@ export const teacherUpdateStudent = teacherProcedure
       student: z.strictObject({
         id: docId,
         userData: studentSchema.shape.userData.unwrap().optional(),
-        variantId: docId.optional(),
+        variantId: docId.nullable().optional(),
         answers: z.record(z.string(), answerSchema).optional(),
         absent: z.boolean().optional(),
         disabled: z.boolean().optional(),
@@ -386,7 +386,11 @@ export const teacherUpdateStudent = teacherProcedure
         });
       }
 
-      const variantId = data.student.variantId ?? existing?.variantId ?? Object.keys(variants)[0];
+      const defaultVariantId = contest.hasVariants ? undefined : Object.keys(variants)[0];
+      const variantId =
+        contest.hasVariants && data.student.variantId === null
+          ? undefined
+          : (data.student.variantId ?? existing?.variantId ?? defaultVariantId);
       if (contest.hasVariants && variantId && !variants[variantId]) {
         throw new TRPCError({ code: "BAD_REQUEST", message: `Variante "${variantId}" non valida` });
       }
@@ -410,7 +414,9 @@ export const teacherUpdateStudent = teacherProcedure
             updateData.userDataHash = studentHash(contest, data.student.userData);
           }
         }
-        if (data.student.variantId !== undefined) updateData.variantId = data.student.variantId;
+        if (data.student.variantId !== undefined) {
+          updateData.variantId = variantId ?? FieldValue.delete();
+        }
         if (data.student.answers !== undefined) updateData.answers = data.student.answers;
         if (data.student.absent !== undefined) updateData.absent = data.student.absent;
         if (data.student.disabled !== undefined) updateData.disabled = data.student.disabled;
@@ -489,9 +495,10 @@ export const teacherSetStudentsDisabled = teacherProcedure
       const batch = db.batch();
       for (const student of studentChunk) {
         // Re-enabled students get their score back.
+        const variant = student.variantId ? variants[student.variantId] : undefined;
         const score = data.disabled
           ? undefined
-          : calcScore({ ...student, disabled: false }, variants[student.variantId!]?.schema);
+          : calcScore({ ...student, disabled: false }, variant?.schema);
         batch.update(studentRef(venue.id, student.id), {
           disabled: data.disabled,
           updatedAt: Timestamp.now(),
@@ -517,7 +524,7 @@ export const teacherImportStudents = teacherProcedure
           z.strictObject({
             id: docId.optional(),
             userData: studentSchema.shape.userData.unwrap().required(),
-            variantId: docId.optional(),
+            variantId: docId.nullable().optional(),
             answers: z.record(z.string(), answerSchema).optional().default({}),
             absent: z.boolean().optional().default(false),
             extraData: z.record(z.string(), z.any()).optional().default({ imported: true }),

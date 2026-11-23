@@ -32,6 +32,13 @@ describe("columnDefinition", () => {
     expect(getValidationErrors({ value: "101" })).toBeNull();
     expect(getValidationErrors({ value: "invalid" })).toEqual(["Invalid variant"]);
     expect(getValidationErrors({ value: "" })).toBeNull();
+
+    const valueParser = (variantCol as any)?.valueParser;
+    expect(valueParser({ newValue: "101" })).toBe("101");
+    expect(valueParser({ newValue: "  101  " })).toBe("101");
+    expect(valueParser({ newValue: "" })).toBeUndefined();
+    expect(valueParser({ newValue: "   " })).toBeUndefined();
+    expect(valueParser({ newValue: undefined })).toBeUndefined();
   });
 
   describe("problem answer columns", () => {

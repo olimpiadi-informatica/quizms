@@ -598,7 +598,7 @@ describe("teacherUpdateStudent", () => {
     expect(student?.score).toBeUndefined();
   });
 
-  it("creates a new student when allowStudentImport is true", async () => {
+  it("creates a new student without variant when hasVariants is true", async () => {
     const res = await teacher.teacherUpdateStudent({
       venueId: "venue",
       student: {
@@ -607,10 +607,34 @@ describe("teacherUpdateStudent", () => {
       },
     });
 
-    expect(res).toEqual({ id: "new-student", score: 1 });
+    expect(res).toEqual({ id: "new-student", score: undefined });
     const student = await getStudent("venue", "new-student");
     expect(student).toMatchObject({
       id: "new-student",
+      contestId: "contest",
+      venueId: "venue",
+      userData: { name: "Giuseppe", surname: "Verdi" },
+      absent: false,
+      disabled: false,
+    });
+    expect(student?.variantId).toBeUndefined();
+    expect(student?.score).toBeUndefined();
+  });
+
+  it("creates a new student with variant when provided", async () => {
+    const res = await teacher.teacherUpdateStudent({
+      venueId: "venue",
+      student: {
+        id: "new-student-with-variant",
+        variantId: "v1",
+        userData: { name: "Giuseppe", surname: "Verdi" },
+      },
+    });
+
+    expect(res).toEqual({ id: "new-student-with-variant", score: 1 });
+    const student = await getStudent("venue", "new-student-with-variant");
+    expect(student).toMatchObject({
+      id: "new-student-with-variant",
       contestId: "contest",
       venueId: "venue",
       userData: { name: "Giuseppe", surname: "Verdi" },
@@ -619,6 +643,60 @@ describe("teacherUpdateStudent", () => {
       absent: false,
       disabled: false,
     });
+  });
+
+  it("creates a new student with default variant when hasVariants is false", async () => {
+    await seed(db, {
+      contests: [makeContest({ id: "contest", hasVariants: false })],
+    });
+
+    const res = await teacher.teacherUpdateStudent({
+      venueId: "venue",
+      student: {
+        id: "new-student-no-variants",
+        userData: { name: "Giuseppe", surname: "Verdi" },
+      },
+    });
+
+    expect(res).toEqual({ id: "new-student-no-variants", score: 1 });
+    const student = await getStudent("venue", "new-student-no-variants");
+    expect(student).toMatchObject({
+      id: "new-student-no-variants",
+      contestId: "contest",
+      venueId: "venue",
+      userData: { name: "Giuseppe", surname: "Verdi" },
+      variantId: "v1",
+      score: 1,
+      absent: false,
+      disabled: false,
+    });
+  });
+
+  it("allows clearing variant on an existing student", async () => {
+    await seed(db, {
+      students: [
+        makeStudent({
+          id: "s1",
+          venueId: "venue",
+          variantId: "v1",
+          answers: { "1": { type: "openNumber", value: 42 } },
+          score: 5,
+        }),
+      ],
+    });
+
+    const res = await teacher.teacherUpdateStudent({
+      venueId: "venue",
+      student: {
+        id: "s1",
+        variantId: null,
+      },
+    });
+
+    expect(res).toEqual({ id: "s1", score: undefined });
+    const student = await getStudent("venue", "s1");
+    expect(student?.variantId).toBeUndefined();
+    expect(student?.score).toBeUndefined();
   });
 
   it("rejects creating a new student when allowStudentImport is false", async () => {

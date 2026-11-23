@@ -146,7 +146,7 @@ function useStudents(venueId: string) {
           student: {
             id: student.id,
             userData: student.userData,
-            variantId: student.variantId,
+            variantId: student.variantId ?? null,
             answers: student.answers,
             absent: student.absent,
             disabled: student.disabled,
