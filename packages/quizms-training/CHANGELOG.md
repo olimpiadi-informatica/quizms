@@ -1,5 +1,18 @@
 # @olinfo/quizms-training
 
+## 5.2.1
+
+### Patch Changes
+
+- [#106](https://github.com/olimpiadi-informatica/quizms/pull/106) [`2fa3776`](https://github.com/olimpiadi-informatica/quizms/commit/2fa37763a3cc263eceda95f802f773e85f955765) Thanks [@Alenygam](https://github.com/Alenygam)! - Added the `teacher_approval` termination mode for online contests (`onlineSettings.terminationMode`, default `immediate`).
+  - When the student finishes, the test is locked and waits for the teacher, who can approve the submission or send the test back. The student's time keeps running in the meantime.
+  - Teachers see the requests in a new "Submission requests" panel of the dashboard and in the status column of the table (new `teacherApproveSubmission` and `teacherRejectSubmission` APIs and optional `approveSubmission` and `rejectSubmission` props of `TeacherProvider`).
+  - Requests still pending at the end of the contest are recorded as submitted when the scores are computed.
+  - The student context exposes the new `locked` field (true while waiting for the teacher and after the end of the test), used by the answer components to disable the inputs.
+  - Training always ends the test immediately.
+- Updated dependencies [[`779d9fc`](https://github.com/olimpiadi-informatica/quizms/commit/779d9fcb2cf3b17d4abcceae4413b81b1f9714c4), [`2fa3776`](https://github.com/olimpiadi-informatica/quizms/commit/2fa37763a3cc263eceda95f802f773e85f955765), [`2fa3776`](https://github.com/olimpiadi-informatica/quizms/commit/2fa37763a3cc263eceda95f802f773e85f955765), [`b256b15`](https://github.com/olimpiadi-informatica/quizms/commit/b256b15881bc8f69a0d523a6f29bae6e136e3a06)]:
+  - @olinfo/quizms@5.3.0
+
 ## 5.2.0
 
 ### Minor Changes
