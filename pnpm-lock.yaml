@@ -169,7 +169,7 @@ importers:
         version: 13.0.2
       rollup-plugin-license:
         specifier: ^3.7.1
-        version: 3.7.1(picomatch@4.0.5)(rollup@4.59.0)
+        version: 3.7.1(picomatch@4.0.7)(rollup@4.59.0)
       rollup-plugin-node-externals:
         specifier: ^8.1.2
         version: 8.1.2(rollup@4.59.0)
@@ -187,7 +187,7 @@ importers:
         version: 1.2.1
       svgo:
         specifier: ^4.0.0
-        version: 4.0.2
+        version: 4.1.0
       swr:
         specifier: ^2.4.2
         version: 2.4.2(react@19.2.8)
@@ -4085,8 +4085,8 @@ packages:
     resolution: {integrity: sha512-x8dy3RnvYdlUcPOjkEHqozhiwzKNSq7GcPuXFbnyMOCHxX8V3OgIg/pYuabl2sbUPfIJaeAQB7PMOK8DFIdoRA==}
     engines: {node: '>=12'}
 
-  css-select@5.2.2:
-    resolution: {integrity: sha512-TizTzUddG/xYLA3NXodFM0fSbNizXjOKhqiQQwvhlspadZokn1KDy0NZFS0wuEubIYAV5/c1/lAr0TaaFXEXzw==}
+  css-select@6.0.0:
+    resolution: {integrity: sha512-rZZVSLle8v0+EY8QAkDWrKhpgt6SA5OtHsgBnsj6ZaLb5dmDVOWUDtQitd9ydxxvEjhewNudS6eTVU7uOyzvXw==}
 
   css-selector-tokenizer@0.8.0:
     resolution: {integrity: sha512-Jd6Ig3/pe62/qe5SBPTN8h8LeUg/pT4lLgtavPf7updwwHpvFzxvOQBHYj2LZDMjUnBzgvIUSjRcf6oT5HzHFg==}
@@ -4099,8 +4099,8 @@ packages:
     resolution: {integrity: sha512-X7sjQzceUhu1u7Y/ylrRZFU2FS6LRiFVp6rKLPg23y3x3c3DOKAwuXGDp+PAGjh6CSnCjYeAul8pcT8bAl+lSA==}
     engines: {node: ^10 || ^12.20.0 || ^14.13.0 || >=15.0.0}
 
-  css-what@6.2.2:
-    resolution: {integrity: sha512-u/O3vwbptzhMs3L1fQE82ZSLHQQfto5gyZzwteVIEyeaY5Fc7R4dapF/BvRoSYFeqfBk4m0V1Vafq5Pjv25wvA==}
+  css-what@7.0.0:
+    resolution: {integrity: sha512-wD5oz5xibMOPHzy13CyGmogB3phdvcDaB5t0W/Nr5Z2O/agcB8YwOz6e2Lsp10pNDzBoDO9nVa3RGs/2BttpHQ==}
     engines: {node: '>= 6'}
 
   css.escape@1.5.1:
@@ -4518,9 +4518,6 @@ packages:
   es-errors@1.3.0:
     resolution: {integrity: sha512-Zf5H2Kxt2xjTvbJvP2ZWLEICxA6j+hAmMzIlypy4xcBg1vKVnx89Wy0GbS+kf5cwCVFFzdCFh2XSCFNULS6csw==}
     engines: {node: '>= 0.4'}
-
-  es-module-lexer@2.3.1:
-    resolution: {integrity: sha512-shc1dbU90Yl/xq1QrC7QRtfcwURZuVRfPhZbDoldJ1cn1gzDvBaBWlv0eFolj5+0znnPJz5TXLxsN77X/12KTA==}
 
   es-module-lexer@2.3.2:
     resolution: {integrity: sha512-poHGpORABojJJucnV9KbOavETW8lBVnphkW77ER5/BQ5Fz7oXSoCNek7IH3vR5nRjdsEz926ibFYX8KtLQmdyw==}
@@ -7214,8 +7211,8 @@ packages:
     resolution: {integrity: sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w==}
     engines: {node: '>= 0.4'}
 
-  svgo@4.0.2:
-    resolution: {integrity: sha512-ekx94z1rRc5LDi6oSUaeRnYhd0UOJxdtQCL2rF8xpWxD3TPAsISWOrxezqGovqS38GRZOdpDfvQe3ts6F7nsng==}
+  svgo@4.1.0:
+    resolution: {integrity: sha512-bkxnTg1kSU0guhIBmibA6UUhrQmPVA1XsQLN+ylCd+UWzbnLkySOcXpyk1mrl05f+pcaCx2eHb+sp6BgMZWX+Q==}
     engines: {node: '>=16'}
     hasBin: true
 
@@ -8145,7 +8142,7 @@ snapshots:
   '@babel/helper-module-imports@7.29.7(supports-color@8.1.1)':
     dependencies:
       '@babel/traverse': 7.29.14(supports-color@8.1.1)
-      '@babel/types': 7.29.7
+      '@babel/types': 7.29.14
     transitivePeerDependencies:
       - supports-color
 
@@ -8184,8 +8181,8 @@ snapshots:
   '@babel/template@7.29.7':
     dependencies:
       '@babel/code-frame': 7.29.7
-      '@babel/parser': 7.29.7
-      '@babel/types': 7.29.7
+      '@babel/parser': 7.29.14
+      '@babel/types': 7.29.14
 
   '@babel/traverse@7.29.14(supports-color@8.1.1)':
     dependencies:
@@ -8460,7 +8457,6 @@ snapshots:
   '@emnapi/runtime@1.11.3':
     dependencies:
       tslib: 2.8.1
-    optional: true
 
   '@esbuild/aix-ppc64@0.21.5':
     optional: true
@@ -8614,7 +8610,7 @@ snapshots:
   '@fastify/ajv-compiler@4.0.6':
     dependencies:
       ajv: 8.20.0
-      ajv-formats: 3.0.1
+      ajv-formats: 3.0.1(ajv@8.20.0)
       fast-uri: 4.1.4
 
   '@fastify/busboy@3.2.0': {}
@@ -9121,96 +9117,72 @@ snapshots:
   '@img/sharp-darwin-arm64@0.34.5':
     optionalDependencies:
       '@img/sharp-libvips-darwin-arm64': 1.2.4
-    optional: true
 
   '@img/sharp-darwin-x64@0.34.5':
     optionalDependencies:
       '@img/sharp-libvips-darwin-x64': 1.2.4
-    optional: true
 
-  '@img/sharp-libvips-darwin-arm64@1.2.4':
-    optional: true
+  '@img/sharp-libvips-darwin-arm64@1.2.4': {}
 
-  '@img/sharp-libvips-darwin-x64@1.2.4':
-    optional: true
+  '@img/sharp-libvips-darwin-x64@1.2.4': {}
 
-  '@img/sharp-libvips-linux-arm64@1.2.4':
-    optional: true
+  '@img/sharp-libvips-linux-arm64@1.2.4': {}
 
-  '@img/sharp-libvips-linux-arm@1.2.4':
-    optional: true
+  '@img/sharp-libvips-linux-arm@1.2.4': {}
 
-  '@img/sharp-libvips-linux-ppc64@1.2.4':
-    optional: true
+  '@img/sharp-libvips-linux-ppc64@1.2.4': {}
 
-  '@img/sharp-libvips-linux-riscv64@1.2.4':
-    optional: true
+  '@img/sharp-libvips-linux-riscv64@1.2.4': {}
 
-  '@img/sharp-libvips-linux-s390x@1.2.4':
-    optional: true
+  '@img/sharp-libvips-linux-s390x@1.2.4': {}
 
-  '@img/sharp-libvips-linux-x64@1.2.4':
-    optional: true
+  '@img/sharp-libvips-linux-x64@1.2.4': {}
 
-  '@img/sharp-libvips-linuxmusl-arm64@1.2.4':
-    optional: true
+  '@img/sharp-libvips-linuxmusl-arm64@1.2.4': {}
 
-  '@img/sharp-libvips-linuxmusl-x64@1.2.4':
-    optional: true
+  '@img/sharp-libvips-linuxmusl-x64@1.2.4': {}
 
   '@img/sharp-linux-arm64@0.34.5':
     optionalDependencies:
       '@img/sharp-libvips-linux-arm64': 1.2.4
-    optional: true
 
   '@img/sharp-linux-arm@0.34.5':
     optionalDependencies:
       '@img/sharp-libvips-linux-arm': 1.2.4
-    optional: true
 
   '@img/sharp-linux-ppc64@0.34.5':
     optionalDependencies:
       '@img/sharp-libvips-linux-ppc64': 1.2.4
-    optional: true
 
   '@img/sharp-linux-riscv64@0.34.5':
     optionalDependencies:
       '@img/sharp-libvips-linux-riscv64': 1.2.4
-    optional: true
 
   '@img/sharp-linux-s390x@0.34.5':
     optionalDependencies:
       '@img/sharp-libvips-linux-s390x': 1.2.4
-    optional: true
 
   '@img/sharp-linux-x64@0.34.5':
     optionalDependencies:
       '@img/sharp-libvips-linux-x64': 1.2.4
-    optional: true
 
   '@img/sharp-linuxmusl-arm64@0.34.5':
     optionalDependencies:
       '@img/sharp-libvips-linuxmusl-arm64': 1.2.4
-    optional: true
 
   '@img/sharp-linuxmusl-x64@0.34.5':
     optionalDependencies:
       '@img/sharp-libvips-linuxmusl-x64': 1.2.4
-    optional: true
 
   '@img/sharp-wasm32@0.34.5':
     dependencies:
       '@emnapi/runtime': 1.11.3
-    optional: true
 
-  '@img/sharp-win32-arm64@0.34.5':
-    optional: true
+  '@img/sharp-win32-arm64@0.34.5': {}
 
-  '@img/sharp-win32-ia32@0.34.5':
-    optional: true
+  '@img/sharp-win32-ia32@0.34.5': {}
 
-  '@img/sharp-win32-x64@0.34.5':
-    optional: true
+  '@img/sharp-win32-x64@0.34.5': {}
 
   '@inquirer/ansi@1.0.2': {}
 
@@ -9763,7 +9735,7 @@ snapshots:
     dependencies:
       '@hono/node-server': 2.1.11(hono@4.13.19)
       ajv: 8.20.0
-      ajv-formats: 3.0.1
+      ajv-formats: 3.0.1(ajv@8.20.0)
       content-type: 1.0.5
       cors: 2.8.6
       cross-spawn: 7.0.6
@@ -9966,7 +9938,7 @@ snapshots:
     dependencies:
       ajv: 8.20.0
       ajv-draft-04: 1.0.0(ajv@8.20.0)
-      ajv-formats: 3.0.1
+      ajv-formats: 3.0.1(ajv@8.20.0)
       fs-extra: 11.3.6
       import-lazy: 4.0.0
       jju: 1.4.0
@@ -10820,12 +10792,12 @@ snapshots:
     optionalDependencies:
       ajv: 8.20.0
 
-  ajv-formats@2.1.1:
-    dependencies:
+  ajv-formats@2.1.1(ajv@8.20.0):
+    optionalDependencies:
       ajv: 8.20.0
 
-  ajv-formats@3.0.1:
-    dependencies:
+  ajv-formats@3.0.1(ajv@8.20.0):
+    optionalDependencies:
       ajv: 8.20.0
 
   ajv-keywords@5.1.0(ajv@8.20.0):
@@ -11446,10 +11418,10 @@ snapshots:
     dependencies:
       type-fest: 1.4.0
 
-  css-select@5.2.2:
+  css-select@6.0.0:
     dependencies:
       boolbase: 1.0.0
-      css-what: 6.2.2
+      css-what: 7.0.0
       domhandler: 5.0.3
       domutils: 3.2.2
       nth-check: 2.1.1
@@ -11463,13 +11435,14 @@ snapshots:
     dependencies:
       mdn-data: 2.0.28
       source-map-js: 1.2.1
+    optional: true
 
   css-tree@3.2.1:
     dependencies:
       mdn-data: 2.27.1
       source-map-js: 1.2.1
 
-  css-what@6.2.2: {}
+  css-what@7.0.0: {}
 
   css.escape@1.5.1: {}
 
@@ -11478,6 +11451,7 @@ snapshots:
   csso@5.0.5:
     dependencies:
       css-tree: 2.2.1
+    optional: true
 
   cssstyle@4.6.0:
     dependencies:
@@ -11866,8 +11840,6 @@ snapshots:
 
   es-errors@1.3.0: {}
 
-  es-module-lexer@2.3.1: {}
-
   es-module-lexer@2.3.2: {}
 
   es-object-atoms@1.1.2:
@@ -12047,7 +12019,7 @@ snapshots:
     dependencies:
       '@apidevtools/json-schema-ref-parser': 9.1.2
       ajv: 8.20.0
-      ajv-formats: 2.1.1
+      ajv-formats: 2.1.1(ajv@8.20.0)
       body-parser: 1.20.9(supports-color@8.1.1)
       content-type: 1.0.5
       deep-freeze: 0.0.1
@@ -12170,7 +12142,7 @@ snapshots:
     dependencies:
       '@fastify/merge-json-schemas': 0.2.1
       ajv: 8.20.0
-      ajv-formats: 3.0.1
+      ajv-formats: 3.0.1(ajv@8.20.0)
       fast-uri: 4.1.4
       json-schema-ref-resolver: 3.0.0
       rfdc: 1.4.1
@@ -12248,6 +12220,10 @@ snapshots:
   fdir@6.5.0(picomatch@4.0.5):
     optionalDependencies:
       picomatch: 4.0.5
+
+  fdir@6.5.0(picomatch@4.0.7):
+    optionalDependencies:
+      picomatch: 4.0.7
 
   fecha@4.2.3: {}
 
@@ -12343,7 +12319,7 @@ snapshots:
       '@modelcontextprotocol/sdk': 1.32.2(supports-color@8.1.1)(zod@4.4.3)
       abort-controller: 3.0.0
       ajv: 8.20.0
-      ajv-formats: 3.0.1
+      ajv-formats: 3.0.1(ajv@8.20.0)
       archiver: 7.0.1(bare-buffer@3.7.3)
       async-lock: 1.4.1
       body-parser: 1.20.9(supports-color@8.1.1)
@@ -13624,7 +13600,8 @@ snapshots:
     dependencies:
       '@types/mdast': 4.0.4
 
-  mdn-data@2.0.28: {}
+  mdn-data@2.0.28:
+    optional: true
 
   mdn-data@2.27.1: {}
 
@@ -14987,10 +14964,10 @@ snapshots:
 
   robust-predicates@3.0.3: {}
 
-  rollup-plugin-license@3.7.1(picomatch@4.0.5)(rollup@4.59.0):
+  rollup-plugin-license@3.7.1(picomatch@4.0.7)(rollup@4.59.0):
     dependencies:
       commenting: 1.1.0
-      fdir: 6.5.0(picomatch@4.0.5)
+      fdir: 6.5.0(picomatch@4.0.7)
       lodash: 4.18.1
       magic-string: 0.30.21
       moment: 2.30.1
@@ -15092,7 +15069,7 @@ snapshots:
     dependencies:
       '@types/json-schema': 7.0.15
       ajv: 8.20.0
-      ajv-formats: 2.1.1
+      ajv-formats: 2.1.1(ajv@8.20.0)
       ajv-keywords: 5.1.0(ajv@8.20.0)
 
   search-insights@2.17.3: {}
@@ -15478,12 +15455,12 @@ snapshots:
 
   supports-preserve-symlinks-flag@1.0.0: {}
 
-  svgo@4.0.2:
+  svgo@4.1.0:
     dependencies:
       commander: 11.1.0
-      css-select: 5.2.2
+      css-select: 6.0.0
       css-tree: 3.2.1
-      css-what: 6.2.2
+      css-what: 7.0.0
       csso: 5.0.5
       picocolors: 1.1.1
       sax: 1.6.1
@@ -15944,8 +15921,8 @@ snapshots:
   vite@7.3.6(@types/node@25.9.5)(jiti@1.21.7)(terser@5.49.0)(yaml@2.9.0):
     dependencies:
       esbuild: 0.28.1
-      fdir: 6.5.0(picomatch@4.0.5)
-      picomatch: 4.0.5
+      fdir: 6.5.0(picomatch@4.0.7)
+      picomatch: 4.0.7
       postcss: 8.5.25
       rollup: 4.59.0
       tinyglobby: 0.2.17
@@ -16086,7 +16063,7 @@ snapshots:
       browserslist: 4.28.1
       chrome-trace-event: 1.0.4
       enhanced-resolve: 5.24.5
-      es-module-lexer: 2.3.1
+      es-module-lexer: 2.3.2
       eslint-scope: 5.1.1
       events: 3.3.0
       graceful-fs: 4.2.11
