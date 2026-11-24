@@ -1,5 +1,32 @@
 # @olinfo/quizms
 
+## 5.3.0
+
+### Minor Changes
+
+- [#106](https://github.com/olimpiadi-informatica/quizms/pull/106) [`2fa3776`](https://github.com/olimpiadi-informatica/quizms/commit/2fa37763a3cc263eceda95f802f773e85f955765) Thanks [@Alenygam](https://github.com/Alenygam)! - Submitting a contest no longer shortens the student's participation window. The submission is now recorded in the new `status`, `submittedAt` and `submittedBy` fields of the student, so the time allotted to the student is kept.
+  - Teachers can reopen the contest of a student who submitted by mistake, as long as the student's time is not over (new `teacherReopenStudent` API and optional `reopenStudent` prop of `TeacherProvider`).
+  - The teacher table has a new "Status" column for online contests (not started, in progress, submitted, time expired), and the export includes the status, submission time and who submitted.
+  - The student context exposes the new `phase` field. `getStudentPhase`, `isStudentTerminated` and `useStudentPhase` are exported.
+
+- [#106](https://github.com/olimpiadi-informatica/quizms/pull/106) [`2fa3776`](https://github.com/olimpiadi-informatica/quizms/commit/2fa37763a3cc263eceda95f802f773e85f955765) Thanks [@Alenygam](https://github.com/Alenygam)! - Added the `teacher_approval` termination mode for online contests (`onlineSettings.terminationMode`, default `immediate`).
+  - When the student finishes, the test is locked and waits for the teacher, who can approve the submission or send the test back. The student's time keeps running in the meantime.
+  - Teachers see the requests in a new "Submission requests" panel of the dashboard and in the status column of the table (new `teacherApproveSubmission` and `teacherRejectSubmission` APIs and optional `approveSubmission` and `rejectSubmission` props of `TeacherProvider`).
+  - Requests still pending at the end of the contest are recorded as submitted when the scores are computed.
+  - The student context exposes the new `locked` field (true while waiting for the teacher and after the end of the test), used by the answer components to disable the inputs.
+  - Training always ends the test immediately.
+
+### Patch Changes
+
+- [#104](https://github.com/olimpiadi-informatica/quizms/pull/104) [`779d9fc`](https://github.com/olimpiadi-informatica/quizms/commit/779d9fcb2cf3b17d4abcceae4413b81b1f9714c4) Thanks [@franfill1](https://github.com/franfill1)! - Fixed client-side answer validation in the teacher table:
+  - Closed answers (multiple choice and multiple response) entered by teachers are no longer rejected as invalid due to AG Grid valueParser object coercion.
+  - Answer values are now properly normalized from parsed answer objects and raw strings.
+
+- [#107](https://github.com/olimpiadi-informatica/quizms/pull/107) [`b256b15`](https://github.com/olimpiadi-informatica/quizms/commit/b256b15881bc8f69a0d523a6f29bae6e136e3a06) Thanks [@franfill1](https://github.com/franfill1)! - Allow teachers to insert students without immediately assigning a variant and to clear variants in the teacher table:
+  - In contests with variants, newly inserted students are no longer automatically assigned the default variant.
+  - Teachers can clear a student's assigned variant by emptying the variant cell.
+  - Scores and submission calculations now safely handle students without an assigned variant.
+
 ## 5.2.2
 
 ### Patch Changes
