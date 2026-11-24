@@ -94,6 +94,7 @@ export function columnDefinition(
       editable: !frozen,
       ...defaultOptions,
       hide: !contest.hasVariants,
+      valueParser: (params) => params.newValue?.trim() || undefined,
       cellEditorParams: {
         getValidationErrors: (params) => {
           if (params.value && !variants[params.value]) {

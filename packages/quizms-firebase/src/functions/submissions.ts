@@ -14,12 +14,11 @@ export async function studentUpdatedHandler(
 
   const student = parseSnapshot(studentSchema, data);
 
-  const variant = await db
-    .doc(`variants/${student.variantId}`)
-    .withConverter(variantConverter)
-    .get();
+  const variant = student.variantId
+    ? await db.doc(`variants/${student.variantId}`).withConverter(variantConverter).get()
+    : undefined;
   // Firestore rejects `undefined` values: leave out the fields that are not set.
-  const score = calcScore(student, variant.data()?.schema);
+  const score = calcScore(student, variant?.data()?.schema);
   if (score === undefined) {
     delete student.score;
   } else {

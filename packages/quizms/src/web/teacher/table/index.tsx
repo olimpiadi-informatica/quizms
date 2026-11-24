@@ -163,7 +163,8 @@ function Table({ frozen }: { frozen: boolean }) {
       student = cloneDeep(student);
       setWith(student, ev.colDef.field!, value, Object);
     }
-    const score = calcScore(student, variants[student.variantId!]?.schema);
+    const variant = student.variantId ? variants[student.variantId] : undefined;
+    const score = calcScore(student, variant?.schema);
     // Firestore rejects undefined fields, so drop the score when it can't be computed
     // (e.g. disabled or absent students).
     student = score === undefined ? (omit(student, "score") as Student) : { ...student, score };
