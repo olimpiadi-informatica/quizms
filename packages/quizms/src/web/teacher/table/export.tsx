@@ -9,6 +9,7 @@ import {
   type Contest,
   displayAnswer,
   formatUserData,
+  getStudentPhase,
   localize,
   type Student,
   type Venue,
@@ -50,6 +51,14 @@ function exportStudents(
         ...(contest.hasVariants ? [student.variantId] : []),
         ...contest.problemIds.map((id) => displayAnswer(student.answers?.[id])),
         ...(scoreVisible ? [student.score] : []),
+        // The status columns are after the answers, so that the file can still be imported.
+        ...(contest.onlineSettings
+          ? [
+              student.participationWindow ? getStudentPhase(student) : "",
+              student.submittedAt?.toISOString() ?? "",
+              student.submittedBy ?? "",
+            ]
+          : []),
       ];
     });
 
@@ -58,6 +67,9 @@ function exportStudents(
     ...(contest.hasVariants ? [i18n._(msg`Variant`)] : []),
     ...contest.problemIds,
     ...(scoreVisible ? [i18n._(msg`Score`)] : []),
+    ...(contest.onlineSettings
+      ? [i18n._(msg`Status`), i18n._(msg`Submitted at`), i18n._(msg`Submitted by`)]
+      : []),
   ]);
 
   const csv = stringifyCSV(flatStudents, {

@@ -26,7 +26,9 @@ function renderForm({
   const value: StudentContextProps = {
     ...studentProviderProps({ contest, student }),
     student,
+    phase: "ongoing",
     terminated: false,
+    locked: false,
     language: language ?? "it",
   };
   const Wrapper = ({ children }: { children: ReactNode }) => (

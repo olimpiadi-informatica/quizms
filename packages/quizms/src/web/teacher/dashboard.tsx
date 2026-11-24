@@ -28,6 +28,7 @@ import { Timer, useLocalize } from "~/web/components";
 import { useTeacher } from "./context";
 import { Announcements } from "./dashboard-announcements";
 import { StudentRestoreList } from "./dashboard-student-restore";
+import { SubmissionRequestList } from "./dashboard-submission-requests";
 
 function StartContestButton() {
   const { t } = useLingui();
@@ -280,6 +281,15 @@ export default function TeacherDashboard() {
           <CardBody title={t`Access requests`}>
             <div className="h-96 max-h-screen">
               <StudentRestoreList isStarted={!!venue.token} />
+            </div>
+          </CardBody>
+        </Card>
+      )}
+      {contest.onlineSettings?.terminationMode === "teacher_approval" && (
+        <Card>
+          <CardBody title={t`Submission requests`}>
+            <div className="h-96 max-h-screen">
+              <SubmissionRequestList isStarted={!!venue.token} />
             </div>
           </CardBody>
         </Card>

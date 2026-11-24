@@ -188,6 +188,12 @@ export const studentSetAnswer = studentProcedure
   .mutation(async (opts) => {
     const { input: data, ctx } = opts;
     const student = await checkStudent(ctx.claims, true);
+    if (student.status === "submitted") {
+      throw new TRPCError({ code: "FORBIDDEN", message: "Gara già terminata" });
+    }
+    if (student.status === "pending_approval") {
+      throw new TRPCError({ code: "FORBIDDEN", message: "Consegna in attesa di conferma" });
+    }
 
     // Validate the problem against the student's variant: this rejects unknown ids and answers
     // of the wrong type, which would otherwise be stored and silently ignored by the scoring.
@@ -217,7 +223,9 @@ export const studentSetAnswer = studentProcedure
 
 export const studentSubmitContest = studentProcedure.mutation(async (opts) => {
   const { ctx } = opts;
-  await checkStudent(ctx.claims, true);
+  const { contestId } = await checkStudent(ctx.claims, true);
+  const contest = await getContest(contestId!);
+  const needsApproval = contest.onlineSettings?.terminationMode === "teacher_approval";
   const ref = studentRef(ctx.claims);
 
   await db.runTransaction(async (t) => {
@@ -225,15 +233,23 @@ export const studentSubmitContest = studentProcedure.mutation(async (opts) => {
     if (!student?.participationWindow) {
       throw new TRPCError({ code: "FORBIDDEN", message: "Gara non iniziata" });
     }
+    if (student.status === "submitted" || student.status === "pending_approval") return;
 
-    // Never extend the window: submitting during the grace period keeps the original end.
-    const now = new Date();
-    const currentEnd = student.participationWindow.end;
-    const newEnd = currentEnd < now ? currentEnd : now;
-
-    t.update(ref, {
-      "participationWindow.end": Timestamp.fromDate(newEnd),
-      updatedAt: Timestamp.now(),
-    });
+    // The participation window is left untouched: it keeps the time allotted to the student, so
+    // that the teacher can reopen the contest if the student submitted by mistake.
+    if (needsApproval) {
+      t.update(ref, {
+        status: "pending_approval",
+        terminationRequestedAt: Timestamp.now(),
+        updatedAt: Timestamp.now(),
+      });
+    } else {
+      t.update(ref, {
+        status: "submitted",
+        submittedAt: Timestamp.now(),
+        submittedBy: "student",
+        updatedAt: Timestamp.now(),
+      });
+    }
   });
 });

@@ -51,7 +51,7 @@ ClosedAnswer.displayName = "ClosedAnswer";
 export function MultipleResponseAnswer({ children }: { children: ReactNode }) {
   const { id } = useAnswer();
   const { id: problemId } = useProblem();
-  const { student, setAnswer, terminated, schema } = useStudent();
+  const { student, setAnswer, terminated, locked, schema } = useStudent();
 
   const problemSchema = schema?.[problemId!];
   const correct = isCorrectAnswer(problemSchema, id);
@@ -95,7 +95,7 @@ export function MultipleResponseAnswer({ children }: { children: ReactNode }) {
         )}
         onChange={(e) => submitAnswer(e.target.checked)}
         type="checkbox"
-        disabled={terminated}
+        disabled={locked}
       />
       <div className="my-auto w-6 screen:hidden">{id})</div>
       <label htmlFor={answerId} className="grow [&_pre]:!p-3">
@@ -110,7 +110,7 @@ export function MultipleChoiceAnswer({ children }: { children: ReactNode }) {
   const { t } = useLingui();
   const { id } = useAnswer();
   const { id: problemId } = useProblem();
-  const { student, setAnswer, terminated, schema } = useStudent();
+  const { student, setAnswer, terminated, locked, schema } = useStudent();
   const problemSchema = schema?.[problemId!];
   const correct = isCorrectAnswer(problemSchema, id);
 
@@ -148,7 +148,7 @@ export function MultipleChoiceAnswer({ children }: { children: ReactNode }) {
         )}
         onChange={(e) => submitAnswer(e.target.checked ? id : undefined)}
         type="radio"
-        disabled={terminated}
+        disabled={locked}
       />
       <div className="my-auto w-6 screen:hidden">{id})</div>
       <label htmlFor={answerId} className="grow [&_pre]:!p-3">
@@ -158,7 +158,7 @@ export function MultipleChoiceAnswer({ children }: { children: ReactNode }) {
         <button
           className={clsx(
             "btn btn-square btn-ghost btn-sm my-auto",
-            (answerValue !== id || terminated) && "hidden",
+            (answerValue !== id || locked) && "hidden",
           )}
           type="button"
           onClick={() => submitAnswer(undefined)}
@@ -178,7 +178,7 @@ export type OpenAnswerProps = {
 export function OpenAnswer({ type = "openText" }: OpenAnswerProps) {
   const { t } = useLingui();
   const { id: problemId } = useProblem();
-  const { student, setAnswer, terminated, schema } = useStudent();
+  const { student, setAnswer, terminated, locked, schema } = useStudent();
   const problemSchema = schema?.[problemId!];
 
   const answerValue = student.answers?.[problemId!]?.value as
@@ -212,7 +212,7 @@ export function OpenAnswer({ type = "openText" }: OpenAnswerProps) {
         maxLength={100}
         type={type}
         value={answerValue ?? ""}
-        disabled={terminated}
+        disabled={locked}
         aria-label={t`Answer`}
       />
     </div>

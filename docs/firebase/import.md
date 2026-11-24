@@ -33,6 +33,7 @@ If `has_online` is `true`, the following fields are required:
 | `contest_window_end`   | Contest end date.                            | `date`     |       |
 | `duration`             | Contest duration in minutes.                 | `number`   |       |
 | `allow_restart`        | If teachers can start the contest multiple times. | `boolean`  |       |
+| `termination_mode`     | How the student's test ends: `"immediate"` when the student submits, or `"teacher_approval"` if the teacher must confirm the submission. | `string` | Optional, default `"immediate"`. |
 
 The fields of type "`string` or table" can be [translated](../task/languages#translating-the-configuration) in the languages of the contest.
 

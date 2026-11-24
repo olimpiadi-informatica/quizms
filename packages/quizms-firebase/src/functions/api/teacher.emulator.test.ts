@@ -19,9 +19,12 @@ import {
 import { auth, db } from "../common";
 import {
   teacherApproveStudentRestore,
+  teacherApproveSubmission,
   teacherFinalizeVenue,
   teacherImportStudents,
   teacherRejectStudentRestore,
+  teacherRejectSubmission,
+  teacherReopenStudent,
   teacherSetStudentsDisabled,
   teacherStartContestWindow,
   teacherStopContestWindow,
@@ -43,6 +46,9 @@ const appRouter = router({
   teacherFinalizeVenue,
   teacherApproveStudentRestore,
   teacherRejectStudentRestore,
+  teacherReopenStudent,
+  teacherApproveSubmission,
+  teacherRejectSubmission,
   teacherUpdateStudent,
   teacherSetStudentsDisabled,
   teacherImportStudents,
@@ -515,6 +521,193 @@ describe("teacherRejectStudentRestore", () => {
     await expect(
       anonymous.teacherRejectStudentRestore({ venueId: "venue", studentId: "s1" }),
     ).rejects.toThrow();
+  });
+});
+
+describe("teacherReopenStudent", () => {
+  const studentWindow = {
+    start: new Date("2030-05-10T09:30:00Z"),
+    end: new Date("2030-05-10T11:00:00Z"),
+  };
+  const submittedAt = new Date("2030-05-10T09:50:00Z");
+
+  beforeEach(async () => {
+    await db.doc("venues/venue").update({ token: "token", participationWindow: studentWindow });
+    await seed(db, {
+      students: [
+        makeStudent({
+          id: "s1",
+          token: "token",
+          participationWindow: studentWindow,
+          status: "submitted",
+          submittedAt,
+          submittedBy: "student",
+        }),
+      ],
+    });
+  });
+
+  it("reopens a submitted student, keeping the participation window", async () => {
+    await teacher.teacherReopenStudent({ venueId: "venue", studentId: "s1" });
+    const student = await getStudent();
+    expect(student?.status).toBe("ongoing");
+    expect(student?.submittedAt).toBeUndefined();
+    expect(student?.submittedBy).toBeUndefined();
+    expect(student?.participationWindow).toEqual(studentWindow);
+    expect(student?.updatedAt).toEqual(NOW);
+  });
+
+  it("rejects a student whose time is over", async () => {
+    vi.setSystemTime(new Date("2030-05-10T11:00:01Z"));
+    await expect(
+      teacher.teacherReopenStudent({ venueId: "venue", studentId: "s1" }),
+    ).rejects.toThrow(
+      expect.objectContaining({ code: "FORBIDDEN", message: "Tempo dello studente esaurito" }),
+    );
+    expect((await getStudent())?.status).toBe("submitted");
+  });
+
+  it("rejects a student that has not submitted", async () => {
+    await db.doc("venues/venue/students/s1").update({ status: "ongoing" });
+    await expect(
+      teacher.teacherReopenStudent({ venueId: "venue", studentId: "s1" }),
+    ).rejects.toThrow(expect.objectContaining({ code: "BAD_REQUEST" }));
+  });
+
+  it("rejects a finalized venue", async () => {
+    await db.doc("venues/venue").update({ finalized: true });
+    await expect(
+      teacher.teacherReopenStudent({ venueId: "venue", studentId: "s1" }),
+    ).rejects.toThrow(
+      expect.objectContaining({ code: "FORBIDDEN", message: "Gara già finalizzata" }),
+    );
+    expect((await getStudent())?.status).toBe("submitted");
+  });
+
+  it("rejects a student of a previous window of the venue", async () => {
+    await db.doc("venues/venue").update({ token: "new-token" });
+    await expect(
+      teacher.teacherReopenStudent({ venueId: "venue", studentId: "s1" }),
+    ).rejects.toThrow(expect.objectContaining({ code: "NOT_FOUND" }));
+    expect((await getStudent())?.status).toBe("submitted");
+  });
+
+  it("rejects a missing student", async () => {
+    await expect(
+      teacher.teacherReopenStudent({ venueId: "venue", studentId: "missing" }),
+    ).rejects.toThrow(expect.objectContaining({ code: "NOT_FOUND" }));
+  });
+
+  it("rejects a teacher of another school", async () => {
+    await expect(
+      otherTeacher.teacherReopenStudent({ venueId: "venue", studentId: "s1" }),
+    ).rejects.toThrow(expect.objectContaining({ code: "FORBIDDEN", message: "Gara non valida" }));
+    expect((await getStudent())?.status).toBe("submitted");
+  });
+
+  it("rejects unauthenticated requests", async () => {
+    await expect(
+      anonymous.teacherReopenStudent({ venueId: "venue", studentId: "s1" }),
+    ).rejects.toThrow(expect.objectContaining({ code: "UNAUTHORIZED" }));
+  });
+});
+
+describe("teacher submission approval", () => {
+  const studentWindow = {
+    start: new Date("2030-05-10T09:30:00Z"),
+    end: new Date("2030-05-10T11:00:00Z"),
+  };
+  const requestedAt = new Date("2030-05-10T09:55:00Z");
+  const input = { venueId: "venue", studentId: "s1" };
+
+  beforeEach(async () => {
+    await db.doc("venues/venue").update({ token: "token", participationWindow: studentWindow });
+    await seed(db, {
+      students: [
+        makeStudent({
+          id: "s1",
+          token: "token",
+          participationWindow: studentWindow,
+          status: "pending_approval",
+          terminationRequestedAt: requestedAt,
+        }),
+      ],
+    });
+  });
+
+  it("approves a request", async () => {
+    await teacher.teacherApproveSubmission(input);
+    const student = await getStudent();
+    expect(student?.status).toBe("submitted");
+    expect(student?.submittedAt).toEqual(NOW);
+    expect(student?.submittedBy).toBe("student");
+    expect(student?.terminationRequestedAt).toEqual(requestedAt);
+    expect(student?.participationWindow).toEqual(studentWindow);
+  });
+
+  it("approves a request after the end of the window", async () => {
+    vi.setSystemTime(new Date("2030-05-10T11:00:01Z"));
+    await teacher.teacherApproveSubmission(input);
+    expect((await getStudent())?.status).toBe("submitted");
+  });
+
+  it("rejects a request", async () => {
+    await teacher.teacherRejectSubmission(input);
+    const student = await getStudent();
+    expect(student?.status).toBe("ongoing");
+    expect(student?.terminationRequestedAt).toBeUndefined();
+    expect(student?.participationWindow).toEqual(studentWindow);
+  });
+
+  it("cannot reject a request after the end of the window", async () => {
+    vi.setSystemTime(new Date("2030-05-10T11:00:01Z"));
+    await expect(teacher.teacherRejectSubmission(input)).rejects.toThrow(
+      expect.objectContaining({ code: "FORBIDDEN", message: "Tempo dello studente esaurito" }),
+    );
+    expect((await getStudent())?.status).toBe("pending_approval");
+  });
+
+  it.each([
+    ["approve", (i: typeof input) => teacher.teacherApproveSubmission(i)],
+    ["reject", (i: typeof input) => teacher.teacherRejectSubmission(i)],
+  ] as const)("cannot %s a student without a request", async (_, call) => {
+    await db.doc("venues/venue/students/s1").update({ status: "ongoing" });
+    await expect(call(input)).rejects.toThrow(
+      expect.objectContaining({ code: "BAD_REQUEST", message: "Nessuna richiesta di consegna" }),
+    );
+  });
+
+  it("cannot approve twice", async () => {
+    await teacher.teacherApproveSubmission(input);
+    await expect(teacher.teacherApproveSubmission(input)).rejects.toThrow(
+      expect.objectContaining({ code: "BAD_REQUEST" }),
+    );
+  });
+
+  it.each([
+    ["approve", (i: typeof input) => teacher.teacherApproveSubmission(i)],
+    ["reject", (i: typeof input) => teacher.teacherRejectSubmission(i)],
+  ] as const)("cannot %s in a finalized venue", async (_, call) => {
+    await db.doc("venues/venue").update({ finalized: true });
+    await expect(call(input)).rejects.toThrow(
+      expect.objectContaining({ code: "FORBIDDEN", message: "Gara già finalizzata" }),
+    );
+  });
+
+  it("rejects a teacher of another school", async () => {
+    await expect(otherTeacher.teacherApproveSubmission(input)).rejects.toThrow(
+      expect.objectContaining({ code: "FORBIDDEN", message: "Gara non valida" }),
+    );
+    expect((await getStudent())?.status).toBe("pending_approval");
+  });
+
+  it("reopening clears the request time", async () => {
+    await teacher.teacherApproveSubmission(input);
+    await teacher.teacherReopenStudent(input);
+    const student = await getStudent();
+    expect(student?.status).toBe("ongoing");
+    expect(student?.terminationRequestedAt).toBeUndefined();
+    expect(student?.submittedAt).toBeUndefined();
   });
 });
 

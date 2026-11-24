@@ -489,27 +489,90 @@ describe("studentSubmitContest", () => {
     });
   });
 
-  async function getWindow() {
+  async function getStudent() {
     const snapshot = await db.doc("venues/venue/students/s1").withConverter(studentConverter).get();
-    return snapshot.data()?.participationWindow;
+    return snapshot.data();
   }
 
-  it("ends the participation window now", async () => {
+  async function getWindow() {
+    return (await getStudent())?.participationWindow;
+  }
+
+  it("marks the student as submitted and keeps the participation window", async () => {
     await asStudent(claims).studentSubmitContest();
-    expect(await getWindow()).toEqual({ start: studentWindow.start, end: NOW });
+    const student = await getStudent();
+    expect(student?.participationWindow).toEqual(studentWindow);
+    expect(student?.status).toBe("submitted");
+    expect(student?.submittedAt).toEqual(NOW);
+    expect(student?.submittedBy).toBe("student");
   });
 
-  it("does not extend the window when submitting during the grace period", async () => {
+  it("accepts submissions during the grace period", async () => {
     vi.setSystemTime(new Date("2030-05-10T10:30:05Z"));
     await asStudent(claims).studentSubmitContest();
-    expect(await getWindow()).toEqual(studentWindow);
+    const student = await getStudent();
+    expect(student?.participationWindow).toEqual(studentWindow);
+    expect(student?.status).toBe("submitted");
   });
 
   it("is idempotent", async () => {
     await asStudent(claims).studentSubmitContest();
     vi.setSystemTime(new Date("2030-05-10T10:00:05Z"));
     await asStudent(claims).studentSubmitContest();
-    expect(await getWindow()).toEqual({ start: studentWindow.start, end: NOW });
+    const student = await getStudent();
+    expect(student?.participationWindow).toEqual(studentWindow);
+    expect(student?.submittedAt).toEqual(NOW);
+  });
+
+  describe("with teacher approval", () => {
+    beforeEach(async () => {
+      await seed(db, {
+        contests: [
+          makeContest({
+            id: "contest",
+            languages: ["it", "en"],
+            onlineSettings: {
+              contestWindow: {
+                start: new Date("2030-05-10T08:00:00Z"),
+                end: new Date("2030-05-10T18:00:00Z"),
+              },
+              duration: 60,
+              allowRestart: false,
+              terminationMode: "teacher_approval",
+            },
+          }),
+        ],
+      });
+    });
+
+    it("requests the submission instead of submitting", async () => {
+      await asStudent(claims).studentSubmitContest();
+      const student = await getStudent();
+      expect(student?.status).toBe("pending_approval");
+      expect(student?.terminationRequestedAt).toEqual(NOW);
+      expect(student?.submittedAt).toBeUndefined();
+      expect(student?.participationWindow).toEqual(studentWindow);
+    });
+
+    it("keeps the first request time when submitting again", async () => {
+      await asStudent(claims).studentSubmitContest();
+      vi.setSystemTime(new Date("2030-05-10T10:00:05Z"));
+      await asStudent(claims).studentSubmitContest();
+      expect((await getStudent())?.terminationRequestedAt).toEqual(NOW);
+    });
+
+    it("rejects answers while waiting for the teacher", async () => {
+      await asStudent(claims).studentSubmitContest();
+      await expect(
+        asStudent(claims).studentSetAnswer({
+          problemId: "1",
+          answer: { type: "openNumber", value: 42 },
+        }),
+      ).rejects.toThrow(
+        expect.objectContaining({ code: "FORBIDDEN", message: "Consegna in attesa di conferma" }),
+      );
+      expect((await getStudent())?.answers?.["1"]).toBeUndefined();
+    });
   });
 
   it("rejects answers after submitting", async () => {
@@ -534,6 +597,7 @@ describe("studentSubmitContest", () => {
       expect.objectContaining({ code: "FORBIDDEN", message }),
     );
     expect(await getWindow()).toEqual(studentWindow);
+    expect((await getStudent())?.status).toBeUndefined();
   });
 
   it("rejects requests without student claims", async () => {

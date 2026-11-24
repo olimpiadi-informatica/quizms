@@ -13,7 +13,7 @@ import {
 } from "@olinfo/react-components";
 import { addMilliseconds, isPast } from "date-fns";
 import { sumBy } from "lodash-es";
-import { FileChartColumn, LogOut, RotateCcw } from "lucide-react";
+import { FileChartColumn, Hourglass, LogOut, RotateCcw } from "lucide-react";
 
 import { useUserAgent } from "~/utils";
 import {
@@ -40,6 +40,7 @@ export function StudentLayout({ children }: { children: ReactNode }) {
     schema,
     reset,
     venue,
+    phase,
     terminated,
     logout,
     enforceFullscreen,
@@ -85,6 +86,16 @@ export function StudentLayout({ children }: { children: ReactNode }) {
     return () => clearInterval(interval);
   }, [enforceFullscreen, logout, student.uid, terminated, ua.hasFullscreen]);
 
+  // In `teacher_approval` mode the test is over only when the teacher approves the request.
+  const needsApproval = contest.onlineSettings?.terminationMode === "teacher_approval";
+  const prevPhase = useRef(phase);
+  useEffect(() => {
+    if (prevPhase.current === "pending_approval" && phase === "submitted") {
+      completedRef.current?.showModal();
+    }
+    prevPhase.current = phase;
+  }, [phase]);
+
   const submit = async () => {
     const modal = submitRef.current;
     if (!modal) return;
@@ -94,7 +105,7 @@ export function StudentLayout({ children }: { children: ReactNode }) {
     await new Promise<void>((resolve) => {
       modal.onclose = () => resolve();
     });
-    if (modal.returnValue === "1") {
+    if (modal.returnValue === "1" && !needsApproval) {
       completedRef.current?.showModal();
     }
   };
@@ -176,6 +187,11 @@ export function StudentLayout({ children }: { children: ReactNode }) {
                   </div>
                 )}
               </>
+            ) : phase === "pending_approval" ? (
+              <div className="badge badge-warning h-full gap-1">
+                <Hourglass size={16} />
+                <Trans>Waiting for the teacher</Trans>
+              </div>
             ) : (
               <Button
                 className="btn-primary btn-sm h-full"
@@ -195,6 +211,18 @@ export function StudentLayout({ children }: { children: ReactNode }) {
         <ErrorBoundary>
           <CompletedModal ref={completedRef} />
           <SubmitModal ref={submitRef} />
+          {phase === "pending_approval" && (
+            <div role="alert" className="alert alert-warning mb-4">
+              <Hourglass />
+              <span>
+                <Trans>
+                  You asked to finish the test: tell your teacher so they can confirm it. In the
+                  meantime you can no longer change your answers. If the teacher sends the test
+                  back, you can keep answering until the end of your time.
+                </Trans>
+              </span>
+            </div>
+          )}
           <Prose>
             {longName && <h1 className="text-pretty">{longName}</h1>}
             {children}

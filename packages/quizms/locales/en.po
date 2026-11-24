@@ -71,6 +71,10 @@ msgstr "Answer"
 msgid "Approve"
 msgstr "Approve"
 
+#: packages/quizms/src/web/teacher/dashboard-submission-requests.tsx
+msgid "Approve submission"
+msgstr "Approve submission"
+
 #: packages/quizms/src/web/teacher/dashboard.tsx
 msgid "Are you sure you want to cancel the start of the contest?"
 msgstr "Are you sure you want to cancel the start of the contest?"
@@ -100,6 +104,7 @@ msgstr "Back to full screen"
 #: packages/quizms/src/web/teacher/table/delete-all.tsx
 #: packages/quizms/src/web/teacher/table/delete.tsx
 #: packages/quizms/src/web/teacher/table/finalize.tsx
+#: packages/quizms/src/web/teacher/table/status-cell.tsx
 msgid "Cancel"
 msgstr "Cancel"
 
@@ -249,6 +254,10 @@ msgstr "Import students"
 msgid "Import the students from a file. The file must be in <0>CSV</0> format, and the first row must contain the header. <1>Do not</1> leave empty rows before the header or empty columns before the data."
 msgstr "Import the students from a file. The file must be in <0>CSV</0> format, and the first row must contain the header. <1>Do not</1> leave empty rows before the header or empty columns before the data."
 
+#: packages/quizms/src/web/teacher/table/status-cell.tsx
+msgid "In progress"
+msgstr "In progress"
+
 #: packages/quizms/src/models/variant.ts
 msgid "Invalid option: {option}"
 msgstr "Invalid option: {option}"
@@ -283,6 +292,7 @@ msgid "Missing variant"
 msgstr "Missing variant"
 
 #: packages/quizms/src/web/teacher/dashboard-student-restore.tsx
+#: packages/quizms/src/web/teacher/dashboard-submission-requests.tsx
 msgid "Name"
 msgstr "Name"
 
@@ -291,8 +301,13 @@ msgid "No announcements."
 msgstr "No announcements."
 
 #: packages/quizms/src/web/teacher/dashboard-student-restore.tsx
+#: packages/quizms/src/web/teacher/dashboard-submission-requests.tsx
 msgid "No requests."
 msgstr "No requests."
+
+#: packages/quizms/src/web/teacher/table/status-cell.tsx
+msgid "Not started"
+msgstr "Not started"
 
 #: packages/quizms/src/web/teacher/table/finalize.tsx
 msgid "Once finalized, you will <0>no longer</0> be able to <1>add</1> new students or <2>edit</2> the data of the students in this school for the contest <3>{contestName}</3>."
@@ -301,6 +316,10 @@ msgstr "Once finalized, you will <0>no longer</0> be able to <1>add</1> new stud
 #: packages/quizms/src/web/teacher/table/finalize.tsx
 msgid "Once finalized, you will <0>no longer</0> be able to <1>edit</1> the data of the students in this school for the contest <2>{contestName}</2>."
 msgstr "Once finalized, you will <0>no longer</0> be able to <1>edit</1> the data of the students in this school for the contest <2>{contestName}</2>."
+
+#: packages/quizms/src/web/student/modals.tsx
+msgid "Once you confirm, you will no longer be able to change your answers, unless your teacher sends the test back to you."
+msgstr "Once you confirm, you will no longer be able to change your answers, unless your teacher sends the test back to you."
 
 #: packages/quizms/src/web/student/modals.tsx
 msgid "Once you confirm, you will no longer be able to change your answers."
@@ -342,9 +361,21 @@ msgstr "Reject"
 msgid "Reload"
 msgstr "Reload"
 
+#: packages/quizms/src/web/teacher/table/status-cell.tsx
+msgid "Reopen"
+msgstr "Reopen"
+
+#: packages/quizms/src/web/teacher/table/status-cell.tsx
+msgid "Reopen contest"
+msgstr "Reopen contest"
+
 #: packages/quizms/src/models/variant.ts
 msgid "Repeated options: {options}"
 msgstr "Repeated options: {options}"
+
+#: packages/quizms/src/web/teacher/dashboard-submission-requests.tsx
+msgid "Requested at"
+msgstr "Requested at"
 
 #: packages/quizms/src/web/student/layout.tsx
 msgid "Restart"
@@ -362,6 +393,10 @@ msgstr "Select a contest"
 #: packages/quizms/src/web/teacher/table/col-def.tsx
 msgid "Select all"
 msgstr "Select all"
+
+#: packages/quizms/src/web/teacher/dashboard-submission-requests.tsx
+msgid "Send back"
+msgstr "Send back"
 
 #: packages/quizms/src/web/student/layout.tsx
 msgid "Show results"
@@ -383,6 +418,11 @@ msgstr "Statement language"
 msgid "Statements in {code}"
 msgstr "Statements in {code}"
 
+#: packages/quizms/src/web/teacher/table/col-def.tsx
+#: packages/quizms/src/web/teacher/table/export.tsx
+msgid "Status"
+msgstr "Status"
+
 #: packages/quizms/src/web/teacher/layout.tsx
 msgid "Student management"
 msgstr "Student management"
@@ -399,7 +439,36 @@ msgstr "Students not deleted"
 msgid "students-{contestId}.csv"
 msgstr "students-{contestId}.csv"
 
+#: packages/quizms/src/web/teacher/table/status-cell.tsx
+msgid "Submission requested"
+msgstr "Submission requested"
+
+#: packages/quizms/src/web/teacher/dashboard.tsx
+msgid "Submission requests"
+msgstr "Submission requests"
+
+#: packages/quizms/src/web/teacher/table/status-cell.tsx
+msgid "Submitted"
+msgstr "Submitted"
+
+#: packages/quizms/src/web/teacher/table/export.tsx
+msgid "Submitted at"
+msgstr "Submitted at"
+
+#: packages/quizms/src/web/teacher/table/export.tsx
+msgid "Submitted by"
+msgstr "Submitted by"
+
+#: packages/quizms/src/web/teacher/table/status-cell.tsx
+msgid "Submitted by the student at {submittedAt}"
+msgstr "Submitted by the student at {submittedAt}"
+
+#: packages/quizms/src/web/teacher/table/status-cell.tsx
+msgid "Submitted by the teacher at {submittedAt}"
+msgstr "Submitted by the teacher at {submittedAt}"
+
 #: packages/quizms/src/web/teacher/dashboard-student-restore.tsx
+#: packages/quizms/src/web/teacher/dashboard-submission-requests.tsx
 msgid "Surname"
 msgstr "Surname"
 
@@ -507,6 +576,10 @@ msgstr "The student {name} {surname} cannot be finalized: {reason}."
 msgid "The student {name} {surname} has been entered more than once"
 msgstr "The student {name} {surname} has been entered more than once"
 
+#: packages/quizms/src/web/teacher/table/status-cell.tsx
+msgid "The student <0>{name}</0> will be able to keep answering until the end of their time. The answers already given are kept."
+msgstr "The student <0>{name}</0> will be able to keep answering until the end of their time. The answers already given are kept."
+
 #: packages/quizms/src/web/student/modals.tsx
 msgid "The test is over."
 msgstr "The test is over."
@@ -514,6 +587,10 @@ msgstr "The test is over."
 #: packages/quizms/src/web/teacher/dashboard.tsx
 msgid "This page intentionally left blank"
 msgstr "This page intentionally left blank"
+
+#: packages/quizms/src/web/teacher/table/status-cell.tsx
+msgid "Time expired"
+msgstr "Time expired"
 
 #: packages/quizms/src/web/teacher/dashboard.tsx
 msgid "Time left until the start: <0/>"
@@ -559,6 +636,10 @@ msgid "View test"
 msgstr "View test"
 
 #: packages/quizms/src/web/student/layout.tsx
+msgid "Waiting for the teacher"
+msgstr "Waiting for the teacher"
+
+#: packages/quizms/src/web/student/layout.tsx
 msgid "Warning!"
 msgstr "Warning!"
 
@@ -593,6 +674,10 @@ msgstr "you are using an unsupported browser!"
 #: packages/quizms/src/web/entry/browser-check.tsx
 msgid "you are using an unsupported version of {browserName}!"
 msgstr "you are using an unsupported version of {browserName}!"
+
+#: packages/quizms/src/web/student/layout.tsx
+msgid "You asked to finish the test: tell your teacher so they can confirm it. In the meantime you can no longer change your answers. If the teacher sends the test back, you can keep answering until the end of your time."
+msgstr "You asked to finish the test: tell your teacher so they can confirm it. In the meantime you can no longer change your answers. If the teacher sends the test back, you can keep answering until the end of your time."
 
 #: packages/quizms/src/web/student/layout.tsx
 msgid "You cannot leave this page or exit full-screen mode."

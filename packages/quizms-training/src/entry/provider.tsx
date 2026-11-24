@@ -174,6 +174,15 @@ export function TrainingProvider({
     );
   }, [contest, updateStudent]);
 
+  // There is no teacher in training: submissions always end the test immediately.
+  const studentContest = useMemo(
+    () =>
+      contest.onlineSettings?.terminationMode
+        ? { ...contest, onlineSettings: { ...contest.onlineSettings, terminationMode: undefined } }
+        : contest,
+    [contest],
+  );
+
   // The iframe protocol has no language field: the choice is kept in the page (and `?lang=`).
   const [language, setLanguage] = useStatementLanguageState(contest);
 
@@ -181,7 +190,7 @@ export function TrainingProvider({
     <TitleProvider title={title}>
       <TrainingStatementContext.Provider value={{ start }}>
         <StudentProvider
-          contest={contest}
+          contest={studentContest}
           venue={mockVenue}
           student={student}
           language={language}

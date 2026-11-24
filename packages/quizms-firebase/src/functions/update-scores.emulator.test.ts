@@ -106,4 +106,36 @@ describe("updateScoresHandler", () => {
     await runHandler("token");
     expect(await getScores()).toEqual({ absent: undefined });
   });
+
+  it("finalizes the submission requests still pending", async () => {
+    const requestedAt = new Date("2030-05-10T09:55:00Z");
+    await seed(db, {
+      students: [
+        makeStudent({
+          id: "pending",
+          token: "token",
+          answers: correct,
+          status: "pending_approval",
+          terminationRequestedAt: requestedAt,
+        }),
+        makeStudent({ id: "ongoing", token: "token", answers: correct, status: "ongoing" }),
+      ],
+    });
+
+    await runHandler("token");
+
+    const snapshot = await db
+      .collection("venues/venue/students")
+      .withConverter(studentConverter)
+      .get();
+    const students = Object.fromEntries(snapshot.docs.map((doc) => [doc.id, doc.data()]));
+    expect(students.pending).toMatchObject({
+      status: "submitted",
+      submittedAt: requestedAt,
+      submittedBy: "student",
+      score: 8,
+    });
+    expect(students.ongoing.status).toBe("ongoing");
+    expect(students.ongoing.score).toBe(8);
+  });
 });

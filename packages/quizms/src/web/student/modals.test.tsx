@@ -15,7 +15,9 @@ function StudentContextWrapper({ student, children }: { student: Student; childr
   const value: StudentContextProps = {
     ...studentProviderProps({ student }),
     student,
+    phase: "expired",
     terminated: true,
+    locked: true,
     language: "it",
   };
   return (

@@ -1,6 +1,6 @@
 import { createContext, use } from "react";
 
-import type { Answer, Contest, Schema, Student, Venue } from "~/models";
+import type { Answer, Contest, Schema, Student, StudentPhase, Venue } from "~/models";
 
 export type StudentContextProps = {
   student: Student;
@@ -11,7 +11,11 @@ export type StudentContextProps = {
   submit: () => Promise<void> | void;
   logout?: () => Promise<void> | void;
   enforceFullscreen: boolean;
+  phase: StudentPhase;
+  /** Whether the test is completed (submitted or expired) */
   terminated: boolean;
+  /** Whether the answers can no longer be changed (terminated or waiting for approval) */
+  locked: boolean;
   schema?: Schema;
   /** Language of the statement being shown */
   language: string;
