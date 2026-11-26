@@ -1,6 +1,16 @@
 "use client";
 
-import { Children, createContext, type ReactNode, use, useCallback, useId, useMemo } from "react";
+import {
+  Children,
+  createContext,
+  type ReactNode,
+  use,
+  useCallback,
+  useEffect,
+  useId,
+  useMemo,
+  useState,
+} from "react";
 
 import { Trans, useLingui } from "@lingui/react/macro";
 import type { AnswerValue, Schema } from "@olinfo/quizms/models";
@@ -8,6 +18,7 @@ import { useStudent } from "@olinfo/quizms/student";
 import clsx from "clsx";
 import { Trash2 } from "lucide-react";
 
+import { parseOpenNumber } from "./open-number";
 import { useProblem } from "./problem";
 
 export function AnswerGroup({ children }: { children: ReactNode }) {
@@ -185,13 +196,40 @@ export function OpenAnswer({ type = "openText" }: OpenAnswerProps) {
     | AnswerValue<"openNumber" | "openText">
     | undefined;
   const correct = isCorrectAnswer(problemSchema, answerValue);
-  const submitAnswer = async (value: string) => {
-    if (!value) {
+
+  const [rawValue, setRawValue] = useState(() => (answerValue == null ? "" : String(answerValue)));
+
+  // Sync local draft when the external answer changes (e.g. initial load, reset, or server update),
+  // without clobbering equivalent intermediate states like "3." or trailing spaces.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: sync only on external answerValue/type changes
+  useEffect(() => {
+    if (type === "openNumber") {
+      if (parseOpenNumber(rawValue) === answerValue) return;
+    } else if (rawValue.trim() === (answerValue ?? "")) {
+      return;
+    }
+    setRawValue(answerValue == null ? "" : String(answerValue));
+  }, [answerValue, type]);
+
+  const handleChange = async (value: string) => {
+    const trimmed = value.trim();
+
+    if (!trimmed) {
+      setRawValue("");
       await setAnswer(problemId!, { type });
-    } else if (type === "openNumber") {
-      await setAnswer(problemId!, { type, value: Number(value) });
+      return;
+    }
+
+    if (type === "openNumber") {
+      if (!/^-?\d*\.?\d*$/.test(trimmed)) return;
+      setRawValue(trimmed);
+      const parsed = parseOpenNumber(trimmed);
+      if (parsed !== undefined) {
+        await setAnswer(problemId!, { type, value: parsed });
+      }
     } else {
-      await setAnswer(problemId!, { type, value });
+      setRawValue(value);
+      await setAnswer(problemId!, { type, value: trimmed });
     }
   };
 
@@ -206,12 +244,13 @@ export function OpenAnswer({ type = "openText" }: OpenAnswerProps) {
             "disabled:input-error": correct === false,
           },
         )}
-        onChange={(e) => submitAnswer(e.target.value.trim())}
+        onChange={(e) => handleChange(e.target.value)}
         onWheel={(e) => e.currentTarget.blur()}
         placeholder={t`Enter your answer`}
         maxLength={100}
-        type={type}
-        value={answerValue ?? ""}
+        type="text"
+        inputMode={type === "openNumber" ? "decimal" : undefined}
+        value={rawValue}
         disabled={locked}
         aria-label={t`Answer`}
       />
